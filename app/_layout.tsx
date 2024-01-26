@@ -27,7 +27,15 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
 	const [loaded, error] = useFonts({
 		Suprapower: require("../assets/fonts/Suprapower.otf"),
-		Inter: require("../assets/fonts/Inter.ttf"),
+		InterRegular: require("../assets/fonts/Inter-Regular.ttf"),
+		InterThin: require("../assets/fonts/Inter-Thin.ttf"),
+		InterBlack: require("../assets/fonts/Inter-Black.ttf"),
+		InterBold: require("../assets/fonts/Inter-Bold.ttf"),
+		InterExtraBold: require("../assets/fonts/Inter-ExtraBold.ttf"),
+		InterExtraLight: require("../assets/fonts/Inter-ExtraLight.ttf"),
+		InterLight: require("../assets/fonts/Inter-Light.ttf"),
+		InterMedium: require("../assets/fonts/Inter-Medium.ttf"),
+		InterSemiBold: require("../assets/fonts/Inter-SemiBold.ttf"),
 		...FontAwesome.font,
 	});
 
@@ -56,10 +64,6 @@ function RootLayoutNav() {
 		<ThemeProvider value={DefaultTheme}>
 			<Stack>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-				<Stack.Screen
-					name="modal"
-					options={{ presentation: "modal" }}
-				/>
 			</Stack>
 		</ThemeProvider>
 	);

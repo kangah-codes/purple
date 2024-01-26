@@ -3,6 +3,7 @@ import {
 	SafeAreaView as _SafeAreaView,
 	View as _View,
 	Text as _Text,
+	TextInput as _TextInput,
 } from "react-native";
 
 /**
@@ -10,22 +11,15 @@ import {
  * @param {_Text["props"]} props Text component props
  * @returns {JSX.Element} Themed text component
  */
-function _SuprapowerText(props: _Text["props"]) {
-	return (
-		<_Text {...props} style={[props.style, { fontFamily: "Suprapower" }]} />
-	);
+function _UnstyledText(props: _Text["props"]) {
+	return <_Text {...props} style={[props.style]} />;
 }
 
-/**
- * @description Themed text component with inter font
- * @param {_Text["props"]} props Text component props
- * @returns {JSX.Element} Themed text component
- */
-function _InterText(props: _Text["props"]) {
-	return <_Text {...props} style={[props.style, { fontFamily: "Inter" }]} />;
+function UnstyledTextInput(props: _TextInput["props"]) {
+	return <_TextInput {...props} style={[props.style]} />;
 }
 
 export const SafeAreaView = styled(_SafeAreaView);
 export const View = styled(_View);
-export const SuprapowerText = styled(_SuprapowerText);
-export const InterText = styled(_InterText);
+export const Text = styled(_UnstyledText);
+export const InputField = styled(UnstyledTextInput);
