@@ -1,113 +1,98 @@
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import { Dimensions, StatusBar as RNStatusBar } from "react-native";
-import { BellIcon, CoinSwapIcon, SearchIcon } from "../SVG/icons";
-import { InputField, Text, View } from "../styled";
-import Carousel from "react-native-snap-carousel";
-import { formatCurrencyAccurate, formatCurrencyRounded } from "@/utils/number";
-
-type AccountCard = {
-	accountCurrency: string;
-	accountBalance: number;
-	accountName: string;
-	cardBackgroundColour: string;
-	cardTintColour: string;
-};
+import {
+	FlatList,
+	StatusBar as RNStatusBar,
+	RefreshControl,
+} from "react-native";
+import { BellIcon, SearchIcon } from "../SVG/icons";
+import { InputField, SafeAreaView, ScrollView, Text, View } from "../styled";
+import AccountCardCarousel from "./AccountCardCarousel";
+import SavingPlanCard from "./SavingPlanCard";
+import TransactionHistoryCard from "./TransactionHistoryCard";
+import { useState, useCallback } from "react";
+// import { hasNotch } from "@/constants/Display";
 
 export default function IndexScreen() {
-	const data = [
+	const [refreshing, setRefreshing] = useState(false);
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true);
+		setTimeout(() => {
+			setRefreshing(false);
+		}, 2000);
+	}, []);
+
+	const savingData = [
 		{
-			accountCurrency: "GHS",
-			accountBalance: 120000,
-			accountName: "Fidelity Bank Account",
-			cardBackgroundColour: "#F97316",
-			cardTintColour: "#FED7AA",
+			category: "🏠 Mortgage",
+			percentageCompleted: 30,
+			name: "House Rent",
+			currentAmount: 3000,
+			targetAmount: 9000,
 		},
 		{
-			accountCurrency: "GHS",
-			accountBalance: 98994329,
-			accountName: "MTN MoMo",
-			cardBackgroundColour: "#FACC15",
-			cardTintColour: "#FEF9C3",
+			category: "🛩️ Travel",
+			percentageCompleted: 30,
+			name: "Trip to Europe",
+			currentAmount: 3000,
+			targetAmount: 9000,
+		},
+		{
+			category: "🚗 Car",
+			percentageCompleted: 20,
+			name: "New Car Fund",
+			currentAmount: 4000,
+			targetAmount: 20000,
+		},
+		{
+			category: "💼 Retirement",
+			percentageCompleted: 10,
+			name: "Retirement Savings",
+			currentAmount: 10000,
+			targetAmount: 100000,
+		},
+		{
+			category: "🎓 Education",
+			percentageCompleted: 50,
+			name: "College Tuition",
+			currentAmount: 15000,
+			targetAmount: 30000,
+		},
+		{
+			category: "👰 Wedding",
+			percentageCompleted: 40,
+			name: "Dream Wedding",
+			currentAmount: 8000,
+			targetAmount: 20000,
+		},
+		{
+			category: "🎁 Gifts",
+			percentageCompleted: 70,
+			name: "Christmas Gifts",
+			currentAmount: 700,
+			targetAmount: 1000,
 		},
 	];
 
-	const renderItem = (item: AccountCard) => {
-		console.log(item);
-		return (
-			<View
-				className="w-full p-5 rounded-2xl flex flex-col justify-center items-center space-y-4"
-				style={{ backgroundColor: item.cardBackgroundColour }}
-			>
-				<Text
-					style={{ fontFamily: "Suprapower" }}
-					className="text-white text-base"
-				>
-					Available Balance
-				</Text>
-
-				<View className="flex flex-col items-center">
-					<Text
-						style={{ fontFamily: "Suprapower" }}
-						className="text-white text-2xl"
-					>
-						{item.accountBalance > 9_999_999
-							? formatCurrencyRounded(
-									item.accountBalance,
-									item.accountCurrency
-							  )
-							: formatCurrencyAccurate(
-									item.accountCurrency,
-									item.accountBalance
-							  )}
-					</Text>
-					<Text
-						style={{ fontFamily: "InterSemiBold" }}
-						className="text-white text-base tracking-tighter"
-					>
-						{item.accountName}
-					</Text>
-				</View>
-
-				<View className="h-[1px] bg-white w-full" />
-
-				<View className="flex flex-row space-x-2 items-stretch w-full">
-					<View className="flex-grow bg-white rounded-full px-2 py-1 flex items-center justify-center h-12">
-						<Text
-							style={{ fontFamily: "Suprapower" }}
-							className="text-black text-base"
-						>
-							Income
-						</Text>
-					</View>
-					<View
-						className="flex-grow rounded-full px-2 py-1 flex items-center justify-center h-12"
-						style={{ backgroundColor: item.cardTintColour }}
-					>
-						<Text
-							style={{ fontFamily: "Suprapower" }}
-							className="text-black text-base"
-						>
-							Expense
-						</Text>
-					</View>
-					<View className="aspect-square h-12 rounded-full bg-white flex items-center justify-center">
-						<CoinSwapIcon width={24} height={24} stroke="#000" />
-					</View>
-				</View>
-			</View>
-		);
-	};
+	// console.log(hasNotch);
 
 	return (
-		<>
+		<SafeAreaView>
 			<ExpoStatusBar style="dark" />
 			<View
 				style={{
 					paddingTop: RNStatusBar.currentHeight,
 				}}
-				className="px-5 bg-white"
+				className="bg-white px-5"
 			>
-				<View className="flex flex-row justify-between items-center">
+				<View
+					className="flex flex-row justify-between items-center pt-2.5 "
+					style={
+						{
+							// paddingTop: hasNotch ? 0 : 10,
+						}
+					}
+				>
 					<View className="flex flex-col">
 						<Text
 							style={{ fontFamily: "Suprapower" }}
@@ -128,7 +113,7 @@ export default function IndexScreen() {
 				<View className="mt-5">
 					<View className="relative flex justify-center">
 						<InputField
-							className="border border-gray-200 rounded-lg p-1.5 px-5 pl-10 text-gray-500"
+							className="border border-gray-200 rounded-lg p-1.5 px-5 pl-10 py-2.5 text-gray-500"
 							style={{ fontFamily: "InterSemiBold" }}
 							placeholder="Search"
 							cursorColor={"#000"}
@@ -142,75 +127,70 @@ export default function IndexScreen() {
 					</View>
 				</View>
 
-				<View className="mt-5">
-					{/* <View className="w-full bg-purple-500 p-5 rounded-2xl flex flex-col justify-center items-center space-y-4">
-						<Text
-							style={{ fontFamily: "Suprapower" }}
-							className="text-white text-base"
-						>
-							Available Balance
-						</Text>
+				<ScrollView
+					className="mt-5 h-full space-y-5"
+					contentContainerStyle={{
+						paddingBottom: 300,
+					}}
+					showsVerticalScrollIndicator={false}
+					refreshControl={
+						<RefreshControl
+							refreshing={refreshing}
+							onRefresh={onRefresh}
+						/>
+					}
+				>
+					<View className="w-full">
+						<AccountCardCarousel />
+					</View>
 
-						<View className="flex flex-col items-center">
-							<Text
-								style={{ fontFamily: "Suprapower" }}
-								className="text-white text-2xl"
-							>
-								GHS 124,000.00
-							</Text>
+					<View className="flex flex-col space-y-5">
+						<View className="flex flex-row w-full justify-between items-center">
 							<Text
 								style={{ fontFamily: "InterSemiBold" }}
-								className="text-white text-base tracking-tighter"
+								className="text-base text-gray-700"
 							>
-								Fidelity Bank Account
+								My saving plans
+							</Text>
+
+							<Text
+								style={{ fontFamily: "InterBold" }}
+								className="text-base"
+							>
+								View All
 							</Text>
 						</View>
-
-						<View className="h-[0.3px] bg-gray-100 w-full" />
-
-						<View className="flex flex-row space-x-2 items-stretch w-full">
-							<View className="flex-grow bg-white rounded-full px-2 py-1 flex items-center justify-center h-12">
-								<Text
-									style={{ fontFamily: "Suprapower" }}
-									className="text-black text-base"
-								>
-									Income
-								</Text>
-							</View>
-							<View className="flex-grow bg-purple-200 border border-purple-100 rounded-full px-2 py-1 flex items-center justify-center h-12">
-								<Text
-									style={{ fontFamily: "Suprapower" }}
-									className="text-black text-base"
-								>
-									Expense
-								</Text>
-							</View>
-							<View className="aspect-square h-12 rounded-full bg-white flex items-center justify-center">
-								<CoinSwapIcon
-									width={24}
-									height={24}
-									stroke="#000"
-								/>
-							</View>
-						</View>
-					</View> */}
-
-					<View className="w-full">
-						<Carousel
-							data={data}
-							renderItem={({ item }) => renderItem(item)}
-							sliderWidth={Dimensions.get("window").width - 40} // Customize width as needed
-							itemWidth={Dimensions.get("window").width - 40} // Customize width as needed
-							layout={"default"} // 'default', 'stack', 'tinder'
-							loop={true} // Set to true if you want to loop through items
-							autoplay={false} // Set to true if you want automatic sliding
-							style={{
-								width: "100%",
-							}}
+						<FlatList
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							data={savingData}
+							renderItem={({ item, index }) => (
+								<SavingPlanCard data={item} index={index} />
+							)}
+							keyExtractor={(_, index) => index.toString()}
 						/>
 					</View>
-				</View>
+
+					<View className="flex flex-col">
+						<View className="flex flex-row w-full justify-between items-center">
+							<Text
+								style={{ fontFamily: "InterSemiBold" }}
+								className="text-base text-gray-700"
+							>
+								Transaction History
+							</Text>
+						</View>
+						<FlatList
+							showsVerticalScrollIndicator={false}
+							data={savingData}
+							renderItem={({ item, index }) => (
+								<TransactionHistoryCard />
+							)}
+							keyExtractor={(_, index) => index.toString()}
+						/>
+					</View>
+				</ScrollView>
 			</View>
-		</>
+		</SafeAreaView>
 	);
 }
