@@ -5,4 +5,4 @@ Inspiration for the design was taken from [here](https://www.behance.net/gallery
 ### Screens
 
 - Home
-	- ![Home](/assets/screenshots/home.png)
+	<img src="/assets/screenshots/home.png" style="width: 100px" />
