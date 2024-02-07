@@ -4,5 +4,6 @@ Inspiration for the design was taken from [here](https://www.behance.net/gallery
 
 ### Screens
 
-- Home
-	<img src="/assets/screenshots/home.png" style="width: 100px" />
+##### Home
+
+<img src="/assets/screenshots/home.png" style="width: 150px" />
