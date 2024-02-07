@@ -1,5 +1,5 @@
-import { ArrowNarrowDownRightIcon } from "../SVG/icons";
-import { View, Text } from "../styled";
+import { ArrowNarrowDownRightIcon } from "../../SVG/icons";
+import { View, Text } from "../../styled";
 
 export default function TransactionHistoryCard() {
 	return (

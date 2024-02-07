@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from "../styled";
+import { Text, TouchableOpacity, View } from "../../styled";
 
 type SavingPlanCardProps = {
 	category: string;

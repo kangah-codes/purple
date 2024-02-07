@@ -2,7 +2,8 @@ import { Dimensions } from "react-native";
 import Carousel, { Pagination } from "react-native-snap-carousel";
 import AccountCard from "./AccountCard";
 import { useState } from "react";
-import { View } from "../styled";
+import { View } from "../../styled";
+import AlternateAccountCard from "./AlternateAccountCard";
 
 const data = [
 	{

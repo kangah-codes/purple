@@ -1,16 +1,16 @@
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
+import { useCallback, useState } from "react";
 import {
 	FlatList,
 	StatusBar as RNStatusBar,
 	RefreshControl,
 } from "react-native";
-import { BellIcon, SearchIcon } from "../SVG/icons";
-import { InputField, SafeAreaView, ScrollView, Text, View } from "../styled";
+import { BellIcon, SearchIcon } from "../../SVG/icons";
+import { InputField, SafeAreaView, ScrollView, Text, View } from "../../styled";
 import AccountCardCarousel from "./AccountCardCarousel";
 import SavingPlanCard from "./SavingPlanCard";
 import TransactionHistoryCard from "./TransactionHistoryCard";
-import { useState, useCallback } from "react";
-// import { hasNotch } from "@/constants/Display";
+import { savingData } from "../constants";
 
 export default function IndexScreen() {
 	const [refreshing, setRefreshing] = useState(false);
@@ -22,62 +22,8 @@ export default function IndexScreen() {
 		}, 2000);
 	}, []);
 
-	const savingData = [
-		{
-			category: "🏠 Mortgage",
-			percentageCompleted: 30,
-			name: "House Rent",
-			currentAmount: 3000,
-			targetAmount: 9000,
-		},
-		{
-			category: "🛩️ Travel",
-			percentageCompleted: 30,
-			name: "Trip to Europe",
-			currentAmount: 3000,
-			targetAmount: 9000,
-		},
-		{
-			category: "🚗 Car",
-			percentageCompleted: 20,
-			name: "New Car Fund",
-			currentAmount: 4000,
-			targetAmount: 20000,
-		},
-		{
-			category: "💼 Retirement",
-			percentageCompleted: 10,
-			name: "Retirement Savings",
-			currentAmount: 10000,
-			targetAmount: 100000,
-		},
-		{
-			category: "🎓 Education",
-			percentageCompleted: 50,
-			name: "College Tuition",
-			currentAmount: 15000,
-			targetAmount: 30000,
-		},
-		{
-			category: "👰 Wedding",
-			percentageCompleted: 40,
-			name: "Dream Wedding",
-			currentAmount: 8000,
-			targetAmount: 20000,
-		},
-		{
-			category: "🎁 Gifts",
-			percentageCompleted: 70,
-			name: "Christmas Gifts",
-			currentAmount: 700,
-			targetAmount: 1000,
-		},
-	];
-
-	// console.log(hasNotch);
-
 	return (
-		<SafeAreaView>
+		<SafeAreaView className="bg-white">
 			<ExpoStatusBar style="dark" />
 			<View
 				style={{
@@ -85,14 +31,7 @@ export default function IndexScreen() {
 				}}
 				className="bg-white px-5"
 			>
-				<View
-					className="flex flex-row justify-between items-center pt-2.5 "
-					style={
-						{
-							// paddingTop: hasNotch ? 0 : 10,
-						}
-					}
-				>
+				<View className="flex flex-row justify-between items-center pt-2.5">
 					<View className="flex flex-col">
 						<Text
 							style={{ fontFamily: "Suprapower" }}
@@ -180,14 +119,9 @@ export default function IndexScreen() {
 								Transaction History
 							</Text>
 						</View>
-						<FlatList
-							showsVerticalScrollIndicator={false}
-							data={savingData}
-							renderItem={({ item, index }) => (
-								<TransactionHistoryCard />
-							)}
-							keyExtractor={(_, index) => index.toString()}
-						/>
+						{savingData.map((data, index) => (
+							<TransactionHistoryCard key={index} />
+						))}
 					</View>
 				</ScrollView>
 			</View>

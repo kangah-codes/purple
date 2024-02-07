@@ -1,0 +1,51 @@
+export const savingData = [
+	{
+		category: "🏠 Mortgage",
+		percentageCompleted: 30,
+		name: "House Rent",
+		currentAmount: 3000,
+		targetAmount: 9000,
+	},
+	{
+		category: "🛩️ Travel",
+		percentageCompleted: 30,
+		name: "Trip to Europe",
+		currentAmount: 3000,
+		targetAmount: 9000,
+	},
+	{
+		category: "🚗 Car",
+		percentageCompleted: 20,
+		name: "New Car Fund",
+		currentAmount: 4000,
+		targetAmount: 20000,
+	},
+	{
+		category: "💼 Retirement",
+		percentageCompleted: 10,
+		name: "Retirement Savings",
+		currentAmount: 10000,
+		targetAmount: 100000,
+	},
+	{
+		category: "🎓 Education",
+		percentageCompleted: 50,
+		name: "College Tuition",
+		currentAmount: 15000,
+		targetAmount: 30000,
+	},
+	{
+		category: "👰 Wedding",
+		percentageCompleted: 40,
+		name: "Dream Wedding",
+		currentAmount: 8000,
+		targetAmount: 20000,
+	},
+	{
+		category: "🎁 Gifts",
+		percentageCompleted: 70,
+		name: "Christmas Gifts",
+		currentAmount: 700,
+		targetAmount: 1000,
+	},
+];

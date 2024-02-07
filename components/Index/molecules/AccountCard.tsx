@@ -1,7 +1,14 @@
 import { formatCurrencyAccurate, formatCurrencyRounded } from "@/utils/number";
 import { useState } from "react";
-import { CoinSwapIcon, EyeCloseIcon, EyeOpenIcon } from "../SVG/icons";
-import { LinearGradient, Text, View } from "../styled";
+import {
+	ArrowCircleDownIcon,
+	ArrowCircleUpIcon,
+	CoinSwapIcon,
+	EyeCloseIcon,
+	EyeOpenIcon,
+	PiggyBankIcon,
+} from "../../SVG/icons";
+import { LinearGradient, Text, View } from "../../styled";
 
 type AccountCard = {
 	accountCurrency: string;
@@ -72,28 +79,62 @@ export default function AccountCard({ item }: { item: AccountCard }) {
 
 			<View className="h-[1px] bg-white w-full" />
 
-			<View className="flex flex-row space-x-2 items-stretch w-full">
-				<View className="flex-grow bg-white rounded-full px-2 py-1 flex items-center justify-center h-12">
+			<View className="flex flex-row flex-grow justify-between space-x-2 items-stretch w-full">
+				<View className="flex flex-col items-center justify-center space-y-1.5">
+					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+						<ArrowCircleDownIcon
+							width={24}
+							height={24}
+							stroke="#9333EA"
+						/>
+					</View>
 					<Text
-						style={{ fontFamily: "Suprapower" }}
-						className="text-black text-base"
+						style={{ fontFamily: "InterSemiBold" }}
+						className="text-white text-sm tracking-tighter"
 					>
 						Income
 					</Text>
 				</View>
-				<View
-					className="flex-grow rounded-full px-2 py-1 flex items-center justify-center h-12 bg-purple-100"
-					// style={{ backgroundColor: item.cardTintColour }}
-				>
+				<View className="flex flex-col items-center justify-center space-y-1.5">
+					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+						<ArrowCircleUpIcon
+							width={24}
+							height={24}
+							stroke="#9333EA"
+						/>
+					</View>
 					<Text
-						style={{ fontFamily: "Suprapower" }}
-						className="text-black text-base"
+						style={{ fontFamily: "InterSemiBold" }}
+						className="text-white text-sm tracking-tighter"
 					>
 						Expense
 					</Text>
 				</View>
-				<View className="aspect-square h-12 rounded-full bg-white flex items-center justify-center">
-					<CoinSwapIcon width={24} height={24} stroke="#000" />
+				<View className="flex flex-col items-center justify-center space-y-1.5">
+					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+						<CoinSwapIcon width={24} height={24} stroke="#9333EA" />
+					</View>
+					<Text
+						style={{ fontFamily: "InterSemiBold" }}
+						className="text-white text-sm tracking-tighter"
+					>
+						Transfer
+					</Text>
+				</View>
+				<View className="flex flex-col items-center justify-center space-y-1.5">
+					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+						<PiggyBankIcon
+							width={24}
+							height={24}
+							stroke="#9333EA"
+						/>
+					</View>
+					<Text
+						style={{ fontFamily: "InterSemiBold" }}
+						className="text-white text-sm tracking-tighter"
+					>
+						Budget
+					</Text>
 				</View>
 			</View>
 		</LinearGradient>

@@ -6,14 +6,16 @@ import { Pressable } from "react-native";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-	name: React.ComponentProps<typeof FontAwesome>["name"];
-	color: string;
-}) {
-	return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import {
+	ArrowSwitchHorizontalIcon,
+	BarLineChartIcon,
+	CoinSwapIcon,
+	HomeSmileIcon,
+	PiggyBankIcon,
+	SafeIcon,
+	UserCircleIcon,
+	WalletIcon,
+} from "@/components/SVG/icons";
 
 export default function TabLayout() {
 	return (
@@ -25,9 +27,64 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="index"
 				options={{
-					title: "Tab One",
+					title: "Home",
 					tabBarIcon: ({ color }) => (
-						<TabBarIcon name="code" color={color} />
+						<HomeSmileIcon width={24} height={24} stroke={color} />
+					),
+					headerShown: false,
+				}}
+			/>
+			<Tabs.Screen
+				name="plans"
+				options={{
+					title: "Plans",
+					tabBarIcon: ({ color }) => (
+						<PiggyBankIcon width={24} height={24} stroke={color} />
+					),
+					headerShown: false,
+					// tabBarBadge: "9+",
+				}}
+			/>
+			<Tabs.Screen
+				name="transactions"
+				options={{
+					title: "Transactions",
+					tabBarIcon: ({ color }) => (
+						<CoinSwapIcon width={24} height={24} stroke={color} />
+					),
+					headerShown: false,
+				}}
+			/>
+			<Tabs.Screen
+				name="stats"
+				options={{
+					title: "Stats",
+					tabBarIcon: ({ color }) => (
+						<BarLineChartIcon
+							width={24}
+							height={24}
+							stroke={color}
+						/>
+					),
+					headerShown: false,
+				}}
+			/>
+			<Tabs.Screen
+				name="accounts"
+				options={{
+					title: "Accounts",
+					tabBarIcon: ({ color }) => (
+						<SafeIcon width={24} height={24} stroke={color} />
+					),
+					headerShown: false,
+				}}
+			/>
+			<Tabs.Screen
+				name="profile"
+				options={{
+					title: "Profile",
+					tabBarIcon: ({ color }) => (
+						<UserCircleIcon width={24} height={24} stroke={color} />
 					),
 					headerShown: false,
 				}}
