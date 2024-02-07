@@ -79,9 +79,9 @@ export default function AccountCard({ item }: { item: AccountCard }) {
 
 			<View className="h-[1px] bg-white w-full" />
 
-			<View className="flex flex-row flex-grow justify-between space-x-2 items-stretch w-full">
+			<View className="flex flex-row flex-grow justify-between space-x-2 items-stretch w-full px-4">
 				<View className="flex flex-col items-center justify-center space-y-1.5">
-					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+					<View className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
 						<ArrowCircleDownIcon
 							width={24}
 							height={24}
@@ -96,7 +96,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
 					</Text>
 				</View>
 				<View className="flex flex-col items-center justify-center space-y-1.5">
-					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+					<View className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
 						<ArrowCircleUpIcon
 							width={24}
 							height={24}
@@ -111,7 +111,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
 					</Text>
 				</View>
 				<View className="flex flex-col items-center justify-center space-y-1.5">
-					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+					<View className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
 						<CoinSwapIcon width={24} height={24} stroke="#9333EA" />
 					</View>
 					<Text
@@ -122,7 +122,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
 					</Text>
 				</View>
 				<View className="flex flex-col items-center justify-center space-y-1.5">
-					<View className="bg-white w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
+					<View className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center space-y-1.5 relative">
 						<PiggyBankIcon
 							width={24}
 							height={24}
