@@ -91,6 +91,20 @@ export function ArrowNarrowDownRightIcon(props: SvgProps) {
 	);
 }
 
+export function ArrowNarrowUpRightIcon(props: SvgProps) {
+	return (
+		<Svg fill="none" {...props}>
+			<Path
+				d="M4 12L12 4M12 4H6.66667M12 4V9.33333"
+				stroke={props.stroke}
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</Svg>
+	);
+}
+
 export function HomeSmileIcon(props: SvgProps) {
 	return (
 		<Svg fill="none" {...props}>

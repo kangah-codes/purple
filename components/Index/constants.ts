@@ -49,3 +49,76 @@ export const savingData = [
 		targetAmount: 1000,
 	},
 ];
+
+export const transactionData = [
+	{
+		type: "debit",
+		category: "🏠 Housing",
+		description: "House rent",
+		amount: "$10,000",
+		dateTime: "June 9, 9:30 PM",
+	},
+	{
+		type: "credit",
+		category: "💰 Salary",
+		description: "Monthly salary",
+		amount: "$5,000",
+		dateTime: "June 10, 10:00 AM",
+	},
+	{
+		type: "debit",
+		category: "🍔 Food",
+		description: "Groceries",
+		amount: "$200",
+		dateTime: "June 10, 3:00 PM",
+	},
+	{
+		type: "credit",
+		category: "💼 Freelance",
+		description: "Web design project",
+		amount: "$1,500",
+		dateTime: "June 11, 11:30 AM",
+	},
+	{
+		type: "debit",
+		category: "🚗 Transportation",
+		description: "Fuel",
+		amount: "$50",
+		dateTime: "June 12, 2:00 PM",
+	},
+	{
+		type: "credit",
+		category: "💵 Refund",
+		description: "Product return",
+		amount: "$100",
+		dateTime: "June 13, 4:45 PM",
+	},
+	{
+		type: "debit",
+		category: "🎁 Shopping",
+		description: "Gift for friend",
+		amount: "$30",
+		dateTime: "June 14, 6:00 PM",
+	},
+	{
+		type: "credit",
+		category: "💼 Salary Bonus",
+		description: "Performance bonus",
+		amount: "$1,000",
+		dateTime: "June 15, 9:00 AM",
+	},
+	{
+		type: "debit",
+		category: "📱 Utilities",
+		description: "Internet bill",
+		amount: "$80",
+		dateTime: "June 16, 1:30 PM",
+	},
+	{
+		type: "credit",
+		category: "💳 Cashback",
+		description: "Credit card cashback",
+		amount: "$20",
+		dateTime: "June 17, 5:30 PM",
+	},
+];

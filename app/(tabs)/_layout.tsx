@@ -22,6 +22,16 @@ export default function TabLayout() {
 		<Tabs
 			screenOptions={{
 				tabBarActiveTintColor: Colors["light"].tint,
+				tabBarLabelStyle: {
+					marginTop: -5, // do this so that on certain android phones it looks better
+					marginBottom: 5,
+					fontFamily: "InterSemiBold",
+				},
+				tabBarStyle: [
+					{
+						backgroundColor: "#F9F9F9",
+					},
+				],
 			}}
 		>
 			<Tabs.Screen

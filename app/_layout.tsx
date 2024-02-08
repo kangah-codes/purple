@@ -10,6 +10,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 export {
 	// Catch any errors thrown by the Layout component.
@@ -61,10 +63,23 @@ function RootLayoutNav() {
 	const colorScheme = useColorScheme();
 
 	return (
-		<ThemeProvider value={DefaultTheme}>
-			<Stack>
-				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-			</Stack>
-		</ThemeProvider>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<BottomSheetModalProvider>
+				<ThemeProvider value={DefaultTheme}>
+					<Stack
+						screenOptions={{
+							contentStyle: {
+								backgroundColor: "#fff",
+							},
+						}}
+					>
+						<Stack.Screen
+							name="(tabs)"
+							options={{ headerShown: false }}
+						/>
+					</Stack>
+				</ThemeProvider>
+			</BottomSheetModalProvider>
+		</GestureHandlerRootView>
 	);
 }

@@ -28,7 +28,7 @@ export default function SavingPlanCard({
 					style={{
 						fontFamily: "InterSemiBold",
 					}}
-					className="text-base text-gray-700"
+					className="text-base text-gray-700 tracking-tighter"
 				>
 					{data.category}
 				</Text>
@@ -38,7 +38,7 @@ export default function SavingPlanCard({
 						style={{
 							fontFamily: "InterMedium",
 						}}
-						className="text-sm text-purple-50"
+						className="text-sm text-purple-50 tracking-tighter"
 					>
 						{data.percentageCompleted}%
 					</Text>
@@ -47,9 +47,9 @@ export default function SavingPlanCard({
 
 			<Text
 				style={{
-					fontFamily: "InterBold",
+					fontFamily: "InterSemiBold",
 				}}
-				className="text-lg text-black"
+				className="text-lg text-black tracking-tighter"
 			>
 				{data.name}
 			</Text>
@@ -61,7 +61,7 @@ export default function SavingPlanCard({
 					style={{
 						fontFamily: "InterBold",
 					}}
-					className="text-sm text-black"
+					className="text-sm text-black tracking-tighter"
 				>
 					₵ {data.currentAmount}
 				</Text>
@@ -70,7 +70,7 @@ export default function SavingPlanCard({
 					style={{
 						fontFamily: "InterBold",
 					}}
-					className="text-sm text-gray-500"
+					className="text-sm text-gray-500 tracking-tighter"
 				>
 					₵ {data.targetAmount}
 				</Text>

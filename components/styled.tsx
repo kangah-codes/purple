@@ -8,6 +8,7 @@ import {
 	TouchableOpacity as _TouchableOpacity,
 } from "react-native";
 import { LinearGradient as _LinearGradient } from "expo-linear-gradient";
+import { BottomSheetModal as _BottomSheetModal } from "@gorhom/bottom-sheet";
 
 /**
  * @description Themed text component with suprapower font
@@ -29,3 +30,4 @@ export const InputField = styled(UnstyledTextInput);
 export const ScrollView = styled(_ScrollView);
 export const LinearGradient = styled(_LinearGradient);
 export const TouchableOpacity = styled(_TouchableOpacity);
+export const BottomSheetModal = styled(_BottomSheetModal);

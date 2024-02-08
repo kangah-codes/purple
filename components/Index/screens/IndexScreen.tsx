@@ -7,10 +7,11 @@ import {
 } from "react-native";
 import { BellIcon, SearchIcon } from "../../SVG/icons";
 import { InputField, SafeAreaView, ScrollView, Text, View } from "../../styled";
-import AccountCardCarousel from "./AccountCardCarousel";
-import SavingPlanCard from "./SavingPlanCard";
-import TransactionHistoryCard from "./TransactionHistoryCard";
-import { savingData } from "../constants";
+import AccountCardCarousel from "../molecules/AccountCardCarousel";
+import SavingPlanCard from "../molecules/SavingPlanCard";
+import TransactionHistoryCard from "../molecules/TransactionHistoryCard";
+import { savingData, transactionData } from "../constants";
+import TransactionHistoryList from "../molecules/TransactionHistoryList";
 
 export default function IndexScreen() {
 	const [refreshing, setRefreshing] = useState(false);
@@ -87,14 +88,14 @@ export default function IndexScreen() {
 						<View className="flex flex-row w-full justify-between items-center">
 							<Text
 								style={{ fontFamily: "InterSemiBold" }}
-								className="text-base text-gray-700"
+								className="text-base text-gray-700 tracking-tighter"
 							>
 								My saving plans
 							</Text>
 
 							<Text
 								style={{ fontFamily: "InterBold" }}
-								className="text-base"
+								className="text-base tracking-tighter"
 							>
 								View All
 							</Text>
@@ -110,19 +111,7 @@ export default function IndexScreen() {
 						/>
 					</View>
 
-					<View className="flex flex-col">
-						<View className="flex flex-row w-full justify-between items-center">
-							<Text
-								style={{ fontFamily: "InterSemiBold" }}
-								className="text-base text-gray-700"
-							>
-								Transaction History
-							</Text>
-						</View>
-						{savingData.map((data, index) => (
-							<TransactionHistoryCard key={index} />
-						))}
-					</View>
+					<TransactionHistoryList />
 				</ScrollView>
 			</View>
 		</SafeAreaView>

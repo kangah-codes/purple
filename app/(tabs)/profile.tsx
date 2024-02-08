@@ -1,5 +1,5 @@
-import IndexScreen from "@/components/Index/molecules/IndexScreen";
+import ProfileScreen from "@/components/Profile/screens/ProfileScreen";
 
-export default function ProfileScreen() {
-	return <IndexScreen />;
+export default function Screen() {
+	return <ProfileScreen />;
 }
