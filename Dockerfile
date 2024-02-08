@@ -24,4 +24,4 @@ WORKDIR /project/app
 RUN git init
 
 # Build the app using EAS
-CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local", "-b", "${{ github.ref }}"]
+CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
