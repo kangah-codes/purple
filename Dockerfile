@@ -3,7 +3,7 @@ FROM node:20.4.0
 ARG EXPO_TOKEN
 ENV EXPO_TOKEN=$EXPO_TOKEN
 
-WORKDIR /
+WORKDIR /project/app
 RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
 RUN apt update && apt install -y wget unzip android-sdk
 RUN corepack enable && corepack prepare yarn@stable --activate && yarn set version stable
