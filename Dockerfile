@@ -1,5 +1,8 @@
 FROM node:20.4.0
 
+ARG EXPO_TOKEN
+ENV EXPO_TOKEN=$EXPO_TOKEN
+
 WORKDIR /
 RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
 RUN apt update && apt install -y wget unzip android-sdk
@@ -15,4 +18,4 @@ WORKDIR /project
 WORKDIR /project/app
 VOLUME ["/project/app"]
 
-CMD ["tail", "-f", "/dev/null"]
+CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
