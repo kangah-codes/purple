@@ -1,4 +1,4 @@
-name: Build and Release APK
+name: Build Android App
 
 on:
     push:
@@ -8,27 +8,21 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
 
-            - name: Set up Docker Buildx
+            - name: Set up Docker
               uses: docker/setup-buildx-action@v1
 
             - name: Build Docker image
-              run: docker build --build-arg EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} -t purple .
+              run: docker build -t purple .
 
-            - name: Run Docker container to build APK
-              run: |
-                  docker run --rm \
-                    -e EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} \
-                    -v $(pwd)/output:/project/app \
-                    purple
+            - name: Run Docker container
+              run: docker run -v ${{ github.workspace }}/output:/output purple
 
-            - name: Upload APK to Releases
-              uses: actions/upload-release-asset@v1
+            - name: Archive APK
+              uses: actions/upload-artifact@v2
               with:
-                  asset_path: ./output/app-release.apk
-                  asset_name: app-release.apk
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  name: purple-debug.apk
+                  path: output/purple-debug.apk
