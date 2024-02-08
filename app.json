@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "spendwise",
+    "name": "Purple",
     "slug": "spendwise",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -10,7 +10,9 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "width": 320,
+      "height": 320
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,7 +24,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.akangah89.Purple"
     },
     "web": {
       "bundler": "metro",
@@ -51,6 +54,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e315a942-184e-49ce-a243-e9006ec7ddb1"
+      }
     }
   }
 }
