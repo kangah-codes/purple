@@ -21,6 +21,10 @@
       "supportsTablet": true
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#9333EA"
+      },
       "package": "com.akangah89.Purple"
     },
     "web": {

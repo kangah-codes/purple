@@ -18,4 +18,4 @@ WORKDIR /project
 WORKDIR /project/app
 VOLUME ["/project/app"]
 
-CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
+CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local", "--project-dir", "/project/app"]
