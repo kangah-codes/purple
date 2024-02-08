@@ -1,28 +1,25 @@
-name: Build Android App
-
+name: EAS Build
 on:
+    workflow_dispatch:
     push:
         branches:
             - main
-
 jobs:
     build:
+        name: Install and build
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-
-            - name: Set up Docker
-              uses: docker/setup-buildx-action@v1
-
-            - name: Build Docker image
-              run: docker build -t purple .
-
-            - name: Run Docker container
-              run: docker run -v ${{ github.workspace }}/output:/output purple
-
-            - name: Archive APK
-              uses: actions/upload-artifact@v2
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
-                  name: purple-debug.apk
-                  path: output/purple-debug.apk
+                  node-version: 18.x
+                  cache: npm
+            - name: Setup Expo and EAS
+              uses: expo/expo-github-action@v8
+              with:
+                  eas-version: latest
+                  token: ${{ secrets.EXPO_TOKEN }}
+            - name: Install dependencies
+              run: npm ci
+            - name: Build on EAS
+              run: eas build --platform android --non-interactive --no-wait
