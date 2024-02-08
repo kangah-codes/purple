@@ -14,7 +14,7 @@ ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
 # Set EAS_NO_VCS environment variable
 ENV EAS_NO_VCS=1
 
-WORKDIR /project
+# Set the project root and Git root to the same directory
 WORKDIR /project/app
 VOLUME ["/project/app"]
 
