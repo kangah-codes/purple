@@ -12,10 +12,13 @@ RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android
 ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
 
 # Set EAS_NO_VCS environment variable
-RUN export EAS_NO_VCS=1
+ENV EAS_NO_VCS=1
 
 WORKDIR /project
 WORKDIR /project/app
 VOLUME ["/project/app"]
+
+# Initialize Git repository
+RUN git init
 
 CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
