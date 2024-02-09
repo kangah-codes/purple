@@ -1,26 +1,67 @@
-FROM node:20.4.0
+# FROM node:20.4.0
 
+# ARG EXPO_TOKEN
+# ENV EXPO_TOKEN=$EXPO_TOKEN
+
+# ARG EAS_NO_VCS
+# ENV EAS_NO_VCS=1
+
+# WORKDIR /
+# RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
+# RUN apt update && apt install -y wget unzip android-sdk
+# RUN corepack enable && corepack prepare yarn@stable --activate && yarn set version stable
+# RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && unzip commandlinetools-linux-9477386_latest.zip
+# RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android-sdk/cmdline-tools/latest
+# ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
+# ENV ANDROID_SDK_ROOT /android-sdk
+# ENV EAS_NO_VCS 1
+# RUN yes | sdkmanager --licenses
+
+# WORKDIR /project
+# WORKDIR /project/app
+# VOLUME ["/project/app"]
+
+# RUN export EAS_NO_VCS=1
+
+# CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
+
+
+# Use a smaller base image
+FROM node:18-alpine
+
+# Include environment variables
 ARG EXPO_TOKEN
 ENV EXPO_TOKEN=$EXPO_TOKEN
 
-ARG EAS_NO_VCS
-ENV EAS_NO_VCS=1
-
+# Set working directory to project root
 WORKDIR /
-RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
-RUN apt update && apt install -y wget unzip android-sdk
-RUN corepack enable && corepack prepare yarn@stable --activate && yarn set version stable
-RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && unzip commandlinetools-linux-9477386_latest.zip
-RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android-sdk/cmdline-tools/latest
+
+# Install EXPO and related tools
+RUN npm install -g eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
+
+# Install Android SDK tools
+RUN apk add --update \
+    wget unzip android-tools
+
+# Download and extract Android commandline tools
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
+    unzip commandlinetools-linux-9477386_latest.zip && \
+    mkdir -p /android-sdk/cmdline-tools/latest && \
+    mv ./cmdline-tools/* ./android-sdk/cmdline-tools/latest
+
+# Set environment variables for Android SDK
 ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
 ENV ANDROID_SDK_ROOT /android-sdk
-ENV EAS_NO_VCS 1
+
+# Accept Android SDK licenses
 RUN yes | sdkmanager --licenses
 
-WORKDIR /project
-WORKDIR /project/app
+# Mount project directory and set working directory
 VOLUME ["/project/app"]
+WORKDIR /project/app
 
-RUN export EAS_NO_VCS=1
+# Set additional environment variables if needed
+ENV EAS_NO_VCS=1
 
-CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
+# Run EAS build command
+CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local", "/project/app"]
