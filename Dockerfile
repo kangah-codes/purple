@@ -14,6 +14,7 @@ RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386
 RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android-sdk/cmdline-tools/latest
 ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
 ENV ANDROID_SDK_ROOT /android-sdk
+ENV ANDROID_HOME /android-sdk
 ENV EAS_NO_VCS 1
 RUN yes | sdkmanager --licenses
 
