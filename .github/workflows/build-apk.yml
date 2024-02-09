@@ -3,7 +3,7 @@ name: Build and Release APK
 on:
     push:
         branches:
-            - main
+            - develop
 
 jobs:
     build:

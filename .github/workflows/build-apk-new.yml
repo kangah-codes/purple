@@ -1,0 +1,68 @@
+name: Build and Release APK
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: "20.4.0"
+
+            - name: Install EAS CLI and dependencies
+              run: |
+                  npm install -g eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
+                  sudo apt update && sudo apt install -y wget unzip
+                  wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && unzip commandlinetools-linux-9477386_latest.zip
+                  sudo mkdir -p /android-sdk/cmdline-tools/latest && sudo mv cmdline-tools/* /android-sdk/cmdline-tools/latest
+                  sudo yes | sdkmanager --licenses
+
+            - name: Set up Android SDK
+              run: |
+                  echo "export ANDROID_SDK_ROOT=/android-sdk" >> $GITHUB_ENV
+                  echo "export PATH=$PATH:/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+
+            - name: Install Yarn
+              run: |
+                  npm install -g yarn@stable
+                  yarn set version stable
+
+            - name: Install project dependencies
+              run: yarn install
+
+            - name: Build APK
+              run: eas build -p android --profile preview --local --output purple.apk
+              env:
+                  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+                  EAS_NO_VCS: 1
+
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
+
+            - name: Upload Release Asset
+              id: upload-release-asset
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+                  asset_path: ./purple.apk
+                  asset_name: purple.apk
+                  asset_content_type: application/vnd.android.package-archive
