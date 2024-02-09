@@ -43,6 +43,7 @@ RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android
 ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
 ENV ANDROID_SDK_ROOT /android-sdk
 ENV ANDROID_HOME /android-sdk
+RUN yes | sdkmanager --licenses
 
 WORKDIR /project/app
 
