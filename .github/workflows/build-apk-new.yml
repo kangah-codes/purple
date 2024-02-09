@@ -24,7 +24,7 @@ jobs:
                   sudo apt update && sudo apt install -y wget unzip
                   wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && unzip commandlinetools-linux-9477386_latest.zip
                   sudo mkdir -p /android-sdk/cmdline-tools/latest && sudo mv cmdline-tools/* /android-sdk/cmdline-tools/latest
-                  sudo yes | sdkmanager --licenses
+                  sudo yes | /android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
             - name: Set up Android SDK
               run: |
