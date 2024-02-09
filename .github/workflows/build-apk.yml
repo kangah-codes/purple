@@ -24,7 +24,7 @@ jobs:
                   docker run --rm \
                     -e EXPO_TOKEN=GWByotFGL1iXR1CgN5Z2oDPCAY4yL49tGXsiHpYG \
                     -e EAS_NO_VCS=1 \
-                    -v "$(pwd)":/project/app \
+                    -v /project/app:/project/app \
                     purple
 
             - name: Upload APK to Releases
