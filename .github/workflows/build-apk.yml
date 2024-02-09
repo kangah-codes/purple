@@ -17,14 +17,14 @@ jobs:
               uses: docker/setup-buildx-action@v1
 
             - name: Build Docker image
-              run: docker build --build-arg EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} -t purple .
+              run: docker build -t purple .
 
             - name: Run Docker container to build APK
               run: |
                   docker run --rm \
-                    -e EXPO_TOKEN=GWByotFGL1iXR1CgN5Z2oDPCAY4yL49tGXsiHpYG \
+                    -e EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} \
                     -e EAS_NO_VCS=1 \
-                    -v /project/app:/project/app \
+                    -v "$(pwd)":/project/app \
                     purple
 
             - name: Upload APK to Releases
