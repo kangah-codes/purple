@@ -22,9 +22,11 @@ jobs:
             - name: Run Docker container to build APK
               run: |
                   docker run --rm \
-                    -e EXPO_TOKEN=${{ secrets.EXPO_TOKEN }} EAS_NO_VCS=1 \
-                    -v $(pwd)/output:/project/app \
+                    -e EXPO_TOKEN=GWByotFGL1iXR1CgN5Z2oDPCAY4yL49tGXsiHpYG \
+                    -e EAS_NO_VCS=1 \
+                    -v "$(pwd)":/project/app \
                     purple
+
             - name: Upload APK to Releases
               uses: actions/upload-release-asset@v1
               with:
