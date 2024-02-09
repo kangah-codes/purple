@@ -1,41 +1,12 @@
-# FROM node:20.4.0
+FROM node:20.4.0
 
-# ARG EXPO_TOKEN
-# ENV EXPO_TOKEN=$EXPO_TOKEN
-
-# ARG EAS_NO_VCS
-# ENV EAS_NO_VCS=1
-
-# WORKDIR /
-# RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
-# RUN apt update && apt install -y wget unzip android-sdk
-# RUN corepack enable && corepack prepare yarn@stable --activate && yarn set version stable
-# RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && unzip commandlinetools-linux-9477386_latest.zip
-# RUN mkdir -p /android-sdk/cmdline-tools/latest && mv ./cmdline-tools/* ./android-sdk/cmdline-tools/latest
-# ENV PATH /android-sdk/cmdline-tools/latest/bin:$PATH
-# ENV ANDROID_SDK_ROOT /android-sdk
-# ENV EAS_NO_VCS 1
-# RUN yes | sdkmanager --licenses
-
-# WORKDIR /project
-# WORKDIR /project/app
-# VOLUME ["/project/app"]
-
-# RUN export EAS_NO_VCS=1
-
-# CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
-
-
-# Use a smaller base image
-FROM node:18-alpine
-
-# Include environment variables
 ARG EXPO_TOKEN
 ENV EXPO_TOKEN=$EXPO_TOKEN
 
-# Set working directory to project root
-WORKDIR /
+ARG EAS_NO_VCS
+ENV EAS_NO_VCS=1
 
+WORKDIR /
 RUN npm -g i eas-cli @expo/ngrok@^4.1.0 sharp-cli@^2.1.0
 RUN apt update && apt install -y wget unzip android-sdk
 RUN corepack enable && corepack prepare yarn@stable --activate && yarn set version stable
@@ -46,11 +17,9 @@ ENV ANDROID_SDK_ROOT /android-sdk
 ENV EAS_NO_VCS 1
 RUN yes | sdkmanager --licenses
 
-# Mount project directory and set working directory
 VOLUME ["/project/app"]
 WORKDIR /project/app
 
-# Set additional environment variables if needed
+RUN export EAS_NO_VCS=1
 
-# Run EAS build command
 CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local", "/project/app"]
