@@ -33,8 +33,8 @@ jobs:
 
             - name: Install Yarn
               run: |
-                  npm install -g yarn@stable
-                  yarn set version stable
+                  npm install -g yarn
+              #   yarn set version stable
 
             - name: Install project dependencies
               run: yarn install
