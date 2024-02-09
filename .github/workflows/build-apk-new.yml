@@ -59,7 +59,7 @@ jobs:
               with:
                   repo_token: ${{ secrets.GITHUB_TOKEN }}
                   file: ./purple.apk
-                  asset_name: Purple
+                  asset_name: Purple.apk
                   tag: ${{ github.ref }}
                   overwrite: true
                   body: "New app release"
