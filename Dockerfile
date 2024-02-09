@@ -22,5 +22,6 @@ VOLUME ["/project/app"]
 WORKDIR /project/app
 
 RUN export EAS_NO_VCS=1
+RUN yarn install
 
 CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
