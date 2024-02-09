@@ -22,4 +22,4 @@ WORKDIR /project/app
 
 RUN export EAS_NO_VCS=1
 
-CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local"]
+CMD ["eas", "build", "-p", "android", "--profile", "preview", "--local", "--non-interactive", "--type", "string"]
