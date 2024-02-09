@@ -48,4 +48,4 @@ RUN yes | sdkmanager --licenses
 WORKDIR /project/app
 
 COPY package.json yarn.lock ./
-CMD yarn install && eas build -p android --profile preview --local
+CMD yarn install && eas build -p android --profile preview --local --output purple.apk
