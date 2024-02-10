@@ -1,10 +1,6 @@
-import { SafeAreaView, View, Text, ScrollView } from "@/components/styled";
+import { SafeAreaView, ScrollView, Text, View } from "@/components/styled";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
-import {
-	FlatList,
-	StatusBar as RNStatusBar,
-	RefreshControl,
-} from "react-native";
+import { StatusBar as RNStatusBar } from "react-native";
 import ProfileHeader from "../molecules/ProfileHeader";
 
 export default function ProfileScreen() {
@@ -28,17 +24,19 @@ export default function ProfileScreen() {
 					</View>
 				</View>
 
-				<View className="mt-5">
-					<ProfileHeader />
-				</View>
-
 				<ScrollView
-					className="mt-5 h-full space-y-5"
+					className="mt-5 h-full flex flex-col space-y-5"
 					contentContainerStyle={{
 						paddingBottom: 300,
 					}}
 					showsVerticalScrollIndicator={false}
-				></ScrollView>
+				>
+					<View className="">
+						<ProfileHeader />
+					</View>
+
+					<View className="border-b border-gray-200 w-full" />
+				</ScrollView>
 			</View>
 		</SafeAreaView>
 	);

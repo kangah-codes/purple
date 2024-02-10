@@ -1,5 +1,5 @@
-import IndexScreen from "@/components/Index/screens/IndexScreen";
+import PlansScreen from "@/components/Plans/screens/PlansScreen";
 
-export default function PlansScreen() {
-	return <IndexScreen />;
+export default function Screen() {
+	return <PlansScreen />;
 }

@@ -7,11 +7,12 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import * as Font from "expo-font";
 
 export {
 	// Catch any errors thrown by the Layout component.
@@ -27,32 +28,40 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-	const [loaded, error] = useFonts({
-		Suprapower: require("../assets/fonts/Suprapower.otf"),
-		InterRegular: require("../assets/fonts/Inter-Regular.ttf"),
-		InterThin: require("../assets/fonts/Inter-Thin.ttf"),
-		InterBlack: require("../assets/fonts/Inter-Black.ttf"),
-		InterBold: require("../assets/fonts/Inter-Bold.ttf"),
-		InterExtraBold: require("../assets/fonts/Inter-ExtraBold.ttf"),
-		InterExtraLight: require("../assets/fonts/Inter-ExtraLight.ttf"),
-		InterLight: require("../assets/fonts/Inter-Light.ttf"),
-		InterMedium: require("../assets/fonts/Inter-Medium.ttf"),
-		InterSemiBold: require("../assets/fonts/Inter-SemiBold.ttf"),
-		...FontAwesome.font,
-	});
-
-	// Expo Router uses Error Boundaries to catch errors in the navigation tree.
-	useEffect(() => {
-		if (error) throw error;
-	}, [error]);
+	const [appIsReady, setAppIsReady] = useState(false);
 
 	useEffect(() => {
-		if (loaded) {
-			SplashScreen.hideAsync();
+		async function prepare() {
+			try {
+				// Pre-load fonts, make any API calls you need to do here
+				await Font.loadAsync({
+					Suprapower: require("../assets/fonts/Suprapower.otf"),
+					InterRegular: require("../assets/fonts/Inter-Regular.ttf"),
+					InterThin: require("../assets/fonts/Inter-Thin.ttf"),
+					InterBlack: require("../assets/fonts/Inter-Black.ttf"),
+					InterBold: require("../assets/fonts/Inter-Bold.ttf"),
+					InterExtraBold: require("../assets/fonts/Inter-ExtraBold.ttf"),
+					InterExtraLight: require("../assets/fonts/Inter-ExtraLight.ttf"),
+					InterLight: require("../assets/fonts/Inter-Light.ttf"),
+					InterMedium: require("../assets/fonts/Inter-Medium.ttf"),
+					InterSemiBold: require("../assets/fonts/Inter-SemiBold.ttf"),
+				});
+
+				// Artificially delay for two seconds to simulate a slow loading
+				// experience. Please remove this if you copy and paste the code!
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			} catch (e) {
+				console.warn(e);
+			} finally {
+				// Tell the application to render
+				setAppIsReady(true);
+			}
 		}
-	}, [loaded]);
 
-	if (!loaded) {
+		prepare();
+	}, []);
+
+	if (!appIsReady) {
 		return null;
 	}
 
@@ -61,6 +70,14 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
 	const colorScheme = useColorScheme();
+
+	useEffect(() => {
+		async function hideSplashScreen() {
+			await SplashScreen.hideAsync();
+		}
+
+		hideSplashScreen();
+	}, []);
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
