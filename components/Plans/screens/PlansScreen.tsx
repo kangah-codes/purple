@@ -7,21 +7,79 @@ import {
 	View,
 } from "@/components/styled";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
-import { StatusBar as RNStatusBar } from "react-native";
+import { FlatList, StatusBar as RNStatusBar } from "react-native";
 import ExpensesCard from "../molecules/ExpensesCard";
 import { EditSquareIcon } from "@/components/SVG/24x24";
+import { useState } from "react";
+import { SceneMap, TabView } from "react-native-tab-view";
+import BudgetPlanCard from "../molecules/BudgetCard";
+import { expensePlans } from "../constants";
+import ExpensesScreen from "./ExpensesScreen";
+
+function SavingsScreen() {
+	return (
+		<View className="flex flex-col space-y-5">
+			<ExpensesCard />
+		</View>
+	);
+}
 
 export default function PlansScreen() {
+	const [index, setIndex] = useState(0);
+	const [routes] = useState([
+		{ key: "expenses", title: "Expenses" },
+		{ key: "savings", title: "Savings" },
+	]);
+
+	function renderTabBar() {
+		return (
+			<View className="px-5">
+				<View className="w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5 mb-5">
+					{routes.map((route, i) => {
+						return (
+							<View
+								className="flex-grow flex items-center justify-center rounded-full"
+								style={{
+									backgroundColor:
+										index === i
+											? "#fff"
+											: "rgb(243 232 255)",
+								}}
+							>
+								<TouchableOpacity
+									onPress={() => setIndex(i)}
+									className="w-full flex items-center justify-center px-5 py-2.5 rounded-full"
+								>
+									<Text
+										style={{ fontFamily: "Suprapower" }}
+										className="text-base"
+									>
+										{route.title}
+									</Text>
+								</TouchableOpacity>
+							</View>
+						);
+					})}
+				</View>
+			</View>
+		);
+	}
+
+	const renderScene = SceneMap({
+		expenses: ExpensesScreen,
+		savings: SavingsScreen,
+	});
+
 	return (
-		<SafeAreaView className="bg-white relative">
+		<SafeAreaView className="bg-white relative h-full">
 			<ExpoStatusBar style="dark" />
 			<View
 				style={{
 					paddingTop: RNStatusBar.currentHeight,
 				}}
-				className="bg-white px-5 space-y-5"
+				className="bg-white space-y-5 flex-1 flex flex-col"
 			>
-				<View className="flex flex-row justify-between items-center pt-2.5">
+				<View className="flex px-5 flex-row justify-between items-center pt-2.5">
 					<View className="flex flex-col">
 						<Text
 							style={{ fontFamily: "Suprapower" }}
@@ -32,41 +90,18 @@ export default function PlansScreen() {
 					</View>
 				</View>
 
-				{/** Will have to replace this component */}
-				<View className="w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5">
-					<View className="bg-white px-5 py-2.5 flex-grow flex items-center justify-center rounded-full">
-						<Text
-							style={{ fontFamily: "Suprapower" }}
-							className="text-base"
-						>
-							Expenses
-						</Text>
-					</View>
-
-					<View className="bg-purple-100 px-5 py-2.5 flex-grow flex items-center justify-center rounded-full">
-						<Text
-							style={{ fontFamily: "Suprapower" }}
-							className="text-base"
-						>
-							Savings
-						</Text>
-					</View>
-				</View>
-
-				<ScrollView
-					className="mt-5 flex h-full flex-col space-y-5"
-					contentContainerStyle={{
-						paddingBottom: 300,
+				<TabView
+					navigationState={{
+						index,
+						routes,
 					}}
-					showsVerticalScrollIndicator={false}
-				>
-					<View className="">
-						<ExpensesCard />
-					</View>
-				</ScrollView>
+					renderScene={renderScene}
+					renderTabBar={renderTabBar}
+					onIndexChange={setIndex}
+				/>
 			</View>
 			<LinearGradient
-				className="rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-[150]"
+				className="rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5"
 				colors={["#c084fc", "#9333ea"]}
 			>
 				<TouchableOpacity

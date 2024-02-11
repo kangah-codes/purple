@@ -1,20 +1,15 @@
-import ArrowCircleDownIcon from "@/components/SVG/28x28";
+import { ArrowNarrowUpRightIcon } from "@/components/SVG/icons";
 import {
 	BottomSheetBackdrop,
 	BottomSheetBackdropProps,
 	BottomSheetModal as TBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 import { useCallback, useMemo, useRef } from "react";
+import { Platform } from "react-native";
+import Svg, { Polygon } from "react-native-svg";
 import { BottomSheetModal, LinearGradient, Text, View } from "../../styled";
 import { transactionData } from "../constants";
 import TransactionHistoryCard from "./TransactionHistoryCard";
-import App from "./Zig";
-import Svg, { Polygon } from "react-native-svg";
-import {
-	ArrowNarrowDownRightIcon,
-	ArrowNarrowUpRightIcon,
-} from "@/components/SVG/icons";
-import { Platform } from "react-native";
 
 export default function TransactionHistoryList() {
 	// ref

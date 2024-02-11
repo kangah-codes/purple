@@ -26,9 +26,9 @@ export default function SavingPlanCard({
 			<View className="flex flex-row w-full justify-between items-center">
 				<Text
 					style={{
-						fontFamily: "InterSemiBold",
+						fontFamily: "Suprapower",
 					}}
-					className="text-base text-gray-700 tracking-tighter"
+					className="text-base text-gray-700"
 				>
 					{data.category}
 				</Text>
