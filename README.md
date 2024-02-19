@@ -4,7 +4,7 @@
   <p style="font-weight: 900; font-size: 40px">Purple</p>
 </div>
 
-Purple is a budget and expense tracker mobile app I'm currently building for personal use. I was inspired to build Purple because after I made the switch to iOS, I couldn't find a budget app that I liked. I wanted something simple, clean, and easy to use, which was hard to find on Android. So I decided to build my own, and to use this as an opportunity to further polish my React Native skills.
+Purple is a budget and expense tracker mobile app I'm currently building for personal use. I was inspired to build Purple because after I made the switch to Android, I couldn't find a budget app that I liked. I wanted something simple, clean, and easy to use, which was hard to find on Android. So I decided to build my own, and to use this as an opportunity to further polish my React Native skills.
 
 Inspiration for the design was taken from [here](https://www.behance.net/gallery/173280263/A-Budget-PLanner-app?tracking_source=search_projects|budget+app&l=24).
 
