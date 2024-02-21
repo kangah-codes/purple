@@ -1,21 +1,14 @@
+import { Tabs } from "expo-router";
 import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
 
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import {
-	ArrowSwitchHorizontalIcon,
 	BarLineChartIcon,
 	CoinSwapIcon,
 	HomeSmileIcon,
 	PiggyBankIcon,
 	SafeIcon,
-	UserCircleIcon,
-	WalletIcon,
 } from "@/components/SVG/icons";
+import Colors from "@/constants/Colors";
 
 export default function TabLayout() {
 	return (
@@ -52,7 +45,6 @@ export default function TabLayout() {
 						<PiggyBankIcon width={24} height={24} stroke={color} />
 					),
 					headerShown: false,
-					// tabBarBadge: "9+",
 				}}
 			/>
 			<Tabs.Screen
