@@ -58,6 +58,7 @@ export default function TransactionHistoryList() {
 
 	return (
 		<View className="mt-5">
+			{/** // TODO: Move this into it's own component and fetch the current transaction from global state */}
 			<BottomSheetModal
 				ref={bottomSheetModalRef}
 				index={0}

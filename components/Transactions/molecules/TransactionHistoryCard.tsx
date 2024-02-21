@@ -23,7 +23,7 @@ export default function TransactionHistoryCard({
 	return (
 		<TouchableOpacity
 			onPress={onPress}
-			className="w-full border-b border-gray-100 py-5 flex flex-row items-center space-x-3.5"
+			className="w-full py-3.5 flex flex-row items-center space-x-3.5"
 		>
 			<View className="relative items-center justify-center">
 				<View
@@ -53,7 +53,7 @@ export default function TransactionHistoryCard({
 			</View>
 
 			<View className="flex flex-col flex-grow">
-				<View className="flex flex-row justify-between">
+				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{ fontFamily: "Suprapower" }}
 						className="text-base"
@@ -62,13 +62,13 @@ export default function TransactionHistoryCard({
 					</Text>
 					<Text
 						style={{
-							fontFamily: "InterSemiBold",
+							fontFamily: "Suprapower",
 							color:
 								data.type === "debit"
 									? "#DC2626"
 									: "rgb(22 163 74)",
 						}}
-						className="text-base tracking-tighter"
+						className="text-xs"
 					>
 						{data.type === "debit" ? "-" : "+"}
 						{data.amount}

@@ -1,5 +1,5 @@
 import { transactionData } from "@/components/Index/constants";
-import { EditSquareIcon } from "@/components/SVG/24x24";
+import { PlusIcon } from "@/components/SVG/24x24";
 import {
 	LinearGradient,
 	SafeAreaView,
@@ -48,6 +48,9 @@ export default function TransactionsScreen() {
 							onPress={() => console.log("LUL")}
 						/>
 					)}
+					ItemSeparatorComponent={() => (
+						<View className="border-b border-gray-100" />
+					)}
 				/>
 			</View>
 
@@ -62,7 +65,7 @@ export default function TransactionsScreen() {
 						alert("Button tapped");
 					}}
 				>
-					<EditSquareIcon stroke={"#fff"} />
+					<PlusIcon stroke={"#fff"} />
 				</TouchableOpacity>
 			</LinearGradient>
 		</SafeAreaView>

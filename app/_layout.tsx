@@ -1,18 +1,14 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import * as Font from "expo-font";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ChevronLeftIcon } from "@/components/SVG/24x24";
+import { TouchableOpacity, View } from "@/components/Shared/styled";
 
 export {
 	// Catch any errors thrown by the Layout component.
@@ -99,6 +95,26 @@ function RootLayoutNav() {
 						<Stack.Screen
 							name="(tabs)"
 							options={{ headerShown: false }}
+						/>
+						<Stack.Screen
+							name="plans"
+							options={{
+								headerStyle: {
+									backgroundColor: "#fff",
+								},
+								headerTitleStyle: {
+									fontFamily: "Suprapower",
+								},
+								headerLeft: () => (
+									<TouchableOpacity
+										onPress={() => router.back()}
+									>
+										<ChevronLeftIcon stroke="#000" />
+									</TouchableOpacity>
+								),
+								headerTitle: "New Plan",
+								headerTitleAlign: "center",
+							}}
 						/>
 					</Stack>
 				</ThemeProvider>
