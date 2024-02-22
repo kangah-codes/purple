@@ -6,12 +6,33 @@ import { create } from "zustand";
  */
 export const createBottomSheetModalStore = create<{
 	showBottomSheetModal: boolean;
-	toggleShowBottomSheetModal: (show: boolean) => void;
-}>((set) => {
+	toggleShowBottomSheetModal: (key: string, show: boolean) => void;
+	createBottomSheetModal: (key: string) => void;
+	bottomSheetModalKeys: Record<string, boolean>;
+}>((set, get) => {
 	return {
 		showBottomSheetModal: false,
-		toggleShowBottomSheetModal: (show: boolean) => {
-			set({ showBottomSheetModal: show });
+		toggleShowBottomSheetModal: (key: string, show: boolean) => {
+			set((state) => {
+				return {
+					...state,
+					bottomSheetModalKeys: {
+						...state.bottomSheetModalKeys,
+						[key]: show,
+					},
+				};
+			});
 		},
+		createBottomSheetModal: (key: string) =>
+			set((state) => {
+				return {
+					...state,
+					bottomSheetModalKeys: {
+						...state.bottomSheetModalKeys,
+						[key]: false,
+					},
+				};
+			}),
+		bottomSheetModalKeys: {},
 	};
 });

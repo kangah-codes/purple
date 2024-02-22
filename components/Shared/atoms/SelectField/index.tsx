@@ -15,11 +15,13 @@ import BottomSheet, {
 	BottomSheetModal as TBottomSheetModal,
 	BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
-import { useRef, useMemo, useCallback } from "react";
+import { useRef, useMemo, useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import Svg from "react-native-svg";
 import CustomBottomSheetModal from "../../molecules/GlobalBottomSheetModal";
 import { useBottomSheetModalStore } from "../../molecules/GlobalBottomSheetModal/hooks";
+import CustomBottomSheetFlatList from "../../molecules/GlobalBottomSheetFlatList";
+import { useBottomSheetFlatListStore } from "../../molecules/GlobalBottomSheetFlatList/hooks";
 
 type SelectFieldProps = {
 	outerClassName?: string;
@@ -30,13 +32,27 @@ type SelectFieldProps = {
 };
 
 export default function SelectField(props: SelectFieldProps) {
-	const { setShowBottomSheetModal } = useBottomSheetModalStore();
+	const { setShowBottomSheetFlatList, createBottomSheetFlatList } =
+		useBottomSheetFlatListStore();
+
+	useEffect(() => {
+		createBottomSheetFlatList("globalSelectField");
+	}, []);
 
 	return (
 		<>
-			<CustomBottomSheetModal>
+			<CustomBottomSheetFlatList
+				sheetKey="globalSelectField"
+				data={[
+					{
+						id: "1",
+						name: "Hello World",
+					},
+				]}
+				renderItem={({ item }) => <Text>{item.name}</Text>}
+			>
 				<Text>HELLO WORLD</Text>
-			</CustomBottomSheetModal>
+			</CustomBottomSheetFlatList>
 			<View className="flex flex-col space-y-1">
 				{props.label && (
 					<Text
@@ -48,7 +64,9 @@ export default function SelectField(props: SelectFieldProps) {
 				)}
 				<TouchableOpacity
 					// onPress={handlePresentModalPress}
-					onPress={() => setShowBottomSheetModal(true)}
+					onPress={() =>
+						setShowBottomSheetFlatList("globalSelectField", true)
+					}
 					className="flex flex-row items-center space-x-2 bg-gray-100 rounded-lg p-2 text-sm border border-gray-200 h-12 relative"
 				>
 					<View className="absolute right-4">
