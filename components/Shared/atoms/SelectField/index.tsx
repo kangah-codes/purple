@@ -1,34 +1,12 @@
 import { ChevronDownIcon } from "@/components/SVG/16x16";
-import { ArrowNarrowUpRightIcon } from "@/components/SVG/icons";
-import {
-	View,
-	Text,
-	InputField,
-	TouchableOpacity,
-	BottomSheetModal,
-	LinearGradient,
-} from "@/components/Shared/styled";
+import { Text, TouchableOpacity, View } from "@/components/Shared/styled";
 import { truncateStringIfLongerThan } from "@/utils/string";
-import BottomSheet, {
-	BottomSheetBackdropProps,
-	BottomSheetBackdrop,
-	BottomSheetModal as TBottomSheetModal,
-	BottomSheetFlatList,
-} from "@gorhom/bottom-sheet";
-import { useRef, useMemo, useCallback, useEffect, useState } from "react";
-import { Platform } from "react-native";
-import Svg from "react-native-svg";
-import CustomBottomSheetModal from "../../molecules/GlobalBottomSheetModal";
-import { useBottomSheetModalStore } from "../../molecules/GlobalBottomSheetModal/hooks";
+import { Portal } from "@gorhom/portal";
+import { useEffect, useState } from "react";
 import CustomBottomSheetFlatList from "../../molecules/GlobalBottomSheetFlatList";
 import { useBottomSheetFlatListStore } from "../../molecules/GlobalBottomSheetFlatList/hooks";
-import { Portal } from "@gorhom/portal";
 
 type SelectFieldProps = {
-	outerClassName?: string;
-	labelClassName?: string;
-	inputClassName?: string;
-
 	label?: string;
 	options: {
 		[key: string]: { value: string | number | boolean; label: string };
@@ -48,7 +26,6 @@ export default function SelectField({ label, options }: SelectFieldProps) {
 		<>
 			<Portal>
 				<CustomBottomSheetFlatList
-					// NOTE: just doing this to appease the typescript gods, no idea why tho
 					children={
 						label && (
 							<View className="px-5 py-1">
@@ -119,7 +96,7 @@ export default function SelectField({ label, options }: SelectFieldProps) {
 					</View>
 
 					<Text
-						style={{ fontFamily: "InterBold" }}
+						style={{ fontFamily: "InterSemiBold" }}
 						className="text-xs text-gray-900"
 					>
 						{truncateStringIfLongerThan(

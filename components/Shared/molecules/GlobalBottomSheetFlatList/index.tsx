@@ -11,16 +11,9 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import {
-	Keyboard,
-	ListRenderItem,
-	Platform,
-	StyleProp,
-	ViewStyle,
-} from "react-native";
+import { ListRenderItem, Platform, StyleProp, ViewStyle } from "react-native";
 import { AnimatedStyle, SharedValue } from "react-native-reanimated";
 import { useBottomSheetFlatListStore } from "./hooks";
-import { Text } from "../../styled";
 
 interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
 	sheetKey: string;
@@ -45,7 +38,7 @@ export default function CustomBottomSheetFlatList<T>({
 		| (string | number)[]
 		| SharedValue<(string | number)[]>
 		| Readonly<(string | number)[] | SharedValue<(string | number)[]>>
-	>(useMemo(() => ["50%", "60%"], []));
+	>(useMemo(() => ["50%", "50%"], []));
 	const {
 		setShowBottomSheetFlatList,
 		bottomSheetFlatListKeys,
@@ -97,7 +90,7 @@ export default function CustomBottomSheetFlatList<T>({
 			onChange={handleSheetChanges}
 			{...rest}
 		>
-			{children ? children : null}
+			{children && children}
 			<BottomSheetFlatList
 				data={data}
 				keyExtractor={(_i, index) => index.toString()}

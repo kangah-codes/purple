@@ -70,7 +70,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 
 			<View className="h-[1.5px] bg-gray-100 w-full" />
 
-			<View className="bg-purple-100 p-3.5 rounded-xl space-y-2.5 flex flex-col">
+			<View className="bg-gray-100 p-3.5 rounded-xl space-y-2.5 flex flex-col">
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{
@@ -89,7 +89,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 						GHS {spent}
 					</Text>
 				</View>
-				<View className="border-b border-purple-200 w-full" />
+				<View className="border-b border-gray-200 w-full" />
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{
@@ -108,7 +108,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 						GHS {balance}
 					</Text>
 				</View>
-				<View className="border-b border-purple-200 w-full" />
+				<View className="border-b border-gray-200 w-full" />
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{
