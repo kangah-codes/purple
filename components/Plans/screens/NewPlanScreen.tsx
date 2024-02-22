@@ -122,7 +122,7 @@ export default function NewPlanScreen() {
 						paddingHorizontal: 20,
 						paddingTop: 20,
 					}}
-				/>
+				></BottomSheetFlatList>
 			</BottomSheet>
 
 			<TouchableOpacity
