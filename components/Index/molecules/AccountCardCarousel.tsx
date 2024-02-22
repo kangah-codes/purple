@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dimensions } from "react-native";
 import Carousel, { Pagination } from "react-native-snap-carousel";
 import AccountCard from "./AccountCard";
+import AlternateAccountCard from "./AlternateAccountCard";
 
 const data = [
 	{
@@ -43,7 +44,7 @@ export default function AccountCardCarousel() {
 		<View>
 			<Carousel
 				data={data}
-				renderItem={({ item }) => <AccountCard item={item} />}
+				renderItem={({ item }) => <AlternateAccountCard item={item} />}
 				sliderWidth={Dimensions.get("window").width - 40} // Customize width as needed
 				itemWidth={Dimensions.get("window").width - 40} // Customize width as needed
 				layout={"default"} // 'default', 'stack', 'tinder'
