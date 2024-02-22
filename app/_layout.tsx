@@ -9,6 +9,7 @@ import * as Font from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ChevronLeftIcon } from "@/components/SVG/24x24";
 import { TouchableOpacity, View } from "@/components/Shared/styled";
+import { PortalProvider } from "@gorhom/portal";
 
 export {
 	// Catch any errors thrown by the Layout component.
@@ -84,40 +85,42 @@ function RootLayoutNav() {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<BottomSheetModalProvider>
-				<ThemeProvider value={DefaultTheme}>
-					<Stack
-						screenOptions={{
-							contentStyle: {
-								backgroundColor: "#fff",
-							},
-						}}
-					>
-						<Stack.Screen
-							name="(tabs)"
-							options={{ headerShown: false }}
-						/>
-						<Stack.Screen
-							name="plans"
-							options={{
-								headerStyle: {
+				<PortalProvider>
+					<ThemeProvider value={DefaultTheme}>
+						<Stack
+							screenOptions={{
+								contentStyle: {
 									backgroundColor: "#fff",
 								},
-								headerTitleStyle: {
-									fontFamily: "Suprapower",
-								},
-								headerLeft: () => (
-									<TouchableOpacity
-										onPress={() => router.back()}
-									>
-										<ChevronLeftIcon stroke="#000" />
-									</TouchableOpacity>
-								),
-								headerTitle: "New Plan",
-								headerTitleAlign: "center",
 							}}
-						/>
-					</Stack>
-				</ThemeProvider>
+						>
+							<Stack.Screen
+								name="(tabs)"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="plans"
+								options={{
+									headerStyle: {
+										backgroundColor: "#fff",
+									},
+									headerTitleStyle: {
+										fontFamily: "Suprapower",
+									},
+									headerLeft: () => (
+										<TouchableOpacity
+											onPress={() => router.back()}
+										>
+											<ChevronLeftIcon stroke="#000" />
+										</TouchableOpacity>
+									),
+									headerTitle: "New Plan",
+									headerTitleAlign: "center",
+								}}
+							/>
+						</Stack>
+					</ThemeProvider>
+				</PortalProvider>
 			</BottomSheetModalProvider>
 		</GestureHandlerRootView>
 	);

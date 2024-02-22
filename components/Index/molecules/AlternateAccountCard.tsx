@@ -125,7 +125,6 @@ export default function AlternateAccountCard({
 							},
 							shadowOpacity: 0.0625,
 							shadowRadius: 10,
-							elevation: 5,
 						}}
 						className="border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative"
 					>

@@ -76,14 +76,30 @@ export default function NewPlanScreen() {
 					</Text>
 
 					<InputField
-						className="bg-gray-100 rounded-lg py-2 px-4 text-sm border border-gray-200"
+						className="bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12"
 						style={{ fontFamily: "InterSemiBold" }}
 						cursorColor={"#8B5CF6"}
 					/>
 				</View>
 
 				<View>
-					<SelectField label="Category" />
+					<SelectField
+						label="Category"
+						options={{
+							kanye: {
+								label: "Kanye",
+								value: "kanye",
+							},
+							rihanna: {
+								label: "Rihanna",
+								value: "rihanna",
+							},
+							drake: {
+								label: "Drake",
+								value: "drake",
+							},
+						}}
+					/>
 				</View>
 
 				<View className="flex flex-col space-y-1">

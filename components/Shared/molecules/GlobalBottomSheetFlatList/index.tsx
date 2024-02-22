@@ -1,7 +1,6 @@
 import BottomSheet, {
 	BottomSheetBackdrop,
 	BottomSheetFlatList,
-	BottomSheetModalProps,
 	BottomSheetProps,
 } from "@gorhom/bottom-sheet";
 import { BottomSheetBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
@@ -12,31 +11,41 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Keyboard, ListRenderItem, Platform } from "react-native";
-import { SharedValue } from "react-native-reanimated";
+import {
+	Keyboard,
+	ListRenderItem,
+	Platform,
+	StyleProp,
+	ViewStyle,
+} from "react-native";
+import { AnimatedStyle, SharedValue } from "react-native-reanimated";
 import { useBottomSheetFlatListStore } from "./hooks";
+import { Text } from "../../styled";
 
-interface CustomBottomSheetFlatListProps<T extends { id: string }>
-	extends BottomSheetProps {
-	children: React.ReactNode;
+interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
 	sheetKey: string;
 	data: T[];
 	renderItem: ListRenderItem<T> | null | undefined;
+	flatListContentContainerStyle?: StyleProp<
+		AnimatedStyle<StyleProp<ViewStyle>>
+	>;
+	children: React.ReactNode;
 }
 
 export default function CustomBottomSheetFlatList<T>({
-	children,
 	sheetKey,
 	data,
 	renderItem,
+	flatListContentContainerStyle,
+	children,
 	...rest
-}: CustomBottomSheetFlatListProps<T & { id: string }>) {
+}: CustomBottomSheetFlatListProps<T>) {
 	const bottomSheetRef = useRef<BottomSheet>(null);
 	const [defaultSnapPoints, setDefaultSnapPoints] = useState<
 		| (string | number)[]
 		| SharedValue<(string | number)[]>
 		| Readonly<(string | number)[] | SharedValue<(string | number)[]>>
-	>(useMemo(() => ["50%", "70%"], []));
+	>(useMemo(() => ["50%", "60%"], []));
 	const {
 		setShowBottomSheetFlatList,
 		bottomSheetFlatListKeys,
@@ -46,19 +55,9 @@ export default function CustomBottomSheetFlatList<T>({
 	useEffect(() => {
 		createBottomSheetFlatList(sheetKey);
 
-		const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
-			if (Platform.OS === "android") {
-				bottomSheetRef.current?.snapToIndex(1);
-			}
-		});
-
 		if (rest.snapPoints) {
 			setDefaultSnapPoints(rest.snapPoints);
 		}
-
-		return () => {
-			showSubscription.remove();
-		};
 	}, []);
 
 	const handleSheetChanges = useCallback((index: number) => {
@@ -67,8 +66,11 @@ export default function CustomBottomSheetFlatList<T>({
 	}, []);
 
 	useEffect(() => {
-		if (bottomSheetFlatListKeys[sheetKey])
+		if (bottomSheetFlatListKeys[sheetKey]) {
 			bottomSheetRef.current?.snapToIndex(0);
+		} else {
+			bottomSheetRef.current?.close();
+		}
 	}, [bottomSheetFlatListKeys]);
 
 	const renderBackdrop = useCallback(
@@ -95,17 +97,13 @@ export default function CustomBottomSheetFlatList<T>({
 			onChange={handleSheetChanges}
 			{...rest}
 		>
+			{children ? children : null}
 			<BottomSheetFlatList
 				data={data}
-				keyExtractor={(i) => i.id}
+				keyExtractor={(_i, index) => index.toString()}
 				renderItem={renderItem}
-				// contentContainerStyle={styles.contentContainer}
-				// contentContainerStyle={{
-				// 	paddingBottom: 100,
-				// 	paddingHorizontal: 20,
-				// 	paddingTop: 20,
-				// }}
-				// {...bottomSheetFlatListProps}
+				contentContainerStyle={flatListContentContainerStyle}
+				showsVerticalScrollIndicator
 			/>
 		</BottomSheet>
 	);

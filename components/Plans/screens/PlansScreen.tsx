@@ -35,6 +35,7 @@ export default function PlansScreen() {
 											? "#fff"
 											: "rgb(243 232 255)",
 								}}
+								key={route.title}
 							>
 								<TouchableOpacity
 									onPress={() => setIndex(i)}
