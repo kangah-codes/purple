@@ -1,34 +1,22 @@
+import { ChevronRightIcon } from "@/components/SVG/16x16";
 import { ArrowNarrowUpRightIcon } from "@/components/SVG/icons";
+import CustomBottomSheetModal from "@/components/Shared/molecules/GlobalBottomSheetModal";
+import { useBottomSheetModalStore } from "@/components/Shared/molecules/GlobalBottomSheetModal/hooks";
 import {
-	BottomSheetBackdrop,
-	BottomSheetBackdropProps,
-	BottomSheetModal as TBottomSheetModal,
-} from "@gorhom/bottom-sheet";
-import { useCallback, useMemo, useRef } from "react";
-import { Platform } from "react-native";
-import Svg, { Polygon } from "react-native-svg";
-import {
-	BottomSheetModal,
 	LinearGradient,
 	Text,
 	TouchableOpacity,
 	View,
 } from "@/components/Shared/styled";
-import { transactionData } from "../constants";
 import TransactionHistoryCard from "@/components/Transactions/molecules/TransactionHistoryCard";
-import { ChevronRightIcon } from "@/components/SVG/16x16";
+import { router } from "expo-router";
+import { useCallback } from "react";
+import { Platform } from "react-native";
+import Svg, { Polygon } from "react-native-svg";
+import { transactionData } from "../constants";
 
 export default function TransactionHistoryList() {
-	// ref
-	const bottomSheetModalRef = useRef<TBottomSheetModal>(null);
-
-	// variables
-	const snapPoints = useMemo(() => ["65%"], []);
-
-	// callbacks
-	const handlePresentModalPress = useCallback(() => {
-		bottomSheetModalRef.current?.present();
-	}, []);
+	const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
 	const renderZigZagView = useCallback(() => {
 		let nodes = [];
@@ -41,31 +29,11 @@ export default function TransactionHistoryList() {
 		return nodes;
 	}, []);
 
-	const handleSheetChanges = useCallback((index: number) => {
-		console.log("handleSheetChanges", index);
-	}, []);
-
-	const renderBackdrop = useCallback(
-		(props: BottomSheetBackdropProps) => (
-			<BottomSheetBackdrop
-				{...props}
-				appearsOnIndex={0}
-				disappearsOnIndex={-1}
-			/>
-		),
-		[]
-	);
-
 	return (
 		<View className="mt-5">
-			{/** // TODO: Move this into it's own component and fetch the current transaction from global state */}
-			<BottomSheetModal
-				ref={bottomSheetModalRef}
-				index={0}
-				snapPoints={snapPoints}
-				onChange={handleSheetChanges}
-				enableOverDrag
-				backdropComponent={renderBackdrop}
+			<CustomBottomSheetModal
+				modalKey="transactionReceipt"
+				snapPoints={["55%", "70%", "90%"]}
 				style={{
 					backgroundColor: "white",
 					borderRadius: 24,
@@ -83,7 +51,19 @@ export default function TransactionHistoryList() {
 				}}
 			>
 				<View className="px-5">
-					<View className="w-full flex flex-col space-y-5 items-center shadow-2xl">
+					<View
+						className="w-full flex flex-col space-y-5 items-center"
+						style={{
+							shadowColor: "#000",
+							shadowOffset: {
+								width: 0,
+								height: 1,
+							},
+							shadowOpacity: 0.125,
+							shadowRadius: 20,
+							elevation: 5,
+						}}
+					>
 						<View className="w-full flex flex-col space-y-0.5 items-center justify-center">
 							<Text
 								style={{ fontFamily: "Suprapower" }}
@@ -126,7 +106,7 @@ export default function TransactionHistoryList() {
 							</LinearGradient>
 							{/** Shadows don't seem to be working on Android, so just make the bg gray to make it stand out from the white bg */}
 							<View
-								className="w-full p-5 flex flex-col items-center space-y-5"
+								className="w-full p-5 flex flex-col items-center space-y-5 bg-white"
 								style={{
 									backgroundColor:
 										Platform.OS === "android"
@@ -207,7 +187,8 @@ export default function TransactionHistoryList() {
 						</View>
 					</View>
 				</View>
-			</BottomSheetModal>
+			</CustomBottomSheetModal>
+			{/** // TODO: Move this into it's own component and fetch the current transaction from global state */}
 			<View className="flex flex-col">
 				<View className="flex flex-row w-full justify-between items-center">
 					<Text
@@ -217,7 +198,10 @@ export default function TransactionHistoryList() {
 						Transaction History
 					</Text>
 
-					<TouchableOpacity className="flex flex-row items-center space-x-1">
+					<TouchableOpacity
+						onPress={() => router.push("/plans")}
+						className="flex flex-row items-center space-x-1"
+					>
 						<Text
 							style={{ fontFamily: "InterSemiBold" }}
 							className="text-sm tracking-tighter text-purple-700"
@@ -231,7 +215,9 @@ export default function TransactionHistoryList() {
 					<TransactionHistoryCard
 						data={data}
 						key={index}
-						onPress={handlePresentModalPress}
+						onPress={() =>
+							setShowBottomSheetModal("transactionReceipt", true)
+						}
 					/>
 				))}
 			</View>
