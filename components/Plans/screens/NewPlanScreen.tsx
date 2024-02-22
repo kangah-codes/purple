@@ -14,13 +14,22 @@ import BottomSheet, {
 	BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Platform, Switch } from "react-native";
 
 export default function NewPlanScreen() {
+	const [isEnabled, setIsEnabled] = useState(false);
+	const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+
 	return (
 		<SafeAreaView className="bg-white relative h-full">
 			<ExpoStatusBar style="dark" />
-			<ScrollView className="space-y-5 flex-1 flex flex-col p-5">
+			<ScrollView
+				className="space-y-5 flex-1 flex flex-col p-5"
+				contentContainerStyle={{
+					paddingBottom: 100,
+				}}
+			>
 				<View className="flex flex-col space-y-1">
 					<Text
 						style={{ fontFamily: "InterBold" }}
@@ -38,6 +47,24 @@ export default function NewPlanScreen() {
 
 				<View>
 					<SelectField
+						selectKey="newPlanType"
+						label="Plan Type"
+						options={{
+							expense: {
+								label: "💸   Expense",
+								value: "expense",
+							},
+							saving: {
+								label: "💰   Saving",
+								value: "saving",
+							},
+						}}
+					/>
+				</View>
+
+				<View>
+					<SelectField
+						selectKey="newPlanCategory"
 						label="Category"
 						options={{
 							kanye: {
@@ -74,19 +101,72 @@ export default function NewPlanScreen() {
 
 				<View className="h-1 border-b border-gray-100 w-full" />
 
-				<Text
+				{/* <Text
 					style={{ fontFamily: "Suprapower" }}
 					className="text-base text-black"
 				>
 					Plan Details
-				</Text>
+				</Text> */}
 
 				<View className="flex flex-col space-y-1">
-					<DatePicker label="Start Date" />
+					<DatePicker
+						label="Start Date"
+						pickerKey="newPlanStartDate"
+					/>
+				</View>
+
+				<View className="flex flex-col space-y-1">
+					<DatePicker label="End Date" pickerKey="newPlanEndDate" />
+				</View>
+
+				<View className="h-1 border-b border-gray-100 w-full" />
+
+				<View>
+					<SelectField
+						selectKey="newPlanDepositFrequency"
+						label="Deposit Frequency"
+						options={{
+							weekly: {
+								label: "Weekly",
+								value: "weekly",
+							},
+							"bi-weekly": {
+								label: "Bi-Weekly",
+								value: "bi-weekly",
+							},
+							monthly: {
+								label: "Monthly",
+								value: "monthly",
+							},
+						}}
+					/>
+				</View>
+
+				<View className="flex flex-row justify-between items-center">
+					<Text
+						style={{ fontFamily: "InterBold" }}
+						className="text-xs text-gray-500"
+					>
+						Send me reminders
+					</Text>
+
+					<Switch
+						trackColor={{ false: "#767577", true: "#8B5CF6" }}
+						thumbColor={"#f4f3f4"}
+						ios_backgroundColor="#3e3e3e"
+						onValueChange={toggleSwitch}
+						value={isEnabled}
+						style={{
+							transform:
+								Platform.OS === "ios"
+									? [{ scaleX: 0.8 }, { scaleY: 0.8 }]
+									: [],
+						}}
+					/>
 				</View>
 			</ScrollView>
 
-			<TouchableOpacity className="items-center w-full justify-center px-4 absolute bottom-5">
+			<TouchableOpacity className="items-center self-center w-[95%] justify-center px-4 absolute bottom-8">
 				<View className="bg-purple-600 py-4 w-full flex items-center justify-center rounded-full">
 					<Text
 						style={{

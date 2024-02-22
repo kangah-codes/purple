@@ -38,6 +38,7 @@ export default function CustomBottomSheetModal({
 	} = useBottomSheetModalStore();
 
 	useEffect(() => {
+		console.log("MODAL KEY", modalKey);
 		createBottomSheetModal(modalKey);
 
 		const showSubscription = Keyboard.addListener("keyboardDidShow", () => {

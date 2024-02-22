@@ -2,7 +2,7 @@ import { ChevronDownIcon } from "@/components/SVG/16x16";
 import { Text, TouchableOpacity, View } from "@/components/Shared/styled";
 import { truncateStringIfLongerThan } from "@/utils/string";
 import { Portal } from "@gorhom/portal";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CustomBottomSheetFlatList from "../../molecules/GlobalBottomSheetFlatList";
 import { useBottomSheetFlatListStore } from "../../molecules/GlobalBottomSheetFlatList/hooks";
 
@@ -11,16 +11,16 @@ type SelectFieldProps = {
 	options: {
 		[key: string]: { value: string | number | boolean; label: string };
 	};
+	selectKey: string;
 };
 
-export default function SelectField({ label, options }: SelectFieldProps) {
-	const { setShowBottomSheetFlatList, createBottomSheetFlatList } =
-		useBottomSheetFlatListStore();
+export default function SelectField({
+	label,
+	options,
+	selectKey,
+}: SelectFieldProps) {
+	const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
 	const [value, setValue] = useState<string | undefined>(undefined);
-
-	useEffect(() => {
-		createBottomSheetFlatList("globalSelectField");
-	}, []);
 
 	return (
 		<>
@@ -38,17 +38,14 @@ export default function SelectField({ label, options }: SelectFieldProps) {
 							</View>
 						)
 					}
-					sheetKey="globalSelectField"
+					sheetKey={selectKey}
 					data={Object.keys(options).map((key) => options[key]) ?? []}
 					renderItem={({ item }) => (
 						<TouchableOpacity
 							onPress={() => {
 								setValue(item.value.toString());
 								// close the bottom sheet
-								setShowBottomSheetFlatList(
-									"globalSelectField",
-									false
-								);
+								setShowBottomSheetFlatList(selectKey, false);
 							}}
 							className="py-3 border-b border-gray-200"
 						>
@@ -86,9 +83,7 @@ export default function SelectField({ label, options }: SelectFieldProps) {
 				)}
 				<TouchableOpacity
 					// onPress={handlePresentModalPress}
-					onPress={() =>
-						setShowBottomSheetFlatList("globalSelectField", true)
-					}
+					onPress={() => setShowBottomSheetFlatList(selectKey, true)}
 					className="flex flex-row items-center space-x-2 bg-gray-100 rounded-lg px-2 text-sm border border-gray-200 h-12 relative"
 				>
 					<View className="absolute right-4">
