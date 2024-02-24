@@ -13,12 +13,16 @@ type DatePickerProps = {
 	label?: string;
 	onChange?: (date: Date) => void;
 	pickerKey: string;
+	minimumDate?: Date;
+	maximumDate?: Date;
 };
 
 export default function DatePicker({
 	label,
 	onChange,
 	pickerKey,
+	minimumDate,
+	maximumDate,
 }: DatePickerProps) {
 	const [date, setDate] = useState(new Date());
 	const { setShowBottomSheetModal } = useBottomSheetModalStore();
@@ -77,6 +81,8 @@ export default function DatePicker({
 								is24Hour={true}
 								onChange={onDateChange}
 								display="spinner"
+								minimumDate={minimumDate}
+								maximumDate={maximumDate}
 							/>
 						</View>
 					</CustomBottomSheetModal>
@@ -102,6 +108,8 @@ export default function DatePicker({
 								onChange: onDateChange,
 								mode: "date",
 								is24Hour: true,
+								minimumDate,
+								maximumDate,
 							});
 						}
 					}}

@@ -3,6 +3,7 @@ import { ArrowNarrowUpRightIcon } from "@/components/SVG/icons";
 import CustomBottomSheetModal from "@/components/Shared/molecules/GlobalBottomSheetModal";
 import { useBottomSheetModalStore } from "@/components/Shared/molecules/GlobalBottomSheetModal/hooks";
 import {
+	Image,
 	LinearGradient,
 	Text,
 	TouchableOpacity,
@@ -11,7 +12,7 @@ import {
 import TransactionHistoryCard from "@/components/Transactions/molecules/TransactionHistoryCard";
 import { router } from "expo-router";
 import { useCallback } from "react";
-import { Platform } from "react-native";
+import { FlatList, Platform } from "react-native";
 import Svg, { Polygon } from "react-native-svg";
 import { transactionData } from "../constants";
 
@@ -199,7 +200,7 @@ export default function TransactionHistoryList() {
 					</Text>
 
 					<TouchableOpacity
-						onPress={() => router.push("/plans")}
+						onPress={() => router.push("/transactions")}
 						className="flex flex-row items-center space-x-1"
 					>
 						<Text
@@ -211,15 +212,45 @@ export default function TransactionHistoryList() {
 						<ChevronRightIcon stroke="#9333ea" />
 					</TouchableOpacity>
 				</View>
-				{transactionData.map((data, index) => (
-					<TransactionHistoryCard
-						data={data}
-						key={index}
-						onPress={() =>
-							setShowBottomSheetModal("transactionReceipt", true)
-						}
-					/>
-				))}
+				<View className="w-full px-5 flex flex-col items-center justify-center mb-5">
+					<View className="my-5 w-full">
+						<Image
+							source={require("@/assets/images/graphics/3.png")}
+							className="w-full h-72"
+						/>
+					</View>
+
+					<Text
+						style={{ fontFamily: "Suprapower" }}
+						className="text-base text-black"
+					>
+						No transactions yet
+					</Text>
+				</View>
+
+				<FlatList
+					data={transactionData}
+					keyExtractor={(_, index) => index.toString()}
+					contentContainerStyle={{
+						paddingBottom: 100,
+					}}
+					showsVerticalScrollIndicator={true}
+					renderItem={({ item }) => (
+						<TransactionHistoryCard
+							data={item}
+							onPress={() =>
+								setShowBottomSheetModal(
+									"transactionReceipt",
+									true
+								)
+							}
+						/>
+					)}
+					ItemSeparatorComponent={() => (
+						<View className="border-b border-gray-100" />
+					)}
+					scrollEnabled={false}
+				/>
 			</View>
 		</View>
 	);

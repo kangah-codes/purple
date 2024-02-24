@@ -2,22 +2,32 @@ import { ChevronDownIcon } from "@/components/SVG/16x16";
 import { Text, TouchableOpacity, View } from "@/components/Shared/styled";
 import { truncateStringIfLongerThan } from "@/utils/string";
 import { Portal } from "@gorhom/portal";
-import { useState } from "react";
+import React, { useState } from "react";
 import CustomBottomSheetFlatList from "../../molecules/GlobalBottomSheetFlatList";
 import { useBottomSheetFlatListStore } from "../../molecules/GlobalBottomSheetFlatList/hooks";
+import { ListRenderItem, ListRenderItemInfo } from "react-native";
+
+type SelectOption = {
+	value: string | number | boolean;
+	label: string;
+};
 
 type SelectFieldProps = {
 	label?: string;
 	options: {
-		[key: string]: { value: string | number | boolean; label: string };
+		[key: string]: SelectOption;
 	};
 	selectKey: string;
+	customSnapPoints?: (number | string)[];
+	renderItem?: (item: SelectOption) => React.ReactNode;
 };
 
 export default function SelectField({
 	label,
 	options,
 	selectKey,
+	customSnapPoints,
+	renderItem,
 }: SelectFieldProps) {
 	const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
 	const [value, setValue] = useState<string | undefined>(undefined);
@@ -26,6 +36,7 @@ export default function SelectField({
 		<>
 			<Portal>
 				<CustomBottomSheetFlatList
+					snapPoints={customSnapPoints ?? ["50%", "50%"]}
 					children={
 						label && (
 							<View className="px-5 py-1">
@@ -47,14 +58,19 @@ export default function SelectField({
 								// close the bottom sheet
 								setShowBottomSheetFlatList(selectKey, false);
 							}}
-							className="py-3 border-b border-gray-200"
 						>
-							<Text
-								style={{ fontFamily: "InterSemiBold" }}
-								className="text-sm text-gray-800"
-							>
-								{item.label}
-							</Text>
+							{renderItem ? (
+								renderItem(item)
+							) : (
+								<View className="py-3 border-b border-gray-200">
+									<Text
+										style={{ fontFamily: "InterSemiBold" }}
+										className="text-sm text-gray-800"
+									>
+										{item.label}
+									</Text>
+								</View>
+							)}
 						</TouchableOpacity>
 					)}
 					containerStyle={{

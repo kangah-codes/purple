@@ -1,15 +1,13 @@
-import { formatCurrencyAccurate, formatCurrencyRounded } from "@/utils/number";
+import { Text, View } from "@/components/Shared/styled";
 import { useState } from "react";
 import {
 	ArrowCircleDownIcon,
 	ArrowCircleUpIcon,
 	CoinSwapIcon,
-	DotsHorizontalIcon,
 	EyeCloseIcon,
 	EyeOpenIcon,
 	PiggyBankIcon,
 } from "../../SVG/icons";
-import { LinearGradient, Text, View } from "@/components/Shared/styled";
 
 type AlternateAccountCardProps = {
 	accountCurrency: string;
@@ -62,7 +60,7 @@ export default function AlternateAccountCard({
 						$45,300,000
 					</Text>
 					<Text
-						style={{ fontFamily: "InterSemiBold" }}
+						style={{ fontFamily: "Suprapower" }}
 						className="text-gray-500 text-2xl tracking-tighter"
 					>
 						.86
@@ -71,7 +69,6 @@ export default function AlternateAccountCard({
 						style={{ fontFamily: "InterMedium" }}
 						className="text-gray-500 text-base tracking-tighter"
 					>
-						{" "}
 						USD
 					</Text>
 				</View>

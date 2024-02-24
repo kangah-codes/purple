@@ -1,20 +1,14 @@
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Stack, router } from "expo-router";
+import { ErrorBoundaryProps, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { PortalProvider } from "@gorhom/portal";
 import * as Font from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ChevronLeftIcon } from "@/components/SVG/24x24";
-import { TouchableOpacity, View } from "@/components/Shared/styled";
-import { PortalProvider } from "@gorhom/portal";
-
-export {
-	// Catch any errors thrown by the Layout component.
-	ErrorBoundary,
-} from "expo-router";
+import { Text, View } from "@/components/Shared/styled";
 
 export const unstable_settings = {
 	// Ensure that reloading on `/modal` keeps a back button present.
@@ -100,28 +94,25 @@ function RootLayoutNav() {
 							/>
 							<Stack.Screen
 								name="plans"
-								options={{
-									headerStyle: {
-										backgroundColor: "#fff",
-									},
-									headerTitleStyle: {
-										fontFamily: "Suprapower",
-									},
-									headerLeft: () => (
-										<TouchableOpacity
-											onPress={() => router.back()}
-										>
-											<ChevronLeftIcon stroke="#000" />
-										</TouchableOpacity>
-									),
-									headerTitle: "New Plan",
-									headerTitleAlign: "center",
-								}}
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="transactions"
+								options={{ headerShown: false }}
 							/>
 						</Stack>
 					</ThemeProvider>
 				</PortalProvider>
 			</BottomSheetModalProvider>
 		</GestureHandlerRootView>
+	);
+}
+
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+	return (
+		<View style={{ flex: 1, backgroundColor: "red" }}>
+			<Text>{props.error.message}</Text>
+			<Text onPress={props.retry}>Try Again?</Text>
+		</View>
 	);
 }

@@ -10,6 +10,7 @@ import {
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
 import { FlatList, StatusBar as RNStatusBar } from "react-native";
 import TransactionHistoryCard from "../molecules/TransactionHistoryCard";
+import { router } from "expo-router";
 
 export default function TransactionsScreen() {
 	return (
@@ -61,8 +62,7 @@ export default function TransactionsScreen() {
 				<TouchableOpacity
 					className="items-center w-[55px] h-[55px] justify-center rounded-full p-3 "
 					onPress={() => {
-						// Handle your button tap here
-						alert("Button tapped");
+						router.push("/transactions/new-transaction");
 					}}
 				>
 					<PlusIcon stroke={"#fff"} />
