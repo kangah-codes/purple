@@ -22,6 +22,13 @@ Here are a few screenshots of the app so far:
 <img src="/assets/screenshots/home.png" style="width: 150px" />
 <img src="/assets/screenshots/plans.png" style="width: 150px" />
 <img src="/assets/screenshots/receipt.png" style="width: 150px" />
+<img src="/assets/screenshots/transactions.png" style="width: 150px" />
+</div>
+
+<div style="display: flex; flex-direction: row;">
+<img src="/assets/screenshots/new-transaction.png" style="width: 150px" />
+<img src="/assets/screenshots/plans.png" style="width: 150px" />
+<img src="/assets/screenshots/new-plan.png" style="width: 150px" />
 </div>
 
 ### Building the app

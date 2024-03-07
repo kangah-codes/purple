@@ -212,7 +212,7 @@ export default function TransactionHistoryList() {
 						<ChevronRightIcon stroke="#9333ea" />
 					</TouchableOpacity>
 				</View>
-				<View className="w-full px-5 flex flex-col items-center justify-center mb-5">
+				{/* <View className="w-full px-5 flex flex-col items-center justify-center mb-5">
 					<View className="my-5 w-full">
 						<Image
 							source={require("@/assets/images/graphics/3.png")}
@@ -226,7 +226,7 @@ export default function TransactionHistoryList() {
 					>
 						No transactions yet
 					</Text>
-				</View>
+				</View> */}
 
 				<FlatList
 					data={transactionData}

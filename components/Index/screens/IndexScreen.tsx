@@ -112,7 +112,7 @@ export default function IndexScreen() {
 							</TouchableOpacity>
 						</View>
 
-						<View className="w-full px-5 flex flex-col items-center justify-center mb-5">
+						{/* <View className="w-full px-5 flex flex-col items-center justify-center mb-5">
 							<View className="my-5 w-full">
 								<Image
 									source={require("@/assets/images/graphics/4.png")}
@@ -126,8 +126,8 @@ export default function IndexScreen() {
 							>
 								No plans yet
 							</Text>
-						</View>
-						{/* <FlatList
+						</View> */}
+						<FlatList
 							horizontal
 							showsHorizontalScrollIndicator={false}
 							data={savingData}
@@ -135,7 +135,7 @@ export default function IndexScreen() {
 								<SavingPlanCard data={item} index={index} />
 							)}
 							keyExtractor={(_, index) => index.toString()}
-						/> */}
+						/>
 					</View>
 
 					<TransactionHistoryList />
