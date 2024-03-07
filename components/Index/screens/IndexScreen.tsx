@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { BellIcon, SearchIcon } from "../../SVG/icons";
 import {
+	Image,
 	InputField,
 	SafeAreaView,
 	ScrollView,
@@ -110,6 +111,22 @@ export default function IndexScreen() {
 								<ChevronRightIcon stroke="#9333ea" />
 							</TouchableOpacity>
 						</View>
+
+						{/* <View className="w-full px-5 flex flex-col items-center justify-center mb-5">
+							<View className="my-5 w-full">
+								<Image
+									source={require("@/assets/images/graphics/4.png")}
+									className="w-full h-72"
+								/>
+							</View>
+
+							<Text
+								style={{ fontFamily: "Suprapower" }}
+								className="text-base text-black"
+							>
+								No plans yet
+							</Text>
+						</View> */}
 						<FlatList
 							horizontal
 							showsHorizontalScrollIndicator={false}

@@ -1,5 +1,5 @@
 import { transactionData } from "@/components/Index/constants";
-import { EditSquareIcon } from "@/components/SVG/24x24";
+import { PlusIcon } from "@/components/SVG/24x24";
 import {
 	LinearGradient,
 	SafeAreaView,
@@ -10,6 +10,7 @@ import {
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
 import { FlatList, StatusBar as RNStatusBar } from "react-native";
 import TransactionHistoryCard from "../molecules/TransactionHistoryCard";
+import { router } from "expo-router";
 
 export default function TransactionsScreen() {
 	return (
@@ -48,6 +49,9 @@ export default function TransactionsScreen() {
 							onPress={() => console.log("LUL")}
 						/>
 					)}
+					ItemSeparatorComponent={() => (
+						<View className="border-b border-gray-100" />
+					)}
 				/>
 			</View>
 
@@ -58,11 +62,10 @@ export default function TransactionsScreen() {
 				<TouchableOpacity
 					className="items-center w-[55px] h-[55px] justify-center rounded-full p-3 "
 					onPress={() => {
-						// Handle your button tap here
-						alert("Button tapped");
+						router.push("/transactions/new-transaction");
 					}}
 				>
-					<EditSquareIcon stroke={"#fff"} />
+					<PlusIcon stroke={"#fff"} />
 				</TouchableOpacity>
 			</LinearGradient>
 		</SafeAreaView>

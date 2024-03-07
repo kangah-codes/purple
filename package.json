@@ -16,6 +16,8 @@
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo/vector-icons": "^14.0.0",
     "@gorhom/bottom-sheet": "^4",
+    "@gorhom/portal": "^1.0.14",
+    "@react-native-community/datetimepicker": "^7.6.2",
     "@react-navigation/native": "^6.0.2",
     "expo": "~50.0.6",
     "expo-font": "~11.10.2",
@@ -39,7 +41,8 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "^14.1.0",
     "react-native-tab-view": "^3.5.2",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

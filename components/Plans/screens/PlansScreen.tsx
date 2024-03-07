@@ -1,21 +1,18 @@
+import { EditSquareIcon } from "@/components/SVG/24x24";
 import {
 	LinearGradient,
 	SafeAreaView,
-	ScrollView,
 	Text,
 	TouchableOpacity,
 	View,
 } from "@/components/Shared/styled";
 import ExpoStatusBar from "expo-status-bar/build/ExpoStatusBar";
-import { FlatList, StatusBar as RNStatusBar } from "react-native";
-import ExpensesCard from "../molecules/ExpensesCard";
-import { EditSquareIcon } from "@/components/SVG/24x24";
 import { useState } from "react";
+import { StatusBar as RNStatusBar } from "react-native";
 import { SceneMap, TabView } from "react-native-tab-view";
-import BudgetPlanCard from "../molecules/BudgetCard";
-import { expensePlans } from "../constants";
 import ExpensesScreen from "./ExpensesScreen";
 import SavingsScreen from "./SavingsScreen";
+import { Link, router } from "expo-router";
 
 export default function PlansScreen() {
 	const [index, setIndex] = useState(0);
@@ -38,6 +35,7 @@ export default function PlansScreen() {
 											? "#fff"
 											: "rgb(243 232 255)",
 								}}
+								key={route.title}
 							>
 								<TouchableOpacity
 									onPress={() => setIndex(i)}
@@ -94,14 +92,14 @@ export default function PlansScreen() {
 				/>
 			</View>
 			<LinearGradient
-				className="rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5"
+				className="rounded-full justify-center items-center space-y-4 absolute right-5 bottom-5"
 				colors={["#c084fc", "#9333ea"]}
 			>
 				<TouchableOpacity
 					className="items-center w-[55px] h-[55px] justify-center rounded-full p-3 "
 					onPress={() => {
 						// Handle your button tap here
-						alert("Button tapped");
+						router.push("/plans/new-plan");
 					}}
 				>
 					<EditSquareIcon stroke={"#fff"} />

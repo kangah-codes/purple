@@ -1,23 +1,14 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { ErrorBoundaryProps, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { PortalProvider } from "@gorhom/portal";
 import * as Font from "expo-font";
-
-export {
-	// Catch any errors thrown by the Layout component.
-	ErrorBoundary,
-} from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Text, View } from "@/components/Shared/styled";
 
 export const unstable_settings = {
 	// Ensure that reloading on `/modal` keeps a back button present.
@@ -88,21 +79,40 @@ function RootLayoutNav() {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<BottomSheetModalProvider>
-				<ThemeProvider value={DefaultTheme}>
-					<Stack
-						screenOptions={{
-							contentStyle: {
-								backgroundColor: "#fff",
-							},
-						}}
-					>
-						<Stack.Screen
-							name="(tabs)"
-							options={{ headerShown: false }}
-						/>
-					</Stack>
-				</ThemeProvider>
+				<PortalProvider>
+					<ThemeProvider value={DefaultTheme}>
+						<Stack
+							screenOptions={{
+								contentStyle: {
+									backgroundColor: "#fff",
+								},
+							}}
+						>
+							<Stack.Screen
+								name="(tabs)"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="plans"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
+								name="transactions"
+								options={{ headerShown: false }}
+							/>
+						</Stack>
+					</ThemeProvider>
+				</PortalProvider>
 			</BottomSheetModalProvider>
 		</GestureHandlerRootView>
+	);
+}
+
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+	return (
+		<View style={{ flex: 1, backgroundColor: "red" }}>
+			<Text>{props.error.message}</Text>
+			<Text onPress={props.retry}>Try Again?</Text>
+		</View>
 	);
 }
