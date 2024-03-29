@@ -1,4 +1,5 @@
 import React, {
+	memo,
 	useCallback,
 	useEffect,
 	useMemo,
@@ -20,11 +21,11 @@ interface CustomBottomSheetModalProps extends BottomSheetModalProps {
 	modalKey: string;
 }
 
-export default function CustomBottomSheetModal({
+const CustomBottomSheetModal = ({
 	children,
 	modalKey,
 	...rest
-}: CustomBottomSheetModalProps) {
+}: CustomBottomSheetModalProps) => {
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
 	const [defaultSnapPoints, setDefaultSnapPoints] = useState<
 		| (string | number)[]
@@ -36,6 +37,7 @@ export default function CustomBottomSheetModal({
 		bottomSheetModalKeys,
 		createBottomSheetModal,
 	} = useBottomSheetModalStore();
+	const [isModalVisible, setIsModalVisible] = useState(false);
 
 	useEffect(() => {
 		console.log("MODAL KEY", modalKey);
@@ -62,14 +64,23 @@ export default function CustomBottomSheetModal({
 	}, []);
 
 	useEffect(() => {
+		const isVisible = bottomSheetModalKeys[modalKey];
 		console.log(
 			bottomSheetModalKeys[modalKey],
 			"CHANGED",
 			bottomSheetModalKeys
 		);
 
-		if (bottomSheetModalKeys[modalKey]) bottomSheetRef.current?.present();
+		if (isVisible !== isModalVisible) {
+			setIsModalVisible(isVisible);
+		}
 	}, [bottomSheetModalKeys]);
+
+	useEffect(() => {
+		if (isModalVisible && bottomSheetRef.current) {
+			bottomSheetRef.current.present();
+		}
+	}, [isModalVisible]);
 
 	const renderBackdrop = useCallback(
 		(props: BottomSheetDefaultBackdropProps) => (
@@ -98,4 +109,6 @@ export default function CustomBottomSheetModal({
 			<View style={{ flex: 1, paddingBottom: 20 }}>{children}</View>
 		</BottomSheetModal>
 	);
-}
+};
+
+export default memo(CustomBottomSheetModal);

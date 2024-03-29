@@ -41,3 +41,31 @@ export function CalendarIcon(props: SvgProps) {
 		</Svg>
 	);
 }
+
+export function DotsVerticalIcon(props: SvgProps) {
+	return (
+		<Svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+			<Path
+				d="M7.99999 8.66675C8.36818 8.66675 8.66666 8.36827 8.66666 8.00008C8.66666 7.63189 8.36818 7.33341 7.99999 7.33341C7.63181 7.33341 7.33333 7.63189 7.33333 8.00008C7.33333 8.36827 7.63181 8.66675 7.99999 8.66675Z"
+				stroke={props.stroke}
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<Path
+				d="M7.99999 4.00008C8.36818 4.00008 8.66666 3.7016 8.66666 3.33341C8.66666 2.96522 8.36818 2.66675 7.99999 2.66675C7.63181 2.66675 7.33333 2.96522 7.33333 3.33341C7.33333 3.7016 7.63181 4.00008 7.99999 4.00008Z"
+				stroke={props.stroke}
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<Path
+				d="M7.99999 13.3334C8.36818 13.3334 8.66666 13.0349 8.66666 12.6667C8.66666 12.2986 8.36818 12.0001 7.99999 12.0001C7.63181 12.0001 7.33333 12.2986 7.33333 12.6667C7.33333 13.0349 7.63181 13.3334 7.99999 13.3334Z"
+				stroke={props.stroke}
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</Svg>
+	);
+}
