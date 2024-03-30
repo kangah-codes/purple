@@ -29,8 +29,11 @@ export default function AccountCard({
 				</Text>
 			</View>
 			<View className="bg-purple-50 flex flex-col px-5 divide-y divide-purple-200">
-				{subAccounts.map((subAccount) => (
-					<TouchableOpacity className="flex flex-row justify-between py-2.5">
+				{subAccounts.map((subAccount, index) => (
+					<TouchableOpacity
+						className="flex flex-row justify-between py-2.5"
+						key={index}
+					>
 						<Text
 							style={{
 								fontFamily: "InterMedium",
