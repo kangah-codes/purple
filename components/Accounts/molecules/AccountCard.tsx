@@ -1,4 +1,4 @@
-import { Text, View } from "@/components/Shared/styled";
+import { Text, TouchableOpacity, View } from "@/components/Shared/styled";
 import { IAccountCard } from "../schema";
 import { formatCurrencyAccurate } from "@/utils/number";
 import { truncateStringIfLongerThan } from "@/utils/string";
@@ -30,7 +30,7 @@ export default function AccountCard({
 			</View>
 			<View className="bg-purple-50 flex flex-col px-5 divide-y divide-purple-200">
 				{subAccounts.map((subAccount) => (
-					<View className="flex flex-row justify-between py-2.5">
+					<TouchableOpacity className="flex flex-row justify-between py-2.5">
 						<Text
 							style={{
 								fontFamily: "InterMedium",
@@ -53,7 +53,7 @@ export default function AccountCard({
 								subAccount.subAccountTotal
 							)}
 						</Text>
-					</View>
+					</TouchableOpacity>
 				))}
 			</View>
 		</View>

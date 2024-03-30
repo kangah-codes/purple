@@ -97,6 +97,10 @@ function RootLayoutNav() {
 								options={{ headerShown: false }}
 							/>
 							<Stack.Screen
+								name="accounts"
+								options={{ headerShown: false }}
+							/>
+							<Stack.Screen
 								name="transactions"
 								options={{ headerShown: false }}
 							/>
