@@ -2,6 +2,8 @@ import { useState, useMemo, ReactNode } from "react";
 import { LinearGradient, Text, TouchableOpacity, View } from "../../styled";
 import { StyleProp, ViewStyle } from "react-native";
 import { getColorIndex } from "./utils";
+import { startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { colors } from "./constants";
 
 export type CellData = {
 	value: number;
@@ -17,6 +19,8 @@ export type HeatmapProps = {
 	data: CellData[];
 	colors: string[][];
 	onPressCallback?: (data: CellData) => void;
+	renderCell?: (data: CellData, index: number) => ReactNode;
+	startColumn: number;
 };
 
 export default function Heatmap({
@@ -27,38 +31,141 @@ export default function Heatmap({
 	data,
 	colors,
 	onPressCallback,
+	renderCell,
+	startColumn,
 }: HeatmapProps) {
 	const [cells, setCells] = useState([]);
+	const now = new Date();
+	const start = startOfMonth(now);
+	const end = endOfMonth(now);
+	const monthDays = eachDayOfInterval({ start, end });
+	const offset = new Date(
+		monthDays[0].getFullYear(),
+		monthDays[0].getMonth(),
+		1
+	).getDay();
+	const offsetData = Array(offset).fill({ value: 0, key: "", index: 0 });
+
+	// useMemo(() => {
+	// 	const newCells = [];
+	// 	const weeks = Math.ceil(data.length / cols);
+
+	// 	for (let i = 0; i < weeks; i++) {
+	// 		const row = [];
+	// 		for (let j = i * cols; j < (i + 1) * cols && j < data.length; j++) {
+	// 			if (i === 0 && j < startColumn) {
+	// 				row.push(
+	// 					<View
+	// 						key={j}
+	// 						style={{
+	// 							width: cellSize,
+	// 							height: cellSize,
+	// 							...cellStyle,
+	// 						}}
+	// 					/>
+	// 				);
+	// 				continue;
+	// 			}
+
+	// 			const colorIndex = getColorIndex(
+	// 				data[j].value,
+	// 				0,
+	// 				Math.max(...data.map((d) => d.value)),
+	// 				colors.length
+	// 			);
+
+	// 			row.push(
+	// 				renderCell && renderCell(data[j]) !== undefined ? (
+	// 					renderCell(data[j])
+	// 				) : (
+	// 					<TouchableOpacity
+	// 						key={j}
+	// 						onPress={() =>
+	// 							onPressCallback && onPressCallback(data[j])
+	// 						}
+	// 					>
+	// 						<LinearGradient
+	// 							style={{
+	// 								width: cellSize,
+	// 								height: cellSize,
+	// 								...cellStyle,
+	// 							}}
+	// 							colors={colors[colorIndex]}
+	// 						></LinearGradient>
+	// 					</TouchableOpacity>
+	// 				)
+	// 			);
+	// 		}
+	// 		newCells.push(
+	// 			<View key={i} style={{ flexDirection: "row" }}>
+	// 				{row}
+	// 			</View>
+	// 		);
+	// 	}
+
+	// 	// @ts-ignore
+	// 	setCells(newCells);
+	// }, [data, cellSize, cellStyle]);
 
 	useMemo(() => {
 		const newCells = [];
-		const weeks = Math.ceil(data.length / cols);
+		// console.log(offset, "offset length", data[0]);
+		const offsetData = Array(startColumn).fill({
+			value: 0,
+			key: "nothing",
+			index: 0,
+		});
+		const fullData = [...offsetData, ...data];
+		const weeks = Math.ceil(fullData.length / cols);
+
 		for (let i = 0; i < weeks; i++) {
 			const row = [];
-			for (let j = i * cols; j < (i + 1) * cols && j < data.length; j++) {
+			for (
+				let j = i * cols;
+				j < (i + 1) * cols && j < fullData.length;
+				j++
+			) {
 				const colorIndex = getColorIndex(
-					data[j].value,
+					fullData[j].value,
 					0,
-					Math.max(...data.map((d) => d.value)),
+					Math.max(...fullData.map((d) => d.value)),
 					colors.length
 				);
 
-				row.push(
-					<TouchableOpacity
-						key={j}
-						onPress={() =>
-							onPressCallback && onPressCallback(data[j])
-						}
-					>
-						<LinearGradient
+				if (fullData[j].key === "nothing") {
+					row.push(
+						<View
+							key={j}
 							style={{
 								width: cellSize,
 								height: cellSize,
 								...cellStyle,
 							}}
-							colors={colors[colorIndex]}
-						></LinearGradient>
-					</TouchableOpacity>
+						/>
+					);
+					continue;
+				}
+
+				row.push(
+					renderCell && renderCell(fullData[j], j) !== undefined ? (
+						renderCell(fullData[j], j)
+					) : (
+						<TouchableOpacity
+							key={j}
+							onPress={() =>
+								onPressCallback && onPressCallback(fullData[j])
+							}
+						>
+							<LinearGradient
+								style={{
+									width: cellSize,
+									height: cellSize,
+									...cellStyle,
+								}}
+								colors={colors[colorIndex]}
+							></LinearGradient>
+						</TouchableOpacity>
+					)
 				);
 			}
 			newCells.push(
@@ -83,13 +190,6 @@ Heatmap.defaultProps = {
 		margin: 2,
 		borderRadius: 8,
 	},
-	colors: [
-		["#E9D5FF", "#D8B4FE"],
-		["#D8B4FE", "#C084FC"],
-		["#C084FC", "#A855F7"],
-		["#A855F7", "#9333EA"],
-		["#9333EA", "#7E22CE"],
-		["#7E22CE", "#6B21A8"],
-		["#6B21A8", "#6B21A8"],
-	],
+	colors,
+	startColumn: 0,
 };

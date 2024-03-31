@@ -67,8 +67,9 @@ export default function AccountsScreen() {
 							className="text-lg text-blackß"
 							style={{ fontFamily: "Suprapower" }}
 						>
-							Weekly Something
+							Daily Activity
 						</Text>
+
 						<StatsHeatmap />
 					</View>
 
@@ -77,7 +78,7 @@ export default function AccountsScreen() {
 							className="text-lg text-blackß"
 							style={{ fontFamily: "Suprapower" }}
 						>
-							Accounts Overview
+							Spend Overview
 						</Text>
 						<View className="flex flex-row justify-between">
 							<View className="flex-1 border-gray-200 rounded-xl p-1.5 px-5 border py-2.5 h-[240] mr-2.5"></View>
