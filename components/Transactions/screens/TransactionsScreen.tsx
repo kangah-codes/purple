@@ -22,17 +22,13 @@ export default function TransactionsScreen() {
 				}}
 				className="bg-white"
 			>
-				<View className="flex flex-col space-y-2.5 px-5 py-2.5">
-					<View className="flex flex-row justify-between items-center">
-						<View className="flex flex-col">
-							<Text
-								style={{ fontFamily: "Suprapower" }}
-								className="text-lg"
-							>
-								My Transactions
-							</Text>
-						</View>
-					</View>
+				<View className="px-5 py-2.5">
+					<Text
+						style={{ fontFamily: "Suprapower" }}
+						className="text-lg"
+					>
+						My Transactions
+					</Text>
 				</View>
 
 				<FlatList
