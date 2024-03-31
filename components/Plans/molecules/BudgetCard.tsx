@@ -24,7 +24,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 	} = props.data;
 
 	return (
-		<View className="p-4 border border-gray-200 rounded-2xl flex flex-col space-y-5 w-full">
+		<View className="p-4 border border-purple-200 rounded-2xl flex flex-col space-y-5 w-full">
 			<View className="flex flex-row w-full justify-between items-center">
 				<Text
 					style={{
@@ -38,7 +38,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 
 			<View className="flex flex-col space-y-1.5">
 				<View className="relative w-full">
-					<View className="h-2 w-full rounded-full bg-gray-100" />
+					<View className="h-2 w-full rounded-full bg-purple-50" />
 					<View
 						className="h-2 bg-purple-600 rounded-full absolute"
 						style={{
@@ -68,9 +68,9 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 				</View>
 			</View>
 
-			<View className="h-[1.5px] bg-gray-100 w-full" />
+			<View className="h-[1.5px] bg-purple-50 w-full" />
 
-			<View className="bg-gray-100 p-3.5 rounded-xl space-y-2.5 flex flex-col">
+			<View className="bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col">
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{
@@ -89,7 +89,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 						GHS {spent}
 					</Text>
 				</View>
-				<View className="border-b border-gray-200 w-full" />
+				<View className="border-b border-purple-200 w-full" />
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{
@@ -108,7 +108,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 						GHS {balance}
 					</Text>
 				</View>
-				<View className="border-b border-gray-200 w-full" />
+				<View className="border-b border-purple-200 w-full" />
 				<View className="flex flex-row justify-between items-center">
 					<Text
 						style={{

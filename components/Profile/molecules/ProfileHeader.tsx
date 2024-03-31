@@ -1,4 +1,4 @@
-import Avatar from "@/components/Shared/Atoms/Avatar";
+import Avatar from "@/components/Shared/atoms/Avatar";
 import { Text, View } from "@/components/Shared/styled";
 
 export default function ProfileHeader() {

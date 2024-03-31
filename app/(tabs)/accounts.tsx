@@ -1,5 +1,5 @@
-import IndexScreen from "@/components/Index/screens/IndexScreen";
+import AccountsScreen from "@/components/Accounts/screens/IndexScreen";
 
-export default function AccountsScreen() {
-	return <IndexScreen />;
+export default function Screen() {
+	return <AccountsScreen />;
 }
