@@ -44,72 +44,9 @@ export default function Heatmap({
 		monthDays[0].getMonth(),
 		1
 	).getDay();
-	const offsetData = Array(offset).fill({ value: 0, key: "", index: 0 });
-
-	// useMemo(() => {
-	// 	const newCells = [];
-	// 	const weeks = Math.ceil(data.length / cols);
-
-	// 	for (let i = 0; i < weeks; i++) {
-	// 		const row = [];
-	// 		for (let j = i * cols; j < (i + 1) * cols && j < data.length; j++) {
-	// 			if (i === 0 && j < startColumn) {
-	// 				row.push(
-	// 					<View
-	// 						key={j}
-	// 						style={{
-	// 							width: cellSize,
-	// 							height: cellSize,
-	// 							...cellStyle,
-	// 						}}
-	// 					/>
-	// 				);
-	// 				continue;
-	// 			}
-
-	// 			const colorIndex = getColorIndex(
-	// 				data[j].value,
-	// 				0,
-	// 				Math.max(...data.map((d) => d.value)),
-	// 				colors.length
-	// 			);
-
-	// 			row.push(
-	// 				renderCell && renderCell(data[j]) !== undefined ? (
-	// 					renderCell(data[j])
-	// 				) : (
-	// 					<TouchableOpacity
-	// 						key={j}
-	// 						onPress={() =>
-	// 							onPressCallback && onPressCallback(data[j])
-	// 						}
-	// 					>
-	// 						<LinearGradient
-	// 							style={{
-	// 								width: cellSize,
-	// 								height: cellSize,
-	// 								...cellStyle,
-	// 							}}
-	// 							colors={colors[colorIndex]}
-	// 						></LinearGradient>
-	// 					</TouchableOpacity>
-	// 				)
-	// 			);
-	// 		}
-	// 		newCells.push(
-	// 			<View key={i} style={{ flexDirection: "row" }}>
-	// 				{row}
-	// 			</View>
-	// 		);
-	// 	}
-
-	// 	// @ts-ignore
-	// 	setCells(newCells);
-	// }, [data, cellSize, cellStyle]);
 
 	useMemo(() => {
 		const newCells = [];
-		// console.log(offset, "offset length", data[0]);
 		const offsetData = Array(startColumn).fill({
 			value: 0,
 			key: "nothing",
