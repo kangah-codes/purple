@@ -100,7 +100,7 @@ export default function Heatmap({
 									...cellStyle,
 								}}
 								colors={colors[colorIndex]}
-							></LinearGradient>
+							/>
 						</TouchableOpacity>
 					)
 				);

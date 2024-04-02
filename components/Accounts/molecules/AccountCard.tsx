@@ -32,7 +32,7 @@ export default function AccountCard({
 				{subAccounts.map((subAccount, index) => (
 					<TouchableOpacity
 						className="flex flex-row justify-between py-2.5"
-						key={index}
+						key={subAccount.subAccountName + index}
 					>
 						<Text
 							style={{
