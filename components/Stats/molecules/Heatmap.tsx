@@ -16,9 +16,10 @@ import {
 	getDay,
 	parse,
 } from "date-fns";
+import { memo } from "react";
 import { Dimensions } from "react-native";
 
-export default function StatsHeatmap() {
+function StatsHeatmap() {
 	const now = new Date();
 	const start = startOfMonth(now);
 	const end = endOfMonth(now);
@@ -87,7 +88,7 @@ export default function StatsHeatmap() {
 						return (
 							<TouchableOpacity
 								key={data.key}
-								onPress={(data) => console.log(data, "CLICKED")}
+								onPress={() => console.log(data, "CLICKED")}
 							>
 								<LinearGradient
 									style={{
@@ -110,3 +111,5 @@ export default function StatsHeatmap() {
 		</View>
 	);
 }
+
+export default memo(StatsHeatmap);

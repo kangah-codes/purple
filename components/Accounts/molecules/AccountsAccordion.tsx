@@ -6,8 +6,8 @@ export default function AccountsAccordion() {
 	return (
 		<View className="flex flex-col space-y-5">
 			{dummyAccountData.map((account, index) => (
-				<View>
-					<AccountCard {...account} key={index} />
+				<View key={`card-${index}`}>
+					<AccountCard {...account} />
 				</View>
 			))}
 		</View>
