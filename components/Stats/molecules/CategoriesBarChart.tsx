@@ -8,7 +8,7 @@ export default function CategoriesBarChart() {
 				{ value: 10, color: "#7E22CE" },
 				{ value: 20, color: "#C084FC", marginBottom: 2 },
 			],
-			label: "Jan",
+			label: "Shopping",
 		},
 		{
 			stacks: [
@@ -39,8 +39,9 @@ export default function CategoriesBarChart() {
 			label: "Mar",
 		},
 	];
+
 	return (
-		<View className="ml-[-10] pb-5">
+		<View className="ml-[-10] pb-2.5">
 			<BarChart
 				width={340}
 				rotateLabel
