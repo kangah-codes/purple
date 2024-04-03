@@ -1,9 +1,8 @@
-import { useState, useMemo, ReactNode } from "react";
-import { LinearGradient, Text, TouchableOpacity, View } from "../../styled";
-import { StyleProp, ViewStyle } from "react-native";
-import { getColorIndex } from "./utils";
-import { startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { ReactNode, useMemo } from "react";
+import { ViewStyle } from "react-native";
+import { LinearGradient, TouchableOpacity, View } from "../../styled";
 import { colors } from "./constants";
+import { getColorIndex } from "./utils";
 
 export type CellData = {
 	value: number;
@@ -34,18 +33,7 @@ export default function Heatmap({
 	renderCell,
 	startColumn,
 }: HeatmapProps) {
-	const [cells, setCells] = useState([]);
-	const now = new Date();
-	const start = startOfMonth(now);
-	const end = endOfMonth(now);
-	const monthDays = eachDayOfInterval({ start, end });
-	const offset = new Date(
-		monthDays[0].getFullYear(),
-		monthDays[0].getMonth(),
-		1
-	).getDay();
-
-	useMemo(() => {
+	const generateCells = useMemo(() => {
 		const newCells = [];
 		const offsetData = Array(startColumn).fill({
 			value: 0,
@@ -111,12 +99,10 @@ export default function Heatmap({
 				</View>
 			);
 		}
-
-		// @ts-ignore
-		setCells(newCells);
+		return newCells;
 	}, [data, cellSize, cellStyle]);
 
-	return <View className="flex">{cells}</View>;
+	return <View style={{ flex: 1 }}>{generateCells}</View>;
 }
 
 Heatmap.defaultProps = {
