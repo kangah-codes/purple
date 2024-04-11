@@ -127,7 +127,7 @@ function TransactionsScreen() {
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
                                         style={{ fontFamily: 'Suprapower' }}
-                                        className='text-sm text-gray-600'
+                                        className='text-sm text-black'
                                     >
                                         Category
                                     </Text>
@@ -142,7 +142,7 @@ function TransactionsScreen() {
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
                                         style={{ fontFamily: 'Suprapower' }}
-                                        className='text-sm text-gray-600'
+                                        className='text-sm text-black'
                                     >
                                         Note
                                     </Text>
@@ -157,7 +157,7 @@ function TransactionsScreen() {
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
                                         style={{ fontFamily: 'Suprapower' }}
-                                        className='text-sm text-gray-600'
+                                        className='text-sm text-black'
                                     >
                                         Date
                                     </Text>

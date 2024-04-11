@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { IAccountCard } from '../schema';
-import { formatCurrencyAccurate } from '@/utils/number';
-import { truncateStringIfLongerThan } from '@/utils/string';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 
 export default function AccountCard({ accountName, accountTotal, subAccounts }: IAccountCard) {
     return (

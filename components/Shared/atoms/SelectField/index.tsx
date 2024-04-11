@@ -1,6 +1,6 @@
 import { ChevronDownIcon } from '@/components/SVG/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { truncateStringIfLongerThan } from '@/utils/string';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';

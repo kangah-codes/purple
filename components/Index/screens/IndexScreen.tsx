@@ -63,7 +63,7 @@ export default function IndexScreen() {
                 <ScrollView
                     className='mt-5 h-full space-y-5'
                     contentContainerStyle={{
-                        paddingBottom: 300,
+                        paddingBottom: 100,
                     }}
                     showsVerticalScrollIndicator={false}
                     refreshControl={

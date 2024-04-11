@@ -14,6 +14,7 @@ import Colors from '@/constants/Colors';
 export default function TabLayout() {
     return (
         <Tabs
+            initialRouteName='plans'
             screenOptions={{
                 tabBarActiveTintColor: Colors['light'].tint,
                 tabBarLabelStyle: {
@@ -75,7 +76,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => <SafeIcon width={24} height={24} stroke={color} />,
                     headerShown: false,
                 }}
-            />{' '}
+            />
             <Tabs.Screen
                 name='profile'
                 options={{
