@@ -1,5 +1,11 @@
-import NewAccountScreen from "@/components/Accounts/screens/NewAccountScreen";
+import NewAccountScreen from '@/components/Accounts/screens/NewAccountScreen';
+import { Stack } from 'expo-router';
 
 export default function Screen() {
-	return <NewAccountScreen />;
+    return (
+        <>
+            <Stack.Screen options={{ headerShown: false }} />
+            <NewAccountScreen />
+        </>
+    );
 }

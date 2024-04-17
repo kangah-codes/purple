@@ -8,6 +8,7 @@ import { BellIcon } from '../../SVG/icons';
 import { savingData } from '../constants';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import { router } from 'expo-router';
 
 export default function IndexScreen() {
     const [refreshing, setRefreshing] = useState(false);
@@ -18,6 +19,12 @@ export default function IndexScreen() {
             setRefreshing(false);
         }, 2000);
     }, []);
+    const renderItem = useCallback(
+        ({ item, index }: { item: any; index: number }) => (
+            <SavingPlanCard data={item} index={index} />
+        ),
+        [],
+    );
 
     return (
         <SafeAreaView className='bg-white'>
@@ -33,13 +40,6 @@ export default function IndexScreen() {
                         <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
                             Hi, Joshua 👋
                         </Text>
-                    </View>
-
-                    <View className='rounded-full bg-purple-100 w-8 h-8 flex items-center justify-center relative'>
-                        <BellIcon width={18} height={18} stroke={'#A855F7'} />
-
-                        {/** Show outstanding notifications */}
-                        <View className='rounded-full bg-red-500 w-1.5 h-1.5 absolute top-1.5 right-2' />
                     </View>
                 </View>
 
@@ -83,7 +83,10 @@ export default function IndexScreen() {
                                 My saving plans
                             </Text>
 
-                            <TouchableOpacity className='flex flex-row items-center space-x-1'>
+                            <TouchableOpacity
+                                className='flex flex-row items-center space-x-1'
+                                onPress={() => router.push('/plans')}
+                            >
                                 <Text
                                     style={{ fontFamily: 'InterSemiBold' }}
                                     className='text-sm tracking-tighter text-purple-700'
@@ -113,9 +116,7 @@ export default function IndexScreen() {
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             data={savingData}
-                            renderItem={({ item, index }) => (
-                                <SavingPlanCard data={item} index={index} />
-                            )}
+                            renderItem={renderItem}
                             keyExtractor={(_, index) => index.toString()}
                         />
                     </View>

@@ -1,19 +1,19 @@
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/icons';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { TransactionData } from '../schema';
 
 type TransactionHistoryCardProps = {
-    data: {
-        type: string;
-        category: string;
-        description: string;
-        amount: string;
-        dateTime: string;
-    };
+    data: TransactionData;
     onPress: () => void;
+    showTitle?: boolean;
 };
 
-export default function TransactionHistoryCard({ data, onPress }: TransactionHistoryCardProps) {
+export default function TransactionHistoryCard({
+    data,
+    onPress,
+    showTitle,
+}: TransactionHistoryCardProps) {
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -45,9 +45,11 @@ export default function TransactionHistoryCard({ data, onPress }: TransactionHis
 
             <View className='flex flex-col flex-grow'>
                 <View className='flex flex-row justify-between items-center'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-base'>
-                        {truncateStringIfLongerThan(data.category, 30)}
-                    </Text>
+                    {showTitle && (
+                        <Text style={{ fontFamily: 'Suprapower' }} className='text-base'>
+                            {truncateStringIfLongerThan(data.category, 30)}
+                        </Text>
+                    )}
                     <Text
                         style={{
                             fontFamily: 'Suprapower',
@@ -78,3 +80,7 @@ export default function TransactionHistoryCard({ data, onPress }: TransactionHis
         </TouchableOpacity>
     );
 }
+
+TransactionHistoryCard.defaultProps = {
+    showTitle: true,
+};

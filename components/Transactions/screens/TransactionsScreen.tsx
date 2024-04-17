@@ -17,7 +17,12 @@ import Svg, { Polygon } from 'react-native-svg';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 
-function TransactionsScreen() {
+type TransactionsScreenProps = {
+    showBackButton?: boolean;
+};
+
+function TransactionsScreen(props: TransactionsScreenProps) {
+    const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const renderZigZagView = useCallback(() => {
@@ -30,6 +35,19 @@ function TransactionsScreen() {
         }
         return nodes;
     }, []);
+    const renderItem = useCallback(
+        ({ item }: any) => (
+            <TransactionHistoryCard
+                data={item}
+                onPress={() => setShowBottomSheetModal('transactionReceiptScreen', true)}
+            />
+        ),
+        [],
+    );
+    const renderItemSeparator = useCallback(
+        () => <View className='border-b border-gray-100' />,
+        [],
+    );
 
     return (
         <SafeAreaView className='bg-white relative h-full'>
@@ -187,10 +205,29 @@ function TransactionsScreen() {
                 }}
                 className='bg-white'
             >
-                <View className='px-5 py-2.5'>
+                {/* <View className='px-5 py-2.5'>
                     <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
                         My Transactions
                     </Text>
+                </View> */}
+
+                <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
+                    <View className='flex flex-col'>
+                        <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
+                            My Transactions
+                        </Text>
+                    </View>
+
+                    {showBackButton && (
+                        <TouchableOpacity onPress={() => router.back()}>
+                            <Text
+                                style={{ fontFamily: 'InterSemiBold' }}
+                                className='text-purple-600'
+                            >
+                                Back
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <FlatList
@@ -201,31 +238,26 @@ function TransactionsScreen() {
                         paddingHorizontal: 20,
                     }}
                     showsVerticalScrollIndicator={true}
-                    renderItem={({ item }) => (
-                        <TransactionHistoryCard
-                            data={item}
-                            onPress={() =>
-                                setShowBottomSheetModal('transactionReceiptScreen', true)
-                            }
-                        />
-                    )}
-                    ItemSeparatorComponent={() => <View className='border-b border-gray-100' />}
+                    renderItem={renderItem}
+                    ItemSeparatorComponent={renderItemSeparator}
                 />
             </View>
 
-            <LinearGradient
-                className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={() => {
-                        router.push('/transactions/new-transaction');
-                    }}
+            {!showBackButton && (
+                <LinearGradient
+                    className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
+                    colors={['#c084fc', '#9333ea']}
                 >
-                    <PlusIcon stroke={'#fff'} />
-                </TouchableOpacity>
-            </LinearGradient>
+                    <TouchableOpacity
+                        className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
+                        onPress={() => {
+                            router.push('/transactions/new-transaction');
+                        }}
+                    >
+                        <PlusIcon stroke={'#fff'} />
+                    </TouchableOpacity>
+                </LinearGradient>
+            )}
         </SafeAreaView>
     );
 }

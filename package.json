@@ -24,6 +24,7 @@
     "date-fns": "^3.6.0",
     "expo": "^50.0.15",
     "expo-font": "~11.10.2",
+    "expo-image": "^1.10.6",
     "expo-linear-gradient": "~12.7.1",
     "expo-linking": "~6.2.2",
     "expo-router": "~3.4.7",
@@ -48,6 +49,7 @@
     "react-native-svg": "^14.1.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-web": "~0.19.6",
+    "twrnc": "^4.2.0",
     "yarn": "^1.22.22",
     "zustand": "^4.5.1"
   },

@@ -23,6 +23,15 @@ export default function TransactionHistoryList() {
         }
         return nodes;
     }, []);
+    const renderItem = useCallback(
+        ({ item }: any) => (
+            <TransactionHistoryCard
+                data={item}
+                onPress={() => setShowBottomSheetModal('transactionReceipt', true)}
+            />
+        ),
+        [],
+    );
 
     return (
         <View className='mt-5'>
@@ -201,12 +210,7 @@ export default function TransactionHistoryList() {
                         paddingBottom: 100,
                     }}
                     showsVerticalScrollIndicator={true}
-                    renderItem={({ item }) => (
-                        <TransactionHistoryCard
-                            data={item}
-                            onPress={() => setShowBottomSheetModal('transactionReceipt', true)}
-                        />
-                    )}
+                    renderItem={renderItem}
                     ItemSeparatorComponent={() => <View className='border-b border-gray-100' />}
                     scrollEnabled={false}
                 />

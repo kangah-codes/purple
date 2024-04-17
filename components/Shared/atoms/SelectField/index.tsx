@@ -2,7 +2,7 @@ import { ChevronDownIcon } from '@/components/SVG/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
 
@@ -30,6 +30,16 @@ export default function SelectField({
 }: SelectFieldProps) {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const [value, setValue] = useState<string | undefined>(undefined);
+    const renderDefaultItem = useCallback(
+        ({ label }: any) => (
+            <View className='py-3 border-b border-gray-200'>
+                <Text style={{ fontFamily: 'InterSemiBold' }} className='text-sm text-gray-800'>
+                    {label}
+                </Text>
+            </View>
+        ),
+        [],
+    );
 
     return (
         <>
@@ -50,8 +60,8 @@ export default function SelectField({
                     }
                     sheetKey={selectKey}
                     data={Object.keys(options).map((key) => options[key]) ?? []}
-                    renderItem={({ item }) => {
-                        let _item = item as SelectOption;
+                    renderItem={(item) => {
+                        let _item = item as unknown as SelectOption;
                         return (
                             <TouchableOpacity
                                 onPress={() => {
@@ -60,18 +70,7 @@ export default function SelectField({
                                     setShowBottomSheetFlatList(selectKey, false);
                                 }}
                             >
-                                {renderItem ? (
-                                    renderItem(_item)
-                                ) : (
-                                    <View className='py-3 border-b border-gray-200'>
-                                        <Text
-                                            style={{ fontFamily: 'InterSemiBold' }}
-                                            className='text-sm text-gray-800'
-                                        >
-                                            {_item.label}
-                                        </Text>
-                                    </View>
-                                )}
+                                {renderItem ? renderItem(_item) : renderDefaultItem(_item)}
                             </TouchableOpacity>
                         );
                     }}
