@@ -1,4 +1,4 @@
-import { truncateStringIfLongerThan } from '@/utils/string';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/icons';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 

@@ -1,9 +1,14 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { IAccountCard } from '../schema';
-import { formatCurrencyAccurate } from '@/utils/number';
-import { truncateStringIfLongerThan } from '@/utils/string';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function AccountCard({ accountName, accountTotal, subAccounts }: IAccountCard) {
+    const navigation = useNavigation();
+    const router = useRouter();
+    const params = useLocalSearchParams();
+
     return (
         <View className='flex flex-col space-y-2.5'>
             <View className='flex flex-row items-center justify-between px-5'>
@@ -29,6 +34,12 @@ export default function AccountCard({ accountName, accountTotal, subAccounts }: 
                     <TouchableOpacity
                         className='flex flex-row justify-between py-2.5'
                         key={subAccount.subAccountName + index}
+                        onPress={() => {
+                            router.push({
+                                pathname: '/accounts/account-transactions',
+                                params: { accountName },
+                            });
+                        }}
                     >
                         <Text
                             style={{

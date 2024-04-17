@@ -4,7 +4,15 @@ import BottomSheet, {
     BottomSheetProps,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    ComponentType,
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { useBottomSheetFlatListStore } from './hooks';
@@ -15,6 +23,11 @@ interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
     renderItem: ListRenderItem<T> | null | undefined;
     flatListContentContainerStyle?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
     children: React.ReactNode;
+    itemSeparator?:
+        | ComponentType<any>
+        | SharedValue<ComponentType<any> | null | undefined>
+        | null
+        | undefined;
 }
 
 function CustomBottomSheetFlatList<T>({
@@ -23,6 +36,7 @@ function CustomBottomSheetFlatList<T>({
     renderItem,
     flatListContentContainerStyle,
     children,
+    itemSeparator,
     ...rest
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -86,6 +100,7 @@ function CustomBottomSheetFlatList<T>({
                 renderItem={renderItem}
                 contentContainerStyle={flatListContentContainerStyle}
                 showsVerticalScrollIndicator
+                ItemSeparatorComponent={itemSeparator}
             />
         </BottomSheet>
     );

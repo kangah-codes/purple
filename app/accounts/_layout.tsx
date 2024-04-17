@@ -1,14 +1,14 @@
-import { Slot, Stack } from "expo-router";
+import { Slot, Stack } from 'expo-router';
 
 export default function Accounts() {
-	return (
-		<Stack
-			screenOptions={{
-				contentStyle: {
-					backgroundColor: "#fff",
-				},
-				headerShown: false,
-			}}
-		/>
-	);
+    return (
+        <Stack
+            screenOptions={{
+                contentStyle: {
+                    backgroundColor: '#fff',
+                },
+                headerShown: false,
+            }}
+        />
+    );
 }
