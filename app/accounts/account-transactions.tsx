@@ -5,7 +5,7 @@ import { Stack } from 'expo-router';
 export default function Screen() {
     return (
         <>
-            <Stack.Screen options={{ headerShown: false, presentation: 'transparentModal' }} />
+            <Stack.Screen options={{ headerShown: false, presentation: 'modal' }} />
             <TransactionsScreen showBackButton />
         </>
     );

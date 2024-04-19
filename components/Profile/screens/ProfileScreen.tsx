@@ -12,12 +12,14 @@ const blurhash =
 export default function ProfileScreen() {
     return (
         <View className='bg-white'>
-            <ExpoStatusBar style='dark' />
+            <ExpoStatusBar style='auto' />
 
             <View
-                style={{
-                    paddingTop: RNStatusBar.currentHeight,
-                }}
+                style={
+                    {
+                        // paddingTop: RNStatusBar.currentHeight,
+                    }
+                }
                 className='space-y-'
             >
                 <View className='relative'>
@@ -47,7 +49,7 @@ export default function ProfileScreen() {
                         {/* <View className='border-b border-gray-200 w-full' /> */}
 
                         <View className='flex flex-row space-x-2.5 justify-between'>
-                            <View className='flex flex-col justify-between space-y-2.5 w-[49%]'>
+                            <View className='flex flex-col justify-between space-y-2.5 w-[48%]'>
                                 <LinearGradient
                                     className='rounded-xl p-5 flex flex-col justify-between space-y-5'
                                     colors={['#C084FC', '#6B21A8']}
@@ -73,13 +75,56 @@ export default function ProfileScreen() {
                                     </View>
                                 </LinearGradient>
                                 <LinearGradient
-                                    className='rounded-xl p-5 h-52 flex-grow'
-                                    colors={['#C084FC', '#6B21A8']}
-                                ></LinearGradient>
+                                    className='rounded-xl p-5 flex flex-col justify-between space-y-5 h-52'
+                                    colors={['rgb(248, 113, 113)', 'rgb(185, 28, 28)']}
+                                >
+                                    <SafeIcon stroke='#fff' width={24} height={24} />
+                                    <View className='flex flex-col space-y-1'>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'InterBold',
+                                            }}
+                                            className='text-white text-base tracking-tighter'
+                                        >
+                                            Total Spend
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'Suprapower',
+                                            }}
+                                            className='text-white text-2xl tracking-tighter'
+                                        >
+                                            GHS 4.5M
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
                             </View>
 
-                            <View className='flex flex-col justify-between space-y-2.5 w-[49%]'>
-                                <View className='bg-[#D2C5FC] rounded-xl p-5 h-52 flex-grow'></View>
+                            <View className='flex flex-col justify-between space-y-2.5 w-[48%]'>
+                                <LinearGradient
+                                    className='rounded-xl p-5 flex flex-col justify-between space-y-5 h-52'
+                                    colors={['rgb(74, 222, 128)', 'rgb(21, 128, 61)']}
+                                >
+                                    <SafeIcon stroke='#fff' width={24} height={24} />
+                                    <View className='flex flex-col space-y-1'>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'InterBold',
+                                            }}
+                                            className='text-white text-base tracking-tighter'
+                                        >
+                                            Total Saved
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'Suprapower',
+                                            }}
+                                            className='text-white text-2xl tracking-tighter'
+                                        >
+                                            GHS 4.5M
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
                                 <LinearGradient
                                     className='rounded-xl p-5 flex flex-col justify-between space-y-5'
                                     colors={['#C084FC', '#6B21A8']}

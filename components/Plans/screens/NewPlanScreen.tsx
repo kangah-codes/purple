@@ -18,7 +18,7 @@ export default function NewPlanScreen() {
     const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
     const [isLoading, setIsLoading] = useState(false);
     const renderItem = useCallback(
-        ({ item }: any) => (
+        (item: any) => (
             <View className='py-3 border-b border-gray-100'>
                 <Text>{item.label}</Text>
             </View>

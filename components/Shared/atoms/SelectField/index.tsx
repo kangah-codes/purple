@@ -31,10 +31,10 @@ export default function SelectField({
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const [value, setValue] = useState<string | undefined>(undefined);
     const renderDefaultItem = useCallback(
-        ({ label }: any) => (
+        (item: any) => (
             <View className='py-3 border-b border-gray-200'>
                 <Text style={{ fontFamily: 'InterSemiBold' }} className='text-sm text-gray-800'>
-                    {label}
+                    {item.label}
                 </Text>
             </View>
         ),
@@ -61,7 +61,7 @@ export default function SelectField({
                     sheetKey={selectKey}
                     data={Object.keys(options).map((key) => options[key]) ?? []}
                     renderItem={(item) => {
-                        let _item = item as unknown as SelectOption;
+                        let _item = item.item as unknown as SelectOption;
                         return (
                             <TouchableOpacity
                                 onPress={() => {
