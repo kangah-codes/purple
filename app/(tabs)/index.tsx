@@ -1,7 +1,7 @@
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import useHasOnboarded from '@/lib/db/db';
 import { Redirect } from 'expo-router';
-import { SafeAreaView, Text, View } from '@/components/Shared/styled';
+import { SafeAreaView, View } from '@/components/Shared/styled';
 import { ActivityIndicator } from 'react-native';
 
 export default function Screen() {
