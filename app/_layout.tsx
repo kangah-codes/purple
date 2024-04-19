@@ -11,7 +11,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text, View } from '@/components/Shared/styled';
 
 export const unstable_settings = {
-    // Ensure that reloading on `/modal` keeps a back button present.
     initialRouteName: '(tabs)',
 };
 
@@ -88,6 +87,7 @@ function RootLayoutNav() {
                             <Stack.Screen name='plans' options={{ headerShown: false }} />
                             <Stack.Screen name='accounts' options={{ headerShown: false }} />
                             <Stack.Screen name='transactions' options={{ headerShown: false }} />
+                            <Stack.Screen name='onboarding' options={{ headerShown: false }} />
                         </Stack>
                     </ThemeProvider>
                 </PortalProvider>

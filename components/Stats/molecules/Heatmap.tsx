@@ -62,7 +62,13 @@ function StatsHeatmap() {
 
             if (format(now, 'dd/MM/yyyy') === data.key)
                 return (
-                    <TouchableOpacity key={data.key} onPress={() => console.log(data, 'CLICKED')}>
+                    <TouchableOpacity
+                        key={data.key}
+                        onPress={() => {
+                            setSelectedDate(data.key);
+                            setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
+                        }}
+                    >
                         <LinearGradient
                             style={{
                                 width: blockSize,
