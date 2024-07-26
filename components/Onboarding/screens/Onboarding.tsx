@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Platform, StyleSheet, Button } from 'react-native';
 import {
     TouchableOpacity,
@@ -12,6 +12,7 @@ import { Image } from 'expo-image';
 import tw from 'twrnc';
 import useHasOnboarded from '@/lib/db/db';
 import { router } from 'expo-router';
+import PersonalInformation from '../molecules/PersonalInformation';
 
 function Pagination({ selected }: { selected: boolean }) {
     return (
@@ -64,8 +65,16 @@ function DoneButtonComponent(props: any) {
     );
 }
 
-export default function Screen({ navigation }) {
+export default function Screen({}) {
     const { setHasOnboardedTrue } = useHasOnboarded();
+    const formRef = useRef<{ submit: Function }>(null);
+
+    const handleFormSubmit = () => {
+        if (formRef.current) {
+            formRef.current.submit();
+        }
+    };
+
     return (
         <Onboarding
             DotComponent={Pagination}
@@ -75,8 +84,9 @@ export default function Screen({ navigation }) {
             skipToPage={3}
             DoneButtonComponent={DoneButtonComponent}
             onDone={() => {
-                setHasOnboardedTrue();
-                router.push('/(tabs)');
+                // setHasOnboardedTrue();
+                // router.push('/(tabs)');
+                handleFormSubmit();
             }}
             titleStyles={{ fontSize: 30, fontFamily: 'Suprapower', ...tw`px-5` }}
             subTitleStyles={{ fontSize: 15, fontFamily: 'InterMedium', ...tw`px-5` }}
@@ -99,22 +109,33 @@ export default function Screen({ navigation }) {
                     image: (
                         <Image
                             source={require('@/assets/images/graphics/10.png')}
-                            style={tw`h-72 w-72]`}
+                            style={tw`h-72 w-72`}
                         />
                     ),
                     title: 'Keep a watchful eye on your spending',
                     subtitle: 'See where your money is going and make better decisions',
                 },
                 {
-                    backgroundColor: '#E9D5FF',
+                    backgroundColor: '#fff',
                     image: (
                         <Image
                             source={require('@/assets/images/graphics/6.png')}
-                            style={tw`h-72 w-72]`}
+                            style={tw`h-72 w-72`}
                         />
                     ),
                     title: 'Get notified when you overspend',
                     subtitle: 'Stay on top of your budget and never miss a beat',
+                },
+                {
+                    backgroundColor: '#fff',
+                    image: (
+                        <Image
+                            source={require('@/assets/images/graphics/12.png')}
+                            style={tw`h-52 w-52`}
+                        />
+                    ),
+                    title: 'Tell us a little bit about yourself',
+                    subtitle: <PersonalInformation ref={formRef} />,
                 },
             ]}
         />

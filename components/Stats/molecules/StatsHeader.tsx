@@ -15,14 +15,12 @@ export default function StatsHeader() {
                     <StatsHeatmap />
                 </View>
 
-                <View className='flex flex-col space-y-2.5'>
+                <View className='flex flex-col space-y-5 border border-gray-200 rounded-xl p-5'>
                     <Text className='text-sm text-black' style={{ fontFamily: 'Suprapower' }}>
                         Spend Overview
                     </Text>
-                    <View className='flex flex-col space-y-5'>
-                        <View className='h-[200] flex-1 rounded-xl border border-gray-200'>
-                            <TransactionsPieChart />
-                        </View>
+                    <View className='h-[160]'>
+                        <TransactionsPieChart />
                     </View>
                 </View>
 

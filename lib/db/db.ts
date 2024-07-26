@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const useHasOnboarded = () => {
-    const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null);
+    const [hasOnboarded, _setHasOnboarded] = useState<boolean | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -12,7 +12,7 @@ const useHasOnboarded = () => {
                 if (hasOnboardedValue !== null) {
                     setHasOnboarded(JSON.parse(hasOnboardedValue));
                 } else {
-                    setHasOnboarded(false);
+                    _setHasOnboarded(false);
                 }
                 setLoading(false);
             } catch (error) {
@@ -33,7 +33,16 @@ const useHasOnboarded = () => {
         }
     };
 
-    return { hasOnboarded, loading, setHasOnboardedTrue };
+    const setHasOnboarded = async (value: boolean) => {
+        try {
+            await AsyncStorage.setItem('hasOnboarded', JSON.stringify(value));
+            _setHasOnboarded(value);
+        } catch (error) {
+            console.error('Error setting hasOnboarded:', error);
+        }
+    };
+
+    return { hasOnboarded, loading, setHasOnboardedTrue, setHasOnboarded };
 };
 
 export default useHasOnboarded;
