@@ -1,72 +1,14 @@
-import React, { useRef } from 'react';
-import { Platform, StyleSheet, Button } from 'react-native';
-import {
-    TouchableOpacity,
-    View,
-    Text,
-    LinearGradient,
-    ScrollView,
-} from '@/components/Shared/styled';
-import Onboarding from 'react-native-onboarding-swiper';
 import { Image } from 'expo-image';
+import React, { useRef } from 'react';
+import Onboarding from 'react-native-onboarding-swiper';
 import tw from 'twrnc';
-import useHasOnboarded from '@/lib/db/db';
-import { router } from 'expo-router';
+import DoneButton from '../molecules/DoneButton';
+import NextButton from '../molecules/NextButton';
+import Pagination from '../molecules/Pagination';
 import PersonalInformation from '../molecules/PersonalInformation';
-
-function Pagination({ selected }: { selected: boolean }) {
-    return (
-        <View
-            className='w-2 h-2 rounded-full mx-0.5'
-            style={{
-                backgroundColor: selected ? 'rgb(124,36,206)' : '#FAF5FF',
-            }}
-        />
-    );
-}
-
-function NextButtonComponent(props: any) {
-    return (
-        <View className='px-5'>
-            <TouchableOpacity {...props}>
-                <LinearGradient
-                    className='flex items-center justify-center rounded-full px-5 py-2'
-                    colors={['#c084fc', '#9333ea']}
-                >
-                    <Text
-                        style={{ fontFamily: 'InterBold' }}
-                        className='text-sm text-white tracking-tight'
-                    >
-                        Next
-                    </Text>
-                </LinearGradient>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
-function DoneButtonComponent(props: any) {
-    return (
-        <View className='px-5'>
-            <TouchableOpacity {...props}>
-                <LinearGradient
-                    className='flex items-center justify-center rounded-full px-5 py-2'
-                    colors={['#c084fc', '#9333ea']}
-                >
-                    <Text
-                        style={{ fontFamily: 'InterBold' }}
-                        className='text-sm text-white tracking-tight'
-                    >
-                        Done
-                    </Text>
-                </LinearGradient>
-            </TouchableOpacity>
-        </View>
-    );
-}
+import { router } from 'expo-router';
 
 export default function Screen({}) {
-    const { setHasOnboardedTrue } = useHasOnboarded();
     const formRef = useRef<{ submit: Function }>(null);
 
     const handleFormSubmit = () => {
@@ -78,15 +20,16 @@ export default function Screen({}) {
     return (
         <Onboarding
             DotComponent={Pagination}
-            NextButtonComponent={NextButtonComponent}
+            NextButtonComponent={NextButton}
             // SkipButtonComponent={Skip}
             showSkip={false}
             skipToPage={3}
-            DoneButtonComponent={DoneButtonComponent}
+            DoneButtonComponent={DoneButton}
             onDone={() => {
                 // setHasOnboardedTrue();
                 // router.push('/(tabs)');
-                handleFormSubmit();
+                // handleFormSubmit();
+                router.replace('/onboarding/landing');
             }}
             titleStyles={{ fontSize: 30, fontFamily: 'Suprapower', ...tw`px-5` }}
             subTitleStyles={{ fontSize: 15, fontFamily: 'InterMedium', ...tw`px-5` }}
@@ -125,17 +68,6 @@ export default function Screen({}) {
                     ),
                     title: 'Get notified when you overspend',
                     subtitle: 'Stay on top of your budget and never miss a beat',
-                },
-                {
-                    backgroundColor: '#fff',
-                    image: (
-                        <Image
-                            source={require('@/assets/images/graphics/12.png')}
-                            style={tw`h-52 w-52`}
-                        />
-                    ),
-                    title: 'Tell us a little bit about yourself',
-                    subtitle: <PersonalInformation ref={formRef} />,
                 },
             ]}
         />

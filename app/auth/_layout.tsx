@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-export default function Transactions() {
+export default function Auth() {
     return (
         <Stack
             screenOptions={{
