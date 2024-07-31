@@ -1,0 +1,12 @@
+# Config file for Air
+[build]
+bin = "bin/main" # Binary output path
+cmd = "go build -o ./bin/main cmd/api/main.go" # Command to build the binary
+include_ext = ["go", "tpl", "tmpl", "html"] # File extensions to watch
+exclude_dir = ["vendor", "bin"] # Directories to exclude from watching
+exclude_file = ["air.toml"] # Files to exclude from watching
+follow_symlink = true # Follow symlinks
+full_bin = "APP_ENV=dev APP_USER=air ./bin/main" # Command to run the binary
+
+[log]
+level = "debug" # Log level
