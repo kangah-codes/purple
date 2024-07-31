@@ -14,5 +14,6 @@
     "purple/.expo/types/**/*.ts",
     "expo-env.d.ts",
     "purple/@types/**/*.d.ts",
+    ".expo/types/**/*.ts"
   ]
 }

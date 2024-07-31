@@ -8,15 +8,18 @@ import {
     TouchableOpacity,
 } from '@/components/Shared/styled';
 import { Controller, useForm } from 'react-hook-form';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback } from 'react-native';
 import tw from 'twrnc';
 import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import useHasOnboarded from '@/lib/db/db';
 
 export default function SignInScreen() {
+    const [loading, setLoading] = useState(false);
+    const { setHasOnboarded } = useHasOnboarded();
     const {
         control,
         handleSubmit,
@@ -44,6 +47,12 @@ export default function SignInScreen() {
                 <View className='bg-white relative h-full flex flex-col items-stretch px-5'>
                     <ExpoStatusBar style='dark' />
                     <View className='w-full space-y-5 flex flex-col items-center justify-center flex-grow'>
+                        <View className=''>
+                            <Image
+                                source={require('@/assets/images/graphics/1.png')}
+                                style={tw`h-22 w-52`}
+                            />
+                        </View>
                         <View className='flex flex-col space-y-2.5'>
                             <Text
                                 style={{ fontFamily: 'Suprapower' }}
@@ -146,17 +155,33 @@ export default function SignInScreen() {
                                     )}
                                 </View>
 
-                                <TouchableOpacity className='w-full'>
+                                <TouchableOpacity
+                                    className='w-full'
+                                    onPress={() => {
+                                        setLoading(true);
+                                        setHasOnboarded(true)
+                                            .then(() => {
+                                                router.push('/(tabs)/');
+                                            })
+                                            .finally(() => {
+                                                setLoading(false);
+                                            });
+                                    }}
+                                >
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 py-2.5'
                                         colors={['#c084fc', '#9333ea']}
                                     >
-                                        <Text
-                                            style={{ fontFamily: 'InterBold' }}
-                                            className='text-base text-white tracking-tight'
-                                        >
-                                            Sign In
-                                        </Text>
+                                        {loading ? (
+                                            <ActivityIndicator size={18} color='#fff' />
+                                        ) : (
+                                            <Text
+                                                style={{ fontFamily: 'InterBold' }}
+                                                className='text-base text-white tracking-tight'
+                                            >
+                                                Sign In
+                                            </Text>
+                                        )}
                                     </LinearGradient>
                                 </TouchableOpacity>
 

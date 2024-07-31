@@ -14,7 +14,7 @@ function ExpensesScreen() {
     );
     const listHeader = useCallback(
         () => (
-            <View style={{ paddingHorizontal: 5 }}>
+            <View>
                 <ExpensesCard />
                 <View style={{ marginTop: 20 }} />
             </View>

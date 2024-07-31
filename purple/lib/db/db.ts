@@ -10,7 +10,7 @@ const useHasOnboarded = () => {
             try {
                 const hasOnboardedValue = await AsyncStorage.getItem('hasOnboarded');
                 if (hasOnboardedValue !== null) {
-                    setHasOnboarded(JSON.parse(hasOnboardedValue));
+                    _setHasOnboarded(JSON.parse(hasOnboardedValue));
                 } else {
                     _setHasOnboarded(false);
                 }

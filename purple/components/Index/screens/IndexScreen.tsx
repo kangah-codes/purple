@@ -3,15 +3,17 @@ import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from '@/compon
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import { FlatList, StatusBar as RNStatusBar, RefreshControl } from 'react-native';
+import { Button, FlatList, StatusBar as RNStatusBar, RefreshControl } from 'react-native';
 import { BellIcon } from '../../SVG/icons';
 import { savingData } from '../constants';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
 import { router } from 'expo-router';
+import useHasOnboarded from '@/lib/db/db';
 
 export default function IndexScreen() {
     const [refreshing, setRefreshing] = useState(false);
+    const { setHasOnboarded } = useHasOnboarded();
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -42,6 +44,13 @@ export default function IndexScreen() {
                         </Text>
                     </View>
                 </View>
+
+                <Button
+                    title='RESET'
+                    onPress={() => {
+                        setHasOnboarded(false).then(() => alert('Onboarding reset'));
+                    }}
+                />
 
                 {/* <View className="mt-5">
 					<View className="relative flex justify-center">
