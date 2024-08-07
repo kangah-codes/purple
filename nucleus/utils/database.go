@@ -10,6 +10,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type sqlOpener func(string) (*gorm.DB, error)
+
 var (
 	instance *gorm.DB
 	once     sync.Once
@@ -27,8 +29,6 @@ func InitDB(dsn string, attempts int, coolDown time.Duration) {
 		}
 	})
 }
-
-type sqlOpener func(string) (*gorm.DB, error)
 
 func ConnectToDB(openDatabase sqlOpener, dsn string, attempts int, coolDown time.Duration) *gorm.DB {
 	if dsn == "" {

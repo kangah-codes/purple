@@ -23,6 +23,6 @@ type RefreshToken struct {
 }
 
 type TokenPair struct {
-	AccessToken  Session
-	RefreshToken RefreshToken
+	AccessToken  Session      `json:"access_token"`
+	RefreshToken RefreshToken `json:"refresh_token"`
 }

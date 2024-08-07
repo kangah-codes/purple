@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"nucleus/internal/models"
 	"time"
@@ -116,4 +118,56 @@ func HashPassword(pw string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 
 	return string(hashedPassword), err
+}
+
+func CheckPasswordHash(pw, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(pw))
+
+	return err == nil
+}
+
+func GenerateSessionToken() (string, error) {
+	token := make([]byte, 32)
+	_, err := rand.Read(token)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(token), nil
+}
+
+func CreateSession(db *gorm.DB, userID uint) (models.TokenPair, error) {
+	token, err := GenerateSessionToken()
+	if err != nil {
+		return models.TokenPair{}, err
+	}
+
+	session := models.Session{
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(time.Hour * 24),
+	}
+	result := db.Create(&session)
+	if result.Error != nil {
+		return models.TokenPair{}, result.Error
+	}
+
+	refreshToken, err := GenerateSessionToken()
+	if err != nil {
+		return models.TokenPair{}, err
+	}
+	refreshSession := models.RefreshToken{
+		SessionID: session.ID,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
+	}
+	result = db.Create(&refreshSession)
+	if result.Error != nil {
+		return models.TokenPair{}, result.Error
+	}
+
+	return models.TokenPair{
+		AccessToken:  session,
+		RefreshToken: refreshSession,
+	}, nil
 }

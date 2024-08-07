@@ -8,3 +8,13 @@ type SignUpDTO struct {
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
 }
+
+type SignInDTO struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type UpdateAccountDTO struct {
+	Username    string `json:"username" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+}

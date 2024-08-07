@@ -2,16 +2,16 @@ package main
 
 import (
 	"nucleus/internal/api/types"
+	"nucleus/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Create a Gin router
 	r := gin.Default()
-	// v1 := r.Group("/api/v1")
+	v1 := utils.CreateV1Group(r)
 
-	r.GET("/ping", func(c *gin.Context) {
+	v1.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{
 			Status:  200,
 			Message: "pong",

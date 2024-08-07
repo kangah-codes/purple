@@ -4,6 +4,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	SuperUser string = "superuser"
+	AppUser   string = "user"
+)
+
 type User struct {
 	gorm.Model
 	FirstName    string `gorm:"not null" json:"first_name"`
@@ -15,4 +20,5 @@ type User struct {
 	Accounts     []Account     `gorm:"foreignKey:UserId"`
 	Plans        []Plan        `gorm:"foreignKey:UserId"`
 	Transactions []Transaction `gorm:"foreignKey:UserId"`
+	Role         string        `gorm:"type:enum('admin', 'user')"`
 }
