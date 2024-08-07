@@ -185,12 +185,14 @@ export default function SignInScreen() {
                                     </LinearGradient>
                                 </TouchableOpacity>
 
-                                <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-purple-500'
-                                >
-                                    Forgot your password?
-                                </Text>
+                                <TouchableOpacity onPress={() => router.push('/auth/otp')}>
+                                    <Text
+                                        style={{ fontFamily: 'InterBold' }}
+                                        className='text-xs text-purple-500'
+                                    >
+                                        Forgot your password?
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
                         </KeyboardAvoidingView>
                     </View>
