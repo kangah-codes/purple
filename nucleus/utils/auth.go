@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -109,4 +110,10 @@ func RevokeAllUserTokens(db *gorm.DB, userID uint) error {
 
 func CleanExpiredTokens(db *gorm.DB) error {
 	return db.Where("expires_at < ?", time.Now()).Delete(&models.RefreshToken{}).Error
+}
+
+func HashPassword(pw string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+
+	return string(hashedPassword), err
 }
