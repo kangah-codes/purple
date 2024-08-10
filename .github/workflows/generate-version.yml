@@ -5,11 +5,8 @@ on:
             - release
 
 jobs:
-    broker_version_ci_pipeline:
+    bump_version:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: apps/broker
 
         steps:
             - uses: actions/checkout@v3
@@ -21,10 +18,10 @@ jobs:
               if: ${{ github.ref == 'refs/heads/release' }}
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
-                  git-message: "chore(release): {version}"
-                  preset: "angular"
-                  tag-prefix: "v"
+                  git-message: 'chore(release): {version}'
+                  preset: 'angular'
+                  tag-prefix: 'v'
                   release-count: 1
-                  output-file: "./CHANGELOG.md"
-                  version-file: "./package.json"
+                  output-file: './CHANGELOG.md'
+                  version-file: './package.json'
                   skip-on-empty: true
