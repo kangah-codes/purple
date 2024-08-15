@@ -37,10 +37,6 @@ export default function SignInScreen() {
         },
     });
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
-    });
-
     return (
         <SafeAreaView
             style={{
@@ -79,13 +75,6 @@ export default function SignInScreen() {
                         >
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
-                                    {/* <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-500'
-                                >
-                                    Username
-                                </Text> */}
-
                                     <Controller
                                         control={control}
                                         rules={{

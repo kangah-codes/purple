@@ -34,7 +34,7 @@ export function ChevronLeftIcon(props: SvgProps) {
             <Path
                 d='M15 18L9 12L15 6'
                 stroke={props.stroke}
-                strokeWidth='2'
+                strokeWidth={props.strokeWidth ?? 2}
                 strokeLinecap='round'
                 strokeLinejoin='round'
             />
