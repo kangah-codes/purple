@@ -7,7 +7,7 @@ import {
     EyeCloseIcon,
     EyeOpenIcon,
     PiggyBankIcon,
-} from '../../SVG/icons';
+} from '../../SVG/noscale';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 
 type AccountCard = {

@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons';
+import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
@@ -23,6 +23,7 @@ export default function TransactionHistoryList() {
         }
         return nodes;
     }, []);
+
     const renderItem = useCallback(
         ({ item }: any) => (
             <TransactionHistoryCard
@@ -207,7 +208,7 @@ export default function TransactionHistoryList() {
                     data={transactionData}
                     keyExtractor={(_, index) => index.toString()}
                     contentContainerStyle={{
-                        paddingBottom: 100,
+                        paddingBottom: 200,
                     }}
                     showsVerticalScrollIndicator={true}
                     renderItem={renderItem}

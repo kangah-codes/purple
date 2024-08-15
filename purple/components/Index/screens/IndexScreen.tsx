@@ -1,10 +1,17 @@
 import SavingPlanCard from '@/components/Plans/molecules/SavingPlanCard';
-import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import {
+    InputField,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { Button, FlatList, StatusBar as RNStatusBar, RefreshControl } from 'react-native';
-import { BellIcon } from '../../SVG/icons';
+import { BellIcon, SearchIcon } from '../../SVG/noscale';
 import { savingData } from '../constants';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
@@ -45,29 +52,22 @@ export default function IndexScreen() {
                     </View>
                 </View>
 
-                <Button
-                    title='RESET'
-                    onPress={() => {
-                        setHasOnboarded(false).then(() => alert('Onboarding reset'));
-                    }}
-                />
-
-                {/* <View className="mt-5">
-					<View className="relative flex justify-center">
-						<InputField
-							className="border border-gray-200 rounded-lg p-1.5 px-5 pl-10 py-2.5 text-gray-500"
-							style={{ fontFamily: "InterSemiBold" }}
-							placeholder="Search"
-							cursorColor={"#000"}
-						/>
-						<SearchIcon
-							width={16}
-							height={16}
-							style={{ position: "absolute", left: 15 }}
-							stroke="#A855F7"
-						/>
-					</View>
-				</View> */}
+                <View className='mt-5'>
+                    <View className='relative flex justify-center'>
+                        <InputField
+                            className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
+                            style={{ fontFamily: 'InterSemiBold' }}
+                            placeholder='Search'
+                            cursorColor={'#000'}
+                        />
+                        <SearchIcon
+                            width={16}
+                            height={16}
+                            style={{ position: 'absolute', left: 15 }}
+                            stroke='#A855F7'
+                        />
+                    </View>
+                </View>
 
                 <ScrollView
                     className='mt-5 h-full space-y-5'

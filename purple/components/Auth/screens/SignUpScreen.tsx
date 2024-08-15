@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
     const [loading, setLoading] = useState(false);
     const { setHasOnboarded } = useHasOnboarded();
     const {
@@ -54,7 +54,7 @@ export default function SignInScreen() {
                     <View className='w-full space-y-5 flex flex-col items-center justify-center flex-grow'>
                         <View className=''>
                             <Image
-                                source={require('@/assets/images/graphics/1.png')}
+                                source={require('@/assets/images/graphics/2.png')}
                                 style={tw`h-22 w-52`}
                             />
                         </View>
@@ -63,14 +63,13 @@ export default function SignInScreen() {
                                 style={{ fontFamily: 'Suprapower' }}
                                 className='text-2xl text-black text-center'
                             >
-                                Welcome back!
+                                Hand over your details
                             </Text>
                             <Text
                                 style={{ fontFamily: 'InterMedium' }}
-                                className='text-sm textblack text-center'
+                                className='text-sm text-gray-600 text-center'
                             >
-                                Enjoy a seamless experience with Purple and take control of your
-                                finances today!
+                                You made the right choice! Let's get you started.
                             </Text>
                         </View>
                         <KeyboardAvoidingView
@@ -79,13 +78,6 @@ export default function SignInScreen() {
                         >
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
-                                    {/* <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-500'
-                                >
-                                    Username
-                                </Text> */}
-
                                     <Controller
                                         control={control}
                                         rules={{
@@ -100,7 +92,7 @@ export default function SignInScreen() {
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
                                                 style={{ fontFamily: 'InterSemiBold' }}
                                                 cursorColor={'#8B5CF6'}
-                                                placeholder='gyimihendrix'
+                                                placeholder='First Name'
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
                                                 value={value}
@@ -120,13 +112,74 @@ export default function SignInScreen() {
                                 </View>
 
                                 <View className='flex flex-col space-y-1'>
-                                    {/* <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-500'
-                                >
-                                    Email
-                                </Text> */}
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: "Username can't be empty",
+                                            pattern: {
+                                                value: /^[a-zA-Z0-9]{1,10}$/,
+                                                message: 'Invalid username',
+                                            },
+                                        }}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                            <InputField
+                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                cursorColor={'#8B5CF6'}
+                                                placeholder='Username'
+                                                onChangeText={onChange}
+                                                onBlur={onBlur}
+                                                value={value}
+                                                autoCapitalize='none'
+                                            />
+                                        )}
+                                        name='userName'
+                                    />
+                                    {errors.userName && (
+                                        <Text
+                                            style={{ fontFamily: 'InterMedium' }}
+                                            className='text-xs text-red-500'
+                                        >
+                                            {errors.userName.message}
+                                        </Text>
+                                    )}
+                                </View>
 
+                                <View className='flex flex-col space-y-1'>
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: "Username can't be empty",
+                                            pattern: {
+                                                value: /^[a-zA-Z0-9]{1,10}$/,
+                                                message: 'Invalid username',
+                                            },
+                                        }}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                            <InputField
+                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                cursorColor={'#8B5CF6'}
+                                                placeholder='Phone'
+                                                onChangeText={onChange}
+                                                onBlur={onBlur}
+                                                value={value}
+                                                autoCapitalize='none'
+                                            />
+                                        )}
+                                        name='userName'
+                                    />
+                                    {errors.userName && (
+                                        <Text
+                                            style={{ fontFamily: 'InterMedium' }}
+                                            className='text-xs text-red-500'
+                                        >
+                                            {errors.userName.message}
+                                        </Text>
+                                    )}
+                                </View>
+
+                                <View className='flex flex-col space-y-1'>
                                     <Controller
                                         control={control}
                                         rules={{
@@ -184,30 +237,21 @@ export default function SignInScreen() {
                                                 style={{ fontFamily: 'InterBold' }}
                                                 className='text-base text-white tracking-tight'
                                             >
-                                                Sign In
+                                                Get Started
                                             </Text>
                                         )}
                                     </LinearGradient>
                                 </TouchableOpacity>
 
                                 <View className='flex flex-row justify-between'>
-                                    <TouchableOpacity onPress={() => router.push('/auth/otp')}>
-                                        <Text
-                                            style={{ fontFamily: 'InterBold' }}
-                                            className='text-xs text-purple-500'
-                                        >
-                                            Forgot your password?
-                                        </Text>
-                                    </TouchableOpacity>
-
                                     <TouchableOpacity
-                                        onPress={() => router.replace('/auth/sign-up')}
+                                        onPress={() => router.replace('/auth/sign-in')}
                                     >
                                         <Text
                                             style={{ fontFamily: 'InterBold' }}
                                             className='text-xs text-purple-500'
                                         >
-                                            New here? Sign Up
+                                            Already a user? Sign in
                                         </Text>
                                     </TouchableOpacity>
                                 </View>

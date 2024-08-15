@@ -1,15 +1,18 @@
 import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { StatusBar as RNStatusBar } from 'react-native';
+import { Button, StatusBar as RNStatusBar } from 'react-native';
 import ProfileHeader from '../molecules/ProfileHeader';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
-import { PiggyBankIcon, SafeIcon } from '@/components/SVG/icons';
+import { PiggyBankIcon, SafeIcon } from '@/components/SVG/noscale';
+import useHasOnboarded from '@/lib/db/db';
 
 const blurhash =
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
 export default function ProfileScreen() {
+    const { setHasOnboarded } = useHasOnboarded();
+
     return (
         <View className='bg-white'>
             <ExpoStatusBar style='auto' />
@@ -47,7 +50,12 @@ export default function ProfileScreen() {
                         showsVerticalScrollIndicator={false}
                     >
                         {/* <View className='border-b border-gray-200 w-full' /> */}
-
+                        <Button
+                            title='RESET'
+                            onPress={() => {
+                                setHasOnboarded(false).then(() => alert('Onboarding reset'));
+                            }}
+                        />
                         <View className='flex flex-row space-x-2.5 justify-between'>
                             <View className='flex flex-col justify-between space-y-2.5 w-[48%]'>
                                 <LinearGradient

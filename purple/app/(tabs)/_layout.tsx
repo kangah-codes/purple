@@ -8,7 +8,7 @@ import {
     PiggyBankIcon,
     SafeIcon,
     UserCircleIcon,
-} from '@/components/SVG/icons';
+} from '@/components/SVG/noscale';
 import Colors from '@/constants/Colors';
 
 export default function TabLayout() {

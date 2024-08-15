@@ -1,20 +1,9 @@
 import { ExternalLink } from '@/components/Shared/molecules/ExternalLink';
-import {
-    InputField,
-    Text,
-    View,
-    SafeAreaView,
-    LinearGradient,
-    TouchableOpacity,
-} from '@/components/Shared/styled';
-import { Controller, useForm } from 'react-hook-form';
-import { forwardRef, useImperativeHandle } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import tw from 'twrnc';
-import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
-import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import tw from 'twrnc';
 
 export default function Landing() {
     return (
@@ -44,7 +33,10 @@ export default function Landing() {
                 </View>
 
                 <View className='flex flex-col space-y-2.5 w-full'>
-                    <TouchableOpacity className='w-full'>
+                    <TouchableOpacity
+                        className='w-full'
+                        onPress={() => router.replace('/auth/sign-up')}
+                    >
                         <LinearGradient
                             className='flex items-center justify-center rounded-full px-5 py-2.5'
                             colors={['#c084fc', '#9333ea']}

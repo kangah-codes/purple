@@ -11,7 +11,7 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { FlatList, Platform, StatusBar as RNStatusBar } from 'react-native';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { router } from 'expo-router';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons';
+import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import React, { memo, useCallback } from 'react';
 import Svg, { Polygon } from 'react-native-svg';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';

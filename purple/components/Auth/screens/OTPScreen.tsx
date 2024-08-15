@@ -1,48 +1,18 @@
-import { ExternalLink } from '@/components/Shared/molecules/ExternalLink';
-import {
-    InputField,
-    Text,
-    View,
-    SafeAreaView,
-    LinearGradient,
-    TouchableOpacity,
-} from '@/components/Shared/styled';
-import { Controller, useForm } from 'react-hook-form';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { SafeAreaView, Text, View } from '@/components/Shared/styled';
+import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import { useRef, useState } from 'react';
 import {
     Keyboard,
     KeyboardAvoidingView,
     Platform,
+    StatusBar as RNStatusBar,
     TextInput,
     TouchableWithoutFeedback,
 } from 'react-native';
 import tw from 'twrnc';
-import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
-import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import useHasOnboarded from '@/lib/db/db';
 import { OTPInput } from '../molecules/OTPInput';
 
 export default function OTPScreen() {
-    const [loading, setLoading] = useState(false);
-    const { setHasOnboarded } = useHasOnboarded();
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            fullName: '',
-            userName: '',
-            email: '',
-        },
-    });
-
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
-    });
-
     const [codes, setCodes] = useState<string[]>(['', '', '', '', '', '']);
     const inputRefs = Array.from({ length: codes.length }, () => useRef<TextInput>(null));
 

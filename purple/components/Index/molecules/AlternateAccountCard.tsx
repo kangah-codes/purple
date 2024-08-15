@@ -7,7 +7,7 @@ import {
     EyeCloseIcon,
     EyeOpenIcon,
     PiggyBankIcon,
-} from '../../SVG/icons';
+} from '../../SVG/noscale';
 
 type AlternateAccountCardProps = {
     accountCurrency: string;

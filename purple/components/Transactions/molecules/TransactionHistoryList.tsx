@@ -1,4 +1,4 @@
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons';
+import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import {
     BottomSheetBackdrop,
     BottomSheetBackdropProps,

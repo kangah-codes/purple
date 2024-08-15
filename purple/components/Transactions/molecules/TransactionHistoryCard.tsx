@@ -1,5 +1,5 @@
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/icons';
+import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { TransactionData } from '../schema';
 

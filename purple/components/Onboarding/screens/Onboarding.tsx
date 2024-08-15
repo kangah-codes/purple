@@ -1,22 +1,13 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import React, { useRef } from 'react';
 import Onboarding from 'react-native-onboarding-swiper';
 import tw from 'twrnc';
 import DoneButton from '../molecules/DoneButton';
 import NextButton from '../molecules/NextButton';
 import Pagination from '../molecules/Pagination';
-import PersonalInformation from '../molecules/PersonalInformation';
-import { router } from 'expo-router';
 
 export default function Screen({}) {
-    const formRef = useRef<{ submit: Function }>(null);
-
-    const handleFormSubmit = () => {
-        if (formRef.current) {
-            formRef.current.submit();
-        }
-    };
-
     return (
         <Onboarding
             DotComponent={Pagination}
@@ -55,7 +46,7 @@ export default function Screen({}) {
                             style={tw`h-72 w-72`}
                         />
                     ),
-                    title: 'Keep a watchful eye on your spending',
+                    title: 'Watch your spending',
                     subtitle: 'See where your money is going and make better decisions',
                 },
                 {
@@ -66,8 +57,19 @@ export default function Screen({}) {
                             style={tw`h-72 w-72`}
                         />
                     ),
-                    title: 'Get notified when you overspend',
+                    title: 'Know when you hit your budget',
                     subtitle: 'Stay on top of your budget and never miss a beat',
+                },
+                {
+                    backgroundColor: '#fff',
+                    image: (
+                        <Image
+                            source={require('@/assets/images/graphics/7.png')}
+                            style={tw`h-72 w-72`}
+                        />
+                    ),
+                    title: 'Take control of your finances',
+                    subtitle: 'Cultivate responsible spending habits and save more',
                 },
             ]}
         />
