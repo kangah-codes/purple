@@ -21,7 +21,7 @@ export default function ExpensesCard() {
                     GHS 10000
                 </Text>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter'
                 >
                     Remaining for this month
@@ -40,7 +40,7 @@ export default function ExpensesCard() {
                 </View>
 
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
                     Spent GHS 120,000 of GHS 240,000
@@ -51,7 +51,7 @@ export default function ExpensesCard() {
 
             <View className='w-full items-start'>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
                     You're still on track for this month's expenses.

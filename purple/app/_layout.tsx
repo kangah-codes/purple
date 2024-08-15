@@ -35,12 +35,6 @@ export default function RootLayout() {
                     InterLight: require('../assets/fonts/Inter-Light.ttf'),
                     InterMedium: require('../assets/fonts/Inter-Medium.ttf'),
                     InterSemiBold: require('../assets/fonts/Inter-SemiBold.ttf'),
-                    SpaceMonoRegular: require('../assets/fonts/SpaceMono-Regular.ttf'),
-                    SpaceMonoBold: require('../assets/fonts/SpaceMono-Bold.ttf'),
-                    AnalogueRegular: require('../assets/fonts/analogue55regular.ttf'),
-                    AnalogueMedium: require('../assets/fonts/analogue65medium.ttf'),
-                    AnalogueBold: require('../assets/fonts/analogue75bold.ttf'),
-                    AnalogueBlack: require('../assets/fonts/analogue85black.ttf'),
                 });
             } catch (e) {
                 console.warn(e);

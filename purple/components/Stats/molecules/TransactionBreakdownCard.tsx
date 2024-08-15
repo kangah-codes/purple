@@ -1,6 +1,7 @@
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type TransactionBreakdownCardProps = {
     data: {
@@ -21,7 +22,7 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
         >
             <View className='relative items-center justify-center'>
                 <View className='flex items-center justify-center rounded-full bg-purple-100 px-2 py-1'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-xs'>
                         89%
                     </Text>
                 </View>
@@ -29,7 +30,7 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
 
             <View className='flex flex-grow flex-col'>
                 <View className='flex flex-row items-center justify-between'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='sm'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='sm'>
                         {truncateStringIfLongerThan(data.category, 30)}
                     </Text>
                     <Text

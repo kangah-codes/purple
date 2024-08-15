@@ -6,9 +6,13 @@ import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Share
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { FlatList, Platform } from 'react-native';
+import { FlatList, Platform, StyleSheet } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { transactionData } from '../constants';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+
+const snapPoints = ['55%', '70%', '90%'];
+const linearGradient = ['#c084fc', '#9333ea'];
 
 export default function TransactionHistoryList() {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
@@ -33,45 +37,27 @@ export default function TransactionHistoryList() {
         ),
         [],
     );
+    const renderItemSeparator = useCallback(
+        () => <View className='border-b border-gray-100' />,
+        [],
+    );
 
     return (
         <View className='mt-5'>
             <CustomBottomSheetModal
                 modalKey='transactionReceipt'
-                snapPoints={['55%', '70%', '90%']}
-                style={{
-                    backgroundColor: 'white',
-                    borderRadius: 24,
-                    shadowColor: '#000000',
-                    shadowOffset: {
-                        width: 0,
-                        height: 8,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 48,
-                    elevation: 10,
-                }}
-                handleIndicatorStyle={{
-                    backgroundColor: '#D4D4D4',
-                }}
+                snapPoints={snapPoints}
+                style={styles.customBottomSheetModal}
+                handleIndicatorStyle={styles.handleIndicator}
             >
                 <View className='px-5'>
                     <View
                         className='w-full flex flex-col space-y-5 items-center'
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 1,
-                            },
-                            shadowOpacity: 0.125,
-                            shadowRadius: 20,
-                            elevation: 5,
-                        }}
+                        style={styles.receiptView}
                     >
                         <View className='w-full flex flex-col space-y-0.5 items-center justify-center'>
                             <Text
-                                style={{ fontFamily: 'Suprapower' }}
+                                style={GLOBAL_STYLESHEET.suprapower}
                                 className='text-lg text-gray-700'
                             >
                                 Receipt
@@ -82,7 +68,7 @@ export default function TransactionHistoryList() {
                             <Svg
                                 height={12}
                                 width={'100%'}
-                                style={{ transform: [{ rotate: '180deg' }] }}
+                                style={styles.zigZag}
                                 fill='#c084fc'
                                 stroke='#c084fc'
                             >
@@ -90,7 +76,7 @@ export default function TransactionHistoryList() {
                             </Svg>
                             <LinearGradient
                                 className='w-full py-5 flex items-center justify-center'
-                                colors={['#c084fc', '#9333ea']}
+                                colors={linearGradient}
                             >
                                 <View className='flex flex-col items-center space-y-1.5'>
                                     <View className='p-5 bg-red-100 rounded-full relative flex items-center justify-center'>
@@ -102,14 +88,13 @@ export default function TransactionHistoryList() {
                                         />
                                     </View>
                                     <Text
-                                        style={{ fontFamily: 'Suprapower' }}
+                                        style={GLOBAL_STYLESHEET.suprapower}
                                         className='text-lg text-white'
                                     >
                                         🏠 Rent
                                     </Text>
                                 </View>
                             </LinearGradient>
-                            {/** Shadows don't seem to be working on Android, so just make the bg gray to make it stand out from the white bg */}
                             <View
                                 className='w-full p-5 flex flex-col items-center space-y-5 bg-white'
                                 style={{
@@ -118,7 +103,7 @@ export default function TransactionHistoryList() {
                                 }}
                             >
                                 <Text
-                                    style={{ fontFamily: 'Suprapower' }}
+                                    style={GLOBAL_STYLESHEET.suprapower}
                                     className='text-3xl text-black'
                                 >
                                     $69.42
@@ -128,13 +113,13 @@ export default function TransactionHistoryList() {
 
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
-                                        style={{ fontFamily: 'Suprapower' }}
+                                        style={GLOBAL_STYLESHEET.suprapower}
                                         className='text-sm text-black'
                                     >
                                         Category
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         🏠 Rent
@@ -143,13 +128,13 @@ export default function TransactionHistoryList() {
 
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
-                                        style={{ fontFamily: 'Suprapower' }}
+                                        style={GLOBAL_STYLESHEET.suprapower}
                                         className='text-sm text-black'
                                     >
                                         Note
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Payment for the month of June
@@ -158,13 +143,13 @@ export default function TransactionHistoryList() {
 
                                 <View className='w-full flex flex-col justify-between'>
                                     <Text
-                                        style={{ fontFamily: 'Suprapower' }}
+                                        style={GLOBAL_STYLESHEET.suprapower}
                                         className='text-sm text-black'
                                     >
                                         Date
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Monday, June 9th 2024, at 12:00 PM
@@ -183,10 +168,9 @@ export default function TransactionHistoryList() {
                     </View>
                 </View>
             </CustomBottomSheetModal>
-            {/** // TODO: Move this into it's own component and fetch the current transaction from global state */}
             <View className='flex flex-col'>
                 <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-base text-black'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         Transaction History
                     </Text>
 
@@ -195,7 +179,7 @@ export default function TransactionHistoryList() {
                         className='flex flex-row items-center space-x-1'
                     >
                         <Text
-                            style={{ fontFamily: 'InterSemiBold' }}
+                            style={GLOBAL_STYLESHEET.interSemiBold}
                             className='text-sm tracking-tighter text-purple-700'
                         >
                             View All
@@ -207,15 +191,47 @@ export default function TransactionHistoryList() {
                 <FlatList
                     data={transactionData}
                     keyExtractor={(_, index) => index.toString()}
-                    contentContainerStyle={{
-                        paddingBottom: 200,
-                    }}
+                    contentContainerStyle={styles.flatlistContainerStyle}
                     showsVerticalScrollIndicator={true}
                     renderItem={renderItem}
-                    ItemSeparatorComponent={() => <View className='border-b border-gray-100' />}
+                    ItemSeparatorComponent={renderItemSeparator}
                     scrollEnabled={false}
                 />
             </View>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    zigZag: {
+        transform: [{ rotate: '180deg' }],
+    },
+    customBottomSheetModal: {
+        backgroundColor: 'white',
+        borderRadius: 24,
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 48,
+        elevation: 10,
+    },
+    handleIndicator: {
+        backgroundColor: '#D4D4D4',
+    },
+    receiptView: {
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 20,
+        elevation: 5,
+    },
+    flatlistContainerStyle: {
+        paddingBottom: 200,
+    },
+});

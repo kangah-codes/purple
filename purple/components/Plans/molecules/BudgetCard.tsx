@@ -47,7 +47,7 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                         style={{
                             fontFamily: 'InterMedium',
                         }}
-                        className='text-sm text-gray-500 tracking-tighter'
+                        className='text-sm text-gray-600 tracking-tighter'
                     >
                         {endDate}
                     </Text>

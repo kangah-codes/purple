@@ -8,6 +8,8 @@ import {
     EyeOpenIcon,
     PiggyBankIcon,
 } from '../../SVG/noscale';
+import { StyleSheet } from 'react-native';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type AlternateAccountCardProps = {
     accountCurrency: string;
@@ -17,6 +19,19 @@ type AlternateAccountCardProps = {
     cardTintColour: string;
 };
 
+const styles = StyleSheet.create({
+    actionButton: {
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.0625,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+});
+
 export default function AlternateAccountCard({ item }: { item: AlternateAccountCardProps }) {
     // show/hide the account balance
     const [showAmount, setShowAmount] = useState(true);
@@ -24,7 +39,7 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
     return (
         <View className='w-full flex flex-col space-y-1.5 relative'>
             <View className='flex flex-row space-x-2 items-center'>
-                <Text style={{ fontFamily: 'Suprapower' }} className='text-black text-sm'>
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-sm'>
                     Available Balance
                 </Text>
                 {showAmount ? (
@@ -46,25 +61,19 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
 
             <View className='flex flex-col space-y-1.5'>
                 <View className='flex flex-row items-end'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-black text-3xl'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-3xl'>
                         $45,300,000
                     </Text>
                     <Text
-                        style={{ fontFamily: 'Suprapower' }}
-                        className='text-gray-500 text-2xl tracking-tighter'
+                        style={GLOBAL_STYLESHEET.suprapower}
+                        className='text-gray-700 text-2xl tracking-tighter'
                     >
                         .86
                     </Text>
-                    <Text
-                        style={{ fontFamily: 'InterMedium' }}
-                        className='text-gray-500 text-base tracking-tighter'
-                    >
-                        USD
-                    </Text>
                 </View>
                 <Text
-                    style={{ fontFamily: 'InterMedium' }}
-                    className='text-gray-500 text-base tracking-tighter'
+                    style={GLOBAL_STYLESHEET.interMedium}
+                    className='text-gray-600 text-base tracking-tighter'
                 >
                     {item.accountName}
                 </Text>
@@ -77,22 +86,13 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
             <View className='flex flex-row flex-grow justify-between space-x-2 items-stretch w-full px-7'>
                 <View className='flex flex-col items-center justify-center space-y-1.5'>
                     <View
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 1,
-                            },
-                            shadowOpacity: 0.0625,
-                            shadowRadius: 10,
-                            elevation: 5,
-                        }}
+                        style={styles.actionButton}
                         className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'
                     >
                         <ArrowCircleDownIcon width={24} height={24} stroke='#9333ea' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-gray-800 text-sm tracking-tighter'
                     >
                         Income
@@ -100,21 +100,13 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
                 </View>
                 <View className='flex flex-col items-center justify-center space-y-1.5'>
                     <View
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 1,
-                            },
-                            shadowOpacity: 0.0625,
-                            shadowRadius: 10,
-                        }}
+                        style={styles.actionButton}
                         className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'
                     >
                         <ArrowCircleUpIcon width={24} height={24} stroke='#9333ea' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-gray-800 text-sm tracking-tighter'
                     >
                         Expense
@@ -122,22 +114,13 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
                 </View>
                 <View className='flex flex-col items-center justify-center space-y-1.5'>
                     <View
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 1,
-                            },
-                            shadowOpacity: 0.0625,
-                            shadowRadius: 10,
-                            elevation: 5,
-                        }}
+                        style={styles.actionButton}
                         className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'
                     >
                         <CoinSwapIcon width={24} height={24} stroke='#9333ea' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-gray-800 text-sm tracking-tighter'
                     >
                         Transfer
@@ -145,22 +128,13 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
                 </View>
                 <View className='flex flex-col items-center justify-center space-y-1.5'>
                     <View
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 1,
-                            },
-                            shadowOpacity: 0.0625,
-                            shadowRadius: 10,
-                            elevation: 5,
-                        }}
+                        style={styles.actionButton}
                         className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'
                     >
                         <PiggyBankIcon width={24} height={24} stroke='#9333ea' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-gray-800 text-sm tracking-tighter'
                     >
                         Plan

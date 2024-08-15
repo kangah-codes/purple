@@ -16,6 +16,7 @@ import React, { memo, useCallback } from 'react';
 import Svg, { Polygon } from 'react-native-svg';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -150,7 +151,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                                         Category
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         🏠 Rent
@@ -165,7 +166,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                                         Note
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Payment for the month of June
@@ -180,7 +181,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                                         Date
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Monday, June 9th 2024, at 12:00 PM
@@ -221,7 +222,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     {showBackButton && (
                         <TouchableOpacity onPress={() => router.back()}>
                             <Text
-                                style={{ fontFamily: 'InterSemiBold' }}
+                                style={GLOBAL_STYLESHEET.interSemiBold}
                                 className='text-purple-600'
                             >
                                 Back

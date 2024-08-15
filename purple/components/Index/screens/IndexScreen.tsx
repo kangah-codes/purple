@@ -8,15 +8,16 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
+import useHasOnboarded from '@/lib/db/db';
+import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import { Button, FlatList, StatusBar as RNStatusBar, RefreshControl } from 'react-native';
-import { BellIcon, SearchIcon } from '../../SVG/noscale';
+import { FlatList, StatusBar as RNStatusBar, RefreshControl } from 'react-native';
+import { SearchIcon } from '../../SVG/noscale';
 import { savingData } from '../constants';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-import { router } from 'expo-router';
-import useHasOnboarded from '@/lib/db/db';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function IndexScreen() {
     const [refreshing, setRefreshing] = useState(false);
@@ -46,7 +47,7 @@ export default function IndexScreen() {
             >
                 <View className='flex flex-row justify-between items-center pt-2.5'>
                     <View className='flex flex-col'>
-                        <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                             Hi, Joshua 👋
                         </Text>
                     </View>
@@ -56,7 +57,7 @@ export default function IndexScreen() {
                     <View className='relative flex justify-center'>
                         <InputField
                             className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={{ fontFamily: 'InterSemiBold' }}
+                            style={GLOBAL_STYLESHEET.interSemiBold}
                             placeholder='Search'
                             cursorColor={'#000'}
                         />
@@ -86,7 +87,7 @@ export default function IndexScreen() {
                     <View className='flex flex-col space-y-5'>
                         <View className='flex flex-row w-full justify-between items-center'>
                             <Text
-                                style={{ fontFamily: 'Suprapower' }}
+                                style={GLOBAL_STYLESHEET.suprapower}
                                 className='text-base text-black'
                             >
                                 My saving plans
@@ -97,7 +98,7 @@ export default function IndexScreen() {
                                 onPress={() => router.push('/plans')}
                             >
                                 <Text
-                                    style={{ fontFamily: 'InterSemiBold' }}
+                                    style={GLOBAL_STYLESHEET.interSemiBold}
                                     className='text-sm tracking-tighter text-purple-700'
                                 >
                                     View All

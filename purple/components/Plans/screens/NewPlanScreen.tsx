@@ -43,7 +43,7 @@ export default function NewPlanScreen() {
                     </View>
 
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={{ fontFamily: 'InterSemiBold' }} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -55,13 +55,13 @@ export default function NewPlanScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                             Plan Name
                         </Text>
 
                         <InputField
                             className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                            style={{ fontFamily: 'InterSemiBold' }}
+                            style={GLOBAL_STYLESHEET.interSemiBold}
                             cursorColor={'#8B5CF6'}
                         />
                     </View>
@@ -108,13 +108,13 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                             Amount
                         </Text>
 
                         <InputField
                             className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                            style={{ fontFamily: 'InterSemiBold' }}
+                            style={GLOBAL_STYLESHEET.interSemiBold}
                             cursorColor={'#8B5CF6'}
                             placeholder='0.00'
                         />
@@ -184,7 +184,7 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-row justify-between items-center'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                             Send me reminders
                         </Text>
 

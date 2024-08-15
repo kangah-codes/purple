@@ -5,6 +5,7 @@ import { Portal } from '@gorhom/portal';
 import React, { useCallback, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -33,7 +34,7 @@ export default function SelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-200'>
-                <Text style={{ fontFamily: 'InterSemiBold' }} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -91,7 +92,7 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -104,7 +105,7 @@ export default function SelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={{ fontFamily: 'InterSemiBold' }} className='text-xs text-gray-900'>
+                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             options[value ?? '']?.label ?? `Select an option...`,
                             45,

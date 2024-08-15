@@ -9,6 +9,7 @@ import {
     PiggyBankIcon,
 } from '../../SVG/noscale';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type AccountCard = {
     accountCurrency: string;
@@ -29,7 +30,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
             colors={['#c084fc', '#9333ea']}
         >
             <View className='flex flex-row space-x-2 items-center'>
-                <Text style={{ fontFamily: 'Suprapower' }} className='text-white text-base'>
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-base'>
                     Available Balance
                 </Text>
                 {showAmount ? (
@@ -50,7 +51,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
             </View>
 
             <View className='flex flex-col items-center'>
-                <Text style={{ fontFamily: 'Suprapower' }} className='text-white text-2xl'>
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-2xl'>
                     {showAmount
                         ? item.accountBalance > 9_999_999
                             ? formatCurrencyRounded(item.accountBalance, item.accountCurrency)
@@ -58,7 +59,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
                         : 'GHS ******'}
                 </Text>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-base tracking-tighter'
                 >
                     {item.accountName}
@@ -73,7 +74,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
                         <ArrowCircleDownIcon width={24} height={24} stroke='#9333EA' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-white text-sm tracking-tighter'
                     >
                         Income
@@ -84,7 +85,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
                         <ArrowCircleUpIcon width={24} height={24} stroke='#9333EA' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-white text-sm tracking-tighter'
                     >
                         Expense
@@ -95,7 +96,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
                         <CoinSwapIcon width={24} height={24} stroke='#9333EA' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-white text-sm tracking-tighter'
                     >
                         Transfer
@@ -106,7 +107,7 @@ export default function AccountCard({ item }: { item: AccountCard }) {
                         <PiggyBankIcon width={24} height={24} stroke='#9333EA' />
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-white text-sm tracking-tighter'
                     >
                         Budget

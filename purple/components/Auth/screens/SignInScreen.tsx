@@ -87,7 +87,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='gyimihendrix'
                                                 onChangeText={onChange}
@@ -111,7 +111,7 @@ export default function SignInScreen() {
                                 <View className='flex flex-col space-y-1'>
                                     {/* <Text
                                     style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-500'
+                                    className='text-xs text-gray-600'
                                 >
                                     Email
                                 </Text> */}
@@ -128,7 +128,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='hello@purpleapp.com'
                                                 onChangeText={onChange}

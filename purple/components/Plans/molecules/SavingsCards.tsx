@@ -13,7 +13,7 @@ export default function SavingsCard() {
                     GHS 10000
                 </Text>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter'
                 >
                     To hit target
@@ -32,7 +32,7 @@ export default function SavingsCard() {
                 </View>
 
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
                     Saved GHS 120,000 of GHS 240,000
@@ -43,7 +43,7 @@ export default function SavingsCard() {
 
             <View className='w-full items-start'>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
                     You're still on track for this month's savings plan.

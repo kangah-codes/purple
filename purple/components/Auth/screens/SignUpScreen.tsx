@@ -90,7 +90,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='First Name'
                                                 onChangeText={onChange}
@@ -124,7 +124,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Username'
                                                 onChangeText={onChange}
@@ -158,7 +158,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Phone'
                                                 onChangeText={onChange}
@@ -192,7 +192,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={{ fontFamily: 'InterSemiBold' }}
+                                                style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='hello@purpleapp.com'
                                                 onChangeText={onChange}

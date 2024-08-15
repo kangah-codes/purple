@@ -3,6 +3,7 @@ import { IAccountCard } from '../schema';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function AccountCard({ accountName, accountTotal, subAccounts }: IAccountCard) {
     const navigation = useNavigation();
@@ -12,12 +13,7 @@ export default function AccountCard({ accountName, accountTotal, subAccounts }: 
     return (
         <View className='flex flex-col space-y-2.5'>
             <View className='flex flex-row items-center justify-between px-5'>
-                <Text
-                    style={{
-                        fontFamily: 'Suprapower',
-                    }}
-                    className='text-black'
-                >
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black'>
                     {truncateStringIfLongerThan(accountName, 20)}
                 </Text>
                 <Text

@@ -1,5 +1,6 @@
 import { ExternalLink } from '@/components/Shared/molecules/ExternalLink';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -56,7 +57,7 @@ export default function Landing() {
                     >
                         <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
                             <Text
-                                style={{ fontFamily: 'InterSemiBold' }}
+                                style={GLOBAL_STYLESHEET.interSemiBold}
                                 className='text-base text-black tracking-tight'
                             >
                                 Sign In

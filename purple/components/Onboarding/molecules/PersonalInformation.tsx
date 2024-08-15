@@ -33,7 +33,7 @@ const PersonalInformation = forwardRef((props, ref) => {
         >
             <View className='space-y-3.5 flex flex-col w-full px-5'>
                 <View className='flex flex-col space-y-1'>
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         Full name
                     </Text>
 
@@ -45,7 +45,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={{ fontFamily: 'InterSemiBold' }}
+                                style={GLOBAL_STYLESHEET.interSemiBold}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='John Doe'
                                 onChangeText={onChange}
@@ -66,7 +66,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                 </View>
 
                 <View className='flex flex-col space-y-1'>
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         Username
                     </Text>
 
@@ -82,7 +82,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={{ fontFamily: 'InterSemiBold' }}
+                                style={GLOBAL_STYLESHEET.interSemiBold}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='John Doe'
                                 onChangeText={onChange}
@@ -104,7 +104,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                 </View>
 
                 <View className='flex flex-col space-y-1'>
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         Email
                     </Text>
 
@@ -120,7 +120,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={{ fontFamily: 'InterSemiBold' }}
+                                style={GLOBAL_STYLESHEET.interSemiBold}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='hello@purpleapp.com'
                                 onChangeText={onChange}
@@ -140,7 +140,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                     )}
                 </View>
 
-                <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                     Signing up means you agree to our{' '}
                     <ExternalLink href='https://purpleapp.vercel.app'>
                         <Text className='text-purple-500'>Terms and Conditions</Text>
