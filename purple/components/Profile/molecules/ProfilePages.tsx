@@ -2,7 +2,7 @@ import { View } from '@/components/Shared/styled';
 import MegaphoneIcon, { SettingsCogIcon, ShieldTickIcon } from '@/components/SVG/24x24';
 import { UserCircleIcon } from '@/components/SVG/noscale';
 import { useCallback } from 'react';
-import { FlatList, ListRenderItem } from 'react-native';
+import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
 import { keyExtractor } from '@/lib/utils/number';
@@ -38,15 +38,25 @@ export default function ProfilePages() {
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100 h-1' />, []);
 
     return (
-        <View className='flex items-center justify-center space-y-5 px-5'>
-            <FlatList
-                data={profilePages}
-                keyExtractor={keyExtractor}
-                showsVerticalScrollIndicator={true}
-                renderItem={renderItem}
-                scrollEnabled={true}
-                ItemSeparatorComponent={itemSeparator}
-            />
-        </View>
+        <FlatList
+            data={profilePages}
+            keyExtractor={keyExtractor}
+            showsVerticalScrollIndicator={true}
+            renderItem={renderItem}
+            scrollEnabled={true}
+            ItemSeparatorComponent={itemSeparator}
+            contentContainerStyle={styles.flatlistContainer}
+        />
     );
 }
+
+const styles = StyleSheet.create({
+    flatlistContainer: {
+        width: '100%',
+        marginVertical: 20,
+        paddingHorizontal: 20,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});

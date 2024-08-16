@@ -29,7 +29,7 @@ export default function SelectField({
     customSnapPoints,
     renderItem,
 }: SelectFieldProps) {
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
     const [value, setValue] = useState<string | undefined>(undefined);
     const renderDefaultItem = useCallback(
         (item: any) => (
