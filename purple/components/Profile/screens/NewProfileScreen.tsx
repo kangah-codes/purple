@@ -57,7 +57,15 @@ export default function NewProfileScreen() {
             <Button
                 title='RESET'
                 onPress={() => {
-                    setHasOnboarded(false).then(() => alert('Onboarding reset'));
+                    setHasOnboarded(false).then(() =>
+                        Toast.show({
+                            type: 'info',
+                            props: {
+                                text1: 'Cache reset',
+                                text2: 'The entire app cache has been cleared!',
+                            },
+                        }),
+                    );
                 }}
             />
             <Button title='Show Toast' onPress={showToast} />

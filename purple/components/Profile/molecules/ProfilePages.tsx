@@ -43,7 +43,7 @@ export default function ProfilePages() {
             keyExtractor={keyExtractor}
             showsVerticalScrollIndicator={true}
             renderItem={renderItem}
-            scrollEnabled={true}
+            scrollEnabled={false}
             ItemSeparatorComponent={itemSeparator}
             contentContainerStyle={styles.flatlistContainer}
         />
