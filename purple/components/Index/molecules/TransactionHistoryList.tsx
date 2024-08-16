@@ -4,29 +4,21 @@ import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSh
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
+import { keyExtractor } from '@/lib/utils/number';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
-import Svg, { Polygon } from 'react-native-svg';
+import Svg from 'react-native-svg';
 import { transactionData } from '../constants';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];
+const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
 
 export default function TransactionHistoryList() {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-
-    const renderZigZagView = useCallback(() => {
-        let nodes = [];
-        const numberOfTeeth = 60; // Increase the number of teeth
-
-        for (let i = 0; i < numberOfTeeth; i++) {
-            const point = `${10 * i},0 ${10 * i + 5},10 ${10 * (i + 1)},0`; // Adjust the spacing between teeth
-            nodes.push(<Polygon key={i} points={point} strokeWidth='2' />);
-        }
-        return nodes;
-    }, []);
 
     const renderItem = useCallback(
         ({ item }: any) => (
@@ -72,7 +64,7 @@ export default function TransactionHistoryList() {
                                 fill='#c084fc'
                                 stroke='#c084fc'
                             >
-                                {renderZigZagView()}
+                                {ZIGZAG_VIEW}
                             </Svg>
                             <LinearGradient
                                 className='w-full py-5 flex items-center justify-center'
@@ -83,7 +75,7 @@ export default function TransactionHistoryList() {
                                         <ArrowNarrowUpRightIcon
                                             width={16}
                                             height={16}
-                                            style={{ position: 'absolute' }}
+                                            style={styles.arrowRight}
                                             stroke={'#B91C1C'}
                                         />
                                     </View>
@@ -96,11 +88,8 @@ export default function TransactionHistoryList() {
                                 </View>
                             </LinearGradient>
                             <View
-                                className='w-full p-5 flex flex-col items-center space-y-5 bg-white'
-                                style={{
-                                    backgroundColor:
-                                        Platform.OS === 'android' ? '#F3F4F6' : 'white',
-                                }}
+                                className='w-full p-5 flex flex-col items-center space-y-5'
+                                style={styles.bottomDrawer}
                             >
                                 <Text
                                     style={GLOBAL_STYLESHEET.suprapower}
@@ -152,17 +141,17 @@ export default function TransactionHistoryList() {
                                         style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
-                                        Monday, June 9th 2024, at 12:00 PM
+                                        Monday, June 9th 2024, at 12:00 PM70
                                     </Text>
                                 </View>
                             </View>
                             <Svg
                                 height={12}
                                 width={'100%'}
-                                fill={Platform.OS === 'android' ? '#F3F4F6' : '#fff'}
-                                stroke={Platform.OS === 'android' ? '#F3F4F6' : '#fff'}
+                                fill={drawerBackground}
+                                stroke={drawerBackground}
                             >
-                                {renderZigZagView()}
+                                {ZIGZAG_VIEW}
                             </Svg>
                         </View>
                     </View>
@@ -190,7 +179,7 @@ export default function TransactionHistoryList() {
 
                 <FlatList
                     data={transactionData}
-                    keyExtractor={(_, index) => index.toString()}
+                    keyExtractor={keyExtractor}
                     contentContainerStyle={styles.flatlistContainerStyle}
                     showsVerticalScrollIndicator={true}
                     renderItem={renderItem}
@@ -233,5 +222,11 @@ const styles = StyleSheet.create({
     },
     flatlistContainerStyle: {
         paddingBottom: 200,
+    },
+    bottomDrawer: {
+        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
+    },
+    arrowRight: {
+        position: 'absolute',
     },
 });

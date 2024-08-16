@@ -17,6 +17,7 @@ import Svg, { Polygon } from 'react-native-svg';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { keyExtractor } from '@/lib/utils/number';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -233,7 +234,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
 
                 <FlatList
                     data={transactionData}
-                    keyExtractor={(_, index) => index.toString()}
+                    keyExtractor={keyExtractor}
                     contentContainerStyle={{
                         paddingBottom: 100,
                         paddingHorizontal: 20,

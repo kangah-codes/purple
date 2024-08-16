@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { FlatList, StatusBar as RNStatusBar } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
+import { keyExtractor } from '@/lib/utils/number';
 
 export default function AccountsScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -85,7 +86,7 @@ export default function AccountsScreen() {
                     data={transactionData}
                     renderItem={renderBreakdownItem}
                     ItemSeparatorComponent={itemSeparator}
-                    keyExtractor={(_, index) => index.toString()}
+                    keyExtractor={keyExtractor}
                     ListHeaderComponent={<StatsHeader />}
                 />
             </View>

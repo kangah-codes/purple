@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { FlatList, ListRenderItem } from 'react-native';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
+import { keyExtractor } from '@/lib/utils/number';
 
 const profilePages: ProfilePageLinkProps[] = [
     {
@@ -40,7 +41,7 @@ export default function ProfilePages() {
         <View className='flex items-center justify-center space-y-5 px-5'>
             <FlatList
                 data={profilePages}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={keyExtractor}
                 showsVerticalScrollIndicator={true}
                 renderItem={renderItem}
                 scrollEnabled={true}

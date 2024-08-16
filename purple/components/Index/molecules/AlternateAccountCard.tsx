@@ -19,21 +19,7 @@ type AlternateAccountCardProps = {
     cardTintColour: string;
 };
 
-const styles = StyleSheet.create({
-    actionButton: {
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.0625,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-});
-
 export default function AlternateAccountCard({ item }: { item: AlternateAccountCardProps }) {
-    // show/hide the account balance
     const [showAmount, setShowAmount] = useState(true);
 
     return (
@@ -144,3 +130,16 @@ export default function AlternateAccountCard({ item }: { item: AlternateAccountC
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    actionButton: {
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.0625,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+});

@@ -5,6 +5,7 @@ import BudgetPlanCard from '../molecules/BudgetCard';
 import ExpensesCard from '../molecules/ExpensesCard';
 import { memo, useCallback } from 'react';
 import { BudgetPlan } from '../schema';
+import { keyExtractor } from '@/lib/utils/number';
 
 function ExpensesScreen() {
     const itemSeparator = useCallback(() => <View style={{ height: 20 }} />, []);
@@ -29,7 +30,7 @@ function ExpensesScreen() {
             showsHorizontalScrollIndicator={false}
             data={expensePlans}
             renderItem={renderItem}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={keyExtractor}
             ItemSeparatorComponent={itemSeparator}
             initialNumToRender={5}
             ListHeaderComponent={listHeader}

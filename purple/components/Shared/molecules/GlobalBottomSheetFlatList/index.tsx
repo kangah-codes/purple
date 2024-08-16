@@ -16,6 +16,7 @@ import React, {
 import { ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { useBottomSheetFlatListStore } from './hooks';
+import { keyExtractor } from '@/lib/utils/number';
 
 interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
     sheetKey: string;
@@ -96,7 +97,7 @@ function CustomBottomSheetFlatList<T>({
             {children && children}
             <BottomSheetFlatList
                 data={data}
-                keyExtractor={(_i, index) => index.toString()}
+                keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 contentContainerStyle={flatListContentContainerStyle}
                 showsVerticalScrollIndicator
