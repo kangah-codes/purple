@@ -20,7 +20,7 @@ function TransactionsPieChart() {
     }, []);
 
     return (
-        <View className='flex items-center justify-between flex-row space-x-5'>
+        <View className='flex items-center justify-between flex-row space-x-5 h-[160] mt-5'>
             <PieChart
                 donut
                 radius={80}

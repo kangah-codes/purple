@@ -82,6 +82,8 @@ function CustomBottomSheetFlatList<T>({
         [],
     );
 
+    if (!bottomSheetFlatListKeys[sheetKey]) return null;
+
     return (
         <BottomSheet
             backdropComponent={renderBackdrop}

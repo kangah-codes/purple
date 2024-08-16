@@ -6,10 +6,11 @@ import TransactionHistoryCard from '@/components/Transactions/molecules/Transact
 import { Portal } from '@gorhom/portal';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
-import { FlatList, StatusBar as RNStatusBar } from 'react-native';
+import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
 import { keyExtractor } from '@/lib/utils/number';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function AccountsScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -39,7 +40,7 @@ export default function AccountsScreen() {
                     children={
                         <View className='px-5 py-2.5'>
                             <Text
-                                style={{ fontFamily: 'Suprapower' }}
+                                style={GLOBAL_STYLESHEET.suprapower}
                                 className='text-base text-gray-900'
                             >
                                 🏠 Housing
@@ -49,39 +50,21 @@ export default function AccountsScreen() {
                     sheetKey={'statsTransactionBreakdownList'}
                     data={transactionData}
                     renderItem={renderItem}
-                    containerStyle={{
-                        paddingHorizontal: 20,
-                    }}
-                    handleIndicatorStyle={{
-                        backgroundColor: '#D4D4D4',
-                    }}
-                    flatListContentContainerStyle={{
-                        paddingBottom: 100,
-                        paddingHorizontal: 20,
-                        // paddingTop: 20,
-                        backgroundColor: 'white',
-                    }}
+                    containerStyle={styles.container}
+                    handleIndicatorStyle={styles.handleIndicator}
+                    flatListContentContainerStyle={styles.flatlistContentContainer}
                 />
             </Portal>
 
-            <View
-                style={{
-                    paddingTop: RNStatusBar.currentHeight,
-                }}
-                className='bg-white px-5'
-            >
+            <View className='px-5'>
                 <View className='flex flex-row items-center justify-between py-2.5'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                         Stats
                     </Text>
-
-                    {/* <TouchableOpacity onPress={alert}>
-							<DotsVerticalIcon stroke={"#9CA3AF"} />
-						</TouchableOpacity> */}
                 </View>
 
                 <FlatList
-                    contentContainerStyle={{ paddingBottom: 100 }}
+                    contentContainerStyle={styles.flatlist}
                     showsVerticalScrollIndicator={false}
                     data={transactionData}
                     renderItem={renderBreakdownItem}
@@ -93,3 +76,21 @@ export default function AccountsScreen() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    flatlist: {
+        paddingBottom: 100,
+    },
+    flatlistContentContainer: {
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+        // paddingTop: 20,
+        backgroundColor: 'white',
+    },
+    handleIndicator: {
+        backgroundColor: '#D4D4D4',
+    },
+    container: {
+        paddingHorizontal: 20,
+    },
+});
