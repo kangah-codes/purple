@@ -1,14 +1,18 @@
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import {
+    CategoryIcon,
+    ReceiptDetail,
+    ReceiptHeader,
+} from '@/components/Transactions/molecules/Receipt';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
 import { keyExtractor } from '@/lib/utils/number';
 import { router } from 'expo-router';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 import { transactionData } from '../constants';
@@ -35,7 +39,7 @@ export default function TransactionHistoryList() {
     );
 
     return (
-        <View className='mt-5'>
+        <>
             <CustomBottomSheetModal
                 modalKey='transactionReceipt'
                 snapPoints={snapPoints}
@@ -43,121 +47,56 @@ export default function TransactionHistoryList() {
                 handleIndicatorStyle={styles.handleIndicator}
             >
                 <View className='px-5'>
-                    <View
-                        className='w-full flex flex-col space-y-5 items-center'
-                        style={styles.receiptView}
-                    >
-                        <View className='w-full flex flex-col space-y-0.5 items-center justify-center'>
+                    <View className='w-full items-center' style={styles.receiptView}>
+                        <ReceiptHeader />
+                        <Svg
+                            height={12}
+                            width='100%'
+                            style={styles.zigZag}
+                            fill='#c084fc'
+                            stroke='#c084fc'
+                        >
+                            {ZIGZAG_VIEW}
+                        </Svg>
+                        <LinearGradient
+                            className='w-full py-5 items-center justify-center'
+                            colors={linearGradient}
+                        >
+                            <CategoryIcon />
                             <Text
                                 style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-lg text-gray-700'
+                                className='text-lg text-white'
                             >
-                                Receipt
+                                🏠 Rent
                             </Text>
+                        </LinearGradient>
+                        <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
+                            <Text
+                                style={GLOBAL_STYLESHEET.suprapower}
+                                className='text-3xl text-black mb-5'
+                            >
+                                $69.42
+                            </Text>
+                            <View className='border-b border-gray-200 w-full mb-5' />
+                            <ReceiptDetail label='Category' value='🏠 Rent' />
+                            <ReceiptDetail label='Note' value='Payment for the month of June' />
+                            <ReceiptDetail
+                                label='Date'
+                                value='Monday, June 9th 2024, at 12:00 PM70'
+                            />
                         </View>
-
-                        <View className='w-full flex flex-col'>
-                            <Svg
-                                height={12}
-                                width={'100%'}
-                                style={styles.zigZag}
-                                fill='#c084fc'
-                                stroke='#c084fc'
-                            >
-                                {ZIGZAG_VIEW}
-                            </Svg>
-                            <LinearGradient
-                                className='w-full py-5 flex items-center justify-center'
-                                colors={linearGradient}
-                            >
-                                <View className='flex flex-col items-center space-y-1.5'>
-                                    <View className='p-5 bg-red-100 rounded-full relative flex items-center justify-center'>
-                                        <ArrowNarrowUpRightIcon
-                                            width={16}
-                                            height={16}
-                                            style={styles.arrowRight}
-                                            stroke={'#B91C1C'}
-                                        />
-                                    </View>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.suprapower}
-                                        className='text-lg text-white'
-                                    >
-                                        🏠 Rent
-                                    </Text>
-                                </View>
-                            </LinearGradient>
-                            <View
-                                className='w-full p-5 flex flex-col items-center space-y-5'
-                                style={styles.bottomDrawer}
-                            >
-                                <Text
-                                    style={GLOBAL_STYLESHEET.suprapower}
-                                    className='text-3xl text-black'
-                                >
-                                    $69.42
-                                </Text>
-
-                                <View className='border-b border-gray-200 w-full' />
-
-                                <View className='w-full flex flex-col justify-between'>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.suprapower}
-                                        className='text-sm text-black'
-                                    >
-                                        Category
-                                    </Text>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.interSemiBold}
-                                        className='text-sm text-black tracking-tighter'
-                                    >
-                                        🏠 Rent
-                                    </Text>
-                                </View>
-
-                                <View className='w-full flex flex-col justify-between'>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.suprapower}
-                                        className='text-sm text-black'
-                                    >
-                                        Note
-                                    </Text>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.interSemiBold}
-                                        className='text-sm text-black tracking-tighter'
-                                    >
-                                        Payment for the month of June
-                                    </Text>
-                                </View>
-
-                                <View className='w-full flex flex-col justify-between'>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.suprapower}
-                                        className='text-sm text-black'
-                                    >
-                                        Date
-                                    </Text>
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.interSemiBold}
-                                        className='text-sm text-black tracking-tighter'
-                                    >
-                                        Monday, June 9th 2024, at 12:00 PM70
-                                    </Text>
-                                </View>
-                            </View>
-                            <Svg
-                                height={12}
-                                width={'100%'}
-                                fill={drawerBackground}
-                                stroke={drawerBackground}
-                            >
-                                {ZIGZAG_VIEW}
-                            </Svg>
-                        </View>
+                        <Svg
+                            height={12}
+                            width='100%'
+                            fill={drawerBackground}
+                            stroke={drawerBackground}
+                        >
+                            {ZIGZAG_VIEW}
+                        </Svg>
                     </View>
                 </View>
             </CustomBottomSheetModal>
-            <View className='flex flex-col'>
+            <View className='flex flex-col mt-5'>
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         Transaction History
@@ -187,7 +126,7 @@ export default function TransactionHistoryList() {
                     scrollEnabled={false}
                 />
             </View>
-        </View>
+        </>
     );
 }
 

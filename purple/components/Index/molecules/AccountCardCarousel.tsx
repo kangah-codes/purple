@@ -1,4 +1,3 @@
-import { View } from '@/components/Shared/styled';
 import { useCallback, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
@@ -61,7 +60,7 @@ export default function AccountCardCarousel() {
     const renderItem = useCallback(({ item }: any) => <AlternateAccountCard item={item} />, []);
 
     return (
-        <View>
+        <>
             <Carousel
                 data={data}
                 renderItem={renderItem}
@@ -87,6 +86,6 @@ export default function AccountCardCarousel() {
                 inactiveDotScale={0.6}
                 containerStyle={styles.containerStyle}
             />
-        </View>
+        </>
     );
 }

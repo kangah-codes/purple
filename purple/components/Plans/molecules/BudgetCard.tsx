@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { BudgetPlan } from '../schema';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type BudgetCardProps = {
     data: BudgetPlan;
@@ -10,14 +11,9 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
         props.data;
 
     return (
-        <View className='p-4 border border-purple-200 rounded-2xl flex flex-col space-y-5 w-full'>
+        <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-5 w-full'>
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text
-                    style={{
-                        fontFamily: 'Suprapower',
-                    }}
-                    className='text-base text-black'
-                >
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                     {category}
                 </Text>
             </View>
@@ -35,18 +31,14 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
 
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={{
-                            fontFamily: 'InterMedium',
-                        }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-sm text-black tracking-tighter'
                     >
                         {startDate}
                     </Text>
 
                     <Text
-                        style={{
-                            fontFamily: 'InterMedium',
-                        }}
+                        style={GLOBAL_STYLESHEET.interMedium}
                         className='text-sm text-gray-600 tracking-tighter'
                     >
                         {endDate}
@@ -59,17 +51,13 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
             <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={{
-                            fontFamily: 'InterSemiBold',
-                        }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-700 tracking-tighter'
                     >
                         Spent
                     </Text>
                     <Text
-                        style={{
-                            fontFamily: 'Suprapower',
-                        }}
+                        style={GLOBAL_STYLESHEET.suprapower}
                         className='text-sm text-black tracking-tighter'
                     >
                         GHS {spent}
@@ -78,17 +66,13 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={{
-                            fontFamily: 'InterSemiBold',
-                        }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-700 tracking-tighter'
                     >
                         Balance
                     </Text>
                     <Text
-                        style={{
-                            fontFamily: 'Suprapower',
-                        }}
+                        style={GLOBAL_STYLESHEET.suprapower}
                         className='text-sm text-black tracking-tighter'
                     >
                         GHS {balance}
@@ -97,17 +81,13 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={{
-                            fontFamily: 'InterSemiBold',
-                        }}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-700 tracking-tighter'
                     >
                         Total Budget
                     </Text>
                     <Text
-                        style={{
-                            fontFamily: 'Suprapower',
-                        }}
+                        style={GLOBAL_STYLESHEET.suprapower}
                         className='text-sm text-black tracking-tighter'
                     >
                         GHS {budget}

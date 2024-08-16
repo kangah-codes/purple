@@ -1,14 +1,14 @@
 import { View } from '@/components/Shared/styled';
-import { FlatList } from 'react-native';
+import { keyExtractor } from '@/lib/utils/number';
+import { memo, useCallback } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
 import { expensePlans } from '../constants';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import ExpensesCard from '../molecules/ExpensesCard';
-import { memo, useCallback } from 'react';
+import BudgetInfoCard from '../molecules/BudgetInfoCard';
 import { BudgetPlan } from '../schema';
-import { keyExtractor } from '@/lib/utils/number';
 
 function ExpensesScreen() {
-    const itemSeparator = useCallback(() => <View style={{ height: 20 }} />, []);
+    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
         ({ item }: { item: BudgetPlan }) => <BudgetPlanCard data={item} />,
         [],
@@ -16,8 +16,8 @@ function ExpensesScreen() {
     const listHeader = useCallback(
         () => (
             <View>
-                <ExpensesCard />
-                <View style={{ marginTop: 20 }} />
+                <BudgetInfoCard />
+                <View style={styles.listHeaderView} />
             </View>
         ),
         [],
@@ -25,8 +25,8 @@ function ExpensesScreen() {
 
     return (
         <FlatList
-            contentContainerStyle={{ paddingBottom: 100 }}
-            style={{ paddingHorizontal: 20 }}
+            contentContainerStyle={styles.contentContainer}
+            style={styles.container}
             showsHorizontalScrollIndicator={false}
             data={expensePlans}
             renderItem={renderItem}
@@ -38,4 +38,18 @@ function ExpensesScreen() {
     );
 }
 
+const styles = StyleSheet.create({
+    container: {
+        paddingHorizontal: 20,
+    },
+    contentContainer: {
+        paddingBottom: 100,
+    },
+    listHeaderView: {
+        marginTop: 20,
+    },
+    itemSeparator: {
+        height: 20,
+    },
+});
 export default memo(ExpensesScreen);

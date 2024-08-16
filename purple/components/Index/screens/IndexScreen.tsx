@@ -23,28 +23,19 @@ export default function IndexScreen() {
             <ExpoStatusBar style='dark' />
             <View style={styles.parentView} className='bg-white px-5'>
                 <View className='flex flex-row justify-between items-center pt-2.5'>
-                    <View className='flex flex-col'>
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                            Hi, Joshua 👋
-                        </Text>
-                    </View>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        Hi, Joshua 👋
+                    </Text>
                 </View>
 
-                <View className='mt-5'>
-                    <View className='relative flex justify-center'>
-                        <InputField
-                            className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            placeholder='Search'
-                            cursorColor={'#000'}
-                        />
-                        <SearchIcon
-                            width={16}
-                            height={16}
-                            style={styles.searchIcon}
-                            stroke='#A855F7'
-                        />
-                    </View>
+                <View className='relative flex justify-center mt-5'>
+                    <InputField
+                        className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
+                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        placeholder='Search'
+                        cursorColor={'#000'}
+                    />
+                    <SearchIcon width={16} height={16} style={styles.searchIcon} stroke='#A855F7' />
                 </View>
 
                 <ScrollView

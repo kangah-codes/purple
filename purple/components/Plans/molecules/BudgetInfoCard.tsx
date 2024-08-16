@@ -1,7 +1,15 @@
-import { useState } from 'react';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
-export default function SavingsCard() {
+type ExpensesCardProps = {
+    accountCurrency: string;
+    accountBalance: number;
+    accountName: string;
+    cardBackgroundColour: string;
+    cardTintColour: string;
+};
+
+export default function BudgetInfoCard() {
     return (
         <LinearGradient
             className='w-full p-5 rounded-2xl flex flex-col justify-center items-center space-y-4 relative'
@@ -9,14 +17,14 @@ export default function SavingsCard() {
             colors={['#c084fc', '#9333ea']}
         >
             <View className='flex flex-col w-full'>
-                <Text style={{ fontFamily: 'Suprapower' }} className='text-white text-2xl'>
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-2xl'>
                     GHS 10000
                 </Text>
                 <Text
                     style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter'
                 >
-                    To hit target
+                    Remaining for this month
                 </Text>
             </View>
 
@@ -35,7 +43,7 @@ export default function SavingsCard() {
                     style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
-                    Saved GHS 120,000 of GHS 240,000
+                    Spent GHS 120,000 of GHS 240,000
                 </Text>
             </View>
 
@@ -46,7 +54,7 @@ export default function SavingsCard() {
                     style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-white text-sm tracking-tighter truncate'
                 >
-                    You're still on track for this month's savings plan.
+                    You're still on track for this month's expenses.
                 </Text>
             </View>
         </LinearGradient>

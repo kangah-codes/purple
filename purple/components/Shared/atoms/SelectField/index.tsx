@@ -99,7 +99,7 @@ export default function SelectField({
                 <TouchableOpacity
                     // onPress={handlePresentModalPress}
                     onPress={() => setShowBottomSheetFlatList(selectKey, true)}
-                    className='flex flex-row items-center space-x-2 bg-gray-100 rounded-lg px-2 text-sm border border-gray-200 h-12 relative'
+                    className='flex flex-row items-center space-x-2 bg-purple-50/80 rounded-full px-2 text-sm border border-purple-200 h-12 relative'
                 >
                     <View className='absolute right-4'>
                         <ChevronDownIcon stroke={'#8B5CF6'} />

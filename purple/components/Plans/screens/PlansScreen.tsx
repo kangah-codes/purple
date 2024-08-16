@@ -6,13 +6,14 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { useState } from 'react';
-import { StatusBar as RNStatusBar } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
-import { Link, router } from 'expo-router';
 
 export default function PlansScreen() {
     const [index, setIndex] = useState(0);
@@ -20,6 +21,9 @@ export default function PlansScreen() {
         { key: 'expenses', title: 'Expenses' },
         { key: 'savings', title: 'Savings' },
     ]);
+    const handleNavigation = () => {
+        router.push('/plans/new-plan');
+    };
 
     function renderTabBar() {
         return (
@@ -39,7 +43,7 @@ export default function PlansScreen() {
                                     className='w-full flex items-center justify-center px-5 py-2.5 rounded-full'
                                 >
                                     <Text
-                                        style={{ fontFamily: 'Suprapower' }}
+                                        style={GLOBAL_STYLESHEET.suprapower}
                                         className='text-base'
                                     >
                                         {route.title}
@@ -61,15 +65,10 @@ export default function PlansScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full'>
             <ExpoStatusBar style='dark' />
-            <View
-                style={{
-                    paddingTop: RNStatusBar.currentHeight,
-                }}
-                className='bg-white space-y-5 flex-1 flex flex-col'
-            >
+            <View style={styles.parentView} className='bg-white space-y-5 flex-1 flex flex-col'>
                 <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
                     <View className='flex flex-col'>
-                        <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                             My Plans
                         </Text>
                     </View>
@@ -91,10 +90,7 @@ export default function PlansScreen() {
             >
                 <TouchableOpacity
                     className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={() => {
-                        // Handle your button tap here
-                        router.push('/plans/new-plan');
-                    }}
+                    onPress={handleNavigation}
                 >
                     <EditSquareIcon stroke={'#fff'} />
                 </TouchableOpacity>
@@ -102,3 +98,9 @@ export default function PlansScreen() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
+    },
+});

@@ -8,10 +8,11 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Platform, StatusBar as RNStatusBar, Switch } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Switch } from 'react-native';
 
 export default function NewPlanScreen() {
     const [isEnabled, setIsEnabled] = useState(false);
@@ -26,23 +27,43 @@ export default function NewPlanScreen() {
         [],
     );
 
+    const planTypes = {
+        expense: {
+            label: '💸   Expense',
+            value: 'expense',
+        },
+        saving: {
+            label: '💰   Saving',
+            value: 'saving',
+        },
+    };
+    const depositFrequency = {
+        weekly: {
+            label: 'Weekly',
+            value: 'weekly',
+        },
+        'bi-weekly': {
+            label: 'Bi-Weekly',
+            value: 'bi-weekly',
+        },
+        monthly: {
+            label: 'Monthly',
+            value: 'monthly',
+        },
+    };
+
     return (
         <>
-            <SafeAreaView
-                className='bg-white relative h-full'
-                style={{
-                    paddingTop: RNStatusBar.currentHeight,
-                }}
-            >
+            <SafeAreaView className='bg-white relative h-full'>
                 <ExpoStatusBar style='dark' />
                 <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
                     <View className='flex flex-col'>
-                        <Text style={{ fontFamily: 'Suprapower' }} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                             New Plan
                         </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => router.back()}>
+                    <TouchableOpacity onPress={router.back}>
                         <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
                             Cancel
                         </Text>
@@ -50,17 +71,15 @@ export default function NewPlanScreen() {
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
-                    contentContainerStyle={{
-                        paddingBottom: 100,
-                    }}
+                    contentContainerStyle={styles.container}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
                             Plan Name
                         </Text>
 
                         <InputField
-                            className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
                             style={GLOBAL_STYLESHEET.interSemiBold}
                             cursorColor={'#8B5CF6'}
                         />
@@ -70,16 +89,7 @@ export default function NewPlanScreen() {
                         <SelectField
                             selectKey='newPlanType'
                             label='Plan Type'
-                            options={{
-                                expense: {
-                                    label: '💸   Expense',
-                                    value: 'expense',
-                                },
-                                saving: {
-                                    label: '💰   Saving',
-                                    value: 'saving',
-                                },
-                            }}
+                            options={planTypes}
                             customSnapPoints={['25%', '25%']}
                             renderItem={renderItem}
                         />
@@ -108,12 +118,12 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
                             Amount
                         </Text>
 
                         <InputField
-                            className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
                             style={GLOBAL_STYLESHEET.interSemiBold}
                             cursorColor={'#8B5CF6'}
                             placeholder='0.00'
@@ -144,13 +154,6 @@ export default function NewPlanScreen() {
 
                     <View className='h-1 border-b border-gray-100 w-full' />
 
-                    {/* <Text
-					style={{ fontFamily: "Suprapower" }}
-					className="text-base text-black"
-				>
-					Plan Details
-				</Text> */}
-
                     <View className='flex flex-col space-y-1'>
                         <DatePicker label='Start Date' pickerKey='newPlanStartDate' />
                     </View>
@@ -165,26 +168,13 @@ export default function NewPlanScreen() {
                         <SelectField
                             selectKey='newPlanDepositFrequency'
                             label='Deposit Frequency'
-                            options={{
-                                weekly: {
-                                    label: 'Weekly',
-                                    value: 'weekly',
-                                },
-                                'bi-weekly': {
-                                    label: 'Bi-Weekly',
-                                    value: 'bi-weekly',
-                                },
-                                monthly: {
-                                    label: 'Monthly',
-                                    value: 'monthly',
-                                },
-                            }}
+                            options={depositFrequency}
                             customSnapPoints={['30%', '30%']}
                         />
                     </View>
 
                     <View className='flex flex-row justify-between items-center'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
                             Send me reminders
                         </Text>
 
@@ -194,10 +184,7 @@ export default function NewPlanScreen() {
                             ios_backgroundColor='#3e3e3e'
                             onValueChange={toggleSwitch}
                             value={isEnabled}
-                            style={{
-                                transform:
-                                    Platform.OS === 'ios' ? [{ scaleX: 0.8 }, { scaleY: 0.8 }] : [],
-                            }}
+                            style={styles.switch}
                         />
                     </View>
                 </ScrollView>
@@ -216,12 +203,7 @@ export default function NewPlanScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text
-                                style={{
-                                    fontFamily: 'Suprapower',
-                                }}
-                                className='text-white'
-                            >
+                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
                                 Create Plan
                             </Text>
                         )}
@@ -231,3 +213,12 @@ export default function NewPlanScreen() {
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    switch: {
+        transform: Platform.OS === 'ios' ? [{ scaleX: 0.8 }, { scaleY: 0.8 }] : [],
+    },
+    container: {
+        paddingBottom: 100,
+    },
+});
