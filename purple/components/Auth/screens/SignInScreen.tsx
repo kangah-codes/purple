@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import useHasOnboarded from '@/lib/db/db';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';

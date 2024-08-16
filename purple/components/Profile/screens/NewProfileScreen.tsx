@@ -6,9 +6,19 @@ import pkg from '@/package.json';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { Button } from 'react-native';
 import ProfilePages from '../molecules/ProfilePages';
+import Toast from 'react-native-toast-message';
 
 export default function NewProfileScreen() {
     const { setHasOnboarded } = useHasOnboarded();
+    const showToast = () => {
+        Toast.show({
+            type: 'warning',
+            props: {
+                text1: 'USER',
+                text2: 'account creation failed!',
+            },
+        });
+    };
 
     return (
         <SafeAreaView className='bg-white relative h-full'>
@@ -50,6 +60,7 @@ export default function NewProfileScreen() {
                     setHasOnboarded(false).then(() => alert('Onboarding reset'));
                 }}
             />
+            <Button title='Show Toast' onPress={showToast} />
         </SafeAreaView>
     );
 }
