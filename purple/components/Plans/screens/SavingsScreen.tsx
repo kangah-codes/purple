@@ -1,22 +1,23 @@
 import { View } from '@/components/Shared/styled';
-import { FlatList } from 'react-native';
+import { keyExtractor } from '@/lib/utils/number';
+import { memo, useCallback } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
 import { expensePlans } from '../constants';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import ExpensesCard from '../molecules/ExpensesCard';
-import { memo, useCallback } from 'react';
+import BudgetInfoCard from '../molecules/BudgetInfoCard';
 import { BudgetPlan } from '../schema';
 
 function SavingsScreen() {
-    const itemSeparator = useCallback(() => <View style={{ height: 20 }} />, []);
+    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
         ({ item }: { item: BudgetPlan }) => <BudgetPlanCard data={item} />,
         [],
     );
     const listHeader = useCallback(
         () => (
-            <View style={{ paddingHorizontal: 5 }}>
-                <ExpensesCard />
-                <View style={{ marginTop: 20 }} />
+            <View>
+                <BudgetInfoCard />
+                <View style={styles.listHeaderView} />
             </View>
         ),
         [],
@@ -24,12 +25,12 @@ function SavingsScreen() {
 
     return (
         <FlatList
-            contentContainerStyle={{ paddingBottom: 100 }}
-            style={{ paddingHorizontal: 20 }}
+            contentContainerStyle={styles.contentContainer}
+            style={styles.container}
             showsHorizontalScrollIndicator={false}
             data={expensePlans}
             renderItem={renderItem}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={keyExtractor}
             ItemSeparatorComponent={itemSeparator}
             initialNumToRender={5}
             ListHeaderComponent={listHeader}
@@ -37,4 +38,18 @@ function SavingsScreen() {
     );
 }
 
+const styles = StyleSheet.create({
+    container: {
+        paddingHorizontal: 20,
+    },
+    contentContainer: {
+        paddingBottom: 100,
+    },
+    listHeaderView: {
+        marginTop: 20,
+    },
+    itemSeparator: {
+        height: 20,
+    },
+});
 export default memo(SavingsScreen);

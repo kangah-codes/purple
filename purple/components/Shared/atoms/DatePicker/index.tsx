@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Platform } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type DatePickerProps = {
     label?: string;
@@ -86,7 +87,7 @@ export default function DatePicker({
             }
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -106,13 +107,13 @@ export default function DatePicker({
                             });
                         }
                     }}
-                    className='flex flex-row items-center space-x-2 bg-gray-100 rounded-lg px-2 text-sm border border-gray-200 h-12 relative'
+                    className='flex flex-row items-center space-x-2 bg-purple-50/80 rounded-full px-2 text-sm border border-purple-200 h-12 relative'
                 >
                     <View className='absolute right-4'>
                         <CalendarIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={{ fontFamily: 'InterSemiBold' }} className='text-xs text-gray-900'>
+                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
                         {date.toDateString()}
                     </Text>
                 </TouchableOpacity>

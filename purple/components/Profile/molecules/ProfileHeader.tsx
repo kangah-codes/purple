@@ -11,7 +11,7 @@ export default function ProfileHeader() {
                     Joshua Akangah
                 </Text>
                 <Text
-                    style={{ fontFamily: 'InterSemiBold' }}
+                    style={GLOBAL_STYLESHEET.interSemiBold}
                     className='text-base text-white tracking-tighter'
                 >
                     akangah89@gmail.com

@@ -1,4 +1,4 @@
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons';
+import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import {
     BottomSheetBackdrop,
     BottomSheetBackdropProps,
@@ -144,7 +144,7 @@ export default function TransactionHistoryList() {
                                         Category
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         🏠 Rent
@@ -159,7 +159,7 @@ export default function TransactionHistoryList() {
                                         Note
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Payment for the month of June
@@ -174,7 +174,7 @@ export default function TransactionHistoryList() {
                                         Date
                                     </Text>
                                     <Text
-                                        style={{ fontFamily: 'InterSemiBold' }}
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
                                         className='text-sm text-black tracking-tighter'
                                     >
                                         Monday, June 9th 2024, at 12:00 PM
@@ -201,7 +201,7 @@ export default function TransactionHistoryList() {
 
                     <TouchableOpacity className='flex flex-row items-center space-x-1'>
                         <Text
-                            style={{ fontFamily: 'InterSemiBold' }}
+                            style={GLOBAL_STYLESHEET.interSemiBold}
                             className='text-sm tracking-tighter text-purple-700'
                         >
                             View All

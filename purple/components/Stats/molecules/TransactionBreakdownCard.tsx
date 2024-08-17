@@ -1,6 +1,7 @@
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/icons';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { StyleSheet } from 'react-native';
 
 type TransactionBreakdownCardProps = {
     data: {
@@ -17,33 +18,30 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
     return (
         <TouchableOpacity
             onPress={onPress}
-            className='flex w-full flex-row items-center space-x-3.5 py-3.5'
+            className='flex w-full flex-row items-center justify-between space-x-3.5 py-3.5'
         >
-            <View className='relative items-center justify-center'>
+            <View className='relative items-center justify-center flex flex-row space-x-2.5'>
                 <View className='flex items-center justify-center rounded-full bg-purple-100 px-2 py-1'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-xs'>
                         89%
                     </Text>
                 </View>
+
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='sm'>
+                    {truncateStringIfLongerThan(data.category, 30)}
+                </Text>
             </View>
 
-            <View className='flex flex-grow flex-col'>
-                <View className='flex flex-row items-center justify-between'>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='sm'>
-                        {truncateStringIfLongerThan(data.category, 30)}
-                    </Text>
-                    <Text
-                        style={{
-                            fontFamily: 'Suprapower',
-                            color: data.type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
-                        }}
-                        className='text-xs'
-                    >
-                        {data.type === 'debit' ? '-' : '+'}
-                        {data.amount}
-                    </Text>
-                </View>
-            </View>
+            <Text
+                style={[
+                    GLOBAL_STYLESHEET.suprapower,
+                    { color: data.type === 'debit' ? '#DC2626' : 'rgb(22 163 74)' },
+                ]}
+                className='text-xs'
+            >
+                {data.type === 'debit' ? '-' : '+'}
+                {data.amount}
+            </Text>
         </TouchableOpacity>
     );
 }

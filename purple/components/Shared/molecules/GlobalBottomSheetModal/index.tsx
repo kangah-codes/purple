@@ -70,6 +70,8 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
         [],
     );
 
+    if (!bottomSheetModalKeys[modalKey]) return null;
+
     return (
         <BottomSheetModal
             backdropComponent={renderBackdrop}

@@ -1,5 +1,5 @@
-import ProfileScreen from '@/components/Profile/screens/ProfileScreen';
+import NewProfileScreen from '@/components/Profile/screens/NewProfileScreen';
 
 export default function Screen() {
-    return <ProfileScreen />;
+    return <NewProfileScreen />;
 }

@@ -5,6 +5,7 @@ import { Portal } from '@gorhom/portal';
 import React, { useCallback, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -28,12 +29,12 @@ export default function SelectField({
     customSnapPoints,
     renderItem,
 }: SelectFieldProps) {
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
     const [value, setValue] = useState<string | undefined>(undefined);
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-200'>
-                <Text style={{ fontFamily: 'InterSemiBold' }} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -91,20 +92,20 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-500'>
+                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
                 <TouchableOpacity
                     // onPress={handlePresentModalPress}
                     onPress={() => setShowBottomSheetFlatList(selectKey, true)}
-                    className='flex flex-row items-center space-x-2 bg-gray-100 rounded-lg px-2 text-sm border border-gray-200 h-12 relative'
+                    className='flex flex-row items-center space-x-2 bg-purple-50/80 rounded-full px-2 text-sm border border-purple-200 h-12 relative'
                 >
                     <View className='absolute right-4'>
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={{ fontFamily: 'InterSemiBold' }} className='text-xs text-gray-900'>
+                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             options[value ?? '']?.label ?? `Select an option...`,
                             45,

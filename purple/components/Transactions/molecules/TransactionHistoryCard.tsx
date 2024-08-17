@@ -1,7 +1,8 @@
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/icons';
+import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { TransactionData } from '../schema';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type TransactionHistoryCardProps = {
     data: TransactionData;
@@ -64,14 +65,14 @@ export default function TransactionHistoryCard({
 
                 <View className='flex flex-row justify-between'>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
-                        className='text-sm text-gray-500 tracking-tighter'
+                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        className='text-sm text-gray-600 tracking-tighter'
                     >
                         {truncateStringIfLongerThan(data.description, 25)}
                     </Text>
                     <Text
-                        style={{ fontFamily: 'InterSemiBold' }}
-                        className='text-sm text-gray-500 tracking-tighter'
+                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        className='text-sm text-gray-600 tracking-tighter'
                     >
                         {data.dateTime}
                     </Text>

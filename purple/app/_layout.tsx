@@ -9,6 +9,8 @@ import { PortalProvider } from '@gorhom/portal';
 import * as Font from 'expo-font';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text, View } from '@/components/Shared/styled';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@/components/Shared/molecules/Toast';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)',
@@ -35,12 +37,6 @@ export default function RootLayout() {
                     InterLight: require('../assets/fonts/Inter-Light.ttf'),
                     InterMedium: require('../assets/fonts/Inter-Medium.ttf'),
                     InterSemiBold: require('../assets/fonts/Inter-SemiBold.ttf'),
-                    SpaceMonoRegular: require('../assets/fonts/SpaceMono-Regular.ttf'),
-                    SpaceMonoBold: require('../assets/fonts/SpaceMono-Bold.ttf'),
-                    AnalogueRegular: require('../assets/fonts/analogue55regular.ttf'),
-                    AnalogueMedium: require('../assets/fonts/analogue65medium.ttf'),
-                    AnalogueBold: require('../assets/fonts/analogue75bold.ttf'),
-                    AnalogueBlack: require('../assets/fonts/analogue85black.ttf'),
                 });
             } catch (e) {
                 console.warn(e);
@@ -72,28 +68,34 @@ function RootLayoutNav() {
     }, []);
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-                <PortalProvider>
-                    <ThemeProvider value={DefaultTheme}>
-                        <Stack
-                            screenOptions={{
-                                contentStyle: {
-                                    backgroundColor: '#fff',
-                                },
-                            }}
-                        >
-                            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                            <Stack.Screen name='plans' options={{ headerShown: false }} />
-                            <Stack.Screen name='accounts' options={{ headerShown: false }} />
-                            <Stack.Screen name='transactions' options={{ headerShown: false }} />
-                            <Stack.Screen name='onboarding' options={{ headerShown: false }} />
-                            <Stack.Screen name='auth' options={{ headerShown: false }} />
-                        </Stack>
-                    </ThemeProvider>
-                </PortalProvider>
-            </BottomSheetModalProvider>
-        </GestureHandlerRootView>
+        <>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <BottomSheetModalProvider>
+                    <PortalProvider>
+                        <ThemeProvider value={DefaultTheme}>
+                            <Stack
+                                screenOptions={{
+                                    contentStyle: {
+                                        backgroundColor: '#fff',
+                                    },
+                                }}
+                            >
+                                <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                                <Stack.Screen name='plans' options={{ headerShown: false }} />
+                                <Stack.Screen name='accounts' options={{ headerShown: false }} />
+                                <Stack.Screen
+                                    name='transactions'
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen name='onboarding' options={{ headerShown: false }} />
+                                <Stack.Screen name='auth' options={{ headerShown: false }} />
+                            </Stack>
+                        </ThemeProvider>
+                    </PortalProvider>
+                </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+            <Toast config={toastConfig} />
+        </>
     );
 }
 

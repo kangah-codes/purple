@@ -1,50 +1,36 @@
-import { ExternalLink } from '@/components/Shared/molecules/ExternalLink';
 import {
     InputField,
-    Text,
-    View,
     SafeAreaView,
-    LinearGradient,
+    Text,
     TouchableOpacity,
+    View,
+    LinearGradient,
 } from '@/components/Shared/styled';
-import { Controller, useForm } from 'react-hook-form';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import { useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
+    StatusBar as RNStatusBar,
     TextInput,
     TouchableWithoutFeedback,
 } from 'react-native';
 import tw from 'twrnc';
-import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
-import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import useHasOnboarded from '@/lib/db/db';
 import { OTPInput } from '../molecules/OTPInput';
+import { Controller, useForm } from 'react-hook-form';
+import {} from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { ChevronLeftIcon } from '@/components/SVG/24x24';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function OTPScreen() {
-    const [loading, setLoading] = useState(false);
-    const { setHasOnboarded } = useHasOnboarded();
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            fullName: '',
-            userName: '',
-            email: '',
-        },
-    });
-
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
-    });
-
     const [codes, setCodes] = useState<string[]>(['', '', '', '', '', '']);
     const inputRefs = Array.from({ length: codes.length }, () => useRef<TextInput>(null));
+    const [loading, setLoading] = useState(false);
+    const [hasRequestedCode, setHasRequestedCode] = useState(false);
+    const [canResetPassword, setCanResetPassword] = useState(false);
 
     const handleChangeCode = (text: string, index: number) => {
         const newCodes = [...codes];
@@ -57,6 +43,18 @@ export default function OTPScreen() {
         }
     };
 
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            fullName: '',
+            userName: '',
+            email: '',
+        },
+    });
+
     return (
         <SafeAreaView
             style={{
@@ -64,6 +62,17 @@ export default function OTPScreen() {
             }}
             className='bg-white'
         >
+            <ExpoStatusBar style='dark' />
+            <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
+                <TouchableOpacity onPress={router.back}>
+                    <View className='flex flex-row space-x-2 items-center'>
+                        <ChevronLeftIcon strokeWidth={3} width={17} stroke='#9333ea' />
+                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                            Back
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -71,30 +80,103 @@ export default function OTPScreen() {
                 >
                     <View className='bg-white relative h-full flex flex-col items-stretch px-5'>
                         <ExpoStatusBar style='dark' />
-                        <View className='w-full space-y- flex flex-col items-center justify-center flex-grow'>
+                        <View className='w-full space-y-5 flex flex-col items-center justify-center flex-grow'>
                             <View className='flex flex-col space-y-2.5'>
                                 <Text
                                     style={{ fontFamily: 'Suprapower' }}
                                     className='text-2xl text-black text-center'
                                 >
-                                    Enter your one-time password
+                                    Forgot password?
                                 </Text>
                                 <Text
                                     style={{ fontFamily: 'InterMedium' }}
-                                    className='text-sm textblack text-center'
+                                    className='text-sm text-gray-600 text-center'
                                 >
-                                    Enter the 6-digit pin sent to your email at a*****9@*****.com
+                                    {hasRequestedCode
+                                        ? 'Enter the 6-digit code sent to your email address'
+                                        : `Enter your email address and we'll send you a 6-digit code to reset your password`}
                                 </Text>
                             </View>
 
-                            <View className='mt-5'>
-                                <OTPInput
-                                    codes={codes}
-                                    refs={inputRefs}
-                                    errorMessages={undefined}
-                                    onChangeCode={handleChangeCode}
-                                    onComplete={alert}
-                                />
+                            <View className='w-full'>
+                                {hasRequestedCode ? (
+                                    <View className='mt-5 w-full space-y-5 flex flex-col items-center justify-center flex-grow'>
+                                        <OTPInput
+                                            codes={codes}
+                                            refs={inputRefs}
+                                            errorMessages={undefined}
+                                            onChangeCode={handleChangeCode}
+                                            onComplete={() => {
+                                                router.replace('/auth/sign-in');
+                                            }}
+                                        />
+                                    </View>
+                                ) : (
+                                    <View className='w-full space-y-5 flex flex-col items-center justify-center flex-grow'>
+                                        <View className='flex flex-col space-y-1 w-full'>
+                                            <Controller
+                                                control={control}
+                                                rules={{
+                                                    required: "Username can't be empty",
+                                                    pattern: {
+                                                        value: /^[a-zA-Z0-9]{1,10}$/,
+                                                        message: 'Invalid username',
+                                                    },
+                                                }}
+                                                render={({
+                                                    field: { onChange, onBlur, value },
+                                                }) => (
+                                                    <InputField
+                                                        className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                                        cursorColor={'#8B5CF6'}
+                                                        placeholder='Email address'
+                                                        onChangeText={onChange}
+                                                        onBlur={onBlur}
+                                                        value={value}
+                                                        autoCapitalize='none'
+                                                    />
+                                                )}
+                                                name='userName'
+                                            />
+                                            {errors.userName && (
+                                                <Text
+                                                    style={{ fontFamily: 'InterMedium' }}
+                                                    className='text-xs text-red-500'
+                                                >
+                                                    {errors.userName.message}
+                                                </Text>
+                                            )}
+                                        </View>
+
+                                        <TouchableOpacity
+                                            className='w-full'
+                                            onPress={() => {
+                                                setLoading(true);
+                                                setTimeout(() => {
+                                                    setLoading(false);
+                                                    setHasRequestedCode(true);
+                                                }, 3000);
+                                            }}
+                                        >
+                                            <LinearGradient
+                                                className='flex items-center justify-center rounded-full px-5 py-2.5 h-12'
+                                                colors={['#c084fc', '#9333ea']}
+                                            >
+                                                {loading ? (
+                                                    <ActivityIndicator size={18} color='#fff' />
+                                                ) : (
+                                                    <Text
+                                                        style={{ fontFamily: 'InterBold' }}
+                                                        className='text-base text-white tracking-tight'
+                                                    >
+                                                        Send Code
+                                                    </Text>
+                                                )}
+                                            </LinearGradient>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
                             </View>
                         </View>
                     </View>

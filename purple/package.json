@@ -49,6 +49,7 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "^14.1.0",
     "react-native-tab-view": "^3.5.2",
+    "react-native-toast-message": "^2.2.0",
     "react-native-web": "~0.19.6",
     "twrnc": "^4.2.0",
     "zustand": "^4.5.1"

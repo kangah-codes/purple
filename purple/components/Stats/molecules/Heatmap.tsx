@@ -7,11 +7,12 @@ import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { StarsIcon } from '@/components/SVG/24x24';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -56,26 +57,23 @@ function StatsHeatmap() {
         [selectedDate],
     );
 
+    const handleCellPress = useCallback(
+        (data: CellData) => {
+            setSelectedDate(data.key);
+            setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
+        },
+        [data],
+    );
+
     const renderCell = useCallback(
         (data: CellData, index: number) => {
             const colorIndex = getColorIndex(values[index], 0, Math.max(...values), colors.length);
 
             if (format(now, 'dd/MM/yyyy') === data.key)
                 return (
-                    <TouchableOpacity
-                        key={data.key}
-                        onPress={() => {
-                            setSelectedDate(data.key);
-                            setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
-                        }}
-                    >
+                    <TouchableOpacity key={data.key} onPress={() => handleCellPress(data)}>
                         <LinearGradient
-                            style={{
-                                width: blockSize,
-                                height: blockSize,
-                                margin: 2,
-                                borderRadius: 8,
-                            }}
+                            style={styles.linearGradient}
                             colors={colors[colorIndex]}
                             className='flex items-center justify-center'
                         >
@@ -101,45 +99,32 @@ function StatsHeatmap() {
                 <CustomBottomSheetFlatList
                     snapPoints={['50%', '70%']}
                     children={
-                        <View className='px-5 py-2.5'>
-                            <Text
-                                style={{ fontFamily: 'Suprapower' }}
-                                className='text-base text-gray-900'
-                            >
-                                Transactions on {selectedDate}
-                            </Text>
-                        </View>
+                        <Text
+                            style={GLOBAL_STYLESHEET.suprapower}
+                            className='text-base text-gray-900 px-5 py-2.5'
+                        >
+                            Transactions on {selectedDate}
+                        </Text>
                     }
                     sheetKey={'statsDailyTransactionBreakdownList'}
                     data={transactionData}
                     renderItem={renderItem}
-                    containerStyle={{
-                        paddingHorizontal: 20,
-                    }}
-                    handleIndicatorStyle={{
-                        backgroundColor: '#D4D4D4',
-                    }}
-                    flatListContentContainerStyle={{
-                        paddingBottom: 100,
-                        paddingHorizontal: 20,
-                        backgroundColor: 'white',
-                    }}
+                    containerStyle={styles.bottomSheetContainer}
+                    handleIndicatorStyle={styles.handleIndicator}
+                    flatListContentContainerStyle={styles.flatlistContentContainer}
                     itemSeparator={itemSeparator}
                 />
             </Portal>
-            <View className='flex flex-col'>
+            <>
                 <View className='flex flex-row justify-between'>
                     {days.map((day, key) => (
-                        <View key={key} className='flex-1 items-center'>
-                            <Text
-                                className='text-black text-base'
-                                style={{
-                                    fontFamily: 'InterSemiBold',
-                                }}
-                            >
-                                {day}
-                            </Text>
-                        </View>
+                        <Text
+                            key={key}
+                            className='text-black text-base mx-auto'
+                            style={GLOBAL_STYLESHEET.interSemiBold}
+                        >
+                            {day}
+                        </Text>
                     ))}
                 </View>
                 <Heatmap
@@ -151,7 +136,7 @@ function StatsHeatmap() {
                     startColumn={getDay(start)}
                     renderCell={renderCell}
                 />
-            </View>
+            </>
         </>
     );
 }
@@ -159,5 +144,25 @@ function StatsHeatmap() {
 function arePropsEqual(prevProps: any, nextProps: any) {
     return deepCompare(prevProps, nextProps);
 }
+
+const styles = StyleSheet.create({
+    bottomSheetContainer: {
+        paddingHorizontal: 20,
+    },
+    handleIndicator: {
+        backgroundColor: '#D4D4D4',
+    },
+    flatlistContentContainer: {
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+        backgroundColor: 'white',
+    },
+    linearGradient: {
+        width: blockSize,
+        height: blockSize,
+        margin: 2,
+        borderRadius: 8,
+    },
+});
 
 export default memo(StatsHeatmap, arePropsEqual);
