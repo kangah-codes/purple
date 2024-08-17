@@ -4,7 +4,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import useHasOnboarded from '@/lib/db/db';
 import pkg from '@/package.json';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { Button } from 'react-native';
+import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import ProfilePages from '../molecules/ProfilePages';
 import Toast from 'react-native-toast-message';
 
@@ -12,7 +12,7 @@ export default function NewProfileScreen() {
     const { setHasOnboarded } = useHasOnboarded();
     const showToast = () => {
         Toast.show({
-            type: 'warning',
+            type: 'error',
             props: {
                 text1: 'USER',
                 text2: 'account creation failed!',
@@ -21,7 +21,7 @@ export default function NewProfileScreen() {
     };
 
     return (
-        <SafeAreaView className='bg-white relative h-full'>
+        <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
@@ -72,3 +72,9 @@ export default function NewProfileScreen() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
+    },
+});

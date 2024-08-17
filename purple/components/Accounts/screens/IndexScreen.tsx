@@ -9,7 +9,7 @@ import {
 } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import { RefreshControl, StatusBar as RNStatusBar } from 'react-native';
+import { RefreshControl, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import AccountsTotalSummary from '../molecules/AccountsTotalSummary';
 import { DotsVerticalIcon } from '@/components/SVG/20x20';
 import AccountsAccordion from '../molecules/AccountsAccordion';
@@ -31,7 +31,7 @@ export default function AccountsScreen() {
     }, []);
 
     return (
-        <SafeAreaView className='bg-white relative h-full'>
+        <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='px-5 flex flex-col space-y-2.5'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg mt-2.5'>
@@ -68,3 +68,9 @@ export default function AccountsScreen() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
+    },
+});

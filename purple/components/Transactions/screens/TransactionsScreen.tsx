@@ -17,6 +17,7 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useCallback } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
+import { StatusBar as RNStatusBar } from 'react-native';
 import { CategoryIcon, ReceiptDetail, ReceiptHeader } from '../molecules/Receipt';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 
@@ -45,7 +46,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     );
 
     return (
-        <SafeAreaView className='bg-white relative h-full px-5'>
+        <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <CustomBottomSheetModal
                 modalKey='transactionReceiptScreen'
@@ -93,7 +94,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     </Svg>
                 </View>
             </CustomBottomSheetModal>
-            <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
+            <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                     My Transactions
                 </Text>
@@ -173,6 +174,9 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 100,
         paddingHorizontal: 20,
+    },
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
     },
 });
 export default memo(TransactionsScreen);
