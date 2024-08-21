@@ -20,7 +20,7 @@ export default function PlanHistoryList() {
     }, []);
 
     return (
-        <View className='flex flex-col space-y-5'>
+        <View className='flex flex-col space-y-5 mt-5'>
             <View className='flex flex-row w-full justify-between items-center'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                     My saving plans
