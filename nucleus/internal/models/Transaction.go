@@ -14,7 +14,7 @@ type Transaction struct {
 	gorm.Model
 	AccountId   uint    `json:"account_id"`
 	UserId      uint    `json:"user_id"`
-	Type        string  `gorm:"type:enum('credit', 'debit')"`
+	Type        string  `gorm:"not null"`
 	Amount      float64 `gorm:"not null" json:"amount"`
 	User        User    `gorm:"foreignKey:UserId"`
 	Account     Account `gorm:"foreignKey:AccountId"`

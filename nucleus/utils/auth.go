@@ -139,6 +139,7 @@ func GenerateSessionToken() (string, error) {
 func CreateSession(db *gorm.DB, userID uint) (models.TokenPair, error) {
 	token, err := GenerateSessionToken()
 	if err != nil {
+		ErrorLogger.Println(err)
 		return models.TokenPair{}, err
 	}
 
@@ -149,13 +150,16 @@ func CreateSession(db *gorm.DB, userID uint) (models.TokenPair, error) {
 	}
 	result := db.Create(&session)
 	if result.Error != nil {
+		ErrorLogger.Println(result.Error)
 		return models.TokenPair{}, result.Error
 	}
 
 	refreshToken, err := GenerateSessionToken()
 	if err != nil {
+		ErrorLogger.Println(err)
 		return models.TokenPair{}, err
 	}
+
 	refreshSession := models.RefreshToken{
 		SessionID: session.ID,
 		Token:     refreshToken,
@@ -163,6 +167,7 @@ func CreateSession(db *gorm.DB, userID uint) (models.TokenPair, error) {
 	}
 	result = db.Create(&refreshSession)
 	if result.Error != nil {
+		ErrorLogger.Println(result.Error)
 		return models.TokenPair{}, result.Error
 	}
 

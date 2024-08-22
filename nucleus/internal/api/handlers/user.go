@@ -37,17 +37,25 @@ func CreateUser(c *gin.Context) {
 	}
 
 	user := models.User{
-		Username:    signUp.Username,
-		Email:       signUp.Email,
-		Password:    hashedPassword,
-		PhoneNumber: signUp.PhoneNumber,
-		FirstName:   signUp.FirstName,
-		LastName:    signUp.LastName,
+		Username:     signUp.Username,
+		Email:        signUp.Email,
+		Password:     hashedPassword,
+		PhoneNumber:  signUp.PhoneNumber,
+		FirstName:    signUp.FirstName,
+		LastName:     signUp.LastName,
+		Accounts:     []models.Account{},
+		Plans:        []models.Plan{},
+		Transactions: []models.Transaction{},
 	}
 
 	result := db.Create(&user)
 	if result.Error != nil {
+		if result.Error == gorm.ErrDuplicatedKey {
+			c.JSON(400, types.Response{Status: 409, Message: "User already exists with these details", Data: nil})
+			return
+		}
 		c.JSON(500, types.Response{Status: 500, Message: fmt.Sprintf("Failed to create user: %s", result.Error.Error()), Data: nil})
+		return
 	}
 
 	c.JSON(201, types.Response{Status: 201, Message: "User created successfully", Data: user})
