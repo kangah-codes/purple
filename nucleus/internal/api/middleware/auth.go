@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
 	"nucleus/utils"
@@ -8,6 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func APIKeyMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKey := utils.EnvValue("API_KEY", "")
+		if apiKey != c.GetHeader("X-API-KEY") {
+			c.JSON(401, types.Response{Status: 401, Message: "Invalid API key", Data: nil})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -39,7 +53,7 @@ func SuperUserMiddleware(db *gorm.DB) gin.HandlerFunc {
 		user := models.User{}
 		result := db.First(&user, userID)
 		if result.Error != nil {
-			c.JSON(500, types.Response{Status: 500, Message: "Failed to fetch user", Data: nil})
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
 			c.Abort()
 			return
 		}

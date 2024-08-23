@@ -9,7 +9,7 @@ import (
 type Session struct {
 	gorm.Model
 	UserID    uint      `gorm:"not null"`
-	User      User      `gorm:"foreignKey:UserID"`
+	User      User      `gorm:"foreignKey:UserID" json:"-"`
 	Token     string    `gorm:"not null;index:session_token;unique"`
 	ExpiresAt time.Time `gorm:"not null"`
 }

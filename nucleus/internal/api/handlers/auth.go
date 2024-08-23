@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"net/http"
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
 	"nucleus/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,29 +37,29 @@ func SignIn(c *gin.Context) {
 	res := db.Where("user_id = ?", user.ID).Delete(&models.Session{})
 	if res.Error != nil {
 		utils.ErrorLogger.Printf("Failed to delete prior sessions: %v", res.Error)
-		c.JSON(500, types.Response{Status: 500, Message: "Failed to sign in", Data: nil})
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to sign in", Data: nil})
 		return
 	}
 
 	session, err := utils.CreateSession(db, user.ID)
 	if err != nil {
 		utils.ErrorLogger.Printf("Failed to create session: %v", err)
-		c.JSON(500, types.Response{Status: 500, Message: "Failed to create session", Data: nil})
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create session", Data: nil})
 		return
 	}
 
 	type Response struct {
-		AccessToken           string `json:"access_token"`
-		AccessTokenExpiresAt  string `json:"access_token_expires_at"`
-		RefreshToken          string `json:"refresh_token"`
-		RefreshTokenExpiresAt string `json:"refresh_token_expires_at"`
+		AccessToken           string    `json:"access_token"`
+		AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
+		RefreshToken          string    `json:"refresh_token"`
+		RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 	}
 
 	response := Response{
 		AccessToken:           session.AccessToken.Token,
-		AccessTokenExpiresAt:  session.AccessToken.ExpiresAt.String(),
+		AccessTokenExpiresAt:  session.AccessToken.ExpiresAt,
 		RefreshToken:          session.RefreshToken.Token,
-		RefreshTokenExpiresAt: session.RefreshToken.ExpiresAt.String(),
+		RefreshTokenExpiresAt: session.RefreshToken.ExpiresAt,
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "Sign in successful", Data: response})
