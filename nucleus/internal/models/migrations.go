@@ -15,6 +15,7 @@ func Migrate(db *gorm.DB) {
 		&Transaction{},
 		&Session{},
 		&RefreshToken{},
+		&UserSettings{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)

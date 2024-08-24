@@ -186,7 +186,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	update := types.UpdateAccountDTO{}
+	update := types.UpdateUserAccountDTO{}
 	if err := c.ShouldBindJSON(&update); err != nil {
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
