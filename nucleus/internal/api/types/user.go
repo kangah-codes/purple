@@ -14,7 +14,7 @@ type SignInDTO struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UpdateAccountDTO struct {
+type UpdateUserAccountDTO struct {
 	Username    string `json:"username" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
 }

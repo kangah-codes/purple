@@ -10,7 +10,7 @@ import * as Font from 'expo-font';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text, View } from '@/components/Shared/styled';
 import Toast from 'react-native-toast-message';
-import { toastConfig } from '@/components/Shared/molecules/Toast';
+import { toastConfig } from '@/components/Shared/atoms/Toast';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)',

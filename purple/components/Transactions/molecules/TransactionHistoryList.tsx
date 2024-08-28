@@ -17,6 +17,7 @@ import {
 import { transactionData } from '../../Index/constants';
 import TransactionHistoryCard from './TransactionHistoryCard';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function TransactionHistoryList() {
     // ref

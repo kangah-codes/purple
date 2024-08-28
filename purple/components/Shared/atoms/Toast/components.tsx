@@ -65,7 +65,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                     image: (
                         <Image
                             source={require('@/assets/images/graphics/red-warning.png')}
-                            style={tw`h-[20px] w-[20px] rounded-2xl`}
+                            style={tw`h-[29px] w-[29px] rounded-2xl`}
                         />
                     ),
                 };
@@ -83,11 +83,11 @@ export default function Toast({ type, ...props }: ToastProps) {
                 };
         }
     }, [type]);
-    const styles = getBackgroundColour();
+    const styles = useCallback(getBackgroundColour, [getBackgroundColour])();
 
     return (
         <View
-            className='w-[90%] rounded-full flex flex-row p-2 items-center mt-8 border'
+            className='w-[90%] rounded-full flex flex-row p-2 items-center mt-2.5 border'
             style={[toastStyles[type]]}
         >
             <View

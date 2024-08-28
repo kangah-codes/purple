@@ -25,7 +25,7 @@ export default function NewAccountScreen() {
 
     return (
         <>
-            <SafeAreaView className='bg-white relative h-full'>
+            <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
                 <ExpoStatusBar style='dark' />
                 <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
@@ -137,5 +137,8 @@ export default function NewAccountScreen() {
 const styles = StyleSheet.create({
     scrollView: {
         paddingBottom: 100,
+    },
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
     },
 });

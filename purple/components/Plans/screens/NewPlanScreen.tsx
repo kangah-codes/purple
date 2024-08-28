@@ -12,7 +12,13 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Switch } from 'react-native';
+import {
+    ActivityIndicator,
+    Platform,
+    StyleSheet,
+    Switch,
+    StatusBar as RNStatusBar,
+} from 'react-native';
 
 export default function NewPlanScreen() {
     const [isEnabled, setIsEnabled] = useState(false);
@@ -56,7 +62,10 @@ export default function NewPlanScreen() {
         <>
             <SafeAreaView className='bg-white relative h-full'>
                 <ExpoStatusBar style='dark' />
-                <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
+                <View
+                    style={styles.parentView}
+                    className='w-full flex flex-row px-5 py-2.5 justify-between items-center'
+                >
                     <View className='flex flex-col'>
                         <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                             New Plan
@@ -220,5 +229,8 @@ const styles = StyleSheet.create({
     },
     container: {
         paddingBottom: 100,
+    },
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
     },
 });

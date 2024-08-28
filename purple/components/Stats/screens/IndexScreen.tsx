@@ -56,7 +56,7 @@ export default function AccountsScreen() {
                 />
             </Portal>
 
-            <View className='px-5'>
+            <View className='px-5' style={styles.parentView}>
                 <View className='flex flex-row items-center justify-between py-2.5'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                         Stats
@@ -92,5 +92,8 @@ const styles = StyleSheet.create({
     },
     container: {
         paddingHorizontal: 20,
+    },
+    parentView: {
+        paddingTop: RNStatusBar.currentHeight,
     },
 });

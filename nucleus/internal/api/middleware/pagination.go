@@ -4,10 +4,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func PaginationMiddleware(db *gorm.DB) gin.HandlerFunc {
+func PaginationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		page, err := strconv.Atoi(c.Query("page"))
 		if err != nil {

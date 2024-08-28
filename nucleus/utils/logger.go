@@ -10,9 +10,7 @@ var (
 	ErrorLogger *log.Logger
 )
 
-func Init() (*log.Logger, *log.Logger) {
+func InitLogger() {
 	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	ErrorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-
-	return InfoLogger, ErrorLogger
 }
