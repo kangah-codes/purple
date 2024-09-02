@@ -21,10 +21,12 @@ import (
 )
 
 func main() {
-	// load env variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("GIN_MODE") == "" {
+		// load env variables only in dev
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	dsn := utils.EnvValue("DSN", "")
@@ -70,6 +72,7 @@ func main() {
 	routes.RegisterUserRoutes(v1)
 	routes.RegisterAuthRoutes(v1)
 	routes.RegisterAccountRoutes(v1)
+	routes.RegisterTransactionRoutes(v1)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{

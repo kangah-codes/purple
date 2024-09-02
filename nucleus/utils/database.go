@@ -29,7 +29,7 @@ func InitDB(dsn string) {
 // GetDB returns the current database instance
 func GetDB() *gorm.DB {
 	if db == nil {
-		log.Fatal("Database not initialized. Call InitDB first.")
+		ErrorLogger.Fatal("Database not initialized. Call InitDB first.")
 	}
 	return db
 }

@@ -17,7 +17,7 @@ type Transaction struct {
 	Type        string  `gorm:"not null"`
 	Amount      float64 `gorm:"not null" json:"amount"`
 	User        User    `gorm:"foreignKey:UserId" json:"-"`
-	Account     Account `gorm:"foreignKey:AccountId"`
+	Account     Account `gorm:"foreignKey:AccountId" json:"account"`
 	Note        string  `gorm:"size:255" json:"note"`
 	Category    string  `gorm:"size:100" json:"category"`
 	FromAccount uint    `json:"from_account"`

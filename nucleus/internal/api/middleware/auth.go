@@ -53,13 +53,13 @@ func SuperUserMiddleware(db *gorm.DB) gin.HandlerFunc {
 		user := models.User{}
 		result := db.First(&user, userID)
 		if result.Error != nil {
-			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "An error occured", Data: nil})
 			c.Abort()
 			return
 		}
 
 		if user.Role != models.SuperUser {
-			c.JSON(403, types.Response{Status: 403, Message: "Forbidden", Data: nil})
+			c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Forbidden", Data: nil})
 			c.Abort()
 			return
 		}

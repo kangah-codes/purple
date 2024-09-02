@@ -15,5 +15,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup) {
 		accountGroup.POST("/", middleware.AuthMiddleware(db), handlers.CreateAccount)
 		accountGroup.GET("/", middleware.AuthMiddleware(db), middleware.PaginationMiddleware(), handlers.FetchUserAccounts)
 		accountGroup.DELETE("/:accountID", middleware.AuthMiddleware(db), handlers.DeleteUserAccount)
+		accountGroup.PATCH("/:accountID", middleware.AuthMiddleware(db), handlers.UpdateUserAccount)
 	}
 }

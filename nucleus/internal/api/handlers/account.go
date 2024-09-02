@@ -57,6 +57,42 @@ func CreateAccount(c *gin.Context) {
 	}})
 }
 
+func UpdateUserAccount(c *gin.Context) {
+	db := utils.GetDB()
+	updateAccount := types.UpdateAccountDTO{}
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	accountID, _ := c.Params.Get("accountID")
+	account := models.Account{}
+	result := db.Where("id = ? AND user_id = ?", accountID, userID).First(&account)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Account not found", Data: nil})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&updateAccount); err != nil {
+		utils.ErrorLogger.Println(err)
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
+		return
+	}
+
+	account.Name = updateAccount.Name
+	account.Balance = updateAccount.Balance
+	account.Category = updateAccount.Category
+	result = db.Save(&account)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to update account: %s", result.Error.Error()), Data: nil})
+		return
+	}
+
+	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Account updated successfully", Data: account})
+}
+
 func FetchUserAccounts(c *gin.Context) {
 	db := utils.GetDB()
 	accounts := []models.Account{}
@@ -102,17 +138,41 @@ func DeleteUserAccount(c *gin.Context) {
 	}
 
 	account := models.Account{}
-	result := db.Where("id = ? AND user_id = ?", accountID, userID).First(&account)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Account not found", Data: nil})
+	if err := db.Where("id = ? AND user_id = ?", accountID, userID).First(&account).Error; err != nil {
+		utils.ErrorLogger.Printf("Failed to fetch account: %v", err)
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch account", Data: nil})
 		return
 	}
 
+	// Check if the account is a default account
 	if account.IsDefaultAccount {
 		c.JSON(http.StatusForbidden, types.Response{Status: http.StatusForbidden, Message: "Cannot delete default account", Data: nil})
 		return
 	}
 
-	db.Delete(&account)
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			utils.ErrorLogger.Printf("Failed to delete account: %v", r)
+			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete account", Data: nil})
+		}
+	}()
+
+	if err := tx.Where("id = ? AND user_id = ?", accountID, userID).Delete(&account).Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Failed to delete account: %v", err)
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete account", Data: nil})
+		return
+	}
+
+	if err := tx.Where("account_id = ? AND user_id = ?", accountID, userID).Delete(&models.Transaction{}).Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Failed to delete transactions: %v", err)
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete account", Data: nil})
+		return
+	}
+
+	tx.Commit()
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Account deleted successfully", Data: account})
 }

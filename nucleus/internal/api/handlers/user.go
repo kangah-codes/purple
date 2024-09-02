@@ -61,10 +61,11 @@ func CreateUser(c *gin.Context) {
 
 	// create a default cash account for this user
 	account := models.Account{
-		UserId:   user.ID,
-		Name:     "Cash",
-		Category: "💵 Cash",
-		Balance:  0.00,
+		UserId:           user.ID,
+		Name:             "Cash",
+		Category:         "💵 Cash",
+		Balance:          0.00,
+		IsDefaultAccount: true,
 	}
 
 	result = db.Create(&account)
