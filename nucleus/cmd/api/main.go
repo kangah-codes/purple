@@ -22,8 +22,8 @@ import (
 func main() {
 	utils.InitLogger()
 
+	// load env variables only in dev
 	if os.Getenv("GIN_MODE") != "prod" {
-		// load env variables only in dev
 		err := godotenv.Load()
 		if err != nil {
 			utils.ErrorLogger.Fatal("Error loading .env file")
