@@ -16,20 +16,21 @@ import (
 
 	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	utils.InitLogger()
 
 	// load env variables only in dev
-	// if os.Getenv("GIN_MODE") != "prod" {
-	// 	err := godotenv.Load()
-	// 	if err != nil {
-	// 		utils.ErrorLogger.Fatal("Error loading .env file")
-	// 	} else {
-	// 		utils.InfoLogger.Println("Loaded env variables")
-	// 	}
-	// }
+	if os.Getenv("GIN_MODE") != "release" {
+		err := godotenv.Load()
+		if err != nil {
+			utils.ErrorLogger.Fatal("Error loading .env file")
+		} else {
+			utils.InfoLogger.Println("Loaded env variables")
+		}
+	}
 
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
