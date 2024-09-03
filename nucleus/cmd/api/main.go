@@ -20,6 +20,8 @@ import (
 )
 
 func main() {
+	utils.InitLogger()
+
 	if os.Getenv("GIN_MODE") == "" {
 		// load env variables only in dev
 		err := godotenv.Load()
@@ -32,7 +34,6 @@ func main() {
 
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
-	utils.InitLogger()
 
 	// get db instance
 	db := utils.GetDB()
@@ -97,6 +98,10 @@ func main() {
 		cancel()
 		cleaner.Stop()
 	}()
+
+	// disable trusted proxies
+	engine := gin.Default()
+	engine.SetTrustedProxies(nil)
 
 	// Run the server on the specified port
 	if err := r.Run(":8080"); err != nil {
