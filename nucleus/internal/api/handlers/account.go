@@ -156,6 +156,7 @@ func DeleteUserAccount(c *gin.Context) {
 			tx.Rollback()
 			utils.ErrorLogger.Printf("Failed to delete account: %v", r)
 			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete account", Data: nil})
+			return
 		}
 	}()
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"nucleus/cmd/workers"
 	"nucleus/internal/api/middleware"
 	"nucleus/internal/api/routes"
@@ -25,7 +24,9 @@ func main() {
 		// load env variables only in dev
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			utils.ErrorLogger.Fatal("Error loading .env file")
+		} else {
+			utils.InfoLogger.Println("Loaded env variables")
 		}
 	}
 
@@ -36,7 +37,7 @@ func main() {
 	// get db instance
 	db := utils.GetDB()
 	if db == nil {
-		log.Fatal("Failed to connect to the database")
+		utils.ErrorLogger.Fatal("Failed to connect to the database")
 	}
 
 	// context for workers
@@ -73,6 +74,7 @@ func main() {
 	routes.RegisterAuthRoutes(v1)
 	routes.RegisterAccountRoutes(v1)
 	routes.RegisterTransactionRoutes(v1)
+	routes.RegisterPlanRoutes(v1)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{

@@ -26,6 +26,14 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	account := models.Account{}
+	result := db.First(&account, createTransaction.AccountId)
+	if result.Error != nil {
+		utils.ErrorLogger.Println(result.Error)
+		c.JSON(404, types.Response{Status: 404, Message: "Account not found", Data: nil})
+		return
+	}
+
 	transaction := models.Transaction{
 		AccountId: createTransaction.AccountId,
 		UserId:    userID.(uint),
@@ -33,6 +41,7 @@ func CreateTransaction(c *gin.Context) {
 		Amount:    createTransaction.Amount,
 		Note:      createTransaction.Note,
 		Category:  createTransaction.Category,
+		Account:   account,
 	}
 
 	// set transactions which aren't transfers to 0
@@ -44,22 +53,12 @@ func CreateTransaction(c *gin.Context) {
 		transaction.ToAccount = createTransaction.ToAccount
 	}
 
-	result := db.Create(&transaction)
+	result = db.Create(&transaction)
 	if result.Error != nil {
 		utils.ErrorLogger.Println(result.Error)
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create transaction", Data: nil})
 		return
 	}
-
-	// Fetch the related account data
-	account := models.Account{}
-	if err := db.Where("id = ?", transaction.AccountId).First(&account).Error; err != nil {
-		utils.ErrorLogger.Println(err)
-		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch account", Data: nil})
-		return
-	}
-
-	transaction.Account = account
 
 	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Transaction created", Data: transaction})
 }
@@ -150,7 +149,7 @@ func DeleteTransaction(c *gin.Context) {
 	}
 
 	if transaction.UserId != userID {
-		c.JSON(403, types.Response{Status: 403, Message: "Forbidden", Data: nil})
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
 		return
 	}
 

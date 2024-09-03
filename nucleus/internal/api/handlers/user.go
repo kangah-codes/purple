@@ -93,26 +93,53 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	// delete all related accounts, plans and transactions
-	tx := db.Where("user_id = ?", userID).Delete(&models.Account{})
-	if tx.Error != nil {
+	// // delete all related accounts, plans and transactions
+	// tx := db.Where("user_id = ?", userID).Delete(&models.Account{})
+	// if tx.Error != nil {
+	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+	// 	return
+	// }
+
+	// tx = db.Where("user_id = ?", userID).Delete(&models.Plan{})
+	// if tx.Error != nil {
+	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+	// 	return
+	// }
+
+	// tx = db.Where("user_id = ?", userID).Delete(&models.Transaction{})
+	// if tx.Error != nil {
+	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+	// 	return
+	// }
+
+	// db.Delete(&user)
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+		}
+	}()
+
+	if err := tx.Where("user_id = ?", userID).Delete(&models.Account{}).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
 		return
 	}
 
-	tx = db.Where("user_id = ?", userID).Delete(&models.Plan{})
-	if tx.Error != nil {
+	if err := tx.Where("user_id = ?", userID).Delete(&models.Plan{}).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
 		return
 	}
 
-	tx = db.Where("user_id = ?", userID).Delete(&models.Transaction{})
-	if tx.Error != nil {
+	if err := tx.Where("user_id = ?", userID).Delete(&models.Transaction{}).Error; err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
 		return
 	}
 
-	db.Delete(&user)
+	tx.Commit()
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "User deleted successfully", Data: nil})
 }
 
