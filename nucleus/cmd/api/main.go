@@ -22,7 +22,7 @@ import (
 func main() {
 	utils.InitLogger()
 
-	if os.Getenv("GIN_MODE") == "" {
+	if os.Getenv("GIN_MODE") != "prod" {
 		// load env variables only in dev
 		err := godotenv.Load()
 		if err != nil {
