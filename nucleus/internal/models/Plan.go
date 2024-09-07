@@ -22,15 +22,15 @@ const (
 type Plan struct {
 	gorm.Model
 	UserId           uint      `json:"user_id"`
-	User             User      `gorm:"foreignKey:UserId"`
-	Type             string    `gorm:"type:enum('saving', 'expense')"`
-	Category         string    `gorm:"size:100;not null"`
+	User             User      `gorm:"foreignKey:UserId" json:"-"`
+	Type             string    `gorm:"not null" json:"type"`
+	Category         string    `gorm:"size:100;not null" json:"category"`
 	Target           float64   `gorm:"not null" json:"target"`
 	Balance          float64   `gorm:"not null" json:"balance"`
 	AccountId        uint      `json:"account_id"`
-	Account          Account   `gorm:"foreignKey:AccountId"`
+	Account          Account   `gorm:"foreignKey:AccountId" json:"account"`
 	StartDate        time.Time `json:"start_date"`
 	EndDate          time.Time `json:"end_date"`
-	DepositFrequency string    `gorm:"type:enum('daily', 'weekly', 'bi-weekly', 'monthly', 'yearly')"`
+	DepositFrequency string    `gorm:"not null" json:"deposit_frequency"`
 	PushNotification bool      `json:"push_notification"`
 }

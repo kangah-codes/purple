@@ -9,12 +9,13 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
 
 export default function NewTransactionScreen() {
+    const { type } = useLocalSearchParams();
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
     const [isLoading, setIsLoading] = useState(false);
@@ -94,9 +95,7 @@ export default function NewTransactionScreen() {
                                         className='w-full flex items-center justify-center py-2.5 rounded-full'
                                     >
                                         <Text
-                                            style={{
-                                                fontFamily: 'Suprapower',
-                                            }}
+                                            style={GLOBAL_STYLESHEET.suprapower}
                                             className='text-sm'
                                         >
                                             {transaction.label}
@@ -115,7 +114,7 @@ export default function NewTransactionScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
                             Amount
                         </Text>
 
