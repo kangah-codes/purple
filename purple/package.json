@@ -54,6 +54,7 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-toast-message": "^2.2.0",
     "react-native-web": "~0.19.6",
+    "react-query": "^3.39.3",
     "twrnc": "^4.2.0",
     "zustand": "^4.5.1"
   },
