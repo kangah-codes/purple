@@ -20,7 +20,7 @@ func SignIn(c *gin.Context) {
 	}
 
 	user := models.User{}
-	result := db.Preload("Transaction").Preload("Account").Preload("Plan").Where("username = ?", signIn.Username).First(&user)
+	result := db.Preload("Transactions").Preload("Accounts").Preload("Plans").Where("username = ?", signIn.Username).First(&user)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Failed to find user: %v", result.Error)
 		c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
