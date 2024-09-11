@@ -20,7 +20,7 @@ func SignIn(c *gin.Context) {
 	}
 
 	user := models.User{}
-	result := db.Where("email = ?", signIn.Username).First(&user)
+	result := db.Preload("Transaction").Preload("Account").Preload("Plan").Where("username = ?", signIn.Username).First(&user)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Failed to find user: %v", result.Error)
 		c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
@@ -74,10 +74,11 @@ func SignIn(c *gin.Context) {
 	}
 
 	type Response struct {
-		AccessToken           string    `json:"access_token"`
-		AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
-		RefreshToken          string    `json:"refresh_token"`
-		RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
+		AccessToken           string      `json:"access_token"`
+		AccessTokenExpiresAt  time.Time   `json:"access_token_expires_at"`
+		RefreshToken          string      `json:"refresh_token"`
+		RefreshTokenExpiresAt time.Time   `json:"refresh_token_expires_at"`
+		User                  models.User `json:"user"`
 	}
 
 	response := Response{
@@ -85,6 +86,7 @@ func SignIn(c *gin.Context) {
 		AccessTokenExpiresAt:  session.AccessToken.ExpiresAt,
 		RefreshToken:          session.RefreshToken.Token,
 		RefreshTokenExpiresAt: session.RefreshToken.ExpiresAt,
+		User:                  user,
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "Sign in successful", Data: response})
