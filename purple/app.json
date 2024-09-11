@@ -56,7 +56,8 @@
             "./assets/fonts/analogue85black.ttf"
           ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,15 +1,16 @@
+import { useAuth } from '@/components/Auth/hooks';
 import Avatar from '@/components/Shared/atoms/Avatar';
 import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import useHasOnboarded from '@/lib/db/db';
 import pkg from '@/package.json';
+import { Redirect } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import ProfilePages from '../molecules/ProfilePages';
 import Toast from 'react-native-toast-message';
+import ProfilePages from '../molecules/ProfilePages';
 
 export default function NewProfileScreen() {
-    const { setHasOnboarded } = useHasOnboarded();
+    const { destroySession, sessionData, hasOnboarded, setOnboarded } = useAuth();
     const showToast = () => {
         Toast.show({
             type: 'error',
@@ -19,6 +20,12 @@ export default function NewProfileScreen() {
             },
         });
     };
+
+    console.log(sessionData, hasOnboarded);
+
+    // if (!sessionData) {
+    //     return <Redirect href={'/onboarding/steps'} />;
+    // }
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -33,13 +40,13 @@ export default function NewProfileScreen() {
 
                 <View className='flex flex-col items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-2xl text-black'>
-                        Joshua Akangah
+                        {sessionData?.user.first_name} {sessionData?.user.last_name}
                     </Text>
                     <Text
                         style={GLOBAL_STYLESHEET.interMedium}
                         className='text-sm text-black tracking-tighter'
                     >
-                        akangah89@gmail.com
+                        {sessionData?.user.email}
                     </Text>
                 </View>
             </View>
@@ -57,15 +64,31 @@ export default function NewProfileScreen() {
             <Button
                 title='RESET'
                 onPress={() => {
-                    setHasOnboarded(false).then(() =>
+                    setOnboarded(false).then(() =>
+                        destroySession().then(() => {
+                            Toast.show({
+                                type: 'info',
+                                props: {
+                                    text1: 'Cache reset',
+                                    text2: 'The entire app cache has been cleared!',
+                                },
+                            });
+                        }),
+                    );
+                }}
+            />
+            <Button
+                title='Sign Out'
+                onPress={() => {
+                    destroySession().then(() => {
                         Toast.show({
                             type: 'info',
                             props: {
-                                text1: 'Cache reset',
-                                text2: 'The entire app cache has been cleared!',
+                                text1: 'Sign Out',
+                                text2: 'Sign Out',
                             },
-                        }),
-                    );
+                        });
+                    });
                 }}
             />
             <Button title='Show Toast' onPress={showToast} />

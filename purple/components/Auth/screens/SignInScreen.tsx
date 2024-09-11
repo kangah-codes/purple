@@ -1,3 +1,4 @@
+import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import {
     InputField,
     LinearGradient,
@@ -7,7 +8,6 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import useHasOnboarded from '@/lib/db/db';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -21,22 +21,58 @@ import {
     StatusBar as RNStatusBar,
     TouchableWithoutFeedback,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
+import { useAuth, useLogin } from '../hooks';
 
 export default function SignInScreen() {
     const [loading, setLoading] = useState(false);
-    const { setHasOnboarded } = useHasOnboarded();
+    const { setSessionData } = useAuth();
     const {
         control,
         handleSubmit,
         formState: { errors },
     } = useForm({
         defaultValues: {
-            fullName: '',
-            userName: '',
-            email: '',
+            username: '',
+            password: '',
         },
     });
+    const { mutate, isLoading, error, data } = useLogin();
+    const signUp = (loginInformation: { username: string; password: string }) => {
+        console.log(isLoading);
+        mutate(loginInformation, {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'Invalid username/password',
+                    },
+                });
+            },
+            onSuccess: (res) => {
+                const { data } = res;
+                console.log(data, 'RESPONSE FROM LOGIN');
+                setSessionData(data)
+                    .then(() => {
+                        router.push('/(tabs)');
+                    })
+                    .catch(() => {
+                        Toast.show({
+                            type: 'error',
+                            props: {
+                                text1: 'Error!',
+                                text2: "Couldn't sign you in. Try again later",
+                            },
+                        });
+                    });
+                console.log(data);
+                // setHasOnboarded(true).then(() => router.push('/'));
+            },
+        });
+        console.log(isLoading, error, data, loginInformation);
+    };
 
     return (
         <SafeAreaView
@@ -80,14 +116,10 @@ export default function SignInScreen() {
                                         control={control}
                                         rules={{
                                             required: "Username can't be empty",
-                                            pattern: {
-                                                value: /^[a-zA-Z0-9]{1,10}$/,
-                                                message: 'Invalid username',
-                                            },
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
-                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                                                className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
                                                 style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='gyimihendrix'
@@ -97,14 +129,14 @@ export default function SignInScreen() {
                                                 autoCapitalize='none'
                                             />
                                         )}
-                                        name='userName'
+                                        name='username'
                                     />
-                                    {errors.userName && (
+                                    {errors.username && (
                                         <Text
                                             style={{ fontFamily: 'InterMedium' }}
                                             className='text-xs text-red-500'
                                         >
-                                            {errors.userName.message}
+                                            {errors.username.message}
                                         </Text>
                                     )}
                                 </View>
@@ -114,60 +146,43 @@ export default function SignInScreen() {
                                     style={{ fontFamily: 'InterBold' }}
                                     className='text-xs text-gray-600'
                                 >
-                                    Email
+                                    password
                                 </Text> */}
 
                                     <Controller
                                         control={control}
                                         rules={{
-                                            required: "Email can't be empty",
-                                            pattern: {
-                                                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                                message: 'Invalid email address',
-                                            },
+                                            required: "Password can't be empty",
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
-                                            <InputField
-                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
+                                            <ProtectedInput
+                                                className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
                                                 style={GLOBAL_STYLESHEET.interSemiBold}
                                                 cursorColor={'#8B5CF6'}
-                                                placeholder='hello@purpleapp.com'
+                                                placeholder='password'
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
                                                 value={value}
-                                                secureTextEntry
                                             />
                                         )}
-                                        name='email'
+                                        name='password'
                                     />
-                                    {errors.email && (
+                                    {errors.password && (
                                         <Text
                                             style={{ fontFamily: 'InterMedium' }}
                                             className='text-xs text-red-500'
                                         >
-                                            {errors.email.message}
+                                            {errors.password.message}
                                         </Text>
                                     )}
                                 </View>
 
-                                <TouchableOpacity
-                                    className='w-full'
-                                    onPress={() => {
-                                        setLoading(true);
-                                        setHasOnboarded(true)
-                                            .then(() => {
-                                                router.push('/(tabs)/');
-                                            })
-                                            .finally(() => {
-                                                setLoading(false);
-                                            });
-                                    }}
-                                >
+                                <TouchableOpacity className='w-full' onPress={handleSubmit(signUp)}>
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 py-2.5 h-12'
                                         colors={['#c084fc', '#9333ea']}
                                     >
-                                        {loading ? (
+                                        {isLoading ? (
                                             <ActivityIndicator size={18} color='#fff' />
                                         ) : (
                                             <Text

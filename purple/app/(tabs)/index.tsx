@@ -1,11 +1,12 @@
+import { useAuth } from '@/components/Auth/hooks';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
-import useHasOnboarded from '@/lib/db/db';
-import { Redirect } from 'expo-router';
 import { SafeAreaView, View } from '@/components/Shared/styled';
 import { ActivityIndicator } from 'react-native';
 
 export default function Screen() {
-    const { hasOnboarded, loading } = useHasOnboarded();
+    const { sessionData } = useAuth();
+
+    const loading = false;
 
     if (loading) {
         return (
@@ -17,10 +18,6 @@ export default function Screen() {
                 </View>
             </SafeAreaView>
         );
-    }
-
-    if (!hasOnboarded) {
-        return <Redirect href='/onboarding/' />;
     }
 
     return <IndexScreen />;

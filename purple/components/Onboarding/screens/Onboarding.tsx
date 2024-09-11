@@ -1,13 +1,17 @@
+import { useAuth } from '@/components/Auth/hooks';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import React, { useRef } from 'react';
+import React from 'react';
 import Onboarding from 'react-native-onboarding-swiper';
+import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import DoneButton from '../molecules/DoneButton';
 import NextButton from '../molecules/NextButton';
 import Pagination from '../molecules/Pagination';
 
-export default function Screen({}) {
+export default function Screen() {
+    const { setOnboarded } = useAuth();
+
     return (
         <Onboarding
             DotComponent={Pagination}
@@ -17,10 +21,23 @@ export default function Screen({}) {
             skipToPage={3}
             DoneButtonComponent={DoneButton}
             onDone={() => {
-                // setHasOnboardedTrue();
+                // setOnboardedTrue();
                 // router.push('/(tabs)');
                 // handleFormSubmit();
-                router.replace('/onboarding/landing');
+                setOnboarded(true)
+                    .then(() => {
+                        alert('ONBOARDED');
+                        router.replace('/onboarding/landing');
+                    })
+                    .catch((error) => {
+                        Toast.show({
+                            type: 'error',
+                            props: {
+                                text1: 'Error',
+                                text2: 'Something went wrong',
+                            },
+                        });
+                    });
             }}
             titleStyles={{ fontSize: 30, fontFamily: 'Suprapower', ...tw`px-5` }}
             subTitleStyles={{ fontSize: 15, fontFamily: 'InterMedium', ...tw`px-5` }}

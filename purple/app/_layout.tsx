@@ -11,10 +11,16 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Text, View } from '@/components/Shared/styled';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { AuthProvider, useAuth } from '@/components/Auth/hooks';
+import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 
 export const unstable_settings = {
-    initialRouteName: '(tabs)',
+    initialRouteName: 'onboarding/steps',
 };
+const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: 2 } },
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -53,11 +59,20 @@ export default function RootLayout() {
         return null;
     }
 
-    return <RootLayoutNav />;
+    return (
+        <ErrorBoundary>
+            <AuthProvider>
+                <RootLayoutNav />
+            </AuthProvider>
+        </ErrorBoundary>
+    );
 }
 
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
+    const { isLoading } = useAuth();
+
+    if (isLoading) return null;
 
     useEffect(() => {
         async function hideSplashScreen() {
@@ -73,37 +88,36 @@ function RootLayoutNav() {
                 <BottomSheetModalProvider>
                     <PortalProvider>
                         <ThemeProvider value={DefaultTheme}>
-                            <Stack
-                                screenOptions={{
-                                    contentStyle: {
-                                        backgroundColor: '#fff',
-                                    },
-                                }}
-                            >
-                                <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                                <Stack.Screen name='plans' options={{ headerShown: false }} />
-                                <Stack.Screen name='accounts' options={{ headerShown: false }} />
-                                <Stack.Screen
-                                    name='transactions'
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen name='onboarding' options={{ headerShown: false }} />
-                                <Stack.Screen name='auth' options={{ headerShown: false }} />
-                            </Stack>
+                            <QueryClientProvider client={queryClient}>
+                                <Stack
+                                    screenOptions={{
+                                        contentStyle: {
+                                            backgroundColor: '#fff',
+                                        },
+                                    }}
+                                >
+                                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                                    <Stack.Screen name='plans' options={{ headerShown: false }} />
+                                    <Stack.Screen
+                                        name='accounts'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name='transactions'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name='onboarding'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen name='auth' options={{ headerShown: false }} />
+                                </Stack>
+                            </QueryClientProvider>
                         </ThemeProvider>
                     </PortalProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>
             <Toast config={toastConfig} />
         </>
-    );
-}
-
-export function ErrorBoundary(props: ErrorBoundaryProps) {
-    return (
-        <View style={{ flex: 1, backgroundColor: 'red' }}>
-            <Text>{props.error.message}</Text>
-            <Text onPress={props.retry}>Try Again?</Text>
-        </View>
     );
 }

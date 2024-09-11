@@ -13,7 +13,7 @@ export default function DoneButton(props: any) {
                         style={{ fontFamily: 'InterBold' }}
                         className='text-sm text-white tracking-tight'
                     >
-                        Done
+                        Get Started
                     </Text>
                 </LinearGradient>
             </TouchableOpacity>

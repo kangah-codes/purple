@@ -7,7 +7,6 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import useHasOnboarded from '@/lib/db/db';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -22,10 +21,11 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import tw from 'twrnc';
+import { useAuth } from '../hooks';
 
 export default function SignUpScreen() {
     const [loading, setLoading] = useState(false);
-    const { setHasOnboarded } = useHasOnboarded();
+    const { setOnboarded } = useAuth();
     const {
         control,
         handleSubmit,
@@ -218,7 +218,7 @@ export default function SignUpScreen() {
                                     className='w-full'
                                     onPress={() => {
                                         setLoading(true);
-                                        setHasOnboarded(true)
+                                        setOnboarded(true)
                                             .then(() => {
                                                 router.push('/(tabs)/');
                                             })

@@ -1,6 +1,7 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 
+import { useAuth } from '@/components/Auth/hooks';
 import {
     BarLineChartIcon,
     CoinSwapIcon,
@@ -12,6 +13,14 @@ import {
 import Colors from '@/constants/Colors';
 
 export default function TabLayout() {
+    const { isAuthenticated } = useAuth();
+
+    console.log('TABS isAuthenticated', isAuthenticated);
+
+    if (!isAuthenticated) {
+        return <Redirect href='/onboarding/landing' />;
+    }
+
     return (
         <Tabs
             initialRouteName='plans'
