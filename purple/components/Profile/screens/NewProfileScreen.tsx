@@ -36,11 +36,17 @@ export default function NewProfileScreen() {
                 </Text>
             </View>
             <View className='flex items-center justify-center space-y-5 mt-5'>
-                <Avatar colour='purple' content='JA' size='xl' />
+                <Avatar
+                    colour='purple'
+                    // TODO: do something proper here
+                    // @ts-ignore
+                    content={sessionData?.user.username.at(0)?.toLocaleUpperCase()}
+                    size='xl'
+                />
 
                 <View className='flex flex-col items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-2xl text-black'>
-                        {sessionData?.user.first_name} {sessionData?.user.last_name}
+                        {sessionData?.user.username}
                     </Text>
                     <Text
                         style={GLOBAL_STYLESHEET.interMedium}

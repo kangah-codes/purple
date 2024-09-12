@@ -20,8 +20,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useLogin = (): UseMutationResult<GenericAPIResponse<SessionData>, Error> => {
-    return useMutation(['login'], async (loginInformation) => {
+export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionData>, Error> => {
+    return useMutation(['sign-in'], async (loginInformation) => {
         const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth`, {
             method: 'POST',
             headers: {
@@ -34,6 +34,48 @@ export const useLogin = (): UseMutationResult<GenericAPIResponse<SessionData>, E
         if (!res.ok) {
             const errorResponse = await res.json();
             throw new Error(errorResponse.message || 'Login failed');
+        }
+
+        const json = await res.json();
+        return json;
+    });
+};
+
+export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionData>, Error> => {
+    return useMutation(['sign-up'], async (signUpInformation) => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/sign-up`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(signUpInformation),
+        });
+
+        if (!res.ok) {
+            const errorResponse = await res.json();
+            throw new Error(errorResponse.message || 'An error occured');
+        }
+
+        const json = await res.json();
+        return json;
+    });
+};
+
+export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, Error> => {
+    return useMutation(['check-username'], async (data) => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/check-username`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const errorResponse = await res.json();
+            throw new Error(errorResponse.message || 'An error occured');
         }
 
         const json = await res.json();

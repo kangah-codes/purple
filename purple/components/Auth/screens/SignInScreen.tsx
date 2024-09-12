@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
-import { useAuth, useLogin } from '../hooks';
+import { useAuth, useSignIn } from '../hooks';
 
 export default function SignInScreen() {
     const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function SignInScreen() {
             password: '',
         },
     });
-    const { mutate, isLoading, error, data } = useLogin();
+    const { mutate, isLoading, error, data } = useSignIn();
     const signUp = (loginInformation: { username: string; password: string }) => {
         console.log(isLoading);
         mutate(loginInformation, {

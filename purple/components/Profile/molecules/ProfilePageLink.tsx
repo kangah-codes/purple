@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { ProfilePageLinkProps } from '../schema';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function ProfilePageLink({ icon, title, link }: ProfilePageLinkProps) {
     return (
@@ -11,8 +12,8 @@ export default function ProfilePageLink({ icon, title, link }: ProfilePageLinkPr
                         {icon}
                     </View>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
-                        className='text-sm text-black tracking-tighter'
+                        style={GLOBAL_STYLESHEET.suprapower}
+                        className='text-sm text-black tracking-tight'
                     >
                         {title}
                     </Text>

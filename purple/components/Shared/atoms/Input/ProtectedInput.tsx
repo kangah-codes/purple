@@ -10,10 +10,10 @@ type ProtectedInputProps = TextInputProps & {
 export default function ProtectedInput(props: ProtectedInputProps) {
     const [hideValue, setHideValue] = useState(true);
     return (
-        <View className='relative'>
+        <View className='relative flex justify-center'>
             <InputField {...props} secureTextEntry={hideValue} />
 
-            <View className='absolute right-0 flex pr-5 top-[16px] m-auto z-10'>
+            <View className='absolute right-0 flex pr-5 z-1'>
                 {hideValue ? (
                     <EyeOpenIcon
                         width={16}

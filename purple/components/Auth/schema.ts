@@ -51,10 +51,7 @@ export type SessionData = {
 };
 
 export type SignUpScreenData = {
-    firstName: string;
-    lastName: string;
-    userName: string;
-    phone: string;
+    username: string;
     password: string;
     confirmPassword: string;
     email: string;
