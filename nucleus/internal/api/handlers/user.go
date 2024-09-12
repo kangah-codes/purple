@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateUser(c *gin.Context) {
+func SignUp(c *gin.Context) {
 	signUp := types.SignUpDTO{}
 	db := utils.GetDB()
 	if err := c.ShouldBindJSON(&signUp); err != nil {
