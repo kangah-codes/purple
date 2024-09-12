@@ -17,6 +17,6 @@ func RegisterUserRoutes(r *gin.RouterGroup) {
 		userGroup.GET("/:id", middleware.AuthMiddleware(db), middleware.PaginationMiddleware(), handlers.FetchUser)
 		userGroup.PUT("/:id", middleware.AuthMiddleware(db), handlers.UpdateUser)
 		userGroup.DELETE("/:id", middleware.AuthMiddleware(db), handlers.DeleteUser)
-		userGroup.POST("/check-username", middleware.AuthMiddleware(db), handlers.CheckAvailableUsername)
+		userGroup.POST("/check-username", handlers.CheckAvailableUsername)
 	}
 }
