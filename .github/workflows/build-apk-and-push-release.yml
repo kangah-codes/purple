@@ -53,6 +53,12 @@ jobs:
               run: yarn install
               working-directory: purple
 
+            - name: Create .env file for build
+              run: |
+                  echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
+                  echo "EXPO_PUBLIC_API_KEY=${{secrets.API_KEY}}" >> .env
+              working-directory: purple
+
             - name: Build APK
               run: eas build -p android --profile preview --local --output purple.apk
               working-directory: purple
