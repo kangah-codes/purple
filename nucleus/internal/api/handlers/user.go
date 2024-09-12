@@ -198,11 +198,14 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user.PhoneNumber = update.PhoneNumber
 	user.Username = update.Username
 
 	result = db.Save(&user)
 	if result.Error != nil {
+		if result.Error == gorm.ErrDuplicatedKey {
+			c.JSON(400, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: nil})
 		return
 	}
