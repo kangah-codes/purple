@@ -9,11 +9,13 @@ import {
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
+import tw from 'twrnc';
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function PlansScreen() {
     const [index, setIndex] = useState(0);
@@ -25,16 +27,44 @@ export default function PlansScreen() {
         router.push('/plans/new-plan');
     };
 
-    function renderTabBar() {
+    const horizontalPadding = 10; // Add this line to define the horizontal padding
+    const width = screenWidth - 40 - 2 * horizontalPadding; // Subtract the horizontal padding from both sides
+    const translateXAnim = useRef(new Animated.Value(0)).current;
+    const tabWidth = width / routes.length;
+
+    useEffect(() => {
+        Animated.spring(translateXAnim, {
+            toValue: index * tabWidth,
+            useNativeDriver: true,
+        }).start();
+    }, [index, tabWidth]);
+
+    const renderTabBar = useCallback(() => {
         return (
             <View className='px-5'>
-                <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5 mb-5'>
+                <View
+                    className='w-full bg-purple-100 rounded-full py-2 flex flex-row mb-5 items-center'
+                    style={{
+                        paddingHorizontal: horizontalPadding,
+                    }}
+                >
+                    <Animated.View
+                        style={{
+                            position: 'absolute',
+                            width: `${100 / routes.length}%`,
+                            height: '100%',
+                            backgroundColor: '#fff',
+                            borderRadius: 999,
+                            transform: [{ translateX: translateXAnim }],
+                            // ...tw`mx-3`,
+                            left: horizontalPadding,
+                        }}
+                    />
                     {routes.map((route, i) => {
                         return (
                             <View
-                                className='flex-grow flex items-center justify-center rounded-full'
                                 style={{
-                                    backgroundColor: index === i ? '#fff' : 'rgb(243 232 255)',
+                                    ...tw`flex-grow flex items-center justify-center rounded-full`,
                                 }}
                                 key={route.title}
                             >
@@ -55,7 +85,7 @@ export default function PlansScreen() {
                 </View>
             </View>
         );
-    }
+    }, [routes, index]);
 
     const renderScene = SceneMap({
         expenses: ExpensesScreen,

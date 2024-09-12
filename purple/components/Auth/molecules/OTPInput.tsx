@@ -1,6 +1,6 @@
 import { View } from '@/components/Shared/styled';
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { TextInput, Animated } from 'react-native';
+import { TextInput, Animated, Dimensions } from 'react-native';
 import tw from 'twrnc';
 
 interface OTPInputProps {
@@ -11,9 +11,12 @@ interface OTPInputProps {
     onComplete: (otp: string) => void;
 }
 
+const { width: screenWidth } = Dimensions.get('window');
+
 export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete }: OTPInputProps) {
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const borderColorAnim = useRef(new Animated.Value(0)).current;
+    const inputWidth = screenWidth / codes.length - 20;
 
     useEffect(() => {
         Animated.timing(borderColorAnim, {
@@ -47,6 +50,8 @@ export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete 
         });
     };
 
+    console.log(inputWidth);
+
     return (
         <View className='flex w-full flex-row justify-between'>
             {codes.map((code, index) => (
@@ -55,7 +60,7 @@ export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete 
                     style={{
                         borderColor: interpolateBorderColor(index),
                         borderWidth: 2,
-                        borderRadius: 8,
+                        borderRadius: 999,
                     }}
                 >
                     <TextInput
@@ -64,7 +69,9 @@ export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete 
                         enterKeyHint='next'
                         style={{
                             fontFamily: 'Suprapower',
-                            ...tw`bg-purple-50 text-center rounded-lg px-2 py-1 w-[48px] h-[48px]`,
+                            ...tw`bg-purple-50 text-center rounded-full px-2 py-1`,
+                            width: inputWidth,
+                            height: 48,
                         }}
                         inputMode='numeric'
                         onChangeText={(text) => handleChangeText(text, index)}

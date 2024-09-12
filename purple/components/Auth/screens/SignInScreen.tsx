@@ -112,6 +112,12 @@ export default function SignInScreen() {
                         >
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
+                                    <Text
+                                        style={{ fontFamily: 'InterBold' }}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Username
+                                    </Text>
                                     <Controller
                                         control={control}
                                         rules={{
@@ -142,12 +148,12 @@ export default function SignInScreen() {
                                 </View>
 
                                 <View className='flex flex-col space-y-1'>
-                                    {/* <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-600'
-                                >
-                                    password
-                                </Text> */}
+                                    <Text
+                                        style={{ fontFamily: 'InterBold' }}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Password
+                                    </Text>
 
                                     <Controller
                                         control={control}

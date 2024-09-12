@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { GenericAPIResponse } from '@/@types/request';
+import * as SecureStore from 'expo-secure-store';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UseMutationResult, useMutation } from 'react-query';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { SessionData } from './schema';
 
 interface AuthContextType {
@@ -73,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = useCallback(async () => {
         setIsLoading(true);
         try {
-            const sessionData = (await getToken('session_data')) as unknown as SessionData | null;
+            const sessionData = await getToken<SessionData>('session_data');
             const isSessionValid =
                 sessionData?.access_token && !isTokenExpired(sessionData.access_token_expires_at);
             const isRefreshValid =
@@ -177,10 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ],
     );
 
-    console.log(JSON.stringify(sessionData), 'Session Data');
-
     if (isLoading) {
-        // You can return a loading component here if you want
         return null;
     }
 

@@ -26,7 +26,7 @@ import { ChevronLeftIcon } from '@/components/SVG/24x24';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function OTPScreen() {
-    const [codes, setCodes] = useState<string[]>(['', '', '', '', '', '']);
+    const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
     const inputRefs = Array.from({ length: codes.length }, () => useRef<TextInput>(null));
     const [loading, setLoading] = useState(false);
     const [hasRequestedCode, setHasRequestedCode] = useState(false);

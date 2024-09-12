@@ -49,3 +49,13 @@ export type SessionData = {
     refresh_token_expires_at: string;
     user: User;
 };
+
+export type SignUpScreenData = {
+    firstName: string;
+    lastName: string;
+    userName: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+    email: string;
+};

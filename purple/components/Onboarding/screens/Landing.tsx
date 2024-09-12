@@ -10,7 +10,13 @@ export default function Landing() {
     return (
         <View className='bg-white relative h-full flex flex-col items-stretch'>
             <ExpoStatusBar style='dark' />
-            <View className='bg-purple-100 flex-grow flex items-center justify-center'>
+            <View className='bg-purple-100 flex-grow flex items-center justify-center relative'>
+                <View className='absolute w-full h-full'>
+                    <Image
+                        source={require('@/assets/images/graphics/gradient-2.png')}
+                        style={tw`h-full w-full`}
+                    />
+                </View>
                 <Image
                     source={require('@/assets/images/graphics/12.png')}
                     style={tw`h-72 w-72 mt-10`}
