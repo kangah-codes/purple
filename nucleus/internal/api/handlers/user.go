@@ -93,25 +93,6 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	// // delete all related accounts, plans and transactions
-	// tx := db.Where("user_id = ?", userID).Delete(&models.Account{})
-	// if tx.Error != nil {
-	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
-	// 	return
-	// }
-
-	// tx = db.Where("user_id = ?", userID).Delete(&models.Plan{})
-	// if tx.Error != nil {
-	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
-	// 	return
-	// }
-
-	// tx = db.Where("user_id = ?", userID).Delete(&models.Transaction{})
-	// if tx.Error != nil {
-	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
-	// 	return
-	// }
-
 	// db.Delete(&user)
 	tx := db.Begin()
 	defer func() {
@@ -230,4 +211,25 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "User updated successfully", Data: user})
+}
+
+func CheckAvailableUsername(c *gin.Context) {
+	db := utils.GetDB()
+	checkUsername := types.CheckAvailableUsernameDTO{}
+	if err := c.ShouldBindJSON(&checkUsername); err != nil {
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
+		return
+	}
+
+	result := db.Where("username = ?", checkUsername.Username).First(&models.User{})
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			c.JSON(200, types.Response{Status: http.StatusOK, Message: "Username available", Data: nil})
+		} else {
+			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error", Data: nil})
+		}
+		return
+	}
+
+	c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available", Data: nil})
 }
