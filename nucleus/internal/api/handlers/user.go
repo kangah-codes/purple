@@ -131,6 +131,7 @@ func FetchUser(c *gin.Context) {
 		return db.Limit(5)
 	}).First(&user, c.Param("id"))
 	if result.Error != nil {
+		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
 		} else {
@@ -140,6 +141,8 @@ func FetchUser(c *gin.Context) {
 	}
 
 	if result.Error != nil {
+		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
+
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
 		return
 	}
