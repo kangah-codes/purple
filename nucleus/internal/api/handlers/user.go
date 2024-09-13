@@ -125,6 +125,8 @@ func FetchUser(c *gin.Context) {
 	db := utils.GetDB()
 	user := models.User{}
 
+	utils.InfoLogger.Printf("User ID %s", c.Param("id"))
+
 	result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 		return db.Limit(5)
 	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
