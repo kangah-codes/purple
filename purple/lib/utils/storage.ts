@@ -1,47 +1,56 @@
-import { MMKV, Mode } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export class NativeStorage {
-    private storage: MMKV;
+    constructor() {}
 
-    constructor(storage: MMKV) {
-        this.storage = storage;
-    }
-
-    getItem<T>(key: string): T | null {
-        const value = this.storage.getString(key);
-        if (value === undefined) {
+    async getItem<T>(key: string): Promise<T | null> {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value === null) {
+                return null;
+            }
+            return JSON.parse(value) as T;
+        } catch (error) {
+            console.error('Error getting item from AsyncStorage', error);
             return null;
         }
+    }
+
+    async setItem<T>(key: string, value: T): Promise<void> {
         try {
-            return JSON.parse(value) as T;
-        } catch {
-            return value as unknown as T;
+            await AsyncStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+            console.error('Error setting item in AsyncStorage', error);
         }
     }
 
-    setItem<T>(key: string, value: T): void {
-        this.storage.set(key, JSON.stringify(value));
+    async removeItem(key: string): Promise<void> {
+        try {
+            await AsyncStorage.removeItem(key);
+        } catch (error) {
+            console.error('Error removing item from AsyncStorage', error);
+        }
     }
 
-    removeItem(key: string): void {
-        this.storage.delete(key);
-    }
-
-    clear(): void {
-        this.storage.clearAll();
+    async clear(): Promise<void> {
+        try {
+            await AsyncStorage.clear();
+        } catch (error) {
+            console.error('Error clearing AsyncStorage', error);
+        }
     }
 
     // Helper method to check if a key exists
-    hasItem(key: string): boolean {
-        return this.storage.contains(key);
+    async hasItem(key: string): Promise<boolean> {
+        try {
+            const keys = await AsyncStorage.getAllKeys();
+            return keys.includes(key);
+        } catch (error) {
+            console.error('Error checking if key exists in AsyncStorage', error);
+            return false;
+        }
     }
 }
 
-// Create an instance of NativeStorage with the MMKV instance
-export const nativeStorage = new NativeStorage(
-    new MMKV({
-        id: `purple`,
-        encryptionKey: process.env.EXPO_PUBLIC_API_KEY,
-        mode: Mode.MULTI_PROCESS,
-    }),
-);
+// Create an instance of NativeStorage
+export const nativeStorage = new NativeStorage();

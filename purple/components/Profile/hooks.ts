@@ -23,10 +23,11 @@ export function useUser({
     options?: UseQueryOptions;
     id: number | string | undefined;
 }): UseQueryResult<GenericAPIResponse<User>, Error> {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/users/${id}`, sessionData);
     return useQuery(
         ['user', id],
         async () => {
-            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/${id}`, {
+            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${id}`, {
                 method: 'GET',
                 headers: {
                     'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,

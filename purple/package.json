@@ -48,7 +48,6 @@
     "react-native-device-info": "^10.12.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-gifted-charts": "^1.4.9",
-    "react-native-mmkv": "^3.0.2",
     "react-native-onboarding-swiper": "^1.2.0",
     "react-native-pager-view": "6.3.0",
     "react-native-reanimated": "~3.10.1",
