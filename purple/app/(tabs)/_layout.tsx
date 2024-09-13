@@ -15,8 +15,6 @@ import Colors from '@/constants/Colors';
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();
 
-    console.log('TABS isAuthenticated', isAuthenticated);
-
     if (!isAuthenticated) {
         return <Redirect href='/onboarding/landing' />;
     }

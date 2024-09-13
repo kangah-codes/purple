@@ -40,6 +40,7 @@ export default function SignInScreen() {
     });
     const { mutate, isLoading, error, data } = useSignIn();
     const signUp = (loginInformation: { username: string; password: string }) => {
+        Keyboard.dismiss();
         console.log(isLoading);
         mutate(loginInformation, {
             onError: () => {
