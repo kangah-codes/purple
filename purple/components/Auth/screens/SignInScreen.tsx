@@ -34,8 +34,8 @@ export default function SignInScreen() {
         formState: { errors },
     } = useForm({
         defaultValues: {
-            username: '',
-            password: '',
+            username: 'gyimihendrix',
+            password: 'password',
         },
     });
     const { mutate, isLoading, error, data } = useSignIn();

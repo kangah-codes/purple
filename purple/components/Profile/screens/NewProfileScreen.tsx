@@ -40,7 +40,7 @@ export default function NewProfileScreen() {
                     colour='purple'
                     // TODO: do something proper here
                     // @ts-ignore
-                    content={sessionData?.user.username.at(0)?.toLocaleUpperCase()}
+                    content={sessionData?.user?.username?.at(0)?.toLocaleUpperCase()}
                     size='xl'
                 />
 

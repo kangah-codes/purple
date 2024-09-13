@@ -26,7 +26,6 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionData>, 
             method: 'POST',
             headers: {
                 'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                'Content-Type': 'application/json',
             },
             body: JSON.stringify(loginInformation),
         });

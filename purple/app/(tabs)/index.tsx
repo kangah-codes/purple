@@ -3,7 +3,8 @@ import { SessionData } from '@/components/Auth/schema';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { SafeAreaView, View } from '@/components/Shared/styled';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Button } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function Screen() {
     const { sessionData } = useAuth();
@@ -11,7 +12,7 @@ export default function Screen() {
 
     console.log(sessionData?.user.ID, 'USER ID');
 
-    const { isLoading } = useUser({
+    const { isLoading, refetch } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,
         options: {
@@ -26,21 +27,33 @@ export default function Screen() {
                         sessionData,
                     )}`,
                 );
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'Something went wrong',
+                    },
+                });
             },
         },
     });
 
-    if (isLoading) {
-        return (
-            <SafeAreaView className='w-full items-center justify-items-center flex flex-1'>
-                <View className='h-full flex items-center w-full justify-items-center flex-row'>
-                    <View className='w-full'>
-                        <ActivityIndicator />
-                    </View>
-                </View>
-            </SafeAreaView>
-        );
-    }
+    // if (isLoading && user == null) {
+    //     return (
+    //         <SafeAreaView className='w-full items-center justify-items-center flex flex-1'>
+    //             <View className='h-full flex items-center w-full justify-items-center flex-row'>
+    //                 <View className='w-full'>
+    //                     <ActivityIndicator />
+    //                 </View>
+    //             </View>
+    //         </SafeAreaView>
+    //     );
+    // }
 
-    return <IndexScreen />;
+    return (
+        <View>
+            <Button title='Refetch' onPress={() => refetch()} />
+            <IndexScreen />
+        </View>
+    );
 }

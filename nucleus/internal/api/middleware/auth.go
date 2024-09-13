@@ -40,7 +40,7 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		utils.InfoLogger.Println("This is the session data; ", session)
+		utils.InfoLogger.Println("This is the session data; ", session.User, session.UserID)
 
 		c.Set("userID", session.UserID)
 		c.Next()

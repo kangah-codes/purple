@@ -106,7 +106,7 @@ func RevokeRefreshToken(db *gorm.DB, token string) error {
 	return db.Model(&models.RefreshToken{}).Where("token = ?", token).Update("is_revoked", true).Error
 }
 
-func RevokeAllUserTokens(db *gorm.DB, userID uint) error {
+func RevokeAllUserTokens(db *gorm.DB, userID int64) error {
 	return db.Model(&models.RefreshToken{}).Where("user_id = ?", userID).Update("is_revoked", true).Error
 }
 

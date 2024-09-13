@@ -23,9 +23,11 @@ func SignIn(c *gin.Context) {
 	result := db.Where("username = ?", signIn.Username).First(&user)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Failed to find user: %v", result.Error)
-		c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
+		c.JSON(404, types.Response{Status: 401, Message: "Invalid username/password", Data: nil})
 		return
 	}
+
+	utils.InfoLogger.Printf("This is the user data: %+v %v", user, user.ID)
 
 	if !utils.CheckPasswordHash(signIn.Password, user.Password) {
 		utils.ErrorLogger.Printf("Invalid password for user: %v", user.ID)

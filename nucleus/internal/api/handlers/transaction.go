@@ -45,10 +45,7 @@ func CreateTransaction(c *gin.Context) {
 	}
 
 	// set transactions which aren't transfers to 0
-	if createTransaction.Type != models.Transfer {
-		transaction.FromAccount = 0
-		transaction.ToAccount = 0
-	} else {
+	if createTransaction.Type == models.Transfer {
 		transaction.FromAccount = createTransaction.FromAccount
 		transaction.ToAccount = createTransaction.ToAccount
 	}

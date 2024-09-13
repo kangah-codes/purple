@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type CreatePlanDTO struct {
 	AccountId        uint      `json:"account_id" binding:"required"`
