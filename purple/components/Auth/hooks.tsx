@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const isRefreshValid =
                 sessionData?.refresh_token && !isTokenExpired(sessionData.refresh_token_expires_at);
 
-            setIsAuthenticated(!!(isSessionValid && isRefreshValid));
+            setIsAuthenticated(!!(isSessionValid && isRefreshValid && sessionData));
             setSessionExpiry(
                 sessionData?.access_token_expires_at
                     ? new Date(sessionData.access_token_expires_at)

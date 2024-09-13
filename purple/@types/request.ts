@@ -7,3 +7,7 @@ export type GenericAPIResponse<T> = {
     total: number;
     total_items: number;
 };
+
+export type RequestParamQuery = {
+    [key: string]: any;
+};
