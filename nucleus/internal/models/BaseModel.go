@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Base model to override gorm.Model
 type Base struct {
 	ID        uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	CreatedAt time.Time      `json:"created_at"`
