@@ -27,7 +27,7 @@ export function BalanceDisplay({ showAmount, setShowAmount, balance, accountName
                 )}
             </View>
             <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-3xl mt-1.5'>
-                {balance}
+                {showAmount ? balance : '********'}
             </Text>
             <Text
                 style={GLOBAL_STYLESHEET.interMedium}

@@ -8,11 +8,11 @@ export type IAccountCard = {
 };
 
 export type Account = {
-    ID: number;
+    ID: string;
     CreatedAt: string;
     UpdatedAt: string;
     DeletedAt: null;
-    user_id: number;
+    user_id: string;
     category: string;
     name: string;
     balance: number;

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
+import { useUserStore } from '@/components/Profile/hooks';
 
 const data = [
     {
@@ -55,6 +56,7 @@ const styles = {
 };
 
 export default function AccountCardCarousel() {
+    const { user, setUser } = useUserStore();
     const [entries, setEntries] = useState(data);
     const [activeSlide, setActiveSlide] = useState(0); // active slide is 0 by default
     const renderItem = useCallback(({ item }: any) => <AlternateAccountCard item={item} />, []);
@@ -62,7 +64,7 @@ export default function AccountCardCarousel() {
     return (
         <>
             <Carousel
-                data={data}
+                data={user?.accounts ?? []}
                 renderItem={renderItem}
                 sliderWidth={styles.sliderWidth}
                 itemWidth={styles.itemWidth}
@@ -74,7 +76,7 @@ export default function AccountCardCarousel() {
             />
 
             <Pagination
-                dotsLength={entries.length}
+                dotsLength={user?.accounts.length ?? 1}
                 activeDotIndex={activeSlide}
                 dotStyle={styles.paginationDotStyle}
                 inactiveDotStyle={

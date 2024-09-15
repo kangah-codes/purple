@@ -1,22 +1,12 @@
-export type Account = {
-    ID: number;
-    CreatedAt: string;
-    UpdatedAt: string;
-    DeletedAt: string | null;
-    user_id: number;
-    category: string;
-    name: string;
-    balance: number;
-    is_default_account: boolean;
-};
+import { Account } from '../Accounts/schema';
 
 export type Transaction = {
-    ID: number;
+    ID: string;
     CreatedAt: string;
     UpdatedAt: string;
     DeletedAt: string | null;
-    account_id: number;
-    user_id: number;
+    account_id: string;
+    user_id: string;
     Type: string;
     amount: number;
     account: Account;
@@ -27,7 +17,7 @@ export type Transaction = {
 };
 
 export type User = {
-    ID: number;
+    ID: string;
     CreatedAt: string;
     UpdatedAt: string;
     DeletedAt: string | null;

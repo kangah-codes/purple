@@ -7,15 +7,34 @@ import { SearchIcon } from '../../SVG/noscale';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import { SessionData } from '@/components/Auth/schema';
+import { useUser } from '@/components/Profile/hooks';
+import Toast from 'react-native-toast-message';
+import { useAuth } from '@/components/Auth/hooks';
 
 export default function IndexScreen() {
+    const { sessionData } = useAuth();
     const [refreshing, setRefreshing] = useState(false);
+    const { refetch } = useUser({
+        sessionData: sessionData as SessionData,
+        id: sessionData?.user.ID,
+        options: {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'Something went wrong',
+                    },
+                });
+            },
+            onSettled: () => setRefreshing(false),
+        },
+    });
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 2000);
+        refetch();
     }, []);
 
     return (

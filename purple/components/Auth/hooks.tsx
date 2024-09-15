@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UseMutationResult, useMutation } from 'react-query';
 import { SessionData } from './schema';
+import { nativeStorage } from '@/lib/utils/storage';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -177,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         try {
             await SecureStore.deleteItemAsync('session_data');
+            await nativeStorage.clear();
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {

@@ -23,7 +23,6 @@ export function useUser({
     options?: UseQueryOptions;
     id: number | string | undefined;
 }): UseQueryResult<GenericAPIResponse<User>, Error> {
-    console.log(`${process.env.EXPO_PUBLIC_API_URL}/users/${id}`, sessionData);
     return useQuery(
         ['user', id],
         async () => {
@@ -47,5 +46,5 @@ export function useUser({
                 'queryKey' | 'queryFn' | 'initialData'
             >),
         },
-    );
+    ) as UseQueryResult<GenericAPIResponse<User>, Error>;
 }
