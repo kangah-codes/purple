@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreateAccount(c *gin.Context) {
@@ -27,7 +28,7 @@ func CreateAccount(c *gin.Context) {
 	}
 
 	account := models.Account{
-		UserId:   userID.(uint),
+		UserId:   userID.(uuid.UUID),
 		Name:     createAccount.Name,
 		Category: createAccount.Category,
 		Balance:  createAccount.Balance,
@@ -41,11 +42,11 @@ func CreateAccount(c *gin.Context) {
 	}
 
 	type Response struct {
-		ID               uint    `json:"id"`
-		Category         string  `json:"category"`
-		Name             string  `json:"name"`
-		Balance          float64 `json:"balance"`
-		IsDefaultAccount bool    `json:"is_default_account"`
+		ID               uuid.UUID `json:"id"`
+		Category         string    `json:"category"`
+		Name             string    `json:"name"`
+		Balance          float64   `json:"balance"`
+		IsDefaultAccount bool      `json:"is_default_account"`
 	}
 
 	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "Account created successfully", Data: Response{

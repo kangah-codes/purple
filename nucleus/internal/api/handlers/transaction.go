@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreateTransaction(c *gin.Context) {
@@ -36,7 +37,7 @@ func CreateTransaction(c *gin.Context) {
 
 	transaction := models.Transaction{
 		AccountId: createTransaction.AccountId,
-		UserId:    userID.(uint),
+		UserId:    userID.(uuid.UUID),
 		Type:      createTransaction.Type,
 		Amount:    createTransaction.Amount,
 		Note:      createTransaction.Note,
@@ -88,7 +89,7 @@ func UpdateTransaction(c *gin.Context) {
 		return
 	}
 
-	if updateTransaction.FromAccount != 0 {
+	if updateTransaction.FromAccount != uuid.Nil {
 		result := db.Where("id = ?", updateTransaction.FromAccount).First(&models.Account{})
 		if result.Error != nil {
 			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "From account not found", Data: nil})
@@ -96,7 +97,7 @@ func UpdateTransaction(c *gin.Context) {
 		}
 	}
 
-	if updateTransaction.ToAccount != 0 {
+	if updateTransaction.ToAccount != uuid.Nil {
 		result := db.Where("id = ?", updateTransaction.ToAccount).First(&models.Account{})
 		if result.Error != nil {
 			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "To account not found", Data: nil})
@@ -111,8 +112,8 @@ func UpdateTransaction(c *gin.Context) {
 	transaction.Category = updateTransaction.Category
 	// set transactions which aren't transfers to 0
 	if updateTransaction.Type != models.Transfer {
-		transaction.FromAccount = 0
-		transaction.ToAccount = 0
+		transaction.FromAccount = uuid.Nil
+		transaction.ToAccount = uuid.Nil
 	} else {
 		transaction.FromAccount = updateTransaction.FromAccount
 		transaction.ToAccount = updateTransaction.ToAccount

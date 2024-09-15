@@ -1,16 +1,12 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 var (
 	SuperUser string = "superuser"
 	AppUser   string = "user"
 )
 
 type User struct {
-	gorm.Model
+	Base
 	Email        string        `gorm:"unique;not null" json:"email"`
 	Username     string        `gorm:"unique;not null" json:"username"`
 	Password     string        `json:"-"`

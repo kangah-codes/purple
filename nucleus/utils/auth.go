@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-func GenerateTokenPair(userID uint) (models.TokenPair, error) {
+func GenerateTokenPair(userID uuid.UUID) (models.TokenPair, error) {
 	// Generate access token
 	db := GetDB()
 	accessToken := jwt.New(jwt.SigningMethodHS256)
@@ -73,7 +74,7 @@ func RefreshTokens(refreshToken string) (models.TokenPair, error) {
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
-	userID := claims["user_id"].(uint)
+	userID := claims["user_id"].(uuid.UUID)
 
 	// Generate new token pair
 	return GenerateTokenPair(userID)
@@ -136,7 +137,7 @@ func GenerateSessionToken() (string, error) {
 	return base64.StdEncoding.EncodeToString(token), nil
 }
 
-func CreateSession(db *gorm.DB, userID uint) (models.TokenPair, error) {
+func CreateSession(db *gorm.DB, userID uuid.UUID) (models.TokenPair, error) {
 	token, err := GenerateSessionToken()
 	if err != nil {
 		ErrorLogger.Println(err)

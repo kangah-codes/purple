@@ -2,10 +2,12 @@ package types
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreatePlanDTO struct {
-	AccountId        uint      `json:"account_id" binding:"required"`
+	AccountId        uuid.UUID `json:"account_id" binding:"required"`
 	Type             string    `json:"type" binding:"required"`
 	Category         string    `json:"category" binding:"required"`
 	Target           float64   `json:"target" binding:"required"`

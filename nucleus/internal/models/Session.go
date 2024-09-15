@@ -3,20 +3,20 @@ package models
 import (
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 type Session struct {
-	gorm.Model
-	UserID    uint      `gorm:"not null" json:"user_id"`
+	Base
+	UserID    uuid.UUID `gorm:"not null" json:"user_id"`
 	User      User      `gorm:"foreignKey:UserID" json:"-"`
 	Token     string    `gorm:"not null;index:session_token;unique"`
 	ExpiresAt time.Time `gorm:"not null"`
 }
 
 type RefreshToken struct {
-	gorm.Model
-	SessionID uint      `gorm:"not null"`
+	Base
+	SessionID uuid.UUID `gorm:"not null"`
 	Session   Session   `gorm:"foreignKey:SessionID"`
 	Token     string    `gorm:"not null;index:refresh_token;unique"`
 	ExpiresAt time.Time `gorm:"not null"`

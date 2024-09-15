@@ -1,8 +1,6 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
+import "github.com/google/uuid"
 
 const (
 	Credit   string = "credit"
@@ -11,15 +9,15 @@ const (
 )
 
 type Transaction struct {
-	gorm.Model
-	AccountId   uint    `json:"account_id"`
-	UserId      uint    `json:"user_id"`
-	Type        string  `gorm:"not null"`
-	Amount      float64 `gorm:"not null" json:"amount"`
-	User        User    `gorm:"foreignKey:UserId" json:"-"`
-	Account     Account `gorm:"foreignKey:AccountId" json:"account"`
-	Note        string  `gorm:"size:255" json:"note"`
-	Category    string  `gorm:"size:100" json:"category"`
-	FromAccount uint    `json:"from_account"`
-	ToAccount   uint    `json:"to_account"`
+	Base
+	AccountId   uuid.UUID `json:"account_id"`
+	UserId      uuid.UUID `json:"user_id"`
+	Type        string    `gorm:"not null"`
+	Amount      float64   `gorm:"not null" json:"amount"`
+	User        User      `gorm:"foreignKey:UserId" json:"-"`
+	Account     Account   `gorm:"foreignKey:AccountId" json:"account"`
+	Note        string    `gorm:"size:255" json:"note"`
+	Category    string    `gorm:"size:100" json:"category"`
+	FromAccount uuid.UUID `json:"from_account"`
+	ToAccount   uuid.UUID `json:"to_account"`
 }

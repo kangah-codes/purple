@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreatePlan(c *gin.Context) {
@@ -34,7 +35,7 @@ func CreatePlan(c *gin.Context) {
 	}
 
 	plan := models.Plan{
-		UserId:           userID.(uint),
+		UserId:           userID.(uuid.UUID),
 		Type:             createPlan.Type,
 		Category:         createPlan.Category,
 		Target:           createPlan.Target,
