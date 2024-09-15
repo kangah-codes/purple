@@ -123,7 +123,9 @@ func DeleteUser(c *gin.Context) {
 
 func FetchUser(c *gin.Context) {
 	db := utils.GetDB()
+	db = db.Debug()
 	user := models.User{}
+	userID := c.Param("id")
 
 	utils.InfoLogger.Printf("User ID %s", c.Param("id"))
 
@@ -131,7 +133,7 @@ func FetchUser(c *gin.Context) {
 		return db.Limit(5)
 	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
 		return db.Limit(5)
-	}).First(&user, c.Param("id"))
+	}).First(&user, "id = ?", userID)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
 		if result.Error == gorm.ErrRecordNotFound {
