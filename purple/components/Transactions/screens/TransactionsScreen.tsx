@@ -20,6 +20,10 @@ import Svg from 'react-native-svg';
 import { StatusBar as RNStatusBar } from 'react-native';
 import { CategoryIcon, ReceiptDetail, ReceiptHeader } from '../molecules/Receipt';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
+import { useTransactions, useTransactionStore } from '../hooks';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
+import Toast from 'react-native-toast-message';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -29,6 +33,8 @@ const linearGradient = ['#c084fc', '#9333ea'];
 const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
 
 function TransactionsScreen(props: TransactionsScreenProps) {
+    const { sessionData } = useAuth();
+    const { setTransactions, transactions } = useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const renderItem = useCallback(
@@ -40,10 +46,29 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         ),
         [],
     );
+    console.log('Transactions ', transactions);
     const renderItemSeparator = useCallback(
         () => <View className='border-b border-gray-100' />,
         [],
     );
+    const { isLoading, data, refetch } = useTransactions({
+        sessionData: sessionData as SessionData,
+        options: {
+            onSuccess: (data) => {
+                console.log('RES ', data);
+            },
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'Something went wrong',
+                    },
+                });
+            },
+        },
+        requestParams: {},
+    });
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -109,12 +134,14 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             </View>
 
             <FlatList
-                data={transactionData}
+                data={[]}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}
                 renderItem={renderItem}
                 ItemSeparatorComponent={renderItemSeparator}
+                onRefresh={refetch}
+                refreshing={isLoading}
             />
 
             {!showBackButton && (

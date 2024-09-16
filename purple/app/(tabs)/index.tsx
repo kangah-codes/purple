@@ -5,6 +5,7 @@ import { SessionData, User } from '@/components/Auth/schema';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { SafeAreaView, View } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useEffect } from 'react';
 import { ActivityIndicator, Button } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -13,7 +14,8 @@ export default function Screen() {
     const { sessionData } = useAuth();
     const { user, setUser } = useUserStore();
     const { setAccounts } = useAccountStore();
-    const { isLoading, refetch, data } = useUser({
+    const { setTransactions } = useTransactionStore();
+    const { isLoading, data } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,
         options: {
@@ -29,10 +31,13 @@ export default function Screen() {
         },
     });
 
+    console.log(data);
+
     useEffect(() => {
         if (data) {
             setUser(data.data);
             setAccounts(data.data.accounts);
+            setTransactions(data.data.transactions);
         }
     }, [data]);
 

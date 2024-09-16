@@ -15,6 +15,7 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
+    console.log(data, 'DATA');
     return (
         <TouchableOpacity
             onPress={onPress}
