@@ -71,3 +71,8 @@ export function stringify(obj: ParsedQuery): string {
 
     return parts.join('&');
 }
+
+export function isNotEmptyString(str?: string) {
+    if (!str) return false;
+    return str.trim().length > 0;
+}

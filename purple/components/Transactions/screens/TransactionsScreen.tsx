@@ -24,6 +24,10 @@ import { useTransactions, useTransactionStore } from '../hooks';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import Toast from 'react-native-toast-message';
+import { GenericAPIResponse } from '@/@types/request';
+import { Transaction } from '../schema';
+import { formatDate } from '@/lib/utils/date';
+import { isNotEmptyString } from '@/lib/utils/string';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -34,19 +38,23 @@ const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
 
 function TransactionsScreen(props: TransactionsScreenProps) {
     const { sessionData } = useAuth();
-    const { setTransactions, transactions } = useTransactionStore();
+    const { setTransactions, transactions, currentTransaction, setCurrentTransaction } =
+        useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const renderItem = useCallback(
-        ({ item }: any) => (
+        ({ item }: { item: Transaction }) => (
             <TransactionHistoryCard
                 data={item}
-                onPress={() => setShowBottomSheetModal('transactionReceiptScreen', true)}
+                onPress={() => {
+                    setCurrentTransaction(item);
+                    setShowBottomSheetModal('transactionReceiptScreen', true);
+                }}
             />
         ),
         [],
     );
-    console.log('Transactions ', transactions);
+    console.log('Transactions ', sessionData);
     const renderItemSeparator = useCallback(
         () => <View className='border-b border-gray-100' />,
         [],
@@ -55,7 +63,8 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         sessionData: sessionData as SessionData,
         options: {
             onSuccess: (data) => {
-                console.log('RES ', data);
+                const res = data as GenericAPIResponse<Transaction[]>;
+                setTransactions(res.data);
             },
             onError: () => {
                 Toast.show({
@@ -73,52 +82,74 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <CustomBottomSheetModal
-                modalKey='transactionReceiptScreen'
-                snapPoints={['55%', '70%', '90%']}
-                style={styles.bottomSheetModal}
-                handleIndicatorStyle={styles.handleIndicator}
-            >
-                <View
-                    className='w-full flex flex-col items-center px-5'
-                    style={styles.receiptContainer}
+            {currentTransaction && (
+                <CustomBottomSheetModal
+                    modalKey='transactionReceiptScreen'
+                    snapPoints={['55%', '70%', '90%']}
+                    style={styles.bottomSheetModal}
+                    handleIndicatorStyle={styles.handleIndicator}
                 >
-                    <ReceiptHeader />
-                    <Svg
-                        height={12}
-                        width='100%'
-                        style={styles.zigzag}
-                        fill='#c084fc'
-                        stroke='#c084fc'
+                    <View
+                        className='w-full flex flex-col items-center px-5'
+                        style={styles.receiptContainer}
                     >
-                        {ZIGZAG_VIEW}
-                    </Svg>
-                    <LinearGradient
-                        className='w-full py-5 items-center justify-center'
-                        colors={linearGradient}
-                    >
-                        <CategoryIcon />
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg text-white'>
-                            🏠 Rent
-                        </Text>
-                    </LinearGradient>
-                    <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
-                        <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
-                            className='text-3xl text-black mb-5'
+                        <ReceiptHeader />
+                        <Svg
+                            height={12}
+                            width='100%'
+                            style={styles.zigzag}
+                            fill='#c084fc'
+                            stroke='#c084fc'
                         >
-                            $69.42
-                        </Text>
-                        <View className='border-b border-gray-200 w-full mb-5' />
-                        <ReceiptDetail label='Category' value='🏠 Rent' />
-                        <ReceiptDetail label='Note' value='Payment for the month of June' />
-                        <ReceiptDetail label='Date' value='Monday, June 9th 2024, at 12:00 PM70' />
+                            {ZIGZAG_VIEW}
+                        </Svg>
+                        <LinearGradient
+                            className='w-full py-5 items-center justify-center'
+                            colors={linearGradient}
+                        >
+                            <CategoryIcon type={currentTransaction.Type} />
+                            <Text
+                                style={GLOBAL_STYLESHEET.suprapower}
+                                className='text-lg text-white'
+                            >
+                                {currentTransaction.category}
+                            </Text>
+                        </LinearGradient>
+                        <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
+                            <Text
+                                style={GLOBAL_STYLESHEET.suprapower}
+                                className='text-3xl text-black mb-5'
+                            >
+                                {currentTransaction.amount}
+                            </Text>
+                            <View className='border-b border-gray-200 w-full mb-5' />
+                            <ReceiptDetail label='Category' value={currentTransaction.category} />
+                            {isNotEmptyString(currentTransaction.note) && (
+                                <ReceiptDetail label='Note' value={currentTransaction.note} />
+                            )}
+                            <ReceiptDetail
+                                label='Date'
+                                value={formatDate(currentTransaction.created_at, {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: 'numeric',
+                                })}
+                            />
+                        </View>
+                        <Svg
+                            height={12}
+                            width='100%'
+                            fill={drawerBackground}
+                            stroke={drawerBackground}
+                        >
+                            {ZIGZAG_VIEW}
+                        </Svg>
                     </View>
-                    <Svg height={12} width='100%' fill={drawerBackground} stroke={drawerBackground}>
-                        {ZIGZAG_VIEW}
-                    </Svg>
-                </View>
-            </CustomBottomSheetModal>
+                </CustomBottomSheetModal>
+            )}
+
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                     My Transactions
@@ -134,7 +165,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             </View>
 
             <FlatList
-                data={[]}
+                data={transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}

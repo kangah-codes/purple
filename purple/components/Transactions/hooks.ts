@@ -7,14 +7,21 @@ import { createTransactionStore } from './state';
 import { stringify } from '@/lib/utils/string';
 
 export function useTransactionStore() {
-    const [transactions, setTransactions] = useStore(createTransactionStore, (state) => [
-        state.transactions,
-        state.setTransactions,
-    ]);
+    const [transactions, setTransactions, currentTransaction, setCurrentTransaction] = useStore(
+        createTransactionStore,
+        (state) => [
+            state.transactions,
+            state.setTransactions,
+            state.currentTransaction,
+            state.setCurrentTransaction,
+        ],
+    );
 
     return {
         transactions,
         setTransactions,
+        currentTransaction,
+        setCurrentTransaction,
     };
 }
 
