@@ -32,6 +32,14 @@ export class NativeStorage {
         }
     }
 
+    async multiRemove(keys: string[]): Promise<void> {
+        try {
+            await AsyncStorage.multiRemove(keys);
+        } catch (error) {
+            console.error('Error removing multiple items from AsyncStorage', error);
+        }
+    }
+
     async clear(): Promise<void> {
         try {
             await AsyncStorage.clear();

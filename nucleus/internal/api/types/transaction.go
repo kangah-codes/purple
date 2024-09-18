@@ -4,7 +4,7 @@ import "github.com/google/uuid"
 
 type CreateTransactionDTO struct {
 	AccountId   uuid.UUID `json:"account_id" binding:"required"`
-	Type        string    `json:"type" binding:"required"`
+	Type        string    `json:"type" binding:"required,oneof=credit debit"`
 	Amount      float64   `json:"amount" binding:"required"`
 	Note        string    `json:"note"`
 	Category    string    `json:"category" binding:"required"`
@@ -14,7 +14,7 @@ type CreateTransactionDTO struct {
 
 type UpdateTransactionDTO struct {
 	AccountId   uuid.UUID `json:"account_id" binding:"required"`
-	Type        string    `json:"type" binding:"required"`
+	Type        string    `json:"type" binding:"required,oneof=saving expense"`
 	Amount      float64   `json:"amount" binding:"required"`
 	Note        string    `json:"note" binding:"required"`
 	Category    string    `json:"category" binding:"required"`

@@ -1,14 +1,15 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { BudgetPlan } from '../schema';
+import { BudgetPlan, Plan } from '../schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { formatDate } from '@/lib/utils/date';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 
 type BudgetCardProps = {
-    data: BudgetPlan;
+    data: Plan;
 };
 
-export default function BudgetPlanCard(props: BudgetCardProps) {
-    const { category, startDate, endDate, percentageCompleted, spent, balance, budget } =
-        props.data;
+export default function BudgetPlanCard({ data }: BudgetCardProps) {
+    const { category, start_date, end_date, balance, target, name } = data;
 
     return (
         <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
@@ -18,18 +19,20 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                 </Text>
             </View>
 
+            <View className='flex flex-row w-full justify-between items-center'>
+                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-base text-black'>
+                    {truncateStringIfLongerThan(name, 20)}
+                </Text>
+            </View>
+
             <View className='flex flex-col space-y-2.5'>
-                {/* <View className='relative w-full'>
-                    <View className='h-2 w-full rounded-full bg-purple-50' />
+                <View className='flex flex-row items-center space-x-0.5'>
                     <View
-                        className='h-2 bg-purple-600 rounded-full absolute'
+                        className='h-2 bg-purple-600 rounded-md'
                         style={{
-                            width: `${percentageCompleted}%`,
+                            width: `${(balance / target) * 100}%`,
                         }}
                     />
-                </View> */}
-                <View className='flex flex-row items-center space-x-0.5'>
-                    <View className='h-2 w-10 bg-purple-600 rounded-md' />
                     <View className='h-2 flex-grow bg-purple-200 rounded-full' />
                 </View>
 
@@ -38,14 +41,18 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                         style={GLOBAL_STYLESHEET.interMedium}
                         className='text-sm text-black tracking-tighter'
                     >
-                        {startDate}
+                        {formatDate(start_date, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        })}
                     </Text>
 
                     <Text
                         style={GLOBAL_STYLESHEET.interMedium}
                         className='text-sm text-gray-600 tracking-tighter'
                     >
-                        {endDate}
+                        {formatDate(end_date, { year: 'numeric', month: 'short', day: 'numeric' })}
                     </Text>
                 </View>
             </View>
@@ -55,29 +62,29 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
             <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
+                        style={GLOBAL_STYLESHEET.suprapower}
+                        className='text-sm text-gray-700 tracking-tight'
                     >
                         Spent
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-black tracking-tighter'
                     >
-                        GHS {spent}
+                        GHS {target - balance}
                     </Text>
                 </View>
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
+                        style={GLOBAL_STYLESHEET.suprapower}
+                        className='text-sm text-gray-700 tracking-tight'
                     >
                         Balance
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
-                        className='text-sm text-black tracking-tighter'
+                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        className='text-sm text-gray-700 tracking-tight'
                     >
                         GHS {balance}
                     </Text>
@@ -85,16 +92,16 @@ export default function BudgetPlanCard(props: BudgetCardProps) {
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
+                        style={GLOBAL_STYLESHEET.suprapower}
+                        className='text-sm text-gray-700 tracking-tight'
                     >
-                        Total Budget
+                        Budget
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-black tracking-tighter'
                     >
-                        GHS {budget}
+                        GHS {target}
                     </Text>
                 </View>
             </View>

@@ -1,34 +1,32 @@
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import {
-    CategoryIcon,
-    ReceiptDetail,
-    ReceiptHeader,
-} from '@/components/Transactions/molecules/Receipt';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
+import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
 import { keyExtractor } from '@/lib/utils/number';
 import { router } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
-import Svg from 'react-native-svg';
-import { transactionData } from '../constants';
-
-const snapPoints = ['55%', '70%', '90%'];
-const linearGradient = ['#c084fc', '#9333ea'];
-const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
 
 export default function TransactionHistoryList() {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
+    const { transactions, currentTransaction, setCurrentTransaction, setTransactions } =
+        useTransactionStore();
+    const getTopFiveTransactions = useCallback(() => {
+        return transactions.slice(0, 5);
+    }, [transactions]);
 
     const renderItem = useCallback(
         ({ item }: any) => (
             <TransactionHistoryCard
                 data={item}
-                onPress={() => setShowBottomSheetModal('transactionReceipt', true)}
+                onPress={() => {
+                    setCurrentTransaction(item);
+                    setShowBottomSheetModal('transactionReceiptIndexScreen', true);
+                }}
             />
         ),
         [],
@@ -37,65 +35,18 @@ export default function TransactionHistoryList() {
         () => <View className='border-b border-gray-100' />,
         [],
     );
+    const renderEmptylist = useCallback(
+        () => (
+            <View className='my-20'>
+                <EmptyList message="Looks like you haven't created any transactions yet." />
+            </View>
+        ),
+        [],
+    );
 
     return (
         <>
-            <CustomBottomSheetModal
-                modalKey='transactionReceipt'
-                snapPoints={snapPoints}
-                style={styles.customBottomSheetModal}
-                handleIndicatorStyle={styles.handleIndicator}
-            >
-                <View className='px-5'>
-                    <View className='w-full items-center' style={styles.receiptView}>
-                        <ReceiptHeader />
-                        <Svg
-                            height={12}
-                            width='100%'
-                            style={styles.zigZag}
-                            fill='#c084fc'
-                            stroke='#c084fc'
-                        >
-                            {ZIGZAG_VIEW}
-                        </Svg>
-                        <LinearGradient
-                            className='w-full py-5 items-center justify-center'
-                            colors={linearGradient}
-                        >
-                            <CategoryIcon />
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-lg text-white'
-                            >
-                                🏠 Rent
-                            </Text>
-                        </LinearGradient>
-                        <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-3xl text-black mb-5'
-                            >
-                                $69.42
-                            </Text>
-                            <View className='border-b border-gray-200 w-full mb-5' />
-                            <ReceiptDetail label='Category' value='🏠 Rent' />
-                            <ReceiptDetail label='Note' value='Payment for the month of June' />
-                            <ReceiptDetail
-                                label='Date'
-                                value='Monday, June 9th 2024, at 12:00 PM70'
-                            />
-                        </View>
-                        <Svg
-                            height={12}
-                            width='100%'
-                            fill={drawerBackground}
-                            stroke={drawerBackground}
-                        >
-                            {ZIGZAG_VIEW}
-                        </Svg>
-                    </View>
-                </View>
-            </CustomBottomSheetModal>
+            <CurrentTransactionModal modalKey='transactionReceiptIndexScreen' />
             <View className='flex flex-col mt-5'>
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
@@ -117,13 +68,14 @@ export default function TransactionHistoryList() {
                 </View>
 
                 <FlatList
-                    data={transactionData}
+                    data={getTopFiveTransactions()}
                     keyExtractor={keyExtractor}
                     contentContainerStyle={styles.flatlistContainerStyle}
                     showsVerticalScrollIndicator={true}
                     renderItem={renderItem}
                     ItemSeparatorComponent={renderItemSeparator}
                     scrollEnabled={false}
+                    ListEmptyComponent={renderEmptylist}
                 />
             </View>
         </>

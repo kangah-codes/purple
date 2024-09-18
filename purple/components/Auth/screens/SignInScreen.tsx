@@ -11,7 +11,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -24,8 +24,10 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
+import { useUserStore } from '@/components/Profile/hooks';
 
 export default function SignInScreen() {
+    const { user, setUser, reset: resetUser } = useUserStore();
     const [loading, setLoading] = useState(false);
     const { setSessionData } = useAuth();
     const {
@@ -74,6 +76,11 @@ export default function SignInScreen() {
         });
         console.log(isLoading, error, data, loginInformation);
     };
+
+    useEffect(() => {
+        // TODO: look into why the user accounts sometimes return an empty array after signup
+        resetUser();
+    }, []);
 
     return (
         <SafeAreaView

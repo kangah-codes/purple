@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { UseMutationResult, useMutation } from 'react-query';
 import { SessionData } from './schema';
 import { nativeStorage } from '@/lib/utils/storage';
+import { useUserStore } from '../Profile/hooks';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -92,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [error, setError] = useState<Error | null>(null);
     const [sessionData, _setSessionData] = useState<SessionData | null>(null);
     const [hasOnboarded, setHasOnboarded] = useState(false);
+    const { reset: resetUser } = useUserStore();
 
     const getToken = useCallback(async <T = any,>(key: string): Promise<T | null> => {
         try {
@@ -178,7 +180,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         try {
             await SecureStore.deleteItemAsync('session_data');
-            await nativeStorage.clear();
+            await nativeStorage.multiRemove([
+                'account-store',
+                'plan-store',
+                'transaction-store',
+                'user-store',
+            ]);
+            resetUser();
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {

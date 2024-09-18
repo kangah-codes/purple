@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 type Primitive = string | number | boolean | null | undefined;
 
 type ObjectType = Record<string, unknown>;
@@ -48,4 +50,27 @@ export function deepCompare(obj1: DeepObject, obj2: DeepObject): boolean {
     }
 
     return true;
+}
+
+/**
+ * Updates an array by adding only new, unique items based on deep comparison.
+ *
+ * @param existingArray - The original array of items.
+ * @param newItems - The new items to potentially add to the array.
+ * @returns A new array with unique items from both existingArray and newItems.
+ */
+export function updateArrayWithUniqueItems<T extends DeepObject>(
+    existingArray: T[],
+    newItems: T[],
+): T[] {
+    const updatedArray = [...existingArray];
+
+    for (const newItem of newItems) {
+        const existingItem = updatedArray.find((item) => deepCompare(item, newItem));
+        if (!existingItem) {
+            updatedArray.push(newItem);
+        }
+    }
+
+    return updatedArray;
 }

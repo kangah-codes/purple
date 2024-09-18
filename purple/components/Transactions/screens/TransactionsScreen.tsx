@@ -1,6 +1,7 @@
-import { transactionData } from '@/components/Index/constants';
+import { GenericAPIResponse } from '@/@types/request';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
 import { PlusIcon } from '@/components/SVG/24x24';
-import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
     LinearGradient,
@@ -10,24 +11,19 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
 import { keyExtractor } from '@/lib/utils/number';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useCallback } from 'react';
-import { FlatList, Platform, StyleSheet } from 'react-native';
-import Svg from 'react-native-svg';
-import { StatusBar as RNStatusBar } from 'react-native';
-import { CategoryIcon, ReceiptDetail, ReceiptHeader } from '../molecules/Receipt';
-import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
-import { useTransactions, useTransactionStore } from '../hooks';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
+import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { GenericAPIResponse } from '@/@types/request';
+import tw from 'twrnc';
+import { useTransactions, useTransactionStore } from '../hooks';
+import CurrentTransactionModal from '../molecules/CurrentTransactionModal';
+import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
-import { formatDate } from '@/lib/utils/date';
-import { isNotEmptyString } from '@/lib/utils/string';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -41,16 +37,24 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     const { setTransactions, transactions, currentTransaction, setCurrentTransaction } =
         useTransactionStore();
     const { showBackButton } = props;
-    const { setShowBottomSheetModal } = useBottomSheetModalStore();
+    const { setShowBottomSheetModal, bottomSheetModalKeys } = useBottomSheetModalStore();
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
             <TransactionHistoryCard
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);
-                    setShowBottomSheetModal('transactionReceiptScreen', true);
+                    setShowBottomSheetModal('transactionReceiptTransactionsScreen', true);
                 }}
             />
+        ),
+        [],
+    );
+    const renderEmptylist = useCallback(
+        () => (
+            <View className='my-20'>
+                <EmptyList message="Looks like you haven't created any transactions plans yet." />
+            </View>
         ),
         [],
     );
@@ -59,6 +63,9 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         () => <View className='border-b border-gray-100' />,
         [],
     );
+    // useEffect(() => {
+    //     setTransactions([]);
+    // }, []);
     const { isLoading, data, refetch } = useTransactions({
         sessionData: sessionData as SessionData,
         options: {
@@ -71,7 +78,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: 'Something went wrong',
+                        text2: "We couldn't fetch your transactions",
                     },
                 });
             },
@@ -82,73 +89,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            {currentTransaction && (
-                <CustomBottomSheetModal
-                    modalKey='transactionReceiptScreen'
-                    snapPoints={['55%', '70%', '90%']}
-                    style={styles.bottomSheetModal}
-                    handleIndicatorStyle={styles.handleIndicator}
-                >
-                    <View
-                        className='w-full flex flex-col items-center px-5'
-                        style={styles.receiptContainer}
-                    >
-                        <ReceiptHeader />
-                        <Svg
-                            height={12}
-                            width='100%'
-                            style={styles.zigzag}
-                            fill='#c084fc'
-                            stroke='#c084fc'
-                        >
-                            {ZIGZAG_VIEW}
-                        </Svg>
-                        <LinearGradient
-                            className='w-full py-5 items-center justify-center'
-                            colors={linearGradient}
-                        >
-                            <CategoryIcon type={currentTransaction.Type} />
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-lg text-white'
-                            >
-                                {currentTransaction.category}
-                            </Text>
-                        </LinearGradient>
-                        <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-3xl text-black mb-5'
-                            >
-                                {currentTransaction.amount}
-                            </Text>
-                            <View className='border-b border-gray-200 w-full mb-5' />
-                            <ReceiptDetail label='Category' value={currentTransaction.category} />
-                            {isNotEmptyString(currentTransaction.note) && (
-                                <ReceiptDetail label='Note' value={currentTransaction.note} />
-                            )}
-                            <ReceiptDetail
-                                label='Date'
-                                value={formatDate(currentTransaction.created_at, {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: 'numeric',
-                                    minute: 'numeric',
-                                })}
-                            />
-                        </View>
-                        <Svg
-                            height={12}
-                            width='100%'
-                            fill={drawerBackground}
-                            stroke={drawerBackground}
-                        >
-                            {ZIGZAG_VIEW}
-                        </Svg>
-                    </View>
-                </CustomBottomSheetModal>
-            )}
+            <CurrentTransactionModal modalKey='transactionReceiptTransactionsScreen' />
 
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
@@ -173,6 +114,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 ItemSeparatorComponent={renderItemSeparator}
                 onRefresh={refetch}
                 refreshing={isLoading}
+                ListEmptyComponent={renderEmptylist}
             />
 
             {!showBackButton && (
