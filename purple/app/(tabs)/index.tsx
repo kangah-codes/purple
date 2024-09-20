@@ -15,7 +15,7 @@ import Toast from 'react-native-toast-message';
 export default function Screen() {
     const { sessionData } = useAuth();
     const { user, setUser } = useUserStore();
-    const { setAccounts } = useAccountStore();
+    const { setAccounts, accounts } = useAccountStore();
     const { setTransactions, transactions } = useTransactionStore();
     const { setPlans } = usePlanStore();
     const { isLoading, data } = useUser({
@@ -45,7 +45,11 @@ export default function Screen() {
         },
     });
 
-    if (isLoading) {
+    useEffect(() => {
+        console.log(user, 'User on mount');
+    }, []);
+
+    if (isLoading || accounts.length == 0) {
         return (
             <SafeAreaView className='w-full items-center justify-items-center flex flex-1'>
                 <View className='h-full flex items-center w-full justify-items-center flex-row'>

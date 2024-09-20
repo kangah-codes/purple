@@ -58,7 +58,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         ),
         [],
     );
-    console.log('Transactions ', sessionData);
     const renderItemSeparator = useCallback(
         () => <View className='border-b border-gray-100' />,
         [],

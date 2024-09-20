@@ -61,7 +61,6 @@ const renderIcon = (type: Transaction['Type']) => {
 };
 
 export const CategoryIcon = React.memo(({ type }: { type: Transaction['Type'] }) => {
-    console.log(type, 'TYPE');
     const icon = renderIcon(type);
     return (
         <View

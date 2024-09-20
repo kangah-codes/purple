@@ -3,7 +3,6 @@ import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Plan } from '../schema';
 
 export default function SavingPlanCard({ data, index }: { data: Plan; index: number }) {
-    console.log(data);
     return (
         <TouchableOpacity
             className='p-4 border border-gray-200 rounded-xl flex flex-col w-72 space-y-2.5'

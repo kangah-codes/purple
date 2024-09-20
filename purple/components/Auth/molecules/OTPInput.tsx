@@ -50,8 +50,6 @@ export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete 
         });
     };
 
-    console.log(inputWidth);
-
     return (
         <View className='flex w-full flex-row justify-between'>
             {codes.map((code, index) => (

@@ -17,7 +17,7 @@ import { GenericAPIResponse } from '@/@types/request';
 export default function IndexScreen() {
     const { sessionData } = useAuth();
     const { setAccounts } = useAccountStore();
-    const { setUser } = useUserStore();
+    const { setUser, user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const { refetch } = useUser({
         sessionData: sessionData as SessionData,
@@ -35,7 +35,6 @@ export default function IndexScreen() {
             onSettled: () => setRefreshing(false),
             onSuccess: (data) => {
                 const res = data as GenericAPIResponse<User>;
-                console.log(res.data, 'INDEXX');
                 setUser(res.data);
                 setAccounts(res.data.accounts);
             },
@@ -43,6 +42,7 @@ export default function IndexScreen() {
     });
 
     const onRefresh = useCallback(() => {
+        console.log('USER HOME ', user);
         setRefreshing(true);
         refetch();
     }, []);
