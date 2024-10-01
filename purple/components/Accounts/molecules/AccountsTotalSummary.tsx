@@ -1,5 +1,7 @@
+import React from 'react';
 import { Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { Account } from '../schema';
 
 function AccountSummary({
     title,
@@ -29,12 +31,48 @@ function AccountSummary({
     );
 }
 
-export default function AccountsTotalSummary() {
+export default function AccountsTotalSummary({ accounts }: { accounts: Account[] }) {
+    const calculateTotals = (accounts: Account[]) => {
+        let assets = 0;
+        let liabilities = 0;
+
+        accounts.forEach((account) => {
+            if (account.balance >= 0) {
+                assets += account.balance;
+            } else {
+                liabilities += Math.abs(account.balance);
+            }
+        });
+
+        const total = assets - liabilities;
+
+        return {
+            assets,
+            liabilities,
+            total,
+        };
+    };
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'GHS', // Assuming USD, change if needed
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    };
+
+    const { assets, liabilities, total } = calculateTotals(accounts);
+
     return (
         <View className='flex flex-row justify-between px-2.5 mb-5'>
-            <AccountSummary title='Assets' amount='5,819.32' color='#34D399' />
-            <AccountSummary title='Liabilities' amount='3,026.80' color='#DC2626' />
-            <AccountSummary title='Total' amount='2,792.52' color='#7C3AED' />
+            <AccountSummary title='Assets' amount={formatCurrency(assets)} color='#34D399' />
+            <AccountSummary
+                title='Liabilities'
+                amount={formatCurrency(liabilities)}
+                color='#DC2626'
+            />
+            <AccountSummary title='Total' amount={formatCurrency(total)} color='#7C3AED' />
         </View>
     );
 }

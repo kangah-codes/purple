@@ -88,7 +88,6 @@ export class NativeStorage {
         try {
             const allKeys = Array.from(this.keys);
             if (allKeys.length > 0) {
-                console.log('Clearing all keys', allKeys);
                 await this.multiRemove(allKeys);
             }
             // Clear AsyncStorage and the local keys set

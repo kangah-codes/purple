@@ -3,6 +3,7 @@ import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { PlusIcon } from '@/components/SVG/24x24';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
     LinearGradient,
     SafeAreaView,
@@ -12,32 +13,45 @@ import {
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useCallback } from 'react';
 import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import tw from 'twrnc';
 import { useTransactions, useTransactionStore } from '../hooks';
 import CurrentTransactionModal from '../molecules/CurrentTransactionModal';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
 };
 
-const linearGradient = ['#c084fc', '#9333ea'];
-const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
-
 function TransactionsScreen(props: TransactionsScreenProps) {
     const { sessionData } = useAuth();
-    const { setTransactions, transactions, currentTransaction, setCurrentTransaction } =
-        useTransactionStore();
+    const { setTransactions, transactions, setCurrentTransaction } = useTransactionStore();
     const { showBackButton } = props;
-    const { setShowBottomSheetModal, bottomSheetModalKeys } = useBottomSheetModalStore();
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
+    const { isLoading, data, refetch } = useTransactions({
+        sessionData: sessionData as SessionData,
+        options: {
+            onSuccess: (data) => {
+                const res = data as GenericAPIResponse<Transaction[]>;
+                setTransactions(res.data);
+            },
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your transactions",
+                    },
+                });
+            },
+        },
+        requestParams: {},
+    });
+
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
             <TransactionHistoryCard
@@ -62,28 +76,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         () => <View className='border-b border-gray-100' />,
         [],
     );
-    // useEffect(() => {
-    //     setTransactions([]);
-    // }, []);
-    const { isLoading, data, refetch } = useTransactions({
-        sessionData: sessionData as SessionData,
-        options: {
-            onSuccess: (data) => {
-                const res = data as GenericAPIResponse<Transaction[]>;
-                setTransactions(res.data);
-            },
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: "We couldn't fetch your transactions",
-                    },
-                });
-            },
-        },
-        requestParams: {},
-    });
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>

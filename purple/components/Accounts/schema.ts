@@ -17,4 +17,5 @@ export type Account = {
     name: string;
     balance: number;
     is_default_account: boolean;
+    currency: string;
 };

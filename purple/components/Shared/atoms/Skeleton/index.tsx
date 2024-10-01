@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, StyleProp, ViewStyle } from 'react-native';
 
 type AnimatedSkeletonProps = {
     style: StyleProp<ViewStyle>;
 };
 
-export default function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
+function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
     console.log(style);
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -43,3 +43,5 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
 });
+
+export default memo(AnimatedSkeleton);

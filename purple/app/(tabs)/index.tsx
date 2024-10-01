@@ -19,7 +19,7 @@ export default function Screen() {
     const { setAccounts, accounts } = useAccountStore();
     const { setTransactions, transactions } = useTransactionStore();
     const { setPlans } = usePlanStore();
-    const { isLoading, data } = useUser({
+    const { isLoading, isFetching } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,
         options: {
@@ -46,11 +46,13 @@ export default function Screen() {
         },
     });
 
+    console.log(isLoading, 'Loading');
+
     useEffect(() => {
         console.log(user, 'User on mount');
     }, []);
 
-    if (isLoading && user == null) {
+    if (isLoading || user == null) {
         return <LoadingScreen />;
     }
 
