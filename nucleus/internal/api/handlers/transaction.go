@@ -177,7 +177,7 @@ func FetchTransactions(c *gin.Context) {
 	var totalItems int64
 	db.Model(&models.Transaction{}).Where("user_id = ?", userID).Count(&totalItems)
 
-	result := db.Preload("Account").Where("user_id = ?", userID).Limit(pageSize).Offset(offset).Find(&transactions)
+	result := db.Preload("Account").Where("user_id = ?", userID).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&transactions)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch transactions: %s", result.Error.Error()), Data: nil})
 		return

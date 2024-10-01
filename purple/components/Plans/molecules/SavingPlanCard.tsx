@@ -1,20 +1,8 @@
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { Plan } from '../schema';
 
-type SavingPlanCardProps = {
-    category: string;
-    percentageCompleted: number;
-    name: string;
-    currentAmount: number;
-    targetAmount: number;
-};
-
-export default function SavingPlanCard({
-    data,
-    index,
-}: {
-    data: SavingPlanCardProps;
-    index: number;
-}) {
+export default function SavingPlanCard({ data, index }: { data: Plan; index: number }) {
     return (
         <TouchableOpacity
             className='p-4 border border-gray-200 rounded-xl flex flex-col w-72 space-y-2.5'
@@ -40,15 +28,13 @@ export default function SavingPlanCard({
                         }}
                         className='text-xs text-purple-50 tracking-tighter'
                     >
-                        {data.percentageCompleted}%
+                        {`${(data.balance / data.target) * 100}%`}
                     </Text>
                 </View>
             </View>
 
             <Text
-                style={{
-                    fontFamily: 'InterSemiBold',
-                }}
+                style={GLOBAL_STYLESHEET.interSemiBold}
                 className='text-base text-black tracking-tighter'
             >
                 {data.name}
@@ -63,7 +49,7 @@ export default function SavingPlanCard({
                     }}
                     className='text-sm text-black tracking-tighter'
                 >
-                    ₵ {data.currentAmount}
+                    ₵ {data.balance}
                 </Text>
 
                 <Text
@@ -72,18 +58,18 @@ export default function SavingPlanCard({
                     }}
                     className='text-sm text-gray-600 tracking-tighter'
                 >
-                    ₵ {data.targetAmount}
+                    ₵ {data.target}
                 </Text>
             </View>
 
-            <View className='relative w-full'>
-                <View className='h-2 w-full rounded-full bg-gray-100' />
+            <View className='flex flex-row items-center space-x-0.5 w-full'>
                 <View
-                    className='h-2 bg-purple-600 rounded-full absolute'
+                    className='h-2 bg-purple-600 rounded-md'
                     style={{
-                        width: `${data.percentageCompleted}%`,
+                        width: `${(data.balance / data.target) * 100}%`,
                     }}
                 />
+                <View className='h-2 flex-grow bg-purple-200 rounded-full' />
             </View>
         </TouchableOpacity>
     );

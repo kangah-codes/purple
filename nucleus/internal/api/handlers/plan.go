@@ -7,6 +7,7 @@ import (
 	"nucleus/internal/models"
 	"nucleus/utils"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ func CreatePlan(c *gin.Context) {
 	db := utils.GetDB()
 	createPlan := types.CreatePlanDTO{}
 	if err := c.ShouldBindJSON(&createPlan); err != nil {
+		utils.InfoLogger.Println("Invalid client request: ", err)
 		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
 	}
@@ -34,17 +36,32 @@ func CreatePlan(c *gin.Context) {
 		return
 	}
 
+	startDate, err := time.Parse("02/01/2006", createPlan.StartDate)
+	if err != nil {
+		utils.ErrorLogger.Println(err)
+		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid start date", Data: nil})
+		return
+	}
+
+	endDate, err := time.Parse("02/01/2006", createPlan.EndDate)
+	if err != nil {
+		utils.ErrorLogger.Println(err)
+		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid end date", Data: nil})
+		return
+	}
+
 	plan := models.Plan{
 		UserId:           userID.(uuid.UUID),
 		Type:             createPlan.Type,
 		Category:         createPlan.Category,
 		Target:           createPlan.Target,
-		Balance:          createPlan.Balance,
+		Balance:          0,
 		AccountId:        createPlan.AccountId,
-		StartDate:        createPlan.StartDate,
-		EndDate:          createPlan.EndDate,
+		StartDate:        startDate,
+		EndDate:          endDate,
 		DepositFrequency: createPlan.DepositFrequency,
 		PushNotification: createPlan.PushNotification,
+		Name:             createPlan.Name,
 	}
 
 	result = db.Create(&plan)
@@ -53,6 +70,8 @@ func CreatePlan(c *gin.Context) {
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create plan", Data: nil})
 		return
 	}
+
+	plan.Account = account
 
 	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Plan created", Data: plan})
 }
@@ -103,16 +122,42 @@ func FetchPlans(c *gin.Context) {
 		return
 	}
 
+	// Access query parameters
+	name := c.Query("name")
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+	planType := c.Query("type")
+
+	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	offset := (page - 1) * pageSize
 
-	var totalItems int64
-	db.Model(&models.Plan{}).Where("user_id = ?", userID).Count(&totalItems)
+	// Base query
+	query := db.Model(&models.Plan{}).Where("user_id = ?", userID)
 
-	result := db.Where("user_id = ?", userID).Limit(pageSize).Offset(offset).Find(&plans)
+	// Apply filters based on query parameters
+	if name != "" {
+		query = query.Where("name LIKE ?", "%"+name+"%")
+	}
+	if startDate != "" {
+		query = query.Where("start_date >= ?", startDate)
+	}
+	if endDate != "" {
+		query = query.Where("end_date <= ?", endDate)
+	}
+	if planType != "" {
+		query = query.Where("type = ?", planType)
+	}
+
+	// Count total items
+	var totalItems int64
+	query.Count(&totalItems)
+
+	// Fetch plans with pagination
+	result := query.Preload("Account").Order("created_at desc").Limit(pageSize).Offset(offset).Find(&plans)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch accounts: %s", result.Error.Error()), Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch plans: %s", result.Error.Error()), Data: nil})
 		return
 	}
 

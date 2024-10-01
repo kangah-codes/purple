@@ -65,8 +65,8 @@ func SignUp(c *gin.Context) {
 		IsDefaultAccount: true,
 	}
 
-	result = db.Create(&account)
-	if result.Error != nil {
+	createAccount := db.Create(&account)
+	if createAccount.Error != nil {
 		utils.ErrorLogger.Println(result.Error)
 		// delete the user if account creation fails
 		// idc if this fails
@@ -75,6 +75,8 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to create user account: %s", result.Error.Error()), Data: nil})
 		return
 	}
+
+	fmt.Printf("Created account: %+v\n", account)
 
 	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
 }
@@ -130,9 +132,9 @@ func FetchUser(c *gin.Context) {
 	utils.InfoLogger.Printf("User ID %s", c.Param("id"))
 
 	result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Limit(5)
+		return db.Order("created_at desc").Limit(5)
 	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Limit(5)
+		return db.Order("created_at desc").Limit(5)
 	}).First(&user, "id = ?", userID)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
@@ -166,9 +168,9 @@ func FetchUsers(c *gin.Context) {
 	db.Model(&models.User{}).Count(&totalItems)
 
 	result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Limit(5)
+		return db.Order("created_at desc").Limit(5)
 	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Limit(5)
+		return db.Order("created_at desc").Limit(5)
 	}).Limit(pageSize).Offset(offset).Find(&users)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch users", Data: nil})

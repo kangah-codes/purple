@@ -15,9 +15,17 @@ import { SceneMap, TabView } from 'react-native-tab-view';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
 import tw from 'twrnc';
+import { useAuth } from '@/components/Auth/hooks';
+import { usePlans, usePlanStore } from '../hooks';
+import { Plan } from '../schema';
+import Toast from 'react-native-toast-message';
+import { GenericAPIResponse } from '@/@types/request';
+import { SessionData } from '@/components/Auth/schema';
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function PlansScreen() {
+    const { sessionData } = useAuth();
+    const { setPlans } = usePlanStore();
     const [index, setIndex] = useState(0);
     const [routes] = useState([
         { key: 'expenses', title: 'Expenses' },

@@ -7,15 +7,19 @@ import { SearchIcon } from '../../SVG/noscale';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-import { SessionData } from '@/components/Auth/schema';
-import { useUser } from '@/components/Profile/hooks';
+import { SessionData, User } from '@/components/Auth/schema';
+import { useUser, useUserStore } from '@/components/Profile/hooks';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '@/components/Auth/hooks';
 import AnimatedSkeleton from '@/components/Shared/atoms/Skeleton';
 import tw from 'twrnc';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { GenericAPIResponse } from '@/@types/request';
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();
+    const { setAccounts } = useAccountStore();
+    const { setUser, user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const { refetch } = useUser({
         sessionData: sessionData as SessionData,
@@ -31,10 +35,16 @@ export default function IndexScreen() {
                 });
             },
             onSettled: () => setRefreshing(false),
+            onSuccess: (data) => {
+                const res = data as GenericAPIResponse<User>;
+                setUser(res.data);
+                setAccounts(res.data.accounts);
+            },
         },
     });
 
     const onRefresh = useCallback(() => {
+        console.log('USER HOME ', user);
         setRefreshing(true);
         refetch();
     }, []);
@@ -45,7 +55,7 @@ export default function IndexScreen() {
             <View style={styles.parentView} className='bg-white px-5'>
                 <View className='flex flex-row justify-between items-center pt-2.5'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                        Hi, Joshua 👋
+                        Hi, {sessionData?.user.username} 👋
                     </Text>
                 </View>
 

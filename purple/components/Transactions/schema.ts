@@ -15,11 +15,12 @@ export type Transaction = {
     DeletedAt: string | null;
     account_id: string;
     user_id: string;
-    Type: string;
+    Type: 'debit' | 'credit' | 'transfer';
     amount: number;
     account: Account;
     note: string;
     category: string;
     from_account: number;
     to_account: number;
+    created_at: string;
 };

@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { forwardRef, useImperativeHandle } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import tw from 'twrnc';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 const PersonalInformation = forwardRef((props, ref) => {
     const {

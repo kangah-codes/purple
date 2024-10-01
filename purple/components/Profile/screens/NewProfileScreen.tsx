@@ -8,9 +8,10 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import ProfilePages from '../molecules/ProfilePages';
+import { nativeStorage } from '@/lib/utils/storage';
 
 export default function NewProfileScreen() {
-    const { destroySession, sessionData, hasOnboarded, setOnboarded } = useAuth();
+    const { destroySession, sessionData, hasOnboarded, setOnboarded, isLoading } = useAuth();
     const showToast = () => {
         Toast.show({
             type: 'error',
@@ -21,11 +22,17 @@ export default function NewProfileScreen() {
         });
     };
 
-    console.log(sessionData, hasOnboarded);
-
     // if (!sessionData) {
     //     return <Redirect href={'/onboarding/steps'} />;
     // }
+
+    nativeStorage.onClearCompleted(() => {
+        console.log('HELLO');
+    });
+
+    if (isLoading) {
+        return null;
+    }
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>

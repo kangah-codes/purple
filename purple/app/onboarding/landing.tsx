@@ -5,8 +5,6 @@ import { Redirect, Stack } from 'expo-router';
 export default function Screen() {
     const { hasOnboarded } = useAuth();
 
-    console.log(hasOnboarded, 'ONBOARDING HAS ONB');
-
     if (!hasOnboarded) return <Redirect href='/onboarding/steps' />;
 
     return (

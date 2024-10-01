@@ -16,11 +16,14 @@ import (
 
 	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	utils.InitLogger()
+	validate := validator.New()
+	utils.RegisterCustomValidations(validate)
 
 	// load env variables only in dev
 	if os.Getenv("GIN_MODE") != "release" {

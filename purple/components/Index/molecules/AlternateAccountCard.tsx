@@ -3,20 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import ActionButtons from './ActionButton';
 import { BalanceDisplay } from './BalanceDisplay';
 import { nativeStorage } from '@/lib/utils/storage';
+import { Account } from '@/components/Accounts/schema';
 
-type AlternateAccountCardProps = {
-    ID: string;
-    balance: number;
-    category: string;
-    created_at: string;
-    deleted_at: string;
-    is_default_account: boolean;
-    name: string;
-    updated_at: string;
-    user_id: string;
-};
-
-export default function AlternateAccountCard({ item }: { item: AlternateAccountCardProps }) {
+export default function AlternateAccountCard({ item }: { item: Account }) {
     const [showAmount, setShowAmount] = useState(false);
 
     const getShowAmount = useCallback(async () => {

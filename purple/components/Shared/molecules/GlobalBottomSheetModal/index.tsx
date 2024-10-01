@@ -45,6 +45,9 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
     }, []);
 
     useEffect(() => {
+        // TODO: fix async state race conditions
+        // idk why adding this makes it work, probably because of the async nature of the state
+        console.log('bottomSheetModalKeys: ' + JSON.stringify(bottomSheetModalKeys));
         const isVisible = bottomSheetModalKeys[modalKey];
 
         if (isVisible !== isModalVisible) {

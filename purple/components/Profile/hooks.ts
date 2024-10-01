@@ -6,11 +6,16 @@ import { UseQueryOptions, UseQueryResult, useQuery } from 'react-query';
 import { stringify } from '@/lib/utils/string';
 
 export function useUserStore() {
-    const [user, setUser] = useStore(createUserStore, (state) => [state.user, state.setUser]);
+    const [user, setUser, reset] = useStore(createUserStore, (state) => [
+        state.user,
+        state.setUser,
+        state.reset,
+    ]);
 
     return {
         user,
         setUser,
+        reset,
     };
 }
 

@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
 import { useUserStore } from '@/components/Profile/hooks';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { Account } from '@/components/Accounts/schema';
 
 const data = [
     {
@@ -56,27 +58,28 @@ const styles = {
 };
 
 export default function AccountCardCarousel() {
-    const { user, setUser } = useUserStore();
-    const [entries, setEntries] = useState(data);
+    const { accounts } = useAccountStore();
     const [activeSlide, setActiveSlide] = useState(0); // active slide is 0 by default
-    const renderItem = useCallback(({ item }: any) => <AlternateAccountCard item={item} />, []);
+    const renderItem = useCallback(
+        ({ item }: { item: Account }) => <AlternateAccountCard item={item} />,
+        [accounts],
+    );
 
     return (
         <>
             <Carousel
-                data={user?.accounts ?? []}
+                data={accounts}
                 renderItem={renderItem}
                 sliderWidth={styles.sliderWidth}
                 itemWidth={styles.itemWidth}
                 layout={'default'}
-                loop
                 autoplay={false}
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
             />
 
             <Pagination
-                dotsLength={user?.accounts.length ?? 1}
+                dotsLength={accounts.length}
                 activeDotIndex={activeSlide}
                 dotStyle={styles.paginationDotStyle}
                 inactiveDotStyle={

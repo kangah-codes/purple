@@ -1,11 +1,15 @@
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '../../SVG/noscale';
+import {
+    ArrowNarrowDownRightIcon,
+    ArrowNarrowRightIcon,
+    ArrowNarrowUpRightIcon,
+} from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { TransactionData } from '../schema';
+import { Transaction, TransactionData } from '../schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 type TransactionHistoryCardProps = {
-    data: TransactionData;
+    data: Transaction;
     onPress: () => void;
     showTitle?: boolean;
 };
@@ -24,22 +28,34 @@ export default function TransactionHistoryCard({
                 <View
                     className='flex items-center justify-center rounded-full h-9 w-9'
                     style={{
-                        backgroundColor: data.type === 'debit' ? '#FEE2E2' : 'rgb(220 252 231)',
+                        backgroundColor:
+                            data.Type === 'debit'
+                                ? '#FEE2E2'
+                                : data.Type == 'credit'
+                                ? 'rgb(220 252 231)'
+                                : '#F3E8FF',
                     }}
                 />
-                {data.type === 'debit' ? (
+                {data.Type === 'debit' ? (
                     <ArrowNarrowUpRightIcon
                         width={16}
                         height={16}
                         style={{ position: 'absolute' }}
                         stroke={'#B91C1C'}
                     />
-                ) : (
+                ) : data.Type == 'credit' ? (
                     <ArrowNarrowDownRightIcon
                         width={16}
                         height={16}
                         style={{ position: 'absolute' }}
                         stroke={'#047857'}
+                    />
+                ) : (
+                    <ArrowNarrowRightIcon
+                        width={16}
+                        height={16}
+                        style={{ position: 'absolute' }}
+                        stroke='#7C3AED'
                     />
                 )}
             </View>
@@ -47,18 +63,18 @@ export default function TransactionHistoryCard({
             <View className='flex flex-col flex-grow'>
                 <View className='flex flex-row justify-between items-center'>
                     {showTitle && (
-                        <Text style={{ fontFamily: 'Suprapower' }} className='text-base'>
+                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base'>
                             {truncateStringIfLongerThan(data.category, 30)}
                         </Text>
                     )}
                     <Text
                         style={{
-                            fontFamily: 'Suprapower',
-                            color: data.type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
+                            ...GLOBAL_STYLESHEET.suprapower,
+                            color: data.Type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
                         }}
                         className='text-xs'
                     >
-                        {data.type === 'debit' ? '-' : '+'}
+                        {data.Type === 'debit' ? '-' : '+'}
                         {data.amount}
                     </Text>
                 </View>
@@ -68,13 +84,13 @@ export default function TransactionHistoryCard({
                         style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-600 tracking-tighter'
                     >
-                        {truncateStringIfLongerThan(data.description, 25)}
+                        {truncateStringIfLongerThan(data.note ?? '', 25)}
                     </Text>
                     <Text
                         style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-600 tracking-tighter'
                     >
-                        {data.dateTime}
+                        {new Date(data.created_at).toLocaleDateString()}
                     </Text>
                 </View>
             </View>

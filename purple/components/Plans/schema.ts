@@ -1,3 +1,5 @@
+import { Account } from '../Accounts/schema';
+
 export type BudgetPlan = {
     category: string;
     startDate: string;
@@ -6,4 +8,25 @@ export type BudgetPlan = {
     spent: number;
     balance: number;
     budget: number;
+};
+
+export type Plan = {
+    ID: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    user_id: string;
+    type: 'expense' | 'saving';
+    category: string;
+    target: number;
+    balance: number;
+    account_id: string;
+    account: Account;
+    start_date: string;
+    end_date: string;
+    deposit_frequency: string;
+    push_notification: boolean;
+    CreatedAt: string;
+    UpdatedAt: string;
+    name: string;
 };

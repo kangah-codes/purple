@@ -11,7 +11,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -24,8 +24,17 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
+import { useUserStore } from '@/components/Profile/hooks';
+import { nativeStorage } from '@/lib/utils/storage';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { useTransactionStore } from '@/components/Transactions/hooks';
+import { usePlanStore } from '@/components/Plans/hooks';
 
 export default function SignInScreen() {
+    const { user, setUser, reset: resetUser } = useUserStore();
+    const { accounts, setAccounts } = useAccountStore();
+    const { transactions, setTransactions } = useTransactionStore();
+    const { plans, setPlans } = usePlanStore();
     const [loading, setLoading] = useState(false);
     const { setSessionData } = useAuth();
     const {
@@ -41,7 +50,6 @@ export default function SignInScreen() {
     const { mutate, isLoading, error, data } = useSignIn();
     const signUp = (loginInformation: { username: string; password: string }) => {
         Keyboard.dismiss();
-        console.log(isLoading);
         mutate(loginInformation, {
             onError: () => {
                 Toast.show({
@@ -54,7 +62,6 @@ export default function SignInScreen() {
             },
             onSuccess: (res) => {
                 const { data } = res;
-                console.log(data, 'RESPONSE FROM LOGIN');
                 setSessionData(data)
                     .then(() => {
                         router.push('/(tabs)');
@@ -68,12 +75,22 @@ export default function SignInScreen() {
                             },
                         });
                     });
-                console.log(data);
-                // setHasOnboarded(true).then(() => router.push('/'));
             },
         });
         console.log(isLoading, error, data, loginInformation);
     };
+
+    // TODO: figure out how to refactor the code so race conditions on sign out are fixed
+    const shouldShowLogin = useCallback(() => {
+        const userIsEmpty = user === null || Object.keys(user).length === 0;
+        const accountsIsEmpty = accounts.length === 0;
+        const transactionsIsEmpty = transactions.length === 0;
+        const plansIsEmpty = plans.length === 0;
+
+        return userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
+    }, [user, accounts, transactions, plans]);
+
+    if (!shouldShowLogin()) return null;
 
     return (
         <SafeAreaView

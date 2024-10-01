@@ -18,6 +18,7 @@ import { transactionData } from '../../Index/constants';
 import TransactionHistoryCard from './TransactionHistoryCard';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { useTransactions, useTransactionStore } from '../hooks';
 
 export default function TransactionHistoryList() {
     // ref
@@ -52,6 +53,7 @@ export default function TransactionHistoryList() {
         ),
         [],
     );
+    const { transactions } = useTransactionStore();
 
     return (
         <View className='mt-5'>
@@ -210,7 +212,7 @@ export default function TransactionHistoryList() {
                         <ChevronRightIcon stroke='#9333ea' />
                     </TouchableOpacity>
                 </View>
-                {transactionData.map((data, index) => (
+                {transactions.map((data, index) => (
                     <TransactionHistoryCard
                         data={data}
                         key={index}
