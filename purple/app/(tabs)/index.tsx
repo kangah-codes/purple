@@ -2,6 +2,7 @@ import { GenericAPIResponse } from '@/@types/request';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData, User } from '@/components/Auth/schema';
+import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { SafeAreaView, View } from '@/components/Shared/styled';
@@ -37,15 +38,7 @@ export default function Screen() {
     }, [data]);
 
     if (isLoading && user == null) {
-        return (
-            <SafeAreaView className='w-full items-center justify-items-center flex flex-1'>
-                <View className='h-full flex items-center w-full justify-items-center flex-row'>
-                    <View className='w-full'>
-                        <ActivityIndicator />
-                    </View>
-                </View>
-            </SafeAreaView>
-        );
+        return <LoadingScreen />;
     }
 
     return <IndexScreen />;

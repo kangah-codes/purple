@@ -11,6 +11,8 @@ import { SessionData } from '@/components/Auth/schema';
 import { useUser } from '@/components/Profile/hooks';
 import Toast from 'react-native-toast-message';
 import { useAuth } from '@/components/Auth/hooks';
+import AnimatedSkeleton from '@/components/Shared/atoms/Skeleton';
+import tw from 'twrnc';
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();
