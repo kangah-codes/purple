@@ -34,7 +34,7 @@ type CreatePlanDTO struct {
 	AccountId        uuid.UUID `json:"account_id" binding:"required"`
 	Type             string    `json:"type" binding:"required,oneof=saving expense"`
 	Category         string    `json:"category" binding:"required"`
-	Target           float64   `json:"target" binding:"required"`
+	Target           float64   `json:"target" validate:"number"`
 	StartDate        string    `json:"start_date" binding:"required"`
 	EndDate          string    `json:"end_date" binding:"required"`
 	DepositFrequency string    `json:"deposit_frequency" binding:"required,oneof=daily weekly bi-weekly monthly yearly"`
@@ -43,5 +43,5 @@ type CreatePlanDTO struct {
 }
 
 type UpdatePlanBalanceDTO struct {
-	Balance float64 `json:"balance" binding:"required"`
+	Balance float64 `json:"balance" validate:"number"`
 }

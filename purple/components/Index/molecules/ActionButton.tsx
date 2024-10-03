@@ -9,15 +9,18 @@ import {
     PiggyBankIcon,
 } from '../../SVG/noscale';
 import { Link } from 'expo-router';
+import { Account } from '@/components/Accounts/schema';
 
 export function ActionButton({
     IconComponent,
     label,
     type,
+    account,
 }: {
     IconComponent: React.ComponentType<SvgProps>;
     label: string;
     type: string;
+    account: Account;
 }) {
     return (
         <View className='flex flex-col items-center justify-center space-y-1.5'>
@@ -26,7 +29,7 @@ export function ActionButton({
                     pathname: type == 'plan' ? '/plans/new-plan' : '/transactions/new-transaction',
                     params: {
                         type,
-                        ...(type == 'plan' && { accountId: '1' }),
+                        accountId: account.ID,
                     },
                 }}
             >
@@ -39,13 +42,33 @@ export function ActionButton({
     );
 }
 
-export default function ActionButtons() {
+export default function ActionButtons({ account }: { account: Account }) {
     return (
         <View className='flex-row justify-between items-stretch w-full px-7 pt-2.5'>
-            <ActionButton IconComponent={ArrowCircleDownIcon} label='Income' type='income' />
-            <ActionButton IconComponent={ArrowCircleUpIcon} label='Expense' type='expense' />
-            <ActionButton IconComponent={CoinSwapIcon} label='Transfer' type='transfer' />
-            <ActionButton IconComponent={PiggyBankIcon} label='Plan' type='plan' />
+            <ActionButton
+                IconComponent={ArrowCircleDownIcon}
+                label='Income'
+                type='income'
+                account={account}
+            />
+            <ActionButton
+                IconComponent={ArrowCircleUpIcon}
+                label='Expense'
+                type='expense'
+                account={account}
+            />
+            <ActionButton
+                IconComponent={CoinSwapIcon}
+                label='Transfer'
+                type='transfer'
+                account={account}
+            />
+            <ActionButton
+                IconComponent={PiggyBankIcon}
+                label='Plan'
+                type='plan'
+                account={account}
+            />
         </View>
     );
 }

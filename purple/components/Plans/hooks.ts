@@ -41,18 +41,18 @@ export function usePlanStore() {
 
 export function usePlans({
     sessionData,
-    requestParams,
+    requestQuery,
     options,
 }: {
     sessionData: SessionData;
-    requestParams: RequestParamQuery;
+    requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Plan[]>, Error> {
     return useQuery(
-        ['plans', requestParams],
+        ['plans', requestQuery],
         async () => {
             const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/plan?${stringify(requestParams)}`,
+                `${process.env.EXPO_PUBLIC_API_URL}/plan?${stringify(requestQuery)}`,
                 {
                     method: 'GET',
                     headers: {

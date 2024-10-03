@@ -54,7 +54,7 @@ function SavingsScreen() {
                 });
             },
         },
-        requestParams: {
+        requestQuery: {
             type: 'saving',
         },
     });

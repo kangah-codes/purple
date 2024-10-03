@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"regexp"
 	"strings"
 
@@ -21,6 +22,8 @@ func ValidateEmail(e string) bool {
 
 func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("oneof", validateOneOf)
+	v.RegisterValidation("validNumber", validateNumber)
+	v.RegisterValidation("validCurrency", validateCurrency)
 }
 
 func validateOneOf(fl validator.FieldLevel) bool {
@@ -31,5 +34,23 @@ func validateOneOf(fl validator.FieldLevel) bool {
 			return true
 		}
 	}
+	return false
+}
+
+func validateNumber(fl validator.FieldLevel) bool {
+	balance := fl.Field().Float()
+	return !math.IsNaN(balance) && !math.IsInf(balance, 0)
+}
+
+func validateCurrency(fl validator.FieldLevel) bool {
+	currency := fl.Field().String()
+
+	// check if the currency is in the Currencies slice which is a slice of Currency structs
+	for _, c := range Currencies {
+		if c.Code == currency {
+			return true
+		}
+	}
+
 	return false
 }

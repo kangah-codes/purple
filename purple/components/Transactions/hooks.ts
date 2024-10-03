@@ -27,18 +27,18 @@ export function useTransactionStore() {
 
 export function useTransactions({
     sessionData,
-    requestParams,
+    requestQuery,
     options,
 }: {
     sessionData: SessionData;
-    requestParams: RequestParamQuery;
+    requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Transaction[]>, Error> {
     return useQuery(
-        ['transactions', requestParams],
+        ['transactions', requestQuery],
         async () => {
             const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/transaction?${stringify(requestParams)}`,
+                `${process.env.EXPO_PUBLIC_API_URL}/transaction?${stringify(requestQuery)}`,
                 {
                     method: 'GET',
                     headers: {

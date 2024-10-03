@@ -36,6 +36,7 @@ export default function SignInScreen() {
     const { transactions, setTransactions } = useTransactionStore();
     const { plans, setPlans } = usePlanStore();
     const [loading, setLoading] = useState(false);
+    const [showLogin, setShowLogin] = useState(true);
     const { setSessionData } = useAuth();
     const {
         control,
@@ -64,7 +65,23 @@ export default function SignInScreen() {
                 const { data } = res;
                 setSessionData(data)
                     .then(() => {
-                        router.push('/(tabs)');
+                        Promise.all([
+                            nativeStorage.setItem('account_groups', data.account_groups),
+                            nativeStorage.setItem('currencies', data.currencies),
+                            nativeStorage.setItem('transaction_types', data.transaction_types),
+                        ])
+                            .then(() => {
+                                router.push('/(tabs)');
+                            })
+                            .catch(() => {
+                                Toast.show({
+                                    type: 'error',
+                                    props: {
+                                        text1: 'Error!',
+                                        text2: "Couldn't sign you in. Try again later",
+                                    },
+                                });
+                            });
                     })
                     .catch(() => {
                         Toast.show({
@@ -77,20 +94,31 @@ export default function SignInScreen() {
                     });
             },
         });
-        console.log(isLoading, error, data, loginInformation);
     };
 
     // TODO: figure out how to refactor the code so race conditions on sign out are fixed
-    const shouldShowLogin = useCallback(() => {
-        const userIsEmpty = user === null || Object.keys(user).length === 0;
-        const accountsIsEmpty = accounts.length === 0;
-        const transactionsIsEmpty = transactions.length === 0;
-        const plansIsEmpty = plans.length === 0;
+    useEffect(() => {
+        const checkLoginState = async () => {
+            try {
+                await nativeStorage.clear();
+                const userIsEmpty = user === null || Object.keys(user).length === 0;
+                const accountsIsEmpty = accounts.length === 0;
+                const transactionsIsEmpty = transactions.length === 0;
+                const plansIsEmpty = plans.length === 0;
 
-        return userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
+                const shouldShow =
+                    userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
+                setShowLogin(shouldShow);
+            } catch (error) {
+                console.error('Error in checkLoginState:', error);
+                setShowLogin(true); // Default to showing login on error
+            }
+        };
+
+        checkLoginState();
     }, [user, accounts, transactions, plans]);
 
-    if (!shouldShowLogin()) return null;
+    if (!showLogin) return null;
 
     return (
         <SafeAreaView

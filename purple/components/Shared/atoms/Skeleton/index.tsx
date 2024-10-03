@@ -6,7 +6,6 @@ type AnimatedSkeletonProps = {
 };
 
 function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
-    console.log(style);
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {

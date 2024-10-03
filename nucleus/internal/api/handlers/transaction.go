@@ -174,10 +174,21 @@ func FetchTransactions(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	offset := (page - 1) * pageSize
 
-	var totalItems int64
-	db.Model(&models.Transaction{}).Where("user_id = ?", userID).Count(&totalItems)
+	// Access query parameters
+	accountID := c.Query("accountID")
 
-	result := db.Preload("Account").Where("user_id = ?", userID).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&transactions)
+	fmt.Println(accountID, "ACCID")
+
+	var totalItems int64
+	query := db.Model(&models.Transaction{}).Where("user_id = ?", userID).Count(&totalItems)
+
+	// Apply filters based on query parameters
+	if accountID != "" {
+		utils.InfoLogger.Println("Account id is not null")
+		query = query.Where("account_id = ?", accountID)
+	}
+
+	result := query.Preload("Account").Where("user_id = ?", userID).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&transactions)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch transactions: %s", result.Error.Error()), Data: nil})
 		return

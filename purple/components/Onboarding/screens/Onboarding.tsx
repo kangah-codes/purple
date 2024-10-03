@@ -26,7 +26,6 @@ export default function Screen() {
                 // handleFormSubmit();
                 setOnboarded(true)
                     .then(() => {
-                        alert('ONBOARDED');
                         router.replace('/onboarding/landing');
                     })
                     .catch((error) => {

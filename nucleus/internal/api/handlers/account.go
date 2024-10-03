@@ -32,6 +32,7 @@ func CreateAccount(c *gin.Context) {
 		Name:     createAccount.Name,
 		Category: createAccount.Category,
 		Balance:  createAccount.Balance,
+		Currency: createAccount.Currency,
 	}
 
 	result := db.Create(&account)

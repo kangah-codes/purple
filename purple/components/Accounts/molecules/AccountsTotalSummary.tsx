@@ -19,11 +19,12 @@ function AccountSummary({
             </Text>
             <Text
                 style={[
-                    GLOBAL_STYLESHEET.suprapower,
+                    GLOBAL_STYLESHEET.interBold,
                     {
                         color,
                     },
                 ]}
+                className='tracking-tight text-sm'
             >
                 {amount}
             </Text>
@@ -65,8 +66,8 @@ export default function AccountsTotalSummary({ accounts }: { accounts: Account[]
     const { assets, liabilities, total } = calculateTotals(accounts);
 
     return (
-        <View className='flex flex-row justify-between px-2.5 mb-5'>
-            <AccountSummary title='Assets' amount={formatCurrency(assets)} color='#34D399' />
+        <View className='flex flex-row justify-between mb-5'>
+            <AccountSummary title='Assets' amount={formatCurrency(assets)} color='#15803D' />
             <AccountSummary
                 title='Liabilities'
                 amount={formatCurrency(liabilities)}

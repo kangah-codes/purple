@@ -17,6 +17,8 @@ import { ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { useBottomSheetFlatListStore } from './hooks';
 import { keyExtractor } from '@/lib/utils/number';
+import EmptyList from '../ListStates/Empty';
+import { View } from '../../styled';
 
 interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
     sheetKey: string;
@@ -104,6 +106,11 @@ function CustomBottomSheetFlatList<T>({
                 contentContainerStyle={flatListContentContainerStyle}
                 showsVerticalScrollIndicator
                 ItemSeparatorComponent={itemSeparator}
+                ListEmptyComponent={
+                    <View className='pt-10'>
+                        <EmptyList message="Couldn't find what you're looking for!" />
+                    </View>
+                }
             />
         </BottomSheet>
     );

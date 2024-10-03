@@ -59,11 +59,18 @@ export function stringify(obj: ParsedQuery): string {
     const parts: string[] = [];
 
     for (const [key, value] of Object.entries(obj)) {
+        if (!Boolean(value)) {
+            // Skip undefined or null values
+            continue;
+        }
+
         if (Array.isArray(value)) {
             for (const item of value) {
-                parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`);
+                if (item !== undefined && item !== null) {
+                    parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`);
+                }
             }
-        } else if (typeof value === 'object' && value !== null) {
+        } else if (typeof value === 'object') {
             parts.push(stringify({ [key]: value }));
         } else {
             parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);

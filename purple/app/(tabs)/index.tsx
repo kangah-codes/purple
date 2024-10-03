@@ -46,12 +46,6 @@ export default function Screen() {
         },
     });
 
-    console.log(isLoading, 'Loading');
-
-    useEffect(() => {
-        console.log(user, 'User on mount');
-    }, []);
-
     if (isLoading || user == null) {
         return <LoadingScreen />;
     }

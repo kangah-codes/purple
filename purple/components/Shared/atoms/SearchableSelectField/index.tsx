@@ -1,18 +1,20 @@
 import { ChevronDownIcon } from '@/components/SVG/16x16';
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { InputField, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { SearchIcon } from '@/components/SVG/noscale';
+import { StyleSheet } from 'react-native';
 
 type SelectOption = {
     value: string | number | boolean;
     label: string;
 };
 
-type SelectFieldProps = {
+type SearchableSelectFieldProps = {
     label?: string;
     options: {
         [key: string]: SelectOption;
@@ -24,7 +26,7 @@ type SelectFieldProps = {
     value?: string;
 };
 
-export default function SelectField({
+export default function SearchableSelectField({
     label,
     options,
     selectKey,
@@ -32,8 +34,9 @@ export default function SelectField({
     renderItem,
     onChange,
     value,
-}: SelectFieldProps) {
+}: SearchableSelectFieldProps) {
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
+    const [searchValue, setSearchValue] = useState<string>('');
     const [val, setValue] = useState<string | undefined>(value);
     const renderDefaultItem = useCallback(
         (item: any) => (
@@ -45,6 +48,15 @@ export default function SelectField({
         ),
         [],
     );
+    const filteredData = useMemo(() => {
+        return Object.keys(options)
+            .map((key) => options[key])
+            .filter((item) => {
+                return item.label.toLowerCase().includes(searchValue.toLowerCase());
+            });
+    }, [searchValue, options]);
+
+    console.log(options);
 
     return (
         <>
@@ -55,19 +67,41 @@ export default function SelectField({
                 <CustomBottomSheetFlatList
                     snapPoints={customSnapPoints ?? ['50%', '50%']}
                     children={
-                        label && (
-                            <View className='px-5 py-1'>
-                                <Text
-                                    style={{ fontFamily: 'Suprapower' }}
-                                    className='text-base text-gray-900'
-                                >
-                                    {label}
-                                </Text>
+                        <View className='flex flex-col space-y-2.5'>
+                            {label && (
+                                <View className='px-5 py-1'>
+                                    <Text
+                                        style={{ fontFamily: 'Suprapower' }}
+                                        className='text-base text-gray-900'
+                                    >
+                                        {label}
+                                    </Text>
+                                </View>
+                            )}
+
+                            <View className='w-full px-5 pb-2.5'>
+                                <View className='relative flex justify-center mt-5'>
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                        placeholder='Search'
+                                        cursorColor={'#000'}
+                                        onChangeText={setSearchValue}
+                                        value={searchValue}
+                                    />
+                                    <SearchIcon
+                                        width={16}
+                                        height={16}
+                                        style={styles.searchIcon}
+                                        stroke='#A855F7'
+                                    />
+                                </View>
                             </View>
-                        )
+                        </View>
                     }
                     sheetKey={selectKey}
-                    data={Object.keys(options).map((key) => options[key]) ?? []}
+                    // data={Object.keys(options).map((key) => options[key]) ?? []}
+                    data={filteredData}
                     renderItem={(item) => {
                         let _item = item.item as unknown as SelectOption;
                         return (
@@ -124,3 +158,10 @@ export default function SelectField({
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    searchIcon: {
+        position: 'absolute',
+        left: 15,
+    },
+});

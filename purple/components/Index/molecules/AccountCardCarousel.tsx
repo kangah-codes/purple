@@ -5,6 +5,7 @@ import AlternateAccountCard from './AlternateAccountCard';
 import { useUserStore } from '@/components/Profile/hooks';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { Account } from '@/components/Accounts/schema';
+import React from 'react';
 
 const data = [
     {

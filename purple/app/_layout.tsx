@@ -1,19 +1,18 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { ErrorBoundaryProps, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-
+import { AuthProvider, useAuth } from '@/components/Auth/hooks';
+import { toastConfig } from '@/components/Shared/atoms/Toast';
+import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import { useColorScheme } from '@/components/useColorScheme';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
 import * as Font from 'expo-font';
+import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Text, View } from '@/components/Shared/styled';
 import Toast from 'react-native-toast-message';
-import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { AuthProvider, useAuth } from '@/components/Auth/hooks';
-import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 
 export const unstable_settings = {
     initialRouteName: 'onboarding/steps',

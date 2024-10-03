@@ -1,37 +1,33 @@
-import React, { useCallback } from 'react';
+import { GenericAPIResponse } from '@/@types/request';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
 import {
-    InputField,
     LinearGradient,
     SafeAreaView,
     Text,
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { RefreshControl, StatusBar as RNStatusBar, StyleSheet, FlatList } from 'react-native';
-import AccountsTotalSummary from '../molecules/AccountsTotalSummary';
 import { PlusIcon } from '@/components/SVG/24x24';
-import AccountsAccordion from '../molecules/AccountsAccordion';
-import { router } from 'expo-router';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { GenericAPIResponse } from '@/@types/request';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
-import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
+import { router } from 'expo-router';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import React, { useCallback } from 'react';
+import { FlatList, RefreshControl, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccounts, useAccountStore } from '../hooks';
+import AccountsAccordion from '../molecules/AccountsAccordion';
+import AccountsTotalSummary from '../molecules/AccountsTotalSummary';
 import { Account } from '../schema';
 
 export default function AccountsScreen() {
     const { sessionData } = useAuth();
     const { setAccounts, accounts } = useAccountStore();
-    const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { isLoading, data, refetch, isFetching } = useAccounts({
+    const { refetch, isFetching } = useAccounts({
         sessionData: sessionData as SessionData,
         options: {
             onSuccess: (data) => {
                 const res = data as GenericAPIResponse<Account[]>;
-                console.log(res.data);
                 setAccounts(res.data);
             },
             onError: () => {
@@ -44,7 +40,7 @@ export default function AccountsScreen() {
                 });
             },
         },
-        requestParams: {},
+        requestQuery: {},
     });
 
     const handleNavigation = useCallback(() => {
@@ -53,7 +49,7 @@ export default function AccountsScreen() {
 
     const renderHeader = useCallback(
         () => (
-            <View className='px-5 flex flex-col space-y-2.5'>
+            <View className='px-5 flex flex-col space-y-2.5 w-full'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg mt-2.5'>
                     Accounts
                 </Text>

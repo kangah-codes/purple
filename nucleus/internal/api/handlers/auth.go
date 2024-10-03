@@ -76,11 +76,14 @@ func SignIn(c *gin.Context) {
 	}
 
 	type Response struct {
-		AccessToken           string      `json:"access_token"`
-		AccessTokenExpiresAt  time.Time   `json:"access_token_expires_at"`
-		RefreshToken          string      `json:"refresh_token"`
-		RefreshTokenExpiresAt time.Time   `json:"refresh_token_expires_at"`
-		User                  models.User `json:"user"`
+		AccessToken           string           `json:"access_token"`
+		AccessTokenExpiresAt  time.Time        `json:"access_token_expires_at"`
+		RefreshToken          string           `json:"refresh_token"`
+		RefreshTokenExpiresAt time.Time        `json:"refresh_token_expires_at"`
+		User                  models.User      `json:"user"`
+		AccountGroups         []string         `json:"account_groups"`
+		Currencies            []utils.Currency `json:"currencies"`
+		TransactionTypes      []string         `json:"transaction_types"`
 	}
 
 	response := Response{
@@ -89,6 +92,9 @@ func SignIn(c *gin.Context) {
 		RefreshToken:          session.RefreshToken.Token,
 		RefreshTokenExpiresAt: session.RefreshToken.ExpiresAt,
 		User:                  user,
+		AccountGroups:         utils.AccountGroups,
+		Currencies:            utils.Currencies,
+		TransactionTypes:      utils.TransactionTypes,
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "Sign in successful", Data: response})

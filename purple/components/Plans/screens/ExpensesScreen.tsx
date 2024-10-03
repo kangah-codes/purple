@@ -55,7 +55,7 @@ function ExpensesScreen() {
                 });
             },
         },
-        requestParams: {
+        requestQuery: {
             type: 'expense',
         },
     });

@@ -13,31 +13,38 @@ import {
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useTransactions, useTransactionStore } from '../hooks';
 import CurrentTransactionModal from '../molecules/CurrentTransactionModal';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
+import { stringify, truncateStringIfLongerThan } from '@/lib/utils/string';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
 };
 
 function TransactionsScreen(props: TransactionsScreenProps) {
+    const local = useLocalSearchParams();
     const { sessionData } = useAuth();
+    const { accountID, accountName } = local;
     const { setTransactions, transactions, setCurrentTransaction } = useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { isLoading, data, refetch } = useTransactions({
+    const { isLoading, refetch } = useTransactions({
         sessionData: sessionData as SessionData,
         options: {
             onSuccess: (data) => {
-                const res = data as GenericAPIResponse<Transaction[]>;
-                setTransactions(res.data);
+                // we're doing this so that the transaction store
+                // isn't overwritten when we're viewing a specific account
+                if (!showBackButton) {
+                    const res = data as GenericAPIResponse<Transaction[]>;
+                    setTransactions(res.data);
+                }
             },
             onError: () => {
                 Toast.show({
@@ -49,7 +56,9 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 });
             },
         },
-        requestParams: {},
+        requestQuery: {
+            accountID,
+        },
     });
 
     const renderItem = useCallback(
@@ -76,6 +85,12 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         () => <View className='border-b border-gray-100' />,
         [],
     );
+    const filteredTransactions = useMemo(() => {
+        if (accountID) {
+            return transactions.filter((transaction) => transaction.account_id === accountID);
+        }
+        return transactions;
+    }, [accountID, transactions]);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -83,9 +98,15 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             <CurrentTransactionModal modalKey='transactionReceiptTransactionsScreen' />
 
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                    My Transactions
-                </Text>
+                {showBackButton && accountName ? (
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        {truncateStringIfLongerThan(accountName as string, 20)}
+                    </Text>
+                ) : (
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        My Transactions
+                    </Text>
+                )}
 
                 {showBackButton && (
                     <TouchableOpacity onPress={() => router.back()}>
@@ -97,7 +118,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             </View>
 
             <FlatList
-                data={transactions}
+                data={showBackButton ? filteredTransactions : transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}

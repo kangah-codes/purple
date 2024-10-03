@@ -3,9 +3,10 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { Account } from '../schema';
+import React from 'react';
 
 export default function AccountCard({
     groupName,
@@ -14,9 +15,7 @@ export default function AccountCard({
     groupName: string;
     accounts: Account[];
 }) {
-    const navigation = useNavigation();
     const router = useRouter();
-    const params = useLocalSearchParams();
     const renderItemSeparator = useCallback(() => <View style={styles.separator} />, []);
 
     const renderItem = ({ item, index }: { item: Account; index: number }) => (
@@ -34,10 +33,14 @@ export default function AccountCard({
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
             <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
-                {formatCurrencyAccurate('GHS', item.balance)}
+                {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>
     );
+
+    const calculateTotalBalance = useMemo(() => {
+        return accounts.reduce((acc, curr) => acc + curr.balance, 0);
+    }, [accounts]);
 
     return (
         <>
@@ -45,9 +48,17 @@ export default function AccountCard({
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black'>
                     {truncateStringIfLongerThan(groupName, 20)}
                 </Text>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-xs'>
+                <Text
+                    style={[
+                        GLOBAL_STYLESHEET.suprapower,
+                        {
+                            color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
+                        },
+                    ]}
+                    className='text-xs'
+                >
                     {formatCurrencyAccurate(
-                        'GHS',
+                        accounts[0].currency,
                         accounts.reduce((acc, curr) => acc + curr.balance, 0),
                     )}
                 </Text>

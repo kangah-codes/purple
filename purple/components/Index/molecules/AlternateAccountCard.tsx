@@ -4,6 +4,7 @@ import ActionButtons from './ActionButton';
 import { BalanceDisplay } from './BalanceDisplay';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Account } from '@/components/Accounts/schema';
+import React from 'react';
 
 export default function AlternateAccountCard({ item }: { item: Account }) {
     const [showAmount, setShowAmount] = useState(false);
@@ -42,7 +43,7 @@ export default function AlternateAccountCard({ item }: { item: Account }) {
                 accountName={item.name}
             />
             <View className='h-[1px] bg-gray-200 w-full my-2.5' />
-            <ActionButtons />
+            <ActionButtons account={item} />
         </>
     );
 }

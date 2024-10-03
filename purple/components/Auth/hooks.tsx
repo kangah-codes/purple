@@ -178,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSessionExpiry(null);
             setRefreshExpiry(null);
             _setSessionData(null);
+            await nativeStorage.clear();
         } finally {
             setIsLoading(false);
         }
@@ -215,7 +216,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             await SecureStore.deleteItemAsync('session_data');
             await nativeStorage.clear();
-            console.log(nativeStorage.getItem('account-store'), 'ACC');
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {
