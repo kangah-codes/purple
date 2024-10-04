@@ -1,5 +1,11 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
-import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
+import {
+    useMutation,
+    UseMutationResult,
+    useQuery,
+    UseQueryOptions,
+    UseQueryResult,
+} from 'react-query';
 import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
 import { Transaction } from './schema';
@@ -7,21 +13,26 @@ import { createTransactionStore } from './state';
 import { stringify } from '@/lib/utils/string';
 
 export function useTransactionStore() {
-    const [transactions, setTransactions, currentTransaction, setCurrentTransaction] = useStore(
-        createTransactionStore,
-        (state) => [
-            state.transactions,
-            state.setTransactions,
-            state.currentTransaction,
-            state.setCurrentTransaction,
-        ],
-    );
+    const [
+        transactions,
+        setTransactions,
+        currentTransaction,
+        setCurrentTransaction,
+        updateTransactions,
+    ] = useStore(createTransactionStore, (state) => [
+        state.transactions,
+        state.setTransactions,
+        state.currentTransaction,
+        state.setCurrentTransaction,
+        state.updateTransactions,
+    ]);
 
     return {
         transactions,
         setTransactions,
         currentTransaction,
         setCurrentTransaction,
+        updateTransactions,
     };
 }
 
@@ -61,4 +72,29 @@ export function useTransactions({
             >),
         },
     );
+}
+
+export function useCreateTransaction({
+    sessionData,
+}: {
+    sessionData: SessionData;
+}): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
+    return useMutation(['create-transaction'], async (transactionInformation) => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transaction`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                Authorization: sessionData.access_token,
+            },
+            body: JSON.stringify(transactionInformation),
+        });
+
+        if (!res.ok) {
+            const errorResponse = await res.json();
+            throw new Error(errorResponse.message || "Can't create transaction");
+        }
+
+        const json = await res.json();
+        return json;
+    });
 }

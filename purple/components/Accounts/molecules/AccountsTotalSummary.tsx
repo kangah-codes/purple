@@ -48,32 +48,19 @@ export default function AccountsTotalSummary({ accounts }: { accounts: Account[]
         const total = assets - liabilities;
 
         return {
-            assets,
-            liabilities,
-            total,
+            assets: assets.toFixed(2),
+            liabilities: liabilities.toFixed(2),
+            total: total.toFixed(2),
         };
-    };
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'GHS', // Assuming USD, change if needed
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(amount);
     };
 
     const { assets, liabilities, total } = calculateTotals(accounts);
 
     return (
         <View className='flex flex-row justify-between mb-5'>
-            <AccountSummary title='Assets' amount={formatCurrency(assets)} color='#15803D' />
-            <AccountSummary
-                title='Liabilities'
-                amount={formatCurrency(liabilities)}
-                color='#DC2626'
-            />
-            <AccountSummary title='Total' amount={formatCurrency(total)} color='#7C3AED' />
+            <AccountSummary title='Assets' amount={assets.toString()} color='#15803D' />
+            <AccountSummary title='Liabilities' amount={liabilities.toString()} color='#DC2626' />
+            <AccountSummary title='Total' amount={total.toString()} color='#7C3AED' />
         </View>
     );
 }

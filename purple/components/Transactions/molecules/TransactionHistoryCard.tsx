@@ -1,3 +1,5 @@
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import {
     ArrowNarrowDownRightIcon,
@@ -5,8 +7,7 @@ import {
     ArrowNarrowUpRightIcon,
 } from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { Transaction, TransactionData } from '../schema';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { Transaction } from '../schema';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -19,6 +20,7 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
+    console.log(data);
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -60,13 +62,22 @@ export default function TransactionHistoryCard({
                 )}
             </View>
 
-            <View className='flex flex-col flex-grow'>
-                <View className='flex flex-row justify-between items-center'>
+            <View className='flex flex-row justify-between items-center flex-grow'>
+                <View className='flex flex-col'>
                     {showTitle && (
                         <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base'>
                             {truncateStringIfLongerThan(data.category, 30)}
                         </Text>
                     )}
+                    <Text
+                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        className='text-sm text-gray-600 tracking-tighter'
+                    >
+                        {new Date(data.CreatedAt).toLocaleDateString()}
+                    </Text>
+                </View>
+
+                <View className='flex flex-col'>
                     <Text
                         style={{
                             ...GLOBAL_STYLESHEET.suprapower,
@@ -75,22 +86,8 @@ export default function TransactionHistoryCard({
                         className='text-xs'
                     >
                         {data.Type === 'debit' ? '-' : '+'}
-                        {data.amount}
-                    </Text>
-                </View>
-
-                <View className='flex flex-row justify-between'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-600 tracking-tighter'
-                    >
-                        {truncateStringIfLongerThan(data.note ?? '', 25)}
-                    </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-600 tracking-tighter'
-                    >
-                        {new Date(data.created_at).toLocaleDateString()}
+                        {/* {JSON.stringify(data.account)} */}
+                        {formatCurrencyAccurate(data.currency, data.amount)}
                     </Text>
                 </View>
             </View>

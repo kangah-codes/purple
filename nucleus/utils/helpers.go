@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 func EnvValue(envKey string, defaultValue string) string {
@@ -38,4 +39,22 @@ func EnvValueBool(envKey string, defaultValue bool) bool {
 	} else {
 		return defaultValue
 	}
+}
+
+func IsValidString(str string) bool {
+	return str != ""
+}
+
+func FormatStrToDateTime(dateStr string) time.Time {
+	// dte is in this format: 2021-08-01T00:00:00.000Z
+	if !IsValidString(dateStr) {
+		return time.Time{}
+	}
+
+	dte, err := time.Parse(time.RFC3339, dateStr)
+	if err != nil {
+		return time.Time{}
+	}
+
+	return dte
 }

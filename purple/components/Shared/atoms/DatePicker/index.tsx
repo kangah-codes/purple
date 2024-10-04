@@ -9,6 +9,7 @@ import { Platform } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import React from 'react';
 
 type DatePickerProps = {
     label?: string;

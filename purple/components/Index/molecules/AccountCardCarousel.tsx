@@ -77,6 +77,7 @@ export default function AccountCardCarousel() {
                 autoplay={false}
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
+                loop
             />
 
             <Pagination

@@ -8,6 +8,7 @@ type TransactionStore = {
     setTransactions: (accounts: Transaction[]) => void;
     currentTransaction: Transaction | null;
     setCurrentTransaction: (transaction: Transaction | null) => void;
+    updateTransactions: (transaction: Transaction | Transaction[]) => void;
 };
 
 export const createTransactionStore = create<TransactionStore>()(
@@ -17,6 +18,12 @@ export const createTransactionStore = create<TransactionStore>()(
             setTransactions: (transactions) => set({ transactions }),
             currentTransaction: null,
             setCurrentTransaction: (transaction) => set({ currentTransaction: transaction }),
+            updateTransactions: (transaction) =>
+                set((state) => ({
+                    transactions: Array.isArray(transaction)
+                        ? [...transaction, ...state.transactions]
+                        : [transaction, ...state.transactions],
+                })),
         }),
         {
             name: 'transaction-store',

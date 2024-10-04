@@ -9,6 +9,7 @@ import {
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
 import { formatDate } from '@/lib/utils/date';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { isNotEmptyString } from '@/lib/utils/string';
 import React from 'react';
 import { Platform, StyleSheet } from 'react-native';
@@ -60,7 +61,10 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             style={GLOBAL_STYLESHEET.suprapower}
                             className='text-3xl text-black mb-5'
                         >
-                            {currentTransaction.amount}
+                            {formatCurrencyAccurate(
+                                currentTransaction.currency,
+                                currentTransaction.amount,
+                            )}
                         </Text>
                         <View className='border-b border-gray-200 w-full mb-5' />
                         <ReceiptDetail label='Category' value={currentTransaction.category} />
@@ -70,7 +74,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
 
                         <ReceiptDetail
                             label='Date'
-                            value={formatDate(currentTransaction.created_at, {
+                            value={formatDate(currentTransaction.CreatedAt, {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',

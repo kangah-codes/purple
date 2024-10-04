@@ -23,4 +23,5 @@ export type Transaction = {
     from_account: number;
     to_account: number;
     created_at: string;
+    currency: string;
 };

@@ -100,15 +100,21 @@ export default function SignInScreen() {
     useEffect(() => {
         const checkLoginState = async () => {
             try {
-                await nativeStorage.clear();
-                const userIsEmpty = user === null || Object.keys(user).length === 0;
-                const accountsIsEmpty = accounts.length === 0;
-                const transactionsIsEmpty = transactions.length === 0;
-                const plansIsEmpty = plans.length === 0;
+                nativeStorage
+                    .clear()
+                    .then(() => {
+                        const userIsEmpty = user === null || Object.keys(user).length === 0;
+                        const accountsIsEmpty = accounts.length === 0;
+                        const transactionsIsEmpty = transactions.length === 0;
+                        const plansIsEmpty = plans.length === 0;
 
-                const shouldShow =
-                    userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
-                setShowLogin(shouldShow);
+                        const shouldShow =
+                            userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
+                        setShowLogin(shouldShow);
+                    })
+                    .catch(() => {
+                        setShowLogin(true); // Default to showing login on error
+                    });
             } catch (error) {
                 console.error('Error in checkLoginState:', error);
                 setShowLogin(true); // Default to showing login on error

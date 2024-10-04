@@ -36,7 +36,7 @@ var TransactionTypes = []string{
 	"🎉 Entertainment",
 	"🍿 Movies",
 	"🎮 Games",
-	"\u200d Gym",
+	"🏋️ Gym",
 	"✈️ Travel",
 	"🏖️ Vacation",
 	"🎁 Gifts",
@@ -54,6 +54,7 @@ var TransactionTypes = []string{
 	"🚨 Security",
 	"📦 Subscriptions",
 	"💸 Miscellaneous",
+	"💰 Wages",
 }
 
 var Currencies = []Currency{

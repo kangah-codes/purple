@@ -10,6 +10,7 @@ type CreateTransactionDTO struct {
 	Category    string    `json:"category" binding:"required"`
 	FromAccount uuid.UUID `json:"from_account"`
 	ToAccount   uuid.UUID `json:"to_account"`
+	CreatedAt   string    `json:"created_at"`
 }
 
 type UpdateTransactionDTO struct {
@@ -20,4 +21,5 @@ type UpdateTransactionDTO struct {
 	Category    string    `json:"category" binding:"required"`
 	FromAccount uuid.UUID `json:"from_account" binding:"required"`
 	ToAccount   uuid.UUID `json:"to_account" binding:"required"`
+	CreatedAt   string    `json:"created_at" binding:"required"`
 }

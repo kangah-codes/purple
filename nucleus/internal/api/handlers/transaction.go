@@ -15,50 +15,198 @@ import (
 func CreateTransaction(c *gin.Context) {
 	createTransaction := types.CreateTransactionDTO{}
 	db := utils.GetDB()
+
+	// Parse JSON body
 	if err := c.ShouldBindJSON(&createTransaction); err != nil {
 		utils.ErrorLogger.Println(err)
 		c.JSON(400, types.Response{Status: 400, Message: "Invalid request", Data: nil})
 		return
 	}
 
+	// Get user ID from context
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	account := models.Account{}
-	result := db.First(&account, createTransaction.AccountId)
-	if result.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
-		c.JSON(404, types.Response{Status: 404, Message: "Account not found", Data: nil})
+	// Start the DB transaction
+	tx := db.Begin()
+	if tx.Error != nil {
+		utils.ErrorLogger.Println(tx.Error)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to start transaction", Data: nil})
 		return
 	}
 
-	transaction := models.Transaction{
-		AccountId: createTransaction.AccountId,
-		UserId:    userID.(uuid.UUID),
-		Type:      createTransaction.Type,
-		Amount:    createTransaction.Amount,
-		Note:      createTransaction.Note,
-		Category:  createTransaction.Category,
-		Account:   account,
-	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			utils.ErrorLogger.Println("Transaction rolled back due to panic:", r)
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Transaction failed", Data: nil})
+		}
+	}()
 
-	// set transactions which aren't transfers to 0
+	var transactions []models.Transaction
+
 	if createTransaction.Type == models.Transfer {
-		transaction.FromAccount = createTransaction.FromAccount
-		transaction.ToAccount = createTransaction.ToAccount
+		// Handle transfer transaction
+		var fromAccount, toAccount models.Account
+
+		// Fetch fromAccount and toAccount
+		if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&fromAccount, createTransaction.FromAccount).Error; err != nil {
+			utils.ErrorLogger.Println(err)
+			tx.Rollback()
+			c.JSON(404, types.Response{Status: 404, Message: "From account not found", Data: nil})
+			return
+		}
+
+		if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&toAccount, createTransaction.ToAccount).Error; err != nil {
+			utils.ErrorLogger.Println(err)
+			tx.Rollback()
+			c.JSON(404, types.Response{Status: 404, Message: "To account not found", Data: nil})
+			return
+		}
+
+		// TODO: in the future we may want to use a currency API to do the conversion automatically
+		// or even make it a premium feature
+		if fromAccount.Currency != toAccount.Currency {
+			utils.ErrorLogger.Println("Currency mismatch")
+			tx.Rollback()
+			c.JSON(400, types.Response{Status: 400, Message: "Can only transfer using accounts with the same currencies", Data: nil})
+			return
+		}
+
+		// Create debit transaction for fromAccount
+		debitTransaction := models.Transaction{
+			AccountId:   fromAccount.ID,
+			UserId:      userID.(uuid.UUID),
+			Type:        models.Debit,
+			Amount:      createTransaction.Amount,
+			Note:        createTransaction.Note,
+			Category:    createTransaction.Category,
+			CreatedAt:   utils.FormatStrToDateTime(createTransaction.CreatedAt),
+			FromAccount: fromAccount.ID,
+			ToAccount:   toAccount.ID,
+			Currency:    fromAccount.Currency,
+		}
+
+		// Create credit transaction for toAccount
+		creditTransaction := models.Transaction{
+			AccountId:   toAccount.ID,
+			UserId:      userID.(uuid.UUID),
+			Type:        models.Credit,
+			Amount:      createTransaction.Amount,
+			Note:        createTransaction.Note,
+			Category:    createTransaction.Category,
+			CreatedAt:   utils.FormatStrToDateTime(createTransaction.CreatedAt),
+			FromAccount: fromAccount.ID,
+			ToAccount:   toAccount.ID,
+			Currency:    toAccount.Currency,
+		}
+
+		// Update account balances
+		oldFromBalance := fromAccount.Balance
+		oldToBalance := toAccount.Balance
+		fromAccount.Balance -= createTransaction.Amount
+		toAccount.Balance += createTransaction.Amount
+
+		utils.InfoLogger.Printf("From account %s old balance: %v, new balance: %v", fromAccount.Name, oldFromBalance, fromAccount.Balance)
+		utils.InfoLogger.Printf("To account %s old balance: %v, new balance: %v", toAccount.Name, oldToBalance, toAccount.Balance)
+
+		// Save updated accounts
+		if err := tx.Save(&fromAccount).Error; err != nil {
+			utils.ErrorLogger.Println("Failed to update from account:", err)
+			tx.Rollback()
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update from account", Data: nil})
+			return
+		}
+
+		if err := tx.Save(&toAccount).Error; err != nil {
+			utils.ErrorLogger.Println("Failed to update to account:", err)
+			tx.Rollback()
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update to account", Data: nil})
+			return
+		}
+
+		debitTransaction.Account = fromAccount
+		creditTransaction.Account = toAccount
+		transactions = append(transactions, debitTransaction, creditTransaction)
+		// Verify the updates
+		var verifyFromAccount, verifyToAccount models.Account
+		tx.First(&verifyFromAccount, fromAccount.ID)
+		tx.First(&verifyToAccount, toAccount.ID)
+		utils.InfoLogger.Printf("Verified From account balance: %v", verifyFromAccount.Balance)
+		utils.InfoLogger.Printf("Verified To account balance: %v", verifyToAccount.Balance)
+
+	} else {
+		// Handle non-transfer transaction
+		var account models.Account
+		if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&account, createTransaction.AccountId).Error; err != nil {
+			utils.ErrorLogger.Println(err)
+			tx.Rollback()
+			c.JSON(404, types.Response{Status: 404, Message: "Account not found", Data: nil})
+			return
+		}
+
+		transaction := models.Transaction{
+			AccountId:   createTransaction.AccountId,
+			UserId:      userID.(uuid.UUID),
+			Type:        createTransaction.Type,
+			Amount:      createTransaction.Amount,
+			Note:        createTransaction.Note,
+			Category:    createTransaction.Category,
+			CreatedAt:   utils.FormatStrToDateTime(createTransaction.CreatedAt),
+			FromAccount: uuid.Nil,
+			ToAccount:   uuid.Nil,
+			Currency:    account.Currency,
+		}
+
+		transaction.Account = account
+
+		transactions = append(transactions, transaction)
+
+		// Update account balance
+		oldBalance := account.Balance
+		if createTransaction.Type == models.Debit {
+			account.Balance -= createTransaction.Amount
+		} else {
+			account.Balance += createTransaction.Amount
+		}
+
+		utils.InfoLogger.Printf("Account %s old balance: %v, new balance: %v", account.Name, oldBalance, account.Balance)
+
+		if err := tx.Save(&account).Error; err != nil {
+			utils.ErrorLogger.Println("Failed to update account:", err)
+			tx.Rollback()
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update account", Data: nil})
+			return
+		}
+
+		// Verify the update
+		var verifyAccount models.Account
+		tx.First(&verifyAccount, account.ID)
+		utils.InfoLogger.Printf("Verified Account balance: %v", verifyAccount.Balance)
 	}
 
-	result = db.Create(&transaction)
-	if result.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
-		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create transaction", Data: nil})
+	// Insert the transaction record(s)
+	for _, transaction := range transactions {
+		if err := tx.Create(&transaction).Error; err != nil {
+			utils.ErrorLogger.Println("Failed to create transaction:", err)
+			tx.Rollback()
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create transaction", Data: nil})
+			return
+		}
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		utils.ErrorLogger.Println("Failed to commit transaction:", err)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to commit transaction", Data: nil})
 		return
 	}
 
-	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Transaction created", Data: transaction})
+	// Return success response
+	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Transaction(s) created", Data: transactions})
 }
 
 func UpdateTransaction(c *gin.Context) {

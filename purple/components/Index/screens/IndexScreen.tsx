@@ -21,6 +21,7 @@ export default function IndexScreen() {
     const { setAccounts } = useAccountStore();
     const { setUser, user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
+    console.log(sessionData);
     const { refetch } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,

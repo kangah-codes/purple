@@ -1,6 +1,10 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 const (
 	Credit   string = "credit"
@@ -20,4 +24,6 @@ type Transaction struct {
 	Category    string    `gorm:"size:100" json:"category"`
 	FromAccount uuid.UUID `json:"from_account"`
 	ToAccount   uuid.UUID `json:"to_account"`
+	CreatedAt   time.Time `gorm:"type:timestamptz;not null"`
+	Currency    string    `gorm:"size:5" json:"currency"`
 }

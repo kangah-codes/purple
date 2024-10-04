@@ -6,11 +6,7 @@ import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { usePlanStore } from '@/components/Plans/hooks';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
-import { SafeAreaView, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import { updateArrayWithUniqueItems } from '@/lib/utils/object';
-import { useEffect } from 'react';
-import { ActivityIndicator, Button } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 export default function Screen() {
@@ -19,7 +15,7 @@ export default function Screen() {
     const { setAccounts, accounts } = useAccountStore();
     const { setTransactions, transactions } = useTransactionStore();
     const { setPlans } = usePlanStore();
-    const { isLoading, isFetching } = useUser({
+    const { isLoading, isFetching, error } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,
         options: {

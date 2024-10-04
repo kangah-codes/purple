@@ -18,7 +18,7 @@ export const unstable_settings = {
     initialRouteName: 'onboarding/steps',
 };
 const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: 2 } },
+    defaultOptions: { queries: { retry: false } },
 });
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

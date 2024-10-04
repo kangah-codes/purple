@@ -1,12 +1,8 @@
-import { Dispatch, SetStateAction } from 'react';
-
 type Primitive = string | number | boolean | null | undefined;
-
 type ObjectType = Record<string, unknown>;
-
 type ArrayType = unknown[];
-
 type DeepValueType = Primitive | ObjectType | ArrayType;
+type OmitKeys = Array<string | [string, ...string[]]>;
 
 export type DeepObject = Record<string, DeepValueType>;
 
@@ -73,4 +69,154 @@ export function updateArrayWithUniqueItems<T extends DeepObject>(
     }
 
     return updatedArray;
+}
+
+/**
+ * ["test"] -> Filter out the "test" value from the form data
+ * {
+ *  test: {
+ *    "abs": "test"
+ * }
+ * }
+ * ["another", ["test", ["abs"]]]
+ */
+
+/**
+ * @description Function to pre-process form data before submission. this allows us to remove unwanted values from the form data before submission
+ * @param {Object} data the form data
+ * @param {Array} omit the values to remove from the form data
+ * @returns {Object} the pre-processed form data
+ * @author Joshua Akangah
+ */
+export const formPreprocessor = <T extends Record<string, unknown> | Array<unknown>>({
+    data,
+    omit,
+    omitKeys,
+}: {
+    data: T;
+    omit: Array<unknown>;
+    omitKeys?: OmitKeys;
+}): Partial<T> | T => {
+    const hasEmptyArray = omit.some((value) => Array.isArray(value) && value.length === 0);
+
+    const filteredData = Array.isArray(data)
+        ? (data.filter((value) => {
+              return (
+                  !(hasEmptyArray && Array.isArray(value) && value.length === 0) &&
+                  !omit.includes(value)
+              );
+          }) as T)
+        : (Object.keys(data || {}).reduce((acc: Record<string, unknown>, key) => {
+              // handle nested objects
+              if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+                  const nestedData = data[key] as Record<string, unknown>;
+                  const nestedFilteredData = formPreprocessor({
+                      data: nestedData,
+                      omit,
+                      omitKeys: omitKeys
+                          ?.map((omitKey) => {
+                              if (Array.isArray(omitKey)) {
+                                  const [firstKey, ...restKeys] = omitKey;
+                                  if (firstKey === key) {
+                                      return restKeys.length > 0 ? restKeys : undefined;
+                                  }
+                              } else if (omitKey === key) {
+                                  return undefined;
+                              }
+                              return omitKey;
+                          })
+                          .filter(Boolean) as OmitKeys,
+                  });
+
+                  return {
+                      ...acc,
+                      [key]: nestedFilteredData,
+                  };
+              }
+
+              const value = data[key] as unknown;
+
+              if (
+                  !(hasEmptyArray && Array.isArray(value) && value.length === 0) &&
+                  !omit.includes(value) &&
+                  !omitKeys?.some((omitKey) => {
+                      if (Array.isArray(omitKey)) {
+                          const [firstKey, ...restKeys] = omitKey;
+                          if (firstKey === key) {
+                              return (
+                                  restKeys.length === 0 ||
+                                  restKeys.reduce(
+                                      (obj, k) => (obj as any)[k],
+                                      data as Record<string, unknown>,
+                                  ) === undefined
+                              );
+                          }
+                      } else if (omitKey === key) {
+                          return true;
+                      }
+                      return false;
+                  })
+              ) {
+                  return {
+                      ...acc,
+                      [key]: value,
+                  };
+              }
+
+              return acc;
+          }, {}) as T);
+
+    return filteredData as Partial<T> | T;
+};
+/**
+ * @description Function to preprocess a single field from a form
+ * @param {Object} data the form data
+ * @param {Array} omit the values to remove from the form data
+ * @returns {String} the pre-processed form data
+ * @author Joshua Akangah
+ */
+export const fieldPreprocessor = <T extends string>({
+    data,
+    omit,
+}: {
+    data: T;
+    omit: Array<string | number | boolean | null | undefined>;
+}): undefined | T => {
+    if (omit.includes(data)) {
+        return undefined;
+    }
+
+    return data;
+};
+
+type KeyMapping<T> = [keyof T, string] | [keyof T, string, (value: T[keyof T]) => any];
+
+type TransformObject<T, U extends KeyMapping<T>[]> = Omit<T, U[number][0]> & {
+    [K in U[number] as K[1]]: U[number] extends [any, any, infer TransformFn]
+        ? TransformFn extends (value: any) => infer R
+            ? R
+            : T[K[0]]
+        : T[K[0]];
+};
+
+export function transformObject<T extends object, U extends KeyMapping<T>[]>(
+    obj: T,
+    keyMappings: U,
+): TransformObject<T, U> {
+    const transformedObj: any = { ...obj };
+
+    for (const keyMapping of keyMappings) {
+        const [oldKey, newKey, valueTransform] = keyMapping;
+
+        if (oldKey in obj) {
+            delete transformedObj[oldKey];
+            transformedObj[newKey] = valueTransform
+                ? valueTransform(transformedObj[oldKey])
+                : transformedObj[oldKey];
+        } else {
+            throw new Error(`Key ${String(oldKey)} does not exist in the object.`);
+        }
+    }
+
+    return transformedObj;
 }
