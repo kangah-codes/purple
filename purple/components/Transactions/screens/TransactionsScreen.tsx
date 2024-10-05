@@ -96,7 +96,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <CurrentTransactionModal modalKey='transactionReceiptTransactionsScreen' />
-
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 {showBackButton && accountName ? (
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
@@ -116,7 +115,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     </TouchableOpacity>
                 )}
             </View>
-
             <FlatList
                 data={showBackButton ? filteredTransactions : transactions}
                 keyExtractor={keyExtractor}
@@ -128,7 +126,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 refreshing={isLoading}
                 ListEmptyComponent={renderEmptylist}
             />
-
             {!showBackButton && (
                 <LinearGradient
                     className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'

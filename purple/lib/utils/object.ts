@@ -191,32 +191,47 @@ export const fieldPreprocessor = <T extends string>({
 
 type KeyMapping<T> = [keyof T, string] | [keyof T, string, (value: T[keyof T]) => any];
 
-type TransformObject<T, U extends KeyMapping<T>[]> = Omit<T, U[number][0]> & {
-    [K in U[number] as K[1]]: U[number] extends [any, any, infer TransformFn]
-        ? TransformFn extends (value: any) => infer R
-            ? R
-            : T[K[0]]
-        : T[K[0]];
-};
+type TransformObject<T, U extends KeyMapping<T>[]> = {
+    [K in U[number] as K[1]]: K extends [infer OldKey, any, (value: any) => infer R]
+        ? R
+        : K extends [infer OldKey, any]
+        ? OldKey extends keyof T
+            ? T[OldKey]
+            : never
+        : never;
+} & Omit<T, U[number][0]>;
 
 export function transformObject<T extends object, U extends KeyMapping<T>[]>(
     obj: T,
     keyMappings: U,
 ): TransformObject<T, U> {
     const transformedObj: any = { ...obj };
-
     for (const keyMapping of keyMappings) {
         const [oldKey, newKey, valueTransform] = keyMapping;
-
         if (oldKey in obj) {
-            delete transformedObj[oldKey];
-            transformedObj[newKey] = valueTransform
-                ? valueTransform(transformedObj[oldKey])
-                : transformedObj[oldKey];
+            // Apply transformation if provided
+            const value = valueTransform
+                ? valueTransform(obj[oldKey as keyof T])
+                : obj[oldKey as keyof T];
+
+            // Rename the key with the transformed value
+            transformedObj[newKey] = value;
+
+            // Remove the old key only if it's different from the new key
+            if (oldKey !== newKey) {
+                delete transformedObj[oldKey];
+            }
         } else {
             throw new Error(`Key ${String(oldKey)} does not exist in the object.`);
         }
     }
+    return transformedObj as TransformObject<T, U>;
+}
 
-    return transformedObj;
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): T | Partial<T> {
+    const result = { ...obj };
+    for (const key of keys) {
+        delete result[key];
+    }
+    return result;
 }

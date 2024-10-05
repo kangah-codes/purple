@@ -36,8 +36,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionData>, 
         });
 
         if (!res.ok) {
-            const errorResponse = await res.json();
-            throw new Error(errorResponse.message || 'Login failed');
+            throw new Error(res.status.toString());
         }
 
         const json = await res.json();
@@ -57,8 +56,7 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionData>, 
         });
 
         if (!res.ok) {
-            const errorResponse = await res.json();
-            throw new Error(errorResponse.message || 'An error occured');
+            throw new Error(res.status.toString());
         }
 
         const json = await res.json();
@@ -78,8 +76,7 @@ export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, E
         });
 
         if (!res.ok) {
-            const errorResponse = await res.json();
-            throw new Error(errorResponse.message || 'An error occured');
+            throw new Error(res.status.toString());
         }
 
         const json = await res.json();

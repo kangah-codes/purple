@@ -13,7 +13,7 @@ export default function Screen() {
     const { sessionData } = useAuth();
     const { user, setUser } = useUserStore();
     const { setAccounts, accounts } = useAccountStore();
-    const { setTransactions, transactions } = useTransactionStore();
+    const { setTransactions, updateTransactions } = useTransactionStore();
     const { setPlans } = usePlanStore();
     const { isLoading, isFetching, error } = useUser({
         sessionData: sessionData as SessionData,
@@ -36,7 +36,7 @@ export default function Screen() {
                 // total transactions on the transactions page to 5, until refreshed
                 // not a huge priority as it can be fixed by refreshing.
                 // leaving this to future Joshua or any other maintainer :)
-                setTransactions(res.data.transactions);
+                updateTransactions(res.data.transactions);
                 setPlans(res.data.plans);
             },
         },

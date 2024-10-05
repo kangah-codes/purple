@@ -20,49 +20,53 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import { useCreateTransaction, useTransactionStore } from '../hooks';
 import Toast from 'react-native-toast-message';
-import { transformObject } from '@/lib/utils/object';
+import { formPreprocessor, omit, transformObject } from '@/lib/utils/object';
+import { TRANSACTION_TYPES } from '@/constants/transactionTypes';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
     const { sessionData } = useAuth();
     const { accounts } = useAccountStore();
     const { updateTransactions } = useTransactionStore();
-    const [isEnabled, setIsEnabled] = useState(false);
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const [transactionCategories, setTransactionCategories] = useState<string[]>([]);
-    const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-    const [transactionTypes] = useState([
-        {
-            key: 'debit',
-            label: 'Expense',
-        },
-        {
-            key: 'credit',
-            label: 'Income',
-        },
-        {
-            key: 'transfer',
-            label: 'Transfer',
-        },
-    ]);
+    const { mutate, isLoading } = useCreateTransaction({ sessionData: sessionData! });
     const {
         control,
         handleSubmit,
         formState: { errors },
         setValue,
+        getValues,
+        reset,
     } = useForm({
         defaultValues: {
             amount: '',
             category: '',
             note: '',
-            fromAccount: '',
+            fromAccount: type == 'transfer' ? (accountId as string) ?? '' : '',
             toAccount: '',
             type: '',
-            accountId: '',
+            accountId: (accountId as string) ?? '',
             date: new Date().toISOString(),
         },
     });
-    const { mutate, isLoading } = useCreateTransaction({ sessionData: sessionData! });
+    useEffect(() => {
+        setValue('type', transactionType);
+        const getCachedConstants = async () => {
+            const cachedTypes = await nativeStorage.getItem<string[]>('transaction_types');
+            if (cachedTypes) setTransactionCategories(cachedTypes);
+        };
+        getCachedConstants();
+    }, [transactionType, setValue]);
+
+    // useEffect(() => {
+    //     alert(accountId);
+    //     if (accountId)
+    //         reset({
+    //             ...getValues(),
+    //             accountId: accountId as string,
+    //         });
+    // }, []);
 
     const onSubmit = (data: {
         amount: string;
@@ -74,60 +78,178 @@ export default function NewTransactionScreen() {
         accountId?: string;
         date: string;
     }) => {
-        console.log(
-            transformObject(data, [
-                ['toAccount', 'to_account'],
-                ['fromAccount', 'from_account'],
-                ['accountId', 'account_id'],
-                ['amount', 'amount', (value) => Number(value)],
-            ]),
-        );
         Keyboard.dismiss();
-        mutate(
-            transformObject(data, [
-                ['toAccount', 'to_account'],
-                ['fromAccount', 'from_account'],
-                ['accountId', 'account_id'],
-                ['amount', 'amount', (value) => Number(value)],
-            ]),
-            {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: 'There was an issue creating transaction',
-                        },
-                    });
-                },
-                onSuccess: (res) => {
-                    const { data } = res;
-                    updateTransactions(data);
-                    Toast.show({
-                        type: 'success',
-                        props: {
-                            text1: 'Success!',
-                            text2: 'Transaction created successfully',
-                        },
-                    });
-                    router.replace('/(tabs)/transactions');
-                },
+        let transformedData = transformObject(data, [
+            ['toAccount', 'to_account'],
+            ['fromAccount', 'from_account'],
+            ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
+            ['amount', 'amount', (value) => Number(value)],
+        ]);
+
+        if (transactionType !== 'transfer') {
+            transformedData = omit(transformedData, [
+                'from_account',
+                'to_account',
+            ]) as typeof transformedData; // looks hacky af
+        }
+
+        console.log(transformedData);
+
+        mutate(transformedData, {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: { text1: 'Error!', text2: 'There was an issue creating transaction' },
+                });
             },
-        );
+            onSuccess: (res) => {
+                console.log(res, 'RES');
+                updateTransactions(res.data);
+                Toast.show({
+                    type: 'success',
+                    props: { text1: 'Success!', text2: 'Transaction created successfully' },
+                });
+                router.replace('/(tabs)/transactions');
+            },
+        });
     };
 
-    useEffect(() => {
-        setValue('type', transactionType);
-    }, [transactionType]);
-
-    useEffect(() => {
-        const getCachedConstants = async () => {
-            const transactionTypes = await nativeStorage.getItem<string[]>('transaction_types');
-            if (transactionTypes) setTransactionCategories(transactionTypes);
-        };
-
-        getCachedConstants();
-    }, []);
+    const renderAccountFields = () => {
+        if (transactionType === 'transfer') {
+            return (
+                <View className='flex flex-col space-y-5'>
+                    <View>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Debit Account
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Debit account can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newTransactionDebitAccount'
+                                            options={accounts.reduce((acc, curr) => {
+                                                acc[curr.ID] = {
+                                                    label: curr.name,
+                                                    value: curr.ID,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '70%']}
+                                            value={value}
+                                            onChange={(val) => {
+                                                onChange(val);
+                                                setValue('fromAccount', val);
+                                            }}
+                                        />
+                                    </>
+                                )}
+                                name='fromAccount'
+                            />
+                            {errors.fromAccount && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.fromAccount.message}
+                                </Text>
+                            )}
+                        </>
+                    </View>
+                    <View>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Credit Account
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Credit account can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newTransactionCreditAccount'
+                                            options={accounts.reduce((acc, curr) => {
+                                                acc[curr.ID] = {
+                                                    label: curr.name,
+                                                    value: curr.ID,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '70%']}
+                                            value={value}
+                                            onChange={(val) => {
+                                                onChange(val);
+                                                setValue('toAccount', val);
+                                            }}
+                                        />
+                                    </>
+                                )}
+                                name='toAccount'
+                            />
+                            {errors.toAccount && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.toAccount.message}
+                                </Text>
+                            )}
+                        </>
+                    </View>
+                </View>
+            );
+        }
+        return (
+            <View>
+                <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                    Account
+                </Text>
+                <>
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: "Account can't be empty",
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <>
+                                <SelectField
+                                    selectKey='newTransactionAccount'
+                                    options={accounts.reduce((acc, curr) => {
+                                        acc[curr.ID] = {
+                                            label: curr.name,
+                                            value: curr.ID,
+                                        };
+                                        return acc;
+                                    }, {} as Record<string, { label: string; value: string }>)}
+                                    customSnapPoints={['50%', '70%']}
+                                    value={value}
+                                    onChange={(val) => {
+                                        onChange(val);
+                                        setValue('accountId', val);
+                                    }}
+                                />
+                            </>
+                        )}
+                        name='accountId'
+                    />
+                    {errors.accountId && (
+                        <Text
+                            style={{ fontFamily: 'InterMedium' }}
+                            className='text-xs text-red-500'
+                        >
+                            {errors.accountId.message}
+                        </Text>
+                    )}
+                </>
+            </View>
+        );
+    };
 
     return (
         <>
@@ -155,7 +277,7 @@ export default function NewTransactionScreen() {
                     </View>
 
                     <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>
-                        {transactionTypes.map((transaction, i) => {
+                        {TRANSACTION_TYPES.map((transaction, i) => {
                             return (
                                 <View
                                     className='flex-grow flex items-center justify-center rounded-full'
@@ -299,159 +421,7 @@ export default function NewTransactionScreen() {
 
                     <View className='h-1 border-b border-gray-100 w-full' />
 
-                    {
-                        // rendering different account fields based on transaction type
-                        transactionType === 'transfer' ? (
-                            <View className='flex flex-col space-y-5'>
-                                <View>
-                                    <Text
-                                        style={{ fontFamily: 'InterBold' }}
-                                        className='text-xs text-gray-600'
-                                    >
-                                        Debit Account
-                                    </Text>
-                                    <>
-                                        <Controller
-                                            control={control}
-                                            rules={{
-                                                required: "Debit account can't be empty",
-                                            }}
-                                            render={({ field: { onChange, value } }) => (
-                                                <>
-                                                    <SelectField
-                                                        selectKey='newTransactionDebitAccount'
-                                                        options={accounts.reduce((acc, curr) => {
-                                                            acc[curr.ID] = {
-                                                                label: curr.name,
-                                                                value: curr.ID,
-                                                            };
-                                                            return acc;
-                                                        }, {} as Record<string, { label: string; value: string }>)}
-                                                        customSnapPoints={['50%', '70%']}
-                                                        value={
-                                                            accounts.find((acc) => acc.ID === value)
-                                                                ?.name ?? ''
-                                                        }
-                                                        onChange={(val) => {
-                                                            onChange(val);
-                                                            setValue('fromAccount', val);
-                                                        }}
-                                                    />
-                                                </>
-                                            )}
-                                            name='fromAccount'
-                                        />
-                                        {errors.fromAccount && (
-                                            <Text
-                                                style={{ fontFamily: 'InterMedium' }}
-                                                className='text-xs text-red-500'
-                                            >
-                                                {errors.fromAccount.message}
-                                            </Text>
-                                        )}
-                                    </>
-                                </View>
-
-                                <View>
-                                    <Text
-                                        style={{ fontFamily: 'InterBold' }}
-                                        className='text-xs text-gray-600'
-                                    >
-                                        Credit Account
-                                    </Text>
-                                    <>
-                                        <Controller
-                                            control={control}
-                                            rules={{
-                                                required: "Credit account can't be empty",
-                                            }}
-                                            render={({ field: { onChange, value } }) => (
-                                                <>
-                                                    <SelectField
-                                                        selectKey='newTransactionCreditAccount'
-                                                        options={accounts.reduce((acc, curr) => {
-                                                            acc[curr.ID] = {
-                                                                label: curr.name,
-                                                                value: curr.ID,
-                                                            };
-                                                            return acc;
-                                                        }, {} as Record<string, { label: string; value: string }>)}
-                                                        customSnapPoints={['50%', '70%']}
-                                                        value={
-                                                            accounts.find((acc) => acc.ID === value)
-                                                                ?.name ?? ''
-                                                        }
-                                                        onChange={(val) => {
-                                                            onChange(val);
-                                                            setValue('fromAccount', val);
-                                                        }}
-                                                    />
-                                                </>
-                                            )}
-                                            name='toAccount'
-                                        />
-                                        {errors.toAccount && (
-                                            <Text
-                                                style={{ fontFamily: 'InterMedium' }}
-                                                className='text-xs text-red-500'
-                                            >
-                                                {errors.toAccount.message}
-                                            </Text>
-                                        )}
-                                    </>
-                                </View>
-                            </View>
-                        ) : (
-                            <View>
-                                <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-600'
-                                >
-                                    Account
-                                </Text>
-                                <>
-                                    <Controller
-                                        control={control}
-                                        rules={{
-                                            required: "Account can't be empty",
-                                        }}
-                                        render={({ field: { onChange, value } }) => (
-                                            <>
-                                                <SelectField
-                                                    selectKey='newTransactionAccount'
-                                                    options={accounts.reduce((acc, curr) => {
-                                                        acc[curr.ID] = {
-                                                            label: curr.name,
-                                                            value: curr.ID,
-                                                        };
-                                                        return acc;
-                                                    }, {} as Record<string, { label: string; value: string }>)}
-                                                    customSnapPoints={['50%', '70%']}
-                                                    value={
-                                                        accounts.find((acc) => acc.ID === value)
-                                                            ?.name ?? ''
-                                                    }
-                                                    onChange={(val) => {
-                                                        onChange(val);
-                                                        setValue('accountId', val);
-                                                    }}
-                                                />
-                                            </>
-                                        )}
-                                        name='accountId'
-                                    />
-                                    {errors.accountId && (
-                                        <Text
-                                            style={{ fontFamily: 'InterMedium' }}
-                                            className='text-xs text-red-500'
-                                        >
-                                            {errors.accountId.message}
-                                        </Text>
-                                    )}
-                                </>
-                            </View>
-                        )
-                    }
+                    {renderAccountFields()}
 
                     <View className='flex flex-col space-y-1'>
                         <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>

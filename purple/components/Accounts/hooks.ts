@@ -109,8 +109,7 @@ export function useCreateAccount({
         });
 
         if (!res.ok) {
-            const errorResponse = await res.json();
-            throw new Error(errorResponse.message || 'Login failed');
+            throw new Error(res.status.toString());
         }
 
         const json = await res.json();

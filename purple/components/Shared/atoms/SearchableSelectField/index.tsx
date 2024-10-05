@@ -56,8 +56,6 @@ export default function SearchableSelectField({
             });
     }, [searchValue, options]);
 
-    console.log(options);
-
     return (
         <>
             {/**

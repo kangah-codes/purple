@@ -27,7 +27,7 @@ export default function NewProfileScreen() {
     // }
 
     nativeStorage.onClearCompleted(() => {
-        console.log('HELLO');
+        console.log('Clear completed');
     });
 
     if (isLoading) {

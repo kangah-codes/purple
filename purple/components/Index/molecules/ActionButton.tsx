@@ -48,13 +48,13 @@ export default function ActionButtons({ account }: { account: Account }) {
             <ActionButton
                 IconComponent={ArrowCircleDownIcon}
                 label='Income'
-                type='income'
+                type='credit'
                 account={account}
             />
             <ActionButton
                 IconComponent={ArrowCircleUpIcon}
                 label='Expense'
-                type='expense'
+                type='debit'
                 account={account}
             />
             <ActionButton

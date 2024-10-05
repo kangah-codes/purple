@@ -90,8 +90,7 @@ export function useCreateTransaction({
         });
 
         if (!res.ok) {
-            const errorResponse = await res.json();
-            throw new Error(errorResponse.message || "Can't create transaction");
+            throw new Error(res.status.toString());
         }
 
         const json = await res.json();

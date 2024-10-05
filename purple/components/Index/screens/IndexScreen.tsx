@@ -1,4 +1,11 @@
-import { InputField, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
+import {
+    InputField,
+    LinearGradient,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    View,
+} from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
@@ -21,7 +28,6 @@ export default function IndexScreen() {
     const { setAccounts } = useAccountStore();
     const { setUser, user } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
-    console.log(sessionData);
     const { refetch } = useUser({
         sessionData: sessionData as SessionData,
         id: sessionData?.user.ID,
@@ -45,7 +51,6 @@ export default function IndexScreen() {
     });
 
     const onRefresh = useCallback(() => {
-        console.log('USER HOME ', user);
         setRefreshing(true);
         refetch();
     }, []);
@@ -53,6 +58,19 @@ export default function IndexScreen() {
     return (
         <SafeAreaView className='bg-white'>
             <ExpoStatusBar style='dark' />
+            <LinearGradient
+                className='flex px-5 py-2.5'
+                colors={['#D8B4FE', '#fff']}
+                style={{
+                    paddingTop: RNStatusBar.currentHeight,
+                }}
+            >
+                <View className='flex flex-col'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-4xl'>
+                        $ 1,574
+                    </Text>
+                </View>
+            </LinearGradient>
             <View style={styles.parentView} className='bg-white px-5'>
                 <View className='flex flex-row justify-between items-center pt-2.5'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
@@ -78,7 +96,7 @@ export default function IndexScreen() {
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
                 >
-                    <AccountCardCarousel />
+                    {/* <AccountCardCarousel /> */}
                     <PlanHistoryList />
                     <TransactionHistoryList />
                 </ScrollView>

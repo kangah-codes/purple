@@ -8,6 +8,7 @@ import {
 } from '../../SVG/noscale';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
+import { ChevronRightIcon } from '@/components/SVG/16x16';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -20,7 +21,6 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
-    console.log(data);
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -71,13 +71,17 @@ export default function TransactionHistoryCard({
                     )}
                     <Text
                         style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-600 tracking-tighter'
+                        className='text-sm text-gray-500 tracking-tighter'
                     >
-                        {new Date(data.CreatedAt).toLocaleDateString()}
+                        {new Date(data.CreatedAt).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                        })}
                     </Text>
                 </View>
 
-                <View className='flex flex-col'>
+                <View className='flex flex-row space-x-2 items-center'>
                     <Text
                         style={{
                             ...GLOBAL_STYLESHEET.suprapower,
@@ -89,6 +93,8 @@ export default function TransactionHistoryCard({
                         {/* {JSON.stringify(data.account)} */}
                         {formatCurrencyAccurate(data.currency, data.amount)}
                     </Text>
+
+                    <ChevronRightIcon stroke='#1F2937' />
                 </View>
             </View>
         </TouchableOpacity>
