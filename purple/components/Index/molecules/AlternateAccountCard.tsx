@@ -43,7 +43,7 @@ export default function AlternateAccountCard({ item }: { item: Account }) {
                 accountName={item.name}
                 account={item}
             />
-            <View className='h-[1px] bg-gray-200 w-full my-2.5' />
+            <View className='h-[1px] bg-purple-200 w-full my-2.5' />
             <ActionButtons account={item} />
         </>
     );

@@ -1,5 +1,8 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import {
+    useInfiniteQuery,
+    UseInfiniteQueryOptions,
+    UseInfiniteQueryResult,
     useMutation,
     UseMutationResult,
     useQuery,
@@ -70,6 +73,57 @@ export function useTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+        },
+    );
+}
+
+export function useInfiniteTransactions({
+    sessionData,
+    requestQuery,
+    options,
+}: {
+    sessionData: SessionData;
+    requestQuery: RequestParamQuery;
+    options?: Omit<
+        UseInfiniteQueryOptions<GenericAPIResponse<Transaction[]>, Error>,
+        'queryKey' | 'queryFn'
+    >;
+}): UseInfiniteQueryResult<GenericAPIResponse<Transaction[]>, Error> {
+    return useInfiniteQuery<GenericAPIResponse<Transaction[]>, Error>(
+        ['transactions', requestQuery],
+        async ({ pageParam = 1 }) => {
+            const queryParams = {
+                ...requestQuery,
+                page: pageParam,
+                page_size: requestQuery.page_size || 10,
+            };
+
+            const res = await fetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/transaction?${stringify(queryParams)}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                        Authorization: sessionData.access_token,
+                    },
+                },
+            );
+
+            if (!res.ok) {
+                throw new Error(`${res.status}`);
+            }
+
+            return res.json();
+        },
+        {
+            ...options,
+            getNextPageParam: (lastPage) => {
+                const nextPage = lastPage.page + 1;
+                return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
+                    ? nextPage
+                    : undefined;
+            },
+            enabled: !!sessionData,
         },
     );
 }

@@ -18,11 +18,12 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useTransactions, useTransactionStore } from '../hooks';
+import { useInfiniteTransactions, useTransactions, useTransactionStore } from '../hooks';
 import CurrentTransactionModal from '../molecules/CurrentTransactionModal';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
 import { stringify, truncateStringIfLongerThan } from '@/lib/utils/string';
+import { useInfiniteQuery } from 'react-query';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -32,34 +33,76 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     const local = useLocalSearchParams();
     const { sessionData } = useAuth();
     const { accountID, accountName } = local;
-    const { setTransactions, transactions, setCurrentTransaction } = useTransactionStore();
+    const { setTransactions, setCurrentTransaction } = useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { isLoading, refetch } = useTransactions({
-        sessionData: sessionData as SessionData,
-        options: {
-            onSuccess: (data) => {
-                // we're doing this so that the transaction store
-                // isn't overwritten when we're viewing a specific account
-                if (!showBackButton) {
-                    const res = data as GenericAPIResponse<Transaction[]>;
-                    setTransactions(res.data);
-                }
+    // const { isLoading, refetch } = useTransactions({
+    //     sessionData: sessionData as SessionData,
+    //     options: {
+    //         onSuccess: (data) => {
+    //             // we're doing this so that the transaction store
+    //             // isn't overwritten when we're viewing a specific account
+    //             if (!showBackButton) {
+    //                 const res = data as GenericAPIResponse<Transaction[]>;
+    //                 setTransactions(res.data);
+    //             }
+    //         },
+    //         onError: () => {
+    //             Toast.show({
+    //                 type: 'error',
+    //                 props: {
+    //                     text1: 'Error!',
+    //                     text2: "We couldn't fetch your transactions",
+    //                 },
+    //             });
+    //         },
+    //     },
+    //     requestQuery: {
+    //         accountID,
+    //     },
+    // });
+
+    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
+        useInfiniteTransactions({
+            sessionData: sessionData as SessionData,
+            requestQuery: {
+                accountID,
+                page_size: 10,
             },
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: "We couldn't fetch your transactions",
-                    },
-                });
+            options: {
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: "We couldn't fetch your transactions",
+                        },
+                    });
+                },
             },
-        },
-        requestQuery: {
-            accountID,
-        },
-    });
+        });
+
+    // flatten the data
+    const transactions = useMemo(
+        () => (data ? data.pages.flatMap((page) => page.data) : []),
+        [data],
+    );
+
+    const handleLoadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
+
+    if (isError) {
+        Toast.show({
+            type: 'error',
+            props: {
+                text1: 'Error!',
+                text2: "We couldn't fetch your transactions",
+            },
+        });
+    }
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
@@ -123,8 +166,10 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 renderItem={renderItem}
                 ItemSeparatorComponent={renderItemSeparator}
                 onRefresh={refetch}
-                refreshing={isLoading}
+                refreshing={isFetching}
                 ListEmptyComponent={renderEmptylist}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
             />
             {!showBackButton && (
                 <LinearGradient

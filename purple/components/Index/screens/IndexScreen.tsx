@@ -58,27 +58,44 @@ export default function IndexScreen() {
     return (
         <SafeAreaView className='bg-white'>
             <ExpoStatusBar style='dark' />
-            <LinearGradient
-                className='flex px-5 py-2.5'
-                colors={['#D8B4FE', '#fff']}
-                style={{
-                    paddingTop: RNStatusBar.currentHeight,
-                }}
-            >
-                <View className='flex flex-col'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-4xl'>
-                        $ 1,574
+            <View className='w-full relative flex'>
+                <LinearGradient
+                    className='flex px-5 py-2.5 h-[350] absolute w-full'
+                    colors={['#D8B4FE', '#fff']}
+                />
+                <View
+                    className='flex flex-col px-5'
+                    style={{
+                        paddingTop: RNStatusBar.currentHeight,
+                    }}
+                >
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        Hi, {sessionData?.user.username} 👋
                     </Text>
+
+                    <ScrollView
+                        className='mt-5 h-full space-y-5'
+                        contentContainerStyle={styles.scrollView}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
+                    >
+                        <AccountCardCarousel />
+                        <PlanHistoryList />
+                        <TransactionHistoryList />
+                    </ScrollView>
                 </View>
-            </LinearGradient>
-            <View style={styles.parentView} className='bg-white px-5'>
+            </View>
+
+            {/* <View style={styles.parentView} className='bg-white px-5'>
                 <View className='flex flex-row justify-between items-center pt-2.5'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                         Hi, {sessionData?.user.username} 👋
                     </Text>
                 </View>
 
-                {/* <View className='relative flex justify-center mt-5'>
+                <View className='relative flex justify-center mt-5'>
                     <InputField
                         className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
                         style={GLOBAL_STYLESHEET.interSemiBold}
@@ -86,21 +103,8 @@ export default function IndexScreen() {
                         cursorColor={'#000'}
                     />
                     <SearchIcon width={16} height={16} style={styles.searchIcon} stroke='#A855F7' />
-                </View> */}
-
-                <ScrollView
-                    className='mt-5 h-full space-y-5'
-                    contentContainerStyle={styles.scrollView}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    }
-                >
-                    {/* <AccountCardCarousel /> */}
-                    <PlanHistoryList />
-                    <TransactionHistoryList />
-                </ScrollView>
-            </View>
+                </View>
+            </View> */}
         </SafeAreaView>
     );
 }

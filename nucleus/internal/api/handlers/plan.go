@@ -62,6 +62,7 @@ func CreatePlan(c *gin.Context) {
 		DepositFrequency: createPlan.DepositFrequency,
 		PushNotification: createPlan.PushNotification,
 		Name:             createPlan.Name,
+		Currency:         account.Currency,
 	}
 
 	result = db.Create(&plan)

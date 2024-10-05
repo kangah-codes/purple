@@ -31,4 +31,19 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
     interSemiBold: {
         fontFamily: 'InterSemiBold',
     },
+    arialBold: {
+        fontFamily: 'ArialBold',
+    },
+    arialRegular: {
+        fontFamily: 'ArialRegular',
+    },
 });
+
+/**
+ *  ClashGroteskBold: require('../assets/fonts/ClashGrotesk-Bold.otf'),
+                    ClashGroteskExtraLight: require('../assets/fonts/ClashGrotesk-ExtraLight.otf'),
+                    ClashGroteskLight: require('../assets/fonts/ClashGrotesk-Light.otf'),
+                    ClashGroteskMedium: require('../assets/fonts/ClashGrotesk-Medium.otf'),
+                    ClashGroteskRegular: require('../assets/fonts/ClashGrotesk-Regular.otf'),
+                    ClashGroteskSemiBold: require('../assets/fonts/ClashGrotesk-SemiBold.otf'),
+ */

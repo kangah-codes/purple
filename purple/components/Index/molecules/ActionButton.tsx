@@ -33,7 +33,7 @@ export function ActionButton({
                     },
                 }}
             >
-                <View className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'>
+                <View className='border border-purple-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'>
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>

@@ -36,4 +36,5 @@ type Plan struct {
 	PushNotification bool      `json:"push_notification"`
 	CreatedAt        time.Time `gorm:"type:timestamptz;not null"`
 	UpdatedAt        time.Time `gorm:"type:timestamptz;not null"`
+	Currency         string    `gorm:"size:3;not null" json:"currency"`
 }

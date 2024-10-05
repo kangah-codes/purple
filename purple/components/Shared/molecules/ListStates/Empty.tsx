@@ -10,7 +10,7 @@ type EmptyListProps = {
 
 export default function EmptyList({ message }: EmptyListProps) {
     return (
-        <View className='flex flex-col space-y-5 items-center justify-center bg-white px-5'>
+        <View className='flex flex-col space-y-5 items-center justify-center px-5'>
             <Image source={require('@/assets/images/graphics/19.png')} style={tw`h-24 w-52`} />
             <View className='flex flex-col space-y-2.5'>
                 <Text

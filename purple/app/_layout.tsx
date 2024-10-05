@@ -42,6 +42,8 @@ export default function RootLayout() {
                     InterLight: require('../assets/fonts/Inter-Light.ttf'),
                     InterMedium: require('../assets/fonts/Inter-Medium.ttf'),
                     InterSemiBold: require('../assets/fonts/Inter-SemiBold.ttf'),
+                    ArialBold: require('../assets/fonts/Arial-Rounded-MT-Bold-Regular.ttf'),
+                    ArialRegular: require('../assets/fonts/Arial-Rounded-MT-Std-Regular.otf'),
                 });
             } catch (e) {
                 console.warn(e);

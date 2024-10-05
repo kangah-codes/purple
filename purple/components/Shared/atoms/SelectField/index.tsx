@@ -71,7 +71,10 @@ export default function SelectField({
                         )
                     }
                     sheetKey={selectKey}
-                    data={Object.keys(options).map((key) => options[key]) ?? []}
+                    data={Object.keys(options).reduce(
+                        (acc, key) => [...acc, options[key]],
+                        [] as SelectOption[],
+                    )}
                     renderItem={(item) => {
                         let _item = item.item as unknown as SelectOption;
                         return (

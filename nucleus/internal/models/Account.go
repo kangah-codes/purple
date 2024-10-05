@@ -15,6 +15,7 @@ type Account struct {
 	IsDefaultAccount bool          `gorm:"default:false" json:"is_default_account"`
 	Currency         string        `gorm:"size:5" json:"currency"`
 	Transactions     []Transaction `gorm:"constraint:OnDelete:CASCADE;"`
+	Plans            []Plan        `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 func (a *Account) UpdateAccountBalance(account *Account, balance float64, db *gorm.DB) error {
