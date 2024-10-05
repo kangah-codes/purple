@@ -15,7 +15,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactions, useTransactionStore } from '../hooks';
@@ -33,7 +33,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     const local = useLocalSearchParams();
     const { sessionData } = useAuth();
     const { accountID, accountName } = local;
-    const { setTransactions, setCurrentTransaction } = useTransactionStore();
+    const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     // const { isLoading, refetch } = useTransactions({
@@ -83,10 +83,12 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         });
 
     // flatten the data
-    const transactions = useMemo(
-        () => (data ? data.pages.flatMap((page) => page.data) : []),
-        [data],
-    );
+    useEffect(() => {
+        if (data) {
+            const tx = data.pages.flatMap((page) => page.data);
+            setTransactions(tx);
+        }
+    }, [data]);
 
     const handleLoadMore = () => {
         if (hasNextPage) {

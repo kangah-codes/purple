@@ -13,6 +13,8 @@ type PlanStore = {
     savingPlans: Plan[];
     setExpensePlans: (plans: Plan[]) => void;
     setSavingPlans: (plans: Plan[]) => void;
+    updateExpenseplans: (plan: Plan | Plan[]) => void;
+    updateSavingPlans: (plan: Plan | Plan[]) => void;
 };
 
 export const createPlanStore = create<PlanStore>()(
@@ -26,6 +28,18 @@ export const createPlanStore = create<PlanStore>()(
             savingPlans: [],
             setExpensePlans: (plans) => set({ expensePlans: plans }),
             setSavingPlans: (plans) => set({ savingPlans: plans }),
+            updateExpenseplans: (plan) =>
+                set((state) => ({
+                    expensePlans: Array.isArray(plan)
+                        ? [...plan, ...state.expensePlans]
+                        : [plan, ...state.expensePlans],
+                })),
+            updateSavingPlans: (plan) =>
+                set((state) => ({
+                    savingPlans: Array.isArray(plan)
+                        ? [...plan, ...state.savingPlans]
+                        : [plan, ...state.savingPlans],
+                })),
         }),
         {
             name: 'plan-store',

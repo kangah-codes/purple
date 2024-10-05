@@ -9,9 +9,12 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import React, { useEffect } from 'react';
 import { useCallback, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
     Platform,
@@ -20,10 +23,44 @@ import {
     StatusBar as RNStatusBar,
 } from 'react-native';
 
+/**
+ * 
+ * @returns type CreatePlanDTO struct {
+	AccountId        uuid.UUID `json:"account_id" binding:"required"`
+	Type             string    `json:"type" binding:"required,oneof=saving expense"`
+	Category         string    `json:"category" binding:"required"`
+	Target           float64   `json:"target" validate:"number"`
+	StartDate        string    `json:"start_date" binding:"required"`
+	EndDate          string    `json:"end_date" binding:"required"`
+	DepositFrequency string    `json:"deposit_frequency" binding:"required,oneof=daily weekly bi-weekly monthly yearly"`
+	PushNotification bool      `json:"push_notification" binding:"required"`
+	Name             string    `json:"name" binding:"required"`
+}
+ */
+
 export default function NewPlanScreen() {
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
     const [isLoading, setIsLoading] = useState(false);
+    const [planCategories, setPlanCategories] = useState<string[]>([]);
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+    } = useForm({
+        defaultValues: {
+            plan_type: '',
+            category: '',
+            amount: '',
+            account_id: '',
+            start_date: '',
+            end_date: '',
+            deposit_frequency: '',
+            push_notification: false,
+            name: '',
+        },
+    });
     const renderItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-100'>
@@ -58,6 +95,14 @@ export default function NewPlanScreen() {
         },
     };
 
+    useEffect(() => {
+        const getCachedConstants = async () => {
+            const cachedTypes = await nativeStorage.getItem<string[]>('transaction_types');
+            if (cachedTypes) setPlanCategories(cachedTypes);
+        };
+        getCachedConstants();
+    }, []);
+
     return (
         <>
             <SafeAreaView className='bg-white relative h-full'>
@@ -87,43 +132,106 @@ export default function NewPlanScreen() {
                             Plan Name
                         </Text>
 
-                        <InputField
-                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            cursorColor={'#8B5CF6'}
-                        />
-                    </View>
-
-                    <View>
-                        <SelectField
-                            selectKey='newPlanType'
-                            label='Plan Type'
-                            options={planTypes}
-                            customSnapPoints={['25%', '25%']}
-                            renderItem={renderItem}
-                        />
-                    </View>
-
-                    <View>
-                        <SelectField
-                            selectKey='newPlanCategory'
-                            label='Category'
-                            options={{
-                                kanye: {
-                                    label: 'Kanye',
-                                    value: 'kanye',
-                                },
-                                rihanna: {
-                                    label: 'Rihanna',
-                                    value: 'rihanna',
-                                },
-                                drake: {
-                                    label: 'Drake',
-                                    value: 'drake',
-                                },
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "Debit account can't be empty",
                             }}
-                            customSnapPoints={['30%', '40%']}
+                            render={({ field: { onChange, value, onBlur } }) => (
+                                <InputField
+                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    cursorColor={'#8B5CF6'}
+                                    placeholder='Plan Name'
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    value={value}
+                                />
+                            )}
+                            name='name'
                         />
+                        {errors.name && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.name.message}
+                            </Text>
+                        )}
+                    </View>
+
+                    <View>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Plan Type
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Debit account can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanTypes'
+                                            options={planTypes}
+                                            customSnapPoints={['30%', '40%']}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='plan_type'
+                            />
+                            {errors.plan_type && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.plan_type.message}
+                                </Text>
+                            )}
+                        </>
+                    </View>
+
+                    <View>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Plan Category
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Debit account can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanCategory'
+                                            options={planCategories.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '70%']}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='category'
+                            />
+                            {errors.category && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.category.message}
+                                </Text>
+                            )}
+                        </>
                     </View>
 
                     <View className='flex flex-col space-y-1'>
@@ -164,7 +272,11 @@ export default function NewPlanScreen() {
                     <View className='h-1 border-b border-gray-100 w-full' />
 
                     <View className='flex flex-col space-y-1'>
-                        <DatePicker label='Start Date' pickerKey='newPlanStartDate' />
+                        <DatePicker
+                            label='Start Date'
+                            pickerKey='newPlanStartDate'
+                            minimumDate={new Date()}
+                        />
                     </View>
 
                     <View className='flex flex-col space-y-1'>

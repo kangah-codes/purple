@@ -11,17 +11,16 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { TRANSACTION_TYPES } from '@/constants/transactionTypes';
+import { omit, transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
-import { useCreateTransaction, useTransactionStore } from '../hooks';
 import Toast from 'react-native-toast-message';
-import { formPreprocessor, omit, transformObject } from '@/lib/utils/object';
-import { TRANSACTION_TYPES } from '@/constants/transactionTypes';
+import { useCreateTransaction, useTransactionStore } from '../hooks';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -36,8 +35,6 @@ export default function NewTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
-        getValues,
-        reset,
     } = useForm({
         defaultValues: {
             amount: '',
@@ -58,15 +55,6 @@ export default function NewTransactionScreen() {
         };
         getCachedConstants();
     }, [transactionType, setValue]);
-
-    // useEffect(() => {
-    //     alert(accountId);
-    //     if (accountId)
-    //         reset({
-    //             ...getValues(),
-    //             accountId: accountId as string,
-    //         });
-    // }, []);
 
     const onSubmit = (data: {
         amount: string;
@@ -93,8 +81,6 @@ export default function NewTransactionScreen() {
             ]) as typeof transformedData; // looks hacky af
         }
 
-        console.log(transformedData);
-
         mutate(transformedData, {
             onError: () => {
                 Toast.show({
@@ -103,7 +89,6 @@ export default function NewTransactionScreen() {
                 });
             },
             onSuccess: (res) => {
-                console.log(res, 'RES');
                 updateTransactions(res.data);
                 Toast.show({
                     type: 'success',
@@ -327,7 +312,6 @@ export default function NewTransactionScreen() {
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
                                     style={GLOBAL_STYLESHEET.interSemiBold}
                                     cursorColor={'#8B5CF6'}
-                                    keyboardType='numeric'
                                     placeholder='0.00'
                                     onChangeText={onChange}
                                     onBlur={onBlur}
