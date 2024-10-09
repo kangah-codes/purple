@@ -3,6 +3,8 @@ import {
     useInfiniteQuery,
     UseInfiniteQueryOptions,
     UseInfiniteQueryResult,
+    useMutation,
+    UseMutationResult,
     useQuery,
     UseQueryOptions,
     UseQueryResult,
@@ -139,4 +141,28 @@ export function useInfinitePlans({
             enabled: !!sessionData,
         },
     );
+}
+
+export function useCreatePlan({
+    sessionData,
+}: {
+    sessionData: SessionData;
+}): UseMutationResult<GenericAPIResponse<Plan>, Error> {
+    return useMutation(['create-plan'], async (data) => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                Authorization: sessionData.access_token,
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            throw new Error(res.status.toString());
+        }
+
+        const json = await res.json();
+        return json;
+    });
 }

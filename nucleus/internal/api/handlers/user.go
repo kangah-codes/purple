@@ -16,6 +16,14 @@ import (
 func SignUp(c *gin.Context) {
 	signUp := types.SignUpDTO{}
 	db := utils.GetDB()
+	clientIP := c.ClientIP()
+
+	ipInfo, err := utils.GetCountryAndCurrencyFromIP(clientIP)
+	if err != nil {
+		utils.ErrorLogger.Printf("Failed to get country info: %s", err.Error())
+		ipInfo = &utils.IPInfo{Currency: "GHS"} // Default to GHS
+	}
+
 	if err := c.ShouldBindJSON(&signUp); err != nil {
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
@@ -37,46 +45,59 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	// Start transaction
+	tx := db.Begin()
+
 	user := models.User{
-		Username:     signUp.Username,
-		Email:        signUp.Email,
-		Password:     hashedPassword,
-		Accounts:     []models.Account{},
+		Username: signUp.Username,
+		Email:    signUp.Email,
+		Password: hashedPassword,
+		Settings: models.UserSettings{
+			PushNotifications:    false,
+			TwoFactorAuth:        false,
+			EndOfDayNotification: false,
+			DefaultCurrency:      ipInfo.Currency,
+		},
+		Accounts: []models.Account{
+			{
+				Name:             "Cash",
+				Category:         "💵 Cash",
+				Balance:          0.00,
+				IsDefaultAccount: true,
+				Currency:         ipInfo.Currency,
+				Transactions:     []models.Transaction{},
+			},
+		},
 		Plans:        []models.Plan{},
 		Transactions: []models.Transaction{},
 	}
 
-	result := db.Create(&user)
-	if result.Error != nil {
-		if result.Error == gorm.ErrDuplicatedKey {
-			c.JSON(400, types.Response{Status: 409, Message: "User already exists with these details", Data: nil})
-			return
+	if err := tx.Create(&user).Error; err != nil {
+		tx.Rollback()
+		if err == gorm.ErrDuplicatedKey {
+			c.JSON(http.StatusConflict, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
+		} else {
+			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to create user: %s", err.Error()), Data: nil})
 		}
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to create user: %s", result.Error.Error()), Data: nil})
 		return
 	}
 
-	// create a default cash account for this user
-	account := models.Account{
-		UserId:           user.ID,
-		Name:             "Cash",
-		Category:         "💵 Cash",
-		Balance:          0.00,
-		IsDefaultAccount: true,
-	}
-
-	createAccount := db.Create(&account)
-	if createAccount.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
-		// delete the user if account creation fails
-		// idc if this fails
-		db.Delete(&user)
-
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to create user account: %s", result.Error.Error()), Data: nil})
+	// Preload the user settings and accounts
+	if err := tx.Preload("Settings").Preload("Accounts").First(&user, user.ID).Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to retrieve user data", Data: nil})
 		return
 	}
 
-	fmt.Printf("Created account: %+v\n", account)
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		utils.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
+		return
+	}
+
+	utils.InfoLogger.Printf("Created user: %+v\n", user)
 
 	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
 }

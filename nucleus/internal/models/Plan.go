@@ -28,8 +28,6 @@ type Plan struct {
 	Name             string    `gorm:"size:100" json:"name"`
 	Target           float64   `gorm:"not null" json:"target"`
 	Balance          float64   `gorm:"not null" json:"balance"`
-	AccountId        uuid.UUID `json:"account_id"`
-	Account          Account   `gorm:"foreignKey:AccountId" json:"account"`
 	StartDate        time.Time `json:"start_date"`
 	EndDate          time.Time `json:"end_date"`
 	DepositFrequency string    `gorm:"not null" json:"deposit_frequency"`

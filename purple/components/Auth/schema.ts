@@ -17,10 +17,15 @@ export type User = {
     plans: Plan[];
     transactions: Transaction[];
     role: string;
+    settings: UserSettings;
 };
 
 export type UserSettings = {
     default_currency: string;
+    push_notifications: boolean;
+    two_factor_auth: boolean;
+    end_of_day_notification: boolean;
+    ID: string;
 };
 
 export type SessionData = {

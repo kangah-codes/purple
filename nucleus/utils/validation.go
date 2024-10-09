@@ -24,6 +24,7 @@ func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("oneof", validateOneOf)
 	v.RegisterValidation("validNumber", validateNumber)
 	v.RegisterValidation("validCurrency", validateCurrency)
+	v.RegisterValidation("validBool", validateBool)
 }
 
 func validateOneOf(fl validator.FieldLevel) bool {
@@ -53,4 +54,8 @@ func validateCurrency(fl validator.FieldLevel) bool {
 	}
 
 	return false
+}
+
+func validateBool(fl validator.FieldLevel) bool {
+	return true
 }

@@ -316,6 +316,7 @@ export default function NewTransactionScreen() {
                                     onChangeText={onChange}
                                     onBlur={onBlur}
                                     value={value}
+                                    keyboardType='numeric'
                                 />
                             )}
                             name='amount'

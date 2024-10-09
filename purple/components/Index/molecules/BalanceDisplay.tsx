@@ -41,7 +41,10 @@ export function BalanceDisplay({
                     />
                 )}
             </View>
-            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-3xl mt-1.5'>
+            <Text
+                style={GLOBAL_STYLESHEET.interSemiBold}
+                className='text-black text-[28px] tracking-tight leading-[1.4] mt-1.5'
+            >
                 {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
             </Text>
             <Text
@@ -53,3 +56,14 @@ export function BalanceDisplay({
         </>
     );
 }
+
+/**
+ * box-sizing: border-box;
+  color: #101828;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+ */

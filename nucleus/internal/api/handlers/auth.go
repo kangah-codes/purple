@@ -20,7 +20,7 @@ func SignIn(c *gin.Context) {
 	}
 
 	user := models.User{}
-	result := db.Where("username = ?", signIn.Username).First(&user)
+	result := db.Preload("Settings").Where("username = ?", signIn.Username).First(&user)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Failed to find user: %v", result.Error)
 		c.JSON(404, types.Response{Status: 401, Message: "Invalid username/password", Data: nil})

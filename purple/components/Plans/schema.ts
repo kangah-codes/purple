@@ -29,4 +29,17 @@ export type Plan = {
     CreatedAt: string;
     UpdatedAt: string;
     name: string;
+    currency: string;
+};
+
+export type CreatePlan = {
+    type: string;
+    category: string;
+    amount: number;
+    start_date: string;
+    end_date: string;
+    deposit_frequency: string;
+    push_notification: boolean;
+    name: string;
+    currency: string;
 };

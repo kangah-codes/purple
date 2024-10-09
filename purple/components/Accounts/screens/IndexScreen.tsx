@@ -54,7 +54,6 @@ export default function AccountsScreen() {
                     Accounts
                 </Text>
                 <View className='h-1 border-gray-100 border-b w-full mb-2.5' />
-                <AccountsTotalSummary accounts={accounts} />
             </View>
         ),
         [accounts],

@@ -3,13 +3,16 @@ import { BudgetPlan, Plan } from '../schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatDate } from '@/lib/utils/date';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { useAuth } from '@/components/Auth/hooks';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
 
 type BudgetCardProps = {
     data: Plan;
 };
 
 export default function BudgetPlanCard({ data }: BudgetCardProps) {
-    const { category, start_date, end_date, balance, target, name } = data;
+    const { category, start_date, end_date, balance, target, name, currency } = data;
+    const { sessionData } = useAuth();
 
     return (
         <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
@@ -20,7 +23,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
             </View>
 
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-base text-black'>
+                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                     {truncateStringIfLongerThan(name, 20)}
                 </Text>
             </View>
@@ -62,7 +65,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
             <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.interBold}
                         className='text-sm text-gray-700 tracking-tight'
                     >
                         Spent
@@ -71,13 +74,13 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                         style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-black tracking-tighter'
                     >
-                        GHS {target - balance}
+                        {formatCurrencyAccurate(currency, target - balance)}
                     </Text>
                 </View>
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.interBold}
                         className='text-sm text-gray-700 tracking-tight'
                     >
                         Balance
@@ -86,13 +89,13 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                         style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-gray-700 tracking-tight'
                     >
-                        GHS {balance}
+                        {formatCurrencyAccurate(currency, balance)}
                     </Text>
                 </View>
                 <View className='border-b border-purple-200 w-full' />
                 <View className='flex flex-row justify-between items-center'>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.interBold}
                         className='text-sm text-gray-700 tracking-tight'
                     >
                         Budget
@@ -101,7 +104,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                         style={GLOBAL_STYLESHEET.interSemiBold}
                         className='text-sm text-black tracking-tighter'
                     >
-                        GHS {target}
+                        {formatCurrencyAccurate(currency, target)}
                     </Text>
                 </View>
             </View>

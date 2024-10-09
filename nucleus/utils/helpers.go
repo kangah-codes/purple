@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -57,4 +60,40 @@ func FormatStrToDateTime(dateStr string) time.Time {
 	}
 
 	return dte
+}
+
+type IPInfo struct {
+	IP       string `json:"ip"`
+	Country  string `json:"country"`
+	Currency string `json:"currency"`
+}
+
+func GetCountryAndCurrencyFromIP(ipAddress string) (*IPInfo, error) {
+	// Use a geolocation API to get country info
+	resp, err := http.Get(fmt.Sprintf("https://ipapi.co/%s/json/", ipAddress))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	country, ok := result["country_name"].(string)
+	if !ok {
+		return nil, fmt.Errorf("country not found")
+	}
+
+	currency, ok := result["currency"].(string)
+	if !ok {
+		return nil, fmt.Errorf("currency not found")
+	}
+
+	return &IPInfo{
+		IP:       ipAddress,
+		Country:  country,
+		Currency: currency,
+	}, nil
 }

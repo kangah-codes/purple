@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // DateFormat defines the expected date format for JSON
@@ -31,15 +29,15 @@ func (d Date) MarshalJSON() ([]byte, error) {
 }
 
 type CreatePlanDTO struct {
-	AccountId        uuid.UUID `json:"account_id" binding:"required"`
-	Type             string    `json:"type" binding:"required,oneof=saving expense"`
-	Category         string    `json:"category" binding:"required"`
-	Target           float64   `json:"target" validate:"number"`
-	StartDate        string    `json:"start_date" binding:"required"`
-	EndDate          string    `json:"end_date" binding:"required"`
-	DepositFrequency string    `json:"deposit_frequency" binding:"required,oneof=daily weekly bi-weekly monthly yearly"`
-	PushNotification bool      `json:"push_notification" binding:"required"`
-	Name             string    `json:"name" binding:"required"`
+	Type             string  `json:"type" binding:"required,oneof=saving expense"`
+	Category         string  `json:"category" binding:"required"`
+	Target           float64 `json:"target" validate:"number"`
+	StartDate        string  `json:"start_date" binding:"required"`
+	EndDate          string  `json:"end_date" binding:"required"`
+	DepositFrequency string  `json:"deposit_frequency" binding:"required,oneof=daily weekly bi-weekly monthly yearly"`
+	PushNotification bool    `json:"push_notification" binding:"validBool"`
+	Name             string  `json:"name" binding:"required"`
+	Currency         string  `json:"currency" binding:"required,len=3"`
 }
 
 type UpdatePlanBalanceDTO struct {

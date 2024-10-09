@@ -31,11 +31,11 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
     interSemiBold: {
         fontFamily: 'InterSemiBold',
     },
-    arialBold: {
-        fontFamily: 'ArialBold',
+    wolfSansRegular: {
+        fontFamily: 'WolfSansRegular',
     },
-    arialRegular: {
-        fontFamily: 'ArialRegular',
+    arialRoundedBold: {
+        fontFamily: 'ArialRoundedBold',
     },
 });
 

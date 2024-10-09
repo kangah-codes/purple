@@ -1,3 +1,4 @@
+import { useAccountStore } from '@/components/Accounts/hooks';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
@@ -21,7 +22,17 @@ import {
     StyleSheet,
     Switch,
     StatusBar as RNStatusBar,
+    Keyboard,
 } from 'react-native';
+import { useCreatePlan } from '../hooks';
+import { useAuth } from '@/components/Auth/hooks';
+import { transformObject } from '@/lib/utils/object';
+import Toast from 'react-native-toast-message';
+import { CreatePlan } from '../schema';
+import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
+import { Currency } from '@/@types/common';
+import { Image } from 'expo-image';
+import tw from 'twrnc';
 
 /**
  * 
@@ -39,35 +50,48 @@ import {
  */
 
 export default function NewPlanScreen() {
+    const { sessionData } = useAuth();
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-    const [isLoading, setIsLoading] = useState(false);
     const [planCategories, setPlanCategories] = useState<string[]>([]);
+    const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
+    const [currencies, setCurrencies] = useState<Currency[]>([]);
+
     const {
         control,
         handleSubmit,
         formState: { errors },
         setValue,
-    } = useForm({
+    } = useForm<CreatePlan>({
         defaultValues: {
-            plan_type: '',
+            type: '',
             category: '',
-            amount: '',
-            account_id: '',
+            amount: 0.0,
             start_date: '',
             end_date: '',
             deposit_frequency: '',
             push_notification: false,
             name: '',
+            currency: sessionData?.user.settings.default_currency ?? '',
         },
     });
-    const renderItem = useCallback(
-        (item: any) => (
-            <View className='py-3 border-b border-gray-100'>
-                <Text>{item.label}</Text>
-            </View>
-        ),
-        [],
+    const renderCurrencies = useCallback(
+        (item: any) => {
+            return (
+                <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
+                    <Image
+                        source={
+                            currencies.find((currency) => currency.code === item.value)?.flag || ''
+                        }
+                        style={tw`h-5 w-5 rounded-full`}
+                    />
+                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
+                        {item.label}
+                    </Text>
+                </View>
+            );
+        },
+        [currencies],
     );
 
     const planTypes = {
@@ -95,10 +119,38 @@ export default function NewPlanScreen() {
         },
     };
 
+    const onSubmit = (data: CreatePlan) => {
+        Keyboard.dismiss();
+        let transformedData = transformObject(data, [
+            ['amount', 'amount', (value) => Number(value)],
+        ]);
+
+        console.log(transformedData);
+
+        mutate(transformedData, {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: { text1: 'Error!', text2: 'There was an issue creating plan' },
+                });
+            },
+            onSuccess: (res) => {
+                Toast.show({
+                    type: 'success',
+                    props: { text1: 'Success!', text2: 'Plan created successfully' },
+                });
+                router.replace('/(tabs)/plans');
+            },
+        });
+    };
+
     useEffect(() => {
         const getCachedConstants = async () => {
             const cachedTypes = await nativeStorage.getItem<string[]>('transaction_types');
             if (cachedTypes) setPlanCategories(cachedTypes);
+
+            const currencies = await nativeStorage.getItem<Currency[]>('currencies');
+            if (currencies) setCurrencies(currencies);
         };
         getCachedConstants();
     }, []);
@@ -168,7 +220,7 @@ export default function NewPlanScreen() {
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Debit account can't be empty",
+                                    required: "Plan type can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
@@ -181,14 +233,14 @@ export default function NewPlanScreen() {
                                         />
                                     </>
                                 )}
-                                name='plan_type'
+                                name='type'
                             />
-                            {errors.plan_type && (
+                            {errors.type && (
                                 <Text
                                     style={{ fontFamily: 'InterMedium' }}
                                     className='text-xs text-red-500'
                                 >
-                                    {errors.plan_type.message}
+                                    {errors.type.message}
                                 </Text>
                             )}
                         </>
@@ -235,63 +287,186 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Currency
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Currency can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SearchableSelectField
+                                            selectKey='newCurrencyType'
+                                            options={currencies.reduce((acc, curr) => {
+                                                acc[curr.code] = {
+                                                    label: curr.name,
+                                                    value: curr.code,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['80%', '90%']}
+                                            renderItem={renderCurrencies}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='currency'
+                            />
+                            {errors.currency && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.currency.message}
+                                </Text>
+                            )}
+                        </>
+                    </View>
+
+                    <View className='flex flex-col space-y-1'>
                         <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
-                            Amount
+                            Target
                         </Text>
 
-                        <InputField
-                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            cursorColor={'#8B5CF6'}
-                            placeholder='0.00'
-                        />
-                    </View>
-
-                    <View>
-                        <SelectField
-                            selectKey='newPlanAccount'
-                            label='Account'
-                            options={{
-                                weekly: {
-                                    label: 'Weekly',
-                                    value: 'weekly',
-                                },
-                                'bi-weekly': {
-                                    label: 'Bi-Weekly',
-                                    value: 'bi-weekly',
-                                },
-                                monthly: {
-                                    label: 'Monthly',
-                                    value: 'monthly',
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "Target amount can't be empty",
+                                min: {
+                                    value: 1,
+                                    message: 'Target amount must be greater than 0',
                                 },
                             }}
-                            customSnapPoints={['30%', '30%']}
+                            render={({ field: { onChange, value } }) => (
+                                <>
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='0.00'
+                                        keyboardType='numeric'
+                                        onChangeText={onChange}
+                                        // may the typescript gods forgive me
+                                        value={value as unknown as string}
+                                    />
+                                </>
+                            )}
+                            name='amount'
                         />
+                        {errors.amount && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.amount.message}
+                            </Text>
+                        )}
                     </View>
 
                     <View className='h-1 border-b border-gray-100 w-full' />
 
                     <View className='flex flex-col space-y-1'>
-                        <DatePicker
-                            label='Start Date'
-                            pickerKey='newPlanStartDate'
-                            minimumDate={new Date()}
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "Start date can't be empty",
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <DatePicker
+                                    label='Start Date'
+                                    pickerKey='newPlanStartDate'
+                                    onChange={(date) => {
+                                        // format "2006-01-02T15:04:05.000Z"
+                                        onChange(date.toISOString());
+                                    }}
+                                    // selectedDate={value}
+                                    // make maximim date today
+                                    maximumDate={new Date()}
+                                    minimumDate={new Date()}
+                                />
+                            )}
+                            name='start_date'
                         />
+                        {errors.start_date && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.start_date.message}
+                            </Text>
+                        )}
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <DatePicker label='End Date' pickerKey='newPlanEndDate' />
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "End date can't be empty",
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <DatePicker
+                                    label='End Date'
+                                    pickerKey='newPlanEndDate'
+                                    onChange={(date) => {
+                                        // format "2006-01-02T15:04:05.000Z"
+                                        onChange(date.toISOString());
+                                    }}
+                                    // selectedDate={value}
+                                    // make maximim date today
+                                    minimumDate={new Date()}
+                                />
+                            )}
+                            name='end_date'
+                        />
+                        {errors.end_date && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.end_date.message}
+                            </Text>
+                        )}
                     </View>
 
                     <View className='h-1 border-b border-gray-100 w-full' />
 
                     <View>
-                        <SelectField
-                            selectKey='newPlanDepositFrequency'
-                            label='Deposit Frequency'
-                            options={depositFrequency}
-                            customSnapPoints={['30%', '30%']}
+                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                            Deposit Frequency
+                        </Text>
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "Deposit Frequency can't be empty",
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <>
+                                    <SelectField
+                                        selectKey='newPlanDepositFrequency'
+                                        options={depositFrequency}
+                                        customSnapPoints={['50%', '70%']}
+                                        value={value}
+                                        onChange={(val) => {
+                                            onChange(val);
+                                            setValue('deposit_frequency', val);
+                                        }}
+                                    />
+                                </>
+                            )}
+                            name='deposit_frequency'
                         />
+                        {errors.deposit_frequency && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.deposit_frequency.message}
+                            </Text>
+                        )}
                     </View>
 
                     <View className='flex flex-row justify-between items-center'>
@@ -299,24 +474,33 @@ export default function NewPlanScreen() {
                             Send me reminders
                         </Text>
 
-                        <Switch
-                            trackColor={{ false: '#767577', true: '#8B5CF6' }}
-                            thumbColor={'#f4f3f4'}
-                            ios_backgroundColor='#3e3e3e'
-                            onValueChange={toggleSwitch}
-                            value={isEnabled}
-                            style={styles.switch}
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <Switch
+                                    trackColor={{ false: '#767577', true: '#8B5CF6' }}
+                                    thumbColor={'#f4f3f4'}
+                                    ios_backgroundColor='#3e3e3e'
+                                    onValueChange={onChange}
+                                    value={value}
+                                    style={styles.switch}
+                                />
+                            )}
+                            name='push_notification'
                         />
+                        {errors.push_notification && (
+                            <Text
+                                style={{ fontFamily: 'InterMedium' }}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.push_notification.message}
+                            </Text>
+                        )}
                     </View>
                 </ScrollView>
 
                 <TouchableOpacity
-                    onPress={() => {
-                        setIsLoading(true);
-                        setTimeout(() => {
-                            setIsLoading(false);
-                        }, 3000);
-                    }}
+                    onPress={handleSubmit(onSubmit)}
                     disabled={isLoading}
                     className='items-center self-center w-[95%] justify-center px-4 absolute bottom-8'
                 >

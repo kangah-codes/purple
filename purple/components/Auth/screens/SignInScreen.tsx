@@ -1,3 +1,6 @@
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { usePlanStore } from '@/components/Plans/hooks';
+import { useUserStore } from '@/components/Profile/hooks';
 import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import {
     InputField,
@@ -7,11 +10,13 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -24,18 +29,12 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
-import { useUserStore } from '@/components/Profile/hooks';
-import { nativeStorage } from '@/lib/utils/storage';
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { useTransactionStore } from '@/components/Transactions/hooks';
-import { usePlanStore } from '@/components/Plans/hooks';
 
 export default function SignInScreen() {
     const { user, setUser, reset: resetUser } = useUserStore();
     const { accounts, setAccounts } = useAccountStore();
     const { transactions, setTransactions } = useTransactionStore();
     const { plans, setPlans } = usePlanStore();
-    const [loading, setLoading] = useState(false);
     const [showLogin, setShowLogin] = useState(true);
     const { setSessionData } = useAuth();
     const {

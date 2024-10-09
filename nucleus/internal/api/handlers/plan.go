@@ -7,7 +7,6 @@ import (
 	"nucleus/internal/models"
 	"nucleus/utils"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -28,51 +27,26 @@ func CreatePlan(c *gin.Context) {
 		return
 	}
 
-	account := models.Account{}
-	result := db.First(&account, createPlan.AccountId)
-	if result.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
-		c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Account not found", Data: nil})
-		return
-	}
-
-	startDate, err := time.Parse("02/01/2006", createPlan.StartDate)
-	if err != nil {
-		utils.ErrorLogger.Println(err)
-		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid start date", Data: nil})
-		return
-	}
-
-	endDate, err := time.Parse("02/01/2006", createPlan.EndDate)
-	if err != nil {
-		utils.ErrorLogger.Println(err)
-		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid end date", Data: nil})
-		return
-	}
-
 	plan := models.Plan{
 		UserId:           userID.(uuid.UUID),
 		Type:             createPlan.Type,
 		Category:         createPlan.Category,
 		Target:           createPlan.Target,
 		Balance:          0,
-		AccountId:        createPlan.AccountId,
-		StartDate:        startDate,
-		EndDate:          endDate,
+		StartDate:        utils.FormatStrToDateTime(createPlan.StartDate),
+		EndDate:          utils.FormatStrToDateTime(createPlan.EndDate),
 		DepositFrequency: createPlan.DepositFrequency,
 		PushNotification: createPlan.PushNotification,
 		Name:             createPlan.Name,
-		Currency:         account.Currency,
+		Currency:         createPlan.Currency,
 	}
 
-	result = db.Create(&plan)
+	result := db.Create(&plan)
 	if result.Error != nil {
 		utils.ErrorLogger.Println(result.Error)
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create plan", Data: nil})
 		return
 	}
-
-	plan.Account = account
 
 	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Plan created", Data: plan})
 }
@@ -156,8 +130,9 @@ func FetchPlans(c *gin.Context) {
 	query.Count(&totalItems)
 
 	// Fetch plans with pagination
-	result := query.Preload("Account").Order("created_at desc").Limit(pageSize).Offset(offset).Find(&plans)
+	result := query.Order("created_at desc").Limit(pageSize).Offset(offset).Find(&plans)
 	if result.Error != nil {
+		utils.ErrorLogger.Printf("Error fetching plans: %v", result.Error)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to fetch plans: %s", result.Error.Error()), Data: nil})
 		return
 	}

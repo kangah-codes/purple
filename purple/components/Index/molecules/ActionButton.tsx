@@ -26,7 +26,7 @@ export function ActionButton({
         <View className='flex flex-col items-center justify-center space-y-1.5'>
             <Link
                 href={{
-                    pathname: type == 'plan' ? '/plans/new-plan' : '/transactions/new-transaction',
+                    pathname: '/transactions/new-transaction',
                     params: {
                         type,
                         accountId: account.ID,
@@ -44,7 +44,7 @@ export function ActionButton({
 
 export default function ActionButtons({ account }: { account: Account }) {
     return (
-        <View className='flex-row justify-between items-stretch w-full px-7 pt-2.5'>
+        <View className='flex-row justify-between items-stretch w-auto px-20 pt-2.5'>
             <ActionButton
                 IconComponent={ArrowCircleDownIcon}
                 label='Income'
@@ -61,12 +61,6 @@ export default function ActionButtons({ account }: { account: Account }) {
                 IconComponent={CoinSwapIcon}
                 label='Transfer'
                 type='transfer'
-                account={account}
-            />
-            <ActionButton
-                IconComponent={PiggyBankIcon}
-                label='Plan'
-                type='plan'
                 account={account}
             />
         </View>
