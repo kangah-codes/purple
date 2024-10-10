@@ -33,17 +33,15 @@ export default function RootLayout() {
                 // Pre-load fonts, make any API calls you need to do here
                 await Font.loadAsync({
                     Suprapower: require('../assets/fonts/Suprapower.otf'),
-                    InterRegular: require('../assets/fonts/Inter-Regular.ttf'),
-                    InterThin: require('../assets/fonts/Inter-Thin.ttf'),
-                    InterBlack: require('../assets/fonts/Inter-Black.ttf'),
-                    InterBold: require('../assets/fonts/Inter-Bold.ttf'),
-                    InterExtraBold: require('../assets/fonts/Inter-ExtraBold.ttf'),
-                    InterExtraLight: require('../assets/fonts/Inter-ExtraLight.ttf'),
-                    InterLight: require('../assets/fonts/Inter-Light.ttf'),
-                    InterMedium: require('../assets/fonts/Inter-Medium.ttf'),
-                    InterSemiBold: require('../assets/fonts/Inter-SemiBold.ttf'),
-                    WolfSansRegular: require('../assets/fonts/Wolf-Sans-Regular.ttf'),
-                    ArialRoundedBold: require('../assets/fonts/Arial-Rounded-MT-Bold.ttf'),
+                    InterRegular: require('../assets/fonts/InterDisplay-Regular.woff2'),
+                    InterThin: require('../assets/fonts/InterDisplay-Thin.woff2'),
+                    InterBlack: require('../assets/fonts/InterDisplay-Black.woff2'),
+                    InterBold: require('../assets/fonts/InterDisplay-Bold.woff2'),
+                    InterExtraBold: require('../assets/fonts/InterDisplay-ExtraBold.woff2'),
+                    InterExtraLight: require('../assets/fonts/InterDisplay-ExtraLight.woff2'),
+                    InterLight: require('../assets/fonts/InterDisplay-Light.woff2'),
+                    InterMedium: require('../assets/fonts/InterDisplay-Medium.woff2'),
+                    InterSemiBold: require('../assets/fonts/InterDisplay-SemiBold.woff2'),
                 });
             } catch (e) {
                 console.warn(e);
