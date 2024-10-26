@@ -67,8 +67,8 @@ export default function NewPlanScreen() {
             type: '',
             category: '',
             amount: 0.0,
-            start_date: '',
-            end_date: '',
+            start_date: new Date().toISOString(),
+            end_date: new Date().toISOString(),
             deposit_frequency: '',
             push_notification: false,
             name: '',
@@ -187,7 +187,7 @@ export default function NewPlanScreen() {
                         <Controller
                             control={control}
                             rules={{
-                                required: "Debit account can't be empty",
+                                required: "Plan name can't be empty",
                             }}
                             render={({ field: { onChange, value, onBlur } }) => (
                                 <InputField
@@ -254,7 +254,7 @@ export default function NewPlanScreen() {
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Debit account can't be empty",
+                                    required: "Category can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>

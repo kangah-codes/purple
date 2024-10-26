@@ -1,5 +1,6 @@
 import { View } from '@/components/Shared/styled';
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 export default function NotFoundScreen() {

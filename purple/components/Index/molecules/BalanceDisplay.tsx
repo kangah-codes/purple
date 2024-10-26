@@ -42,8 +42,8 @@ export function BalanceDisplay({
                 )}
             </View>
             <Text
-                style={GLOBAL_STYLESHEET.interSemiBold}
-                className='text-black text-[28px] tracking-tight leading-[1.4] mt-1.5'
+                style={GLOBAL_STYLESHEET.suprapower}
+                className='text-black text-3xl tracking-tighter leading-[1.4] mt-1.5'
             >
                 {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
             </Text>

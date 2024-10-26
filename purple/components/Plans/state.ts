@@ -1,8 +1,7 @@
-import { expensePlans } from './constants';
-import { create } from 'zustand';
-import { Plan } from './schema';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { nativeStorage } from '@/lib/utils/storage';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { Plan } from './schema';
 
 type PlanStore = {
     plans: Plan[];

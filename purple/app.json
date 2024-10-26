@@ -40,15 +40,15 @@
         {
           "fonts": [
             "./assets/fonts/Suprapower.otf",
-            "./assets/fonts/InterDisplay-Thin.woff2",
-            "./assets/fonts/InterDisplay-Black.woff2",
-            "./assets/fonts/InterDisplay-Bold.woff2",
-            "./assets/fonts/InterDisplay-ExtraBold.woff2",
-            "./assets/fonts/InterDisplay-ExtraLight.woff2",
-            "./assets/fonts/InterDisplay-Light.woff2",
-            "./assets/fonts/InterDisplay-Medium.woff2",
-            "./assets/fonts/InterDisplay-Regular.woff2",
-            "./assets/fonts/InterDisplay-SemiBold.woff2",
+            "./assets/fonts/InterDisplay-Thin.ttf",
+            "./assets/fonts/InterDisplay-Black.ttf",
+            "./assets/fonts/InterDisplay-Bold.ttf",
+            "./assets/fonts/InterDisplay-ExtraBold.ttf",
+            "./assets/fonts/InterDisplay-ExtraLight.ttf",
+            "./assets/fonts/InterDisplay-Light.ttf",
+            "./assets/fonts/InterDisplay-Medium.ttf",
+            "./assets/fonts/InterDisplay-Regular.ttf",
+            "./assets/fonts/InterDisplay-SemiBold.ttf",
             "./assets/fonts/Wolf-Sans-Regular.ttf",
             "./assets/fonts/Arial-Rounded-MT-Bold.ttf"
           ]
