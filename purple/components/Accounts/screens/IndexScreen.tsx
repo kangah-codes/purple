@@ -17,7 +17,6 @@ import { FlatList, RefreshControl, StatusBar as RNStatusBar, StyleSheet } from '
 import Toast from 'react-native-toast-message';
 import { useAccounts, useAccountStore } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
-import AccountsTotalSummary from '../molecules/AccountsTotalSummary';
 import { Account } from '../schema';
 
 export default function AccountsScreen() {

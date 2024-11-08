@@ -44,9 +44,7 @@ function CustomBottomSheetFlatList<T>({
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const [defaultSnapPoints, setDefaultSnapPoints] = useState<
-        | (string | number)[]
-        | SharedValue<(string | number)[]>
-        | Readonly<(string | number)[] | SharedValue<(string | number)[]>>
+        (string | number)[] | SharedValue<(string | number)[]> | undefined
     >(useMemo(() => ['50%', '50%'], []));
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();

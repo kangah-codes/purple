@@ -1,27 +1,17 @@
-import {
-    InputField,
-    LinearGradient,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    View,
-} from '@/components/Shared/styled';
+import { GenericAPIResponse } from '@/@types/request';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData, User } from '@/components/Auth/schema';
+import { useUser, useUserStore } from '@/components/Profile/hooks';
+import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
-import { SearchIcon } from '../../SVG/noscale';
+import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-import { SessionData, User } from '@/components/Auth/schema';
-import { useUser, useUserStore } from '@/components/Profile/hooks';
-import Toast from 'react-native-toast-message';
-import { useAuth } from '@/components/Auth/hooks';
-import AnimatedSkeleton from '@/components/Shared/atoms/Skeleton';
-import tw from 'twrnc';
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { GenericAPIResponse } from '@/@types/request';
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();

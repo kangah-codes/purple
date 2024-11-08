@@ -31,8 +31,8 @@ type TransactionsScreenProps = {
 
 function TransactionsScreen(props: TransactionsScreenProps) {
     const local = useLocalSearchParams();
-    const { sessionData } = useAuth();
     const { accountID, accountName } = local;
+    const { sessionData } = useAuth();
     const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
     const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();

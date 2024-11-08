@@ -2,7 +2,7 @@ import { GenericAPIResponse } from '@/@types/request';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UseMutationResult, useMutation } from 'react-query';
-import { SessionData } from './schema';
+import { SessionData, SessionDataResponse } from './schema';
 import { nativeStorage } from '@/lib/utils/storage';
 import { useUserStore } from '../Profile/hooks';
 import { useAccountStore } from '../Accounts/hooks';
@@ -25,7 +25,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionData>, Error> => {
+export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataResponse>, Error> => {
     return useMutation(['sign-in'], async (loginInformation) => {
         const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth`, {
             method: 'POST',
@@ -44,7 +44,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionData>, 
     });
 };
 
-export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionData>, Error> => {
+export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataResponse>, Error> => {
     return useMutation(['sign-up'], async (signUpInformation) => {
         const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/sign-up`, {
             method: 'POST',
@@ -150,18 +150,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const sessionData = await getToken<SessionData>('session_data');
             const isSessionValid =
                 sessionData?.access_token && !isTokenExpired(sessionData.access_token_expires_at);
-            const isRefreshValid =
-                sessionData?.refresh_token && !isTokenExpired(sessionData.refresh_token_expires_at);
 
-            setIsAuthenticated(!!(isSessionValid && isRefreshValid && sessionData));
+            setIsAuthenticated(!!(isSessionValid && sessionData));
             setSessionExpiry(
                 sessionData?.access_token_expires_at
                     ? new Date(sessionData.access_token_expires_at)
-                    : null,
-            );
-            setRefreshExpiry(
-                sessionData?.refresh_token_expires_at
-                    ? new Date(sessionData.refresh_token_expires_at)
                     : null,
             );
             _setSessionData(sessionData);

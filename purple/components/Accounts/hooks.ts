@@ -12,16 +12,23 @@ import { Account } from './schema';
 import { createAccountStore } from './state';
 
 export function useAccountStore() {
-    const [accounts, setAccounts, updateAccounts] = useStore(createAccountStore, (state) => [
-        state.accounts,
-        state.setAccounts,
-        state.updateAccounts,
-    ]);
+    const [accounts, setAccounts, updateAccounts, currentAccount, setCurrentAccount] = useStore(
+        createAccountStore,
+        (state) => [
+            state.accounts,
+            state.setAccounts,
+            state.updateAccounts,
+            state.currentAccount,
+            state.setCurrentAccount,
+        ],
+    );
 
     return {
         accounts,
         setAccounts,
         updateAccounts,
+        currentAccount,
+        setCurrentAccount,
     };
 }
 

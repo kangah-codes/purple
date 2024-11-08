@@ -1,6 +1,11 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Platform, View } from 'react-native';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProps } from '@gorhom/bottom-sheet';
+import {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetModalProps,
+    BottomSheetView,
+} from '@gorhom/bottom-sheet';
 import { useBottomSheetModalStore } from './hooks';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { SharedValue } from 'react-native-reanimated';
@@ -83,11 +88,11 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
             keyboardBlurBehavior='restore'
             ref={bottomSheetRef}
             index={bottomSheetModalKeys[modalKey] ? 1 : -1}
-            snapPoints={defaultSnapPoints}
+            snapPoints={defaultSnapPoints as any}
             onChange={handleSheetChanges}
             {...rest}
         >
-            <View style={{ flex: 1, paddingBottom: 20 }}>{children}</View>
+            <BottomSheetView style={{ flex: 1, paddingBottom: 20 }}>{children}</BottomSheetView>
         </BottomSheetModal>
     );
 };

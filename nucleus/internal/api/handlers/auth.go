@@ -87,14 +87,12 @@ func SignIn(c *gin.Context) {
 	}
 
 	response := Response{
-		AccessToken:           session.AccessToken.Token,
-		AccessTokenExpiresAt:  session.AccessToken.ExpiresAt,
-		RefreshToken:          session.RefreshToken.Token,
-		RefreshTokenExpiresAt: session.RefreshToken.ExpiresAt,
-		User:                  user,
-		AccountGroups:         utils.AccountGroups,
-		Currencies:            utils.Currencies,
-		TransactionTypes:      utils.TransactionTypes,
+		AccessToken:          session.Token,
+		AccessTokenExpiresAt: session.ExpiresAt,
+		User:                 user,
+		AccountGroups:        utils.AccountGroups,
+		Currencies:           utils.Currencies,
+		TransactionTypes:     utils.TransactionTypes,
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "Sign in successful", Data: response})

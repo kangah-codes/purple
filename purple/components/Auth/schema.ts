@@ -28,7 +28,7 @@ export type UserSettings = {
     ID: string;
 };
 
-export type SessionData = {
+export type SessionDataResponse = {
     access_token: string;
     access_token_expires_at: string;
     refresh_token: string;
@@ -37,6 +37,12 @@ export type SessionData = {
     account_groups: string[];
     currencies: Currency[];
     transaction_types: string[];
+};
+
+export type SessionData = {
+    access_token: string;
+    access_token_expires_at: string;
+    user: User;
 };
 
 export type SignUpScreenData = {

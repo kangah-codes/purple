@@ -26,17 +26,6 @@ func GenerateTokenPair(userID uuid.UUID) (models.TokenPair, error) {
 		return models.TokenPair{}, err
 	}
 
-	// Generate refresh token
-	refreshToken := jwt.New(jwt.SigningMethodHS256)
-	refreshClaims := refreshToken.Claims.(jwt.MapClaims)
-	refreshClaims["user_id"] = userID
-	refreshClaims["exp"] = time.Now().Add(time.Hour * 24 * 30).Unix() // Long-lived (30 days)
-
-	refreshTokenString, err := refreshToken.SignedString([]byte("your_refresh_token_secret"))
-	if err != nil {
-		return models.TokenPair{}, err
-	}
-
 	session := models.Session{
 		UserID:    userID,
 		Token:     accessTokenString,
@@ -48,19 +37,9 @@ func GenerateTokenPair(userID uuid.UUID) (models.TokenPair, error) {
 		return models.TokenPair{}, sessionTokenResult.Error
 	}
 
-	sessionRefreshToken := models.RefreshToken{
-		SessionID: session.ID,
-		Token:     refreshTokenString,
-		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
-	}
-	refreshTokenResult := db.Create(&sessionRefreshToken)
-
-	if refreshTokenResult.Error != nil {
-		return models.TokenPair{}, refreshTokenResult.Error
-	}
-
 	return models.TokenPair{
-		AccessToken: session, RefreshToken: sessionRefreshToken}, nil
+		AccessToken: session,
+	}, nil
 }
 
 func RefreshTokens(refreshToken string) (models.TokenPair, error) {
@@ -137,11 +116,11 @@ func GenerateSessionToken() (string, error) {
 	return base64.StdEncoding.EncodeToString(token), nil
 }
 
-func CreateSession(db *gorm.DB, userID uuid.UUID) (models.TokenPair, error) {
+func CreateSession(db *gorm.DB, userID uuid.UUID) (models.Session, error) {
 	token, err := GenerateSessionToken()
 	if err != nil {
 		ErrorLogger.Println(err)
-		return models.TokenPair{}, err
+		return models.Session{}, err
 	}
 
 	session := models.Session{
@@ -152,28 +131,8 @@ func CreateSession(db *gorm.DB, userID uuid.UUID) (models.TokenPair, error) {
 	result := db.Create(&session)
 	if result.Error != nil {
 		ErrorLogger.Println(result.Error)
-		return models.TokenPair{}, result.Error
+		return models.Session{}, result.Error
 	}
 
-	refreshToken, err := GenerateSessionToken()
-	if err != nil {
-		ErrorLogger.Println(err)
-		return models.TokenPair{}, err
-	}
-
-	refreshSession := models.RefreshToken{
-		SessionID: session.ID,
-		Token:     refreshToken,
-		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
-	}
-	result = db.Create(&refreshSession)
-	if result.Error != nil {
-		ErrorLogger.Println(result.Error)
-		return models.TokenPair{}, result.Error
-	}
-
-	return models.TokenPair{
-		AccessToken:  session,
-		RefreshToken: refreshSession,
-	}, nil
+	return session, nil
 }

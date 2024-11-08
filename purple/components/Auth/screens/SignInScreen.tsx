@@ -62,12 +62,24 @@ export default function SignInScreen() {
             },
             onSuccess: (res) => {
                 const { data } = res;
-                setSessionData(data)
+                const {
+                    account_groups,
+                    currencies,
+                    transaction_types,
+                    access_token,
+                    access_token_expires_at,
+                    user,
+                } = data;
+                setSessionData({
+                    access_token,
+                    access_token_expires_at,
+                    user,
+                })
                     .then(() => {
                         Promise.all([
-                            nativeStorage.setItem('account_groups', data.account_groups),
-                            nativeStorage.setItem('currencies', data.currencies),
-                            nativeStorage.setItem('transaction_types', data.transaction_types),
+                            nativeStorage.setItem('account_groups', account_groups),
+                            nativeStorage.setItem('currencies', currencies),
+                            nativeStorage.setItem('transaction_types', transaction_types),
                         ])
                             .then(() => {
                                 router.push('/(tabs)');

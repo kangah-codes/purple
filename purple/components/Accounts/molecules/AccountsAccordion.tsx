@@ -1,12 +1,10 @@
-import { View } from '@/components/Shared/styled';
-import { dummyAccountData } from '../constants';
-import AccountCard from './AccountCard';
-import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
-import { useCallback } from 'react';
-import { keyExtractor } from '@/lib/utils/number';
-import { useAccountStore } from '../hooks';
 import { groupBy } from '@/lib/utils/helpers';
+import { keyExtractor } from '@/lib/utils/number';
+import { useCallback } from 'react';
+import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
+import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
+import AccountCard from './AccountCard';
 
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();

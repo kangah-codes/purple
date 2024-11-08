@@ -2,11 +2,11 @@ import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { Account } from '../schema';
-import React from 'react';
+import { useAccountStore } from '../hooks';
 
 export default function AccountCard({
     groupName,
@@ -15,6 +15,7 @@ export default function AccountCard({
     groupName: string;
     accounts: Account[];
 }) {
+    const { setCurrentAccount } = useAccountStore();
     const router = useRouter();
     const renderItemSeparator = useCallback(() => <View style={styles.separator} />, []);
 
@@ -23,6 +24,7 @@ export default function AccountCard({
             className='flex flex-row justify-between py-2.5'
             key={item.name + index}
             onPress={() => {
+                setCurrentAccount(item);
                 router.push({
                     pathname: '/accounts/account-transactions',
                     params: { accountName: item.name, accountID: item.ID },
