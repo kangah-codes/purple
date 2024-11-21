@@ -126,7 +126,7 @@ func CreateSession(db *gorm.DB, userID uuid.UUID) (models.Session, error) {
 	session := models.Session{
 		UserID:    userID,
 		Token:     token,
-		ExpiresAt: time.Now().Add(time.Hour * 24),
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
 	}
 	result := db.Create(&session)
 	if result.Error != nil {
