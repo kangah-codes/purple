@@ -66,7 +66,7 @@ export default function NewPlanScreen() {
         defaultValues: {
             type: '',
             category: '',
-            amount: 0.0,
+            target: 0.0,
             start_date: new Date().toISOString(),
             end_date: new Date().toISOString(),
             deposit_frequency: '',
@@ -122,7 +122,7 @@ export default function NewPlanScreen() {
     const onSubmit = (data: CreatePlan) => {
         Keyboard.dismiss();
         let transformedData = transformObject(data, [
-            ['amount', 'amount', (value) => Number(value)],
+            ['target', 'target', (value) => Number(value)],
         ]);
 
         console.log(transformedData);
@@ -355,14 +355,14 @@ export default function NewPlanScreen() {
                                     />
                                 </>
                             )}
-                            name='amount'
+                            name='target'
                         />
-                        {errors.amount && (
+                        {errors.target && (
                             <Text
                                 style={{ fontFamily: 'InterMedium' }}
                                 className='text-xs text-red-500'
                             >
-                                {errors.amount.message}
+                                {errors.target.message}
                             </Text>
                         )}
                     </View>

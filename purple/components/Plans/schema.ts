@@ -35,7 +35,7 @@ export type Plan = {
 export type CreatePlan = {
     type: string;
     category: string;
-    amount: number;
+    target: number;
     start_date: string;
     end_date: string;
     deposit_frequency: string;
@@ -43,3 +43,34 @@ export type CreatePlan = {
     name: string;
     currency: string;
 };
+
+export interface SpendingProgress {
+    isOnTrack: boolean;
+    actualSpendingRate: number;
+    expectedSpendingRate: number;
+    daysElapsed: number;
+    totalDays: number;
+    percentTimeElapsed: number;
+    percentTargetSpent: number;
+    deviation: number;
+    message: string;
+}
+
+export interface ExpenseCalculationResult {
+    totalExpense: number;
+    totalExpensePercentage: number;
+    totalExpenseRemaining: number;
+    totalExpenseRemainingPercentage: number;
+    activePlansCount: number;
+}
+
+export interface TrendDataPoint {
+    date: string;
+    amount: number;
+}
+
+export interface SpendingTrendData {
+    projected: TrendDataPoint[];
+    actual: TrendDataPoint[];
+    ideal: TrendDataPoint[];
+}

@@ -1,7 +1,9 @@
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { PieChart } from 'react-native-gifted-charts';
+import calculateTotalExpenseDetails from '../utils';
+import { usePlanStore } from '../hooks';
 
 type ExpensesCardProps = {
     accountCurrency: string;
@@ -12,6 +14,8 @@ type ExpensesCardProps = {
 };
 
 export default function BudgetInfoCard() {
+    const { expensePlans } = usePlanStore();
+    const budgetDetails = useMemo(() => calculateTotalExpenseDetails(expensePlans), [expensePlans]);
     const pieData = [
         // { value: 40, color: "#C084FC", gradientCenterColor: "#E9D5FF" },
         { value: 54, color: '#A855F7', gradientCenterColor: '#E9D5FF' },
@@ -28,6 +32,8 @@ export default function BudgetInfoCard() {
         );
     }, []);
 
+    console.log(budgetDetails);
+
     return (
         <LinearGradient
             className='w-full p-5 rounded-2xl flex flex-col justify-center space-y-4 relative'
@@ -36,7 +42,7 @@ export default function BudgetInfoCard() {
         >
             <View className='flex flex-col'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-5xl'>
-                    100%
+                    {budgetDetails.totalExpensePercentage}%
                 </Text>
                 <View className='flex flex-col space-y-1.5'>
                     <Text
@@ -44,12 +50,6 @@ export default function BudgetInfoCard() {
                         className='text-white text-sm tracking-tighter'
                     >
                         of total budget spent
-                    </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-white text-sm tracking-tighter truncate'
-                    >
-                        120,000 / GHS 240,000
                     </Text>
                 </View>
             </View>

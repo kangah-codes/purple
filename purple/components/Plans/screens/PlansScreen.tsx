@@ -1,3 +1,4 @@
+import { useAuth } from '@/components/Auth/hooks';
 import { EditSquareIcon } from '@/components/SVG/24x24';
 import {
     LinearGradient,
@@ -12,15 +13,10 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
+import tw from 'twrnc';
+import { usePlanStore } from '../hooks';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
-import tw from 'twrnc';
-import { useAuth } from '@/components/Auth/hooks';
-import { usePlans, usePlanStore } from '../hooks';
-import { Plan } from '../schema';
-import Toast from 'react-native-toast-message';
-import { GenericAPIResponse } from '@/@types/request';
-import { SessionData } from '@/components/Auth/schema';
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function PlansScreen() {
