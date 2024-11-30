@@ -32,8 +32,6 @@ export default function BudgetInfoCard() {
         );
     }, []);
 
-    console.log(budgetDetails);
-
     return (
         <LinearGradient
             className='w-full p-5 rounded-2xl flex flex-col justify-center space-y-4 relative'

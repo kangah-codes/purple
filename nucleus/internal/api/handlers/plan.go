@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreatePlan(c *gin.Context) {
@@ -109,7 +110,9 @@ func FetchPlans(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	// Base query
-	query := db.Model(&models.Plan{}).Where("user_id = ?", userID)
+	query := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at desc")
+	}).Model(&models.Plan{}).Where("user_id = ?", userID)
 
 	// Apply filters based on query parameters
 	if name != "" {
@@ -177,4 +180,115 @@ func DeletePlan(c *gin.Context) {
 	}
 
 	c.JSON(200, types.Response{Status: http.StatusOK, Message: "Deleted plan successfully"})
+}
+
+func AddPlanTransaction(c *gin.Context) {
+	db := utils.GetDB()
+	transaction := types.CreatePlanTransaction{}
+	if err := c.ShouldBindJSON(&transaction); err != nil {
+		utils.ErrorLogger.Printf("Invalid client request: %v", err)
+		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
+		return
+	}
+
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
+		return
+	}
+
+	planID, _ := c.Params.Get("planID")
+	plan := models.Plan{}
+	result := db.Where("id = ? AND user_id = ?", planID, userID).First(&plan)
+	if result.Error != nil {
+		c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
+		return
+	}
+
+	if plan.UserId != userID {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Cannot add transaction to this plan", Data: nil})
+		return
+	}
+
+	planTransaction := models.PlanTransaction{
+		Amount: transaction.Amount,
+		Note:   transaction.Note,
+		UserId: userID.(uuid.UUID),
+		PlanId: plan.ID,
+	}
+
+	// Start database transaction
+	tx := db.Begin()
+	if tx.Error != nil {
+		utils.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error processing request", Data: nil})
+		return
+	}
+
+	// Create plan transaction within the database transaction
+	if err := tx.Create(&planTransaction).Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Error creating plan transaction: %v", err)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error creating plan transaction", Data: nil})
+		return
+	}
+
+	// Update plan balance within the same database transaction
+	plan.Balance += transaction.Amount
+	if err := tx.Save(&plan).Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Error updating plan balance: %v", err)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error updating plan balance", Data: nil})
+		return
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		utils.ErrorLogger.Printf("Error committing transaction: %v", err)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error processing request", Data: nil})
+		return
+	}
+
+	c.JSON(201, types.Response{Status: http.StatusCreated, Message: "Plan transaction created", Data: planTransaction})
+}
+
+func FetchPlan(c *gin.Context) {
+	db := utils.GetDB()
+	planID := c.Param("planID")
+	userID, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
+		return
+	}
+
+	if _, err := uuid.Parse(planID); err != nil {
+		utils.ErrorLogger.Println("Invalid UUID", planID, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+		return
+	}
+
+	plan := models.Plan{}
+	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at desc")
+	}).Where("id = ?", planID).First(&plan)
+	utils.InfoLogger.Println(planID, "PLAN ID")
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
+		} else {
+			utils.ErrorLogger.Println("Error fetching plan", result.Error)
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error fetching plan", Data: nil})
+		}
+
+		return
+	}
+
+	if plan.UserId != userID {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Cannot delete this plan"})
+		return
+	}
+
+	c.JSON(200, types.Response{Status: http.StatusOK, Message: "Plan fetched successfully", Data: plan})
 }

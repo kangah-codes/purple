@@ -1,3 +1,4 @@
+import { Text } from '../Shared/styled';
 import {
     BudgetPlan,
     ExpenseCalculationResult,
@@ -144,7 +145,15 @@ function createProgressResponse(
  * @param {number} dataPoints - Number of points to generate (default 30)
  * @returns {SpendingTrendData} Object containing projected and actual spending trends
  */
-export function generateSpendingTrendData(plan: Plan, dataPoints: number = 30): SpendingTrendData {
+export function generateSpendingTrendData(
+    plan: Plan | null,
+    dataPoints: number = 30,
+    numberOfLabels: number = 3,
+): SpendingTrendData {
+    if (!plan) {
+        return { projected: [], actual: [], ideal: [] };
+    }
+
     const startDate = new Date(plan.start_date);
     const endDate = new Date(plan.end_date);
     const now = new Date();
@@ -158,52 +167,80 @@ export function generateSpendingTrendData(plan: Plan, dataPoints: number = 30): 
     const actual: TrendDataPoint[] = [];
     const ideal: TrendDataPoint[] = [];
 
-    // Calculate daily rate for ideal spending
-    const dailyIdealRate = plan.target / (totalDuration / (1000 * 60 * 60 * 24));
+    // Sort transactions by date
+    const sortedTransactions = [...(plan.Transactions || [])].sort(
+        (a, b) => new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime(),
+    );
 
-    // Calculate actual daily rate based on current balance
-    const daysElapsed = (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-    const actualDailyRate = plan.balance / daysElapsed;
+    // Calculate cumulative transaction amounts up to each date
+    function getAmountUpToDate(date: Date): number {
+        return sortedTransactions
+            .filter((t) => new Date(t.CreatedAt) <= date)
+            .reduce((sum, t) => sum + t.amount, 0);
+    }
+
+    // Pre-calculate the label indices for even spacing
+    const labelIndices = new Set<number>();
+    if (numberOfLabels > 0) {
+        const interval = (dataPoints - 1) / (numberOfLabels - 1);
+        for (let i = 0; i < numberOfLabels; i++) {
+            const index = Math.round(i * interval);
+            if (index < dataPoints) {
+                labelIndices.add(index);
+            }
+        }
+    }
+
+    // Calculate daily rate based on remaining budget and time
+    const daysRemaining = Math.max(0, (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const remainingBudget = plan.target - plan.balance;
+    const projectedDailyRate = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
 
     // Generate data points
     for (let i = 0; i < dataPoints; i++) {
         const pointDate = new Date(startDate.getTime() + timeInterval * i);
         const daysFromStart = (pointDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        const totalDays = totalDuration / (1000 * 60 * 60 * 24);
 
         // Format date for output
         const dateStr = pointDate.toISOString().split('T')[0];
+        const shouldAddLabel = labelIndices.has(i);
 
-        // Calculate ideal trend (linear)
-        const idealAmount = Math.min(dailyIdealRate * daysFromStart, plan.target);
+        // Calculate ideal trend (curved using quadratic function)
+        const progress = daysFromStart / totalDays;
+        const curvature = 1;
+        const curvedProgress = curvature * progress * progress + (1 - curvature) * progress;
+        const idealAmount = Math.min(plan.target * curvedProgress, plan.target);
+
         ideal.push({
             date: dateStr,
-            amount: Number(idealAmount.toFixed(2)),
+            value: Number(idealAmount.toFixed(2)),
+            ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
         });
 
         // Calculate actual spending (only up to current date)
         if (pointDate <= now) {
-            const actualAmount = Math.min(actualDailyRate * daysFromStart, plan.balance);
+            const actualAmount = getAmountUpToDate(pointDate);
             actual.push({
                 date: dateStr,
-                amount: Number(actualAmount.toFixed(2)),
+                value: Number(actualAmount.toFixed(2)),
+                ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
             });
         }
 
         // Calculate projected spending (from current date to end)
         if (pointDate >= now) {
-            const daysRemaining = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-            const remainingBudget = plan.target - plan.balance;
-            const projectedDailyRate = remainingBudget / daysRemaining;
+            const currentAmount = getAmountUpToDate(now);
             const daysFromNow = (pointDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-
             const projectedAmount = Math.min(
-                plan.balance + projectedDailyRate * daysFromNow,
+                currentAmount + projectedDailyRate * daysFromNow,
                 plan.target,
             );
 
             projected.push({
                 date: dateStr,
-                amount: Number(projectedAmount.toFixed(2)),
+                value: Number(projectedAmount.toFixed(2)),
+                ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
             });
         }
     }

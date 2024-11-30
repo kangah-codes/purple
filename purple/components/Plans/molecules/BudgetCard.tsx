@@ -20,8 +20,6 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
     const { sessionData } = useAuth();
     const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
 
-    console.log(spendProgress);
-
     /**
      * {"actualSpendingRate": 0, "daysElapsed": 14, "deviation": NaN, "expectedSpendingRate": 0,
      * "isOnTrack": false, "message": "Spending is on track", "percentTargetSpent": NaN,
@@ -32,7 +30,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
         <TouchableOpacity
             onPress={() => {
                 setCurrentPlan(data);
-                router.push('/plans/expense/76');
+                router.push(`/plans/expense/${data.ID}`);
             }}
         >
             <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>

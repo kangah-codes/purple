@@ -20,7 +20,7 @@ const PersonalInformation = forwardRef((props, ref) => {
     });
 
     const onSubmit = handleSubmit((data) => {
-        console.log(data);
+        // console.log(data);
     });
 
     useImperativeHandle(ref, () => ({

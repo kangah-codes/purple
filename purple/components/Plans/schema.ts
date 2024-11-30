@@ -30,6 +30,7 @@ export type Plan = {
     UpdatedAt: string;
     name: string;
     currency: string;
+    Transactions: PlanTransaction[];
 };
 
 export type CreatePlan = {
@@ -66,7 +67,7 @@ export interface ExpenseCalculationResult {
 
 export interface TrendDataPoint {
     date: string;
-    amount: number;
+    value: number;
 }
 
 export interface SpendingTrendData {
@@ -74,3 +75,16 @@ export interface SpendingTrendData {
     actual: TrendDataPoint[];
     ideal: TrendDataPoint[];
 }
+
+export type PlanTransaction = {
+    ID: string;
+    CreatedAt: string;
+    UpdatedAt: string;
+    DeletedAt: string | null;
+    plan_id: string;
+    user_id: string;
+    amount: number;
+    plan: Plan;
+    note: string;
+    created_at: string;
+};

@@ -2,15 +2,20 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Plan } from '../schema';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { router } from 'expo-router';
 
-export default function SavingPlanCard({ data, index }: { data: Plan; index: number }) {
+export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
         <TouchableOpacity
             className='p-4 border border-purple-200 rounded-xl flex flex-col w-72 space-y-2.5'
             style={{
                 marginLeft: index !== 0 ? 20 : 0,
             }}
-            onLongPress={() => alert('Chale chale you be broke')}
+            onPress={() => {
+                router.push(
+                    data.type === 'expense' ? `/plans/expense/${data.ID}` : '/plans/new-plan',
+                );
+            }}
         >
             <View className='flex flex-row w-full justify-between items-center'>
                 <Text

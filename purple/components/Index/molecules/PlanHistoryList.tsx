@@ -1,24 +1,21 @@
-import SavingPlanCard from '@/components/Plans/molecules/SavingPlanCard';
+import { usePlanStore } from '@/components/Plans/hooks';
+import PlanCard from '@/components/Plans/molecules/PlanCard';
+import { Plan } from '@/components/Plans/schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { keyExtractor } from '@/lib/utils/number';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { Dimensions, FlatList } from 'react-native';
-import { savingData } from '../constants';
-import { keyExtractor } from '@/lib/utils/number';
-import { usePlanStore } from '@/components/Plans/hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import { Plan } from '@/components/Plans/schema';
 
 const width = Dimensions.get('screen').width;
 
 export default function PlanHistoryList() {
     const { plans } = usePlanStore();
     const renderItem = useCallback(
-        ({ item, index }: { item: Plan; index: number }) => (
-            <SavingPlanCard data={item} index={index} />
-        ),
+        ({ item, index }: { item: Plan; index: number }) => <PlanCard data={item} index={index} />,
         [],
     );
     const handleNavigation = useCallback(() => {

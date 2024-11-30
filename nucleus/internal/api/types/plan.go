@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // DateFormat defines the expected date format for JSON
@@ -42,4 +44,11 @@ type CreatePlanDTO struct {
 
 type UpdatePlanBalanceDTO struct {
 	Balance float64 `json:"balance" validate:"number"`
+}
+
+type CreatePlanTransaction struct {
+	PlanId uuid.UUID `json:"plan_id" binding:"required"`
+	UserId uuid.UUID `json:"user_id" binding:"required"`
+	Amount float64   `json:"amount" validate:"number"`
+	Note   string    `json:"note"`
 }

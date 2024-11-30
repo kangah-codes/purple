@@ -11,6 +11,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
+import React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 

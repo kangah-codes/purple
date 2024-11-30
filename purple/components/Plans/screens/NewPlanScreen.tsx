@@ -125,8 +125,6 @@ export default function NewPlanScreen() {
             ['target', 'target', (value) => Number(value)],
         ]);
 
-        console.log(transformedData);
-
         mutate(transformedData, {
             onError: () => {
                 Toast.show({
