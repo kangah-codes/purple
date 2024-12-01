@@ -30,6 +30,8 @@ import { ArrowLeftIcon, EditSquareIcon, PlusIcon } from '@/components/SVG/24x24'
 import { generateSpendingTrendData } from '../utils';
 import { Plan, PlanTransaction } from '../schema';
 import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
+import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 
 type ExpenseScreenProps = {
     showBackButton?: boolean;
@@ -38,6 +40,7 @@ function ExpenseScreen(props: ExpenseScreenProps) {
     const { currentPlan, setCurrentPlan } = usePlanStore();
     const { id } = useLocalSearchParams();
     const local = useLocalSearchParams();
+    const [visible, setVisible] = useState(false);
     const { sessionData } = useAuth();
     const { accountID, accountName } = local;
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -151,12 +154,35 @@ function ExpenseScreen(props: ExpenseScreenProps) {
                             </View>
                         </TouchableOpacity>
                         <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                            <DotsHorizontalIcon
-                                stroke='#fff'
-                                width='24'
-                                height='24'
-                                strokeWidth={2.5}
-                            />
+                            <DropdownMenu
+                                visible={visible}
+                                handleOpen={() => setVisible(true)}
+                                handleClose={() => setVisible(false)}
+                                trigger={
+                                    <DotsHorizontalIcon
+                                        stroke='#fff'
+                                        width='24'
+                                        height='24'
+                                        strokeWidth={2.5}
+                                    />
+                                }
+                                padX={20}
+                            >
+                                <MenuOption
+                                    onSelect={() => {
+                                        setVisible(false);
+                                    }}
+                                >
+                                    <Text>View Details</Text>
+                                </MenuOption>
+                                <MenuOption
+                                    onSelect={() => {
+                                        setVisible(false);
+                                    }}
+                                >
+                                    <Text>Delete</Text>
+                                </MenuOption>
+                            </DropdownMenu>
                         </View>
                     </View>
                     {/* <TouchableOpacity onPress={() => router.back()}>
@@ -297,6 +323,25 @@ const styles = StyleSheet.create({
     },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5fcff',
+    },
+    triggerStyle: {
+        height: 40,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: 100,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+    },
+    triggerText: {
+        fontSize: 16,
     },
 });
 export default ExpenseScreen;

@@ -16,7 +16,7 @@ type BudgetCardProps = {
 
 export default function BudgetPlanCard({ data }: BudgetCardProps) {
     const { category, start_date, end_date, balance, target, name, currency } = data;
-    const { setCurrentPlan } = usePlanStore();
+    const { setCurrentPlan, currentPlan } = usePlanStore();
     const { sessionData } = useAuth();
     const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
 
@@ -29,7 +29,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
     return (
         <TouchableOpacity
             onPress={() => {
-                setCurrentPlan(data);
+                setCurrentPlan(null);
                 router.push(`/plans/expense/${data.ID}`);
             }}
         >
