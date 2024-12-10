@@ -49,6 +49,7 @@
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
+      <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
     <key>UIAppFonts</key>
     <array>
@@ -68,6 +69,17 @@
       <string>analogue65medium.ttf</string>
       <string>analogue75bold.ttf</string>
       <string>analogue85black.ttf</string>
+      <string>InterDisplay-Thin.ttf</string>
+      <string>InterDisplay-Black.ttf</string>
+      <string>InterDisplay-Bold.ttf</string>
+      <string>InterDisplay-ExtraBold.ttf</string>
+      <string>InterDisplay-ExtraLight.ttf</string>
+      <string>InterDisplay-Light.ttf</string>
+      <string>InterDisplay-Medium.ttf</string>
+      <string>InterDisplay-Regular.ttf</string>
+      <string>InterDisplay-SemiBold.ttf</string>
+      <string>Wolf-Sans-Regular.ttf</string>
+      <string>Arial-Rounded-MT-Bold.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

@@ -93,6 +93,31 @@ export function usePlans({
     );
 }
 
+export function useDeletePlan({
+    sessionData,
+    planID,
+}: {
+    sessionData: SessionData;
+    planID: string;
+}): UseMutationResult<GenericAPIResponse<undefined>, Error> {
+    return useMutation(['delete-plan'], async () => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}`, {
+            method: 'DELETE',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                Authorization: sessionData.access_token,
+            },
+        });
+
+        if (!res.ok) {
+            throw new Error(res.status.toString());
+        }
+
+        const json = await res.json();
+        return json;
+    });
+}
+
 export function usePlan({
     sessionData,
     options,

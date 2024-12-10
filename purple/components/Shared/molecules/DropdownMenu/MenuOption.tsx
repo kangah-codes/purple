@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 export const MenuOption = ({
     onSelect,
@@ -8,15 +8,5 @@ export const MenuOption = ({
     onSelect: () => void;
     children: ReactNode;
 }) => {
-    return (
-        <TouchableOpacity onPress={onSelect} style={styles.menuOption}>
-            {children}
-        </TouchableOpacity>
-    );
+    return <TouchableOpacity onPress={onSelect}>{children}</TouchableOpacity>;
 };
-
-const styles = StyleSheet.create({
-    menuOption: {
-        padding: 5,
-    },
-});

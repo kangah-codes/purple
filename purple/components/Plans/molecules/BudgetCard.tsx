@@ -1,14 +1,12 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { BudgetPlan, Plan } from '../schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatDate } from '@/lib/utils/date';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { useAuth } from '@/components/Auth/hooks';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { useMemo } from 'react';
-import { analyzeSpendingProgress } from '../utils';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
-import { usePlanStore } from '../hooks';
+import { useMemo } from 'react';
+import { Plan } from '../schema';
+import { analyzeSpendingProgress } from '../utils';
 
 type BudgetCardProps = {
     data: Plan;
@@ -16,8 +14,6 @@ type BudgetCardProps = {
 
 export default function BudgetPlanCard({ data }: BudgetCardProps) {
     const { category, start_date, end_date, balance, target, name, currency } = data;
-    const { setCurrentPlan, currentPlan } = usePlanStore();
-    const { sessionData } = useAuth();
     const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
 
     /**
@@ -29,7 +25,6 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
     return (
         <TouchableOpacity
             onPress={() => {
-                setCurrentPlan(null);
                 router.push(`/plans/expense/${data.ID}`);
             }}
         >

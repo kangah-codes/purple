@@ -155,7 +155,7 @@ func FetchPlans(c *gin.Context) {
 
 func DeletePlan(c *gin.Context) {
 	db := utils.GetDB()
-	planID, _ := strconv.Atoi(c.Param("id"))
+	planID, _ := c.Params.Get("planID")
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
@@ -164,17 +164,20 @@ func DeletePlan(c *gin.Context) {
 
 	plan := models.Plan{}
 	if err := db.Where("id = ? AND user_id = ?", planID, userID).First(&plan).Error; err != nil {
+		utils.ErrorLogger.Printf("Error fetching plan: %v", err)
 		c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan could not be found"})
 		return
 	}
 
 	if plan.UserId != userID {
+		utils.ErrorLogger.Printf("User %s is not authorized to delete plan %d", userID, plan.ID)
 		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Cannot delete this plan"})
 		return
 	}
 
 	result := db.Delete(&plan)
 	if result.Error != nil {
+		utils.ErrorLogger.Printf("Error deleting plan: %v", result.Error)
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})
 		return
 	}

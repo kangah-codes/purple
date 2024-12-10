@@ -1,8 +1,10 @@
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { createTransactionChartData } from '@/components/Accounts/utils';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
+import { ArrowLeftIcon, EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/24x24';
 import { ArrowNarrowUpRightIcon, DotsHorizontalIcon } from '@/components/SVG/noscale';
+import HoldButton from '@/components/Shared/atoms/HoldButton';
+import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
@@ -13,9 +15,6 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
-import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
@@ -25,25 +24,24 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions, FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import Toast from 'react-native-toast-message';
-import { useInfinitePlanTransactions, usePlan, usePlans, usePlanStore } from '../hooks';
-import { ArrowLeftIcon, EditSquareIcon, PlusIcon } from '@/components/SVG/24x24';
-import { generateSpendingTrendData } from '../utils';
-import { Plan, PlanTransaction } from '../schema';
+import CustomBottomSheetModal from '../../Shared/molecules/GlobalBottomSheetModal';
+import { useDeletePlan, usePlan } from '../hooks';
 import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
-import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
+import { Plan, PlanTransaction } from '../schema';
+import { generateSpendingTrendData } from '../utils';
 
 type ExpenseScreenProps = {
     showBackButton?: boolean;
 };
 function ExpenseScreen(props: ExpenseScreenProps) {
-    const { currentPlan, setCurrentPlan } = usePlanStore();
+    const [currentPlan, setCurrentPlan] = useState<Plan>();
     const { id } = useLocalSearchParams();
-    const local = useLocalSearchParams();
     const [visible, setVisible] = useState(false);
     const { sessionData } = useAuth();
-    const { accountID, accountName } = local;
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const { mutate, isLoading: deletePlanLoading } = useDeletePlan({
+        sessionData: sessionData!,
+        planID: id as string,
+    });
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { data, isLoading, isError, refetch, isFetching } = usePlan({
         sessionData: sessionData as SessionData,
@@ -61,52 +59,24 @@ function ExpenseScreen(props: ExpenseScreenProps) {
         },
     });
 
-    // const {
-    //     data: planTransactionData,
-    //     fetchNextPage,
-    //     hasNextPage,
-    //     isLoading: isPlanTransactionLoading,
-    //     isError: isPlanTransactionError,
-    //     refetch: planTransactionRefetch,
-    //     isFetching: isPlanTransactionIsFetching,
-    // } = useInfinitePlanTransactions({
-    //     sessionData: sessionData as SessionData,
-    //     requestQuery: {
-    //         page_size: 10,
-    //     },
-    //     planID: id as string,
-    //     options: {
-    //         onError: () => {
-    //             Toast.show({
-    //                 type: 'error',
-    //                 props: {
-    //                     text1: 'Error!',
-    //                     text2: "We couldn't fetch your transactions",
-    //                 },
-    //             });
-    //         },
-    //     },
-    // });
-
-    // flatten the data
-    // useEffect(() => {
-    //     if (planTransactionData) {
-    //         const tx = planTransactionData.pages.flatMap((page) => page.data);
-    //         // setExpensePlans(tx);
-    //         console.log(tx, 'TX');
-    //     }
-    // }, [data]);
-
     useEffect(() => {
         if (data) {
             // may the ts gods forgive me
             setCurrentPlan(data.data as unknown as Plan);
         }
+
+        return () => {
+            setCurrentPlan(undefined);
+        };
     }, [data]);
 
-    console.log(currentPlan?.Transactions, 'currentPlan');
+    const chartData = useMemo(() => {
+        if (!currentPlan) {
+            return { projected: [], actual: [], ideal: [] };
+        }
 
-    const chartData = useMemo(() => generateSpendingTrendData(currentPlan, 30, 5), [currentPlan]);
+        return generateSpendingTrendData(currentPlan, 30, 5);
+    }, [currentPlan]);
 
     const renderItem = useCallback(
         ({ item }: { item: PlanTransaction }) => <PlanTransactionHistoryCard data={item} />,
@@ -134,6 +104,80 @@ function ExpenseScreen(props: ExpenseScreenProps) {
                 colors={['#D8B4FE', '#fff']}
                 style={styles.parentView}
             />
+            <CustomBottomSheetModal
+                modalKey={'planScreenModal'}
+                snapPoints={['35%', '35%']}
+                style={{
+                    backgroundColor: 'white',
+                    borderRadius: 24,
+                    shadowColor: '#000000',
+                    shadowOffset: {
+                        width: 0,
+                        height: 8,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 48,
+                    elevation: 10,
+                }}
+                handleIndicatorStyle={{
+                    backgroundColor: '#D4D4D4',
+                }}
+            >
+                <View className='flex flex-col p-5 space-y-10'>
+                    <View className='flex flex-col space-y-2.5'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.suprapower}
+                            className='text-2xl text-black text-center'
+                        >
+                            Delete Plan?
+                        </Text>
+                        <Text
+                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            className='text-sm textblack text-center'
+                        >
+                            Are you sure you want to delete{' '}
+                            {truncateStringIfLongerThan(currentPlan.name as string, 20)}
+                        </Text>
+                    </View>
+                    <View>
+                        <HoldButton
+                            onComplete={() =>
+                                mutate(undefined, {
+                                    onError: () => {
+                                        Toast.show({
+                                            type: 'error',
+                                            props: {
+                                                text1: 'Error!',
+                                                text2: 'There was an issue deleting plan',
+                                            },
+                                        });
+                                    },
+                                    onSuccess: (res) => {
+                                        Toast.show({
+                                            type: 'success',
+                                            props: {
+                                                text1: 'Success!',
+                                                text2: 'Plan deleted successfully',
+                                            },
+                                        });
+                                        router.replace('/(tabs)/plans');
+                                    },
+                                })
+                            }
+                            isLoading={deletePlanLoading}
+                            progressColor='#dc2626'
+                            backgroundColor='#e5e7eb'
+                        >
+                            <Text
+                                style={GLOBAL_STYLESHEET.suprapower}
+                                className='text-white text-lg'
+                            >
+                                Delete
+                            </Text>
+                        </HoldButton>
+                    </View>
+                </View>
+            </CustomBottomSheetModal>
             <ExpoStatusBar style='dark' />
             <ScrollView>
                 <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
@@ -167,29 +211,41 @@ function ExpenseScreen(props: ExpenseScreenProps) {
                                     />
                                 }
                                 padX={20}
+                                dropdownWidth={180}
                             >
                                 <MenuOption
                                     onSelect={() => {
                                         setVisible(false);
                                     }}
                                 >
-                                    <Text>View Details</Text>
+                                    <View className='flex flex-row items-center space-x-1'>
+                                        <EditSquareIcon stroke='#A855F7' width={18} />
+                                        <Text
+                                            style={GLOBAL_STYLESHEET.interMedium}
+                                            className='text-sm'
+                                        >
+                                            Edit Plan
+                                        </Text>
+                                    </View>
                                 </MenuOption>
                                 <MenuOption
                                     onSelect={() => {
-                                        setVisible(false);
+                                        setShowBottomSheetModal('planScreenModal', true);
                                     }}
                                 >
-                                    <Text>Delete</Text>
+                                    <View className='flex flex-row items-center space-x-1'>
+                                        <TrashIcon stroke='#EF4444' width={18} />
+                                        <Text
+                                            style={GLOBAL_STYLESHEET.interMedium}
+                                            className='text-sm'
+                                        >
+                                            Delete
+                                        </Text>
+                                    </View>
                                 </MenuOption>
                             </DropdownMenu>
                         </View>
                     </View>
-                    {/* <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
-                            Back
-                        </Text>
-                    </TouchableOpacity> */}
                 </View>
 
                 <View className='px-5 flex flex-col'>
