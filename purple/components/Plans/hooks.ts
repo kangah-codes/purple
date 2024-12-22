@@ -128,7 +128,7 @@ export function usePlan({
     planID: string;
 }): UseQueryResult<GenericAPIResponse<Plan[]>, Error> {
     return useQuery(
-        ['plan'],
+        [`plan-${planID}`],
         async () => {
             const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}`, {
                 method: 'GET',

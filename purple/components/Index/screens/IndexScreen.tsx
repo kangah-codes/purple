@@ -12,6 +12,7 @@ import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import React from 'react';
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();

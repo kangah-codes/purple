@@ -1,5 +1,5 @@
 import { useAuth } from '@/components/Auth/hooks';
-import { EditSquareIcon } from '@/components/SVG/24x24';
+import { PlusIcon } from '@/components/SVG/24x24';
 import {
     LinearGradient,
     SafeAreaView,
@@ -10,7 +10,7 @@ import {
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import tw from 'twrnc';
@@ -126,7 +126,7 @@ export default function PlansScreen() {
                     className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
                     onPress={handleNavigation}
                 >
-                    <EditSquareIcon stroke={'#fff'} />
+                    <PlusIcon stroke={'#fff'} />
                 </TouchableOpacity>
             </LinearGradient>
         </SafeAreaView>

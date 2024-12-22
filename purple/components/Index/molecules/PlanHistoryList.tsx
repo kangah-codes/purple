@@ -7,6 +7,7 @@ import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { router } from 'expo-router';
+import React from 'react';
 import { useCallback } from 'react';
 import { Dimensions, FlatList } from 'react-native';
 

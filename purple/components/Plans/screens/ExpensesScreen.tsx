@@ -1,17 +1,15 @@
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
-import { expensePlans } from '../constants';
+import Toast from 'react-native-toast-message';
+import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import BudgetInfoCard from '../molecules/BudgetInfoCard';
-import { BudgetPlan, Plan } from '../schema';
-import { useInfinitePlans, usePlans, usePlanStore } from '../hooks';
-import { GenericAPIResponse } from '@/@types/request';
-import { SessionData } from '@/components/Auth/schema';
-import Toast from 'react-native-toast-message';
-import { useAuth } from '@/components/Auth/hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import { Plan } from '../schema';
 
 function ExpensesScreen() {
     const { setExpensePlans, expensePlans, updateExpenseplans } = usePlanStore();

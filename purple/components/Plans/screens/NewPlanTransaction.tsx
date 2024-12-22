@@ -10,7 +10,7 @@ import {
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -22,7 +22,7 @@ export default function NewPlanTransactionScreen() {
     const { currentPlan } = usePlanStore();
     const { mutate, isLoading } = useCreatePlanTransaction({
         sessionData: sessionData!,
-        planId: currentPlan!.ID,
+        planId: currentPlan?.ID ?? '',
     });
     const {
         control,
@@ -34,6 +34,10 @@ export default function NewPlanTransactionScreen() {
             note: '',
         },
     });
+
+    useEffect(() => {
+        if (!currentPlan) router.push('/plans');
+    }, [currentPlan]);
 
     const onSubmit = (data: { amount: string; note: string }) => {
         Keyboard.dismiss();

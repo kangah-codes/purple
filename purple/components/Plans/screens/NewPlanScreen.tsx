@@ -33,6 +33,8 @@ import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectFie
 import { Currency } from '@/@types/common';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
+import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
 /**
  * 
@@ -56,6 +58,7 @@ export default function NewPlanScreen() {
     const [planCategories, setPlanCategories] = useState<string[]>([]);
     const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
     const [currencies, setCurrencies] = useState<Currency[]>([]);
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const {
         control,
@@ -222,13 +225,115 @@ export default function NewPlanScreen() {
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
-                                        <SelectField
+                                        {/* <SelectField
                                             selectKey='newPlanTypes'
                                             options={planTypes}
                                             customSnapPoints={['30%', '40%']}
                                             value={value}
                                             onChange={onChange}
-                                        />
+                                        /> */}
+
+                                        <CustomModalSelectField
+                                            sheetKey='newPlanTypes'
+                                            customSnapPoints={['35%', '35%']}
+                                            value={value}
+                                        >
+                                            <View className='w-full px-5 py-2.5 flex flex-row justify-between'>
+                                                <View
+                                                    className='flex-1 mr-2.5 flex flex-col space-y-2 bg-purple-100 rounded-2xl'
+                                                    style={{
+                                                        borderColor:
+                                                            value === 'saving'
+                                                                ? '#8B5CF6'
+                                                                : 'transparent',
+                                                        borderWidth: value === 'saving' ? 2.5 : 0,
+                                                    }}
+                                                >
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onChange('saving');
+                                                            setShowBottomSheetModal(
+                                                                'newPlanTypes',
+                                                                false,
+                                                            );
+                                                        }}
+                                                    >
+                                                        <View className='flex flex-col space-y-5 items-center justify-center'>
+                                                            <View className='pt-5'>
+                                                                <Image
+                                                                    source={require('@/assets/images/graphics/3.png')}
+                                                                    style={tw`h-24 w-24`}
+                                                                />
+                                                            </View>
+                                                            <View className='flex flex-col space-y-1 w-full px-5'>
+                                                                <Text
+                                                                    style={
+                                                                        GLOBAL_STYLESHEET.suprapower
+                                                                    }
+                                                                    className='text-xl text-black'
+                                                                >
+                                                                    Saving
+                                                                </Text>
+                                                                <Text
+                                                                    style={{
+                                                                        fontFamily: 'InterMedium',
+                                                                    }}
+                                                                    className='text-sm text-gray-600'
+                                                                >
+                                                                    Save money for a specific goal
+                                                                </Text>
+                                                            </View>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <View
+                                                    className='flex-1 ml-2.5 flex flex-col space-y-2 bg-purple-100 rounded-2xl'
+                                                    style={{
+                                                        borderColor:
+                                                            value === 'expense'
+                                                                ? '#8B5CF6'
+                                                                : 'transparent',
+                                                        borderWidth: value === 'expense' ? 2.5 : 0,
+                                                    }}
+                                                >
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onChange('expense');
+                                                            setShowBottomSheetModal(
+                                                                'newPlanTypes',
+                                                                false,
+                                                            );
+                                                        }}
+                                                    >
+                                                        <View className='flex flex-col space-y-5 items-start justify-center'>
+                                                            <Image
+                                                                source={require('@/assets/images/graphics/2.png')}
+                                                                style={tw`h-24 w-[95%]`}
+                                                            />
+                                                            <View className='flex flex-col space-y-1 w-full p-5'>
+                                                                <Text
+                                                                    style={
+                                                                        GLOBAL_STYLESHEET.suprapower
+                                                                    }
+                                                                    className='text-xl text-black'
+                                                                >
+                                                                    Expense
+                                                                </Text>
+                                                                <Text
+                                                                    style={{
+                                                                        fontFamily: 'InterMedium',
+                                                                    }}
+                                                                    className='text-sm text-gray-600'
+                                                                >
+                                                                    Put money aside for a projected
+                                                                    expense
+                                                                </Text>
+                                                            </View>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </CustomModalSelectField>
                                     </>
                                 )}
                                 name='type'

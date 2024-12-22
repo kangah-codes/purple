@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Plan } from '../schema';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { router } from 'expo-router';
+import React from 'react';
 
 export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
@@ -12,9 +13,7 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
                 marginLeft: index !== 0 ? 20 : 0,
             }}
             onPress={() => {
-                router.push(
-                    data.type === 'expense' ? `/plans/expense/${data.ID}` : '/plans/new-plan',
-                );
+                router.push(`/plans/${data.ID}`);
             }}
         >
             <View className='flex flex-row w-full justify-between items-center'>

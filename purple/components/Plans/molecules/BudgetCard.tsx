@@ -7,54 +7,69 @@ import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Plan } from '../schema';
 import { analyzeSpendingProgress } from '../utils';
+import React from 'react';
 
 type BudgetCardProps = {
     data: Plan;
 };
 
 export default function BudgetPlanCard({ data }: BudgetCardProps) {
-    const { category, start_date, end_date, balance, target, name, currency } = data;
+    const { category, start_date, end_date, balance, target, name, currency, type } = data;
     const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
 
-    /**
-     * {"actualSpendingRate": 0, "daysElapsed": 14, "deviation": NaN, "expectedSpendingRate": 0,
-     * "isOnTrack": false, "message": "Spending is on track", "percentTargetSpent": NaN,
-     * "percentTimeElapsed": 4.72972972972973, "totalDays": 296}
-     */
+    const isExpense = type === 'expense';
+
+    // Calculate the progress amount based on plan type
+    const progressAmount = isExpense ? target - balance : balance;
+    const progressPercentage = isExpense
+        ? spendProgress.percentTargetSpent
+        : (balance / target) * 100;
+
+    const getLabelsByType = () => ({
+        progressLabel: isExpense ? 'Spent so far' : 'Saved so far',
+        remainingLabel: isExpense ? 'Remaining budget' : 'Still to save',
+        targetLabel: isExpense ? 'Budget limit' : 'Savings goal',
+    });
+
+    const labels = getLabelsByType();
 
     return (
         <TouchableOpacity
             onPress={() => {
-                router.push(`/plans/expense/${data.ID}`);
+                router.push(`/plans/${data.ID}`);
             }}
         >
             <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
+                {/* Plan Category */}
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {category}
                     </Text>
                 </View>
 
+                {/* Plan Name */}
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {truncateStringIfLongerThan(name, 20)}
                     </Text>
                 </View>
 
+                {/* Progress Bar */}
                 <View className='flex flex-col space-y-2.5'>
                     <View className='flex flex-row items-center space-x-0.5'>
                         <View
                             className='h-2 bg-purple-600 rounded-md'
                             style={{
-                                width: `${spendProgress.percentTargetSpent}%`,
+                                width: `${Math.min(progressPercentage, 100)}%`,
                             }}
                         />
                         <View className='h-2 flex-grow bg-purple-200 rounded-full' />
                     </View>
 
+                    {/* Date Range */}
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.interMedium}
+                            style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatDate(start_date, {
@@ -65,7 +80,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                         </Text>
 
                         <Text
-                            style={GLOBAL_STYLESHEET.interMedium}
+                            style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatDate(end_date, {
@@ -79,19 +94,20 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
 
                 <View className='h-[1.5px] bg-purple-50 w-full' />
 
+                {/* Financial Details */}
                 <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                     <View className='flex flex-row justify-between items-center'>
                         <Text
                             style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
-                            Spent
+                            {labels.progressLabel}
                         </Text>
                         <Text
                             style={GLOBAL_STYLESHEET.interSemiBold}
                             className='text-sm text-black tracking-tighter'
                         >
-                            {formatCurrencyAccurate(currency, target - balance)}
+                            {formatCurrencyAccurate(currency, progressAmount)}
                         </Text>
                     </View>
                     <View className='border-b border-purple-200 w-full' />
@@ -100,13 +116,16 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                             style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
-                            Balance
+                            {labels.remainingLabel}
                         </Text>
                         <Text
                             style={GLOBAL_STYLESHEET.interSemiBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
-                            {formatCurrencyAccurate(currency, balance)}
+                            {formatCurrencyAccurate(
+                                currency,
+                                isExpense ? balance : target - balance,
+                            )}
                         </Text>
                     </View>
                     <View className='border-b border-purple-200 w-full' />
@@ -115,7 +134,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                             style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
-                            Budget
+                            {labels.targetLabel}
                         </Text>
                         <Text
                             style={GLOBAL_STYLESHEET.interSemiBold}
