@@ -25,16 +25,20 @@ import { Dimensions, FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } 
 import { LineChart } from 'react-native-gifted-charts';
 import Toast from 'react-native-toast-message';
 import CustomBottomSheetModal from '../../Shared/molecules/GlobalBottomSheetModal';
-import { useDeletePlan, usePlan } from '../hooks';
+import { useDeletePlan, usePlan, usePlanStore } from '../hooks';
 import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
 import { Plan, PlanTransaction } from '../schema';
 import { generateSpendingTrendData } from '../utils';
+import LoadingScreen from '../molecules/LoadingScreen';
+import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
+import PlanInformation from '../molecules/PlanInformation';
 
-type ExpenseScreenProps = {
+type PlanScreenProps = {
     showBackButton?: boolean;
 };
-function ExpenseScreen(props: ExpenseScreenProps) {
-    const [currentPlan, setCurrentPlan] = useState<Plan>();
+
+function PlanScreen(props: PlanScreenProps) {
+    const { currentPlan, setCurrentPlan } = usePlanStore();
     const { id } = useLocalSearchParams();
     const [visible, setVisible] = useState(false);
     const { sessionData } = useAuth();
@@ -56,6 +60,8 @@ function ExpenseScreen(props: ExpenseScreenProps) {
                     },
                 });
             },
+            staleTime: 1000 * 60 * 1,
+            refetchInterval: 1000 * 60 * 0.1, // 6 seconds
         },
     });
 
@@ -66,7 +72,7 @@ function ExpenseScreen(props: ExpenseScreenProps) {
         }
 
         return () => {
-            setCurrentPlan(undefined);
+            setCurrentPlan(null);
         };
     }, [data]);
 
@@ -85,7 +91,7 @@ function ExpenseScreen(props: ExpenseScreenProps) {
     const renderEmptylist = useCallback(
         () => (
             <View className='my-20'>
-                <EmptyList message="Looks like you haven't created any transactions for this account yet." />
+                <EmptyList message="Looks like you haven't created any transactions for this plan yet." />
             </View>
         ),
         [],
@@ -94,6 +100,8 @@ function ExpenseScreen(props: ExpenseScreenProps) {
         () => <View className='border-b border-gray-100' />,
         [],
     );
+
+    if (isLoading) return <LoadingScreen />;
 
     if (!currentPlan) return null;
 
@@ -248,77 +256,9 @@ function ExpenseScreen(props: ExpenseScreenProps) {
                     </View>
                 </View>
 
-                <View className='px-5 flex flex-col'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
-                        className='text-black text-2xl tracking-tighter leading-[1.4] mt-1.5'
-                    >
-                        {formatCurrencyAccurate(currentPlan.currency, currentPlan.balance)}
-                    </Text>
-                    <View className='flex flex-row items-center space-x-1'>
-                        <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
-                        <Text
-                            style={GLOBAL_STYLESHEET.interBold}
-                            className='text-purple-500 text-sm tracking-tight'
-                        >
-                            GHS 250.98 today
-                        </Text>
-                    </View>
-                </View>
+                <PlanInformation />
 
-                <View
-                    className='pt-10 -ml-3 mr-3'
-                    style={{
-                        width: Dimensions.get('window').width + 11,
-                    }}
-                >
-                    <LineChart
-                        width={Dimensions.get('window').width}
-                        height={220}
-                        rotateLabel
-                        // spacing={25}
-                        areaChart
-                        curved
-                        curvature={0.025}
-                        color1='#A855F7'
-                        color2='#DB2777'
-                        data={chartData.ideal}
-                        data2={chartData.actual}
-                        // hideRules
-                        hideYAxisText
-                        // hide the line on the x axis
-                        // hideAxesAndRules
-                        // spacing={9.2}
-                        // noOfSections={4}
-                        startFillColor='#A855F7'
-                        startOpacity={0.5}
-                        endFillColor='#FAF5FF'
-                        endOpacity={0.3}
-                        // maxValue={900}
-                        hideDataPoints
-                        yAxisColor='white'
-                        xAxisColor={'white'}
-                        // hideYAxisText
-                        // yAxisThickness={0}
-                        // rulesType="solid"
-                        // rulesColor="#F3E8FF"
-                        // yAxisTextStyle={{ color: "gray" }}
-                        // yAxisSide="right"
-                        // xAxisColor="lightgray"
-                        disableScroll
-                        // hideRules
-                        // hideYAxisText
-                        // hide the line on the x axis
-                        // hideAxesAndRules
-                        // isAnimated
-                        animateOnDataChange
-                        animationDuration={1200}
-                        initialSpacing={0}
-                        adjustToWidth
-                        // spacing={30}
-                        thickness={2.5}
-                    />
-                </View>
+                <PlanBuildUpChart chartData={chartData} />
 
                 <View>
                     <FlatList
@@ -400,4 +340,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
-export default ExpenseScreen;
+export default PlanScreen;
