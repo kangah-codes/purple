@@ -188,6 +188,8 @@ func DeletePlan(c *gin.Context) {
 func AddPlanTransaction(c *gin.Context) {
 	db := utils.GetDB()
 	transaction := types.CreatePlanTransaction{}
+	var account models.Account
+
 	if err := c.ShouldBindJSON(&transaction); err != nil {
 		utils.ErrorLogger.Printf("Invalid client request: %v", err)
 		c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
@@ -200,12 +202,66 @@ func AddPlanTransaction(c *gin.Context) {
 		return
 	}
 
+	// Start database transaction
+	tx := db.Begin()
+	if tx.Error != nil {
+		utils.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error processing request", Data: nil})
+		return
+	}
+
 	planID, _ := c.Params.Get("planID")
 	plan := models.Plan{}
-	result := db.Where("id = ? AND user_id = ?", planID, userID).First(&plan)
+	result := tx.Where("id = ? AND user_id = ?", planID, userID).First(&plan)
 	if result.Error != nil {
 		c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
 		return
+	}
+
+	if transaction.DebitAccountId != uuid.Nil {
+		if err := tx.Where("id = ? and user_id = ?", transaction.DebitAccountId, userID).First(&account).Error; err != nil {
+			utils.ErrorLogger.Printf("Error fetching account: %v", err)
+			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Account not found", Data: nil})
+			return
+		}
+
+		// if the account & plan currencies don't match, throw an error
+		// maybe make this a premium faeture? with currency conversion
+		if account.Currency != plan.Currency {
+			tx.Rollback()
+			c.JSON(400, types.Response{Status: http.StatusBadRequest, Message: "Account currency does not match plan currency", Data: nil})
+			return
+		}
+
+		// debit the account by the transaction amount
+		account.Balance -= transaction.Amount
+		if err := tx.Save(&account).Error; err != nil {
+			tx.Rollback()
+			utils.ErrorLogger.Printf("Error updating account balance: %v", err)
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error updating account balance", Data: nil})
+			return
+		}
+
+		// create a transaction for the account
+		accTransaction := models.Transaction{
+			AccountId:   account.ID,
+			UserId:      userID.(uuid.UUID),
+			Type:        "debit",
+			Amount:      transaction.Amount,
+			Note:        transaction.Note,
+			Category:    "Plan", // come back to this
+			FromAccount: account.ID,
+			ToAccount:   uuid.Nil,
+			Currency:    account.Currency,
+		}
+
+		if err := tx.Create(&accTransaction).Error; err != nil {
+			tx.Rollback()
+			utils.ErrorLogger.Printf("Error creating account transaction: %v", err)
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error creating account transaction", Data: nil})
+			return
+		}
+
 	}
 
 	if plan.UserId != userID {
@@ -220,12 +276,9 @@ func AddPlanTransaction(c *gin.Context) {
 		PlanId: plan.ID,
 	}
 
-	// Start database transaction
-	tx := db.Begin()
-	if tx.Error != nil {
-		utils.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
-		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error processing request", Data: nil})
-		return
+	if transaction.DebitAccountId != uuid.Nil {
+		planTransaction.DebitAccountId = &transaction.DebitAccountId
+		planTransaction.DebitAccount = account
 	}
 
 	// Create plan transaction within the database transaction

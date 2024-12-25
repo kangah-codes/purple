@@ -16,10 +16,14 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useCreatePlanTransaction, usePlanStore } from '../hooks';
 import { transformObject } from '@/lib/utils/object';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import SelectField from '@/components/Shared/atoms/SelectField';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();
     const { currentPlan } = usePlanStore();
+    const { accounts } = useAccountStore();
+
     const { mutate, isLoading } = useCreatePlanTransaction({
         sessionData: sessionData!,
         planId: currentPlan?.ID ?? '',
@@ -27,11 +31,13 @@ export default function NewPlanTransactionScreen() {
     const {
         control,
         handleSubmit,
+        setValue,
         formState: { errors },
     } = useForm({
         defaultValues: {
             amount: '',
             note: '',
+            debit_account_id: '',
         },
     });
 
@@ -39,10 +45,15 @@ export default function NewPlanTransactionScreen() {
         if (!currentPlan) router.push('/plans');
     }, [currentPlan]);
 
-    const onSubmit = (data: { amount: string; note: string }) => {
+    const onSubmit = (data: { amount: string; note: string; debit_account_id: string }) => {
         Keyboard.dismiss();
         let transformedData = transformObject(data, [
             ['amount', 'amount', (value) => Number(value)],
+            [
+                'debit_account_id',
+                'debit_account_id',
+                (value) => (Boolean(value) ? value : undefined),
+            ],
         ]);
 
         mutate(
@@ -133,6 +144,46 @@ export default function NewPlanTransactionScreen() {
                                 {errors.amount.message}
                             </Text>
                         )}
+                    </View>
+
+                    <View>
+                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                            Debit Account
+                        </Text>
+                        <>
+                            <Controller
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanTransactionDebitAccount'
+                                            options={accounts.reduce((acc, curr) => {
+                                                acc[curr.ID] = {
+                                                    label: curr.name,
+                                                    value: curr.ID,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '70%']}
+                                            value={value}
+                                            onChange={(val) => {
+                                                onChange(val);
+                                                setValue('debit_account_id', val);
+                                            }}
+                                        />
+                                    </>
+                                )}
+                                name='debit_account_id'
+                            />
+                            {errors.debit_account_id && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.debit_account_id.message}
+                                </Text>
+                            )}
+                        </>
                     </View>
 
                     <View className='flex flex-col space-y-1'>

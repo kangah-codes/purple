@@ -9,21 +9,18 @@ import { Plan } from '../schema';
 import { analyzeSpendingProgress } from '../utils';
 import React from 'react';
 
-type BudgetCardProps = {
-    data: Plan;
-};
-
-export default function BudgetPlanCard({ data }: BudgetCardProps) {
+export default function BudgetPlanCard({ data }: { data: Plan }) {
     const { category, start_date, end_date, balance, target, name, currency, type } = data;
     const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
-
     const isExpense = type === 'expense';
 
-    // Calculate the progress amount based on plan type
     const progressAmount = isExpense ? target - balance : balance;
-    const progressPercentage = isExpense
-        ? spendProgress.percentTargetSpent
-        : (balance / target) * 100;
+    const progressPercentage = Math.min(
+        isExpense ? spendProgress.percentTargetSpent : (balance / target) * 100,
+        100,
+    );
+
+    const remainingAmount = isExpense ? Math.max(balance, 0) : Math.max(target - balance, 0);
 
     const getLabelsByType = () => ({
         progressLabel: isExpense ? 'Spent so far' : 'Saved so far',
@@ -34,39 +31,29 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
     const labels = getLabelsByType();
 
     return (
-        <TouchableOpacity
-            onPress={() => {
-                router.push(`/plans/${data.ID}`);
-            }}
-        >
+        <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)}>
             <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
-                {/* Plan Category */}
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {category}
                     </Text>
                 </View>
 
-                {/* Plan Name */}
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {truncateStringIfLongerThan(name, 20)}
                     </Text>
                 </View>
 
-                {/* Progress Bar */}
                 <View className='flex flex-col space-y-2.5'>
                     <View className='flex flex-row items-center space-x-0.5'>
                         <View
                             className='h-2 bg-purple-600 rounded-md'
-                            style={{
-                                width: `${Math.min(progressPercentage, 100)}%`,
-                            }}
+                            style={{ width: `${progressPercentage}%` }}
                         />
                         <View className='h-2 flex-grow bg-purple-200 rounded-full' />
                     </View>
 
-                    {/* Date Range */}
                     <View className='flex flex-row justify-between items-center'>
                         <Text
                             style={GLOBAL_STYLESHEET.interBold}
@@ -78,7 +65,6 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                                 day: 'numeric',
                             })}
                         </Text>
-
                         <Text
                             style={GLOBAL_STYLESHEET.interBold}
                             className='text-sm text-black tracking-tighter'
@@ -94,7 +80,6 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
 
                 <View className='h-[1.5px] bg-purple-50 w-full' />
 
-                {/* Financial Details */}
                 <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                     <View className='flex flex-row justify-between items-center'>
                         <Text
@@ -122,10 +107,7 @@ export default function BudgetPlanCard({ data }: BudgetCardProps) {
                             style={GLOBAL_STYLESHEET.interSemiBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
-                            {formatCurrencyAccurate(
-                                currency,
-                                isExpense ? balance : target - balance,
-                            )}
+                            {formatCurrencyAccurate(currency, remainingAmount)}
                         </Text>
                     </View>
                     <View className='border-b border-purple-200 w-full' />
