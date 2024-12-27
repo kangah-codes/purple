@@ -60,7 +60,7 @@ jobs:
               working-directory: purple
 
             - name: Build APK
-              run: eas build -p android --profile preview --local --output purple.apk
+              run: eas build -p android --profile development --local --output purple.apk
               working-directory: purple
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
