@@ -16,6 +16,10 @@
     "preview4": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {},
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
   }
 }

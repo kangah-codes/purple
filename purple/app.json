@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Purple",
-    "slug": "spendwise",
+    "slug": "purple",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "com.akangah89.Purple",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -75,8 +75,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "e315a942-184e-49ce-a243-e9006ec7ddb1"
+        "projectId": "381fc979-2396-4f04-93f0-bdfea57f48d2"
       }
-    }
+    },
+    "owner": "akangah89"
   }
 }
