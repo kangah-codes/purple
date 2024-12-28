@@ -26,11 +26,19 @@ jobs:
               with:
                   distribution: "adopt"
                   java-version: "17"
+                  java-package: jdk
+                  cache: "gradle"
 
             - name: Set up Node.js
               uses: actions/setup-node@v2
               with:
                   node-version: "20.4.0"
+                  cache: "yarn"
+
+            - name: Setup Gradle
+              uses: gradle/gradle-build-action@v2
+              with:
+                  gradle-version: 7.6
 
             - name: Install EAS CLI and dependencies
               run: |
@@ -45,23 +53,31 @@ jobs:
                   echo "export ANDROID_SDK_ROOT=/android-sdk" >> $GITHUB_ENV
                   echo "export PATH=$PATH:/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
-            - name: Install Yarn
+            - name: Configure Gradle memory
               run: |
-                  npm install -g yarn
+                  mkdir -p android/gradle/
+                  echo "org.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError" > android/gradle.properties
+                  echo "org.gradle.parallel=true" >> android/gradle.properties
+                  echo "org.gradle.configureondemand=true" >> android/gradle.properties
+                  echo "org.gradle.daemon=false" >> android/gradle.properties
+
+            - name: Install Yarn
+              run: npm install -g yarn
 
             - name: Install project dependencies
-              run: yarn install
-              working-directory: purple
+              run: |
+                  yarn install
+                  yarn cache clean
 
             - name: Create .env file for build
               run: |
                   echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
                   echo "EXPO_PUBLIC_API_KEY=${{secrets.API_KEY}}" >> .env
-              working-directory: purple
 
             - name: Build APK
-              run: eas build -p android --profile development --local --output purple.apk
-              working-directory: purple
+              run: |
+                  export GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError"
+                  eas build -p android --profile development --local --output purple.apk
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
                   EAS_NO_VCS: 1
