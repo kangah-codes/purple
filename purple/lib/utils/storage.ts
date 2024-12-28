@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MMKV } from 'react-native-mmkv';
 
 type Listener = () => void;
 
@@ -27,14 +28,21 @@ class SimpleEventEmitter {
     }
 }
 
+
 export class NativeStorage {
     private static instance: NativeStorage;
     private keys: Set<string> = new Set();
     private eventEmitter: SimpleEventEmitter;
+    private storage: MMKV;
 
     private constructor() {
         this.eventEmitter = new SimpleEventEmitter();
         this.keys = new Set();
+        this.storage = new MMKV();
+        
+        // Initialize keys set with existing keys
+        const allKeys = this.storage.getAllKeys();
+        allKeys.forEach(key => this.keys.add(key));
     }
 
     public static getInstance(): NativeStorage {
@@ -46,69 +54,65 @@ export class NativeStorage {
 
     async getItem<T>(key: string): Promise<T | null> {
         try {
-            const value = await AsyncStorage.getItem(key);
-            if (value === null) {
+            const value = this.storage.getString(key);
+            if (value === undefined || value === null) {
                 return null;
             }
             return JSON.parse(value) as T;
         } catch (error) {
-            console.error('Error getting item from AsyncStorage', error);
+            console.error('Error getting item from MMKV', error);
             return null;
         }
     }
 
     async setItem<T>(key: string, value: T): Promise<void> {
         try {
-            await AsyncStorage.setItem(key, JSON.stringify(value));
+            this.storage.set(key, JSON.stringify(value));
             this.keys.add(key);
         } catch (error) {
-            console.error('Error setting item in AsyncStorage', error);
+            console.error('Error setting item in MMKV', error);
         }
     }
 
     async removeItem(key: string): Promise<void> {
         try {
-            await AsyncStorage.removeItem(key);
+            this.storage.delete(key);
             this.keys.delete(key);
         } catch (error) {
-            console.error('Error removing item from AsyncStorage', error);
+            console.error('Error removing item from MMKV', error);
         }
     }
 
     async multiRemove(keys: string[]): Promise<void> {
         try {
-            await AsyncStorage.multiRemove(keys);
-            keys.forEach((key) => this.keys.delete(key));
+            keys.forEach((key) => {
+                this.storage.delete(key);
+                this.keys.delete(key);
+            });
         } catch (error) {
-            console.error('Error removing multiple items from AsyncStorage', error);
+            console.error('Error removing multiple items from MMKV', error);
         }
     }
 
     async clear(): Promise<void> {
         try {
-            const allKeys = Array.from(this.keys);
-            if (allKeys.length > 0) {
-                await this.multiRemove(allKeys);
-            }
-            // Clear AsyncStorage and the local keys set
+            this.storage.clearAll();
             this.keys.clear();
             this.eventEmitter.emit('clearCompleted');
         } catch (error) {
-            console.error('Error clearing AsyncStorage', error);
+            console.error('Error clearing MMKV', error);
         }
     }
 
     async hasItem(key: string): Promise<boolean> {
         try {
-            const keys = await AsyncStorage.getAllKeys();
-            return keys.includes(key);
+            return this.storage.contains(key);
         } catch (error) {
-            console.error('Error checking if key exists in AsyncStorage', error);
+            console.error('Error checking if key exists in MMKV', error);
             return false;
         }
     }
 
-    // Helper method to get all stored keys
     getAllKeys(): string[] {
         return Array.from(this.keys);
     }
