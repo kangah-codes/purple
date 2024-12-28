@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { PieChart } from 'react-native-gifted-charts';
 import calculateTotalExpenseDetails from '../utils';
 import { usePlanStore } from '../hooks';
+import React from 'react';
 
 type ExpensesCardProps = {
     accountCurrency: string;
@@ -16,21 +17,6 @@ type ExpensesCardProps = {
 export default function BudgetInfoCard() {
     const { expensePlans } = usePlanStore();
     const budgetDetails = useMemo(() => calculateTotalExpenseDetails(expensePlans), [expensePlans]);
-    const pieData = [
-        // { value: 40, color: "#C084FC", gradientCenterColor: "#E9D5FF" },
-        { value: 54, color: '#A855F7', gradientCenterColor: '#E9D5FF' },
-        { value: 20, color: '#6B21A8', gradientCenterColor: '#E9D5FF' },
-    ];
-    const centerLabelComponent = useCallback(() => {
-        const highestValue = pieData.reduce((acc, curr) => Math.max(acc, curr.value), 0);
-        const total = pieData.reduce((acc, curr) => acc + curr.value, 0);
-
-        return (
-            <Text style={{ fontSize: 30, fontFamily: 'Suprapower' }}>
-                {Math.round((highestValue / total) * 100) + '%'}
-            </Text>
-        );
-    }, []);
 
     return (
         <LinearGradient
@@ -40,7 +26,7 @@ export default function BudgetInfoCard() {
         >
             <View className='flex flex-col'>
                 <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-5xl'>
-                    {budgetDetails.totalExpensePercentage}%
+                    {budgetDetails.totalExpensePercentage.toFixed(2)}%
                 </Text>
                 <View className='flex flex-col space-y-1.5'>
                     <Text

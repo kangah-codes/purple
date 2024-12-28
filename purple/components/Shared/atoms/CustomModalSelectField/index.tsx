@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from '@/components/SVG/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { isNotEmptyString, truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useEffect, useState } from 'react';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
@@ -71,37 +71,13 @@ export default function CustomModalSelectField({
                     </View>
 
                     <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
-                        {truncateStringIfLongerThan(val ?? 'Select an option...', 45)}
+                        {truncateStringIfLongerThan(
+                            isNotEmptyString(val) ? val! : 'Select an option...',
+                            45,
+                        )}
                     </Text>
                 </TouchableOpacity>
             </View>
         </>
     );
 }
-
-// // Example of a type-safe child component
-// const SelectContent: React.FC<SelectChildProps> = ({ onChange, value }) => {
-//     return (
-//         <View>
-//             <TouchableOpacity
-//                 onPress={() => onChange('expense')}
-//                 className='py-3 border-b border-gray-200'
-//             >
-//                 <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
-//                     Expense
-//                 </Text>
-//             </TouchableOpacity>
-//             <TouchableOpacity
-//                 onPress={() => onChange('savings')}
-//                 className='py-3 border-b border-gray-200'
-//             >
-//                 <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
-//                     Savings
-//                 </Text>
-//             </TouchableOpacity>
-//         </View>
-//     );
-// };
-
-// // Export the types for use in other files
-// export type { SelectChildProps, InjectedSelectProps };

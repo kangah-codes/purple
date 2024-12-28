@@ -1,16 +1,26 @@
 import { View } from '@/components/Shared/styled';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { SpendingTrendData } from '../schema';
+import { usePlanStore } from '../hooks';
+import { generateSpendingTrendData } from '../utils';
 
 const screenDimensions = Dimensions.get('screen');
 
-type PlanBuildUpChartProps = {
-    chartData: SpendingTrendData;
-};
+export default function PlanBuildUpChart() {
+    const { currentPlan } = usePlanStore();
 
-export default function PlanBuildUpChart({ chartData }: PlanBuildUpChartProps) {
+    const chartData = useMemo(() => {
+        if (!currentPlan) {
+            return { projected: [], actual: [], ideal: [] };
+        }
+
+        return generateSpendingTrendData(currentPlan, 30, 5, true);
+    }, [currentPlan]);
+
+    if (!currentPlan) return null;
+
     return (
         <View
             className='pt-10 -ml-3 mr-3'

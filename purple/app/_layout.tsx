@@ -28,6 +28,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(false);
 
+    console.log(process.env.EXPO_PUBLIC_API_URL, 'PREC');
+
     useEffect(() => {
         async function prepare() {
             try {

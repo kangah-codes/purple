@@ -356,9 +356,6 @@ export default function NewPlanScreen() {
                         <>
                             <Controller
                                 control={control}
-                                rules={{
-                                    required: "Category can't be empty",
-                                }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
                                         <SelectField
@@ -488,7 +485,7 @@ export default function NewPlanScreen() {
                                     }}
                                     // selectedDate={value}
                                     // make maximim date today
-                                    maximumDate={new Date()}
+                                    // maximumDate={new Date()}
                                     minimumDate={new Date()}
                                 />
                             )}

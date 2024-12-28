@@ -23,8 +23,8 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     const remainingAmount = isExpense ? Math.max(balance, 0) : Math.max(target - balance, 0);
 
     const getLabelsByType = () => ({
-        progressLabel: isExpense ? 'Spent so far' : 'Saved so far',
-        remainingLabel: isExpense ? 'Remaining budget' : 'Still to save',
+        progressLabel: isExpense ? 'Remaining budget' : 'Saved so far',
+        remainingLabel: isExpense ? 'Spent so far' : 'Still to save',
         targetLabel: isExpense ? 'Budget limit' : 'Savings goal',
     });
 
@@ -33,11 +33,11 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     return (
         <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)}>
             <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
-                <View className='flex flex-row w-full justify-between items-center'>
+                {/* <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {category}
                     </Text>
-                </View>
+                </View> */}
 
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>

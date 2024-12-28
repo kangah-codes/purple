@@ -17,14 +17,14 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
             }}
         >
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text
+                {/* <Text
                     style={{
                         fontFamily: 'Suprapower',
                     }}
                     className='text-base text-black'
                 >
                     {data.category}
-                </Text>
+                </Text> */}
 
                 <View className='rounded-full bg-purple-600 px-2.5 py-0.5'>
                     <Text

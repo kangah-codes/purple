@@ -1,53 +1,33 @@
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
-import { ArrowLeftIcon, EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/24x24';
-import { ArrowNarrowUpRightIcon, DotsHorizontalIcon } from '@/components/SVG/noscale';
-import HoldButton from '@/components/Shared/atoms/HoldButton';
-import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
-import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import {
-    LinearGradient,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { router, useLocalSearchParams } from 'expo-router';
+import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
+import { useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Dimensions, FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import { LineChart } from 'react-native-gifted-charts';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { RefreshControl } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
-import CustomBottomSheetModal from '../../Shared/molecules/GlobalBottomSheetModal';
-import { useDeletePlan, usePlan, usePlanStore } from '../hooks';
-import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
-import { Plan, PlanTransaction } from '../schema';
-import { generateSpendingTrendData } from '../utils';
+import { usePlan, usePlanStore } from '../hooks';
 import LoadingScreen from '../molecules/LoadingScreen';
+import PlanActionMenu from '../molecules/PlanActionMenu';
 import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
 import PlanInformation from '../molecules/PlanInformation';
+import PlanNavigationArea from '../molecules/PlanNavigationArea';
+import PlanTransactionsList from '../molecules/PlanTransactionsList';
+import { Plan } from '../schema';
+import { generateSpendingTrendData } from '../utils';
 
 type PlanScreenProps = {
     showBackButton?: boolean;
 };
 
+const linearGradientColours = ['#D8B4FE', '#fff'];
+
 function PlanScreen(props: PlanScreenProps) {
     const { currentPlan, setCurrentPlan } = usePlanStore();
     const { id } = useLocalSearchParams();
-    const [visible, setVisible] = useState(false);
     const { sessionData } = useAuth();
-    const { mutate, isLoading: deletePlanLoading } = useDeletePlan({
-        sessionData: sessionData!,
-        planID: id as string,
-    });
-    const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { data, isLoading, isError, refetch, isFetching } = usePlan({
+    const { data, isLoading, refetch, isFetching } = usePlan({
         sessionData: sessionData as SessionData,
         planID: id as string,
         options: {
@@ -60,8 +40,6 @@ function PlanScreen(props: PlanScreenProps) {
                     },
                 });
             },
-            staleTime: 1000 * 60 * 1,
-            refetchInterval: 1000 * 60 * 0.1, // 6 seconds
         },
     });
 
@@ -84,260 +62,47 @@ function PlanScreen(props: PlanScreenProps) {
         return generateSpendingTrendData(currentPlan, 30, 5);
     }, [currentPlan]);
 
-    const renderItem = useCallback(
-        ({ item }: { item: PlanTransaction }) => <PlanTransactionHistoryCard data={item} />,
-        [],
-    );
-    const renderEmptylist = useCallback(
-        () => (
-            <View className='my-20'>
-                <EmptyList message="Looks like you haven't created any transactions for this plan yet." />
-            </View>
-        ),
-        [],
-    );
-    const renderItemSeparator = useCallback(
-        () => <View className='border-b border-gray-100' />,
-        [],
-    );
+    const onRefresh = useCallback(() => {
+        refetch();
+    }, []);
 
     if (isLoading) return <LoadingScreen />;
 
     if (!currentPlan) return null;
 
     return (
-        <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
-            <LinearGradient
-                className='flex px-5 py-2.5 h-[350] absolute w-full'
-                colors={['#D8B4FE', '#fff']}
-                style={styles.parentView}
-            />
-            <CustomBottomSheetModal
-                modalKey={'planScreenModal'}
-                snapPoints={['35%', '35%']}
-                style={{
-                    backgroundColor: 'white',
-                    borderRadius: 24,
-                    shadowColor: '#000000',
-                    shadowOffset: {
-                        width: 0,
-                        height: 8,
-                    },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 48,
-                    elevation: 10,
-                }}
-                handleIndicatorStyle={{
-                    backgroundColor: '#D4D4D4',
-                }}
-            >
-                <View className='flex flex-col p-5 space-y-10'>
-                    <View className='flex flex-col space-y-2.5'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
-                            className='text-2xl text-black text-center'
-                        >
-                            Delete Plan?
-                        </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            className='text-sm textblack text-center'
-                        >
-                            Are you sure you want to delete{' '}
-                            {truncateStringIfLongerThan(currentPlan.name as string, 20)}
-                        </Text>
-                    </View>
-                    <View>
-                        <HoldButton
-                            onComplete={() =>
-                                mutate(undefined, {
-                                    onError: () => {
-                                        Toast.show({
-                                            type: 'error',
-                                            props: {
-                                                text1: 'Error!',
-                                                text2: 'There was an issue deleting plan',
-                                            },
-                                        });
-                                    },
-                                    onSuccess: (res) => {
-                                        Toast.show({
-                                            type: 'success',
-                                            props: {
-                                                text1: 'Success!',
-                                                text2: 'Plan deleted successfully',
-                                            },
-                                        });
-                                        router.replace('/(tabs)/plans');
-                                    },
-                                })
-                            }
-                            isLoading={deletePlanLoading}
-                            progressColor='#dc2626'
-                            backgroundColor='#e5e7eb'
-                        >
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-white text-lg'
-                            >
-                                Delete
-                            </Text>
-                        </HoldButton>
-                    </View>
-                </View>
-            </CustomBottomSheetModal>
+        <SafeAreaView style={styles.parentView}>
+            <LinearGradient colors={linearGradientColours} style={styles.linearGradient} />
+            <PlanActionMenu />
             <ExpoStatusBar style='dark' />
-            <ScrollView>
-                <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                    <TouchableOpacity
-                        onPress={router.back}
-                        className='bg-purple-300 px-4 py-2 flex items-center justify-center rounded-full'
-                    >
-                        <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
-                    </TouchableOpacity>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                        {truncateStringIfLongerThan(currentPlan.name as string, 20)}
-                    </Text>
-
-                    <View className='flex flex-row space-x-2'>
-                        <TouchableOpacity onPress={() => router.push('/plans/transaction')}>
-                            <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                                <PlusIcon stroke={'#fff'} />
-                            </View>
-                        </TouchableOpacity>
-                        <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                            <DropdownMenu
-                                visible={visible}
-                                handleOpen={() => setVisible(true)}
-                                handleClose={() => setVisible(false)}
-                                trigger={
-                                    <DotsHorizontalIcon
-                                        stroke='#fff'
-                                        width='24'
-                                        height='24'
-                                        strokeWidth={2.5}
-                                    />
-                                }
-                                padX={20}
-                                dropdownWidth={180}
-                            >
-                                <MenuOption
-                                    onSelect={() => {
-                                        setVisible(false);
-                                    }}
-                                >
-                                    <View className='flex flex-row items-center space-x-1'>
-                                        <EditSquareIcon stroke='#A855F7' width={18} />
-                                        <Text
-                                            style={GLOBAL_STYLESHEET.interMedium}
-                                            className='text-sm'
-                                        >
-                                            Edit Plan
-                                        </Text>
-                                    </View>
-                                </MenuOption>
-                                <MenuOption
-                                    onSelect={() => {
-                                        setShowBottomSheetModal('planScreenModal', true);
-                                    }}
-                                >
-                                    <View className='flex flex-row items-center space-x-1'>
-                                        <TrashIcon stroke='#EF4444' width={18} />
-                                        <Text
-                                            style={GLOBAL_STYLESHEET.interMedium}
-                                            className='text-sm'
-                                        >
-                                            Delete
-                                        </Text>
-                                    </View>
-                                </MenuOption>
-                            </DropdownMenu>
-                        </View>
-                    </View>
-                </View>
-
+            <ScrollView
+                refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefresh} />}
+            >
+                <PlanNavigationArea />
                 <PlanInformation />
-
-                <PlanBuildUpChart chartData={chartData} />
-
-                <View>
-                    <FlatList
-                        data={currentPlan.Transactions}
-                        keyExtractor={keyExtractor}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={true}
-                        renderItem={renderItem}
-                        ItemSeparatorComponent={renderItemSeparator}
-                        ListEmptyComponent={renderEmptylist}
-                        onEndReachedThreshold={0.5}
-                        scrollEnabled={false}
-                    />
-                </View>
+                <PlanBuildUpChart />
+                <PlanTransactionsList />
             </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    bottomSheetModal: {
-        backgroundColor: 'white',
-        borderRadius: 24,
-        shadowColor: '#000000',
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 48,
-        elevation: 10,
-    },
-    handleIndicator: {
-        backgroundColor: '#D4D4D4',
-    },
-    receiptContainer: {
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 20,
-        elevation: 5,
-    },
-    zigzag: {
-        transform: [{ rotate: '180deg' }],
-    },
-    receipt: {
-        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
-    },
-    bottomDrawer: {
-        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
-    },
-    contentContainer: {
-        paddingBottom: 100,
-        paddingHorizontal: 20,
-    },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,
-    },
-    container: {
+        position: 'relative',
+        backgroundColor: 'white',
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5fcff',
+        height: '100%',
     },
-    triggerStyle: {
-        height: 40,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: 100,
+    linearGradient: {
+        flex: 1,
+        position: 'absolute',
+        width: '100%',
+        height: 350,
         paddingHorizontal: 20,
+        paddingTop: RNStatusBar.currentHeight,
         paddingVertical: 10,
-        borderRadius: 5,
-    },
-    triggerText: {
-        fontSize: 16,
     },
 });
 export default PlanScreen;

@@ -18,11 +18,13 @@ import { useCreatePlanTransaction, usePlanStore } from '../hooks';
 import { transformObject } from '@/lib/utils/object';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import { useQueryClient } from 'react-query';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();
     const { currentPlan } = usePlanStore();
     const { accounts } = useAccountStore();
+    const queryClient = useQueryClient();
 
     const { mutate, isLoading } = useCreatePlanTransaction({
         sessionData: sessionData!,
@@ -74,6 +76,7 @@ export default function NewPlanTransactionScreen() {
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction created successfully' },
                     });
+                    queryClient.invalidateQueries(`plan-${currentPlan?.ID}`);
                     router.back();
                 },
             },

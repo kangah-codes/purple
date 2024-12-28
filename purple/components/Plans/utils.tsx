@@ -150,6 +150,7 @@ export function generateSpendingTrendData(
     plan: Plan | null,
     dataPoints: number = 30,
     numberOfLabels: number = 3,
+    normalize: boolean = false,
 ): SpendingTrendData {
     if (!plan) {
         return { projected: [], actual: [], ideal: [] };
@@ -175,9 +176,10 @@ export function generateSpendingTrendData(
 
     // Calculate cumulative transaction amounts up to each date
     function getAmountUpToDate(date: Date): number {
-        return sortedTransactions
+        const amount = sortedTransactions
             .filter((t) => new Date(t.CreatedAt) <= date)
-            .reduce((sum, t) => sum + t.amount, 0);
+            .reduce((sum, t) => sum + (isNaN(t.amount) ? 0 : t.amount), 0);
+        return isNaN(amount) ? 0 : amount;
     }
 
     // Pre-calculate the label indices for even spacing
@@ -194,10 +196,17 @@ export function generateSpendingTrendData(
 
     // Calculate daily rate based on remaining budget and time
     const daysRemaining = Math.max(0, (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const remainingBudget = plan.target - plan.balance;
+    const remainingBudget = isNaN(plan.target - plan.balance) ? 0 : plan.target - plan.balance;
     const projectedDailyRate = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
 
+    // Function to normalize values to 0-100 scale
+    const normalizeValue = (value: number): number => {
+        if (!normalize || plan.target <= 0) return value;
+        return (value / plan.target) * 100;
+    };
+
     // Generate data points
+    // const dataPoints: { date: string; amount: number }[] = [];
     for (let i = 0; i < dataPoints; i++) {
         const pointDate = new Date(startDate.getTime() + timeInterval * i);
         const daysFromStart = (pointDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -211,11 +220,12 @@ export function generateSpendingTrendData(
         const progress = daysFromStart / totalDays;
         const curvature = 1;
         const curvedProgress = curvature * progress * progress + (1 - curvature) * progress;
-        const idealAmount = Math.min(plan.target * curvedProgress, plan.target);
+        let idealAmount = plan.target * curvedProgress;
+        idealAmount = isNaN(idealAmount) ? 0 : Math.min(idealAmount, plan.target || 0);
 
         ideal.push({
             date: dateStr,
-            value: Number(idealAmount.toFixed(2)),
+            value: Number(normalizeValue(idealAmount).toFixed(2)),
             ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
         });
 
@@ -224,7 +234,7 @@ export function generateSpendingTrendData(
             const actualAmount = getAmountUpToDate(pointDate);
             actual.push({
                 date: dateStr,
-                value: Number(actualAmount.toFixed(2)),
+                value: Number(normalizeValue(isNaN(actualAmount) ? 0 : actualAmount).toFixed(2)),
                 ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
             });
         }
@@ -233,18 +243,35 @@ export function generateSpendingTrendData(
         if (pointDate >= now) {
             const currentAmount = getAmountUpToDate(now);
             const daysFromNow = (pointDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-            const projectedAmount = Math.min(
-                currentAmount + projectedDailyRate * daysFromNow,
-                plan.target,
-            );
+            let projectedAmount = currentAmount + projectedDailyRate * daysFromNow;
+            projectedAmount = isNaN(projectedAmount)
+                ? 0
+                : Math.min(projectedAmount, plan.target || 0);
 
             projected.push({
                 date: dateStr,
-                value: Number(projectedAmount.toFixed(2)),
+                value: Number(normalizeValue(projectedAmount).toFixed(2)),
                 ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
             });
         }
     }
 
     return { projected, actual, ideal };
+}
+
+export function calculateAmountAddedOnDay(plan: Plan | null, date?: Date): number {
+    if (!plan) return 0;
+
+    let dateToUse = date || new Date();
+
+    // check if any transactions were made on this day
+    const transactionsOnDate = plan.Transactions?.filter(
+        (t) => new Date(t.CreatedAt).toDateString() === dateToUse.toDateString(),
+    );
+
+    // if no transactions were made, return 0
+    if (!transactionsOnDate || transactionsOnDate.length === 0) return 0;
+
+    // sum up all transactions made on this day
+    return transactionsOnDate.reduce((acc, curr) => acc + curr.amount, 0);
 }

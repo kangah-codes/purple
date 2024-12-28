@@ -126,7 +126,7 @@ export function usePlan({
     sessionData: SessionData;
     options?: UseQueryOptions;
     planID: string;
-}): UseQueryResult<GenericAPIResponse<Plan[]>, Error> {
+}): UseQueryResult<GenericAPIResponse<Plan>, Error> {
     return useQuery(
         [`plan-${planID}`],
         async () => {

@@ -32,7 +32,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 
 type CreatePlanDTO struct {
 	Type             string  `json:"type" binding:"required,oneof=saving expense"`
-	Category         string  `json:"category" binding:"required"`
+	Category         string  `json:"category"`
 	Target           float64 `json:"target" validate:"number"`
 	StartDate        string  `json:"start_date" binding:"required"`
 	EndDate          string  `json:"end_date" binding:"required"`

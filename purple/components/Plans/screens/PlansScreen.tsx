@@ -1,4 +1,3 @@
-import { useAuth } from '@/components/Auth/hooks';
 import { PlusIcon } from '@/components/SVG/24x24';
 import {
     LinearGradient,
@@ -14,14 +13,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import tw from 'twrnc';
-import { usePlanStore } from '../hooks';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
+
 const { width: screenWidth } = Dimensions.get('window');
+const linearGradientColours = ['#c084fc', '#9333ea'];
 
 export default function PlansScreen() {
-    const { sessionData } = useAuth();
-    const { setPlans } = usePlanStore();
     const [index, setIndex] = useState(0);
     const [routes] = useState([
         { key: 'expenses', title: 'Expenses' },
@@ -97,7 +95,7 @@ export default function PlansScreen() {
     });
 
     return (
-        <SafeAreaView className='bg-white relative h-full'>
+        <SafeAreaView style={styles.safeAreaView}>
             <ExpoStatusBar style='dark' />
             <View style={styles.parentView} className='bg-white space-y-5 flex-1 flex flex-col'>
                 <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
@@ -118,14 +116,8 @@ export default function PlansScreen() {
                     onIndexChange={setIndex}
                 />
             </View>
-            <LinearGradient
-                className='rounded-full justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={handleNavigation}
-                >
+            <LinearGradient colors={linearGradientColours} style={styles.linearGradient}>
+                <TouchableOpacity onPress={handleNavigation} style={styles.touchableOpacity}>
                     <PlusIcon stroke={'#fff'} />
                 </TouchableOpacity>
             </LinearGradient>
@@ -134,7 +126,28 @@ export default function PlansScreen() {
 }
 
 const styles = StyleSheet.create({
+    safeAreaView: {
+        backgroundColor: '#fff',
+        position: 'relative',
+        height: '100%',
+    },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,
+    },
+    linearGradient: {
+        borderRadius: 999_999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        right: 20,
+        bottom: 20,
+    },
+    touchableOpacity: {
+        alignItems: 'center',
+        width: 55,
+        height: 55,
+        justifyContent: 'center',
+        borderRadius: 999_999,
+        padding: 12,
     },
 });

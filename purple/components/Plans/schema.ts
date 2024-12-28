@@ -78,13 +78,26 @@ export interface SpendingTrendData {
 
 export type PlanTransaction = {
     ID: string;
-    CreatedAt: string;
-    UpdatedAt: string;
-    DeletedAt: string | null;
     plan_id: string;
     user_id: string;
     amount: number;
     plan: Plan;
     note: string;
     created_at: string;
+    debit_account_id: string;
+    debit_account: Account;
+    CreatedAt: string;
+    updated_at: string;
 };
+
+/**
+ * 	PlanId         uuid.UUID  `json:"plan_id"`
+	UserId         uuid.UUID  `json:"user_id"`
+	Amount         float64    `gorm:"not null" json:"amount"`
+	User           User       `gorm:"foreignKey:UserId" json:"-"`
+	Plan           Plan       `gorm:"foreignKey:PlanId" json:"plan"`
+	Note           string     `gorm:"size:255" json:"note"`
+	CreatedAt      time.Time  `gorm:"type:timestamptz;not null"`
+	DebitAccountId *uuid.UUID `json:"debit_account_id"`
+	DebitAccount   Account    `gorm:"foreignKey:debit_account_id" json:"-"`
+ */
