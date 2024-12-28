@@ -48,7 +48,7 @@ jobs:
               run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple.apk
 
             - name: Upload Build Artifact
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v4
               with:
                   name: app-release
                   path: ${{ github.workspace }}/purple.apk
