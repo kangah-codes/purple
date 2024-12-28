@@ -45,4 +45,14 @@ jobs:
                   echo "EXPO_PUBLIC_API_KEY=${{secrets.API_KEY}}" >> .env
 
             - name: 🚀 Build app
-              run: eas build --non-interactive -p android --profile development --local --output purple.apk
+              run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple.apk
+
+            - name: Upload binaries to release
+              uses: svenstaro/upload-release-action@v2
+              with:
+                  repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  file: ${{ github.workspace }}/purple.apk
+                  asset_name: Purple.apk
+                  tag: ${{ github.ref }}
+                  overwrite: true
+                  body: "New app release from ${{ github.ref }}"
