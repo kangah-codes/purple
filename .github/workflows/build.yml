@@ -47,12 +47,8 @@ jobs:
             - name: 🚀 Build app
               run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple.apk
 
-            - name: Upload binaries to release
-              uses: svenstaro/upload-release-action@v2
+            - name: Upload Build Artifact
+              uses: actions/upload-artifact@v2
               with:
-                  repo_token: ${{ secrets.GITHUB_TOKEN }}
-                  file: ${{ github.workspace }}/purple.apk
-                  asset_name: Purple.apk
-                  tag: ${{ github.ref }}
-                  overwrite: true
-                  body: "New app release from ${{ github.ref }}"
+                  name: app-release
+                  path: ${{ github.workspace }}/purple.apk
