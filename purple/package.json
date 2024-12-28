@@ -46,7 +46,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.52.1",
-    "react-native": "0.74.5",
+    "react-native": "0.75.4",
     "react-native-device-info": "^10.12.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-gifted-charts": "^1.4.9",
