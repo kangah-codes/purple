@@ -4,41 +4,28 @@ import { formatDate } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Plan } from '../schema';
-import { analyzeSpendingProgress } from '../utils';
-import React from 'react';
+import { StyleSheet } from 'react-native';
 
 export default function BudgetPlanCard({ data }: { data: Plan }) {
-    const { category, start_date, end_date, balance, target, name, currency, type } = data;
-    const spendProgress = useMemo(() => analyzeSpendingProgress(data), [data]);
+    const { start_date, end_date, balance, target, name, currency, type } = data;
     const isExpense = type === 'expense';
-
     const progressAmount = isExpense ? target - balance : balance;
-    const progressPercentage = Math.min(
-        isExpense ? spendProgress.percentTargetSpent : (balance / target) * 100,
-        100,
-    );
-
     const remainingAmount = isExpense ? Math.max(balance, 0) : Math.max(target - balance, 0);
-
-    const getLabelsByType = () => ({
-        progressLabel: isExpense ? 'Remaining budget' : 'Saved so far',
-        remainingLabel: isExpense ? 'Spent so far' : 'Still to save',
-        targetLabel: isExpense ? 'Budget limit' : 'Savings goal',
-    });
-
+    const getLabelsByType = useCallback(
+        () => ({
+            progressLabel: isExpense ? 'Remaining budget' : 'Saved so far',
+            remainingLabel: isExpense ? 'Spent so far' : 'Still to save',
+            targetLabel: isExpense ? 'Budget limit' : 'Savings goal',
+        }),
+        [data],
+    );
     const labels = getLabelsByType();
 
     return (
         <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)}>
-            <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
-                {/* <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
-                        {category}
-                    </Text>
-                </View> */}
-
+            <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full bg-white'>
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         {truncateStringIfLongerThan(name, 20)}
@@ -49,7 +36,9 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='flex flex-row items-center space-x-0.5'>
                         <View
                             className='h-2 bg-purple-600 rounded-md'
-                            style={{ width: `${progressPercentage}%` }}
+                            style={{
+                                width: `${Math.min((data.balance / data.target) * 100, 100)}%`,
+                            }}
                         />
                         <View className='h-2 flex-grow bg-purple-200 rounded-full' />
                     </View>

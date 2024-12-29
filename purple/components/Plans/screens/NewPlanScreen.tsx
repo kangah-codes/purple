@@ -1,6 +1,10 @@
-import { useAccountStore } from '@/components/Accounts/hooks';
+import { Currency } from '@/@types/common';
+import { useAuth } from '@/components/Auth/hooks';
+import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
+import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
     InputField,
     SafeAreaView,
@@ -10,31 +14,24 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect } from 'react';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
-    Platform,
-    StyleSheet,
-    Switch,
-    StatusBar as RNStatusBar,
     Keyboard,
+    Platform,
+    StatusBar as RNStatusBar,
+    StyleSheet,
 } from 'react-native';
-import { useCreatePlan } from '../hooks';
-import { useAuth } from '@/components/Auth/hooks';
-import { transformObject } from '@/lib/utils/object';
 import Toast from 'react-native-toast-message';
-import { CreatePlan } from '../schema';
-import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
-import { Currency } from '@/@types/common';
-import { Image } from 'expo-image';
 import tw from 'twrnc';
-import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
-import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
+import { useCreatePlan } from '../hooks';
+import { CreatePlan } from '../schema';
 
 /**
  * 
@@ -51,10 +48,24 @@ import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBo
 }
  */
 
+const depositFrequency = {
+    weekly: {
+        label: 'Weekly',
+        value: 'weekly',
+    },
+    'bi-weekly': {
+        label: 'Bi-Weekly',
+        value: 'bi-weekly',
+    },
+    monthly: {
+        label: 'Monthly',
+        value: 'monthly',
+    },
+};
+
 export default function NewPlanScreen() {
     const { sessionData } = useAuth();
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
     const [planCategories, setPlanCategories] = useState<string[]>([]);
     const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
     const [currencies, setCurrencies] = useState<Currency[]>([]);
@@ -96,31 +107,6 @@ export default function NewPlanScreen() {
         },
         [currencies],
     );
-
-    const planTypes = {
-        expense: {
-            label: '💸   Expense',
-            value: 'expense',
-        },
-        saving: {
-            label: '💰   Saving',
-            value: 'saving',
-        },
-    };
-    const depositFrequency = {
-        weekly: {
-            label: 'Weekly',
-            value: 'weekly',
-        },
-        'bi-weekly': {
-            label: 'Bi-Weekly',
-            value: 'bi-weekly',
-        },
-        monthly: {
-            label: 'Monthly',
-            value: 'monthly',
-        },
-    };
 
     const onSubmit = (data: CreatePlan) => {
         Keyboard.dismiss();
@@ -548,7 +534,7 @@ export default function NewPlanScreen() {
                                     <SelectField
                                         selectKey='newPlanDepositFrequency'
                                         options={depositFrequency}
-                                        customSnapPoints={['50%', '70%']}
+                                        customSnapPoints={['20%', '30%']}
                                         value={value}
                                         onChange={(val) => {
                                             onChange(val);
@@ -568,41 +554,12 @@ export default function NewPlanScreen() {
                             </Text>
                         )}
                     </View>
-
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
-                            Send me reminders
-                        </Text>
-
-                        <Controller
-                            control={control}
-                            render={({ field: { onChange, value } }) => (
-                                <Switch
-                                    trackColor={{ false: '#767577', true: '#8B5CF6' }}
-                                    thumbColor={'#f4f3f4'}
-                                    ios_backgroundColor='#3e3e3e'
-                                    onValueChange={onChange}
-                                    value={value}
-                                    style={styles.switch}
-                                />
-                            )}
-                            name='push_notification'
-                        />
-                        {errors.push_notification && (
-                            <Text
-                                style={{ fontFamily: 'InterMedium' }}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.push_notification.message}
-                            </Text>
-                        )}
-                    </View>
                 </ScrollView>
 
                 <TouchableOpacity
                     onPress={handleSubmit(onSubmit)}
                     disabled={isLoading}
-                    className='items-center self-center w-[95%] justify-center px-4 absolute bottom-8'
+                    className='items-center self-center w-full justify-center px-4 absolute bottom-8'
                 >
                     <View className='bg-purple-600 py-4 w-full flex items-center justify-center rounded-full'>
                         {isLoading ? (
@@ -624,7 +581,7 @@ const styles = StyleSheet.create({
         transform: Platform.OS === 'ios' ? [{ scaleX: 0.8 }, { scaleY: 0.8 }] : [],
     },
     container: {
-        paddingBottom: 100,
+        paddingBottom: 200,
     },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,

@@ -9,6 +9,7 @@ import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import ProfilePages from '../molecules/ProfilePages';
 import { nativeStorage } from '@/lib/utils/storage';
+import React from 'react';
 
 export default function NewProfileScreen() {
     const { destroySession, sessionData, hasOnboarded, setOnboarded, isLoading } = useAuth();
@@ -21,14 +22,6 @@ export default function NewProfileScreen() {
             },
         });
     };
-
-    // if (!sessionData) {
-    //     return <Redirect href={'/onboarding/steps'} />;
-    // }
-
-    nativeStorage.onClearCompleted(() => {
-        console.log('Clear completed');
-    });
 
     if (isLoading) {
         return null;
@@ -97,8 +90,8 @@ export default function NewProfileScreen() {
                         Toast.show({
                             type: 'info',
                             props: {
-                                text1: 'Sign Out',
-                                text2: 'Sign Out',
+                                text1: 'Signed Out',
+                                text2: 'Signed out of Purple',
                             },
                         });
                     });

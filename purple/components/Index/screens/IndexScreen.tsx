@@ -6,18 +6,19 @@ import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-import React from 'react';
+
+const linearGradientColours = ['#D8B4FE', '#fff'];
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();
     const { setAccounts } = useAccountStore();
-    const { setUser, user } = useUserStore();
+    const { setUser } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const { refetch } = useUser({
         sessionData: sessionData as SessionData,
@@ -52,7 +53,7 @@ export default function IndexScreen() {
             <View className='w-full relative flex'>
                 <LinearGradient
                     className='flex px-5 py-2.5 h-[350] absolute w-full'
-                    colors={['#D8B4FE', '#fff']}
+                    colors={linearGradientColours}
                 />
                 <View
                     className='flex flex-col px-5'
@@ -78,24 +79,6 @@ export default function IndexScreen() {
                     </ScrollView>
                 </View>
             </View>
-
-            {/* <View style={styles.parentView} className='bg-white px-5'>
-                <View className='flex flex-row justify-between items-center pt-2.5'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                        Hi, {sessionData?.user.username} 👋
-                    </Text>
-                </View>
-
-                <View className='relative flex justify-center mt-5'>
-                    <InputField
-                        className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        placeholder='Search'
-                        cursorColor={'#000'}
-                    />
-                    <SearchIcon width={16} height={16} style={styles.searchIcon} stroke='#A855F7' />
-                </View>
-            </View> */}
         </SafeAreaView>
     );
 }

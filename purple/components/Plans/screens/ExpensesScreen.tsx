@@ -8,8 +8,8 @@ import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import BudgetInfoCard from '../molecules/BudgetInfoCard';
 import { Plan } from '../schema';
+import PlanInfoCard from '../molecules/PlanInfoCard';
 
 function ExpensesScreen() {
     const { setExpensePlans, expensePlans, updateExpenseplans } = usePlanStore();
@@ -30,8 +30,8 @@ function ExpensesScreen() {
     const listHeader = useCallback(() => {
         if (expensePlans.length === 0) return null;
         return (
-            <View>
-                <BudgetInfoCard />
+            <View className='flex flex-col space-y-5 -px-5'>
+                <PlanInfoCard type='expense' />
                 <View style={styles.listHeaderView} />
             </View>
         );
@@ -93,10 +93,11 @@ function ExpensesScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
     },
     contentContainer: {
         paddingBottom: 100,
+        paddingHorizontal: 20,
     },
     listHeaderView: {
         marginTop: 20,

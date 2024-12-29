@@ -1,48 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MMKV } from 'react-native-mmkv';
 
-type Listener = () => void;
-
-class SimpleEventEmitter {
-    private listeners: Map<string, Set<Listener>> = new Map();
-
-    on(event: string, listener: Listener): void {
-        if (!this.listeners.has(event)) {
-            this.listeners.set(event, new Set());
-        }
-        this.listeners.get(event)!.add(listener);
-    }
-
-    off(event: string, listener: Listener): void {
-        const eventListeners = this.listeners.get(event);
-        if (eventListeners) {
-            eventListeners.delete(listener);
-        }
-    }
-
-    emit(event: string): void {
-        const eventListeners = this.listeners.get(event);
-        if (eventListeners) {
-            eventListeners.forEach((listener) => listener());
-        }
-    }
-}
-
-
 export class NativeStorage {
     private static instance: NativeStorage;
     private keys: Set<string> = new Set();
-    private eventEmitter: SimpleEventEmitter;
     private storage: MMKV;
 
     private constructor() {
-        this.eventEmitter = new SimpleEventEmitter();
         this.keys = new Set();
         this.storage = new MMKV();
-        
+
         // Initialize keys set with existing keys
         const allKeys = this.storage.getAllKeys();
-        allKeys.forEach(key => this.keys.add(key));
+        allKeys.forEach((key) => this.keys.add(key));
     }
 
     public static getInstance(): NativeStorage {
@@ -98,7 +68,6 @@ export class NativeStorage {
         try {
             this.storage.clearAll();
             this.keys.clear();
-            this.eventEmitter.emit('clearCompleted');
         } catch (error) {
             console.error('Error clearing MMKV', error);
         }
@@ -115,14 +84,6 @@ export class NativeStorage {
 
     getAllKeys(): string[] {
         return Array.from(this.keys);
-    }
-
-    onClearCompleted(listener: () => void): void {
-        this.eventEmitter.on('clearCompleted', listener);
-    }
-
-    offClearCompleted(listener: () => void): void {
-        this.eventEmitter.off('clearCompleted', listener);
     }
 }
 

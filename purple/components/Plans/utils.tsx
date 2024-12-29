@@ -42,6 +42,30 @@ export default function calculateTotalExpenseDetails(plans: Plan[]): ExpenseCalc
     };
 }
 
+export function calculateTotalSavingDetails(plans: Plan[]): ExpenseCalculationResult {
+    // Filter for active expense plans only
+    const savingPlans = plans.filter((plan) => plan.type === 'saving' && plan.deleted_at === null);
+
+    // Calculate totals
+    const totalSaving = savingPlans.reduce((acc, curr) => acc + curr.balance, 0);
+    const totalGoal = savingPlans.reduce((acc, curr) => acc + curr.target, 0);
+
+    // Prevent division by zero
+    const totalSavingPercentage = totalGoal === 0 ? 0 : (totalSaving / totalGoal) * 100;
+
+    const totalSavingRemaining = totalGoal - totalSaving;
+    const totalSavingRemainingPercentage =
+        totalGoal === 0 ? 0 : (totalSavingRemaining / totalGoal) * 100;
+
+    return {
+        totalExpense: totalSaving,
+        totalExpensePercentage: totalSavingPercentage,
+        totalExpenseRemaining: totalSavingRemaining,
+        totalExpenseRemainingPercentage: totalSavingRemainingPercentage,
+        activePlansCount: savingPlans.length,
+    };
+}
+
 /**
  * Determines if a user's spending is on track based on time elapsed and amount spent
  *

@@ -1,16 +1,16 @@
-import { View } from '@/components/Shared/styled';
-import { keyExtractor } from '@/lib/utils/number';
-import { memo, useCallback } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
-import BudgetPlanCard from '../molecules/BudgetCard';
-import BudgetInfoCard from '../molecules/BudgetInfoCard';
-import { BudgetPlan, Plan } from '../schema';
 import { GenericAPIResponse } from '@/@types/request';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import { View } from '@/components/Shared/styled';
+import { keyExtractor } from '@/lib/utils/number';
+import React, { memo, useCallback } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { usePlanStore, usePlans } from '../hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import BudgetPlanCard from '../molecules/BudgetCard';
+import PlanInfoCard from '../molecules/PlanInfoCard';
+import { Plan } from '../schema';
 
 function SavingsScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
@@ -31,8 +31,8 @@ function SavingsScreen() {
     const listHeader = useCallback(() => {
         if (savingPlans.length === 0) return null;
         return (
-            <View>
-                <BudgetInfoCard />
+            <View className='flex flex-col space-y-5 -px-5'>
+                <PlanInfoCard type='saving' />
                 <View style={styles.listHeaderView} />
             </View>
         );
@@ -78,11 +78,10 @@ function SavingsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 20,
-    },
+    container: {},
     contentContainer: {
         paddingBottom: 100,
+        paddingHorizontal: 20,
     },
     listHeaderView: {
         marginTop: 20,

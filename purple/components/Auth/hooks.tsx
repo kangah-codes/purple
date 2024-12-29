@@ -1,13 +1,9 @@
 import { GenericAPIResponse } from '@/@types/request';
+import { nativeStorage } from '@/lib/utils/storage';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UseMutationResult, useMutation } from 'react-query';
 import { SessionData, SessionDataResponse } from './schema';
-import { nativeStorage } from '@/lib/utils/storage';
-import { useUserStore } from '../Profile/hooks';
-import { useAccountStore } from '../Accounts/hooks';
-import { useTransactionStore } from '../Transactions/hooks';
-import { usePlanStore } from '../Plans/hooks';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -93,38 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [error, setError] = useState<Error | null>(null);
     const [sessionData, _setSessionData] = useState<SessionData | null>(null);
     const [hasOnboarded, setHasOnboarded] = useState(false);
-    const { reset: resetUser, setUser, user } = useUserStore();
-    const { accounts, setAccounts } = useAccountStore();
-    const { transactions, setTransactions } = useTransactionStore();
-    const { plans, setPlans } = usePlanStore();
-
-    useEffect(() => {
-        // TODO: research better way to handle that issue future Joshua
-        const handleClearCompleted = () => {
-            if (user !== null) {
-                setUser(null);
-            }
-
-            if (accounts.length > 0) {
-                setAccounts([]);
-            }
-
-            if (transactions.length > 0) {
-                setTransactions([]);
-            }
-
-            if (plans.length > 0) {
-                setPlans([]);
-            }
-        };
-
-        nativeStorage.onClearCompleted(handleClearCompleted);
-
-        // Cleanup function to remove the event listener
-        return () => {
-            nativeStorage.offClearCompleted(handleClearCompleted);
-        };
-    }, [user, accounts, transactions, plans, setUser, setAccounts, setTransactions, setPlans]);
 
     const getToken = useCallback(async <T = any,>(key: string): Promise<T | null> => {
         try {
