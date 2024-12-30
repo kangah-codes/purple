@@ -54,4 +54,4 @@ expo-env.d.ts
 # @end expo-cli
 
 **/tmp/
-**/bin/
+# **/bin/
