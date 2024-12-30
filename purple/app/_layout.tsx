@@ -28,8 +28,6 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(false);
 
-    console.log(process.env.EXPO_PUBLIC_API_URL, 'PREC');
-
     useEffect(() => {
         async function prepare() {
             try {
@@ -45,6 +43,7 @@ export default function RootLayout() {
                     InterLight: require('../assets/fonts/InterDisplay-Light.ttf'),
                     InterMedium: require('../assets/fonts/InterDisplay-Medium.ttf'),
                     InterSemiBold: require('../assets/fonts/InterDisplay-SemiBold.ttf'),
+                    GresaRegular: require('../assets/fonts/gresa/Gresa-Regular.ttf'),
                 });
             } catch (e) {
                 console.warn(e);

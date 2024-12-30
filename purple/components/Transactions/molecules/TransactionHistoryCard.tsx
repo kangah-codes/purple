@@ -6,15 +6,20 @@ import {
     ArrowNarrowRightIcon,
     ArrowNarrowUpRightIcon,
 } from '../../SVG/noscale';
-import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { LinearGradient, Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
+import React from 'react';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
     onPress: () => void;
     showTitle?: boolean;
 };
+
+const transferGradientColours = ['#c084fc', '#9333ea'];
+const debitGradientColours = ['#EF4444', '#B91C1C'];
+const creditGradientColours = ['#34D399', '#059669'];
 
 export default function TransactionHistoryCard({
     data,
@@ -27,8 +32,15 @@ export default function TransactionHistoryCard({
             className='w-full py-3.5 flex flex-row items-center space-x-3.5'
         >
             <View className='relative items-center justify-center'>
-                <View
-                    className='flex items-center justify-center rounded-full h-9 w-9'
+                <LinearGradient
+                    colors={
+                        data.Type === 'debit'
+                            ? debitGradientColours
+                            : data.Type == 'credit'
+                            ? creditGradientColours
+                            : transferGradientColours
+                    }
+                    className='flex items-center justify-center rounded-xl h-10 w-10'
                     style={{
                         backgroundColor:
                             data.Type === 'debit'
@@ -43,21 +55,21 @@ export default function TransactionHistoryCard({
                         width={16}
                         height={16}
                         style={{ position: 'absolute' }}
-                        stroke={'#B91C1C'}
+                        stroke={'#fff'}
                     />
                 ) : data.Type == 'credit' ? (
                     <ArrowNarrowDownRightIcon
                         width={16}
                         height={16}
                         style={{ position: 'absolute' }}
-                        stroke={'#047857'}
+                        stroke={'#fff'}
                     />
                 ) : (
                     <ArrowNarrowRightIcon
                         width={16}
                         height={16}
                         style={{ position: 'absolute' }}
-                        stroke='#7C3AED'
+                        stroke='#fff'
                     />
                 )}
             </View>

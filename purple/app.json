@@ -48,7 +48,8 @@
                         "./assets/fonts/InterDisplay-Regular.ttf",
                         "./assets/fonts/InterDisplay-SemiBold.ttf",
                         "./assets/fonts/Wolf-Sans-Regular.ttf",
-                        "./assets/fonts/Arial-Rounded-MT-Bold.ttf"
+                        "./assets/fonts/Arial-Rounded-MT-Bold.ttf",
+                        "./assets/fonts/gresa/Gresa-Regular.ttf"
                     ]
                 }
             ],

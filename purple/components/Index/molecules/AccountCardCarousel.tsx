@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { Account } from '@/components/Accounts/schema';
+import React, { useCallback, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
-import { useUserStore } from '@/components/Profile/hooks';
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { Account } from '@/components/Accounts/schema';
-import React from 'react';
 
 const data = [
     {
@@ -68,6 +66,7 @@ export default function AccountCardCarousel() {
 
     return (
         <>
+            {/** @ts-ignore */}
             <Carousel
                 data={accounts}
                 renderItem={renderItem}
@@ -80,6 +79,7 @@ export default function AccountCardCarousel() {
                 loop
             />
 
+            {/** @ts-ignore */}
             <Pagination
                 dotsLength={accounts.length}
                 activeDotIndex={activeSlide}
