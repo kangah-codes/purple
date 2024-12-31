@@ -112,7 +112,7 @@ func main() {
 	engine.SetTrustedProxies(nil)
 
 	// Run the server on the specified port
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run("0.0.0.0:8080"); err != nil {
 		utils.InfoLogger.Fatalf("Failed to run server: %v", err)
 	}
 }

@@ -4,6 +4,8 @@ on:
     push:
         branches:
             - dev
+            - rc
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -44,10 +46,15 @@ jobs:
                   echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
                   echo "EXPO_PUBLIC_API_KEY=${{secrets.API_KEY}}" >> .env
 
-            - name: 🚀 Build app
+            - name: 🚀 Development Build
+              if: ${{ github.ref == 'refs/heads/dev' }}
               run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple.apk
 
-            - name: Upload Build Artifact
+            - name: 🚀 Release Candidate Build
+              if: ${{ github.ref == 'refs/heads/rc' }}
+              run: eas build --non-interactive -p android --profile rc --local --output ${{ github.workspace }}/purple.apk
+
+            - name: ☁️ Upload Build Artifact
               uses: actions/upload-artifact@v4
               with:
                   name: app-release

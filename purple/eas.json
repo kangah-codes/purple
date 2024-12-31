@@ -23,6 +23,12 @@
             "android": {
                 "buildType": "apk"
             }
+        },
+        "rc": {
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            }
         }
     }
 }
