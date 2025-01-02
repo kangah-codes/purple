@@ -20,7 +20,7 @@ export default function EmptyList({ message }: EmptyListProps) {
                     Nothing to see here! 👀
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.interSemiBold}
+                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
                     className='text-sm textblack text-center'
                 >
                     {message}

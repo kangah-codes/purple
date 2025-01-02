@@ -1,11 +1,7 @@
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import {
-    CategoryIcon,
-    ReceiptDetail,
-    ReceiptHeader,
-} from '@/components/Transactions/molecules/Receipt';
+import { CategoryIcon, ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
 import { formatDate } from '@/lib/utils/date';
@@ -36,8 +32,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             handleIndicatorStyle={styles.handleIndicator}
         >
             <View className='px-5'>
-                <View className='w-full items-center' style={styles.receiptView}>
-                    <ReceiptHeader />
+                <View className='w-full items-center mt-5' style={styles.receiptView}>
                     <Svg
                         height={12}
                         width='100%'
@@ -52,7 +47,10 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         colors={linearGradient}
                     >
                         <CategoryIcon type={currentTransaction.Type} />
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg text-white'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.suprapower}
+                            className='text-lg text-white mt-2.5'
+                        >
                             {currentTransaction.category}
                         </Text>
                     </LinearGradient>

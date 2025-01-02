@@ -122,7 +122,7 @@ function StatsHeatmap() {
                         <Text
                             key={key}
                             className='text-black text-base mx-auto'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
                         >
                             {day}
                         </Text>

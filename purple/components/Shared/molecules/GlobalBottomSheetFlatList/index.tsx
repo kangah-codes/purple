@@ -43,32 +43,20 @@ function CustomBottomSheetFlatList<T>({
     ...rest
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const [defaultSnapPoints, setDefaultSnapPoints] = useState<
-        (string | number)[] | SharedValue<(string | number)[]> | undefined
-    >(useMemo(() => ['50%', '50%'], []));
+
+    // Memoize default snap points
+    const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '50%'], [rest.snapPoints]);
+
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();
 
-    useEffect(() => {
-        createBottomSheetFlatList(sheetKey);
-
-        if (rest.snapPoints) {
-            setDefaultSnapPoints(rest.snapPoints);
-        }
-    }, []);
-
-    const handleSheetChanges = useCallback((index: number) => {
-        // if user swipes modal down, close it
-        if (index === -1) setShowBottomSheetFlatList(sheetKey, false);
-    }, []);
-
-    useEffect(() => {
-        if (bottomSheetFlatListKeys[sheetKey]) {
-            bottomSheetRef.current?.snapToIndex(0);
-        } else {
-            bottomSheetRef.current?.close();
-        }
-    }, [bottomSheetFlatListKeys]);
+    // Memoize handlers
+    const handleSheetChanges = useCallback(
+        (index: number) => {
+            if (index === -1) setShowBottomSheetFlatList(sheetKey, false);
+        },
+        [sheetKey, setShowBottomSheetFlatList],
+    );
 
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
@@ -79,8 +67,33 @@ function CustomBottomSheetFlatList<T>({
                 disappearsOnIndex={-1}
             />
         ),
+        [sheetKey, setShowBottomSheetFlatList],
+    );
+
+    // Memoize empty list component
+    const EmptyListComponent = useMemo(
+        () => (
+            <View className='pt-10'>
+                <EmptyList message="Couldn't find what you're looking for!" />
+            </View>
+        ),
         [],
     );
+
+    // Setup effect
+    useEffect(() => {
+        createBottomSheetFlatList(sheetKey);
+    }, [sheetKey, createBottomSheetFlatList]);
+
+    // Handle visibility changes
+    useEffect(() => {
+        const isVisible = bottomSheetFlatListKeys[sheetKey];
+        if (isVisible) {
+            bottomSheetRef.current?.snapToIndex(0);
+        } else {
+            bottomSheetRef.current?.close();
+        }
+    }, [bottomSheetFlatListKeys[sheetKey]]);
 
     if (!bottomSheetFlatListKeys[sheetKey]) return null;
 
@@ -91,12 +104,12 @@ function CustomBottomSheetFlatList<T>({
             android_keyboardInputMode='adjustResize'
             keyboardBlurBehavior='restore'
             ref={bottomSheetRef}
-            index={bottomSheetFlatListKeys[sheetKey] ? 1 : -1}
+            index={1}
             snapPoints={defaultSnapPoints}
             onChange={handleSheetChanges}
             {...rest}
         >
-            {children && children}
+            {children}
             <BottomSheetFlatList
                 data={data}
                 keyExtractor={keyExtractor}
@@ -104,11 +117,11 @@ function CustomBottomSheetFlatList<T>({
                 contentContainerStyle={flatListContentContainerStyle}
                 showsVerticalScrollIndicator
                 ItemSeparatorComponent={itemSeparator}
-                ListEmptyComponent={
-                    <View className='pt-10'>
-                        <EmptyList message="Couldn't find what you're looking for!" />
-                    </View>
-                }
+                ListEmptyComponent={EmptyListComponent}
+                removeClippedSubviews={Platform.OS === 'android'} // Optimize memory usage
+                maxToRenderPerBatch={10} // Optimize initial render
+                windowSize={10} // Optimize scroll performance
+                updateCellsBatchingPeriod={50} // Optimize update batching
             />
         </BottomSheet>
     );

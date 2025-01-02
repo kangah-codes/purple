@@ -49,7 +49,16 @@
                         "./assets/fonts/InterDisplay-SemiBold.ttf",
                         "./assets/fonts/Wolf-Sans-Regular.ttf",
                         "./assets/fonts/Arial-Rounded-MT-Bold.ttf",
-                        "./assets/fonts/gresa/Gresa-Regular.ttf"
+                        "./assets/fonts/gresa/Gresa-Regular.ttf",
+                        "./assets/fonts/Mockup-Display.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-Black.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-Bold.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-ExtraBold.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-ExtraLight.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-Light.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-Medium.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-Regular.ttf",
+                        "./assets/fonts/mona-sans/MonaSans-SemiBold.ttf"
                     ]
                 }
             ],

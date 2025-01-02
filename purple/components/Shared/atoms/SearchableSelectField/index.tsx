@@ -41,7 +41,7 @@ export default function SearchableSelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-200'>
-                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -81,7 +81,7 @@ export default function SearchableSelectField({
                                 <View className='relative flex justify-center mt-5'>
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                        style={GLOBAL_STYLESHEET.monaSansBold}
                                         placeholder='Search'
                                         cursorColor={'#000'}
                                         onChangeText={setSearchValue}
@@ -132,7 +132,7 @@ export default function SearchableSelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -145,7 +145,10 @@ export default function SearchableSelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
+                    <Text
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        className='text-xs text-gray-900'
+                    >
                         {truncateStringIfLongerThan(
                             options[val ?? '']?.label ?? `Select an option...`,
                             45,

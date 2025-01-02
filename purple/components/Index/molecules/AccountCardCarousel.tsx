@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
+import { View } from '@/components/Shared/styled';
 
 const data = [
     {
@@ -65,7 +66,7 @@ export default function AccountCardCarousel() {
     );
 
     return (
-        <>
+        <View className='px-5'>
             {/** @ts-ignore */}
             <Carousel
                 data={accounts}
@@ -93,6 +94,6 @@ export default function AccountCardCarousel() {
                 inactiveDotScale={0.6}
                 containerStyle={styles.containerStyle}
             />
-        </>
+        </View>
     );
 }

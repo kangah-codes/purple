@@ -99,7 +99,7 @@ export default function NewPlanScreen() {
                         }
                         style={tw`h-5 w-5 rounded-full`}
                     />
-                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
+                    <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='tracking-tight'>
                         {item.label}
                     </Text>
                 </View>
@@ -157,7 +157,10 @@ export default function NewPlanScreen() {
                     </View>
 
                     <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                            className='text-purple-600'
+                        >
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -167,7 +170,10 @@ export default function NewPlanScreen() {
                     contentContainerStyle={styles.container}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-xs text-gray-600'
+                        >
                             Plan Name
                         </Text>
 
@@ -179,7 +185,7 @@ export default function NewPlanScreen() {
                             render={({ field: { onChange, value, onBlur } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='Plan Name'
                                     onChangeText={onChange}
@@ -200,7 +206,10 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Plan Type
                         </Text>
                         <>
@@ -261,9 +270,9 @@ export default function NewPlanScreen() {
                                                                     Saving
                                                                 </Text>
                                                                 <Text
-                                                                    style={{
-                                                                        fontFamily: 'InterMedium',
-                                                                    }}
+                                                                    style={
+                                                                        GLOBAL_STYLESHEET.monaSansSemiBold
+                                                                    }
                                                                     className='text-sm text-gray-600'
                                                                 >
                                                                     Save money for a specific goal
@@ -306,9 +315,9 @@ export default function NewPlanScreen() {
                                                                     Expense
                                                                 </Text>
                                                                 <Text
-                                                                    style={{
-                                                                        fontFamily: 'InterMedium',
-                                                                    }}
+                                                                    style={
+                                                                        GLOBAL_STYLESHEET.monaSansSemiBold
+                                                                    }
                                                                     className='text-sm text-gray-600'
                                                                 >
                                                                     Put money aside for a projected
@@ -336,7 +345,10 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Plan Category
                         </Text>
                         <>
@@ -356,6 +368,17 @@ export default function NewPlanScreen() {
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
+                                            // renderItem={(item) => (
+                                            //     <View className='w-[105%] border items-center border-purple-200 bg-purple-50 rounded-xl my-0.5 flex flex-row p-2.5 -mx-2.5'>
+                                            //         <View className='h-5 w-5 bg-purple-500 rounded-full' />
+                                            //         <Text
+                                            //             style={GLOBAL_STYLESHEET.monaSansBold}
+                                            //             className='text-base text-black'
+                                            //         >
+                                            //             {item.label}
+                                            //         </Text>
+                                            //     </View>
+                                            // )}
                                         />
                                     </>
                                 )}
@@ -373,7 +396,10 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Currency
                         </Text>
                         <>
@@ -414,7 +440,10 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-xs text-gray-600'
+                        >
                             Target
                         </Text>
 
@@ -431,7 +460,7 @@ export default function NewPlanScreen() {
                                 <>
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='0.00'
                                         keyboardType='numeric'
@@ -521,7 +550,10 @@ export default function NewPlanScreen() {
                     <View className='h-1 border-b border-gray-100 w-full' />
 
                     <View>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-xs text-gray-600'
+                        >
                             Deposit Frequency
                         </Text>
                         <Controller

@@ -7,6 +7,7 @@ import CurrentTransactionModal from '@/components/Transactions/molecules/Current
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
+import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
@@ -25,7 +26,7 @@ export default function TransactionHistoryList() {
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);
-                    setShowBottomSheetModal('transactionReceiptIndexScreen', true);
+                    setShowBottomSheetModal('transactionReceipt', true);
                 }}
             />
         ),
@@ -46,8 +47,10 @@ export default function TransactionHistoryList() {
 
     return (
         <>
-            <CurrentTransactionModal modalKey='transactionReceiptIndexScreen' />
-            <View className='flex flex-col mt-5'>
+            <Portal hostName='transactionReceipt'>
+                <CurrentTransactionModal modalKey='transactionReceipt' />
+            </Portal>
+            <View className='flex flex-col mt-5 px-5'>
                 <View className='flex flex-row w-full justify-between items-center'>
                     <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
                         Transaction History
@@ -58,8 +61,8 @@ export default function TransactionHistoryList() {
                         className='flex flex-row items-center space-x-1'
                     >
                         <Text
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            className='text-sm tracking-tighter text-purple-700'
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-sm tracking-tight text-purple-700'
                         >
                             View All
                         </Text>

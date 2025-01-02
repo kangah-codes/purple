@@ -49,7 +49,7 @@ export default function PlanActionMenu() {
                         Delete Plan?
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
                         className='text-sm textblack text-center'
                     >
                         Are you sure you want to delete{' '}

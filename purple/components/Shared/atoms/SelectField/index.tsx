@@ -38,7 +38,7 @@ export default function SelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-200'>
-                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -108,7 +108,7 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -121,7 +121,10 @@ export default function SelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
+                    <Text
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        className='text-xs text-gray-900'
+                    >
                         {truncateStringIfLongerThan(
                             options[val ?? '']?.label ?? `Select an option...`,
                             45,

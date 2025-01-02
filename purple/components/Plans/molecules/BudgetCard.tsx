@@ -45,7 +45,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
 
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatDate(start_date, {
@@ -55,7 +55,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                             })}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatDate(end_date, {
@@ -72,13 +72,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.progressLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatCurrencyAccurate(currency, progressAmount)}
@@ -87,13 +87,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.remainingLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {formatCurrencyAccurate(currency, remainingAmount)}
@@ -102,13 +102,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.targetLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
                             className='text-sm text-black tracking-tighter'
                         >
                             {formatCurrencyAccurate(currency, target)}

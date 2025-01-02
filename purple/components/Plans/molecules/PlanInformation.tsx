@@ -24,7 +24,7 @@ export default function PlanInformation() {
                 <View className='flex flex-row items-center space-x-1'>
                     <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                     <Text
-                        style={GLOBAL_STYLESHEET.interBold}
+                        style={GLOBAL_STYLESHEET.monaSansBold}
                         className='text-purple-500 text-sm tracking-tight'
                     >
                         {formatCurrencyAccurate(currentPlan.currency, amountAdded)} added today

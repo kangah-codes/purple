@@ -14,7 +14,7 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
         fontFamily: 'InterBlack',
     },
     interBold: {
-        fontFamily: 'InterBold',
+        fontFamily: 'MonaSansBold',
     },
     interExtraBold: {
         fontFamily: 'InterExtraBold',
@@ -41,5 +41,34 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
     // onest
     gresaRegular: {
         fontFamily: 'GresaRegular',
+    },
+    mockupDisplay: {
+        fontFamily: 'mockupDisplay',
+    },
+
+    // mona sans
+    monaSansBlack: {
+        fontFamily: 'MonaSansBlack',
+    },
+    monaSansBold: {
+        fontFamily: 'MonaSansBold',
+    },
+    monaSansExtraBold: {
+        fontFamily: 'MonaSansExtraBold',
+    },
+    monaSansExtraLight: {
+        fontFamily: 'MonaSansExtraLight',
+    },
+    monaSansLight: {
+        fontFamily: 'MonaSansLight',
+    },
+    monaSansMedium: {
+        fontFamily: 'MonaSansMedium',
+    },
+    monaSansRegular: {
+        fontFamily: 'MonaSansRegular',
+    },
+    monaSansSemiBold: {
+        fontFamily: 'MonaSansSemiBold',
     },
 });

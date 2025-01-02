@@ -2,13 +2,13 @@ import 'expo-dev-client';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AuthProvider, useAuth } from '@/components/Auth/hooks';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import { useColorScheme } from '@/components/useColorScheme';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { PortalProvider } from '@gorhom/portal';
+import { PortalHost, PortalProvider } from '@gorhom/portal';
 import * as Font from 'expo-font';
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -44,6 +44,16 @@ export default function RootLayout() {
                     InterMedium: require('../assets/fonts/InterDisplay-Medium.ttf'),
                     InterSemiBold: require('../assets/fonts/InterDisplay-SemiBold.ttf'),
                     GresaRegular: require('../assets/fonts/gresa/Gresa-Regular.ttf'),
+                    MockupDisplay: require('../assets/fonts/Mockup-Display.ttf'),
+                    WolfSansRegular: require('../assets/fonts/Wolf-Sans-Regular.ttf'),
+                    MonaSansBlack: require('../assets/fonts/mona-sans/MonaSans-Black.ttf'),
+                    MonaSansBold: require('../assets/fonts/mona-sans/MonaSans-Bold.ttf'),
+                    MonaSansExtraBold: require('../assets/fonts/mona-sans/MonaSans-ExtraBold.ttf'),
+                    MonaSansExtraLight: require('../assets/fonts/mona-sans/MonaSans-ExtraLight.ttf'),
+                    MonaSansLight: require('../assets/fonts/mona-sans/MonaSans-Light.ttf'),
+                    MonaSansMedium: require('../assets/fonts/mona-sans/MonaSans-Medium.ttf'),
+                    MonaSansRegular: require('../assets/fonts/mona-sans/MonaSans-Regular.ttf'),
+                    MonaSansSemiBold: require('../assets/fonts/mona-sans/MonaSans-SemiBold.ttf'),
                 });
             } catch (e) {
                 console.warn(e);
@@ -73,7 +83,13 @@ function RootLayoutNav() {
     const colorScheme = useColorScheme();
     const { isLoading } = useAuth();
 
-    if (isLoading) return null;
+    // portals
+    const { transactionPortal } = useMemo(
+        () => ({
+            transactionPortal: <PortalHost name='transactionReceipt' />,
+        }),
+        [],
+    );
 
     useEffect(() => {
         async function hideSplashScreen() {
@@ -83,6 +99,8 @@ function RootLayoutNav() {
         hideSplashScreen();
     }, []);
 
+    if (isLoading) return null;
+
     return (
         <>
             <GestureHandlerRootView style={{ flex: 1 }}>
@@ -90,6 +108,10 @@ function RootLayoutNav() {
                     <PortalProvider>
                         <ThemeProvider value={DefaultTheme}>
                             <QueryClientProvider client={queryClient}>
+                                {/** Portal Rendering  */}
+                                {transactionPortal}
+
+                                {/** Main Navigation Stack */}
                                 <Stack
                                     screenOptions={{
                                         contentStyle: {

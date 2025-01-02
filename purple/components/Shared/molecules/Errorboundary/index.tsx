@@ -64,7 +64,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={{ fontFamily: 'InterBold' }}
+                                style={{ fontFamily: 'MonaSansBold' }}
                                 className='text-base text-white tracking-tight'
                             >
                                 Try again

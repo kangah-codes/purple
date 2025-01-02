@@ -113,7 +113,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.interRegular,
+                        GLOBAL_STYLESHEET.monaSansSemiBold,
                         {
                             color: styles.labelFontColour,
                         },

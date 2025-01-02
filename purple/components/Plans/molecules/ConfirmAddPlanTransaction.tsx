@@ -49,7 +49,7 @@ export default function ConfirmAddPlanTransaction() {
                         Add Transaction?
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
                         className='text-sm textblack text-center'
                     >
                         {currentPlan.type == 'expense'

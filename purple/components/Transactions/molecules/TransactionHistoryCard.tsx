@@ -82,7 +82,7 @@ export default function TransactionHistoryCard({
                         </Text>
                     )}
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.monaSansBold}
                         className='text-sm text-gray-500 tracking-tighter'
                     >
                         {new Date(data.CreatedAt).toLocaleDateString('en-GB', {

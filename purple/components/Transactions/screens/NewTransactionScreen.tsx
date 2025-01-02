@@ -104,7 +104,10 @@ export default function NewTransactionScreen() {
             return (
                 <View className='flex flex-col space-y-5'>
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Debit Account
                         </Text>
                         <>
@@ -146,7 +149,10 @@ export default function NewTransactionScreen() {
                         </>
                     </View>
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Credit Account
                         </Text>
                         <>
@@ -192,7 +198,7 @@ export default function NewTransactionScreen() {
         }
         return (
             <View>
-                <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                     Account
                 </Text>
                 <>
@@ -253,7 +259,7 @@ export default function NewTransactionScreen() {
 
                         <TouchableOpacity onPress={router.back}>
                             <Text
-                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
                                 className='text-purple-600'
                             >
                                 Cancel
@@ -298,7 +304,10 @@ export default function NewTransactionScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-xs text-gray-600'
+                        >
                             Amount
                         </Text>
 
@@ -310,7 +319,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -332,7 +341,10 @@ export default function NewTransactionScreen() {
                     </View>
 
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Category
                         </Text>
                         <>
@@ -409,7 +421,10 @@ export default function NewTransactionScreen() {
                     {renderAccountFields()}
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Note
                         </Text>
 
@@ -418,7 +433,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}

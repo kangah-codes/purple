@@ -4,14 +4,18 @@ import { Plan } from '../schema';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { router } from 'expo-router';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 
 export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
         <TouchableOpacity
-            className='p-4 border border-gray-200 rounded-2xl flex flex-col w-72 space-y-2.5'
-            style={{
-                marginLeft: index !== 0 ? 20 : 0,
-            }}
+            className='p-4 border bg-white border-purple-200 rounded-2xl flex flex-col w-72 space-y-2.5'
+            style={[
+                {
+                    marginLeft: index !== 0 ? 20 : 0,
+                },
+                styles.planCard,
+            ]}
             onPress={() => {
                 router.push(`/plans/${data.ID}`);
             }}
@@ -40,22 +44,18 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
                 {data.name}
             </Text>
 
-            <View className='h-[1px] bg-gray-200 w-full' />
+            <View className='h-[1px] bg-purple-200 w-full' />
 
             <View className='flex flex-row justify-between items-center'>
                 <Text
-                    style={{
-                        fontFamily: 'InterBold',
-                    }}
-                    className='text-sm text-black tracking-tighter'
+                    style={GLOBAL_STYLESHEET.monaSansBold}
+                    className='text-sm text-gray-600 tracking-tighter'
                 >
                     {formatCurrencyAccurate(data.currency, data.balance)}
                 </Text>
 
                 <Text
-                    style={{
-                        fontFamily: 'InterBold',
-                    }}
+                    style={GLOBAL_STYLESHEET.monaSansBold}
                     className='text-sm text-gray-600 tracking-tighter'
                 >
                     {formatCurrencyAccurate(data.currency, data.target)}
@@ -74,3 +74,16 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
         </TouchableOpacity>
     );
 }
+
+const styles = StyleSheet.create({
+    planCard: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 80,
+        elevation: 3,
+    },
+});

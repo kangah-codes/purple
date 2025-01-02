@@ -14,7 +14,7 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
                     {data.amount}
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.interSemiBold}
+                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
                     className='text-sm text-gray-500 tracking-tighter'
                 >
                     {new Date(data.CreatedAt).toLocaleDateString('en-GB', {

@@ -22,7 +22,7 @@ export function BalanceDisplay({
     return (
         <>
             <View className='flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.gresaRegular} className='text-black text-sm'>
+                <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='text-black text-sm'>
                     Available Balance
                 </Text>
                 {showAmount ? (
@@ -47,7 +47,10 @@ export function BalanceDisplay({
             >
                 {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.gresaRegular} className='text-gray-600 text-base mt-1.5'>
+            <Text
+                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                className='text-black text-base mt-1.5'
+            >
                 {accountName}
             </Text>
         </>

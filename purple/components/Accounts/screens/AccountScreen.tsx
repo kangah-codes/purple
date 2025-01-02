@@ -166,7 +166,10 @@ function AccountScreen(props: AccountScreenProps) {
                     </Text>
 
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                            className='text-purple-600'
+                        >
                             Back
                         </Text>
                     </TouchableOpacity>
@@ -182,7 +185,7 @@ function AccountScreen(props: AccountScreenProps) {
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-purple-500 text-sm tracking-tight'
                         >
                             GHS 250.98 today

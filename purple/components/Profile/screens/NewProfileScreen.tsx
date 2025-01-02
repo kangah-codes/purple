@@ -49,7 +49,7 @@ export default function NewProfileScreen() {
                         {sessionData?.user.username}
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.interMedium}
+                        style={GLOBAL_STYLESHEET.monaSansMedium}
                         className='text-sm text-black tracking-tighter'
                     >
                         {sessionData?.user.email}
@@ -61,7 +61,7 @@ export default function NewProfileScreen() {
             </View>
             <View className='flex flex-row justify-center'>
                 <Text
-                    style={GLOBAL_STYLESHEET.interMedium}
+                    style={GLOBAL_STYLESHEET.monaSansMedium}
                     className='text-sm text-gray-600 tracking-tight'
                 >
                     Purple v{pkg.version}

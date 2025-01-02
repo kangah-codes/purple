@@ -88,7 +88,7 @@ export default function DatePicker({
             }
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -114,7 +114,10 @@ export default function DatePicker({
                         <CalendarIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-xs text-gray-900'>
+                    <Text
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        className='text-xs text-gray-900'
+                    >
                         {date.toDateString()}
                     </Text>
                 </TouchableOpacity>

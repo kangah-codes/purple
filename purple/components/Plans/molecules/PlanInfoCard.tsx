@@ -33,7 +33,7 @@ export default function PlanInfoCard({ type }: PlanInfoCardProps) {
                 </Text>
                 <View className='flex flex-col space-y-1.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
                         className='text-white text-sm tracking-tighter'
                     >
                         {type === 'expense'

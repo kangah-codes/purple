@@ -56,12 +56,12 @@ export default function IndexScreen() {
                     colors={linearGradientColours}
                 />
                 <View
-                    className='flex flex-col px-5'
+                    className='flex flex-col'
                     style={{
                         paddingTop: RNStatusBar.currentHeight,
                     }}
                 >
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg px-5'>
                         Hi, {sessionData?.user.username} 👋
                     </Text>
 
