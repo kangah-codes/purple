@@ -1,11 +1,13 @@
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import { View } from '@/components/Shared/styled';
+import { View, Text } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
 import React, { useCallback } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { usePlanStore } from '../hooks';
 import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
 import { PlanTransaction } from '../schema';
+import { FlashList } from '@shopify/flash-list';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function PlanTransactionsList() {
     const { currentPlan } = usePlanStore();
@@ -23,15 +25,22 @@ export default function PlanTransactionsList() {
         [],
     );
     const renderItemSeparator = useCallback(
-        () => <View className='border-b border-gray-100' />,
+        () => <View className='border-b border-purple-100' />,
         [],
     );
 
     if (!currentPlan) return null;
 
     return (
-        <View>
-            <FlatList
+        <View className='flex flex-col px-5'>
+            <View className='flex flex-row w-full justify-between items-center'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-black'>
+                    Transaction History
+                </Text>
+            </View>
+
+            <FlashList
+                estimatedItemSize={40}
                 data={currentPlan.Transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
@@ -48,6 +57,5 @@ export default function PlanTransactionsList() {
 const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 100,
-        paddingHorizontal: 20,
     },
 });

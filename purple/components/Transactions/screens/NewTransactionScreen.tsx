@@ -253,13 +253,13 @@ export default function NewTransactionScreen() {
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
                     <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                             New Transaction
                         </Text>
 
                         <TouchableOpacity onPress={router.back}>
                             <Text
-                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-purple-600'
                             >
                                 Cancel
@@ -285,7 +285,7 @@ export default function NewTransactionScreen() {
                                         className='w-full flex items-center justify-center py-2.5 rounded-full'
                                     >
                                         <Text
-                                            style={GLOBAL_STYLESHEET.suprapower}
+                                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                                             className='text-sm'
                                         >
                                             {transaction.label}
@@ -305,7 +305,7 @@ export default function NewTransactionScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-xs text-gray-600'
                         >
                             Amount
@@ -319,7 +319,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -433,7 +433,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -463,7 +463,7 @@ export default function NewTransactionScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
                                 Save
                             </Text>
                         )}

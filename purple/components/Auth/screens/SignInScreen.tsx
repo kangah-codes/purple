@@ -189,7 +189,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='gyimihendrix'
                                                 onChangeText={onChange}
@@ -226,7 +226,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='password'
                                                 onChangeText={onChange}

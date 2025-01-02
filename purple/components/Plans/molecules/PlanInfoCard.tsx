@@ -23,17 +23,17 @@ export default function PlanInfoCard({ type }: PlanInfoCardProps) {
 
     return (
         <LinearGradient
-            className='w-full p-5 rounded-2xl flex flex-col justify-center space-y-4 relative'
+            className='w-full p-5 rounded-3xl flex flex-col justify-center space-y-4 relative'
             colors={linearGradientColours}
             style={style.linearGradient}
         >
             <View className='flex flex-col'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-5xl'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white text-5xl'>
                     {budgetDetails.totalExpensePercentage.toFixed(2)}%
                 </Text>
                 <View className='flex flex-col space-y-1.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-white text-sm tracking-tighter'
                     >
                         {type === 'expense'

@@ -24,10 +24,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     const labels = getLabelsByType();
 
     return (
-        <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)}>
-            <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full bg-white'>
+        <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)} activeOpacity={0.9}>
+            <View
+                className='p-4 border border-purple-200 rounded-3xl flex flex-col space-y-2.5 w-full bg-white'
+                style={styles.planCard}
+            >
                 <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
                         {truncateStringIfLongerThan(name, 20)}
                     </Text>
                 </View>
@@ -45,8 +48,8 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
 
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
-                            className='text-sm text-black tracking-tighter'
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            className='text-sm text-black'
                         >
                             {formatDate(start_date, {
                                 year: 'numeric',
@@ -55,8 +58,8 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                             })}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
-                            className='text-sm text-black tracking-tighter'
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            className='text-sm text-black'
                         >
                             {formatDate(end_date, {
                                 year: 'numeric',
@@ -72,14 +75,14 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.progressLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
-                            className='text-sm text-black tracking-tighter'
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            className='text-sm text-black'
                         >
                             {formatCurrencyAccurate(currency, progressAmount)}
                         </Text>
@@ -87,13 +90,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.remainingLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {formatCurrencyAccurate(currency, remainingAmount)}
@@ -102,14 +105,14 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.targetLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
-                            className='text-sm text-black tracking-tighter'
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            className='text-sm text-black'
                         >
                             {formatCurrencyAccurate(currency, target)}
                         </Text>
@@ -119,3 +122,16 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
         </TouchableOpacity>
     );
 }
+
+const styles = StyleSheet.create({
+    planCard: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+});

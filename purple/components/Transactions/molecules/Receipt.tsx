@@ -15,7 +15,7 @@ const creditGradientColours = ['#34D399', '#059669'];
 
 export const ReceiptHeader = React.memo(() => (
     <View className='w-full items-center mb-5'>
-        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg text-gray-700'>
+        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-gray-700'>
             Receipt
         </Text>
     </View>
@@ -114,13 +114,10 @@ export const CategoryIcon = React.memo(({ type }: { type: Transaction['Type'] })
 
 export const ReceiptDetail = React.memo(({ label, value }: any) => (
     <View className='w-full mb-5'>
-        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-sm text-black'>
+        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-sm text-black'>
             {label}
         </Text>
-        <Text
-            style={GLOBAL_STYLESHEET.monaSansSemiBold}
-            className='text-sm text-black tracking-tighter'
-        >
+        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-black'>
             {value}
         </Text>
     </View>

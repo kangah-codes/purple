@@ -25,7 +25,7 @@ export default function PlanNavigationArea() {
             >
                 <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                 {truncateStringIfLongerThan(currentPlan.name as string, 20)}
             </Text>
 

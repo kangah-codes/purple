@@ -125,7 +125,7 @@ export default function SignUpScreen() {
                         <View style={tw`mt-5 mb-5`}>
                             <Text
                                 style={[
-                                    GLOBAL_STYLESHEET.suprapower,
+                                    GLOBAL_STYLESHEET.gramatikaBlack,
                                     tw`text-2xl text-black text-center`,
                                 ]}
                             >
@@ -160,7 +160,7 @@ export default function SignUpScreen() {
                                             <AsyncInput
                                                 // @ts-ignore
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Username'
                                                 onChangeText={(data) => {
@@ -204,7 +204,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Email'
                                                 onChangeText={onChange}
@@ -244,7 +244,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Password'
                                                 onChangeText={onChange}
@@ -282,7 +282,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Confirm Password'
                                                 onChangeText={onChange}

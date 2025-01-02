@@ -38,7 +38,7 @@ export default function SelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-gray-200'>
-                <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -62,7 +62,7 @@ export default function SelectField({
                         label && (
                             <View className='px-5 py-1'>
                                 <Text
-                                    style={{ fontFamily: 'Suprapower' }}
+                                    style={{ fontFamily: 'GramatikaBold' }}
                                     className='text-base text-gray-900'
                                 >
                                     {label}
@@ -108,7 +108,7 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
+                    <Text style={{ fontFamily: 'GramatikaBold' }} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -122,7 +122,7 @@ export default function SelectField({
                     </View>
 
                     <Text
-                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-xs text-gray-900'
                     >
                         {truncateStringIfLongerThan(

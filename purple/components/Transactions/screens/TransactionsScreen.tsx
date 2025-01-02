@@ -142,21 +142,18 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             <ExpoStatusBar style='dark' />
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 {showBackButton && accountName ? (
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         {truncateStringIfLongerThan(accountName as string, 20)}
                     </Text>
                 ) : (
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         My Transactions
                     </Text>
                 )}
 
                 {showBackButton && (
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Text
-                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
-                            className='text-purple-600'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
                             Back
                         </Text>
                     </TouchableOpacity>

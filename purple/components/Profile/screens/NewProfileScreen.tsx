@@ -31,7 +31,7 @@ export default function NewProfileScreen() {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                     My Profile
                 </Text>
             </View>
@@ -45,7 +45,7 @@ export default function NewProfileScreen() {
                 />
 
                 <View className='flex flex-col items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-2xl text-black'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-2xl text-black'>
                         {sessionData?.user.username}
                     </Text>
                     <Text

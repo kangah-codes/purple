@@ -14,6 +14,7 @@ import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 
 export const unstable_settings = {
     initialRouteName: 'onboarding/steps',
@@ -53,7 +54,19 @@ export default function RootLayout() {
                     MonaSansLight: require('../assets/fonts/mona-sans/MonaSans-Light.ttf'),
                     MonaSansMedium: require('../assets/fonts/mona-sans/MonaSans-Medium.ttf'),
                     MonaSansRegular: require('../assets/fonts/mona-sans/MonaSans-Regular.ttf'),
-                    MonaSansSemiBold: require('../assets/fonts/mona-sans/MonaSans-SemiBold.ttf'),
+                    gramatikaMedium: require('../assets/fonts/mona-sans/MonaSans-SemiBold.ttf'),
+                    GramatikaBlack: require('../assets/fonts/gramatika/GramatikaBlack.otf'),
+                    GramatikaBlackItalic: require('../assets/fonts/gramatika/GramatikaBlackItalic.otf'),
+                    GramatikaBold: require('../assets/fonts/gramatika/GramatikaBold.otf'),
+                    GramatikaBoldItalic: require('../assets/fonts/gramatika/GramatikaBoldItalic.otf'),
+                    GramatikaExtraLight: require('../assets/fonts/gramatika/GramatikaExtraLight.otf'),
+                    GramatikaExtraLightItalic: require('../assets/fonts/gramatika/GramatikaExtraLightItalic.otf'),
+                    GramatikaLight: require('../assets/fonts/gramatika/GramatikaLight.otf'),
+                    GramatikaLightItalic: require('../assets/fonts/gramatika/GramatikaLightItalic.otf'),
+                    GramatikaMedium: require('../assets/fonts/gramatika/GramatikaMedium.otf'),
+                    GramatikaMediumItalic: require('../assets/fonts/gramatika/GramatikaMediumItalic.otf'),
+                    GramatikaRegular: require('../assets/fonts/gramatika/GramatikaRegular.otf'),
+                    GramatikaRegularItalic: require('../assets/fonts/gramatika/GramatikaRegularItalic.otf'),
                 });
             } catch (e) {
                 console.warn(e);
@@ -109,7 +122,8 @@ function RootLayoutNav() {
                         <ThemeProvider value={DefaultTheme}>
                             <QueryClientProvider client={queryClient}>
                                 {/** Portal Rendering  */}
-                                {transactionPortal}
+                                {/* {transactionPortal} */}
+                                <CurrentTransactionModal modalKey='transactionReceipt' />
 
                                 {/** Main Navigation Stack */}
                                 <Stack

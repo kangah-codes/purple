@@ -29,7 +29,9 @@ export default function TabLayout() {
                 tabBarLabelStyle: {
                     marginTop: -5, // do this so that on certain android phones it looks better
                     marginBottom: 5,
-                    fontFamily: 'MonaSansBold',
+                    fontFamily: 'GramatikaBold',
+                    lineHeight: 16,
+                    fontSize: 11,
                 },
                 tabBarStyle: [
                     {

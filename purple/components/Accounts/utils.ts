@@ -1,6 +1,5 @@
 import { Transaction } from '../Transactions/schema';
-
-export {};
+import { useAccountStore } from './hooks';
 
 export function createTransactionChartData(
     transactions: Transaction[],
@@ -32,4 +31,9 @@ export function createTransactionChartData(
 
     // Convert the data object to an array of { date, value } objects
     return Object.keys(data).map((date) => ({ date, value: data[date] }));
+}
+
+export function useGetAccountFromStore(accountID: string) {
+    const { accounts } = useAccountStore();
+    return accounts.find((account) => account.ID === accountID);
 }

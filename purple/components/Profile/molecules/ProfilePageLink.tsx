@@ -12,7 +12,7 @@ export default function ProfilePageLink({ icon, title, link }: ProfilePageLinkPr
                         {icon}
                     </View>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.gramatikaBlack}
                         className='text-sm text-black tracking-tight'
                     >
                         {title}

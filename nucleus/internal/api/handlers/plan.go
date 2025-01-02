@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
 	"nucleus/utils"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -347,4 +349,183 @@ func FetchPlan(c *gin.Context) {
 	}
 
 	c.JSON(200, types.Response{Status: http.StatusOK, Message: "Plan fetched successfully", Data: plan})
+}
+
+func CalculatePlanOnTrack(c *gin.Context) {
+	db := utils.GetDB()
+	planID := c.Param("planID")
+	userID, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
+		return
+	}
+
+	if _, err := uuid.Parse(planID); err != nil {
+		utils.ErrorLogger.Println("Invalid UUID", planID, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+		return
+	}
+
+	plan := models.Plan{}
+	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at desc")
+	}).Where("id = ?", planID).First(&plan)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
+		} else {
+			utils.ErrorLogger.Println("Error fetching plan", result.Error)
+			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error fetching plan", Data: nil})
+		}
+		return
+	}
+
+	if plan.UserId != userID {
+		c.JSON(401, types.Response{Status: http.StatusUnauthorized, Message: "Cannot access this plan"})
+		return
+	}
+
+	// Calculate basic metrics
+	now := time.Now()
+	totalDuration := plan.EndDate.Sub(plan.StartDate)
+	elapsedDuration := now.Sub(plan.StartDate)
+	daysRemaining := plan.EndDate.Sub(now).Hours() / 24
+	if daysRemaining < 0 {
+		daysRemaining = 0
+	}
+
+	// Calculate savings progress
+	var amountSaved float64
+	var lastTransactionDate time.Time
+	var longestStreak int
+	var currentStreak int
+	lastDepositDate := plan.StartDate
+
+	for i, transaction := range plan.Transactions {
+		amountSaved += transaction.Amount
+
+		if i == 0 {
+			lastTransactionDate = transaction.CreatedAt
+		}
+
+		// Calculate deposit streaks
+		if i > 0 {
+			daysBetweenDeposits := transaction.CreatedAt.Sub(lastDepositDate).Hours() / 24
+			var expectedInterval float64
+			switch plan.DepositFrequency {
+			case "daily":
+				expectedInterval = 1
+			case "weekly":
+				expectedInterval = 7
+			case "bi-weekly":
+				expectedInterval = 14
+			case "monthly":
+				expectedInterval = 30
+			case "yearly":
+				expectedInterval = 365
+			default:
+				expectedInterval = 1
+			}
+
+			if daysBetweenDeposits <= expectedInterval*1.5 { // Allow 50% buffer
+				currentStreak++
+				if currentStreak > longestStreak {
+					longestStreak = currentStreak
+				}
+			} else {
+				currentStreak = 1
+			}
+		}
+
+		lastDepositDate = transaction.CreatedAt
+	}
+
+	amountRemaining := plan.Target - amountSaved
+	percentageSaved := (amountSaved / plan.Target) * 100
+
+	// Calculate expected progress based on time elapsed
+	expectedProgress := (elapsedDuration.Hours() / totalDuration.Hours()) * 100
+	progressDifference := percentageSaved - expectedProgress
+
+	// Calculate daily savings target based on deposit frequency
+	var depositInterval float64
+	switch plan.DepositFrequency {
+	case "daily":
+		depositInterval = 1
+	case "weekly":
+		depositInterval = 7
+	case "bi-weekly":
+		depositInterval = 14
+	case "monthly":
+		depositInterval = 30
+	case "yearly":
+		depositInterval = 365
+	default:
+		depositInterval = 1
+	}
+
+	periodsSaved := daysRemaining / depositInterval
+	if periodsSaved <= 0 {
+		periodsSaved = 1
+	}
+	periodicSavingsTarget := amountRemaining / periodsSaved
+
+	// Calculate savings pace and status
+	var savingsPace string
+	var onTrack bool
+	if progressDifference >= 5 {
+		savingsPace = "ahead"
+		onTrack = true
+	} else if progressDifference <= -5 {
+		savingsPace = "behind"
+		onTrack = false
+	} else {
+		savingsPace = "on_track"
+		onTrack = true
+	}
+
+	// Calculate next milestone
+	milestones := []float64{25, 50, 75, 100}
+	var nextMilestone float64
+	for _, milestone := range milestones {
+		if percentageSaved < milestone {
+			nextMilestone = milestone
+			break
+		}
+	}
+
+	// Calculate projected completion
+	averageSavingsPerDay := amountSaved / (elapsedDuration.Hours() / 24)
+	var projectedCompletionDate time.Time
+	if averageSavingsPerDay > 0 {
+		daysToComplete := amountRemaining / averageSavingsPerDay
+		projectedCompletionDate = now.AddDate(0, 0, int(daysToComplete))
+	} else {
+		projectedCompletionDate = plan.EndDate
+	}
+
+	response := gin.H{
+		"amount_saved":         amountSaved,
+		"amount_remaining":     amountRemaining,
+		"percentage_saved":     math.Round(percentageSaved*100) / 100,
+		"days_remaining":       math.Round(daysRemaining*100) / 100,
+		"periodic_target":      math.Round(periodicSavingsTarget*100) / 100,
+		"deposit_frequency":    plan.DepositFrequency,
+		"on_track":             onTrack,
+		"savings_pace":         savingsPace,
+		"progress_difference":  math.Round(progressDifference*100) / 100,
+		"next_milestone":       nextMilestone,
+		"longest_streak":       longestStreak,
+		"current_streak":       currentStreak,
+		"projected_completion": projectedCompletionDate,
+		"last_deposit":         lastTransactionDate,
+	}
+
+	c.JSON(200, types.Response{
+		Status:  http.StatusOK,
+		Message: "Plan progress calculated successfully",
+		Data:    response,
+	})
 }

@@ -8,6 +8,8 @@ import {
     SpendingTrendData,
     TrendDataPoint,
 } from './schema';
+import { formatDateTime } from '@/lib/utils/date';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 /**
  * Calculates the total expense details from an array of budget plans.
@@ -163,6 +165,20 @@ function createProgressResponse(
     };
 }
 
+function formatDateLabel(dateStr: string): string {
+    const inputDate = new Date(dateStr);
+    const currentDate = new Date();
+
+    // Format date
+    const month = inputDate.toLocaleString('en-US', { month: 'short' });
+    const date = inputDate.getDate();
+    const year = inputDate.getFullYear();
+    const currentYear = currentDate.getFullYear();
+
+    // Only include year if the date is from a different year
+    return year !== currentYear ? `${date} ${month} ${year}` : `${date} ${month}`;
+}
+
 /**
  * Generates trend data for spending visualization
  *
@@ -225,8 +241,10 @@ export function generateSpendingTrendData(
 
     // Function to normalize values to 0-100 scale
     const normalizeValue = (value: number): number => {
-        if (!normalize || plan.target <= 0) return value;
-        return (value / plan.target) * 100;
+        // if (!normalize || plan.target <= 0) return value;
+        // return (value / plan.target) * 100;
+
+        return value;
     };
 
     // Generate data points
@@ -250,7 +268,13 @@ export function generateSpendingTrendData(
         ideal.push({
             date: dateStr,
             value: Number(normalizeValue(idealAmount).toFixed(2)),
-            ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
+            ...(shouldAddLabel && {
+                labelComponent: () => (
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='leading-5 text-xs'>
+                        {formatDateLabel(dateStr)}
+                    </Text>
+                ),
+            }),
         });
 
         // Calculate actual spending (only up to current date)
@@ -259,7 +283,9 @@ export function generateSpendingTrendData(
             actual.push({
                 date: dateStr,
                 value: Number(normalizeValue(isNaN(actualAmount) ? 0 : actualAmount).toFixed(2)),
-                ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
+                ...(shouldAddLabel && {
+                    labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
+                }),
             });
         }
 
@@ -275,7 +301,9 @@ export function generateSpendingTrendData(
             projected.push({
                 date: dateStr,
                 value: Number(normalizeValue(projectedAmount).toFixed(2)),
-                ...(shouldAddLabel && { labelComponent: () => <Text>{dateStr}</Text> }),
+                ...(shouldAddLabel && {
+                    labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
+                }),
             });
         }
     }

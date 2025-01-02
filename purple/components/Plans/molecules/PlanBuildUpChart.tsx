@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-gifted-charts';
 import { SpendingTrendData } from '../schema';
 import { usePlanStore } from '../hooks';
 import { generateSpendingTrendData } from '../utils';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 
 const screenDimensions = Dimensions.get('screen');
 
@@ -22,38 +23,42 @@ export default function PlanBuildUpChart() {
     if (!currentPlan) return null;
 
     return (
-        <View
-            className='pt-10 -ml-3 mr-3'
-            style={{
-                width: screenDimensions.width + 11,
-            }}
-        >
+        <View className='pt-10 w-full pl-2'>
             <LineChart
-                width={screenDimensions.width}
+                // width={200}
                 height={220}
                 rotateLabel
                 // spacing={25}
                 areaChart
                 curved
-                curvature={0.025}
-                color1='#A855F7'
-                color2='#DB2777'
+                curvature={0.25}
+                color1='#C026D3'
+                color2='#15803D'
                 data={chartData.ideal}
                 data2={chartData.actual}
                 // hideRules
-                hideYAxisText
+                // hideYAxisText
+                yAxisTextStyle={{
+                    fontSize: 12,
+                    fontFamily: 'GramatikaBold',
+                }}
                 // hide the line on the x axis
                 // hideAxesAndRules
-                // spacing={9.2}
-                // noOfSections={4}
-                startFillColor='#A855F7'
+                spacing={9.8}
+                noOfSections={5}
+                // yAxisLabelPrefix='GHS '
+                yAxisLabelWidth={70}
+                startFillColor1='#A855F7'
+                startFillColor2='#10B981'
+                endFillColor2='#F0FDF4'
                 startOpacity={0.5}
-                endFillColor='#FAF5FF'
+                endFillColor1='#FAF5FF'
                 endOpacity={0.3}
+                endSpacing={10}
                 // maxValue={900}
                 hideDataPoints
-                yAxisColor='white'
-                xAxisColor={'white'}
+                yAxisColor='#C026D3'
+                xAxisColor='#C026D3'
                 // hideYAxisText
                 // yAxisThickness={0}
                 // rulesType="solid"
@@ -73,6 +78,16 @@ export default function PlanBuildUpChart() {
                 adjustToWidth
                 // spacing={30}
                 thickness={2.5}
+                xAxisLabelTextStyle={{
+                    alignSelf: 'flex-end',
+                    marginRight: 40,
+                    marginTop: -44,
+                }}
+                labelsExtraHeight={50}
+                // labelWidth={100}
+                // showValuesAsTopLabel
+                xAxisLabelsVerticalShift={20}
+                formatYLabel={(value) => formatCurrencyRounded(Number(value), currentPlan.currency)}
             />
         </View>
     );

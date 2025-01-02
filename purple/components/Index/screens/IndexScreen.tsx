@@ -61,7 +61,7 @@ export default function IndexScreen() {
                         paddingTop: RNStatusBar.currentHeight,
                     }}
                 >
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg px-5'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg px-5'>
                         Hi, {sessionData?.user.username} 👋
                     </Text>
 

@@ -1,11 +1,11 @@
 import { Text, View } from '@/components/Shared/styled';
-import MegaphoneIcon from '@/components/SVG/24x24';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { useCallback, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
-import tw from 'twrnc';
+import React from 'react';
+import { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 import { BaseToastProps } from 'react-native-toast-message';
+import tw from 'twrnc';
 
 interface ToastProps extends BaseToastProps {
     type: 'info' | 'warning' | 'error' | 'success';
@@ -102,7 +102,7 @@ export default function Toast({ type, ...props }: ToastProps) {
             <View className='flex flex-col'>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.suprapower,
+                        GLOBAL_STYLESHEET.gramatikaBold,
                         {
                             color: styles.titleFontColour,
                         },
@@ -113,12 +113,12 @@ export default function Toast({ type, ...props }: ToastProps) {
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.monaSansSemiBold,
+                        GLOBAL_STYLESHEET.gramatikaMedium,
                         {
                             color: styles.labelFontColour,
                         },
                     ]}
-                    className='text-sm tracking-tighter'
+                    className='text-sm'
                 >
                     {props.text2}
                 </Text>

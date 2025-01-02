@@ -8,6 +8,7 @@ import TransactionHistoryCard from '@/components/Transactions/molecules/Transact
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { Portal } from '@gorhom/portal';
+import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
 import { FlatList, Platform, StyleSheet } from 'react-native';
@@ -47,13 +48,13 @@ export default function TransactionHistoryList() {
 
     return (
         <>
-            <Portal hostName='transactionReceipt'>
+            {/* <Portal hostName='transactionReceipt'>
                 <CurrentTransactionModal modalKey='transactionReceipt' />
-            </Portal>
+            </Portal> */}
             <View className='flex flex-col mt-5 px-5'>
                 <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
-                        Transaction History
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                        Recent Transactions
                     </Text>
 
                     <TouchableOpacity
@@ -61,8 +62,8 @@ export default function TransactionHistoryList() {
                         className='flex flex-row items-center space-x-1'
                     >
                         <Text
-                            style={GLOBAL_STYLESHEET.monaSansBold}
-                            className='text-sm tracking-tight text-purple-700'
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            className='text-sm text-purple-700'
                         >
                             View All
                         </Text>
@@ -70,7 +71,8 @@ export default function TransactionHistoryList() {
                     </TouchableOpacity>
                 </View>
 
-                <FlatList
+                <FlashList
+                    estimatedItemSize={50}
                     data={getTopFiveTransactions()}
                     keyExtractor={keyExtractor}
                     contentContainerStyle={styles.flatlistContainerStyle}

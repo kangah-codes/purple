@@ -63,7 +63,7 @@ export default function Landing() {
                     >
                         <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
                             <Text
-                                style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-base text-black tracking-tight'
                             >
                                 Sign In

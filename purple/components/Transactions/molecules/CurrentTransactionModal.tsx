@@ -4,10 +4,10 @@ import { useTransactionStore } from '@/components/Transactions/hooks';
 import { CategoryIcon, ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
-import { formatDate } from '@/lib/utils/date';
+import { formatDate, formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { isNotEmptyString } from '@/lib/utils/string';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 
@@ -23,6 +23,11 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
     const { currentTransaction } = useTransactionStore();
 
     if (!currentTransaction) return null;
+
+    const transactionDate = useMemo(
+        () => formatDateTime(currentTransaction.CreatedAt),
+        [currentTransaction?.CreatedAt],
+    );
 
     return (
         <CustomBottomSheetModal
@@ -48,7 +53,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                     >
                         <CategoryIcon type={currentTransaction.Type} />
                         <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                             className='text-lg text-white mt-2.5'
                         >
                             {currentTransaction.category}
@@ -56,7 +61,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                     </LinearGradient>
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
                         <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                             className='text-3xl text-black mb-5'
                         >
                             {formatCurrencyAccurate(
@@ -72,13 +77,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
 
                         <ReceiptDetail
                             label='Date'
-                            value={formatDate(currentTransaction.CreatedAt, {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: 'numeric',
-                                minute: 'numeric',
-                            })}
+                            value={`${transactionDate.date} at ${transactionDate.time}`}
                         />
                     </View>
                     <Svg height={12} width='100%' fill={drawerBackground} stroke={drawerBackground}>

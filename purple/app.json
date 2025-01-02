@@ -58,7 +58,19 @@
                         "./assets/fonts/mona-sans/MonaSans-Light.ttf",
                         "./assets/fonts/mona-sans/MonaSans-Medium.ttf",
                         "./assets/fonts/mona-sans/MonaSans-Regular.ttf",
-                        "./assets/fonts/mona-sans/MonaSans-SemiBold.ttf"
+                        "./assets/fonts/mona-sans/MonaSans-SemiBold.ttf",
+                        "./assets/fonts/gramatika/GramatikaBlack.otf",
+                        "./assets/fonts/gramatika/GramatikaBlackItalic.otf",
+                        "./assets/fonts/gramatika/GramatikaBold.otf",
+                        "./assets/fonts/gramatika/GramatikaBoldItalic.otf",
+                        "./assets/fonts/gramatika/GramatikaExtraLight.otf",
+                        "./assets/fonts/gramatika/GramatikaExtraLightItalic.otf",
+                        "./assets/fonts/gramatika/GramatikaLight.otf",
+                        "./assets/fonts/gramatika/GramatikaLightItalic.otf",
+                        "./assets/fonts/gramatika/GramatikaMedium.otf",
+                        "./assets/fonts/gramatika/GramatikaMediumItalic.otf",
+                        "./assets/fonts/gramatika/GramatikaRegular.otf",
+                        "./assets/fonts/gramatika/GramatikaRegularItalic.otf"
                     ]
                 }
             ],

@@ -14,12 +14,12 @@ function AccountSummary({
 }) {
     return (
         <View className='flex flex-col items-center'>
-            <Text style={GLOBAL_STYLESHEET.monaSansSemiBold} className='tracking-tighter'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tighter'>
                 {title}
             </Text>
             <Text
                 style={[
-                    GLOBAL_STYLESHEET.monaSansBold,
+                    GLOBAL_STYLESHEET.gramatikaMedium,
                     {
                         color,
                     },

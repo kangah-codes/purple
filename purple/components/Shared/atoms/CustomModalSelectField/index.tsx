@@ -71,7 +71,7 @@ export default function CustomModalSelectField({
                     </View>
 
                     <Text
-                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-xs text-gray-900'
                     >
                         {truncateStringIfLongerThan(

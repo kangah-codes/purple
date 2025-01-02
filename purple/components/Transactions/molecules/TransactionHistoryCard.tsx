@@ -9,7 +9,8 @@ import {
 import { LinearGradient, Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { formatDateTime } from '@/lib/utils/date';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -26,6 +27,8 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
+    const date = useMemo(() => formatDateTime(data.CreatedAt), [data.CreatedAt]);
+
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -77,29 +80,25 @@ export default function TransactionHistoryCard({
             <View className='flex flex-row justify-between items-center flex-grow'>
                 <View className='flex flex-col'>
                     {showTitle && (
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
                             {truncateStringIfLongerThan(data.category, 30)}
                         </Text>
                     )}
                     <Text
-                        style={GLOBAL_STYLESHEET.monaSansBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-sm text-gray-500 tracking-tighter'
                     >
-                        {new Date(data.CreatedAt).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                        })}
+                        {date.date} • {date.time}
                     </Text>
                 </View>
 
                 <View className='flex flex-row space-x-2 items-center'>
                     <Text
                         style={{
-                            ...GLOBAL_STYLESHEET.suprapower,
+                            ...GLOBAL_STYLESHEET.gramatikaBlack,
                             color: data.Type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
                         }}
-                        className='text-xs'
+                        className='text-sm'
                     >
                         {data.Type === 'debit' ? '-' : '+'}
                         {/* {JSON.stringify(data.account)} */}

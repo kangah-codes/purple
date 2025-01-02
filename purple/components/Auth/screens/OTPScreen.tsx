@@ -67,10 +67,7 @@ export default function OTPScreen() {
                 <TouchableOpacity onPress={router.back}>
                     <View className='flex flex-row space-x-2 items-center'>
                         <ChevronLeftIcon strokeWidth={3} width={17} stroke='#9333ea' />
-                        <Text
-                            style={GLOBAL_STYLESHEET.monaSansSemiBold}
-                            className='text-purple-600'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
                             Back
                         </Text>
                     </View>
@@ -131,7 +128,7 @@ export default function OTPScreen() {
                                                 }) => (
                                                     <InputField
                                                         className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                        style={GLOBAL_STYLESHEET.monaSansSemiBold}
+                                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                         cursorColor={'#8B5CF6'}
                                                         placeholder='Email address'
                                                         onChangeText={onChange}

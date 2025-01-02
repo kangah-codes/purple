@@ -41,14 +41,19 @@ export function ActionButton({
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>
-            <Text style={[GLOBAL_STYLESHEET.monaSansSemiBold, styles.actionText]}>{label}</Text>
+            <Text
+                style={[GLOBAL_STYLESHEET.gramatikaMedium, styles.actionText]}
+                className='leading-[14px]'
+            >
+                {label}
+            </Text>
         </View>
     );
 }
 
 export default function ActionButtons({ account }: { account: Account }) {
     return (
-        <View className='flex-row justify-between items-stretch w-auto px-20 pt-2.5'>
+        <View className='flex-row justify-between items-stretch w-auto px-20 py-2.5'>
             <ActionButton
                 IconComponent={ArrowCircleDownIcon}
                 label='Income'

@@ -69,6 +69,44 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
         fontFamily: 'MonaSansRegular',
     },
     monaSansSemiBold: {
-        fontFamily: 'MonaSansSemiBold',
+        fontFamily: 'monaSansSemiBold',
+    },
+
+    // gramatika
+    gramatikaBlack: {
+        fontFamily: 'GramatikaBlack',
+    },
+    gramatikaBlackItalic: {
+        fontFamily: 'GramatikaBlackItalic',
+    },
+    gramatikaBold: {
+        fontFamily: 'GramatikaBold',
+    },
+    gramatikaBoldItalic: {
+        fontFamily: 'GramatikaBoldItalic',
+    },
+    gramatikaExtraLight: {
+        fontFamily: 'GramatikaExtraLight',
+    },
+    gramatikaExtraLightItalic: {
+        fontFamily: 'GramatikaExtraLightItalic',
+    },
+    gramatikaLight: {
+        fontFamily: 'GramatikaLight',
+    },
+    gramatikaLightItalic: {
+        fontFamily: 'GramatikaLightItalic',
+    },
+    gramatikaMedium: {
+        fontFamily: 'GramatikaMedium',
+    },
+    gramatikaMediumItalic: {
+        fontFamily: 'GramatikaMediumItalic',
+    },
+    gramatikaRegular: {
+        fontFamily: 'GramatikaRegular',
+    },
+    gramatikaRegularItalic: {
+        fontFamily: 'GramatikaRegularItalic',
     },
 });
