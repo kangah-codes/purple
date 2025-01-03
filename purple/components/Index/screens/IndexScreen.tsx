@@ -66,7 +66,7 @@ export default function IndexScreen() {
                     </Text>
 
                     <ScrollView
-                        className='mt-5 h-full space-y-5'
+                        className='mt-5 h-full'
                         contentContainerStyle={styles.scrollView}
                         showsVerticalScrollIndicator={false}
                         refreshControl={

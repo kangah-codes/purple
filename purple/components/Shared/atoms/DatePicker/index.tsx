@@ -17,6 +17,7 @@ type DatePickerProps = {
     pickerKey: string;
     minimumDate?: Date;
     maximumDate?: Date;
+    value: Date;
 };
 
 export default function DatePicker({
@@ -25,13 +26,12 @@ export default function DatePicker({
     pickerKey,
     minimumDate,
     maximumDate,
+    value,
 }: DatePickerProps) {
-    const [date, setDate] = useState(new Date());
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const onDateChange = (_event: DateTimePickerEvent, selectedDate: Date | undefined) => {
         const currentDate = selectedDate;
-        if (currentDate) setDate(currentDate);
 
         // call the callback function if it exists
         if (currentDate && typeof onChange === 'function') onChange(currentDate);
@@ -74,7 +74,7 @@ export default function DatePicker({
                             )}
                             <DateTimePicker
                                 testID='dateTimePicker'
-                                value={date}
+                                value={value}
                                 mode={'date'}
                                 is24Hour={true}
                                 onChange={onDateChange}
@@ -99,7 +99,7 @@ export default function DatePicker({
                         } else {
                             // use imperative api for android since it's better
                             DateTimePickerAndroid.open({
-                                value: date,
+                                value,
                                 onChange: onDateChange,
                                 mode: 'date',
                                 is24Hour: true,
@@ -118,7 +118,7 @@ export default function DatePicker({
                         style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-xs text-gray-900'
                     >
-                        {date.toDateString()}
+                        {value.toDateString()}
                     </Text>
                 </TouchableOpacity>
             </View>

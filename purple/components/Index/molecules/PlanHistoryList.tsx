@@ -59,24 +59,21 @@ export default function PlanHistoryList() {
                     <ChevronRightIcon stroke='#9333ea' />
                 </TouchableOpacity>
             </View>
-            <FlashList
-                estimatedItemSize={150}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={plans}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                ListEmptyComponent={renderEmptylist}
-                contentContainerStyle={{
-                    paddingHorizontal: 20, // Adjust based on your shadow spread
-                    paddingVertical: 10, // Adjust based on your shadow spread
-                }}
-                // Add style to the FlatList itself
-                style={{
-                    // marginHorizontal: -8, // Compensate for the padding to maintain alignment
-                    marginVertical: -8,
-                }}
-            />
+            <View className='-my-2'>
+                <FlashList
+                    estimatedItemSize={150}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={plans}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                    ListEmptyComponent={renderEmptylist}
+                    contentContainerStyle={{
+                        paddingHorizontal: 20, // Adjust based on your shadow spread
+                        paddingVertical: 10, // Adjust based on your shadow spread
+                    }}
+                />
+            </View>
         </View>
     );
 }

@@ -157,13 +157,13 @@ export default function SignInScreen() {
                         </View>
                         <View className='flex flex-col space-y-2.5'>
                             <Text
-                                style={{ fontFamily: 'Suprapower' }}
+                                style={GLOBAL_STYLESHEET.gramatikaBlack}
                                 className='text-2xl text-black text-center'
                             >
                                 Welcome back!
                             </Text>
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-sm textblack text-center'
                             >
                                 Enjoy a seamless experience with Purple and take control of your
@@ -177,7 +177,7 @@ export default function SignInScreen() {
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Username
@@ -213,7 +213,7 @@ export default function SignInScreen() {
 
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Password
@@ -256,8 +256,8 @@ export default function SignInScreen() {
                                             <ActivityIndicator size={18} color='#fff' />
                                         ) : (
                                             <Text
-                                                style={{ fontFamily: 'MonaSansBold' }}
-                                                className='text-base text-white tracking-tight'
+                                                style={GLOBAL_STYLESHEET.gramatikaBlack}
+                                                className='text-base text-white'
                                             >
                                                 Sign In
                                             </Text>
@@ -268,7 +268,7 @@ export default function SignInScreen() {
                                 <View className='flex flex-row justify-between'>
                                     <TouchableOpacity onPress={() => router.push('/auth/otp')}>
                                         <Text
-                                            style={{ fontFamily: 'MonaSansBold' }}
+                                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                                             className='text-xs text-purple-500'
                                         >
                                             Forgot your password?
@@ -279,7 +279,7 @@ export default function SignInScreen() {
                                         onPress={() => router.replace('/auth/sign-up')}
                                     >
                                         <Text
-                                            style={{ fontFamily: 'MonaSansBold' }}
+                                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                                             className='text-xs text-purple-500'
                                         >
                                             New here? Sign Up

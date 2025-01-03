@@ -3,23 +3,22 @@ import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBo
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
-import { Portal } from '@gorhom/portal';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect } from 'react';
-import { FlatList, Platform, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
+import { Platform, StyleSheet } from 'react-native';
 
 export default function TransactionHistoryList() {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { transactions, currentTransaction, setCurrentTransaction, setTransactions } =
-        useTransactionStore();
+    const { transactions, setCurrentTransaction } = useTransactionStore();
     const getTopFiveTransactions = useCallback(() => {
         return transactions.slice(0, 5);
     }, [transactions]);
+
+    console.log('TRAN', getTopFiveTransactions(), transactions);
 
     const renderItem = useCallback(
         ({ item }: any) => (
@@ -51,7 +50,7 @@ export default function TransactionHistoryList() {
             {/* <Portal hostName='transactionReceipt'>
                 <CurrentTransactionModal modalKey='transactionReceipt' />
             </Portal> */}
-            <View className='flex flex-col mt-5 '>
+            <View className='flex flex-col mt-2.5'>
                 <View className='flex flex-row w-full justify-between items-center px-5'>
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
                         Recent Transactions

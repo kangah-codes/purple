@@ -4,6 +4,7 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import React from 'react';
 import tw from 'twrnc';
 
 export default function Landing() {
@@ -25,14 +26,14 @@ export default function Landing() {
             <View className='w-full px-5 space-y-5 flex flex-col items-center justify-center bg-white flex-grow'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={{ fontFamily: 'Suprapower' }}
+                        style={GLOBAL_STYLESHEET.gramatikaBlack}
                         className='text-2xl text-black text-center'
                     >
                         Take your personal finance into your own hands!
                     </Text>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
-                        className='text-sm textblack text-center'
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        className='text-sm text-black text-center'
                     >
                         Enjoy a seamless experience with Purple and take control of your finances
                         today!
@@ -49,8 +50,8 @@ export default function Landing() {
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={{ fontFamily: 'MonaSansBold' }}
-                                className='text-base text-white tracking-tight'
+                                style={GLOBAL_STYLESHEET.gramatikaBold}
+                                className='text-base text-white'
                             >
                                 Sign Up
                             </Text>
@@ -63,7 +64,7 @@ export default function Landing() {
                     >
                         <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
                             <Text
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                style={GLOBAL_STYLESHEET.gramatikaBold}
                                 className='text-base text-black tracking-tight'
                             >
                                 Sign In
@@ -73,7 +74,7 @@ export default function Landing() {
 
                     <ExternalLink href='https://purpleapp.vercel.app'>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-xs text-purple-500 text-center'
                         >
                             Terms and Conditions

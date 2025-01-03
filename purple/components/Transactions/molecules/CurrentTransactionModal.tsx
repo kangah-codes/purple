@@ -23,15 +23,13 @@ type CurrentTransactionModalProps = {
 export default function CurrentTransactionModal({ modalKey }: CurrentTransactionModalProps) {
     const { currentTransaction } = useTransactionStore();
 
-    if (!currentTransaction) return null;
-
-    const account = useGetAccountFromStore(currentTransaction.account_id);
+    const account = useGetAccountFromStore(currentTransaction?.account_id ?? '');
     const transactionDate = useMemo(
-        () => formatDateTime(currentTransaction.CreatedAt),
+        () => formatDateTime(currentTransaction?.CreatedAt ?? ''),
         [currentTransaction?.CreatedAt],
     );
 
-    console.log(currentTransaction);
+    if (!currentTransaction) return null;
 
     return (
         <CustomBottomSheetModal
@@ -55,10 +53,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         className='w-full py-5 items-center justify-center'
                         colors={linearGradient}
                     >
-                        <View
-                            style={styles.categoryIcon}
-                            className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'
-                        >
+                        <View className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'>
                             <Text className='absolute text-lg'>
                                 {extractEmojiOrDefault(currentTransaction.category, '❔')}
                             </Text>
@@ -67,7 +62,9 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             style={GLOBAL_STYLESHEET.gramatikaBlack}
                             className='text-lg text-white mt-2.5'
                         >
-                            {currentTransaction.category.split(' ').slice(1).join(' ')}
+                            {currentTransaction.category.includes(' ')
+                                ? currentTransaction.category.split(' ').slice(1).join(' ')
+                                : currentTransaction.category}
                         </Text>
                     </LinearGradient>
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
@@ -101,17 +98,14 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             <View className='h-5 w-5 bg-white absolute -right-[30] -top-[10] rounded-full' />
                             <View className='border-b border-gray-200 w-full mb-5' />
                         </View>
-                        {/* <ReceiptDetail label='Category' value={currentTransaction.category} /> */}
-                        {isNotEmptyString(currentTransaction.note) && (
-                            <ReceiptDetail label='Note' value={currentTransaction.note} />
-                        )}
-
                         <ReceiptDetail
                             label='Date'
                             value={`${transactionDate.date} at ${transactionDate.time}`}
                         />
-
                         <ReceiptDetail label='Account' value={account?.name} />
+                        {isNotEmptyString(currentTransaction.note) && (
+                            <ReceiptDetail label='Note' value={currentTransaction.note} />
+                        )}
                     </View>
                     <Svg height={12} width='100%' fill={drawerBackground} stroke={drawerBackground}>
                         {ZIGZAG_VIEW}
@@ -159,15 +153,5 @@ const styles = StyleSheet.create({
     },
     arrowRight: {
         position: 'absolute',
-    },
-    categoryIcon: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 80,
-        elevation: 3,
     },
 });

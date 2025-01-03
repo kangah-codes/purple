@@ -14,13 +14,11 @@ type TransactionHistoryCardProps = {
 
 export default function PlanTransactionHistoryCard({ data }: TransactionHistoryCardProps) {
     const { currentPlan } = usePlanStore();
-    const account = useGetAccountFromStore(data.debit_account_id);
+    const account = useGetAccountFromStore(data.debit_account_id as string);
 
     if (!currentPlan) return null;
 
     const date = formatDateTime(data.CreatedAt);
-
-    console.log(data.debit_account_id);
 
     return (
         <View className='flex flex-col py-2.5'>

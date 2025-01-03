@@ -4,12 +4,16 @@ import {
     BudgetPlan,
     ExpenseCalculationResult,
     Plan,
+    PlanAccountPieChartStats,
+    PlanTransaction,
     SpendingProgress,
     SpendingTrendData,
     TrendDataPoint,
 } from './schema';
 import { formatDateTime } from '@/lib/utils/date';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { Account } from '../Accounts/schema';
+import { generatePalette } from '@/lib/utils/colour';
 
 /**
  * Calculates the total expense details from an array of budget plans.
@@ -326,4 +330,48 @@ export function calculateAmountAddedOnDay(plan: Plan | null, date?: Date): numbe
 
     // sum up all transactions made on this day
     return transactionsOnDate.reduce((acc, curr) => acc + curr.amount, 0);
+}
+
+export function getAccountTransactionStats(
+    transactions: PlanTransaction[] | undefined,
+    accounts: Account[],
+): PlanAccountPieChartStats[] {
+    if (!transactions) return [];
+
+    // Create a map to store stats for each account
+    const statsMap = new Map<string, PlanAccountPieChartStats>();
+
+    // Create a lookup map for account details
+    const accountMap = new Map(accounts.map((account) => [account.ID, account]));
+
+    // Process all transactions
+    transactions.forEach((transaction) => {
+        if (transaction.debit_account_id) {
+            const account = accountMap.get(transaction.debit_account_id);
+            if (!account) return;
+
+            let stats = statsMap.get(transaction.debit_account_id);
+
+            if (!stats) {
+                const palette = generatePalette(account.ID);
+                stats = {
+                    accountId: account.ID,
+                    accountName: account.name,
+                    value: 0,
+                    amount: 0,
+                    color: palette.color600,
+                    gradientCenterColor: palette.color300,
+                    transactionCount: 0,
+                };
+                statsMap.set(account.ID, stats);
+            }
+
+            stats.transactionCount += 1;
+            stats.value += transaction.amount;
+            stats.amount += transaction.amount;
+        }
+    });
+
+    // Convert map to array and return only accounts with transactions
+    return Array.from(statsMap.values()).sort((a, b) => b.amount - a.amount);
 }

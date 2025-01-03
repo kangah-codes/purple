@@ -6,37 +6,6 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
 import { View } from '@/components/Shared/styled';
 
-const data = [
-    {
-        accountCurrency: 'GHS',
-        accountBalance: 120000,
-        accountName: 'Fidelity Bank Account',
-        cardBackgroundColour: '#FB923C',
-        cardTintColour: '#FED7AA',
-    },
-    {
-        accountCurrency: 'GHS',
-        accountBalance: 98994329,
-        accountName: 'MTN MoMo',
-        cardBackgroundColour: '#FACC15',
-        cardTintColour: '#FEF9C3',
-    },
-    {
-        accountCurrency: 'GHS',
-        accountBalance: 98994329,
-        accountName: 'Prepaid Card',
-        cardBackgroundColour: '#FACC15',
-        cardTintColour: '#FEF9C3',
-    },
-    {
-        accountCurrency: 'GHS',
-        accountBalance: 98994329,
-        accountName: 'MTN MoMo',
-        cardBackgroundColour: '#FACC15',
-        cardTintColour: '#FEF9C3',
-    },
-];
-
 const styles = {
     sliderWidth: Dimensions.get('window').width - 40,
     itemWidth: Dimensions.get('window').width - 40,

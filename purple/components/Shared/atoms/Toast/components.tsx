@@ -99,7 +99,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                 {styles.image}
             </View>
 
-            <View className='flex flex-col'>
+            <View className='flex-1 flex-col'>
                 <Text
                     style={[
                         GLOBAL_STYLESHEET.gramatikaBold,
@@ -118,7 +118,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                             color: styles.labelFontColour,
                         },
                     ]}
-                    className='text-sm'
+                    className='text-sm flex-wrap'
                 >
                     {props.text2}
                 </Text>

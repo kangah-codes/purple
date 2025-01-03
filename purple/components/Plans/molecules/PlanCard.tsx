@@ -1,10 +1,11 @@
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { Plan } from '../schema';
-import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { formatCurrencyRounded } from '@/lib/utils/number';
+import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { Plan } from '../schema';
 
 export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
@@ -21,14 +22,9 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
             }}
         >
             <View className='flex flex-row w-full justify-between items-center'>
-                {/* <Text
-                    style={{
-                        fontFamily: 'Suprapower',
-                    }}
-                    className='text-base text-black'
-                >
-                    {data.category}
-                </Text> */}
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                    {truncateStringIfLongerThan(data.name, 20)}
+                </Text>
 
                 <View className='rounded-full bg-purple-600 px-2.5 py-0.5'>
                     <Text
@@ -40,19 +36,15 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
                 </View>
             </View>
 
-            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
-                {data.name}
-            </Text>
-
             <View className='h-[1px] bg-purple-200 w-full' />
 
             <View className='flex flex-row justify-between items-center'>
                 <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-sm text-gray-600'>
-                    {formatCurrencyAccurate(data.currency, data.balance)}
+                    {formatCurrencyRounded(data.balance, data.currency)}
                 </Text>
 
                 <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-sm text-gray-600'>
-                    {formatCurrencyAccurate(data.currency, data.target)}
+                    {formatCurrencyRounded(data.target, data.currency)}
                 </Text>
             </View>
 

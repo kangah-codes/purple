@@ -189,7 +189,15 @@ export const fieldPreprocessor = <T extends string>({
     return data;
 };
 
-type KeyMapping<T> = [keyof T, string] | [keyof T, string, (value: T[keyof T]) => any];
+type KeyMapping<T> =
+    | [keyof T, string]
+    | [
+          keyof T,
+          string,
+          (
+              value: T[keyof T],
+          ) => string | number | boolean | null | undefined | ObjectType | ArrayType,
+      ];
 
 type TransformObject<T, U extends KeyMapping<T>[]> = {
     [K in U[number] as K[1]]: K extends [infer OldKey, any, (value: any) => infer R]
@@ -234,4 +242,27 @@ export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): T 
         delete result[key];
     }
     return result;
+}
+
+/**
+ * Excludes specific keys from an object.
+ *
+ * @param obj - The object from which to exclude keys.
+ * @param keysToExclude - An array of keys to exclude.
+ * @returns A new object without the excluded keys.
+ *
+ * @example
+ * const obj = { a: 1, b: 2, c: 3 };
+ * excludeKeys(obj, ['b']); // { a: 1, c: 3 }
+ */
+export function excludeKeys<T extends Record<string, unknown>>(
+    obj: T,
+    keysToExclude: (keyof T)[],
+): Partial<T> {
+    return Object.keys(obj).reduce((acc, key) => {
+        if (!keysToExclude.includes(key as keyof T)) {
+            acc[key as keyof T] = obj[key] as T[keyof T];
+        }
+        return acc;
+    }, {} as Partial<T>);
 }

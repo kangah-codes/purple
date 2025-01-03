@@ -105,7 +105,7 @@ export default function NewTransactionScreen() {
                 <View className='flex flex-col space-y-5'>
                     <View>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Debit Account
@@ -150,7 +150,7 @@ export default function NewTransactionScreen() {
                     </View>
                     <View>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Credit Account
@@ -198,7 +198,7 @@ export default function NewTransactionScreen() {
         }
         return (
             <View>
-                <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                     Account
                 </Text>
                 <>
@@ -259,7 +259,7 @@ export default function NewTransactionScreen() {
 
                         <TouchableOpacity onPress={router.back}>
                             <Text
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                style={GLOBAL_STYLESHEET.gramatikaBold}
                                 className='text-purple-600'
                             >
                                 Cancel
@@ -305,7 +305,7 @@ export default function NewTransactionScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Amount
@@ -318,7 +318,7 @@ export default function NewTransactionScreen() {
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
                                     style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
@@ -342,7 +342,7 @@ export default function NewTransactionScreen() {
 
                     <View>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Category
@@ -364,7 +364,7 @@ export default function NewTransactionScreen() {
                                                 };
                                                 return acc;
                                             }, {} as Record<string, { label: string; value: string }>)}
-                                            customSnapPoints={['30%', '40%']}
+                                            customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
                                         />
@@ -402,6 +402,7 @@ export default function NewTransactionScreen() {
                                     // selectedDate={value}
                                     // make maximim date today
                                     maximumDate={new Date()}
+                                    value={new Date(value)}
                                 />
                             )}
                             name='date'
@@ -422,7 +423,7 @@ export default function NewTransactionScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Note
@@ -432,10 +433,10 @@ export default function NewTransactionScreen() {
                             control={control}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
                                     style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
-                                    placeholder='0.00'
+                                    placeholder='Add a note...'
                                     onChangeText={onChange}
                                     onBlur={onBlur}
                                     value={value}

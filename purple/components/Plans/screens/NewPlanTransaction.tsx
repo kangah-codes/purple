@@ -61,12 +61,12 @@ export default function NewPlanTransactionScreen() {
         mutate(
             { ...transformedData, plan_id: currentPlan!.ID, user_id: sessionData?.user.ID },
             {
-                onError: () => {
+                onError: (err) => {
                     Toast.show({
                         type: 'error',
                         props: {
                             text1: 'Error!',
-                            text2: 'There was an issue creating transaction',
+                            text2: err.message,
                         },
                     });
                 },
@@ -94,7 +94,7 @@ export default function NewPlanTransactionScreen() {
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
                     <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                             New Transaction
                         </Text>
 
@@ -238,7 +238,7 @@ export default function NewPlanTransactionScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
                                 Save
                             </Text>
                         )}

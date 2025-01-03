@@ -82,7 +82,7 @@ export default function NewPlanScreen() {
             category: '',
             target: 0.0,
             start_date: new Date().toISOString(),
-            end_date: new Date().toISOString(),
+            end_date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
             deposit_frequency: '',
             push_notification: false,
             name: '',
@@ -118,13 +118,13 @@ export default function NewPlanScreen() {
         ]);
 
         mutate(transformedData, {
-            onError: () => {
+            onError: (err) => {
                 Toast.show({
                     type: 'error',
-                    props: { text1: 'Error!', text2: 'There was an issue creating plan' },
+                    props: { text1: 'Error!', text2: err.message },
                 });
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Plan created successfully' },
@@ -501,6 +501,7 @@ export default function NewPlanScreen() {
                                     // selectedDate={value}
                                     // make maximim date today
                                     // maximumDate={new Date()}
+                                    value={new Date(value)}
                                     minimumDate={new Date()}
                                 />
                             )}
@@ -531,8 +532,11 @@ export default function NewPlanScreen() {
                                         onChange(date.toISOString());
                                     }}
                                     // selectedDate={value}
-                                    // make maximim date today
-                                    minimumDate={new Date()}
+                                    // make minimum date tomorrow
+                                    value={new Date(value)}
+                                    minimumDate={
+                                        new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+                                    }
                                 />
                             )}
                             name='end_date'

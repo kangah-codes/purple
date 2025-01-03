@@ -1,28 +1,19 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
-import {
-    ArrowNarrowDownRightIcon,
-    ArrowNarrowRightIcon,
-    ArrowNarrowUpRightIcon,
-} from '../../SVG/noscale';
-import { LinearGradient, Text, TouchableOpacity, View } from '../../Shared/styled';
-import { Transaction } from '../schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import React, { useCallback, useMemo } from 'react';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
-import { StyleSheet } from 'react-native';
+import { formatCurrencyAccurate, formatCurrencyRounded } from '@/lib/utils/number';
+import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
+import React, { useCallback, useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { Transaction } from '../schema';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
     onPress: () => void;
     showTitle?: boolean;
 };
-
-const transferGradientColours = ['#c084fc', '#9333ea'];
-const debitGradientColours = ['#EF4444', '#B91C1C'];
-const creditGradientColours = ['#34D399', '#059669'];
 
 export default function TransactionHistoryCard({
     data,
@@ -57,7 +48,9 @@ export default function TransactionHistoryCard({
                     {showTitle && (
                         <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
                             {truncateStringIfLongerThan(
-                                data.category.split(' ').slice(1).join(' '),
+                                data.category.includes(' ')
+                                    ? data.category.split(' ').slice(1).join(' ')
+                                    : data.category,
                                 30,
                             )}
                         </Text>
@@ -84,7 +77,7 @@ export default function TransactionHistoryCard({
                         className='text-sm'
                     >
                         {data.Type === 'debit' ? '-' : data.Type === 'credit' ? '+' : ''}
-                        {formatCurrencyAccurate(data.currency, data.amount)}
+                        {formatCurrencyRounded(data.amount, data.currency)}
                     </Text>
 
                     <ChevronRightIcon stroke='#1F2937' />

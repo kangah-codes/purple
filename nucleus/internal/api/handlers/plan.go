@@ -244,6 +244,14 @@ func AddPlanTransaction(c *gin.Context) {
 			return
 		}
 
+		// create emoji for plan type
+		var planEmoji string
+		if plan.Type == "saving" {
+			planEmoji = "💰"
+		} else {
+			planEmoji = "📉"
+		}
+
 		// create a transaction for the account
 		accTransaction := models.Transaction{
 			AccountId:   account.ID,
@@ -251,7 +259,7 @@ func AddPlanTransaction(c *gin.Context) {
 			Type:        "debit",
 			Amount:      transaction.Amount,
 			Note:        transaction.Note,
-			Category:    "Plan", // come back to this
+			Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
 			FromAccount: account.ID,
 			ToAccount:   uuid.Nil,
 			Currency:    account.Currency,

@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
-import { usePlan, usePlanStore } from '../hooks';
+import { usePlan, usePlanStatus, usePlanStore } from '../hooks';
 import LoadingScreen from '../molecules/LoadingScreen';
 import PlanActionMenu from '../molecules/PlanActionMenu';
 import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
@@ -16,6 +16,7 @@ import PlanNavigationArea from '../molecules/PlanNavigationArea';
 import PlanTransactionsList from '../molecules/PlanTransactionsList';
 import { Plan } from '../schema';
 import { generateSpendingTrendData } from '../utils';
+import PlanAccountOverviewPieChart from '../molecules/PlanAccountOverviewPieChart';
 
 type PlanScreenProps = {
     showBackButton?: boolean;
@@ -36,12 +37,32 @@ function PlanScreen(props: PlanScreenProps) {
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: "We couldn't fetch your transactions",
+                        text2: "We couldn't fetch this plan",
                     },
                 });
             },
         },
     });
+    // const {
+    //     data: planStatus,
+    //     isLoading: planStatusLoading,
+    //     refetch: refetchPlanStatus,
+    //     isFetching: planStatusFetching,
+    // } = usePlanStatus({
+    //     sessionData: sessionData as SessionData,
+    //     planID: id as string,
+    //     options: {
+    //         onError: () => {
+    //             Toast.show({
+    //                 type: 'error',
+    //                 props: {
+    //                     text1: 'Error!',
+    //                     text2: "We couldn't fetch your transactions",
+    //                 },
+    //             });
+    //         },
+    //     },
+    // });
 
     useEffect(() => {
         if (data) {
@@ -54,21 +75,12 @@ function PlanScreen(props: PlanScreenProps) {
         };
     }, [data]);
 
-    const chartData = useMemo(() => {
-        if (!currentPlan) {
-            return { projected: [], actual: [], ideal: [] };
-        }
-
-        return generateSpendingTrendData(currentPlan, 30, 5);
-    }, [currentPlan]);
-
     const onRefresh = useCallback(() => {
         refetch();
     }, []);
 
-    if (isLoading) return <LoadingScreen />;
-
-    if (!currentPlan) return null;
+    if (isLoading || !currentPlan) return <LoadingScreen />;
+    if (!currentPlan && (!isLoading || !isFetching)) return null;
 
     return (
         <SafeAreaView style={styles.parentView}>
@@ -81,6 +93,7 @@ function PlanScreen(props: PlanScreenProps) {
                 <PlanNavigationArea />
                 <PlanInformation />
                 <PlanBuildUpChart />
+                <PlanAccountOverviewPieChart />
                 <PlanTransactionsList />
             </ScrollView>
         </SafeAreaView>

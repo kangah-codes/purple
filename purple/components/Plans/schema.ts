@@ -84,11 +84,21 @@ export type PlanTransaction = {
     plan: Plan;
     note: string;
     created_at: string;
-    debit_account_id: string;
-    debit_account: Account;
+    debit_account_id?: string;
+    debit_account: undefined;
     CreatedAt: string;
     updated_at: string;
 };
+
+export interface PlanAccountPieChartStats {
+    accountId: string;
+    accountName: string;
+    transactionCount: number;
+    amount: number;
+    value: number;
+    color: string;
+    gradientCenterColor: string;
+}
 
 /**
  * 	PlanId         uuid.UUID  `json:"plan_id"`

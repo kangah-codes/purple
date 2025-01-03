@@ -27,6 +27,7 @@ import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import AsyncInput from '@/components/Shared/atoms/Input/AsyncInput';
 import { useDebounce } from '@/lib/utils/debounce';
 import Toast from 'react-native-toast-message';
+import React from 'react';
 
 export default function SignUpScreen() {
     const [usernameLoading, setUsernameLoading] = useState(false);
@@ -133,7 +134,7 @@ export default function SignUpScreen() {
                             </Text>
                             <Text
                                 style={[
-                                    { fontFamily: 'InterMedium' },
+                                    GLOBAL_STYLESHEET.gramatikaMedium,
                                     tw`text-sm text-gray-600 text-center mt-2.5`,
                                 ]}
                             >
@@ -146,7 +147,7 @@ export default function SignUpScreen() {
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Username
@@ -186,7 +187,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Email Address
@@ -226,7 +227,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Password
@@ -266,7 +267,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'MonaSansBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Confirm Password
@@ -307,7 +308,7 @@ export default function SignUpScreen() {
                                         onPress={() => router.replace('/auth/sign-in')}
                                     >
                                         <Text
-                                            style={{ fontFamily: 'MonaSansBold' }}
+                                            style={GLOBAL_STYLESHEET.gramatikaBold}
                                             className='text-xs text-purple-500'
                                         >
                                             Already a user? Sign in
@@ -336,8 +337,8 @@ export default function SignUpScreen() {
                                     ) : (
                                         <Text
                                             style={[
-                                                { fontFamily: 'Suprapower' },
-                                                tw`text-base text-white tracking-tight`,
+                                                GLOBAL_STYLESHEET.gramatikaBlack,
+                                                tw`text-base text-white`,
                                             ]}
                                         >
                                             Let's Go

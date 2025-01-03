@@ -1,4 +1,5 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
+import { stringify } from '@/lib/utils/string';
 import {
     useInfiniteQuery,
     UseInfiniteQueryOptions,
@@ -13,8 +14,6 @@ import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
 import { Plan, PlanTransaction } from './schema';
 import { createPlanStore } from './state';
-import { stringify } from '@/lib/utils/string';
-import { Transaction } from '../Transactions/schema';
 
 export function usePlanStore() {
     const [
@@ -78,11 +77,17 @@ export function usePlans({
                 },
             );
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...(options as Omit<
@@ -109,11 +114,16 @@ export function useDeletePlan({
             },
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 }
@@ -138,11 +148,61 @@ export function usePlan({
                 },
             });
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+        },
+    );
+}
+
+export function usePlanStatus({
+    sessionData,
+    options,
+    planID,
+}: {
+    sessionData: SessionData;
+    options?: UseQueryOptions;
+    planID: string;
+}): UseQueryResult<GenericAPIResponse<unknown>, Error> {
+    return useQuery(
+        [`plan-${planID}-status`],
+        async () => {
+            const res = await fetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}/track-status`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                        Authorization: sessionData.access_token,
+                    },
+                },
+            );
+
+            const statusCode = res.status;
+            const json = await res.json();
+
+            if (!res.ok) {
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
+            }
+
+            return json;
         },
         {
             ...(options as Omit<
@@ -185,11 +245,17 @@ export function useInfinitePlans({
                 },
             );
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...options,
@@ -219,11 +285,16 @@ export function useCreatePlan({
             body: JSON.stringify(data),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 }
@@ -245,11 +316,16 @@ export function useCreatePlanTransaction({
             body: JSON.stringify(data),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 }
@@ -290,11 +366,17 @@ export function useInfinitePlanTransactions({
                 },
             );
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...options,

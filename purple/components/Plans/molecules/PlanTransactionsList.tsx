@@ -32,10 +32,10 @@ export default function PlanTransactionsList() {
     if (!currentPlan) return null;
 
     return (
-        <View className='flex flex-col px-5'>
+        <View className='flex flex-col px-5 mt-5'>
             <View className='flex flex-row w-full justify-between items-center'>
                 <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-black'>
-                    Transaction History
+                    Transactions
                 </Text>
             </View>
 
