@@ -97,7 +97,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                         </Text>
                         <Text
                             style={GLOBAL_STYLESHEET.gramatikaBold}
-                            className='text-sm text-gray-700 tracking-tight'
+                            className='text-sm text-black tracking-tight'
                         >
                             {formatCurrencyAccurate(currency, remainingAmount)}
                         </Text>

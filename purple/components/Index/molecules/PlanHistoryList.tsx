@@ -52,7 +52,7 @@ export default function PlanHistoryList() {
                 >
                     <Text
                         style={GLOBAL_STYLESHEET.gramatikaBold}
-                        className='text-sm text-purple-700'
+                        className='text-sm tracking-tight text-purple-700'
                     >
                         View All
                     </Text>

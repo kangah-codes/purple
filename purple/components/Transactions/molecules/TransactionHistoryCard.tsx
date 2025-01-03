@@ -1,6 +1,6 @@
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import {
     ArrowNarrowDownRightIcon,
     ArrowNarrowRightIcon,
@@ -9,8 +9,10 @@ import {
 import { LinearGradient, Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { formatDateTime } from '@/lib/utils/date';
+import { StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -29,59 +31,35 @@ export default function TransactionHistoryCard({
 }: TransactionHistoryCardProps) {
     const date = useMemo(() => formatDateTime(data.CreatedAt), [data.CreatedAt]);
 
+    const showActionMenu = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, []);
+
     return (
         <TouchableOpacity
             onPress={onPress}
             className='w-full py-3.5 flex flex-row items-center space-x-3.5'
+            activeOpacity={0.7}
+            onLongPress={showActionMenu}
+            delayLongPress={350}
         >
-            <View className='relative items-center justify-center'>
-                <LinearGradient
-                    colors={
-                        data.Type === 'debit'
-                            ? debitGradientColours
-                            : data.Type == 'credit'
-                            ? creditGradientColours
-                            : transferGradientColours
-                    }
-                    className='flex items-center justify-center rounded-xl h-10 w-10'
-                    style={{
-                        backgroundColor:
-                            data.Type === 'debit'
-                                ? '#FEE2E2'
-                                : data.Type == 'credit'
-                                ? 'rgb(220 252 231)'
-                                : '#F3E8FF',
-                    }}
-                />
-                {data.Type === 'debit' ? (
-                    <ArrowNarrowUpRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke={'#fff'}
-                    />
-                ) : data.Type == 'credit' ? (
-                    <ArrowNarrowDownRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke={'#fff'}
-                    />
-                ) : (
-                    <ArrowNarrowRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke='#fff'
-                    />
-                )}
+            <View
+                style={styles.categoryIcon}
+                className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'
+            >
+                <Text className='absolute text-lg'>
+                    {extractEmojiOrDefault(data.category, '❔')}
+                </Text>
             </View>
 
             <View className='flex flex-row justify-between items-center flex-grow'>
                 <View className='flex flex-col'>
                     {showTitle && (
                         <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
-                            {truncateStringIfLongerThan(data.category, 30)}
+                            {truncateStringIfLongerThan(
+                                data.category.split(' ').slice(1).join(' '),
+                                30,
+                            )}
                         </Text>
                     )}
                     <Text
@@ -96,12 +74,16 @@ export default function TransactionHistoryCard({
                     <Text
                         style={{
                             ...GLOBAL_STYLESHEET.gramatikaBlack,
-                            color: data.Type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
+                            color:
+                                data.Type === 'debit'
+                                    ? '#DC2626'
+                                    : data.Type === 'credit'
+                                    ? 'rgb(22 163 74)'
+                                    : '#9333EA',
                         }}
                         className='text-sm'
                     >
-                        {data.Type === 'debit' ? '-' : '+'}
-                        {/* {JSON.stringify(data.account)} */}
+                        {data.Type === 'debit' ? '-' : data.Type === 'credit' ? '+' : ''}
                         {formatCurrencyAccurate(data.currency, data.amount)}
                     </Text>
 
@@ -115,3 +97,16 @@ export default function TransactionHistoryCard({
 TransactionHistoryCard.defaultProps = {
     showTitle: true,
 };
+
+const styles = StyleSheet.create({
+    categoryIcon: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 80,
+        elevation: 3,
+    },
+});

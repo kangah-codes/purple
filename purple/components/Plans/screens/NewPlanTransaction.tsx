@@ -50,7 +50,7 @@ export default function NewPlanTransactionScreen() {
     const onSubmit = (data: { amount: string; note: string; debit_account_id: string }) => {
         Keyboard.dismiss();
         let transformedData = transformObject(data, [
-            ['amount', 'amount', (value) => Number(value)],
+            ['amount', 'amount', (value) => Math.abs(Number(value))],
             [
                 'debit_account_id',
                 'debit_account_id',
@@ -94,7 +94,7 @@ export default function NewPlanTransactionScreen() {
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
                     <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
                             New Transaction
                         </Text>
 
@@ -117,7 +117,7 @@ export default function NewPlanTransactionScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.monaSansBold}
                             className='text-xs text-gray-600'
                         >
                             Amount
@@ -238,7 +238,7 @@ export default function NewPlanTransactionScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
                                 Save
                             </Text>
                         )}

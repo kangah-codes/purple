@@ -51,8 +51,8 @@ export default function TransactionHistoryList() {
             {/* <Portal hostName='transactionReceipt'>
                 <CurrentTransactionModal modalKey='transactionReceipt' />
             </Portal> */}
-            <View className='flex flex-col mt-5 px-5'>
-                <View className='flex flex-row w-full justify-between items-center'>
+            <View className='flex flex-col mt-5 '>
+                <View className='flex flex-row w-full justify-between items-center px-5'>
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
                         Recent Transactions
                     </Text>
@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
     },
     flatlistContainerStyle: {
         paddingBottom: 200,
+        paddingHorizontal: 20,
     },
     bottomDrawer: {
         backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',

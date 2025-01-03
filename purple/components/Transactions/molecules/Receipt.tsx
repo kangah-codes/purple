@@ -64,54 +64,6 @@ const renderIcon = (type: Transaction['Type']) => {
     }
 };
 
-export const CategoryIcon = React.memo(({ type }: { type: Transaction['Type'] }) => {
-    const icon = renderIcon(type);
-    return (
-        <View className='relative items-center justify-center'>
-            <LinearGradient
-                colors={
-                    type === 'debit'
-                        ? debitGradientColours
-                        : type == 'credit'
-                        ? creditGradientColours
-                        : transferGradientColours
-                }
-                className='flex items-center justify-center rounded-xl h-10 w-10'
-                style={{
-                    backgroundColor:
-                        type === 'debit'
-                            ? '#FEE2E2'
-                            : type == 'credit'
-                            ? 'rgb(220 252 231)'
-                            : '#F3E8FF',
-                }}
-            />
-            {type === 'debit' ? (
-                <ArrowNarrowUpRightIcon
-                    width={16}
-                    height={16}
-                    style={{ position: 'absolute' }}
-                    stroke={'#fff'}
-                />
-            ) : type == 'credit' ? (
-                <ArrowNarrowDownRightIcon
-                    width={16}
-                    height={16}
-                    style={{ position: 'absolute' }}
-                    stroke={'#fff'}
-                />
-            ) : (
-                <ArrowNarrowRightIcon
-                    width={16}
-                    height={16}
-                    style={{ position: 'absolute' }}
-                    stroke='#fff'
-                />
-            )}
-        </View>
-    );
-});
-
 export const ReceiptDetail = React.memo(({ label, value }: any) => (
     <View className='w-full mb-5'>
         <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-sm text-black'>

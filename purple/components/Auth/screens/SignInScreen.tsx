@@ -29,6 +29,7 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
+import React from 'react';
 
 export default function SignInScreen() {
     const { user, setUser, reset: resetUser } = useUserStore();
