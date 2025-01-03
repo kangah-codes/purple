@@ -1,17 +1,14 @@
+import { useGetAccountFromStore } from '@/components/Accounts/utils';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import {
-    CategoryIcon,
-    ReceiptDetail,
-    ReceiptHeader,
-} from '@/components/Transactions/molecules/Receipt';
+import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
-import { formatDate } from '@/lib/utils/date';
+import { formatDate, formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { isNotEmptyString } from '@/lib/utils/string';
-import React from 'react';
+import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
+import React, { useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 
@@ -28,6 +25,14 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
 
     if (!currentTransaction) return null;
 
+    const account = useGetAccountFromStore(currentTransaction.account_id);
+    const transactionDate = useMemo(
+        () => formatDateTime(currentTransaction.CreatedAt),
+        [currentTransaction?.CreatedAt],
+    );
+
+    console.log(currentTransaction);
+
     return (
         <CustomBottomSheetModal
             modalKey={modalKey}
@@ -36,8 +41,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             handleIndicatorStyle={styles.handleIndicator}
         >
             <View className='px-5'>
-                <View className='w-full items-center' style={styles.receiptView}>
-                    <ReceiptHeader />
+                <View className='w-full items-center mt-5' style={styles.receiptView}>
                     <Svg
                         height={12}
                         width='100%'
@@ -51,37 +55,63 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         className='w-full py-5 items-center justify-center'
                         colors={linearGradient}
                     >
-                        <CategoryIcon type={currentTransaction.Type} />
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg text-white'>
-                            {currentTransaction.category}
+                        <View
+                            style={styles.categoryIcon}
+                            className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'
+                        >
+                            <Text className='absolute text-lg'>
+                                {extractEmojiOrDefault(currentTransaction.category, '❔')}
+                            </Text>
+                        </View>
+                        <Text
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                            className='text-lg text-white mt-2.5'
+                        >
+                            {currentTransaction.category.split(' ').slice(1).join(' ')}
                         </Text>
                     </LinearGradient>
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
                         <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
-                            className='text-3xl text-black mb-5'
+                            style={[
+                                GLOBAL_STYLESHEET.gramatikaBlack,
+                                {
+                                    color:
+                                        currentTransaction.Type === 'debit'
+                                            ? '#DC2626'
+                                            : currentTransaction.Type === 'credit'
+                                            ? 'rgb(22 163 74)'
+                                            : '#9333EA',
+                                },
+                            ]}
+                            className='text-3xl mb-5'
                         >
+                            {currentTransaction.Type == 'debit'
+                                ? '-'
+                                : currentTransaction.Type == 'credit'
+                                ? '+'
+                                : ''}
                             {formatCurrencyAccurate(
                                 currentTransaction.currency,
                                 currentTransaction.amount,
                             )}
                         </Text>
-                        <View className='border-b border-gray-200 w-full mb-5' />
-                        <ReceiptDetail label='Category' value={currentTransaction.category} />
+                        <View className='w-full relative flex items-center justify-center'>
+                            {/** The little wedges in the receipt */}
+                            <View className='h-5 w-5 bg-white absolute -left-[30] -top-[10] rounded-full' />
+                            <View className='h-5 w-5 bg-white absolute -right-[30] -top-[10] rounded-full' />
+                            <View className='border-b border-gray-200 w-full mb-5' />
+                        </View>
+                        {/* <ReceiptDetail label='Category' value={currentTransaction.category} /> */}
                         {isNotEmptyString(currentTransaction.note) && (
                             <ReceiptDetail label='Note' value={currentTransaction.note} />
                         )}
 
                         <ReceiptDetail
                             label='Date'
-                            value={formatDate(currentTransaction.CreatedAt, {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: 'numeric',
-                                minute: 'numeric',
-                            })}
+                            value={`${transactionDate.date} at ${transactionDate.time}`}
                         />
+
+                        <ReceiptDetail label='Account' value={account?.name} />
                     </View>
                     <Svg height={12} width='100%' fill={drawerBackground} stroke={drawerBackground}>
                         {ZIGZAG_VIEW}
@@ -115,11 +145,11 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 1,
+            height: 2,
         },
         shadowOpacity: 0.125,
         shadowRadius: 20,
-        elevation: 5,
+        elevation: 50,
     },
     flatlistContainerStyle: {
         paddingBottom: 200,
@@ -129,5 +159,15 @@ const styles = StyleSheet.create({
     },
     arrowRight: {
         position: 'absolute',
+    },
+    categoryIcon: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 80,
+        elevation: 3,
     },
 });

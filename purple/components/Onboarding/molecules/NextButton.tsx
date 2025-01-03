@@ -10,7 +10,7 @@ export default function NextButton(props: any) {
                     colors={['#c084fc', '#9333ea']}
                 >
                     <Text
-                        style={{ fontFamily: 'InterBold' }}
+                        style={{ fontFamily: 'MonaSansBold' }}
                         className='text-sm text-white tracking-tight'
                     >
                         Next

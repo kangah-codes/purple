@@ -50,7 +50,7 @@ export default function NewPlanTransactionScreen() {
     const onSubmit = (data: { amount: string; note: string; debit_account_id: string }) => {
         Keyboard.dismiss();
         let transformedData = transformObject(data, [
-            ['amount', 'amount', (value) => Number(value)],
+            ['amount', 'amount', (value) => Math.abs(Number(value))],
             [
                 'debit_account_id',
                 'debit_account_id',
@@ -100,7 +100,7 @@ export default function NewPlanTransactionScreen() {
 
                         <TouchableOpacity onPress={router.back}>
                             <Text
-                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-purple-600'
                             >
                                 Cancel
@@ -116,7 +116,10 @@ export default function NewPlanTransactionScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.monaSansBold}
+                            className='text-xs text-gray-600'
+                        >
                             Amount
                         </Text>
 
@@ -128,7 +131,7 @@ export default function NewPlanTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -150,7 +153,10 @@ export default function NewPlanTransactionScreen() {
                     </View>
 
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Debit Account
                         </Text>
                         <>
@@ -190,7 +196,10 @@ export default function NewPlanTransactionScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Note
                         </Text>
 
@@ -199,7 +208,7 @@ export default function NewPlanTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='Note'
                                     onChangeText={onChange}

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient as _LinearGradient } from 'expo-linear-gradient';
 import { BottomSheetModal as _BottomSheetModal } from '@gorhom/bottom-sheet';
+import React from 'react';
 
 function _UnstyledText(props: _Text['props']) {
     return <_Text {...props} style={[props.style]} />;

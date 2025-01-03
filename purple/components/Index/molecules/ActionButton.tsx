@@ -10,6 +10,7 @@ import {
 } from '../../SVG/noscale';
 import { Link } from 'expo-router';
 import { Account } from '@/components/Accounts/schema';
+import React from 'react';
 
 export function ActionButton({
     IconComponent,
@@ -33,18 +34,26 @@ export function ActionButton({
                     },
                 }}
             >
-                <View className='border border-purple-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'>
+                <View
+                    style={styles.actionButton}
+                    className='border bg-white border-purple-200 w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'
+                >
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>
-            <Text style={[GLOBAL_STYLESHEET.interMedium, styles.actionText]}>{label}</Text>
+            <Text
+                style={[GLOBAL_STYLESHEET.gramatikaMedium, styles.actionText]}
+                className='leading-[14px]'
+            >
+                {label}
+            </Text>
         </View>
     );
 }
 
 export default function ActionButtons({ account }: { account: Account }) {
     return (
-        <View className='flex-row justify-between items-stretch w-auto px-20 pt-2.5'>
+        <View className='flex-row justify-between items-stretch w-auto px-20 py-2.5'>
             <ActionButton
                 IconComponent={ArrowCircleDownIcon}
                 label='Income'
@@ -71,6 +80,16 @@ const styles = StyleSheet.create({
     actionText: {
         color: '#1f2937',
         fontSize: 14,
-        letterSpacing: -0.5,
+        letterSpacing: -0.3,
+    },
+    actionButton: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });

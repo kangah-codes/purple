@@ -1,12 +1,12 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Platform, View } from 'react-native';
+import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetModalProps,
     BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import { useBottomSheetModalStore } from './hooks';
+import { useBottomSheetModalStore, useKeyboardSnapEffect } from './hooks';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { SharedValue } from 'react-native-reanimated';
 
@@ -17,54 +17,27 @@ interface CustomBottomSheetModalProps extends BottomSheetModalProps {
 
 const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomSheetModalProps) => {
     const bottomSheetRef = useRef<BottomSheetModal>(null);
-    const [defaultSnapPoints, setDefaultSnapPoints] = useState<
-        | (string | number)[]
-        | SharedValue<(string | number)[]>
-        | Readonly<(string | number)[] | SharedValue<(string | number)[]>>
-    >(useMemo(() => ['50%', '70%'], []));
+    // Memoize default snap points
+    const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '70%'], [rest.snapPoints]);
+
     const { setShowBottomSheetModal, bottomSheetModalKeys, createBottomSheetModal } =
         useBottomSheetModalStore();
-    const [isModalVisible, setIsModalVisible] = useState(false);
 
+    // Combine the two useEffects for visibility handling
     useEffect(() => {
-        createBottomSheetModal(modalKey);
-
-        const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
-            if (Platform.OS === 'android') {
-                bottomSheetRef.current?.snapToIndex(1);
-            }
-        });
-
-        if (rest.snapPoints) {
-            setDefaultSnapPoints(rest.snapPoints);
-        }
-
-        return () => {
-            showSubscription.remove();
-        };
-    }, []);
-
-    const handleSheetChanges = useCallback((index: number) => {
-        // if user swipes modal down, close it
-        if (index === -1) setShowBottomSheetModal(modalKey, false);
-    }, []);
-
-    useEffect(() => {
-        // TODO: fix async state race conditions
-        // idk why adding this makes it work, probably because of the async nature of the state
-        console.log('bottomSheetModalKeys: ' + JSON.stringify(bottomSheetModalKeys));
         const isVisible = bottomSheetModalKeys[modalKey];
-
-        if (isVisible !== isModalVisible) {
-            setIsModalVisible(isVisible);
-        }
-    }, [bottomSheetModalKeys]);
-
-    useEffect(() => {
-        if (isModalVisible && bottomSheetRef.current) {
+        if (isVisible && bottomSheetRef.current) {
             bottomSheetRef.current.present();
         }
-    }, [isModalVisible]);
+    }, [bottomSheetModalKeys[modalKey]]);
+
+    // Memoize handlers
+    const handleSheetChanges = useCallback(
+        (index: number) => {
+            if (index === -1) setShowBottomSheetModal(modalKey, false);
+        },
+        [modalKey, setShowBottomSheetModal],
+    );
 
     const renderBackdrop = useCallback(
         (props: BottomSheetDefaultBackdropProps) => (
@@ -75,8 +48,13 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
                 disappearsOnIndex={-1}
             />
         ),
-        [],
+        [modalKey, setShowBottomSheetModal],
     );
+
+    useKeyboardSnapEffect(bottomSheetRef);
+    useEffect(() => {
+        createBottomSheetModal(modalKey);
+    }, [modalKey, createBottomSheetModal]);
 
     if (!bottomSheetModalKeys[modalKey]) return null;
 
@@ -87,14 +65,21 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
             android_keyboardInputMode='adjustResize'
             keyboardBlurBehavior='restore'
             ref={bottomSheetRef}
-            index={bottomSheetModalKeys[modalKey] ? 1 : -1}
-            snapPoints={defaultSnapPoints as any}
+            index={1}
+            snapPoints={defaultSnapPoints}
             onChange={handleSheetChanges}
             {...rest}
         >
-            <BottomSheetView style={{ flex: 1, paddingBottom: 20 }}>{children}</BottomSheetView>
+            <BottomSheetView style={styles.bottomSheetView}>{children}</BottomSheetView>
         </BottomSheetModal>
     );
 };
+
+const styles = StyleSheet.create({
+    bottomSheetView: {
+        flex: 1,
+        paddingBottom: 20,
+    },
+});
 
 export default memo(CustomBottomSheetModal);

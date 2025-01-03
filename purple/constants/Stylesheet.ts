@@ -14,7 +14,7 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
         fontFamily: 'InterBlack',
     },
     interBold: {
-        fontFamily: 'InterBold',
+        fontFamily: 'MonaSansBold',
     },
     interExtraBold: {
         fontFamily: 'InterExtraBold',
@@ -37,13 +37,76 @@ export const GLOBAL_STYLESHEET = StyleSheet.create({
     arialRoundedBold: {
         fontFamily: 'ArialRoundedBold',
     },
-});
 
-/**
- *  ClashGroteskBold: require('../assets/fonts/ClashGrotesk-Bold.otf'),
-                    ClashGroteskExtraLight: require('../assets/fonts/ClashGrotesk-ExtraLight.otf'),
-                    ClashGroteskLight: require('../assets/fonts/ClashGrotesk-Light.otf'),
-                    ClashGroteskMedium: require('../assets/fonts/ClashGrotesk-Medium.otf'),
-                    ClashGroteskRegular: require('../assets/fonts/ClashGrotesk-Regular.otf'),
-                    ClashGroteskSemiBold: require('../assets/fonts/ClashGrotesk-SemiBold.otf'),
- */
+    // onest
+    gresaRegular: {
+        fontFamily: 'GresaRegular',
+    },
+    mockupDisplay: {
+        fontFamily: 'mockupDisplay',
+    },
+
+    // mona sans
+    monaSansBlack: {
+        fontFamily: 'MonaSansBlack',
+    },
+    monaSansBold: {
+        fontFamily: 'MonaSansBold',
+    },
+    monaSansExtraBold: {
+        fontFamily: 'MonaSansExtraBold',
+    },
+    monaSansExtraLight: {
+        fontFamily: 'MonaSansExtraLight',
+    },
+    monaSansLight: {
+        fontFamily: 'MonaSansLight',
+    },
+    monaSansMedium: {
+        fontFamily: 'MonaSansMedium',
+    },
+    monaSansRegular: {
+        fontFamily: 'MonaSansRegular',
+    },
+    monaSansSemiBold: {
+        fontFamily: 'monaSansSemiBold',
+    },
+
+    // gramatika
+    gramatikaBlack: {
+        fontFamily: 'GramatikaBlack',
+    },
+    gramatikaBlackItalic: {
+        fontFamily: 'GramatikaBlackItalic',
+    },
+    gramatikaBold: {
+        fontFamily: 'GramatikaBold',
+    },
+    gramatikaBoldItalic: {
+        fontFamily: 'GramatikaBoldItalic',
+    },
+    gramatikaExtraLight: {
+        fontFamily: 'GramatikaExtraLight',
+    },
+    gramatikaExtraLightItalic: {
+        fontFamily: 'GramatikaExtraLightItalic',
+    },
+    gramatikaLight: {
+        fontFamily: 'GramatikaLight',
+    },
+    gramatikaLightItalic: {
+        fontFamily: 'GramatikaLightItalic',
+    },
+    gramatikaMedium: {
+        fontFamily: 'GramatikaMedium',
+    },
+    gramatikaMediumItalic: {
+        fontFamily: 'GramatikaMediumItalic',
+    },
+    gramatikaRegular: {
+        fontFamily: 'GramatikaRegular',
+    },
+    gramatikaRegularItalic: {
+        fontFamily: 'GramatikaRegularItalic',
+    },
+});

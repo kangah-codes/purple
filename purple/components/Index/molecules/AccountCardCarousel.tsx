@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { Account } from '@/components/Accounts/schema';
+import React, { useCallback, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
-import { useUserStore } from '@/components/Profile/hooks';
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { Account } from '@/components/Accounts/schema';
-import React from 'react';
+import { View } from '@/components/Shared/styled';
 
 const data = [
     {
@@ -67,7 +66,8 @@ export default function AccountCardCarousel() {
     );
 
     return (
-        <>
+        <View className='px-5'>
+            {/** @ts-ignore */}
             <Carousel
                 data={accounts}
                 renderItem={renderItem}
@@ -80,6 +80,7 @@ export default function AccountCardCarousel() {
                 loop
             />
 
+            {/** @ts-ignore */}
             <Pagination
                 dotsLength={accounts.length}
                 activeDotIndex={activeSlide}
@@ -93,6 +94,6 @@ export default function AccountCardCarousel() {
                 inactiveDotScale={0.6}
                 containerStyle={styles.containerStyle}
             />
-        </>
+        </View>
     );
 }

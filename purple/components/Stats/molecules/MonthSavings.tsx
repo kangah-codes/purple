@@ -15,14 +15,14 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 export default function MonthSavings() {
     return (
         <View className='w-full space-y-2.5 border border-gray-200 rounded-xl p-5'>
-            <Text style={GLOBAL_STYLESHEET.suprapower}>Savings this month</Text>
+            <Text style={GLOBAL_STYLESHEET.gramatikaBlack}>Savings this month</Text>
 
             <>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-2xl text-purple-700'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-2xl text-purple-700'>
                     GHS 1,000.00
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.suprapower}
+                    style={GLOBAL_STYLESHEET.gramatikaBlack}
                     className='text-sm tracking-tighter text-gray-400'
                 >
                     / GHS 2,000.00

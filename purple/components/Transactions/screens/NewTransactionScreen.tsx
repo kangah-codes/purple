@@ -104,7 +104,10 @@ export default function NewTransactionScreen() {
             return (
                 <View className='flex flex-col space-y-5'>
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Debit Account
                         </Text>
                         <>
@@ -146,7 +149,10 @@ export default function NewTransactionScreen() {
                         </>
                     </View>
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Credit Account
                         </Text>
                         <>
@@ -192,7 +198,7 @@ export default function NewTransactionScreen() {
         }
         return (
             <View>
-                <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                     Account
                 </Text>
                 <>
@@ -247,13 +253,13 @@ export default function NewTransactionScreen() {
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
                     <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                             New Transaction
                         </Text>
 
                         <TouchableOpacity onPress={router.back}>
                             <Text
-                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-purple-600'
                             >
                                 Cancel
@@ -279,7 +285,7 @@ export default function NewTransactionScreen() {
                                         className='w-full flex items-center justify-center py-2.5 rounded-full'
                                     >
                                         <Text
-                                            style={GLOBAL_STYLESHEET.suprapower}
+                                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                                             className='text-sm'
                                         >
                                             {transaction.label}
@@ -298,7 +304,10 @@ export default function NewTransactionScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text style={GLOBAL_STYLESHEET.interBold} className='text-xs text-gray-600'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            className='text-xs text-gray-600'
+                        >
                             Amount
                         </Text>
 
@@ -310,7 +319,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -332,7 +341,10 @@ export default function NewTransactionScreen() {
                     </View>
 
                     <View>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Category
                         </Text>
                         <>
@@ -409,7 +421,10 @@ export default function NewTransactionScreen() {
                     {renderAccountFields()}
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Note
                         </Text>
 
@@ -418,7 +433,7 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     onChangeText={onChange}
@@ -448,7 +463,7 @@ export default function NewTransactionScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
                                 Save
                             </Text>
                         )}

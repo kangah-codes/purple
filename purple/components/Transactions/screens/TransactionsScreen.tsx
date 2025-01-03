@@ -112,7 +112,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);
-                    setShowBottomSheetModal('transactionReceiptTransactionsScreen', true);
+                    setShowBottomSheetModal('transactionReceipt', true);
                 }}
             />
         ),
@@ -140,21 +140,20 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <CurrentTransactionModal modalKey='transactionReceiptTransactionsScreen' />
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
                 {showBackButton && accountName ? (
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         {truncateStringIfLongerThan(accountName as string, 20)}
                     </Text>
                 ) : (
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         My Transactions
                     </Text>
                 )}
 
                 {showBackButton && (
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
                             Back
                         </Text>
                     </TouchableOpacity>

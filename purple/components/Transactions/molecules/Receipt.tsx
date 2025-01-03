@@ -1,4 +1,4 @@
-import { Text, View } from '@/components/Shared/styled';
+import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import {
     ArrowNarrowDownRightIcon,
     ArrowNarrowRightIcon,
@@ -9,9 +9,13 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Transaction } from '../schema';
 
+const transferGradientColours = ['#c084fc', '#9333ea'];
+const debitGradientColours = ['#EF4444', '#B91C1C'];
+const creditGradientColours = ['#34D399', '#059669'];
+
 export const ReceiptHeader = React.memo(() => (
     <View className='w-full items-center mb-5'>
-        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg text-gray-700'>
+        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-gray-700'>
             Receipt
         </Text>
     </View>
@@ -60,29 +64,12 @@ const renderIcon = (type: Transaction['Type']) => {
     }
 };
 
-export const CategoryIcon = React.memo(({ type }: { type: Transaction['Type'] }) => {
-    const icon = renderIcon(type);
-    return (
-        <View
-            className='p-5 rounded-full items-center justify-center mb-1.5'
-            style={{
-                backgroundColor: icon?.bgColor,
-            }}
-        >
-            {icon?.component}
-        </View>
-    );
-});
-
 export const ReceiptDetail = React.memo(({ label, value }: any) => (
     <View className='w-full mb-5'>
-        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-sm text-black'>
+        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-sm text-black'>
             {label}
         </Text>
-        <Text
-            style={GLOBAL_STYLESHEET.interSemiBold}
-            className='text-sm text-black tracking-tighter'
-        >
+        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-black'>
             {value}
         </Text>
     </View>

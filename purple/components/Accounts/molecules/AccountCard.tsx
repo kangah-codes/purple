@@ -31,10 +31,10 @@ export default function AccountCard({
                 });
             }}
         >
-            <Text style={GLOBAL_STYLESHEET.interMedium} className='tracking-tight'>
+            <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='tracking-tight'>
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
                 {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>
@@ -47,12 +47,12 @@ export default function AccountCard({
     return (
         <>
             <View className='flex flex-row items-center justify-between px-5 py-2.5'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-black'>
                     {truncateStringIfLongerThan(groupName, 20)}
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.suprapower,
+                        GLOBAL_STYLESHEET.gramatikaBlack,
                         {
                             color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
                         },

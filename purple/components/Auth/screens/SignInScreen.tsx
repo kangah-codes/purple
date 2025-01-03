@@ -29,6 +29,7 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
+import React from 'react';
 
 export default function SignInScreen() {
     const { user, setUser, reset: resetUser } = useUserStore();
@@ -176,7 +177,7 @@ export default function SignInScreen() {
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'InterBold' }}
+                                        style={{ fontFamily: 'MonaSansBold' }}
                                         className='text-xs text-gray-600'
                                     >
                                         Username
@@ -189,7 +190,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='gyimihendrix'
                                                 onChangeText={onChange}
@@ -212,7 +213,7 @@ export default function SignInScreen() {
 
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={{ fontFamily: 'InterBold' }}
+                                        style={{ fontFamily: 'MonaSansBold' }}
                                         className='text-xs text-gray-600'
                                     >
                                         Password
@@ -226,7 +227,7 @@ export default function SignInScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='password'
                                                 onChangeText={onChange}
@@ -255,7 +256,7 @@ export default function SignInScreen() {
                                             <ActivityIndicator size={18} color='#fff' />
                                         ) : (
                                             <Text
-                                                style={{ fontFamily: 'InterBold' }}
+                                                style={{ fontFamily: 'MonaSansBold' }}
                                                 className='text-base text-white tracking-tight'
                                             >
                                                 Sign In
@@ -267,7 +268,7 @@ export default function SignInScreen() {
                                 <View className='flex flex-row justify-between'>
                                     <TouchableOpacity onPress={() => router.push('/auth/otp')}>
                                         <Text
-                                            style={{ fontFamily: 'InterBold' }}
+                                            style={{ fontFamily: 'MonaSansBold' }}
                                             className='text-xs text-purple-500'
                                         >
                                             Forgot your password?
@@ -278,7 +279,7 @@ export default function SignInScreen() {
                                         onPress={() => router.replace('/auth/sign-up')}
                                     >
                                         <Text
-                                            style={{ fontFamily: 'InterBold' }}
+                                            style={{ fontFamily: 'MonaSansBold' }}
                                             className='text-xs text-purple-500'
                                         >
                                             New here? Sign Up

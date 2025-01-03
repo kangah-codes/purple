@@ -18,5 +18,6 @@ func RegisterPlanRoutes(r *gin.RouterGroup) {
 		planGroup.PUT("/:planID", middleware.AuthMiddleware(db), handlers.UpdatePlanBalance)
 		planGroup.DELETE("/:planID", middleware.AuthMiddleware(db), handlers.DeletePlan)
 		planGroup.POST("/:planID/transaction", middleware.AuthMiddleware(db), handlers.AddPlanTransaction)
+		planGroup.GET("/:planID/track-status", middleware.AuthMiddleware(db), handlers.CalculatePlanOnTrack)
 	}
 }

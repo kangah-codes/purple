@@ -1,5 +1,6 @@
 import { BaseToastProps } from 'react-native-toast-message';
 import Toast from './components';
+import React from 'react';
 
 export const toastConfig = {
     success: ({ props }: { props: BaseToastProps }) => <Toast type='success' {...props} />,

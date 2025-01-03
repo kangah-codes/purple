@@ -77,7 +77,7 @@ export default function NewAccountScreen() {
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-gray-100'>
-                <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
                     {item.label}
                 </Text>
             </View>
@@ -94,7 +94,7 @@ export default function NewAccountScreen() {
                         }
                         style={tw`h-5 w-5 rounded-full`}
                     />
-                    <Text style={GLOBAL_STYLESHEET.interSemiBold} className='tracking-tight'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
                         {item.label}
                     </Text>
                 </View>
@@ -122,12 +122,12 @@ export default function NewAccountScreen() {
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
                 <ExpoStatusBar style='dark' />
                 <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         New Account
                     </Text>
 
                     <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -136,7 +136,7 @@ export default function NewAccountScreen() {
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
-                    <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
                         Category
                     </Text>
                     <>
@@ -175,7 +175,10 @@ export default function NewAccountScreen() {
                         )}
                     </>
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Account Name
                         </Text>
 
@@ -187,7 +190,7 @@ export default function NewAccountScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='Account name'
                                     onChangeText={onChange}
@@ -208,7 +211,10 @@ export default function NewAccountScreen() {
                         )}
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Balance
                         </Text>
 
@@ -220,7 +226,7 @@ export default function NewAccountScreen() {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.interSemiBold}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     cursorColor={'#8B5CF6'}
                                     placeholder='0.00'
                                     keyboardType='numeric'
@@ -241,7 +247,10 @@ export default function NewAccountScreen() {
                         )}
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text
+                            style={{ fontFamily: 'MonaSansBold' }}
+                            className='text-xs text-gray-600'
+                        >
                             Currency
                         </Text>
                         <>
@@ -291,7 +300,7 @@ export default function NewAccountScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
                                 Create Account
                             </Text>
                         )}

@@ -1,34 +1,29 @@
 {
     "build": {
-        "preview": {
-            "android": {
-                "buildType": "apk"
-            }
-        },
-        "preview2": {
-            "android": {
-                "gradleCommand": ":app:assembleRelease"
-            }
-        },
-        "preview3": {
-            "developmentClient": true
-        },
-        "preview4": {
-            "distribution": "internal"
-        },
         "production": {},
         "development": {
             "developmentClient": true,
             "distribution": "internal",
             "android": {
                 "buildType": "apk"
-            }
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
+            },
+            "channel": "development"
         },
         "rc": {
+            "developmentClient": false,
             "distribution": "internal",
             "android": {
                 "buildType": "apk"
-            }
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
+            },
+            "channel": "development"
         }
     }
 }

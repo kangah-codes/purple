@@ -101,7 +101,7 @@ function StatsHeatmap() {
                     snapPoints={['50%', '70%']}
                     children={
                         <Text
-                            style={GLOBAL_STYLESHEET.suprapower}
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                             className='text-base text-gray-900 px-5 py-2.5'
                         >
                             Transactions on {selectedDate}
@@ -122,7 +122,7 @@ function StatsHeatmap() {
                         <Text
                             key={key}
                             className='text-black text-base mx-auto'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                         >
                             {day}
                         </Text>

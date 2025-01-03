@@ -49,7 +49,7 @@ export default function Landing() {
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={{ fontFamily: 'InterBold' }}
+                                style={{ fontFamily: 'MonaSansBold' }}
                                 className='text-base text-white tracking-tight'
                             >
                                 Sign Up
@@ -63,7 +63,7 @@ export default function Landing() {
                     >
                         <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
                             <Text
-                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-base text-black tracking-tight'
                             >
                                 Sign In
@@ -73,7 +73,7 @@ export default function Landing() {
 
                     <ExternalLink href='https://purpleapp.vercel.app'>
                         <Text
-                            style={{ fontFamily: 'InterBold' }}
+                            style={{ fontFamily: 'MonaSansBold' }}
                             className='text-xs text-purple-500 text-center'
                         >
                             Terms and Conditions

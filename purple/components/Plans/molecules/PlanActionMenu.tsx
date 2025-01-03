@@ -43,13 +43,13 @@ export default function PlanActionMenu() {
             <View className='flex flex-col p-5 space-y-10'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.gramatikaBlack}
                         className='text-2xl text-black text-center'
                     >
                         Delete Plan?
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-sm textblack text-center'
                     >
                         Are you sure you want to delete{' '}
@@ -85,7 +85,10 @@ export default function PlanActionMenu() {
                         progressColor='#dc2626'
                         backgroundColor='#e5e7eb'
                     >
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white text-lg'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                            className='text-white text-lg'
+                        >
                             Delete
                         </Text>
                     </HoldButton>

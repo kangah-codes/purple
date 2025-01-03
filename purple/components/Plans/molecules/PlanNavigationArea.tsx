@@ -25,7 +25,7 @@ export default function PlanNavigationArea() {
             >
                 <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                 {truncateStringIfLongerThan(currentPlan.name as string, 20)}
             </Text>
 
@@ -58,7 +58,7 @@ export default function PlanNavigationArea() {
                         >
                             <View className='flex flex-row items-center space-x-1'>
                                 <EditSquareIcon stroke='#A855F7' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.interMedium} className='text-sm'>
+                                <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='text-sm'>
                                     Edit Plan
                                 </Text>
                             </View>
@@ -70,7 +70,7 @@ export default function PlanNavigationArea() {
                         >
                             <View className='flex flex-row items-center space-x-1'>
                                 <TrashIcon stroke='#EF4444' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.interMedium} className='text-sm'>
+                                <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='text-sm'>
                                     Delete
                                 </Text>
                             </View>

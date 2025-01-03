@@ -1,14 +1,18 @@
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import {
     ArrowNarrowDownRightIcon,
     ArrowNarrowRightIcon,
     ArrowNarrowUpRightIcon,
 } from '../../SVG/noscale';
-import { Text, TouchableOpacity, View } from '../../Shared/styled';
+import { LinearGradient, Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
+import React, { useCallback, useMemo } from 'react';
+import { formatDateTime } from '@/lib/utils/date';
+import { StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -16,81 +20,70 @@ type TransactionHistoryCardProps = {
     showTitle?: boolean;
 };
 
+const transferGradientColours = ['#c084fc', '#9333ea'];
+const debitGradientColours = ['#EF4444', '#B91C1C'];
+const creditGradientColours = ['#34D399', '#059669'];
+
 export default function TransactionHistoryCard({
     data,
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
+    const date = useMemo(() => formatDateTime(data.CreatedAt), [data.CreatedAt]);
+
+    const showActionMenu = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }, []);
+
     return (
         <TouchableOpacity
             onPress={onPress}
             className='w-full py-3.5 flex flex-row items-center space-x-3.5'
+            activeOpacity={0.7}
+            onLongPress={showActionMenu}
+            delayLongPress={350}
         >
-            <View className='relative items-center justify-center'>
-                <View
-                    className='flex items-center justify-center rounded-full h-9 w-9'
-                    style={{
-                        backgroundColor:
-                            data.Type === 'debit'
-                                ? '#FEE2E2'
-                                : data.Type == 'credit'
-                                ? 'rgb(220 252 231)'
-                                : '#F3E8FF',
-                    }}
-                />
-                {data.Type === 'debit' ? (
-                    <ArrowNarrowUpRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke={'#B91C1C'}
-                    />
-                ) : data.Type == 'credit' ? (
-                    <ArrowNarrowDownRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke={'#047857'}
-                    />
-                ) : (
-                    <ArrowNarrowRightIcon
-                        width={16}
-                        height={16}
-                        style={{ position: 'absolute' }}
-                        stroke='#7C3AED'
-                    />
-                )}
+            <View
+                style={styles.categoryIcon}
+                className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'
+            >
+                <Text className='absolute text-lg'>
+                    {extractEmojiOrDefault(data.category, '❔')}
+                </Text>
             </View>
 
             <View className='flex flex-row justify-between items-center flex-grow'>
                 <View className='flex flex-col'>
                     {showTitle && (
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base'>
-                            {truncateStringIfLongerThan(data.category, 30)}
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
+                            {truncateStringIfLongerThan(
+                                data.category.split(' ').slice(1).join(' '),
+                                30,
+                            )}
                         </Text>
                     )}
                     <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
+                        style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-sm text-gray-500 tracking-tighter'
                     >
-                        {new Date(data.CreatedAt).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                        })}
+                        {date.date} • {date.time}
                     </Text>
                 </View>
 
                 <View className='flex flex-row space-x-2 items-center'>
                     <Text
                         style={{
-                            ...GLOBAL_STYLESHEET.suprapower,
-                            color: data.Type === 'debit' ? '#DC2626' : 'rgb(22 163 74)',
+                            ...GLOBAL_STYLESHEET.gramatikaBlack,
+                            color:
+                                data.Type === 'debit'
+                                    ? '#DC2626'
+                                    : data.Type === 'credit'
+                                    ? 'rgb(22 163 74)'
+                                    : '#9333EA',
                         }}
-                        className='text-xs'
+                        className='text-sm'
                     >
-                        {data.Type === 'debit' ? '-' : '+'}
-                        {/* {JSON.stringify(data.account)} */}
+                        {data.Type === 'debit' ? '-' : data.Type === 'credit' ? '+' : ''}
                         {formatCurrencyAccurate(data.currency, data.amount)}
                     </Text>
 
@@ -104,3 +97,16 @@ export default function TransactionHistoryCard({
 TransactionHistoryCard.defaultProps = {
     showTitle: true,
 };
+
+const styles = StyleSheet.create({
+    categoryIcon: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 80,
+        elevation: 3,
+    },
+});

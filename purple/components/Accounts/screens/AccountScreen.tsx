@@ -161,12 +161,12 @@ function AccountScreen(props: AccountScreenProps) {
             <ExpoStatusBar style='dark' />
             <ScrollView>
                 <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         {truncateStringIfLongerThan(accountName as string, 20)}
                     </Text>
 
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
                             Back
                         </Text>
                     </TouchableOpacity>
@@ -174,7 +174,7 @@ function AccountScreen(props: AccountScreenProps) {
 
                 <View className='px-5 flex flex-col'>
                     <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
+                        style={GLOBAL_STYLESHEET.gramatikaBlack}
                         className='text-black text-2xl tracking-tighter leading-[1.4] mt-1.5'
                     >
                         {formatCurrencyAccurate(currentAccount.currency, currentAccount.balance)}
@@ -182,7 +182,7 @@ function AccountScreen(props: AccountScreenProps) {
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.interBold}
+                            style={GLOBAL_STYLESHEET.gramatikaMedium}
                             className='text-purple-500 text-sm tracking-tight'
                         >
                             GHS 250.98 today

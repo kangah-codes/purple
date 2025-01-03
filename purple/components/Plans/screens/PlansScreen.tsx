@@ -75,7 +75,7 @@ export default function PlansScreen() {
                                     className='w-full flex items-center justify-center px-5 py-2.5 rounded-full'
                                 >
                                     <Text
-                                        style={GLOBAL_STYLESHEET.suprapower}
+                                        style={GLOBAL_STYLESHEET.gramatikaBlack}
                                         className='text-base'
                                     >
                                         {route.title}
@@ -100,7 +100,7 @@ export default function PlansScreen() {
             <View style={styles.parentView} className='bg-white space-y-5 flex-1 flex flex-col'>
                 <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
                     <View className='flex flex-col'>
-                        <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                             My Plans
                         </Text>
                     </View>

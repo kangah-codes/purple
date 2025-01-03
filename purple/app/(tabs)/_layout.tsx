@@ -11,6 +11,8 @@ import {
     UserCircleIcon,
 } from '@/components/SVG/noscale';
 import Colors from '@/constants/Colors';
+import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { Portal } from '@gorhom/portal';
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();
@@ -27,7 +29,9 @@ export default function TabLayout() {
                 tabBarLabelStyle: {
                     marginTop: -5, // do this so that on certain android phones it looks better
                     marginBottom: 5,
-                    fontFamily: 'InterSemiBold',
+                    fontFamily: 'GramatikaBold',
+                    lineHeight: 16,
+                    fontSize: 11,
                 },
                 tabBarStyle: [
                     {
