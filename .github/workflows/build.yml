@@ -52,7 +52,7 @@ jobs:
 
             - name: 🚀 Release Candidate Build
               if: ${{ github.ref == 'refs/heads/rc' }}
-              run: eas build --non-interactive -p android --profile rc --local --output ${{ github.workspace }}/purple.apk
+              run: npx dotenv -c -- eas build --non-interactive -p android --profile rc --local --output ${{ github.workspace }}/purple.apk
 
             - name: ☁️ Upload Build Artifact
               uses: actions/upload-artifact@v4
