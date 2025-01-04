@@ -5,6 +5,9 @@ on:
         branches:
             - dev
             - rc
+        paths:
+            # Trigger this action only for changes in purple directory
+            - "purple/**"
 
 jobs:
     build:
