@@ -52,11 +52,17 @@ export function useAccounts({
                 },
             });
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...(options as Omit<
@@ -85,11 +91,17 @@ export function useAccountGroups({
                 },
             });
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...(options as Omit<
@@ -115,11 +127,16 @@ export function useCreateAccount({
             body: JSON.stringify(accountInformation),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 }

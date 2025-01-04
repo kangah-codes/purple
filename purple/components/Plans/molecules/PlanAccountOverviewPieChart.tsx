@@ -28,7 +28,7 @@ function PlanAccountOverviewPieChart() {
                 {Math.round((highestValue / total) * 100) + '%'}
             </Text>
         );
-    }, []);
+    }, [currentPlan]);
     const renderItem = useCallback(
         ({ item }: { item: PlanAccountPieChartStats }) => <PlanAccountDeductionCard data={item} />,
         [currentPlan],

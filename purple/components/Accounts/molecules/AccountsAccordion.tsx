@@ -1,36 +1,36 @@
 import { groupBy } from '@/lib/utils/helpers';
 import { keyExtractor } from '@/lib/utils/number';
 import { useCallback } from 'react';
-import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
+import { ListRenderItem, StyleSheet } from 'react-native';
 import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
 import AccountCard from './AccountCard';
+import React from 'react';
+import { FlashList } from '@shopify/flash-list';
+import { groupAccountsByCategory } from '../utils';
 
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();
-    const renderItem: ListRenderItem<{ groupName: string; accounts: Account[] }> = useCallback(
-        ({ item }) => <AccountCard groupName={item.groupName} accounts={item.accounts} />,
+    const renderItem = useCallback(
+        ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
+            <AccountCard groupName={item.groupName} accounts={item.accounts} />
+        ),
         [],
     );
 
     return (
-        <FlatList
-            data={Object.entries(groupBy(accounts, 'category')).map(([key, value]) => {
+        <FlashList
+            estimatedItemSize={50}
+            data={Object.entries(groupAccountsByCategory(accounts)).map(([key, value]) => {
+                const [category, currency] = key.split('_');
                 return {
-                    groupName: key,
+                    groupName: category,
+                    currency: currency,
                     accounts: value,
                 };
             })}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            contentContainerStyle={styles.container}
         />
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'column',
-        // marginVertical: 20,
-    },
-});

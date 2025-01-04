@@ -17,7 +17,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 
 export const unstable_settings = {
-    initialRouteName: 'onboarding/steps',
+    initialRouteName: '(tabs)/index',
 };
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },

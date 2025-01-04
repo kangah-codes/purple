@@ -13,7 +13,7 @@ export default function DoneButton(props: any) {
                         style={{ fontFamily: 'MonaSansBold' }}
                         className='text-sm text-white tracking-tight'
                     >
-                        Get Started
+                        Go!
                     </Text>
                 </LinearGradient>
             </TouchableOpacity>

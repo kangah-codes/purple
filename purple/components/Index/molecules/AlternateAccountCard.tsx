@@ -11,7 +11,7 @@ export default function AlternateAccountCard({ item }: { item: Account }) {
 
     const getShowAmount = useCallback(async () => {
         try {
-            const storedShowAmount = await nativeStorage.getItem('showAmount');
+            const storedShowAmount = nativeStorage.getItem('showAmount');
             setShowAmount(!!storedShowAmount);
         } catch (error) {
             console.error('Error fetching showAmount:', error);
@@ -25,9 +25,7 @@ export default function AlternateAccountCard({ item }: { item: Account }) {
     }, [getShowAmount]);
 
     useEffect(() => {
-        nativeStorage.setItem('showAmount', showAmount).catch((error) => {
-            console.error('Error saving showAmount:', error);
-        });
+        nativeStorage.setItem('showAmount', showAmount);
     }, [showAmount]);
 
     const toggleShowAmount = useCallback(() => {

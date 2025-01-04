@@ -31,10 +31,10 @@ export default function AccountCard({
                 });
             }}
         >
-            <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='tracking-tight'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-sm'>
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
+            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-sm'>
                 {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>
@@ -57,7 +57,7 @@ export default function AccountCard({
                             color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
                         },
                     ]}
-                    className='text-xs'
+                    className='text-sm'
                 >
                     {formatCurrencyAccurate(
                         accounts[0].currency,

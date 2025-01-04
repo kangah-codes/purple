@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Transaction } from './schema';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { nativeStorage } from '@/lib/utils/storage';
-import { dedupe } from '@/lib/utils/array';
+import { dedupe, dedupeByKey } from '@/lib/utils/array';
 
 type TransactionStore = {
     transactions: Transaction[];
@@ -21,11 +21,12 @@ export const createTransactionStore = create<TransactionStore>()(
             setCurrentTransaction: (transaction) => set({ currentTransaction: transaction }),
             updateTransactions: (transaction) =>
                 set((state) => ({
-                    // probably not optimal but idgaf
-                    transactions: dedupe(
+                    // TODO: probably not optimal but idgaf
+                    transactions: dedupeByKey(
                         Array.isArray(transaction)
                             ? [...transaction, ...state.transactions]
                             : [transaction, ...state.transactions],
+                        'ID',
                     ),
                 })),
         }),

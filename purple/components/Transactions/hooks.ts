@@ -62,11 +62,17 @@ export function useTransactions({
                 },
             );
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || "Couldn't fetch transactions");
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...(options as Omit<
@@ -109,11 +115,17 @@ export function useInfiniteTransactions({
                 },
             );
 
+            const statusCode = res.status;
+            const json = await res.json();
+
             if (!res.ok) {
-                throw new Error(`${res.status}`);
+                const err = new Error(json.message || "Couldn't fetch transactions");
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
             }
 
-            return res.json();
+            return json;
         },
         {
             ...options,
@@ -143,11 +155,16 @@ export function useCreateTransaction({
             body: JSON.stringify(transactionInformation),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || "Couldn't create transaction");
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 }

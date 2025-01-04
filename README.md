@@ -54,12 +54,21 @@ Since this application uses the expo-sdk and is built with React Native, buildin
 
 ### Roadmap
 
-Right now, Purple is still just a pet project, I'm not entirely sure I have the direction I want to take it in. But I do have a few ideas in mind:
+Right now, Purple is still just a pet project, I'm not entirely sure I have the direction I want to take it in. But I do have a few ideas in mind (in no particular order):
 
+-   Adding recurring transactions 🔄
 -   Session Recording & Tracking 📹 (Trust me bro it's for analytics only I swear bro 🥺👉👈)
 -   Dark Mode 🌚
+-   Search functionality 🔍
+-   Push Notifications 📬
+-   Custom Categories 📊
+-   Buget Limits 📉
+-   Expense Splitting 🤝
 -   Automatic Exchange Rate Conversion / Proper multi-currency support 🌍
+-   Reporting 📈 (Cashflow analysis)
 -   Iris 🪻
+-   Offline Syncing 🔄
+-   Calender Integration 📅
 -   Web Version? 🌐
 -   Integration with bank/mobile money services for automatic expense tracking 🏦
 

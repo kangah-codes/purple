@@ -34,7 +34,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     const { accountID, accountName } = local;
     const { sessionData } = useAuth();
     const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
-    const { showBackButton } = props;
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     // const { isLoading, refetch } = useTransactions({
     //     sessionData: sessionData as SessionData,
@@ -141,26 +140,18 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                {showBackButton && accountName ? (
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
-                        {truncateStringIfLongerThan(accountName as string, 20)}
-                    </Text>
-                ) : (
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
-                        My Transactions
-                    </Text>
-                )}
+                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    My Transactions
+                </Text>
 
-                {showBackButton && (
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
-                            Back
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
+                        Back
+                    </Text>
+                </TouchableOpacity>
             </View>
             <FlatList
-                data={showBackButton ? filteredTransactions : transactions}
+                data={transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}
@@ -172,21 +163,19 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
             />
-            {!showBackButton && (
-                <LinearGradient
-                    className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
-                    colors={['#c084fc', '#9333ea']}
+            <LinearGradient
+                className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
+                colors={['#c084fc', '#9333ea']}
+            >
+                <TouchableOpacity
+                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
+                    onPress={() => {
+                        router.push('/transactions/new-transaction');
+                    }}
                 >
-                    <TouchableOpacity
-                        className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                        onPress={() => {
-                            router.push('/transactions/new-transaction');
-                        }}
-                    >
-                        <PlusIcon stroke={'#fff'} />
-                    </TouchableOpacity>
-                </LinearGradient>
-            )}
+                    <PlusIcon stroke={'#fff'} />
+                </TouchableOpacity>
+            </LinearGradient>
         </SafeAreaView>
     );
 }

@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
+import { useInfiniteTransactions, useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
@@ -25,6 +25,11 @@ import { LineChart } from 'react-native-gifted-charts';
 import Toast from 'react-native-toast-message';
 import { useAccountStore } from '../hooks';
 import { createTransactionChartData } from '../utils';
+import AccountNavigationArea from '../molecules/AccountNavigationArea';
+import AccountInformation from '../molecules/AccountInformation';
+import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
+import LoadingScreen from '../molecules/LoadingScreen';
+import AccountTransactionsList from '../molecules/AccountTransactionsList';
 
 type AccountScreenProps = {
     showBackButton?: boolean;
@@ -85,6 +90,7 @@ function AccountScreen(props: AccountScreenProps) {
     const local = useLocalSearchParams();
     const { sessionData } = useAuth();
     const { accountID, accountName } = local;
+    const { setCurrentTransaction } = useTransactionStore();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { currentAccount } = useAccountStore();
@@ -96,19 +102,17 @@ function AccountScreen(props: AccountScreenProps) {
                 page_size: 10,
             },
             options: {
-                onError: () => {
+                onError: (err) => {
                     Toast.show({
                         type: 'error',
                         props: {
                             text1: 'Error!',
-                            text2: "We couldn't fetch your transactions",
+                            text2: err.message,
                         },
                     });
                 },
             },
         });
-
-    const chartData = useMemo(() => createTransactionChartData(transactions), [transactions, data]);
 
     const handleLoadMore = () => {
         if (hasNextPage) {
@@ -129,8 +133,8 @@ function AccountScreen(props: AccountScreenProps) {
             <TransactionHistoryCard
                 data={item}
                 onPress={() => {
-                    // setCurrentTransaction(item);
-                    setShowBottomSheetModal('transactionReceiptTransactionsScreen', true);
+                    setCurrentTransaction(item);
+                    setShowBottomSheetModal('transactionReceipt', true);
                 }}
             />
         ),
@@ -145,11 +149,12 @@ function AccountScreen(props: AccountScreenProps) {
         [],
     );
     const renderItemSeparator = useCallback(
-        () => <View className='border-b border-gray-100' />,
+        () => <View className='border-b border-purple-100' />,
         [],
     );
 
-    if (!currentAccount) return null;
+    if (isLoading || !currentAccount) return <LoadingScreen />;
+    if (!currentAccount && (!isLoading || !isFetching)) return null;
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -160,106 +165,12 @@ function AccountScreen(props: AccountScreenProps) {
             />
             <ExpoStatusBar style='dark' />
             <ScrollView>
-                <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
-                        {truncateStringIfLongerThan(accountName as string, 20)}
-                    </Text>
-
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
-                            Back
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View className='px-5 flex flex-col'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.gramatikaBlack}
-                        className='text-black text-2xl tracking-tighter leading-[1.4] mt-1.5'
-                    >
-                        {formatCurrencyAccurate(currentAccount.currency, currentAccount.balance)}
-                    </Text>
-                    <View className='flex flex-row items-center space-x-1'>
-                        <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
-                        <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
-                            className='text-purple-500 text-sm tracking-tight'
-                        >
-                            GHS 250.98 today
-                        </Text>
-                    </View>
-                </View>
-
+                <AccountNavigationArea />
+                <AccountInformation transactions={transactions} />
                 {transactions.length > 2 && (
-                    <View
-                        className='pt-10 -ml-3 mr-3'
-                        style={{
-                            width: Dimensions.get('window').width + 11,
-                        }}
-                    >
-                        <LineChart
-                            width={Dimensions.get('window').width}
-                            height={200}
-                            rotateLabel
-                            // spacing={25}
-                            areaChart
-                            curved
-                            curvature={0.025}
-                            color='#A855F7'
-                            data={chartData}
-                            // hideRules
-                            hideYAxisText
-                            // hide the line on the x axis
-                            // hideAxesAndRules
-                            // spacing={9.2}
-                            // noOfSections={4}
-                            startFillColor='#A855F7'
-                            startOpacity={0.5}
-                            endFillColor='#FAF5FF'
-                            endOpacity={0.3}
-                            // maxValue={900}
-                            hideDataPoints
-                            yAxisColor='white'
-                            xAxisColor={'white'}
-                            // hideYAxisText
-                            // yAxisThickness={0}
-                            // rulesType="solid"
-                            // rulesColor="#F3E8FF"
-                            // yAxisTextStyle={{ color: "gray" }}
-                            // yAxisSide="right"
-                            // xAxisColor="lightgray"
-                            disableScroll
-                            hideRules
-                            // hideYAxisText
-                            // hide the line on the x axis
-                            // hideAxesAndRules
-                            // isAnimated
-                            animateOnDataChange
-                            animationDuration={1200}
-                            initialSpacing={0}
-                            adjustToWidth
-                            // spacing={30}
-                            thickness={2.5}
-                        />
-                    </View>
+                    <AccountActivityAreaChart transactions={transactions} />
                 )}
-
-                <View>
-                    <FlatList
-                        data={transactions}
-                        keyExtractor={keyExtractor}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={true}
-                        renderItem={renderItem}
-                        ItemSeparatorComponent={renderItemSeparator}
-                        onRefresh={refetch}
-                        refreshing={isFetching}
-                        ListEmptyComponent={renderEmptylist}
-                        onEndReached={handleLoadMore}
-                        onEndReachedThreshold={0.5}
-                        scrollEnabled={false}
-                    />
-                </View>
+                <AccountTransactionsList transactions={transactions} />
             </ScrollView>
         </SafeAreaView>
     );

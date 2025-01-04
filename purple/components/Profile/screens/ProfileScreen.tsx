@@ -10,8 +10,10 @@ import Toast from 'react-native-toast-message';
 import ProfilePages from '../molecules/ProfilePages';
 import { nativeStorage } from '@/lib/utils/storage';
 import React from 'react';
+import { Image } from 'expo-image';
+import tw from 'twrnc';
 
-export default function NewProfileScreen() {
+export default function ProfileScreen() {
     const { destroySession, sessionData, hasOnboarded, setOnboarded, isLoading } = useAuth();
     const showToast = () => {
         Toast.show({
@@ -35,23 +37,19 @@ export default function NewProfileScreen() {
                     My Profile
                 </Text>
             </View>
-            <View className='flex items-center justify-center space-y-5 mt-5'>
-                <Avatar
-                    colour='purple'
-                    // TODO: do something proper here
-                    // @ts-ignore
-                    content={sessionData?.user?.username?.at(0)?.toLocaleUpperCase()}
-                    size='xl'
-                />
+            <View className='flex items-center justify-center space-y-2.5 mt-5'>
+                <View className='flex items-center justify-center bg-purple-50 border border-purple-300 rounded-full w-20 h-20'>
+                    <Image
+                        source={require('@/assets/images/graphics/catto.png')}
+                        style={tw`h-12 w-12`}
+                    />
+                </View>
 
                 <View className='flex flex-col items-center'>
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-2xl text-black'>
-                        {sessionData?.user.username}
+                        @{sessionData?.user.username}
                     </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.monaSansMedium}
-                        className='text-sm text-black tracking-tighter'
-                    >
+                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-black'>
                         {sessionData?.user.email}
                     </Text>
                 </View>

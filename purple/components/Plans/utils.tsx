@@ -14,6 +14,7 @@ import { formatDateTime } from '@/lib/utils/date';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { Account } from '../Accounts/schema';
 import { generatePalette } from '@/lib/utils/colour';
+import { Transaction } from '../Transactions/schema';
 
 /**
  * Calculates the total expense details from an array of budget plans.
@@ -169,7 +170,7 @@ function createProgressResponse(
     };
 }
 
-function formatDateLabel(dateStr: string): string {
+export function formatDateLabel(dateStr: string, showYear: boolean = false): string {
     const inputDate = new Date(dateStr);
     const currentDate = new Date();
 
@@ -180,7 +181,9 @@ function formatDateLabel(dateStr: string): string {
     const currentYear = currentDate.getFullYear();
 
     // Only include year if the date is from a different year
-    return year !== currentYear ? `${date} ${month} ${year}` : `${date} ${month}`;
+    return year !== currentYear
+        ? `${date} ${month} ${year}`
+        : `${date} ${month} ${showYear ? year : ''}`;
 }
 
 /**
@@ -194,7 +197,6 @@ export function generateSpendingTrendData(
     plan: Plan | null,
     dataPoints: number = 30,
     numberOfLabels: number = 3,
-    normalize: boolean = false,
 ): SpendingTrendData {
     if (!plan) {
         return { projected: [], actual: [], ideal: [] };
@@ -315,13 +317,16 @@ export function generateSpendingTrendData(
     return { projected, actual, ideal };
 }
 
-export function calculateAmountAddedOnDay(plan: Plan | null, date?: Date): number {
-    if (!plan) return 0;
+export function calculateAmountAddedOnDay(
+    transactions: Transaction[] | PlanTransaction[] | undefined,
+    date?: Date,
+): number {
+    if (!transactions) return 0;
 
     let dateToUse = date || new Date();
 
     // check if any transactions were made on this day
-    const transactionsOnDate = plan.Transactions?.filter(
+    const transactionsOnDate = transactions.filter(
         (t) => new Date(t.CreatedAt).toDateString() === dateToUse.toDateString(),
     );
 

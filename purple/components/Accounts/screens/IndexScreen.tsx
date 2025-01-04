@@ -29,12 +29,13 @@ export default function AccountsScreen() {
                 const res = data as GenericAPIResponse<Account[]>;
                 setAccounts(res.data);
             },
-            onError: () => {
+            // @ts-ignore wtf is this
+            onError: (err: Error) => {
                 Toast.show({
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: "We couldn't fetch your accounts",
+                        text2: err.message,
                     },
                 });
             },

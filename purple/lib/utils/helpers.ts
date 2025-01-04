@@ -14,7 +14,7 @@ type KeyOf<T> = keyof T | keyof T[keyof T];
  * @returns {string} The value of the key as a string, or "undefined" if the key does not exist.
  * @author Joshua Akangah
  */
-function getKey<T, K extends KeyOf<T>>(obj: T, key: K): string {
+export function getKey<T, K extends KeyOf<T>>(obj: T, key: K): string {
     if (typeof key === 'string') {
         return obj[key as keyof T] as any as string;
     } else {

@@ -6,7 +6,7 @@ import Onboarding from 'react-native-onboarding-swiper';
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import DoneButton from '../molecules/DoneButton';
-import NextButton from '../molecules/NextButton';
+import NextButton, { SkipButton } from '../molecules/NextButton';
 import Pagination from '../molecules/Pagination';
 
 export default function Screen() {
@@ -16,14 +16,11 @@ export default function Screen() {
         <Onboarding
             DotComponent={Pagination}
             NextButtonComponent={NextButton}
-            // SkipButtonComponent={Skip}
-            showSkip={false}
+            SkipButtonComponent={SkipButton}
+            showSkip={true}
             skipToPage={3}
             DoneButtonComponent={DoneButton}
             onDone={() => {
-                // setOnboardedTrue();
-                // router.push('/(tabs)');
-                // handleFormSubmit();
                 setOnboarded(true)
                     .then(() => {
                         router.replace('/onboarding/landing');
@@ -38,8 +35,8 @@ export default function Screen() {
                         });
                     });
             }}
-            titleStyles={{ fontSize: 30, fontFamily: 'Suprapower', ...tw`px-5` }}
-            subTitleStyles={{ fontSize: 15, fontFamily: 'InterMedium', ...tw`px-5` }}
+            titleStyles={{ fontFamily: 'GramatikaBlack', ...tw`px-5 text-3xl` }}
+            subTitleStyles={{ fontFamily: 'GramatikaMedium', ...tw`px-5, text-base` }}
             bottomBarColor='rgba(0, 0, 0,0)'
             bottomBarHighlight={false}
             pages={[

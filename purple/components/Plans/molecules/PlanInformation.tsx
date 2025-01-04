@@ -9,9 +9,11 @@ import { formatDateTime } from '@/lib/utils/date';
 
 export default function PlanInformation() {
     const { currentPlan } = usePlanStore();
-    if (!currentPlan) return null;
 
-    const amountAdded = useMemo(() => calculateAmountAddedOnDay(currentPlan), [currentPlan]);
+    const amountAdded = useMemo(
+        () => calculateAmountAddedOnDay(currentPlan?.Transactions),
+        [currentPlan],
+    );
     const [startDate, endDate] = useMemo(
         () => [
             formatDateTime(currentPlan?.start_date, false),
@@ -19,6 +21,8 @@ export default function PlanInformation() {
         ],
         [currentPlan],
     );
+
+    if (!currentPlan) return null;
 
     return (
         <View className='px-5 flex flex-col space-y-2.5'>
@@ -57,10 +61,7 @@ export default function PlanInformation() {
                     </Text>
                 </View>
 
-                <Text
-                    style={GLOBAL_STYLESHEET.gramatikaMedium}
-                    className='text-purple-500 text-sm tracking-tight'
-                >
+                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-500 text-sm'>
                     You're on a 3-day streak!
                 </Text>
             </View>

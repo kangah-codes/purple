@@ -1,4 +1,5 @@
 import { LinearGradient, Text } from '@/components/Shared/styled';
+import React from 'react';
 
 const AvatarGradients = {
     purple: ['#C084FC', '#7E22CE'],
@@ -55,8 +56,9 @@ export default function Avatar(props: AvatarProps) {
             <Text
                 className='text-white tracking-tighter'
                 style={{
-                    fontFamily: 'Suprapower',
+                    fontFamily: 'GramatikaBlack',
                     fontSize: getAvatarSize(size).fontSize,
+                    lineHeight: getAvatarSize(size).fontSize,
                 }}
             >
                 {content}

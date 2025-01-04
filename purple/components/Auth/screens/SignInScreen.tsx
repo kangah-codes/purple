@@ -1,6 +1,3 @@
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { usePlanStore } from '@/components/Plans/hooks';
-import { useUserStore } from '@/components/Profile/hooks';
 import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import {
     InputField,
@@ -10,13 +7,12 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -29,14 +25,8 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
-import React from 'react';
 
 export default function SignInScreen() {
-    const { user, setUser, reset: resetUser } = useUserStore();
-    const { accounts, setAccounts } = useAccountStore();
-    const { transactions, setTransactions } = useTransactionStore();
-    const { plans, setPlans } = usePlanStore();
-    const [showLogin, setShowLogin] = useState(true);
     const { setSessionData } = useAuth();
     const {
         control,
@@ -49,15 +39,15 @@ export default function SignInScreen() {
         },
     });
     const { mutate, isLoading, error, data } = useSignIn();
-    const signUp = (loginInformation: { username: string; password: string }) => {
+    const signIn = (loginInformation: { username: string; password: string }) => {
         Keyboard.dismiss();
         mutate(loginInformation, {
-            onError: () => {
+            onError: (err) => {
                 Toast.show({
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: 'Invalid username/password',
+                        text2: err.message,
                     },
                 });
             },
@@ -77,30 +67,16 @@ export default function SignInScreen() {
                     user,
                 })
                     .then(() => {
-                        Promise.all([
-                            nativeStorage.setItem('account_groups', account_groups),
-                            nativeStorage.setItem('currencies', currencies),
-                            nativeStorage.setItem('transaction_types', transaction_types),
-                        ])
-                            .then(() => {
-                                router.push('/(tabs)');
-                            })
-                            .catch(() => {
-                                Toast.show({
-                                    type: 'error',
-                                    props: {
-                                        text1: 'Error!',
-                                        text2: "Couldn't sign you in. Try again later",
-                                    },
-                                });
-                            });
+                        nativeStorage.setItem('account_groups', account_groups);
+                        nativeStorage.setItem('currencies', currencies);
+                        nativeStorage.setItem('transaction_types', transaction_types);
                     })
-                    .catch(() => {
+                    .catch((err) => {
                         Toast.show({
                             type: 'error',
                             props: {
                                 text1: 'Error!',
-                                text2: "Couldn't sign you in. Try again later",
+                                text2: err.message,
                             },
                         });
                     });
@@ -110,33 +86,8 @@ export default function SignInScreen() {
 
     // TODO: figure out how to refactor the code so race conditions on sign out are fixed
     useEffect(() => {
-        const checkLoginState = async () => {
-            try {
-                nativeStorage
-                    .clear()
-                    .then(() => {
-                        const userIsEmpty = user === null || Object.keys(user).length === 0;
-                        const accountsIsEmpty = accounts.length === 0;
-                        const transactionsIsEmpty = transactions.length === 0;
-                        const plansIsEmpty = plans.length === 0;
-
-                        const shouldShow =
-                            userIsEmpty && accountsIsEmpty && transactionsIsEmpty && plansIsEmpty;
-                        setShowLogin(shouldShow);
-                    })
-                    .catch(() => {
-                        setShowLogin(true); // Default to showing login on error
-                    });
-            } catch (error) {
-                console.error('Error in checkLoginState:', error);
-                setShowLogin(true); // Default to showing login on error
-            }
-        };
-
-        checkLoginState();
-    }, [user, accounts, transactions, plans]);
-
-    if (!showLogin) return null;
+        nativeStorage.clear();
+    }, []);
 
     return (
         <SafeAreaView
@@ -247,7 +198,7 @@ export default function SignInScreen() {
                                     )}
                                 </View>
 
-                                <TouchableOpacity className='w-full' onPress={handleSubmit(signUp)}>
+                                <TouchableOpacity className='w-full' onPress={handleSubmit(signIn)}>
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 py-2.5 h-12'
                                         colors={['#c084fc', '#9333ea']}

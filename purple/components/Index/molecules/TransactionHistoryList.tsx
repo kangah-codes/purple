@@ -4,7 +4,9 @@ import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { dedupeByKey } from '@/lib/utils/array';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
@@ -15,13 +17,14 @@ export default function TransactionHistoryList() {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { transactions, setCurrentTransaction } = useTransactionStore();
     const getTopFiveTransactions = useCallback(() => {
-        return transactions.slice(0, 5);
+        // TODO: research why duplicate transactions were being sent in the first place instead of this shit
+        return dedupeByKey(transactions.slice(0, 5), 'ID');
     }, [transactions]);
 
-    console.log('TRAN', getTopFiveTransactions(), transactions);
+    console.log('TRAN', getTopFiveTransactions());
 
     const renderItem = useCallback(
-        ({ item }: any) => (
+        ({ item }: { item: Transaction }) => (
             <TransactionHistoryCard
                 data={item}
                 onPress={() => {

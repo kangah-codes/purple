@@ -1,6 +1,7 @@
 import { useAuth } from '@/components/Auth/hooks';
 import Landing from '@/components/Onboarding/screens/Landing';
 import { Redirect, Stack } from 'expo-router';
+import React from 'react';
 
 export default function Screen() {
     const { hasOnboarded } = useAuth();

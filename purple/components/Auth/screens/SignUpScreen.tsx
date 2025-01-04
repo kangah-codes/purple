@@ -72,6 +72,7 @@ export default function SignUpScreen() {
         });
     };
     const signUp = (data: SignUpScreenData) => {
+        Keyboard.dismiss();
         setLoading(true);
         signUpMutate(
             {
@@ -81,6 +82,13 @@ export default function SignUpScreen() {
             },
             {
                 onSuccess: () => {
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Welcome!',
+                            text2: 'Your Purple account has been created successfully!',
+                        },
+                    });
                     router.push('/auth/sign-in');
                 },
                 onError: (error) => {

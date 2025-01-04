@@ -22,6 +22,7 @@ import { Currency } from '@/@types/common';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
 import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
+
 export default function NewAccountScreen() {
     const { sessionData } = useAuth();
     const [accountGroups, setAccountsGroups] = useState<string[]>([]);
@@ -105,10 +106,10 @@ export default function NewAccountScreen() {
 
     useEffect(() => {
         const getAccountGroups = async () => {
-            const groups = await nativeStorage.getItem<string[]>('account_groups');
+            const groups = nativeStorage.getItem<string[]>('account_groups');
             if (groups) setAccountsGroups(groups);
 
-            const currencies = await nativeStorage.getItem<Currency[]>('currencies');
+            const currencies = nativeStorage.getItem<Currency[]>('currencies');
             if (currencies) setCurrencies(currencies);
         };
 
@@ -136,7 +137,7 @@ export default function NewAccountScreen() {
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
-                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                         Category
                     </Text>
                     <>
@@ -167,7 +168,7 @@ export default function NewAccountScreen() {
                         />
                         {errors.category && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.category.message}
@@ -176,7 +177,7 @@ export default function NewAccountScreen() {
                     </>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Account Name
@@ -203,7 +204,7 @@ export default function NewAccountScreen() {
                         />
                         {errors.name && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.name.message}
@@ -212,7 +213,7 @@ export default function NewAccountScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Balance
@@ -239,7 +240,7 @@ export default function NewAccountScreen() {
                         />
                         {errors.balance && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.gramatikaMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.balance.message}
@@ -248,7 +249,7 @@ export default function NewAccountScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Currency
@@ -281,7 +282,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.currency && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.currency.message}

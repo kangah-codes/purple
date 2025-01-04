@@ -50,7 +50,7 @@ export default function NewTransactionScreen() {
     useEffect(() => {
         setValue('type', transactionType);
         const getCachedConstants = async () => {
-            const cachedTypes = await nativeStorage.getItem<string[]>('transaction_types');
+            const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
             if (cachedTypes) setTransactionCategories(cachedTypes);
         };
         getCachedConstants();

@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MMKV } from 'react-native-mmkv';
 
 export class NativeStorage {
@@ -22,7 +21,7 @@ export class NativeStorage {
         return NativeStorage.instance;
     }
 
-    async getItem<T>(key: string): Promise<T | null> {
+    getItem<T>(key: string): T | null {
         try {
             const value = this.storage.getString(key);
             if (value === undefined || value === null) {
@@ -35,7 +34,7 @@ export class NativeStorage {
         }
     }
 
-    async setItem<T>(key: string, value: T): Promise<void> {
+    setItem<T>(key: string, value: T): void {
         try {
             this.storage.set(key, JSON.stringify(value));
             this.keys.add(key);
@@ -44,7 +43,7 @@ export class NativeStorage {
         }
     }
 
-    async removeItem(key: string): Promise<void> {
+    removeItem(key: string): void {
         try {
             this.storage.delete(key);
             this.keys.delete(key);
@@ -53,7 +52,7 @@ export class NativeStorage {
         }
     }
 
-    async multiRemove(keys: string[]): Promise<void> {
+    multiRemove(keys: string[]): void {
         try {
             keys.forEach((key) => {
                 this.storage.delete(key);
@@ -64,7 +63,7 @@ export class NativeStorage {
         }
     }
 
-    async clear(): Promise<void> {
+    clear(): void {
         try {
             this.storage.clearAll();
             this.keys.clear();
@@ -73,7 +72,7 @@ export class NativeStorage {
         }
     }
 
-    async hasItem(key: string): Promise<boolean> {
+    hasItem(key: string): boolean {
         try {
             return this.storage.contains(key);
         } catch (error) {

@@ -1,13 +1,10 @@
-import { View } from '@/components/Shared/styled';
+import { Text, View } from '@/components/Shared/styled';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
-import { Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { SpendingTrendData } from '../schema';
 import { usePlanStore } from '../hooks';
 import { generateSpendingTrendData } from '../utils';
-import { formatCurrencyRounded } from '@/lib/utils/number';
-
-const screenDimensions = Dimensions.get('screen');
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function PlanBuildUpChart() {
     const { currentPlan } = usePlanStore();
@@ -17,13 +14,13 @@ export default function PlanBuildUpChart() {
             return { projected: [], actual: [], ideal: [] };
         }
 
-        return generateSpendingTrendData(currentPlan, 30, 5, true);
+        return generateSpendingTrendData(currentPlan, 30, 5);
     }, [currentPlan]);
 
     if (!currentPlan) return null;
 
     return (
-        <View className='pt-10 w-full pl-2'>
+        <View className='pt-10 w-full pl-2 flex flex-col'>
             <LineChart
                 // width={200}
                 height={220}
@@ -67,7 +64,7 @@ export default function PlanBuildUpChart() {
                 // yAxisSide="right"
                 // xAxisColor="lightgray"
                 disableScroll
-                // hideRules
+                hideRules
                 // hideYAxisText
                 // hide the line on the x axis
                 // hideAxesAndRules
@@ -89,6 +86,21 @@ export default function PlanBuildUpChart() {
                 xAxisLabelsVerticalShift={20}
                 formatYLabel={(value) => formatCurrencyRounded(Number(value), currentPlan.currency)}
             />
+
+            <View className='flex flex-row justify-between items-center -mt-2.5 px-5 mx-auto space-x-2'>
+                <View className='flex flex-row space-x-1 items-center'>
+                    <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#10B981' }} />
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-black text-xs'>
+                        Actual {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
+                    </Text>
+                </View>
+                <View className='flex flex-row space-x-1 items-center'>
+                    <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#A855F7' }} />
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-black text-xs'>
+                        Optimal {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
+                    </Text>
+                </View>
+            </View>
         </View>
     );
 }

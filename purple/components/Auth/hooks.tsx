@@ -31,11 +31,16 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataRes
             body: JSON.stringify(loginInformation),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 };
@@ -51,11 +56,16 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataRes
             body: JSON.stringify(signUpInformation),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 };
@@ -71,11 +81,16 @@ export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, E
             body: JSON.stringify(data),
         });
 
+        const statusCode = res.status;
+        const json = await res.json();
+
         if (!res.ok) {
-            throw new Error(res.status.toString());
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
         }
 
-        const json = await res.json();
         return json;
     });
 };
@@ -132,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSessionExpiry(null);
             setRefreshExpiry(null);
             _setSessionData(null);
-            await nativeStorage.clear();
+            nativeStorage.clear();
         } finally {
             setIsLoading(false);
         }
@@ -169,7 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         try {
             await SecureStore.deleteItemAsync('session_data');
-            await nativeStorage.clear();
+            nativeStorage.clear();
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {

@@ -11,8 +11,6 @@ import {
     UserCircleIcon,
 } from '@/components/SVG/noscale';
 import Colors from '@/constants/Colors';
-import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
-import { Portal } from '@gorhom/portal';
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();

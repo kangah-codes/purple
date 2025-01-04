@@ -136,10 +136,10 @@ export default function NewPlanScreen() {
 
     useEffect(() => {
         const getCachedConstants = async () => {
-            const cachedTypes = await nativeStorage.getItem<string[]>('transaction_types');
+            const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
             if (cachedTypes) setPlanCategories(cachedTypes);
 
-            const currencies = await nativeStorage.getItem<Currency[]>('currencies');
+            const currencies = nativeStorage.getItem<Currency[]>('currencies');
             if (currencies) setCurrencies(currencies);
         };
         getCachedConstants();

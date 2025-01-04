@@ -23,7 +23,7 @@ export default function PlanActionMenu() {
     return (
         <CustomBottomSheetModal
             modalKey={'planScreenModal'}
-            snapPoints={['35%', '35%']}
+            snapPoints={['25%', '30%']}
             style={{
                 backgroundColor: 'white',
                 borderRadius: 24,
@@ -40,7 +40,7 @@ export default function PlanActionMenu() {
                 backgroundColor: '#D4D4D4',
             }}
         >
-            <View className='flex flex-col p-5 space-y-10'>
+            <View className='flex flex-col p-5 space-y-7'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
                         style={GLOBAL_STYLESHEET.gramatikaBlack}
@@ -52,8 +52,9 @@ export default function PlanActionMenu() {
                         style={GLOBAL_STYLESHEET.gramatikaMedium}
                         className='text-sm textblack text-center'
                     >
-                        Are you sure you want to delete{' '}
-                        {truncateStringIfLongerThan(currentPlan.name as string, 20)}
+                        Are you sure you want to delete "
+                        {truncateStringIfLongerThan(currentPlan.name as string, 20)}"? This action
+                        cannot be undone.
                     </Text>
                 </View>
                 <View>

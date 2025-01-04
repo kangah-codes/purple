@@ -6,9 +6,11 @@ export function formatDate(
 }
 
 export function formatDateTime(
-    inputDateStr: string,
+    inputDateStr: string | undefined,
     showRelative: boolean = true,
 ): { date: string; time: string } {
+    if (!inputDateStr) return { date: '', time: '' };
+
     const inputDate = new Date(inputDateStr);
     const currentDate = new Date();
     const yesterday = new Date(currentDate);

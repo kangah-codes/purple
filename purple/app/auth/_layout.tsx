@@ -1,11 +1,12 @@
 import { useAuth } from '@/components/Auth/hooks';
 import { Redirect, Stack } from 'expo-router';
+import React from 'react';
 
 export default function Auth() {
     const { isAuthenticated } = useAuth();
 
     if (isAuthenticated) {
-        return <Redirect href={'/(tabs)'} />;
+        return <Redirect href={'/(tabs)/'} />;
     }
 
     return (
