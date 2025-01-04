@@ -152,10 +152,12 @@ func FetchUser(c *gin.Context) {
 
 	utils.InfoLogger.Printf("User ID %s", c.Param("id"))
 
-	result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc").Limit(5)
+	result := db.Preload("Accounts", func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id = ?", userID)
+	}).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("account", "user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
 	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc").Limit(5)
+		return db.Omit("user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
 	}).First(&user, "id = ?", userID)
 	if result.Error != nil {
 		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
