@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native-mmkv/lib/module/MMKV.js b/node_modules/react-native-mmkv/lib/module/MMKV.js
+index c7b6cdd..439d3dd 100644
+--- a/node_modules/react-native-mmkv/lib/module/MMKV.js
++++ b/node_modules/react-native-mmkv/lib/module/MMKV.js
+@@ -41,6 +41,10 @@ export class MMKV {
+   }
+   set(key, value) {
+     const func = this.getFunctionFromCache('set');
++    if (key) {
++      const _delete = this.getFunctionFromCache('delete');
++      _delete(key);
++    }
+     func(key, value);
+     this.onValuesChanged([key]);
+   }
