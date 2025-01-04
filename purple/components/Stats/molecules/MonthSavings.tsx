@@ -15,7 +15,9 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 export default function MonthSavings() {
     return (
         <View className='w-full space-y-2.5 border border-gray-200 rounded-xl p-5'>
-            <Text style={GLOBAL_STYLESHEET.gramatikaBlack}>Savings this month</Text>
+            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
+                Savings this month
+            </Text>
 
             <>
                 <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-2xl text-purple-700'>

@@ -38,7 +38,7 @@ export default function SignInScreen() {
             password: 'password',
         },
     });
-    const { mutate, isLoading, error, data } = useSignIn();
+    const { mutate, isLoading } = useSignIn();
     const signIn = (loginInformation: { username: string; password: string }) => {
         Keyboard.dismiss();
         mutate(loginInformation, {
@@ -67,9 +67,17 @@ export default function SignInScreen() {
                     user,
                 })
                     .then(() => {
+                        router.replace('/(tabs)/');
                         nativeStorage.setItem('account_groups', account_groups);
                         nativeStorage.setItem('currencies', currencies);
                         nativeStorage.setItem('transaction_types', transaction_types);
+                        Toast.show({
+                            type: 'success',
+                            props: {
+                                text1: 'Success!',
+                                text2: `Welcome back, ${user.username}`,
+                            },
+                        });
                     })
                     .catch((err) => {
                         Toast.show({

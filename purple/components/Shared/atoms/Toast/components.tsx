@@ -107,7 +107,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                             color: styles.titleFontColour,
                         },
                     ]}
-                    className='text-[15px]'
+                    className='text-[15px] leading-[16px]'
                 >
                     {props.text1}
                 </Text>

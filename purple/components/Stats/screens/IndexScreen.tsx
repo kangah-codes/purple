@@ -56,10 +56,10 @@ export default function AccountsScreen() {
                 />
             </Portal>
 
-            <View className='px-5' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5'>
+            <View className='' style={styles.parentView}>
+                <View className='flex flex-row items-center justify-between py-2.5 px-5'>
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
-                        Stats
+                        My Stats
                     </Text>
                 </View>
 
@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
     flatlistContentContainer: {
         paddingBottom: 100,
         paddingHorizontal: 20,
-        // paddingTop: 20,
         backgroundColor: 'white',
     },
     handleIndicator: {

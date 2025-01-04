@@ -5,11 +5,13 @@ import DateTimePicker, {
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import React from 'react';
+
+const snapPoints = ['35%', '35%'];
 
 type DatePickerProps = {
     label?: string;
@@ -44,19 +46,8 @@ export default function DatePicker({
                 Platform.OS === 'ios' && (
                     <CustomBottomSheetModal
                         modalKey={pickerKey}
-                        snapPoints={['35%', '35%']}
-                        style={{
-                            backgroundColor: 'white',
-                            borderRadius: 24,
-                            shadowColor: '#000000',
-                            shadowOffset: {
-                                width: 0,
-                                height: 8,
-                            },
-                            shadowOpacity: 0.25,
-                            shadowRadius: 48,
-                            elevation: 10,
-                        }}
+                        snapPoints={snapPoints}
+                        style={styles.bottomSheet}
                         handleIndicatorStyle={{
                             backgroundColor: '#D4D4D4',
                         }}
@@ -65,7 +56,7 @@ export default function DatePicker({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={{ fontFamily: 'GramatikaBold' }}
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
                                         className='text-base text-gray-900'
                                     >
                                         {label}
@@ -88,7 +79,7 @@ export default function DatePicker({
             }
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'GramatikaBold' }} className='text-xs text-gray-600'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -125,3 +116,18 @@ export default function DatePicker({
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    bottomSheet: {
+        backgroundColor: 'white',
+        borderRadius: 24,
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 48,
+        elevation: 10,
+    },
+});

@@ -72,7 +72,7 @@ function StatsHeatmap() {
 
             if (format(now, 'dd/MM/yyyy') === data.key)
                 return (
-                    <TouchableOpacity key={data.key} onPress={() => handleCellPress(data)}>
+                    <TouchableOpacity key={data.key} onPress={handleCellPress.bind(null, data)}>
                         <LinearGradient
                             style={styles.linearGradient}
                             colors={colors[colorIndex]}
@@ -122,7 +122,7 @@ function StatsHeatmap() {
                         <Text
                             key={key}
                             className='text-black text-base mx-auto'
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.gramatikaBlack}
                         >
                             {day}
                         </Text>

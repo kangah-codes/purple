@@ -1,62 +1,52 @@
 import { PieChart } from 'react-native-gifted-charts';
 import { View, Text } from '@/components/Shared/styled';
 import { memo, useCallback } from 'react';
+import React from 'react';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 function TransactionsPieChart() {
     const pieData = [
-        // { value: 40, color: "#C084FC", gradientCenterColor: "#E9D5FF" },
-        { value: 54, color: '#A855F7', gradientCenterColor: '#E9D5FF' },
-        { value: 20, color: '#6B21A8', gradientCenterColor: '#E9D5FF' },
+        { value: 4, color: '#9333EA', gradientCenterColor: '#F3E8FF' },
+        { value: 54, color: '#EF4444', gradientCenterColor: '#FEE2E2' },
+        { value: 20, color: '#16A34A', gradientCenterColor: '#DCFCE7' },
     ];
-    const centerLabelComponent = useCallback(() => {
-        const highestValue = pieData.reduce((acc, curr) => Math.max(acc, curr.value), 0);
-        const total = pieData.reduce((acc, curr) => acc + curr.value, 0);
-
-        return (
-            <Text style={{ fontSize: 30, fontFamily: 'Suprapower' }}>
-                {Math.round((highestValue / total) * 100) + '%'}
-            </Text>
-        );
-    }, []);
-
     return (
         <View className='flex items-center justify-between flex-row space-x-5 h-[160] mt-5'>
-            <PieChart
-                donut
-                radius={80}
-                innerRadius={60}
-                data={pieData}
-                centerLabelComponent={centerLabelComponent}
-                showGradient
-            />
+            <PieChart donut radius={80} innerRadius={60} data={pieData} showGradient />
 
-            <View className='flex flex-col flex-grow rounded-lg h-full space-y-5 items-center justify-center'>
+            <View className='flex flex-col flex-grow rounded-lg h-full space-y-2.5 items-center justify-center'>
                 <View className='flex flex-col'>
                     <View className='flex flex-row items-center space-x-1.5'>
-                        <View className='w-2.5 h-2.5 rounded-full bg-[#A855F7]' />
-                        <Text
-                            style={{ fontFamily: 'InterMedium' }}
-                            className='text-xs tracking-tighter'
-                        >
+                        <View className='w-2.5 h-2.5 rounded-full bg-[#16A34A]' />
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
                             Income
                         </Text>
                     </View>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-xl'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         3,046.09
                     </Text>
                 </View>
 
                 <View className='flex flex-col'>
                     <View className='flex flex-row items-center space-x-1.5'>
-                        <View className='w-2.5 h-2.5 rounded-full bg-[#6B21A8]' />
-                        <Text
-                            style={{ fontFamily: 'InterMedium' }}
-                            className='text-xs tracking-tighter'
-                        >
+                        <View className='w-2.5 h-2.5 rounded-full bg-[#EF4444]' />
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
                             Expenses
                         </Text>
                     </View>
-                    <Text style={{ fontFamily: 'Suprapower' }} className='text-xl'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                        3,046.09
+                    </Text>
+                </View>
+
+                <View className='flex flex-col'>
+                    <View className='flex flex-row items-center space-x-1.5'>
+                        <View className='w-2.5 h-2.5 rounded-full bg-[#9333EA]' />
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                            Transfers
+                        </Text>
+                    </View>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
                         3,046.09
                     </Text>
                 </View>

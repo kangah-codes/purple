@@ -5,22 +5,26 @@ import TransactionsPieChart from './TransactionsPieChart';
 import SpendTrendAreaChart from './SpendTrendAreaChart';
 import MonthSavings from './MonthSavings';
 import { StyleSheet } from 'react-native';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function StatsHeader() {
     return (
         <>
-            <View className='flex flex-col space-y-5'>
+            <View className='flex flex-col space-y-5 px-5'>
                 {/* Daily Activity Section */}
                 <View className='space-y-2.5'>
-                    <Text className='text-sm text-black' style={{ fontFamily: 'Suprapower' }}>
+                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
                         Daily Activity
                     </Text>
                     <StatsHeatmap />
                 </View>
 
                 {/* Spend Overview Section */}
-                <View className='space-y-5 border border-gray-200 rounded-xl p-5'>
-                    <Text className='text-sm text-black' style={{ fontFamily: 'Suprapower' }}>
+                <View
+                    className='space-y-5 border border-purple-200 rounded-3xl p-5 bg-white'
+                    style={styles.card}
+                >
+                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
                         Spend Overview
                     </Text>
                     <TransactionsPieChart />
@@ -33,8 +37,8 @@ export default function StatsHeader() {
 
                 {/* Spend Overview Section */}
 
-                <View className='space-y-5 border border-gray-200 rounded-xl px-5 pt-5'>
-                    <Text className='text-sm text-black' style={{ fontFamily: 'Suprapower' }}>
+                <View className='space-y-5 border border-purple-200 rounded-3xl px-5 pt-5'>
+                    <Text className='text-sm text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
                         Spend Trend
                     </Text>
 
@@ -48,3 +52,16 @@ export default function StatsHeader() {
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    card: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.125,
+        shadowRadius: 80,
+        elevation: 3,
+    },
+});

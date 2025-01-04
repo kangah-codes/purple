@@ -1,8 +1,9 @@
-import { ReactNode, useCallback, useMemo } from 'react';
-import { FlatList, ViewStyle } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { ViewStyle } from 'react-native';
 import { LinearGradient, TouchableOpacity, View } from '../../styled';
-import { getColorIndex } from './utils';
 import { colors as defaultColors } from './constants';
+import { getColorIndex } from './utils';
 
 export type CellData = {
     value: number;
@@ -78,7 +79,7 @@ export default function Heatmap({
         return renderCell && renderCell(item, index) !== undefined ? (
             renderCell(item, index)
         ) : (
-            <TouchableOpacity onPress={() => handleCellPress(item)}>
+            <TouchableOpacity onPress={handleCellPress.bind(null, item)}>
                 <LinearGradient
                     style={{
                         width: cellSize,
@@ -94,13 +95,14 @@ export default function Heatmap({
     const keyExtractor = (item: CellData, index: number) => item.key + index.toString();
 
     return (
-        <FlatList
+        <FlashList
+            estimatedItemSize={cellSize}
             data={fullData}
             renderItem={renderItem as any}
             keyExtractor={keyExtractor}
             numColumns={cols}
-            scrollEnabled={false} // disable scrolling for static heatmap
-            getItemLayout={getItemLayout}
+            scrollEnabled={false}
+            // getItemLayout={getItemLayout} here's to hoping commenting this out don't break anything
         />
     );
 }
