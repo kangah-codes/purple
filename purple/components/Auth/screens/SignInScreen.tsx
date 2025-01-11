@@ -25,9 +25,11 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useAuth, useSignIn } from '../hooks';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 
 export default function SignInScreen() {
     const { setSessionData } = useAuth();
+    const { transactions } = useTransactionStore();
     const {
         control,
         handleSubmit,
@@ -41,60 +43,70 @@ export default function SignInScreen() {
     const { mutate, isLoading } = useSignIn();
     const signIn = (loginInformation: { username: string; password: string }) => {
         Keyboard.dismiss();
-        mutate(loginInformation, {
-            onError: (err) => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: err.message,
-                    },
-                });
+        mutate(
+            {
+                username: loginInformation.username.trim(),
+                password: loginInformation.password.trim(),
             },
-            onSuccess: (res) => {
-                const { data } = res;
-                const {
-                    account_groups,
-                    currencies,
-                    transaction_types,
-                    access_token,
-                    access_token_expires_at,
-                    user,
-                } = data;
-                setSessionData({
-                    access_token,
-                    access_token_expires_at,
-                    user,
-                })
-                    .then(() => {
-                        router.replace('/(tabs)/');
-                        nativeStorage.setItem('account_groups', account_groups);
-                        nativeStorage.setItem('currencies', currencies);
-                        nativeStorage.setItem('transaction_types', transaction_types);
-                        Toast.show({
-                            type: 'success',
-                            props: {
-                                text1: 'Success!',
-                                text2: `Welcome back, ${user.username}`,
-                            },
-                        });
-                    })
-                    .catch((err) => {
-                        Toast.show({
-                            type: 'error',
-                            props: {
-                                text1: 'Error!',
-                                text2: err.message,
-                            },
-                        });
+            {
+                onError: (err) => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: err.message,
+                        },
                     });
+                },
+                onSuccess: (res) => {
+                    const { data } = res;
+                    const {
+                        account_groups,
+                        currencies,
+                        transaction_types,
+                        access_token,
+                        access_token_expires_at,
+                        user,
+                    } = data;
+                    setSessionData({
+                        access_token,
+                        access_token_expires_at,
+                        user,
+                    })
+                        .then(() => {
+                            router.replace('/(tabs)/');
+                            nativeStorage.setItem('account_groups', account_groups);
+                            nativeStorage.setItem('currencies', currencies);
+                            nativeStorage.setItem('transaction_types', transaction_types);
+                            Toast.show({
+                                type: 'success',
+                                props: {
+                                    text1: 'Success!',
+                                    text2: `Welcome back, ${user.username}`,
+                                },
+                            });
+                        })
+                        .catch((err) => {
+                            Toast.show({
+                                type: 'error',
+                                props: {
+                                    text1: 'Error!',
+                                    text2: err.message,
+                                },
+                            });
+                        });
+                },
             },
-        });
+        );
     };
+
+    console.log(transactions);
 
     // TODO: figure out how to refactor the code so race conditions on sign out are fixed
     useEffect(() => {
-        nativeStorage.clear();
+        if (nativeStorage.getAllKeys().length > 0) {
+            nativeStorage.clear();
+        }
     }, []);
 
     return (

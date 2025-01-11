@@ -12,12 +12,14 @@ import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
 export default function IndexScreen() {
     const { sessionData } = useAuth();
     const { setAccounts } = useAccountStore();
+    const { updateTransactions } = useTransactionStore();
     const { setUser } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
     const { refetch } = useUser({
@@ -38,6 +40,7 @@ export default function IndexScreen() {
                 const res = data as GenericAPIResponse<User>;
                 setUser(res.data);
                 setAccounts(res.data.accounts);
+                updateTransactions(res.data.transactions);
             },
         },
     });

@@ -21,8 +21,6 @@ export default function TransactionHistoryList() {
         return dedupeByKey(transactions.slice(0, 5), 'ID');
     }, [transactions]);
 
-    console.log('TRAN', transactions);
-
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
             <TransactionHistoryCard
