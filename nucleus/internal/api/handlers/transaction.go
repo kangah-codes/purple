@@ -5,8 +5,11 @@ import (
 	"net/http"
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
+	"nucleus/internal/redis"
+	"nucleus/log"
 	"nucleus/utils"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -17,7 +20,7 @@ func CreateTransaction(c *gin.Context) {
 	db := utils.GetDB()
 
 	if err := c.ShouldBindJSON(&createTransaction); err != nil {
-		utils.ErrorLogger.Println(err)
+		log.ErrorLogger.Println(err)
 		c.JSON(400, types.Response{Status: 400, Message: "Invalid request"})
 		return
 	}
@@ -30,7 +33,7 @@ func CreateTransaction(c *gin.Context) {
 
 	tx := db.Begin()
 	if tx.Error != nil {
-		utils.ErrorLogger.Println(tx.Error)
+		log.ErrorLogger.Println(tx.Error)
 		c.JSON(500, types.Response{Status: 500, Message: "Failed to start transaction"})
 		return
 	}
@@ -38,10 +41,12 @@ func CreateTransaction(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			utils.ErrorLogger.Println("Transaction rolled back due to panic:", r)
+			log.ErrorLogger.Println("Transaction rolled back due to panic:", r)
 			c.JSON(500, types.Response{Status: 500, Message: "Transaction failed"})
 		}
 	}()
+
+	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), "*")
 
 	if createTransaction.Type == models.Transfer {
 		var fromAccount, toAccount models.Account
@@ -105,6 +110,10 @@ func CreateTransaction(c *gin.Context) {
 			return
 		}
 
+		if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", fmt.Sprintf("%s", userID))}); err != nil {
+			log.ErrorLogger.Printf("Error invalidating cache with key %s: %v", cacheKey, err)
+		}
+
 		c.JSON(201, types.Response{Status: 201, Message: "Transfer completed", Data: transaction})
 		return
 	}
@@ -154,6 +163,9 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", fmt.Sprintf("%s", userID))}); err != nil {
+		log.ErrorLogger.Printf("Error invalidating cache with key %s: %v", cacheKey, err)
+	}
 	c.JSON(201, types.Response{Status: 201, Message: "Transaction created", Data: transaction})
 }
 
@@ -161,7 +173,7 @@ func UpdateTransaction(c *gin.Context) {
 	updateTransaction := types.UpdateTransactionDTO{}
 	db := utils.GetDB()
 	if err := c.ShouldBindJSON(&updateTransaction); err != nil {
-		utils.ErrorLogger.Println(err)
+		log.ErrorLogger.Println(err)
 		c.JSON(400, types.Response{Status: 400, Message: "Invalid request", Data: nil})
 		return
 	}
@@ -172,6 +184,7 @@ func UpdateTransaction(c *gin.Context) {
 		return
 	}
 
+	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), "*")
 	transactionID, _ := c.Params.Get("transactionID")
 	transaction := models.Transaction{}
 	result := db.First(&transaction, transactionID)
@@ -218,11 +231,14 @@ func UpdateTransaction(c *gin.Context) {
 	result = db.Save(&transaction)
 
 	if result.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
+		log.ErrorLogger.Println(result.Error)
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update transaction", Data: nil})
 		return
 	}
 
+	if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", fmt.Sprintf("%s", userID))}); err != nil {
+		log.ErrorLogger.Printf("Error invalidating cache with key %s: %v", cacheKey, err)
+	}
 	c.JSON(200, types.Response{Status: http.StatusOK, Message: "Transaction updated", Data: transaction})
 }
 
@@ -233,7 +249,7 @@ func DeleteTransaction(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-
+	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), "*")
 	transactionID, _ := c.Params.Get("transactionID")
 	transaction := models.Transaction{}
 	result := db.First(&transaction, transactionID)
@@ -249,11 +265,14 @@ func DeleteTransaction(c *gin.Context) {
 
 	result = db.Delete(&transaction)
 	if result.Error != nil {
-		utils.ErrorLogger.Println(result.Error)
+		log.ErrorLogger.Println(result.Error)
 		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete transaction", Data: nil})
 		return
 	}
 
+	if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", fmt.Sprintf("%s", userID))}); err != nil {
+		log.ErrorLogger.Printf("Error invalidating cache with key %s: %v", cacheKey, err)
+	}
 	c.JSON(200, types.Response{Status: http.StatusOK, Message: "Transaction deleted", Data: nil})
 }
 
@@ -273,14 +292,25 @@ func FetchTransactions(c *gin.Context) {
 	// Access query parameters
 	accountID := c.Query("accountID")
 
-	fmt.Println(accountID, "ACCID")
+	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), fmt.Sprintf("%d", page), fmt.Sprintf("%d", pageSize), accountID)
+	var cachedResponse types.Response
+	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+
+	if err != nil {
+		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
+	}
+
+	if cacheHit {
+		c.JSON(http.StatusOK, cachedResponse)
+		return
+	}
 
 	var totalItems int64
 	query := db.Model(&models.Transaction{}).Where("user_id = ?", userID).Count(&totalItems)
 
 	// Apply filters based on query parameters
 	if accountID != "" {
-		utils.InfoLogger.Println("Account id is not null")
+		log.InfoLogger.Debugln("Account id is not null")
 		query = query.Where("account_id = ?", accountID)
 	}
 
@@ -291,8 +321,7 @@ func FetchTransactions(c *gin.Context) {
 	}
 
 	totalPages := int((totalItems + int64(pageSize) - 1) / int64(pageSize))
-
-	c.JSON(http.StatusOK, types.Response{
+	response := types.Response{
 		Status:     http.StatusOK,
 		Message:    "Transactions fetched successfully",
 		Data:       transactions,
@@ -300,5 +329,11 @@ func FetchTransactions(c *gin.Context) {
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 		TotalItems: int(totalItems),
-	})
+	}
+
+	if err := redis.SetCache(cacheKey, response, 30*time.Minute); err != nil {
+		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
+	}
+
+	c.JSON(http.StatusOK, response)
 }

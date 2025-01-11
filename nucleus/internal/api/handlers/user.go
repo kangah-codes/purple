@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"nucleus/utils"
 	"strconv"
+	"time"
 
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
+	"nucleus/internal/redis"
+	"nucleus/log"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -20,7 +23,7 @@ func SignUp(c *gin.Context) {
 
 	ipInfo, err := utils.GetCountryAndCurrencyFromIP(clientIP)
 	if err != nil {
-		utils.ErrorLogger.Printf("Failed to get country info: %s", err.Error())
+		log.ErrorLogger.Printf("Failed to get country info: %s", err.Error())
 		ipInfo = &utils.IPInfo{Currency: "GHS"} // Default to GHS
 	}
 
@@ -52,12 +55,6 @@ func SignUp(c *gin.Context) {
 		Username: signUp.Username,
 		Email:    signUp.Email,
 		Password: hashedPassword,
-		Settings: models.UserSettings{
-			PushNotifications:    false,
-			TwoFactorAuth:        false,
-			EndOfDayNotification: false,
-			DefaultCurrency:      ipInfo.Currency,
-		},
 		Accounts: []models.Account{
 			{
 				Name:             "Cash",
@@ -85,19 +82,19 @@ func SignUp(c *gin.Context) {
 	// Preload the user settings and accounts
 	if err := tx.Preload("Settings").Preload("Accounts").First(&user, user.ID).Error; err != nil {
 		tx.Rollback()
-		utils.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
+		log.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to retrieve user data", Data: nil})
 		return
 	}
 
 	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
-		utils.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
+		log.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
 		return
 	}
 
-	utils.InfoLogger.Printf("Created user: %+v\n", user)
+	log.InfoLogger.Printf("Created user: %+v\n", user)
 
 	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
 }
@@ -140,6 +137,14 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
+	cacheKey := redis.BuildCacheKey("*", fmt.Sprintf("%v", userID), "*")
+	if err := redis.InvalidateCache(cacheKey); err != nil {
+		log.ErrorLogger.Debugf("Error invalidating cache with key %s: %v", cacheKey, err)
+		// we rollback just to be safe in case user data is still in the cache & we don't want that if the account is deleted & there's still cached data
+		tx.Rollback()
+		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+	}
+
 	tx.Commit()
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "User deleted successfully", Data: nil})
 }
@@ -149,8 +154,19 @@ func FetchUser(c *gin.Context) {
 	db = db.Debug()
 	user := models.User{}
 	userID := c.Param("id")
+	cacheKey := redis.BuildCacheKey("users", userID)
 
-	utils.InfoLogger.Printf("User ID %s", c.Param("id"))
+	var cachedResponse types.Response
+	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+
+	if err != nil {
+		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
+	}
+
+	if cacheHit {
+		c.JSON(http.StatusOK, cachedResponse)
+		return
+	}
 
 	result := db.Preload("Accounts", func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
@@ -160,7 +176,7 @@ func FetchUser(c *gin.Context) {
 		return db.Omit("user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
 	}).First(&user, "id = ?", userID)
 	if result.Error != nil {
-		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
+		log.ErrorLogger.Printf("Error fetching user: %v", result.Error)
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
 		} else {
@@ -170,13 +186,18 @@ func FetchUser(c *gin.Context) {
 	}
 
 	if result.Error != nil {
-		utils.ErrorLogger.Printf("Error fetching user: %v", result.Error)
+		log.ErrorLogger.Printf("Error fetching user: %v", result.Error)
 
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
 		return
 	}
 
-	c.JSON(200, types.Response{Status: 200, Message: "User fetched successfully", Data: user})
+	response := types.Response{Status: 200, Message: "User fetched successfully", Data: user}
+	if err := redis.SetCache(cacheKey, response, 5*time.Minute); err != nil {
+		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
+	}
+
+	c.JSON(200, response)
 }
 
 func FetchUsers(c *gin.Context) {

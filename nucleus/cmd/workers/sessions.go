@@ -3,7 +3,7 @@ package workers
 import (
 	"context"
 	"nucleus/internal/models"
-	"nucleus/utils"
+	"nucleus/log"
 	"sync"
 	"time"
 
@@ -54,15 +54,15 @@ func (sc *SessionCleaner) deleteExpiredSessions() {
 	now := time.Now()
 	sessionResult := sc.db.Where("expires_at <= ?", now).Delete(&models.Session{})
 	if sessionResult.Error != nil {
-		utils.ErrorLogger.Printf("Error deleting expired sessions: %v", sessionResult.Error)
+		log.ErrorLogger.Printf("Error deleting expired sessions: %v", sessionResult.Error)
 	} else {
-		utils.InfoLogger.Printf("Deleted %d expired sessions", sessionResult.RowsAffected)
+		log.InfoLogger.Printf("Deleted %d expired sessions", sessionResult.RowsAffected)
 	}
 
 	refreshTokenResult := sc.db.Where("expires_at <= ?", now).Delete(&models.RefreshToken{})
 	if refreshTokenResult.Error != nil {
-		utils.ErrorLogger.Printf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
+		log.ErrorLogger.Printf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
 	} else {
-		utils.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
+		log.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
 	}
 }

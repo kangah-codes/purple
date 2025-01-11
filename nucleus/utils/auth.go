@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"nucleus/internal/models"
+	"nucleus/log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -59,16 +60,16 @@ func RefreshTokens(refreshToken string) (models.TokenPair, error) {
 	return GenerateTokenPair(userID)
 }
 
-func ValidateSessionToken(db *gorm.DB, token string) (*models.Session, error) {
+func ValidateSessionToken(db *gorm.DB, token string) (models.Session, error) {
 	var session models.Session
 	if err := db.Where("token = ? AND expires_at > ?", token, time.Now()).First(&session).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("invalid or expired session token")
+			return models.Session{}, errors.New("invalid or expired session token")
 		}
-		return nil, err
+		return models.Session{}, err
 	}
 
-	return &session, nil
+	return session, nil
 }
 
 func ValidateRefreshToken(db *gorm.DB, token string) (*models.RefreshToken, error) {
@@ -119,7 +120,7 @@ func GenerateSessionToken() (string, error) {
 func CreateSession(db *gorm.DB, userID uuid.UUID) (models.Session, error) {
 	token, err := GenerateSessionToken()
 	if err != nil {
-		ErrorLogger.Println(err)
+		log.ErrorLogger.Println(err)
 		return models.Session{}, err
 	}
 
@@ -130,7 +131,7 @@ func CreateSession(db *gorm.DB, userID uuid.UUID) (models.Session, error) {
 	}
 	result := db.Create(&session)
 	if result.Error != nil {
-		ErrorLogger.Println(result.Error)
+		log.ErrorLogger.Println(result.Error)
 		return models.Session{}, result.Error
 	}
 

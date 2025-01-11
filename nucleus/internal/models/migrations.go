@@ -1,7 +1,7 @@
 package models
 
 import (
-	"log"
+	"nucleus/log"
 	"os"
 	"strconv"
 
@@ -16,7 +16,8 @@ func envValueBool(envKey string, defaultValue bool) bool {
 		retVal, err := strconv.ParseBool(val)
 
 		if err != nil {
-			log.Panicf("Environment variable %s is not a boolean type!", envKey)
+			log.ErrorLogger.Errorf("Environment variable %s is not a boolean type!", envKey)
+			panic("Environment variable is not a boolean type")
 		}
 
 		return retVal
@@ -28,7 +29,7 @@ func envValueBool(envKey string, defaultValue bool) bool {
 func Migrate(db *gorm.DB) {
 	var skipMigrations = envValueBool("IGNORE_MIGRATIONS", false)
 	if !skipMigrations {
-		log.Println("Running migrations")
+		log.InfoLogger.Println("Running migrations")
 		err := db.AutoMigrate(
 			&User{},
 			&Account{},
@@ -36,14 +37,14 @@ func Migrate(db *gorm.DB) {
 			&Transaction{},
 			&Session{},
 			&RefreshToken{},
-			&UserSettings{},
+			&UserProfile{},
 			&PlanTransaction{},
 		)
 		if err != nil {
-			log.Fatalf("Failed to run migrations: %v", err)
+			log.ErrorLogger.Fatalf("Failed to run migrations: %v", err)
 		}
-		log.Println("Migrations completed")
+		log.InfoLogger.Println("Migrations completed")
 	}
 
-	log.Println("Skipping migrations")
+	log.InfoLogger.Println("Skipping migrations")
 }

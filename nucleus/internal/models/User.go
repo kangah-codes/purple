@@ -13,6 +13,6 @@ type User struct {
 	Accounts     []Account     `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;" json:"accounts"`
 	Plans        []Plan        `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;" json:"plans"`
 	Transactions []Transaction `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;" json:"transactions"`
+	Profile      UserProfile   `gorm:"foreignKey:PUserId;constraint:OnDelete:CASCADE;" json:"profile"`
 	Role         string        `gorm:"default:user" json:"role"`
-	Settings     UserSettings  `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;" json:"settings"`
 }

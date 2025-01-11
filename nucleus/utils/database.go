@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"fmt"
-	"log"
+	"nucleus/log"
 	"sync"
 
 	"gorm.io/driver/postgres"
@@ -20,16 +19,16 @@ func InitDB(dsn string) {
 		var err error
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
-			log.Fatalf("Failed to connect to database: %v", err)
+			log.ErrorLogger.Fatalf("Failed to connect to database: %v", err)
 		}
-		fmt.Println("Connected to database")
+		log.InfoLogger.Println("Connected to database...")
 	})
 }
 
 // GetDB returns the current database instance
 func GetDB() *gorm.DB {
 	if db == nil {
-		ErrorLogger.Fatal("Database not initialized. Call InitDB first.")
+		log.ErrorLogger.Fatal("Database not initialized. Call InitDB first.")
 	}
 	return db
 }

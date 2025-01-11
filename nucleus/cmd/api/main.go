@@ -6,7 +6,8 @@ import (
 	"nucleus/internal/api/middleware"
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
-	"nucleus/internal/models"
+	"nucleus/internal/redis"
+	"nucleus/log"
 	"nucleus/utils"
 	"os"
 	"os/signal"
@@ -22,7 +23,7 @@ import (
 )
 
 func main() {
-	utils.InitLogger()
+	log.InitLogger()
 	// validate := validator.New()
 	// utils.RegisterCustomValidations(validate)
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -33,19 +34,20 @@ func main() {
 	if os.Getenv("GIN_MODE") != "release" {
 		err := godotenv.Load()
 		if err != nil {
-			utils.ErrorLogger.Fatal("Error loading .env file")
+			log.ErrorLogger.Fatal("Error loading .env file")
 		} else {
-			utils.InfoLogger.Println("Loaded env variables")
+			log.InfoLogger.Println("Loaded env variables")
 		}
 	}
 
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
+	redis.InitRedis()
 
 	// get db instance
 	db := utils.GetDB()
 	if db == nil {
-		utils.ErrorLogger.Fatal("Failed to connect to the database")
+		log.ErrorLogger.Fatal("Failed to connect to the database")
 	}
 
 	// context for workers
@@ -70,7 +72,7 @@ func main() {
 		},
 	})
 
-	models.Migrate(db)
+	// models.Migrate(db)
 	r := gin.Default()
 	r.Use(rateLimit)
 	r.Use(middleware.CorsMiddleware())
@@ -93,14 +95,14 @@ func main() {
 		})
 	})
 
-	utils.InfoLogger.Printf("Starting server on port 8080")
+	log.InfoLogger.Printf("Starting server on port 8080")
 
 	// setup graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-quit
-		utils.InfoLogger.Println("Shutting down server")
+		log.InfoLogger.Println("Shutting down server")
 
 		// stop workers
 		cancel()
@@ -113,6 +115,6 @@ func main() {
 
 	// Run the server on the specified port
 	if err := r.Run("0.0.0.0:8080"); err != nil {
-		utils.InfoLogger.Fatalf("Failed to run server: %v", err)
+		log.InfoLogger.Fatalf("Failed to run server: %v", err)
 	}
 }
