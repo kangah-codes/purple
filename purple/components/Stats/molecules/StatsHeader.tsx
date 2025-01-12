@@ -12,12 +12,7 @@ export default function StatsHeader() {
         <>
             <View className='flex flex-col space-y-5 px-5'>
                 {/* Daily Activity Section */}
-                <View className='space-y-2.5'>
-                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
-                        Daily Activity
-                    </Text>
-                    <StatsHeatmap />
-                </View>
+                <StatsHeatmap />
 
                 {/* Spend Overview Section */}
                 <View

@@ -10,7 +10,17 @@ import TransactionHistoryCard from '@/components/Transactions/molecules/Transact
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
-export default function AccountTransactionsList({ transactions }: { transactions: Transaction[] }) {
+export default function AccountTransactionsList({
+    transactions,
+    queryData: { refetch, refreshing, handleLoadMore },
+}: {
+    transactions: Transaction[];
+    queryData: {
+        refetch: () => void;
+        refreshing: boolean;
+        handleLoadMore: () => void;
+    };
+}) {
     const { setCurrentTransaction } = useTransactionStore();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
@@ -58,6 +68,9 @@ export default function AccountTransactionsList({ transactions }: { transactions
                 ListEmptyComponent={renderEmptylist}
                 onEndReachedThreshold={0.5}
                 scrollEnabled={false}
+                onRefresh={refetch}
+                refreshing={refreshing}
+                onEndReached={handleLoadMore}
             />
         </View>
     );

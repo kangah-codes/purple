@@ -1,13 +1,11 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { LinearGradient, Text, View } from '../../Shared/styled';
-import { PlanAccountPieChartStats, PlanTransaction } from '../schema';
-import React, { useMemo } from 'react';
-import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { usePlanStore } from '../hooks';
-import { formatDateTime } from '@/lib/utils/date';
-import { useGetAccountFromStore } from '@/components/Accounts/utils';
 import { ArrowNarrowDownRightIcon } from '@/components/SVG/noscale';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import React from 'react';
+import { LinearGradient, Text, View } from '../../Shared/styled';
+import { usePlanStore } from '../hooks';
+import { PlanAccountPieChartStats } from '../schema';
 
 type PlanAccountDeductionCardProps = {
     data: PlanAccountPieChartStats;

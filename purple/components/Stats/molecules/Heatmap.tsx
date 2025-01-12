@@ -14,6 +14,11 @@ import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'dat
 import React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import HeatmapLoading from './HeatmapLoading';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
+import { usePlanStatus } from '@/components/Plans/hooks';
+import Toast from 'react-native-toast-message';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -29,14 +34,21 @@ const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
 function StatsHeatmap() {
+    const { sessionData } = useAuth();
+    const {
+        isLoading,
+        refetch: refetchPlanStatus,
+        isFetching,
+    } = usePlanStatus({
+        sessionData: sessionData as SessionData,
+        planID: 'id as string',
+    });
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-
     const values = useMemo(
         () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
         [finalMonthDays],
     );
-
     const data = useMemo(
         () =>
             monthDays.map((day, index) => ({
@@ -46,6 +58,8 @@ function StatsHeatmap() {
             })),
         [values],
     );
+
+    console.log(values, finalMonthDays);
 
     const click = useCallback(
         (item: CellData) => {
@@ -57,7 +71,6 @@ function StatsHeatmap() {
         },
         [selectedDate],
     );
-
     const handleCellPress = useCallback(
         (data: CellData) => {
             setSelectedDate(data.key);
@@ -95,7 +108,7 @@ function StatsHeatmap() {
     );
 
     return (
-        <>
+        <View className='flex flex-col space-y-2.5'>
             <Portal>
                 <CustomBottomSheetFlatList
                     snapPoints={['50%', '70%']}
@@ -116,7 +129,10 @@ function StatsHeatmap() {
                     itemSeparator={itemSeparator}
                 />
             </Portal>
-            <>
+            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
+                Daily Activity
+            </Text>
+            <View>
                 <View className='flex flex-row justify-between'>
                     {days.map((day, key) => (
                         <Text
@@ -128,17 +144,21 @@ function StatsHeatmap() {
                         </Text>
                     ))}
                 </View>
-                <Heatmap
-                    cellSize={blockSize}
-                    rows={4}
-                    cols={numBlocksPerRow}
-                    data={data}
-                    onPressCallback={click}
-                    startColumn={getDay(start)}
-                    renderCell={renderCell}
-                />
-            </>
-        </>
+                {isFetching ? (
+                    <HeatmapLoading blockSize={blockSize} />
+                ) : (
+                    <Heatmap
+                        cellSize={blockSize}
+                        rows={4}
+                        cols={numBlocksPerRow}
+                        data={data}
+                        onPressCallback={click}
+                        startColumn={getDay(start)}
+                        renderCell={renderCell}
+                    />
+                )}
+            </View>
+        </View>
     );
 }
 

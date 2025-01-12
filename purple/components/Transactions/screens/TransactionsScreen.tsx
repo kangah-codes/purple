@@ -1,4 +1,3 @@
-import { GenericAPIResponse } from '@/@types/request';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { PlusIcon } from '@/components/SVG/24x24';
@@ -13,55 +12,25 @@ import {
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
-import { router, useLocalSearchParams, useRouter } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import React, { memo, useCallback, useEffect } from 'react';
+import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useInfiniteTransactions, useTransactions, useTransactionStore } from '../hooks';
-import CurrentTransactionModal from '../molecules/CurrentTransactionModal';
+import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
-import { stringify, truncateStringIfLongerThan } from '@/lib/utils/string';
-import { useInfiniteQuery } from 'react-query';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
 };
 
 function TransactionsScreen(props: TransactionsScreenProps) {
-    const local = useLocalSearchParams();
-    const { accountID, accountName } = local;
+    const { accountID } = useLocalSearchParams();
     const { sessionData } = useAuth();
     const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    // const { isLoading, refetch } = useTransactions({
-    //     sessionData: sessionData as SessionData,
-    //     options: {
-    //         onSuccess: (data) => {
-    //             // we're doing this so that the transaction store
-    //             // isn't overwritten when we're viewing a specific account
-    //             if (!showBackButton) {
-    //                 const res = data as GenericAPIResponse<Transaction[]>;
-    //                 setTransactions(res.data);
-    //             }
-    //         },
-    //         onError: () => {
-    //             Toast.show({
-    //                 type: 'error',
-    //                 props: {
-    //                     text1: 'Error!',
-    //                     text2: "We couldn't fetch your transactions",
-    //                 },
-    //             });
-    //         },
-    //     },
-    //     requestQuery: {
-    //         accountID,
-    //     },
-    // });
-
-    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
+    const { data, fetchNextPage, hasNextPage, isError, refetch, isFetching } =
         useInfiniteTransactions({
             sessionData: sessionData as SessionData,
             requestQuery: {
@@ -129,12 +98,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         () => <View className='border-b border-gray-100' />,
         [],
     );
-    const filteredTransactions = useMemo(() => {
-        if (accountID) {
-            return transactions.filter((transaction) => transaction.account_id === accountID);
-        }
-        return transactions;
-    }, [accountID, transactions]);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -144,11 +107,14 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     My Transactions
                 </Text>
 
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
-                        Back
-                    </Text>
-                </TouchableOpacity>
+                {accountID && (
+                    // no idea why this is even here
+                    <TouchableOpacity onPress={router.back}>
+                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
+                            Back
+                        </Text>
+                    </TouchableOpacity>
+                )}
             </View>
             <FlatList
                 data={transactions}
@@ -181,40 +147,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
 }
 
 const styles = StyleSheet.create({
-    bottomSheetModal: {
-        backgroundColor: 'white',
-        borderRadius: 24,
-        shadowColor: '#000000',
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 48,
-        elevation: 10,
-    },
-    handleIndicator: {
-        backgroundColor: '#D4D4D4',
-    },
-    receiptContainer: {
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 20,
-        elevation: 5,
-    },
-    zigzag: {
-        transform: [{ rotate: '180deg' }],
-    },
-    receipt: {
-        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
-    },
-    bottomDrawer: {
-        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
-    },
     contentContainer: {
         paddingBottom: 100,
         paddingHorizontal: 20,
@@ -223,4 +155,5 @@ const styles = StyleSheet.create({
         paddingTop: RNStatusBar.currentHeight,
     },
 });
+
 export default memo(TransactionsScreen);

@@ -12,16 +12,23 @@ import { Account } from './schema';
 import { createAccountStore } from './state';
 
 export function useAccountStore() {
-    const [accounts, setAccounts, updateAccounts, currentAccount, setCurrentAccount] = useStore(
-        createAccountStore,
-        (state) => [
-            state.accounts,
-            state.setAccounts,
-            state.updateAccounts,
-            state.currentAccount,
-            state.setCurrentAccount,
-        ],
-    );
+    const [
+        accounts,
+        setAccounts,
+        updateAccounts,
+        currentAccount,
+        setCurrentAccount,
+        currentAccountTransactions,
+        setCurrentAccountTransactions,
+    ] = useStore(createAccountStore, (state) => [
+        state.accounts,
+        state.setAccounts,
+        state.updateAccounts,
+        state.currentAccount,
+        state.setCurrentAccount,
+        state.currentAccountTransactions,
+        state.setCurrentAccountTransactions,
+    ]);
 
     return {
         accounts,
@@ -29,6 +36,8 @@ export function useAccountStore() {
         updateAccounts,
         currentAccount,
         setCurrentAccount,
+        currentAccountTransactions,
+        setCurrentAccountTransactions,
     };
 }
 

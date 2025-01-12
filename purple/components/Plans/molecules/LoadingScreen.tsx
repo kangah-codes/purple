@@ -1,57 +1,34 @@
-import React from 'react';
-import AnimatedSkeleton from '@/components/Shared/atoms/Skeleton';
-import { SafeAreaView, View } from '@/components/Shared/styled';
+import {
+    LineChartSkeleton,
+    PieChartSkeleton,
+    SkeletonLine,
+    SkeletonListItem,
+} from '@/components/Shared/molecules/Skeleton';
+import { ScrollView, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
 
-const SkeletonLine = ({ width, height = 5 }: { width: number | string; height?: number }) => (
-    <AnimatedSkeleton style={[tw`rounded-md mb-2.5`, { width, height }]} />
-);
-
-const SkeletonCircle = ({ size = 40 }) => (
-    <AnimatedSkeleton style={[tw`rounded-full`, { width: size, height: size }]} />
-);
-
-const SkeletonListItem = () => (
-    <View style={tw`flex-row justify-between items-center mb-2.5`}>
-        <View style={tw`flex-row items-center`}>
-            <SkeletonCircle size={40} />
-            <View className='ml-2.5'>
-                <SkeletonLine width={80} height={16} />
-                <SkeletonLine width={40} height={16} />
-            </View>
-        </View>
-        <SkeletonLine width={80} height={20} />
-    </View>
-);
-
 export default function LoadingScreen() {
     return (
-        <SafeAreaView style={tw`bg-white h-full`}>
+        <ScrollView style={[tw`bg-white h-full px-5`, styles.parentView]}>
             <ExpoStatusBar style='dark' />
             <View
-                style={[
-                    styles.parentView,
-                    tw`px-5 bg-white flex flex-row justify-between items-center`,
-                ]}
+                style={[styles.parentView, tw`bg-white flex flex-row justify-between items-center`]}
             >
-                <SkeletonLine width={80} height={20} />
+                <View className='flex flex-col'>
+                    <SkeletonLine width={80} height={20} />
+                    <SkeletonLine width={60} height={20} />
+                </View>
                 <SkeletonLine width={40} height={20} />
             </View>
-            <View style={[styles.parentView, tw`bg-white px-5 flex flex-col space-y-5`]}>
-                <SkeletonLine width={80} height={20} />
-                <SkeletonLine width={128} height={20} />
-
+            <View className='mt-20'>
+                <LineChartSkeleton />
+            </View>
+            <View style={[styles.parentView, tw`bg-white flex flex-col space-y-5`]}>
                 <View className='my-5'>
-                    <View style={tw`flex-row justify-between items-center mb-2.5`}>
-                        <SkeletonLine width={80} height={20} />
-                        <SkeletonLine width={40} height={20} />
-                    </View>
-
-                    <View style={tw`space-y-2`}>
-                        <SkeletonLine width={'100%'} height={200} />
-                    </View>
+                    <PieChartSkeleton />
                 </View>
 
                 <View className='my-5 bg-re'>
@@ -69,7 +46,7 @@ export default function LoadingScreen() {
                     ))}
                 </View>
             </View>
-        </SafeAreaView>
+        </ScrollView>
     );
 }
 

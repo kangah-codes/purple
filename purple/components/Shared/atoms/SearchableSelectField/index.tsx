@@ -8,6 +8,7 @@ import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFl
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { SearchIcon } from '@/components/SVG/noscale';
 import { StyleSheet } from 'react-native';
+import { LRUCache } from '@/lib/utils/cache';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -35,12 +36,13 @@ export default function SearchableSelectField({
     onChange,
     value,
 }: SearchableSelectFieldProps) {
-    const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const selectCache = new LRUCache<SelectOption>(selectKey, 3);
     const [searchValue, setSearchValue] = useState<string>('');
     const [val, setValue] = useState<string | undefined>(value);
     const renderDefaultItem = useCallback(
         (item: any) => (
-            <View className='py-3 border-b border-gray-200'>
+            <View className='py-3 border-b border-purple-200'>
                 <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
@@ -69,8 +71,8 @@ export default function SearchableSelectField({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={{ fontFamily: 'GramatikaBold' }}
-                                        className='text-base text-gray-900'
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        className='text-base text-black'
                                     >
                                         {label}
                                     </Text>
@@ -95,6 +97,35 @@ export default function SearchableSelectField({
                                     />
                                 </View>
                             </View>
+
+                            {selectCache.size() > 0 && (
+                                <View
+                                    className='w-full px-5 flex flex-col bg-white'
+                                    // style={styles.shadow}
+                                >
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        className='text-base text-black'
+                                    >
+                                        Recently Used
+                                    </Text>
+                                    {selectCache.getAllItems().map(([key, item]) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setValue(item.value.toString());
+                                                onChange && onChange(item.value.toString());
+                                                // close the bottom sheet
+                                                setShowBottomSheetFlatList(selectKey, false);
+                                                selectCache.set(item.value.toString(), item);
+                                            }}
+                                        >
+                                            {renderItem
+                                                ? renderItem(item)
+                                                : renderDefaultItem(item)}
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
                         </View>
                     }
                     sheetKey={selectKey}
@@ -109,6 +140,7 @@ export default function SearchableSelectField({
                                     onChange && onChange(_item.value.toString());
                                     // close the bottom sheet
                                     setShowBottomSheetFlatList(selectKey, false);
+                                    selectCache.set(_item.value.toString(), _item);
                                 }}
                             >
                                 {renderItem ? renderItem(_item) : renderDefaultItem(_item)}
@@ -132,7 +164,7 @@ export default function SearchableSelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'GramatikaBold' }} className='text-xs text-gray-600'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -164,5 +196,16 @@ const styles = StyleSheet.create({
     searchIcon: {
         position: 'absolute',
         left: 15,
+    },
+    shadow: {
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 48,
+        elevation: 10,
+        // marginBottom: 10,
     },
 });

@@ -97,3 +97,20 @@ func GetCountryAndCurrencyFromIP(ipAddress string) (*IPInfo, error) {
 		Currency: currency,
 	}, nil
 }
+
+func EachDayOfInterval(start time.Time, end time.Time) []time.Time {
+	var dates []time.Time
+	for d := start; !d.After(end); d = d.AddDate(0, 0, 1) {
+		dates = append(dates, d)
+	}
+	return dates
+}
+
+func DateEqual(date1, date2 time.Time) bool {
+	loc := time.UTC
+	date1 = date1.In(loc)
+	date2 = date2.In(loc)
+	y1, m1, d1 := date1.Date()
+	y2, m2, d2 := date2.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
+}

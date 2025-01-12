@@ -51,7 +51,7 @@ export default function TransactionHistoryList() {
             {/* <Portal hostName='transactionReceipt'>
                 <CurrentTransactionModal modalKey='transactionReceipt' />
             </Portal> */}
-            <View className='flex flex-col mt-2.5'>
+            <View className='flex flex-col mt-5'>
                 <View className='flex flex-row w-full justify-between items-center px-5'>
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
                         Recent Transactions

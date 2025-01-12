@@ -11,13 +11,16 @@ type EmptyListProps = {
 export default function EmptyList({ message }: EmptyListProps) {
     return (
         <View className='flex flex-col space-y-5 items-center justify-center px-5'>
-            <Image source={require('@/assets/images/graphics/19.png')} style={tw`h-24 w-52`} />
+            <Image
+                source={require('@/assets/images/graphics/cactus.png')}
+                style={tw`h-[200px] w-[200px]`}
+            />
             <View className='flex flex-col space-y-2.5'>
                 <Text
                     style={GLOBAL_STYLESHEET.gramatikaBlack}
                     className='text-2xl text-black text-center'
                 >
-                    Nothing to see here! 👀
+                    Wow, such empty.
                 </Text>
                 <Text
                     style={GLOBAL_STYLESHEET.gramatikaMedium}

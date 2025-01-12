@@ -86,6 +86,7 @@ func main() {
 	routes.RegisterTransactionRoutes(v1)
 	routes.RegisterPlanRoutes(v1)
 	routes.RegisterUtilRoutes(v1)
+	routes.RegisterStatsRoutes(v1)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{
