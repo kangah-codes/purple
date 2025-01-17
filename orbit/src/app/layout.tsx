@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
+import Nav from '@/components/shared/Nav';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -31,9 +32,11 @@ export default function RootLayout({
     return (
         <html lang='en'>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} ${satoshi.className} antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} ${satoshi.className} antialiased relative`}
             >
-                <div className='relative z-10'></div>
+                <div className='fixed top-0 left-0 w-full z-50'>
+                    <Nav />
+                </div>
                 {children}
             </body>
         </html>

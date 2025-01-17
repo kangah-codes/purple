@@ -1,4 +1,5 @@
 import AnimatedClouds from './AnimatedClouds';
+import Image from 'next/image';
 
 export default function Hero() {
     return (
@@ -7,11 +8,12 @@ export default function Hero() {
                 baseSpeed={1}
                 minHeight={10}
                 maxHeight={650}
-                className='left-0 right-0'
+                spawnRate={5}
+                className='left-0 right-0 absolute'
             />
             <div className='w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-2 relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
-                    <div className='py-48 space-y-5 flex flex-col text-center'>
+                    <div className='pt-48 pb-12 space-y-5 flex flex-col text-center'>
                         <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
                             <span>The budgeting platform</span>
                             <br />
@@ -20,7 +22,7 @@ export default function Hero() {
                             </span>
                         </h1>
                         <div className='space-y-5 flex flex-col items-center justify-center max-w-2xl mx-auto'>
-                            <p className='text-lg text-insurerity-text-gray'>
+                            <p className='text-lg text-black'>
                                 Revolutionizing the way you budget your money. Get started today and
                                 take control of your finances.
                             </p>
@@ -34,6 +36,29 @@ export default function Hero() {
                         </div>
                     </div>
                 </div>
+
+                {/* <div className='absolute bottom-0 w-full overflow-hidden'> */}
+                <div className='flex justify-center h-full space-x-5'>
+                    <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
+                        <Image
+                            src='/graphics/mockup-1.webp'
+                            alt='Screenshot 1'
+                            width={400}
+                            height={400}
+                            style={{ objectFit: 'cover', objectPosition: 'top' }}
+                        />
+                    </div>
+                    <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
+                        <Image
+                            src='/graphics/mockup-1.webp'
+                            alt='Screenshot 1'
+                            width={400}
+                            height={400}
+                            style={{ objectFit: 'cover', objectPosition: 'top' }}
+                        />
+                    </div>
+                </div>
+                {/* </div> */}
             </div>
         </div>
     );

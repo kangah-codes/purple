@@ -1,5 +1,11 @@
+import Features from '@/components/index/Features';
 import Hero from '@/components/index/Hero';
 
 export default function Home() {
-    return <Hero />;
+    return (
+        <div>
+            <Hero />
+            <Features />
+        </div>
+    );
 }
