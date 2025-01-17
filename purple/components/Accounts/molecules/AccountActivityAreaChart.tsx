@@ -36,6 +36,8 @@ export default function AccountActivityAreaChart({
     const chartData = useMemo(() => createTransactionChartData(transactions, 5), [transactions]);
     const scrollRef = React.useRef<typeof ScrollView>(null);
 
+    if (transactions.length < 2) return null;
+
     return (
         <ScrollView
             horizontal

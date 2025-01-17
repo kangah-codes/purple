@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { LRUCache } from '@/lib/utils/cache';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -34,6 +35,7 @@ export default function SelectField({
     value,
 }: SelectFieldProps) {
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
+    const selectCache = new LRUCache<SelectOption>(selectKey, 3);
     const [val, setValue] = useState<string | undefined>(value);
     const renderDefaultItem = useCallback(
         (item: any) => (
@@ -59,16 +61,46 @@ export default function SelectField({
                 <CustomBottomSheetFlatList
                     snapPoints={customSnapPoints ?? ['50%', '50%']}
                     children={
-                        label && (
-                            <View className='px-5 py-1'>
-                                <Text
-                                    style={{ fontFamily: 'GramatikaBold' }}
-                                    className='text-base text-gray-900'
+                        <View className='flex flex-col space-y-2.5'>
+                            {label && (
+                                <View className='px-5 py-1'>
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        className='text-base text-gray-900'
+                                    >
+                                        {label}
+                                    </Text>
+                                </View>
+                            )}
+                            {selectCache.size() > 0 && (
+                                <View
+                                    className='w-full px-5 flex flex-col bg-white'
+                                    // style={styles.shadow}
                                 >
-                                    {label}
-                                </Text>
-                            </View>
-                        )
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        className='text-base text-black'
+                                    >
+                                        Recently Used
+                                    </Text>
+                                    {selectCache.getAllItems().map(([_, item]) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setValue(item.value.toString());
+                                                onChange && onChange(item.value.toString());
+                                                // close the bottom sheet
+                                                setShowBottomSheetFlatList(selectKey, false);
+                                                selectCache.set(item.value.toString(), item);
+                                            }}
+                                        >
+                                            {renderItem
+                                                ? renderItem(item)
+                                                : renderDefaultItem(item)}
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
                     }
                     sheetKey={selectKey}
                     data={Object.keys(options).reduce(
@@ -84,6 +116,7 @@ export default function SelectField({
                                     onChange && onChange(_item.value.toString());
                                     // close the bottom sheet
                                     setShowBottomSheetFlatList(selectKey, false);
+                                    selectCache.set(_item.value.toString(), _item);
                                 }}
                             >
                                 {renderItem ? renderItem(_item) : renderDefaultItem(_item)}
@@ -108,7 +141,7 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'GramatikaBold' }} className='text-xs text-gray-600'>
+                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}

@@ -17,6 +17,23 @@ type Account struct {
 	Transactions     []Transaction `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
+// func (a *Account) BeforeSave(tx *gorm.DB) (err error) {
+// 	Name, err := encryption.Encrypt(a.Name)
+
+// 	if err != nil {
+// 		log.InfoLogger.Panic().Msgf("Error encrypting data for account model: %s", err)
+// 	}
+
+// 	a.Name = Name
+
+// 	return
+// }
+
+// func (a *Account) AfterFind(tx *gorm.DB) (err error) {
+// 	// a.Name = utils.Decrypt(a.Name)
+// 	return
+// }
+
 func (a *Account) UpdateAccountBalance(account *Account, balance float64, db *gorm.DB) error {
 	account.Balance = balance
 	result := db.Save(&account)

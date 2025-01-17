@@ -1,3 +1,5 @@
+import { useAuth } from '@/components/Auth/hooks';
+import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
     InputField,
@@ -7,26 +9,20 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { currencies } from '@/constants/currencies';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect } from 'react';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import { useAccountStore, useCreateAccount } from '../hooks';
 import Toast from 'react-native-toast-message';
-import { useAuth } from '@/components/Auth/hooks';
-import { Currency } from '@/@types/common';
-import { Image } from 'expo-image';
-import tw from 'twrnc';
-import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
+import { useAccountStore, useCreateAccount } from '../hooks';
 
 export default function NewAccountScreen() {
     const { sessionData } = useAuth();
     const [accountGroups, setAccountsGroups] = useState<string[]>([]);
-    const [currencies, setCurrencies] = useState<Currency[]>([]);
     const { updateAccounts } = useAccountStore();
     const {
         control,
@@ -85,32 +81,24 @@ export default function NewAccountScreen() {
         );
     }, []);
 
-    const renderCurrencies = useCallback(
-        (item: any) => {
-            return (
-                <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
-                    <Image
-                        source={
-                            currencies.find((currency) => currency.code === item.value)?.flag || ''
-                        }
-                        style={tw`h-5 w-5 rounded-full`}
-                    />
-                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
-                        {item.label}
-                    </Text>
-                </View>
-            );
-        },
-        [currencies],
-    );
+    const renderCurrencies = useCallback((item: any) => {
+        const currency = currencies.find((currency) => currency.code === item.value);
+
+        return (
+            <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                    {currency?.emojiFlag}
+                    {'  '}
+                    {currency?.name}
+                </Text>
+            </View>
+        );
+    }, []);
 
     useEffect(() => {
         const getAccountGroups = async () => {
             const groups = nativeStorage.getItem<string[]>('account_groups');
             if (groups) setAccountsGroups(groups);
-
-            const currencies = nativeStorage.getItem<Currency[]>('currencies');
-            if (currencies) setCurrencies(currencies);
         };
 
         getAccountGroups();
@@ -137,44 +125,49 @@ export default function NewAccountScreen() {
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
-                        Category
-                    </Text>
-                    <>
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Category can't be empty",
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <>
-                                    <SelectField
-                                        selectKey='newPlanType'
-                                        options={accountGroups.reduce((acc, curr) => {
-                                            acc[curr] = {
-                                                label: curr,
-                                                value: curr,
-                                            };
-                                            return acc;
-                                        }, {} as Record<string, { label: string; value: string }>)}
-                                        customSnapPoints={['50%', '55%', '60%']}
-                                        renderItem={renderItem}
-                                        value={value}
-                                        onChange={onChange}
-                                    />
-                                </>
+                    <View className='flex flex-col space-y-1'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            className='text-xs text-gray-600'
+                        >
+                            Category
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Category can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanType'
+                                            options={accountGroups.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '55%', '60%']}
+                                            renderItem={renderItem}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='category'
+                            />
+                            {errors.category && (
+                                <Text
+                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.category.message}
+                                </Text>
                             )}
-                            name='category'
-                        />
-                        {errors.category && (
-                            <Text
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.category.message}
-                            </Text>
-                        )}
-                    </>
+                        </View>
+                    </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.gramatikaBold}
@@ -183,33 +176,35 @@ export default function NewAccountScreen() {
                             Account Name
                         </Text>
 
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Account name can't be empty",
-                            }}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Account name can't be empty",
+                                }}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='Account name'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                        autoCapitalize='none'
+                                    />
+                                )}
+                                name='name'
+                            />
+                            {errors.name && (
+                                <Text
                                     style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                    cursorColor={'#8B5CF6'}
-                                    placeholder='Account name'
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    value={value}
-                                    autoCapitalize='none'
-                                />
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.name.message}
+                                </Text>
                             )}
-                            name='name'
-                        />
-                        {errors.name && (
-                            <Text
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.name.message}
-                            </Text>
-                        )}
+                        </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
@@ -219,33 +214,35 @@ export default function NewAccountScreen() {
                             Balance
                         </Text>
 
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Balance can't be empty",
-                            }}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Balance can't be empty",
+                                }}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='0.00'
+                                        keyboardType='numeric'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                    />
+                                )}
+                                name='balance'
+                            />
+                            {errors.balance && (
+                                <Text
                                     style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                    cursorColor={'#8B5CF6'}
-                                    placeholder='0.00'
-                                    keyboardType='numeric'
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    value={value}
-                                />
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.balance.message}
+                                </Text>
                             )}
-                            name='balance'
-                        />
-                        {errors.balance && (
-                            <Text
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.balance.message}
-                            </Text>
-                        )}
+                        </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
@@ -254,7 +251,7 @@ export default function NewAccountScreen() {
                         >
                             Currency
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -288,7 +285,7 @@ export default function NewAccountScreen() {
                                     {errors.currency.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
                 </ScrollView>
 

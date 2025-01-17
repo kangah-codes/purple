@@ -1,5 +1,5 @@
 export type Currency = {
-    flag: string;
+    flag: React.JSX.Element;
     country: string;
     name: string;
     code: string;

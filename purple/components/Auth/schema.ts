@@ -17,11 +17,11 @@ export type User = {
     plans: Plan[];
     transactions: Transaction[];
     role: string;
-    settings: UserSettings;
+    preferences: UserPreferences;
 };
 
-export type UserSettings = {
-    default_currency: string;
+export type UserPreferences = {
+    preferred_currency: string;
     push_notifications: boolean;
     two_factor_auth: boolean;
     end_of_day_notification: boolean;

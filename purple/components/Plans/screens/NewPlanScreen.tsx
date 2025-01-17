@@ -32,6 +32,7 @@ import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
+import { currencies } from '@/constants/currencies';
 
 /**
  * 
@@ -68,7 +69,7 @@ export default function NewPlanScreen() {
     const [isEnabled, setIsEnabled] = useState(false);
     const [planCategories, setPlanCategories] = useState<string[]>([]);
     const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
-    const [currencies, setCurrencies] = useState<Currency[]>([]);
+    // const [currencies, setCurrencies] = useState<Currency[]>([]);
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const {
@@ -86,30 +87,22 @@ export default function NewPlanScreen() {
             deposit_frequency: '',
             push_notification: false,
             name: '',
-            currency: sessionData?.user.settings.default_currency ?? '',
+            currency: sessionData?.user?.preferences?.preferred_currency ?? '',
         },
     });
-    const renderCurrencies = useCallback(
-        (item: any) => {
-            return (
-                <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
-                    <Image
-                        source={
-                            currencies.find((currency) => currency.code === item.value)?.flag || ''
-                        }
-                        style={tw`h-5 w-5 rounded-full`}
-                    />
-                    <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
-                        className='tracking-tight leading-5 text-sm'
-                    >
-                        {item.label}
-                    </Text>
-                </View>
-            );
-        },
-        [currencies],
-    );
+    const renderCurrencies = useCallback((item: any) => {
+        const currency = currencies.find((currency) => currency.code === item.value);
+
+        return (
+            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'>
+                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                    {currency?.emojiFlag}
+                    {'  '}
+                    {currency?.name}
+                </Text>
+            </View>
+        );
+    }, []);
 
     const onSubmit = (data: CreatePlan) => {
         Keyboard.dismiss();
@@ -138,9 +131,6 @@ export default function NewPlanScreen() {
         const getCachedConstants = async () => {
             const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
             if (cachedTypes) setPlanCategories(cachedTypes);
-
-            const currencies = nativeStorage.getItem<Currency[]>('currencies');
-            if (currencies) setCurrencies(currencies);
         };
         getCachedConstants();
     }, []);
@@ -177,24 +167,26 @@ export default function NewPlanScreen() {
                             Plan Name
                         </Text>
 
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Plan name can't be empty",
-                            }}
-                            render={({ field: { onChange, value, onBlur } }) => (
-                                <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                    cursorColor={'#8B5CF6'}
-                                    placeholder='Plan Name'
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    value={value}
-                                />
-                            )}
-                            name='name'
-                        />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Plan name can't be empty",
+                                }}
+                                render={({ field: { onChange, value, onBlur } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='Plan Name'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                    />
+                                )}
+                                name='name'
+                            />
+                        </View>
                         {errors.name && (
                             <Text
                                 style={{ fontFamily: 'InterMedium' }}
@@ -205,14 +197,14 @@ export default function NewPlanScreen() {
                         )}
                     </View>
 
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'GramatikaBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Plan Type
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -220,14 +212,6 @@ export default function NewPlanScreen() {
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
-                                        {/* <SelectField
-                                            selectKey='newPlanTypes'
-                                            options={planTypes}
-                                            customSnapPoints={['30%', '40%']}
-                                            value={value}
-                                            onChange={onChange}
-                                        /> */}
-
                                         <CustomModalSelectField
                                             sheetKey='newPlanTypes'
                                             customSnapPoints={['35%', '35%']}
@@ -341,17 +325,17 @@ export default function NewPlanScreen() {
                                     {errors.type.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
 
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'GramatikaBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Plan Category
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 render={({ field: { onChange, value } }) => (
@@ -392,17 +376,17 @@ export default function NewPlanScreen() {
                                     {errors.category.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={{ fontFamily: 'GramatikaBold' }}
+                            style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Currency
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -436,7 +420,7 @@ export default function NewPlanScreen() {
                                     {errors.currency.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
 
                     <View className='flex flex-col space-y-1'>
@@ -447,31 +431,33 @@ export default function NewPlanScreen() {
                             Target
                         </Text>
 
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Target amount can't be empty",
-                                min: {
-                                    value: 1,
-                                    message: 'Target amount must be greater than 0',
-                                },
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <>
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='0.00'
-                                        keyboardType='numeric'
-                                        onChangeText={onChange}
-                                        // may the typescript gods forgive me
-                                        value={value as unknown as string}
-                                    />
-                                </>
-                            )}
-                            name='target'
-                        />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Target amount can't be empty",
+                                    min: {
+                                        value: 1,
+                                        message: 'Target amount must be greater than 0',
+                                    },
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='0.00'
+                                            keyboardType='numeric'
+                                            onChangeText={onChange}
+                                            // may the typescript gods forgive me
+                                            value={value as unknown as string}
+                                        />
+                                    </>
+                                )}
+                                name='target'
+                            />
+                        </View>
                         {errors.target && (
                             <Text
                                 style={{ fontFamily: 'InterMedium' }}
@@ -560,27 +546,29 @@ export default function NewPlanScreen() {
                         >
                             Deposit Frequency
                         </Text>
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Deposit Frequency can't be empty",
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <>
-                                    <SelectField
-                                        selectKey='newPlanDepositFrequency'
-                                        options={depositFrequency}
-                                        customSnapPoints={['20%', '30%']}
-                                        value={value}
-                                        onChange={(val) => {
-                                            onChange(val);
-                                            setValue('deposit_frequency', val);
-                                        }}
-                                    />
-                                </>
-                            )}
-                            name='deposit_frequency'
-                        />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Deposit Frequency can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanDepositFrequency'
+                                            options={depositFrequency}
+                                            customSnapPoints={['20%', '30%']}
+                                            value={value}
+                                            onChange={(val) => {
+                                                onChange(val);
+                                                setValue('deposit_frequency', val);
+                                            }}
+                                        />
+                                    </>
+                                )}
+                                name='deposit_frequency'
+                            />
+                        </View>
                         {errors.deposit_frequency && (
                             <Text
                                 style={{ fontFamily: 'InterMedium' }}

@@ -71,6 +71,7 @@ Right now, Purple is still just a pet project, I'm not entirely sure I have the 
 -   Calender Integration 📅
 -   Web Version? 🌐
 -   Integration with bank/mobile money services for automatic expense tracking 🏦
+-   Opt-in encryption (Users can choose to have their sensitive data in the db encrypted)
 
 ## Nucleus (Backend)
 

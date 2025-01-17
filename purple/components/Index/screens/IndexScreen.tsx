@@ -53,16 +53,16 @@ export default function IndexScreen() {
     return (
         <SafeAreaView className='bg-white'>
             <ExpoStatusBar style='dark' />
-            <View className='w-full relative flex'>
+            <View className='w-full relative flex' style={styles.parentView}>
                 <LinearGradient
                     className='flex px-5 py-2.5 h-[350] absolute w-full'
                     colors={linearGradientColours}
                 />
                 <View
                     className='flex flex-col'
-                    style={{
-                        paddingTop: RNStatusBar.currentHeight,
-                    }}
+                    // style={{
+                    //     paddingTop: RNStatusBar.currentHeight,
+                    // }}
                 >
                     <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg px-5'>
                         Hi, {sessionData?.user.username} 👋
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
         left: 15,
     },
     parentView: {
-        paddingTop: RNStatusBar.currentHeight,
+        paddingTop: (RNStatusBar.currentHeight ?? 0) + 10, // TODO: idk why this worked
     },
     scrollView: {
         paddingBottom: 100,

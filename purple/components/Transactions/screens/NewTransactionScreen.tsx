@@ -94,7 +94,8 @@ export default function NewTransactionScreen() {
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },
                 });
-                router.replace('/(tabs)/transactions');
+                // router.replace('/(tabs)/transactions');
+                router.back();
             },
         });
     };
@@ -103,14 +104,14 @@ export default function NewTransactionScreen() {
         if (transactionType === 'transfer') {
             return (
                 <View className='flex flex-col space-y-5'>
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Debit Account
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -146,16 +147,16 @@ export default function NewTransactionScreen() {
                                     {errors.fromAccount.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Credit Account
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -191,17 +192,17 @@ export default function NewTransactionScreen() {
                                     {errors.toAccount.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
                 </View>
             );
         }
         return (
-            <View>
+            <View className='flex flex-col space-y-1'>
                 <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
                     Account
                 </Text>
-                <>
+                <View>
                     <Controller
                         control={control}
                         rules={{
@@ -237,7 +238,7 @@ export default function NewTransactionScreen() {
                             {errors.accountId.message}
                         </Text>
                     )}
-                </>
+                </View>
             </View>
         );
     };
@@ -311,43 +312,45 @@ export default function NewTransactionScreen() {
                             Amount
                         </Text>
 
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Amount can't be empty",
-                            }}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                    cursorColor={'#8B5CF6'}
-                                    placeholder='0.00'
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    value={value}
-                                    keyboardType='numeric'
-                                />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Amount can't be empty",
+                                }}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='0.00'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                        keyboardType='numeric'
+                                    />
+                                )}
+                                name='amount'
+                            />
+                            {errors.amount && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.amount.message}
+                                </Text>
                             )}
-                            name='amount'
-                        />
-                        {errors.amount && (
-                            <Text
-                                style={{ fontFamily: 'InterMedium' }}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.amount.message}
-                            </Text>
-                        )}
+                        </View>
                     </View>
 
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.gramatikaBold}
                             className='text-xs text-gray-600'
                         >
                             Category
                         </Text>
-                        <>
+                        <View>
                             <Controller
                                 control={control}
                                 rules={{
@@ -380,7 +383,7 @@ export default function NewTransactionScreen() {
                                     {errors.category.message}
                                 </Text>
                             )}
-                        </>
+                        </View>
                     </View>
 
                     <View className='h-1 border-b border-gray-100 w-full' />
@@ -429,29 +432,31 @@ export default function NewTransactionScreen() {
                             Note
                         </Text>
 
-                        <Controller
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <InputField
-                                    className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
-                                    cursorColor={'#8B5CF6'}
-                                    placeholder='Add a note...'
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    value={value}
-                                />
+                        <View>
+                            <Controller
+                                control={control}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='Add a note...'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                    />
+                                )}
+                                name='note'
+                            />
+                            {errors.note && (
+                                <Text
+                                    style={{ fontFamily: 'InterMedium' }}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.note.message}
+                                </Text>
                             )}
-                            name='note'
-                        />
-                        {errors.note && (
-                            <Text
-                                style={{ fontFamily: 'InterMedium' }}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.note.message}
-                            </Text>
-                        )}
+                        </View>
                     </View>
                 </ScrollView>
 

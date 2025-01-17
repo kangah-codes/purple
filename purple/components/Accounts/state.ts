@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Account } from './schema';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { nativeStorage } from '@/lib/utils/storage';
+import { Transaction } from '../Transactions/schema';
 
 type AccountStore = {
     accounts: Account[];
@@ -9,6 +10,8 @@ type AccountStore = {
     updateAccounts: (account: Account) => void;
     currentAccount?: Account;
     setCurrentAccount: (account: Account) => void;
+    currentAccountTransactions: Transaction[];
+    setCurrentAccountTransactions: (transactions: Transaction[]) => void;
 };
 
 export const createAccountStore = create<AccountStore>()(
@@ -20,6 +23,9 @@ export const createAccountStore = create<AccountStore>()(
                 set((state) => ({ accounts: [...state.accounts, account] })),
             currentAccount: undefined,
             setCurrentAccount: (account) => set({ currentAccount: account }),
+            currentAccountTransactions: [],
+            setCurrentAccountTransactions: (transactions) =>
+                set({ currentAccountTransactions: transactions }),
         }),
         {
             name: 'account-store',
