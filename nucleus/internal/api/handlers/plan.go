@@ -399,9 +399,8 @@ func FetchPlan(c *gin.Context) {
 
 	plan := models.Plan{}
 	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc")
+		return db.Omit("plan", "user").Order("created_at desc")
 	}).Where("id = ? and user_id = ?", planID, userID).First(&plan)
-	log.InfoLogger.Println(planID, "PLAN ID")
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
