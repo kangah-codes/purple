@@ -80,7 +80,7 @@ func SignUp(c *gin.Context) {
 	}
 
 	// Preload the user settings and accounts
-	if err := tx.Preload("Settings").Preload("Accounts").First(&user, user.ID).Error; err != nil {
+	if err := tx.Preload("Profile").Preload("Accounts").First(&user, user.ID).Error; err != nil {
 		tx.Rollback()
 		log.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to retrieve user data", Data: nil})
