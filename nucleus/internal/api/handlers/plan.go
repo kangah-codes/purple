@@ -26,17 +26,16 @@ func CreatePlan(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("userID")
-	uID, err := uuid.Parse(userID)
-	if err != nil {
-		log.ErrorLogger.Printf("Error parsing user id as UUID: %v", err)
-		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create plan", Data: nil})
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(401, types.Response{Status: http.StatusInternalServerError, Message: "User is not authorised", Data: nil})
+		return
 	}
 
 	// build cache key
-	cacheKey := redis.BuildCacheKey("plans", userID, "*")
+	cacheKey := redis.BuildCacheKey("plans", fmt.Sprintf("%v", userID), "*")
 	plan := models.Plan{
-		UserId:           uID,
+		UserId:           userID.(uuid.UUID),
 		Type:             createPlan.Type,
 		Category:         createPlan.Category,
 		Target:           createPlan.Target,
@@ -56,7 +55,7 @@ func CreatePlan(c *gin.Context) {
 		return
 	}
 
-	if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", userID)}); err != nil {
+	if err := redis.InvalidateMultipleCaches([]string{cacheKey, redis.BuildCacheKey("users", fmt.Sprintf("%v", userID))}); err != nil {
 		log.ErrorLogger.Printf("Error invalidating cache with key %s: %v", cacheKey, err)
 	}
 
@@ -400,9 +399,8 @@ func FetchPlan(c *gin.Context) {
 
 	plan := models.Plan{}
 	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc")
+		return db.Omit("plan", "user").Order("created_at desc")
 	}).Where("id = ? and user_id = ?", planID, userID).First(&plan)
-	log.InfoLogger.Println(planID, "PLAN ID")
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
