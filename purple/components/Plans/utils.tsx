@@ -276,7 +276,7 @@ export function generateSpendingTrendData(
             value: Number(normalizeValue(idealAmount).toFixed(2)),
             ...(shouldAddLabel && {
                 labelComponent: () => (
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='leading-5 text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='leading-5 text-xs'>
                         {formatDateLabel(dateStr)}
                     </Text>
                 ),
@@ -284,16 +284,16 @@ export function generateSpendingTrendData(
         });
 
         // Calculate actual spending (only up to current date)
-        if (pointDate <= now) {
-            const actualAmount = getAmountUpToDate(pointDate);
-            actual.push({
-                date: dateStr,
-                value: Number(normalizeValue(isNaN(actualAmount) ? 0 : actualAmount).toFixed(2)),
-                ...(shouldAddLabel && {
-                    labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
-                }),
-            });
-        }
+        // if (pointDate <= now) {
+        const actualAmount = getAmountUpToDate(pointDate);
+        actual.push({
+            date: dateStr,
+            value: Number(normalizeValue(isNaN(actualAmount) ? 0 : actualAmount).toFixed(2)),
+            ...(shouldAddLabel && {
+                labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
+            }),
+        });
+        // }
 
         // Calculate projected spending (from current date to end)
         if (pointDate >= now) {

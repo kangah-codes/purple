@@ -103,14 +103,14 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                     My Transactions
                 </Text>
 
                 {accountID && (
                     // no idea why this is even here
                     <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
                             Back
                         </Text>
                     </TouchableOpacity>

@@ -33,7 +33,7 @@ export default function ProfileScreen() {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                     My Profile
                 </Text>
             </View>
@@ -46,10 +46,10 @@ export default function ProfileScreen() {
                 </View>
 
                 <View className='flex flex-col items-center'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-2xl text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-2xl text-black'>
                         @{sessionData?.user.username}
                     </Text>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-black'>
                         {sessionData?.user.email}
                     </Text>
                 </View>

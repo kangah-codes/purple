@@ -50,7 +50,7 @@ export default function AccountsScreen() {
     const renderHeader = useCallback(
         () => (
             <View className='px-5 flex flex-col space-y-2.5 w-full'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg mt-2.5'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg mt-2.5'>
                     Accounts
                 </Text>
                 <View className='h-1 border-gray-100 border-b w-full mb-2.5' />

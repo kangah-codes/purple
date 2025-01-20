@@ -106,7 +106,7 @@ export default function NewTransactionScreen() {
                 <View className='flex flex-col space-y-5'>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Debit Account
@@ -141,7 +141,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.fromAccount && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.fromAccount.message}
@@ -151,7 +151,7 @@ export default function NewTransactionScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Credit Account
@@ -186,7 +186,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.toAccount && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.toAccount.message}
@@ -199,7 +199,7 @@ export default function NewTransactionScreen() {
         }
         return (
             <View className='flex flex-col space-y-1'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
                     Account
                 </Text>
                 <View>
@@ -232,7 +232,7 @@ export default function NewTransactionScreen() {
                     />
                     {errors.accountId && (
                         <Text
-                            style={{ fontFamily: 'InterMedium' }}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-red-500'
                         >
                             {errors.accountId.message}
@@ -254,15 +254,12 @@ export default function NewTransactionScreen() {
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
                     <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                             New Transaction
                         </Text>
 
                         <TouchableOpacity onPress={router.back}>
-                            <Text
-                                style={GLOBAL_STYLESHEET.gramatikaBold}
-                                className='text-purple-600'
-                            >
+                            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-600'>
                                 Cancel
                             </Text>
                         </TouchableOpacity>
@@ -286,7 +283,7 @@ export default function NewTransactionScreen() {
                                         className='w-full flex items-center justify-center py-2.5 rounded-full'
                                     >
                                         <Text
-                                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                                            style={GLOBAL_STYLESHEET.satoshiBlack}
                                             className='text-sm'
                                         >
                                             {transaction.label}
@@ -306,7 +303,7 @@ export default function NewTransactionScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Amount
@@ -321,7 +318,7 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='0.00'
                                         onChangeText={onChange}
@@ -334,7 +331,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.amount && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.amount.message}
@@ -345,7 +342,7 @@ export default function NewTransactionScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Category
@@ -377,7 +374,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -412,7 +409,7 @@ export default function NewTransactionScreen() {
                         />
                         {errors.date && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.date.message}
@@ -426,7 +423,7 @@ export default function NewTransactionScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Note
@@ -438,7 +435,7 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Add a note...'
                                         onChangeText={onChange}
@@ -450,7 +447,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.note && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.note.message}
@@ -469,7 +466,7 @@ export default function NewTransactionScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white'>
                                 Save
                             </Text>
                         )}

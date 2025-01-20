@@ -134,7 +134,7 @@ export default function SignUpScreen() {
                         <View style={tw`mt-5 mb-5`}>
                             <Text
                                 style={[
-                                    GLOBAL_STYLESHEET.gramatikaBlack,
+                                    GLOBAL_STYLESHEET.satoshiBlack,
                                     tw`text-2xl text-black text-center`,
                                 ]}
                             >
@@ -142,7 +142,7 @@ export default function SignUpScreen() {
                             </Text>
                             <Text
                                 style={[
-                                    GLOBAL_STYLESHEET.gramatikaMedium,
+                                    GLOBAL_STYLESHEET.satoshiMedium,
                                     tw`text-sm text-gray-600 text-center mt-2.5`,
                                 ]}
                             >
@@ -155,7 +155,7 @@ export default function SignUpScreen() {
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Username
@@ -169,7 +169,7 @@ export default function SignUpScreen() {
                                             <AsyncInput
                                                 // @ts-ignore
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Username'
                                                 onChangeText={(data) => {
@@ -186,7 +186,7 @@ export default function SignUpScreen() {
                                     />
                                     {errors.username && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
                                             {errors.username.message}
@@ -195,7 +195,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Email Address
@@ -213,7 +213,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Email'
                                                 onChangeText={onChange}
@@ -226,7 +226,7 @@ export default function SignUpScreen() {
                                     />
                                     {errors.email && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
                                             {errors.email.message}
@@ -235,7 +235,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Password
@@ -253,7 +253,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Password'
                                                 onChangeText={onChange}
@@ -266,7 +266,7 @@ export default function SignUpScreen() {
                                     />
                                     {errors.password && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
                                             {errors.password.message}
@@ -275,7 +275,7 @@ export default function SignUpScreen() {
                                 </View>
                                 <View className='flex flex-col space-y-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
                                         className='text-xs text-gray-600'
                                     >
                                         Confirm Password
@@ -291,7 +291,7 @@ export default function SignUpScreen() {
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <ProtectedInput
                                                 className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='Confirm Password'
                                                 onChangeText={onChange}
@@ -304,7 +304,7 @@ export default function SignUpScreen() {
                                     />
                                     {errors.password && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
                                             {errors.password.message}
@@ -316,7 +316,7 @@ export default function SignUpScreen() {
                                         onPress={() => router.replace('/auth/sign-in')}
                                     >
                                         <Text
-                                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
                                             className='text-xs text-purple-500'
                                         >
                                             Already a user? Sign in
@@ -345,7 +345,7 @@ export default function SignUpScreen() {
                                     ) : (
                                         <Text
                                             style={[
-                                                GLOBAL_STYLESHEET.gramatikaBlack,
+                                                GLOBAL_STYLESHEET.satoshiBlack,
                                                 tw`text-base text-white`,
                                             ]}
                                         >

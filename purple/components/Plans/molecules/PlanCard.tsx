@@ -22,13 +22,13 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
             }}
         >
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
                     {truncateStringIfLongerThan(data.name, 20)}
                 </Text>
 
                 <View className='rounded-full bg-purple-600 px-2.5 py-0.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaBlack}
+                        style={GLOBAL_STYLESHEET.satoshiBlack}
                         className='text-xs text-purple-50 tracking-tighter'
                     >
                         {`${((data.balance / data.target || 0) * 100).toFixed(0)}%`}
@@ -39,11 +39,11 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
             <View className='h-[1px] bg-purple-200 w-full' />
 
             <View className='flex flex-row justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-sm text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-600'>
                     {formatCurrencyRounded(data.balance, data.currency)}
                 </Text>
 
-                <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-sm text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-600'>
                     {formatCurrencyRounded(data.target, data.currency)}
                 </Text>
             </View>

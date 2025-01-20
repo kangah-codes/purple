@@ -56,7 +56,7 @@ export default function DatePicker({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
                                         className='text-base text-gray-900'
                                     >
                                         {label}
@@ -79,7 +79,7 @@ export default function DatePicker({
             }
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-xs text-gray-600'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -105,10 +105,7 @@ export default function DatePicker({
                         <CalendarIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
-                        className='text-xs text-gray-900'
-                    >
+                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
                         {value.toDateString()}
                     </Text>
                 </TouchableOpacity>

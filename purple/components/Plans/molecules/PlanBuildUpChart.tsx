@@ -15,7 +15,7 @@ export default function PlanBuildUpChart() {
         }
 
         return generateSpendingTrendData(currentPlan, 30, 5);
-    }, [currentPlan]);
+    }, [currentPlan?.Transactions]);
 
     if (!currentPlan) return null;
 
@@ -90,13 +90,13 @@ export default function PlanBuildUpChart() {
             <View className='flex flex-row justify-between items-center -mt-2.5 px-5 mx-auto space-x-2'>
                 <View className='flex flex-row space-x-1 items-center'>
                     <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#10B981' }} />
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-black text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-xs'>
                         Actual {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
                     </Text>
                 </View>
                 <View className='flex flex-row space-x-1 items-center'>
                     <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#A855F7' }} />
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='text-black text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-xs'>
                         Optimal {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
                     </Text>
                 </View>

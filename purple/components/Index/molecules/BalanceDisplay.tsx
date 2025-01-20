@@ -22,7 +22,7 @@ export function BalanceDisplay({
     return (
         <View className='flex flex-col'>
             <View className='flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-sm'>
+                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
                     Available Balance
                 </Text>
                 {showAmount ? (
@@ -42,12 +42,12 @@ export function BalanceDisplay({
                 )}
             </View>
             <Text
-                style={GLOBAL_STYLESHEET.gramatikaBlack}
+                style={GLOBAL_STYLESHEET.satoshiBlack}
                 className='text-black text-3xl tracking- mt-1.5'
             >
                 {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-base mt-1.5'>
+            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-base mt-1.5'>
                 {accountName}
             </Text>
         </View>

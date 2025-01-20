@@ -1,112 +1,35 @@
 import { StyleSheet } from 'react-native';
 
 export const GLOBAL_STYLESHEET = StyleSheet.create({
-    suprapower: {
-        fontFamily: 'Suprapower',
+    // satoshi
+    satoshiBlack: {
+        fontFamily: 'SatoshiBlack',
     },
-    interRegular: {
-        fontFamily: 'InterRegular',
+    satoshiBlackItalic: {
+        fontFamily: 'SatoshiBlackItalic',
     },
-    interThin: {
-        fontFamily: 'InterThin',
+    satoshiBold: {
+        fontFamily: 'SatoshiBold',
     },
-    interBlack: {
-        fontFamily: 'InterBlack',
+    satoshiBoldItalic: {
+        fontFamily: 'SatoshiBoldItalic',
     },
-    interBold: {
-        fontFamily: 'MonaSansBold',
+    satoshiItalic: {
+        fontFamily: 'SatoshiItalic',
     },
-    interExtraBold: {
-        fontFamily: 'InterExtraBold',
+    satoshiLight: {
+        fontFamily: 'SatoshiLight',
     },
-    interExtraLight: {
-        fontFamily: 'InterExtraLight',
+    satoshiLightItalic: {
+        fontFamily: 'SatoshiLightItalic',
     },
-    interLight: {
-        fontFamily: 'InterLight',
+    satoshiMedium: {
+        fontFamily: 'SatoshiMedium',
     },
-    interMedium: {
-        fontFamily: 'InterMedium',
+    satoshiMediumItalic: {
+        fontFamily: 'SatoshiMediumItalic',
     },
-    interSemiBold: {
-        fontFamily: 'InterSemiBold',
-    },
-    wolfSansRegular: {
-        fontFamily: 'WolfSansRegular',
-    },
-    arialRoundedBold: {
-        fontFamily: 'ArialRoundedBold',
-    },
-
-    // onest
-    gresaRegular: {
-        fontFamily: 'GresaRegular',
-    },
-    mockupDisplay: {
-        fontFamily: 'mockupDisplay',
-    },
-
-    // mona sans
-    monaSansBlack: {
-        fontFamily: 'MonaSansBlack',
-    },
-    monaSansBold: {
-        fontFamily: 'MonaSansBold',
-    },
-    monaSansExtraBold: {
-        fontFamily: 'MonaSansExtraBold',
-    },
-    monaSansExtraLight: {
-        fontFamily: 'MonaSansExtraLight',
-    },
-    monaSansLight: {
-        fontFamily: 'MonaSansLight',
-    },
-    monaSansMedium: {
-        fontFamily: 'MonaSansMedium',
-    },
-    monaSansRegular: {
-        fontFamily: 'MonaSansRegular',
-    },
-    monaSansSemiBold: {
-        fontFamily: 'monaSansSemiBold',
-    },
-
-    // gramatika
-    gramatikaBlack: {
-        fontFamily: 'GramatikaBlack',
-    },
-    gramatikaBlackItalic: {
-        fontFamily: 'GramatikaBlackItalic',
-    },
-    gramatikaBold: {
-        fontFamily: 'GramatikaBold',
-    },
-    gramatikaBoldItalic: {
-        fontFamily: 'GramatikaBoldItalic',
-    },
-    gramatikaExtraLight: {
-        fontFamily: 'GramatikaExtraLight',
-    },
-    gramatikaExtraLightItalic: {
-        fontFamily: 'GramatikaExtraLightItalic',
-    },
-    gramatikaLight: {
-        fontFamily: 'GramatikaLight',
-    },
-    gramatikaLightItalic: {
-        fontFamily: 'GramatikaLightItalic',
-    },
-    gramatikaMedium: {
-        fontFamily: 'GramatikaMedium',
-    },
-    gramatikaMediumItalic: {
-        fontFamily: 'GramatikaMediumItalic',
-    },
-    gramatikaRegular: {
-        fontFamily: 'GramatikaRegular',
-    },
-    gramatikaRegularItalic: {
-        fontFamily: 'GramatikaRegularItalic',
+    satoshiRegular: {
+        fontFamily: 'SatoshiRegular',
     },
 });

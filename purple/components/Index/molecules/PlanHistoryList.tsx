@@ -42,7 +42,7 @@ export default function PlanHistoryList() {
     return (
         <View className='flex flex-col space-y-1 mt-5'>
             <View className='flex flex-row w-full justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
                     My plans
                 </Text>
 
@@ -51,7 +51,7 @@ export default function PlanHistoryList() {
                     onPress={handleNavigation}
                 >
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaBold}
+                        style={GLOBAL_STYLESHEET.satoshiBold}
                         className='text-sm tracking-tight text-purple-700'
                     >
                         View All

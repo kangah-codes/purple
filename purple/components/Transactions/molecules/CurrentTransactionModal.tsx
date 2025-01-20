@@ -59,7 +59,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             </Text>
                         </View>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
                             className='text-lg text-white mt-2.5'
                         >
                             {currentTransaction.category.includes(' ')
@@ -70,7 +70,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
                         <Text
                             style={[
-                                GLOBAL_STYLESHEET.gramatikaBlack,
+                                GLOBAL_STYLESHEET.satoshiBlack,
                                 {
                                     color:
                                         currentTransaction.Type === 'debit'

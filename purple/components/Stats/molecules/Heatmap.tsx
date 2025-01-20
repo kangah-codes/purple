@@ -19,6 +19,7 @@ import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { usePlanStatus } from '@/components/Plans/hooks';
 import Toast from 'react-native-toast-message';
+import { useMonthlyStats } from '../hooks';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -39,9 +40,9 @@ function StatsHeatmap() {
         isLoading,
         refetch: refetchPlanStatus,
         isFetching,
-    } = usePlanStatus({
+        data,
+    } = useMonthlyStats({
         sessionData: sessionData as SessionData,
-        planID: 'id as string',
     });
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -49,17 +50,20 @@ function StatsHeatmap() {
         () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
         [finalMonthDays],
     );
-    const data = useMemo(
+    const heatmapData = useMemo(
         () =>
-            monthDays.map((day, index) => ({
-                value: values[index],
-                key: format(day, 'dd/MM/yyyy'),
-                index: index + offset,
-            })),
+            monthDays.map((day, index) => {
+                const date = format(day, 'dd/MM/yy');
+                return {
+                    value: data?.data.DailyActivity[date] ?? 0, // this is where i need to injext
+                    key: date,
+                    index: index + offset,
+                };
+            }),
         [values],
     );
 
-    console.log(values, finalMonthDays);
+    console.log(data);
 
     const click = useCallback(
         (item: CellData) => {
@@ -89,7 +93,7 @@ function StatsHeatmap() {
                         <LinearGradient
                             style={styles.linearGradient}
                             colors={colors[colorIndex]}
-                            className='flex items-center justify-center'
+                            className='flex items-center justify-center border border-purple-300'
                         >
                             <StarsIcon stroke='#fff' fill={'#fff'} />
                         </LinearGradient>
@@ -114,7 +118,7 @@ function StatsHeatmap() {
                     snapPoints={['50%', '70%']}
                     children={
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
                             className='text-base text-gray-900 px-5 py-2.5'
                         >
                             Transactions on {selectedDate}
@@ -129,7 +133,7 @@ function StatsHeatmap() {
                     itemSeparator={itemSeparator}
                 />
             </Portal>
-            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
+            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                 Daily Activity
             </Text>
             <View>
@@ -138,7 +142,7 @@ function StatsHeatmap() {
                         <Text
                             key={key}
                             className='text-black text-base mx-auto'
-                            style={GLOBAL_STYLESHEET.gramatikaBlack}
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
                         >
                             {day}
                         </Text>
@@ -151,7 +155,7 @@ function StatsHeatmap() {
                         cellSize={blockSize}
                         rows={4}
                         cols={numBlocksPerRow}
-                        data={data}
+                        data={heatmapData}
                         onPressCallback={click}
                         startColumn={getDay(start)}
                         renderCell={renderCell}

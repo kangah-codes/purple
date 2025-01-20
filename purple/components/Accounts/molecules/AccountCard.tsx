@@ -31,10 +31,10 @@ export default function AccountCard({
                 });
             }}
         >
-            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-sm'>
+            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-black text-sm'>
+            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
                 {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>
@@ -47,12 +47,12 @@ export default function AccountCard({
     return (
         <>
             <View className='flex flex-row items-center justify-between px-5 py-2.5'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-black'>
                     {truncateStringIfLongerThan(groupName, 20)}
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.gramatikaBlack,
+                        GLOBAL_STYLESHEET.satoshiBlack,
                         {
                             color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
                         },

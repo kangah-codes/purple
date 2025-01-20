@@ -43,13 +43,13 @@ export default function ConfirmAddPlanTransaction() {
             <View className='flex flex-col p-5 space-y-10'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaBlack}
+                        style={GLOBAL_STYLESHEET.satoshiBlack}
                         className='text-2xl text-black text-center'
                     >
                         Add Transaction?
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-sm textblack text-center'
                     >
                         {currentPlan.type == 'expense'
@@ -86,10 +86,7 @@ export default function ConfirmAddPlanTransaction() {
                         progressColor='#dc2626'
                         backgroundColor='#e5e7eb'
                     >
-                        <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBlack}
-                            className='text-white text-lg'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white text-lg'>
                             Delete
                         </Text>
                     </HoldButton>

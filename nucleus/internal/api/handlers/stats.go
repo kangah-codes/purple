@@ -12,7 +12,8 @@ import (
 )
 
 type DailyActivity struct {
-	Data map[string]float64
+	Heatmap         map[string]float64
+	TransactionData map[string][]models.Transaction
 }
 
 func CalculateMonthlyStats(c *gin.Context) {
@@ -35,7 +36,7 @@ func CalculateMonthlyStats(c *gin.Context) {
 	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
 	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
 	monthDays := utils.EachDayOfInterval(firstOfMonth, lastOfMonth)
-	userDailyActivity := DailyActivity{Data: make(map[string]float64)}
+	userDailyActivity := DailyActivity{Heatmap: make(map[string]float64)}
 
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -61,27 +62,27 @@ func CalculateMonthlyStats(c *gin.Context) {
 	// Initialize daily activity data
 	for _, day := range monthDays {
 		dateStr := day.Format("02/01/06")
-		userDailyActivity.Data[dateStr] = 0
+		userDailyActivity.Heatmap[dateStr] = 0
 	}
 
 	// Sum up transactions for each day
 	for _, transaction := range transactions {
 		dateStr := transaction.CreatedAt.Format("02/01/06")
-		if _, exists := userDailyActivity.Data[dateStr]; exists {
-			userDailyActivity.Data[dateStr] += transaction.Amount
+		if _, exists := userDailyActivity.Heatmap[dateStr]; exists {
+			userDailyActivity.Heatmap[dateStr] += transaction.Amount
 		}
 	}
 
 	// Sum up plan transactions for each day
 	for _, planTransaction := range planTransactions {
 		dateStr := planTransaction.CreatedAt.Format("02/01/06")
-		if _, exists := userDailyActivity.Data[dateStr]; exists {
-			userDailyActivity.Data[dateStr] += planTransaction.Amount
+		if _, exists := userDailyActivity.Heatmap[dateStr]; exists {
+			userDailyActivity.Heatmap[dateStr] += planTransaction.Amount
 		}
 	}
 
 	response := types.Response{Status: http.StatusOK, Message: "Monthly stats fetched successfully", Data: gin.H{
-		"DailyActivity": userDailyActivity.Data,
+		"DailyActivity": userDailyActivity.Heatmap,
 	}}
 
 	c.JSON(http.StatusOK, response)

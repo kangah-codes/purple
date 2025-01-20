@@ -46,7 +46,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='John Doe'
                                 onChangeText={onChange}
@@ -58,7 +58,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                     />
                     {errors.fullName && (
                         <Text
-                            style={{ fontFamily: 'InterMedium' }}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-red-500'
                         >
                             {errors.fullName.message}
@@ -83,7 +83,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='John Doe'
                                 onChangeText={onChange}
@@ -96,7 +96,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                     />
                     {errors.userName && (
                         <Text
-                            style={{ fontFamily: 'InterMedium' }}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-red-500'
                         >
                             {errors.userName.message}
@@ -121,7 +121,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <InputField
                                 className='bg-gray-100 rounded-lg px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 cursorColor={'#8B5CF6'}
                                 placeholder='hello@purpleapp.com'
                                 onChangeText={onChange}
@@ -133,7 +133,7 @@ const PersonalInformation = forwardRef((props, ref) => {
                     />
                     {errors.email && (
                         <Text
-                            style={{ fontFamily: 'InterMedium' }}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-red-500'
                         >
                             {errors.email.message}

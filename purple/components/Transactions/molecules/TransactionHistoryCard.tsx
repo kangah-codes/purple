@@ -46,7 +46,7 @@ export default function TransactionHistoryCard({
             <View className='flex flex-row justify-between items-center flex-grow'>
                 <View className='flex flex-col'>
                     {showTitle && (
-                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base'>
                             {truncateStringIfLongerThan(
                                 data.category.includes(' ')
                                     ? data.category.split(' ').slice(1).join(' ')
@@ -56,7 +56,7 @@ export default function TransactionHistoryCard({
                         </Text>
                     )}
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-sm text-gray-500 tracking-tighter'
                     >
                         {date.date} • {date.time}
@@ -66,7 +66,7 @@ export default function TransactionHistoryCard({
                 <View className='flex flex-row space-x-2 items-center'>
                     <Text
                         style={{
-                            ...GLOBAL_STYLESHEET.gramatikaBlack,
+                            ...GLOBAL_STYLESHEET.satoshiBlack,
                             color:
                                 data.Type === 'debit'
                                     ? '#DC2626'

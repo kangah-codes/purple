@@ -28,12 +28,12 @@ export default function PlanInfoCard({ type }: PlanInfoCardProps) {
             style={style.linearGradient}
         >
             <View className='flex flex-col'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white text-5xl'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white text-5xl'>
                     {budgetDetails.totalExpensePercentage.toFixed(2)}%
                 </Text>
                 <View className='flex flex-col space-y-1.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-white text-sm tracking-tighter'
                     >
                         {type === 'expense'
