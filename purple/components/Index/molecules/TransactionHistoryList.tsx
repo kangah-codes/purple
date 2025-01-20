@@ -53,7 +53,7 @@ export default function TransactionHistoryList() {
             </Portal> */}
             <View className='flex flex-col mt-5'>
                 <View className='flex flex-row w-full justify-between items-center px-5'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
                         Recent Transactions
                     </Text>
 
@@ -62,7 +62,7 @@ export default function TransactionHistoryList() {
                         className='flex flex-row items-center space-x-1'
                     >
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-sm text-purple-700'
                         >
                             View All

@@ -24,7 +24,7 @@ function PlanAccountOverviewPieChart() {
         const total = accountStats.reduce((acc, curr) => acc + curr.amount, 0);
 
         return (
-            <Text style={GLOBAL_STYLESHEET.gramatikaBlackItalic} className='text-3xl'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBlackItalic} className='text-3xl'>
                 {Math.round((highestValue / total) * 100) + '%'}
             </Text>
         );
@@ -43,7 +43,7 @@ function PlanAccountOverviewPieChart() {
     return (
         <View className='flex flex-col px-5 space-y-2.5 mt-5'>
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg text-black'>
                     Account Deductions
                 </Text>
             </View>

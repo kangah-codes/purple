@@ -18,11 +18,11 @@ function TransactionsPieChart() {
                 <View className='flex flex-col'>
                     <View className='flex flex-row items-center space-x-1.5'>
                         <View className='w-2.5 h-2.5 rounded-full bg-[#16A34A]' />
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                             Income
                         </Text>
                     </View>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         3,046.09
                     </Text>
                 </View>
@@ -30,11 +30,11 @@ function TransactionsPieChart() {
                 <View className='flex flex-col'>
                     <View className='flex flex-row items-center space-x-1.5'>
                         <View className='w-2.5 h-2.5 rounded-full bg-[#EF4444]' />
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                             Expenses
                         </Text>
                     </View>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         3,046.09
                     </Text>
                 </View>
@@ -42,11 +42,11 @@ function TransactionsPieChart() {
                 <View className='flex flex-col'>
                     <View className='flex flex-row items-center space-x-1.5'>
                         <View className='w-2.5 h-2.5 rounded-full bg-[#9333EA]' />
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                             Transfers
                         </Text>
                     </View>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         3,046.09
                     </Text>
                 </View>

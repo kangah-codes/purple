@@ -26,13 +26,13 @@ export default function Landing() {
             <View className='w-full px-5 space-y-5 flex flex-col items-center justify-center bg-white flex-grow'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaBlack}
+                        style={GLOBAL_STYLESHEET.satoshiBlack}
                         className='text-2xl text-black text-center'
                     >
                         Take your personal finance into your own hands!
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-sm text-black text-center'
                     >
                         Enjoy a seamless experience with Purple and take control of your finances
@@ -50,7 +50,7 @@ export default function Landing() {
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={GLOBAL_STYLESHEET.gramatikaBold}
+                                style={GLOBAL_STYLESHEET.satoshiBold}
                                 className='text-base text-white'
                             >
                                 Sign Up
@@ -64,7 +64,7 @@ export default function Landing() {
                     >
                         <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
                             <Text
-                                style={GLOBAL_STYLESHEET.gramatikaBold}
+                                style={GLOBAL_STYLESHEET.satoshiBold}
                                 className='text-base text-black tracking-tight'
                             >
                                 Sign In
@@ -74,7 +74,7 @@ export default function Landing() {
 
                     <ExternalLink href='https://purpleapp.vercel.app'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-purple-500 text-center'
                         >
                             Terms and Conditions

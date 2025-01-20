@@ -25,7 +25,7 @@ export default function AccountNavigationArea() {
             >
                 <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                 {truncateStringIfLongerThan(currentAccount.name as string, 20)}
             </Text>
 

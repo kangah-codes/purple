@@ -74,7 +74,7 @@ export default function NewAccountScreen() {
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-gray-100'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='tracking-tight'>
+                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='tracking-tight'>
                     {item.label}
                 </Text>
             </View>
@@ -86,7 +86,7 @@ export default function NewAccountScreen() {
 
         return (
             <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                     {currency?.emojiFlag}
                     {'  '}
                     {currency?.name}
@@ -111,12 +111,12 @@ export default function NewAccountScreen() {
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
                 <ExpoStatusBar style='dark' />
                 <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         New Account
                     </Text>
 
                     <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -127,7 +127,7 @@ export default function NewAccountScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Category
@@ -160,7 +160,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -170,7 +170,7 @@ export default function NewAccountScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Account Name
@@ -185,7 +185,7 @@ export default function NewAccountScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Account name'
                                         onChangeText={onChange}
@@ -198,7 +198,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.name && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.name.message}
@@ -208,7 +208,7 @@ export default function NewAccountScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Balance
@@ -223,7 +223,7 @@ export default function NewAccountScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='0.00'
                                         keyboardType='numeric'
@@ -236,7 +236,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.balance && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.balance.message}
@@ -246,7 +246,7 @@ export default function NewAccountScreen() {
                     </View>
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Currency
@@ -279,7 +279,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.currency && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.currency.message}
@@ -298,7 +298,7 @@ export default function NewAccountScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white'>
                                 Create Account
                             </Text>
                         )}

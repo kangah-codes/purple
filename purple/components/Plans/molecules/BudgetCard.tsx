@@ -30,7 +30,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 style={styles.planCard}
             >
                 <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
                         {truncateStringIfLongerThan(name, 20)}
                     </Text>
                 </View>
@@ -48,7 +48,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
 
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-sm text-black'
                         >
                             {formatDate(start_date, {
@@ -57,10 +57,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                                 day: 'numeric',
                             })}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
-                            className='text-sm text-black'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
                             {formatDate(end_date, {
                                 year: 'numeric',
                                 month: 'short',
@@ -75,28 +72,25 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.progressLabel}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
-                            className='text-sm text-black'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
                             {formatCurrencyAccurate(currency, progressAmount)}
                         </Text>
                     </View>
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.remainingLabel}
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-sm text-black tracking-tight'
                         >
                             {formatCurrencyAccurate(currency, remainingAmount)}
@@ -105,15 +99,12 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <View className='border-b border-purple-200 w-full' />
                     <View className='flex flex-row justify-between items-center'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-sm text-gray-700 tracking-tight'
                         >
                             {labels.targetLabel}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
-                            className='text-sm text-black'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
                             {formatCurrencyAccurate(currency, target)}
                         </Text>
                     </View>

@@ -20,7 +20,7 @@ export default function NotFoundScreen() {
                         Looks like you're lost!
                     </Text>
                     <Text
-                        style={{ fontFamily: 'InterMedium' }}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-sm textblack text-center'
                     >
                         The page you're looking for doesn't exist or has been moved.

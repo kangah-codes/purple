@@ -102,7 +102,7 @@ export default function Toast({ type, ...props }: ToastProps) {
             <View className='flex-1 flex-col'>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.gramatikaBold,
+                        GLOBAL_STYLESHEET.satoshiBold,
                         {
                             color: styles.titleFontColour,
                         },
@@ -113,7 +113,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.gramatikaMedium,
+                        GLOBAL_STYLESHEET.satoshiMedium,
                         {
                             color: styles.labelFontColour,
                         },

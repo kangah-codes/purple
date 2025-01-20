@@ -11,7 +11,7 @@ export default function ProfileHeader() {
                     Joshua Akangah
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                    style={GLOBAL_STYLESHEET.satoshiMedium}
                     className='text-base text-white tracking-tighter'
                 >
                     akangah89@gmail.com

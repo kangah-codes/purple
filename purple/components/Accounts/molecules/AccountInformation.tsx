@@ -19,7 +19,7 @@ export default function AccountInformation({ transactions }: { transactions: Tra
             <View className='flex flex-col'>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.gramatikaBlack,
+                        GLOBAL_STYLESHEET.satoshiBlack,
                         {
                             color: currentAccount.balance < 0 ? '#DC2626' : '#000000',
                         },
@@ -32,7 +32,7 @@ export default function AccountInformation({ transactions }: { transactions: Tra
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                            style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-purple-500 text-sm'
                         >
                             {formatCurrencyAccurate(currentAccount.currency, amountAdded)} recorded

@@ -95,7 +95,7 @@ export default function NewPlanScreen() {
 
         return (
             <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm'>
+                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                     {currency?.emojiFlag}
                     {'  '}
                     {currency?.name}
@@ -144,13 +144,13 @@ export default function NewPlanScreen() {
                     className='w-full flex flex-row px-5 py-2.5 justify-between items-center'
                 >
                     <View className='flex flex-col'>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                             New Plan
                         </Text>
                     </View>
 
                     <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -161,7 +161,7 @@ export default function NewPlanScreen() {
                 >
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Plan Name
@@ -176,7 +176,7 @@ export default function NewPlanScreen() {
                                 render={({ field: { onChange, value, onBlur } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Plan Name'
                                         onChangeText={onChange}
@@ -189,7 +189,7 @@ export default function NewPlanScreen() {
                         </View>
                         {errors.name && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.name.message}
@@ -199,7 +199,7 @@ export default function NewPlanScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Plan Type
@@ -247,7 +247,7 @@ export default function NewPlanScreen() {
                                                             <View className='flex flex-col space-y-1 w-full px-5'>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.gramatikaBlack
+                                                                        GLOBAL_STYLESHEET.satoshiBlack
                                                                     }
                                                                     className='text-xl text-black'
                                                                 >
@@ -255,7 +255,7 @@ export default function NewPlanScreen() {
                                                                 </Text>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.gramatikaMedium
+                                                                        GLOBAL_STYLESHEET.satoshiMedium
                                                                     }
                                                                     className='text-sm text-gray-600'
                                                                 >
@@ -292,7 +292,7 @@ export default function NewPlanScreen() {
                                                             <View className='flex flex-col space-y-1 w-full p-5'>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.gramatikaBlack
+                                                                        GLOBAL_STYLESHEET.satoshiBlack
                                                                     }
                                                                     className='text-xl text-black'
                                                                 >
@@ -300,7 +300,7 @@ export default function NewPlanScreen() {
                                                                 </Text>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.gramatikaMedium
+                                                                        GLOBAL_STYLESHEET.satoshiMedium
                                                                     }
                                                                     className='text-sm text-gray-600'
                                                                 >
@@ -319,7 +319,7 @@ export default function NewPlanScreen() {
                             />
                             {errors.type && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.type.message}
@@ -330,7 +330,7 @@ export default function NewPlanScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Plan Category
@@ -356,7 +356,7 @@ export default function NewPlanScreen() {
                                             //     <View className='w-[105%] border items-center border-purple-200 bg-purple-50 rounded-xl my-0.5 flex flex-row p-2.5 -mx-2.5'>
                                             //         <View className='h-5 w-5 bg-purple-500 rounded-full' />
                                             //         <Text
-                                            //             style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                            //             style={GLOBAL_STYLESHEET.satoshiMedium}
                                             //             className='text-base text-black'
                                             //         >
                                             //             {item.label}
@@ -370,7 +370,7 @@ export default function NewPlanScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -381,7 +381,7 @@ export default function NewPlanScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Currency
@@ -414,7 +414,7 @@ export default function NewPlanScreen() {
                             />
                             {errors.currency && (
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.currency.message}
@@ -425,7 +425,7 @@ export default function NewPlanScreen() {
 
                     <View className='flex flex-col space-y-1'>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Target
@@ -445,7 +445,7 @@ export default function NewPlanScreen() {
                                     <>
                                         <InputField
                                             className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                            style={GLOBAL_STYLESHEET.gramatikaMedium}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             cursorColor={'#8B5CF6'}
                                             placeholder='0.00'
                                             keyboardType='numeric'
@@ -460,7 +460,7 @@ export default function NewPlanScreen() {
                         </View>
                         {errors.target && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.target.message}
@@ -495,7 +495,7 @@ export default function NewPlanScreen() {
                         />
                         {errors.start_date && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.start_date.message}
@@ -529,7 +529,7 @@ export default function NewPlanScreen() {
                         />
                         {errors.end_date && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.end_date.message}
@@ -541,7 +541,7 @@ export default function NewPlanScreen() {
 
                     <View>
                         <Text
-                            style={GLOBAL_STYLESHEET.gramatikaBold}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
                             Deposit Frequency
@@ -571,7 +571,7 @@ export default function NewPlanScreen() {
                         </View>
                         {errors.deposit_frequency && (
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.deposit_frequency.message}
@@ -589,7 +589,7 @@ export default function NewPlanScreen() {
                         {isLoading ? (
                             <ActivityIndicator size={18} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-white'>
+                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white'>
                                 Create Plan
                             </Text>
                         )}

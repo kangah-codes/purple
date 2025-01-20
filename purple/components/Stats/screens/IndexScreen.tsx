@@ -40,7 +40,7 @@ export default function AccountsScreen() {
                     children={
                         <View className='px-5 py-2.5'>
                             <Text
-                                style={GLOBAL_STYLESHEET.gramatikaBlack}
+                                style={GLOBAL_STYLESHEET.satoshiBlack}
                                 className='text-base text-gray-900'
                             >
                                 🏠 Housing
@@ -58,7 +58,7 @@ export default function AccountsScreen() {
 
             <View className='' style={styles.parentView}>
                 <View className='flex flex-row items-center justify-between py-2.5 px-5'>
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
                     </Text>
                 </View>

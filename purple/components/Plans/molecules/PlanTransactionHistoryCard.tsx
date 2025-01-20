@@ -22,17 +22,17 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
 
     return (
         <View className='flex flex-col py-2.5'>
-            <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-base'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base'>
                 {formatCurrencyAccurate(currentPlan.currency, data.amount)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.gramatikaMedium} className='text-sm text-gray-500'>
+            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-500'>
                 {date.date} • {date.time}
             </Text>
             {data.debit_account_id && account && (
                 <View className='flex flex-row items-center space-x-1'>
                     <ArrowNarrowDownRightIcon width={16} height={16} stroke='#F87171' />
                     <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
+                        style={GLOBAL_STYLESHEET.satoshiMedium}
                         className='text-red-400 text-sm tracking-tight'
                     >
                         Deducted from {account.name} account

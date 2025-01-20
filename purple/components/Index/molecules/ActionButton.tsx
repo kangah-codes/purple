@@ -42,7 +42,7 @@ export function ActionButton({
                 </View>
             </Link>
             <Text
-                style={[GLOBAL_STYLESHEET.gramatikaMedium, styles.actionText]}
+                style={[GLOBAL_STYLESHEET.satoshiMedium, styles.actionText]}
                 className='leading-[14px]'
             >
                 {label}

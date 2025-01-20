@@ -19,11 +19,10 @@ export default function LoadingScreen() {
             >
                 <View className='flex flex-col'>
                     <SkeletonLine width={80} height={20} />
-                    <SkeletonLine width={60} height={20} />
                 </View>
                 <SkeletonLine width={40} height={20} />
             </View>
-            <View className='mt-20'>
+            <View className='mt-10'>
                 <LineChartSkeleton />
             </View>
             <View style={[styles.parentView, tw`bg-white flex flex-col space-y-5`]}>

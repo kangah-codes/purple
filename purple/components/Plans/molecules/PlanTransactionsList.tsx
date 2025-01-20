@@ -34,7 +34,7 @@ export default function PlanTransactionsList() {
     return (
         <View className='flex flex-col px-5 mt-5'>
             <View className='flex flex-row w-full justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.gramatikaBlack} className='text-lg text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg text-black'>
                     Transactions
                 </Text>
             </View>

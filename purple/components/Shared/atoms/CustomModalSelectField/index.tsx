@@ -70,10 +70,7 @@ export default function CustomModalSelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text
-                        style={GLOBAL_STYLESHEET.gramatikaMedium}
-                        className='text-xs text-gray-900'
-                    >
+                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             isNotEmptyString(val) ? val! : 'Select an option...',
                             45,

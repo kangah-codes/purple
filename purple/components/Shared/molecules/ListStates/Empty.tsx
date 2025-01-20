@@ -17,13 +17,13 @@ export default function EmptyList({ message }: EmptyListProps) {
             />
             <View className='flex flex-col space-y-2.5'>
                 <Text
-                    style={GLOBAL_STYLESHEET.gramatikaBlack}
+                    style={GLOBAL_STYLESHEET.satoshiBlack}
                     className='text-2xl text-black text-center'
                 >
                     Wow, such empty.
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.gramatikaMedium}
+                    style={GLOBAL_STYLESHEET.satoshiMedium}
                     className='text-sm textblack text-center'
                 >
                     {message}

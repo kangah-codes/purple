@@ -19,7 +19,7 @@ export default function StatsHeader() {
                     className='space-y-5 border border-purple-200 rounded-3xl p-5 bg-white'
                     style={styles.card}
                 >
-                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
+                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                         Spend Overview
                     </Text>
                     <TransactionsPieChart />
@@ -33,7 +33,7 @@ export default function StatsHeader() {
                 {/* Spend Overview Section */}
 
                 <View className='space-y-5 border border-purple-200 rounded-3xl px-5 pt-5'>
-                    <Text className='text-sm text-black' style={GLOBAL_STYLESHEET.gramatikaBlack}>
+                    <Text className='text-sm text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                         Spend Trend
                     </Text>
 

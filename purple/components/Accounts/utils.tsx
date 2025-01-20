@@ -58,7 +58,7 @@ export function createTransactionChartData(
             value: transactions[i].amount,
             ...(shouldAddLabel && {
                 labelComponent: () => (
-                    <Text style={GLOBAL_STYLESHEET.gramatikaBold} className='leading-5 text-xs'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='leading-5 text-xs'>
                         {formatDateLabel(dateStr, true)}
                     </Text>
                 ),
