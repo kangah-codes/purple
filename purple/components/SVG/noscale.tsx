@@ -1,5 +1,6 @@
 // Forgot which dimensions these SVGs are, so they just gonna stay here instead of a designated size file :/
 
+import React from 'react';
 import { Path, Svg, SvgProps } from 'react-native-svg';
 
 export function BellIcon(props: SvgProps) {

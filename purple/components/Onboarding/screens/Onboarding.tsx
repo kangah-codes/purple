@@ -1,90 +1,84 @@
 import { useAuth } from '@/components/Auth/hooks';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import React from 'react';
-import Onboarding from 'react-native-onboarding-swiper';
-import Toast from 'react-native-toast-message';
+import Stories, { StoriesRef } from '@/components/Shared/molecules/Stories';
+import { View, Image } from 'react-native';
+import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
+import React, { useRef } from 'react';
+import OnboardingPage from '../molecules/OnboardingPage';
 import tw from 'twrnc';
-import DoneButton from '../molecules/DoneButton';
-import NextButton, { SkipButton } from '../molecules/NextButton';
-import Pagination from '../molecules/Pagination';
 
 export default function Screen() {
-    const { setOnboarded } = useAuth();
+    const storiesRef = useRef<StoriesRef>(null);
+
+    const pages = [
+        <OnboardingPage
+            title='Welcome to Purple!'
+            description={
+                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+            }
+            image={
+                <Image
+                    source={require('@/assets/images/graphics/8.png')}
+                    style={tw`rounded-3xl w-[200px] h-[200px]`}
+                />
+            }
+            currentIndex={0}
+            pages={4}
+        />,
+        <OnboardingPage
+            title='Watch your spending'
+            description={
+                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+            }
+            image={
+                <Image
+                    source={require('@/assets/images/graphics/10.png')}
+                    style={tw`rounded-3xl w-[70px] h-[200px]`}
+                />
+            }
+            currentIndex={1}
+            pages={4}
+        />,
+        <OnboardingPage
+            title='Know when you hit your limits'
+            description={
+                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+            }
+            image={
+                <Image
+                    source={require('@/assets/images/graphics/6.png')}
+                    style={tw`rounded-3xl w-[200px] h-[200px]`}
+                />
+            }
+            currentIndex={2}
+            pages={4}
+        />,
+        <OnboardingPage
+            title='Take control of your finances'
+            description={
+                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+            }
+            image={
+                <Image
+                    source={require('@/assets/images/graphics/7.png')}
+                    style={tw`rounded-3xl w-[150px] h-[200px]`}
+                />
+            }
+            currentIndex={3}
+            pages={4}
+        />,
+    ];
 
     return (
-        <Onboarding
-            DotComponent={Pagination}
-            NextButtonComponent={NextButton}
-            SkipButtonComponent={SkipButton}
-            showSkip={true}
-            skipToPage={3}
-            DoneButtonComponent={DoneButton}
-            onDone={() => {
-                setOnboarded(true)
-                    .then(() => {
-                        router.replace('/onboarding/landing');
-                    })
-                    .catch((error) => {
-                        Toast.show({
-                            type: 'error',
-                            props: {
-                                text1: 'Error',
-                                text2: 'Something went wrong',
-                            },
-                        });
-                    });
-            }}
-            titleStyles={{ fontFamily: 'GramatikaBlack', ...tw`px-5 text-3xl` }}
-            subTitleStyles={{ fontFamily: 'GramatikaMedium', ...tw`px-5, text-base` }}
-            bottomBarColor='rgba(0, 0, 0,0)'
-            bottomBarHighlight={false}
-            pages={[
-                {
-                    backgroundColor: '#fff',
-                    image: (
-                        <Image
-                            source={require('@/assets/images/icon.png')}
-                            style={tw`h-32 w-32 rounded-2xl`}
-                        />
-                    ),
-                    title: 'Welcome to Purple',
-                    subtitle: 'Track your budget and finances seamlessly',
-                },
-                {
-                    backgroundColor: '#fff',
-                    image: (
-                        <Image
-                            source={require('@/assets/images/graphics/10.png')}
-                            style={tw`h-72 w-72`}
-                        />
-                    ),
-                    title: 'Watch your spending',
-                    subtitle: 'See where your money is going and make better decisions',
-                },
-                {
-                    backgroundColor: '#fff',
-                    image: (
-                        <Image
-                            source={require('@/assets/images/graphics/6.png')}
-                            style={tw`h-72 w-72`}
-                        />
-                    ),
-                    title: 'Know when you hit your budget',
-                    subtitle: 'Stay on top of your budget and never miss a beat',
-                },
-                {
-                    backgroundColor: '#fff',
-                    image: (
-                        <Image
-                            source={require('@/assets/images/graphics/7.png')}
-                            style={tw`h-72 w-72`}
-                        />
-                    ),
-                    title: 'Take control of your finances',
-                    subtitle: 'Cultivate responsible spending habits and save more',
-                },
-            ]}
-        />
+        <>
+            <ExpoStatusBar style='dark' />
+            <Stories
+                pages={pages}
+                timePerPage={5000}
+                ref={storiesRef}
+                onPageChange={(index: number) => console.log(`Page ${index}`)}
+                enableNavigation={false}
+                // disableAutomaticScroll
+            />
+        </>
     );
 }

@@ -116,6 +116,7 @@ export default function PlansScreen() {
                     onIndexChange={setIndex}
                 />
             </View>
+
             <LinearGradient colors={linearGradientColours} style={styles.linearGradient}>
                 <TouchableOpacity onPress={handleNavigation} style={styles.touchableOpacity}>
                     <PlusIcon stroke={'#fff'} />

@@ -1,32 +1,9 @@
+import { ScrollView } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
-import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import {
-    LinearGradient,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from '@/components/Shared/styled';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { router, useLocalSearchParams } from 'expo-router';
-import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Dimensions, FlatList, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import Toast from 'react-native-toast-message';
-import { useAccountStore } from '../hooks';
 import { createTransactionChartData } from '../utils';
-import AccountNavigationArea from '../molecules/AccountNavigationArea';
-import AccountInformation from '../molecules/AccountInformation';
 
 export default function AccountActivityAreaChart({
     transactions,

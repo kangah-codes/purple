@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -96,38 +97,49 @@ function RootLayoutNav() {
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <BottomSheetModalProvider>
                     <PortalProvider>
-                        <ThemeProvider value={DefaultTheme}>
-                            <QueryClientProvider client={queryClient}>
-                                {/** Portal Rendering  */}
-                                {/* {transactionPortal} */}
-                                <CurrentTransactionModal modalKey='transactionReceipt' />
+                        <SafeAreaProvider>
+                            <ThemeProvider value={DefaultTheme}>
+                                <QueryClientProvider client={queryClient}>
+                                    {/** Portal Rendering  */}
+                                    {/* {transactionPortal} */}
+                                    <CurrentTransactionModal modalKey='transactionReceipt' />
 
-                                {/** Main Navigation Stack */}
-                                <Stack
-                                    screenOptions={{
-                                        contentStyle: {
-                                            backgroundColor: '#fff',
-                                        },
-                                    }}
-                                >
-                                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                                    <Stack.Screen name='plans' options={{ headerShown: false }} />
-                                    <Stack.Screen
-                                        name='accounts'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name='transactions'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name='onboarding'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen name='auth' options={{ headerShown: false }} />
-                                </Stack>
-                            </QueryClientProvider>
-                        </ThemeProvider>
+                                    {/** Main Navigation Stack */}
+                                    <Stack
+                                        screenOptions={{
+                                            contentStyle: {
+                                                backgroundColor: '#fff',
+                                            },
+                                        }}
+                                    >
+                                        <Stack.Screen
+                                            name='(tabs)'
+                                            options={{ headerShown: false }}
+                                        />
+                                        <Stack.Screen
+                                            name='plans'
+                                            options={{ headerShown: false }}
+                                        />
+                                        <Stack.Screen
+                                            name='accounts'
+                                            options={{ headerShown: false }}
+                                        />
+                                        <Stack.Screen
+                                            name='transactions'
+                                            options={{ headerShown: false }}
+                                        />
+                                        <Stack.Screen
+                                            name='onboarding'
+                                            options={{ headerShown: false }}
+                                        />
+                                        <Stack.Screen
+                                            name='auth'
+                                            options={{ headerShown: false }}
+                                        />
+                                    </Stack>
+                                </QueryClientProvider>
+                            </ThemeProvider>
+                        </SafeAreaProvider>
                     </PortalProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

@@ -54,16 +54,17 @@ function StatsHeatmap() {
         () =>
             monthDays.map((day, index) => {
                 const date = format(day, 'dd/MM/yy');
+
                 return {
                     value: data?.data.DailyActivity[date] ?? 0, // this is where i need to injext
-                    key: date,
+                    key: format(day, 'dd/MM/yyyy'),
                     index: index + offset,
                 };
             }),
         [values],
     );
 
-    console.log(data);
+    console.log(data, isFetching, 'fetching');
 
     const click = useCallback(
         (item: CellData) => {
@@ -87,20 +88,19 @@ function StatsHeatmap() {
         (data: CellData, index: number) => {
             const colorIndex = getColorIndex(values[index], 0, Math.max(...values), colors.length);
 
-            if (format(now, 'dd/MM/yyyy') === data.key)
+            if (format(now, 'dd/MM/yyyy') === data.key) {
                 return (
                     <TouchableOpacity key={data.key} onPress={handleCellPress.bind(null, data)}>
                         <LinearGradient
                             style={styles.linearGradient}
                             colors={colors[colorIndex]}
-                            className='flex items-center justify-center border border-purple-300'
+                            className='flex items-center justify-center'
                         >
                             <StarsIcon stroke='#fff' fill={'#fff'} />
                         </LinearGradient>
                     </TouchableOpacity>
                 );
-
-            return undefined;
+            }
         },
         [data],
     );

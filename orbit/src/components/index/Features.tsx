@@ -13,8 +13,8 @@ export default function Features() {
                 </div>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 w-full gap-5'>
-                    <div className='w-full h-[400px] border border-purple-300 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
-                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-300'></div>
+                    <div className='w-full h-[400px] border border-purple-200 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
+                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-200'></div>
                         <div className='flex flex-col p-5 space-y-2'>
                             <h2 className='font-semibold text-2xl'>Card Header</h2>
                             <p className='font-medium text-sm'>
@@ -25,8 +25,8 @@ export default function Features() {
                             </p>
                         </div>
                     </div>
-                    <div className='w-full h-[400px] border border-purple-300 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
-                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-300'></div>
+                    <div className='w-full h-[400px] border border-purple-200 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
+                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-200'></div>
                         <div className='flex flex-col p-5 space-y-2'>
                             <h2 className='font-semibold text-2xl'>Card Header</h2>
                             <p className='font-medium text-sm'>
@@ -37,8 +37,8 @@ export default function Features() {
                             </p>
                         </div>
                     </div>
-                    <div className='w-full h-[400px] border border-purple-300 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
-                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-300'></div>
+                    <div className='w-full h-[400px] border border-purple-200 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
+                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-200'></div>
                         <div className='flex flex-col p-5 space-y-2'>
                             <h2 className='font-semibold text-2xl'>Card Header</h2>
                             <p className='font-medium text-sm'>
@@ -49,8 +49,8 @@ export default function Features() {
                             </p>
                         </div>
                     </div>
-                    <div className='w-full h-[400px] border border-purple-300 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
-                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-300'></div>
+                    <div className='w-full h-[400px] border border-purple-200 rounded-3xl flex flex-col overflow-hidden shadow-lg shadow-purple-100'>
+                        <div className='h-[70%] bg-gradient-to-br from-purple-100 to-purple-200'></div>
                         <div className='flex flex-col p-5 space-y-2'>
                             <h2 className='font-semibold text-2xl'>Card Header</h2>
                             <p className='font-medium text-sm'>
