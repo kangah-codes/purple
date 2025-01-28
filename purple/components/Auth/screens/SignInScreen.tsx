@@ -129,7 +129,7 @@ export default function SignInScreen() {
                         <View className='flex flex-col space-y-2.5'>
                             <Text
                                 style={GLOBAL_STYLESHEET.satoshiBlack}
-                                className='text-2xl text-black text-center'
+                                className='text-2xl text-black text-center tracking-tighter'
                             >
                                 Welcome back!
                             </Text>

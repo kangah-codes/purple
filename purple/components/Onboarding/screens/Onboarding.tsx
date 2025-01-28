@@ -73,10 +73,10 @@ export default function Screen() {
             <ExpoStatusBar style='dark' />
             <Stories
                 pages={pages}
-                timePerPage={5000}
                 ref={storiesRef}
-                onPageChange={(index: number) => console.log(`Page ${index}`)}
+                timePerPage={5000}
                 enableNavigation={false}
+                onPageChange={(index: number) => console.log(`Page ${index}`)}
                 // disableAutomaticScroll
             />
         </>

@@ -61,10 +61,8 @@ function StatsHeatmap() {
                     index: index + offset,
                 };
             }),
-        [values],
+        [monthDays],
     );
-
-    console.log(data, isFetching, 'fetching');
 
     const click = useCallback(
         (item: CellData) => {
@@ -137,11 +135,11 @@ function StatsHeatmap() {
                 Daily Activity
             </Text>
             <View>
-                <View className='flex flex-row justify-between'>
+                <View className='flex flex-row justify-between py-2'>
                     {days.map((day, key) => (
                         <Text
                             key={key}
-                            className='text-black text-base mx-auto'
+                            className='text-black text-xs mx-auto'
                             style={GLOBAL_STYLESHEET.satoshiBlack}
                         >
                             {day}
