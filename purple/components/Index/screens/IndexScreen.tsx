@@ -59,7 +59,7 @@ export default function IndexScreen() {
                     className='flex px-5 py-2.5 h-[350] absolute w-full'
                     colors={linearGradientColours}
                 />
-                <AnimatedClouds baseSpeed={0.4} minHeight={10} maxHeight={450} spawnRate={10} />
+                <AnimatedClouds baseSpeed={0.3} minHeight={10} maxHeight={450} spawnRate={10} />
                 <View
                     className='flex flex-col'
                     // style={{
