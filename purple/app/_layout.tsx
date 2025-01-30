@@ -63,9 +63,11 @@ export default function RootLayout() {
 
     return (
         <ErrorBoundary>
-            <AuthProvider>
-                <RootLayoutNav />
-            </AuthProvider>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <RootLayoutNav />
+                </AuthProvider>
+            </QueryClientProvider>
         </ErrorBoundary>
     );
 }
@@ -99,45 +101,34 @@ function RootLayoutNav() {
                     <PortalProvider>
                         <SafeAreaProvider>
                             <ThemeProvider value={DefaultTheme}>
-                                <QueryClientProvider client={queryClient}>
-                                    {/** Portal Rendering  */}
-                                    {/* {transactionPortal} */}
-                                    <CurrentTransactionModal modalKey='transactionReceipt' />
+                                {/** Portal Rendering  */}
+                                {/* {transactionPortal} */}
+                                <CurrentTransactionModal modalKey='transactionReceipt' />
 
-                                    {/** Main Navigation Stack */}
-                                    <Stack
-                                        screenOptions={{
-                                            contentStyle: {
-                                                backgroundColor: '#fff',
-                                            },
-                                        }}
-                                    >
-                                        <Stack.Screen
-                                            name='(tabs)'
-                                            options={{ headerShown: false }}
-                                        />
-                                        <Stack.Screen
-                                            name='plans'
-                                            options={{ headerShown: false }}
-                                        />
-                                        <Stack.Screen
-                                            name='accounts'
-                                            options={{ headerShown: false }}
-                                        />
-                                        <Stack.Screen
-                                            name='transactions'
-                                            options={{ headerShown: false }}
-                                        />
-                                        <Stack.Screen
-                                            name='onboarding'
-                                            options={{ headerShown: false }}
-                                        />
-                                        <Stack.Screen
-                                            name='auth'
-                                            options={{ headerShown: false }}
-                                        />
-                                    </Stack>
-                                </QueryClientProvider>
+                                {/** Main Navigation Stack */}
+                                <Stack
+                                    screenOptions={{
+                                        contentStyle: {
+                                            backgroundColor: '#fff',
+                                        },
+                                    }}
+                                >
+                                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                                    <Stack.Screen name='plans' options={{ headerShown: false }} />
+                                    <Stack.Screen
+                                        name='accounts'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name='transactions'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name='onboarding'
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen name='auth' options={{ headerShown: false }} />
+                                </Stack>
                             </ThemeProvider>
                         </SafeAreaProvider>
                     </PortalProvider>

@@ -1,7 +1,7 @@
 import { Text, View } from '@/components/Shared/styled';
 import React from 'react';
 import StatsHeatmap from './Heatmap';
-import TransactionsPieChart from './TransactionsPieChart';
+import SpendOverview from './SpendOverview';
 import SpendTrendAreaChart from './SpendTrendAreaChart';
 import MonthSavings from './MonthSavings';
 import { StyleSheet } from 'react-native';
@@ -22,7 +22,7 @@ export default function StatsHeader() {
                     <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                         Spend Overview
                     </Text>
-                    <TransactionsPieChart />
+                    <SpendOverview />
                 </View>
 
                 {/* Savings Overview Section */}

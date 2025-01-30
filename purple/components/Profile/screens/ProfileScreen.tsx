@@ -1,11 +1,17 @@
 import { useAuth } from '@/components/Auth/hooks';
 import Avatar from '@/components/Shared/atoms/Avatar';
-import { SafeAreaView, Text, View } from '@/components/Shared/styled';
+import {
+    LinearGradient,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import pkg from '@/package.json';
 import { Redirect } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { ActivityIndicator, Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import ProfilePages from '../molecules/ProfilePages';
 import { nativeStorage } from '@/lib/utils/storage';
@@ -57,45 +63,77 @@ export default function ProfileScreen() {
             <View className='mt-5'>
                 <ProfilePages />
             </View>
-            <View className='flex flex-row justify-center'>
-                <Text
-                    style={GLOBAL_STYLESHEET.monaSansMedium}
-                    className='text-sm text-gray-600 tracking-tight'
+
+            <View className='flex flex-col space-y-2.5'>
+                <View className='flex flex-row justify-center'>
+                    <Text
+                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        className='text-sm text-gray-600 tracking-tight'
+                    >
+                        Purple v{pkg.version}
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    className='items-center self-center justify-center px-4'
+                    onPress={() => {
+                        setOnboarded(false).then(() =>
+                            destroySession().then(() => {
+                                Toast.show({
+                                    type: 'info',
+                                    props: {
+                                        text1: 'Cache reset',
+                                        text2: 'The entire app cache has been cleared!',
+                                    },
+                                });
+                            }),
+                        );
+                    }}
                 >
-                    Purple v{pkg.version}
-                </Text>
-            </View>
-            <Button
-                title='RESET'
-                onPress={() => {
-                    setOnboarded(false).then(() =>
+                    <LinearGradient
+                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                        colors={['#F87171', '#DC2626']}
+                    >
+                        <Text
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
+                            className='text-white text-center'
+                        >
+                            Reset App Cache
+                        </Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='items-center self-center justify-center px-4'
+                    onPress={() => {
                         destroySession().then(() => {
                             Toast.show({
                                 type: 'info',
                                 props: {
-                                    text1: 'Cache reset',
-                                    text2: 'The entire app cache has been cleared!',
+                                    text1: 'Signed Out',
+                                    text2: 'Signed out of Purple',
                                 },
                             });
-                        }),
-                    );
-                }}
-            />
-            <Button
-                title='Sign Out'
-                onPress={() => {
-                    destroySession().then(() => {
-                        Toast.show({
-                            type: 'info',
-                            props: {
-                                text1: 'Signed Out',
-                                text2: 'Signed out of Purple',
-                            },
                         });
-                    });
-                }}
-            />
-            <Button title='Show Toast' onPress={showToast} />
+                    }}
+                    // disabled={isLoading}
+                >
+                    <LinearGradient
+                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                        colors={['#c084fc', '#9333ea']}
+                    >
+                        {false ? (
+                            <ActivityIndicator size={15} color='#fff' />
+                        ) : (
+                            <Text
+                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                className='text-white text-center'
+                            >
+                                Sign Out
+                            </Text>
+                        )}
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     );
 }

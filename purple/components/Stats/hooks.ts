@@ -2,6 +2,22 @@ import { GenericAPIResponse } from '@/@types/request';
 import { UseQueryOptions, UseQueryResult, useQuery } from 'react-query';
 import { SessionData } from '../Auth/schema';
 import { MonthlyStats } from './schema';
+import { createStatsStore } from './state';
+import { useStore } from 'zustand';
+
+export function useStatsStore() {
+    const [stats, setStats, isStatsLoading, setIsStatsLoading] = useStore(
+        createStatsStore,
+        (state) => [state.stats, state.setStats, state.isStatsLoading, state.setIsStatsLoading],
+    );
+
+    return {
+        stats,
+        setStats,
+        isStatsLoading,
+        setIsStatsLoading,
+    };
+}
 
 export function useMonthlyStats({
     sessionData,

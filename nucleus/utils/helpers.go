@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"nucleus/internal/models"
 	"os"
 	"strconv"
 	"time"
@@ -113,4 +114,25 @@ func DateEqual(date1, date2 time.Time) bool {
 	y1, m1, d1 := date1.Date()
 	y2, m2, d2 := date2.Date()
 	return y1 == y2 && m1 == m2 && d1 == d2
+}
+
+func CalculateIncomeAndExpenseByCurrency(transactions []models.Transaction) map[string]map[string]float64 {
+	result := make(map[string]map[string]float64)
+
+	for _, transaction := range transactions {
+		if _, exists := result[transaction.Currency]; !exists {
+			result[transaction.Currency] = map[string]float64{
+				"Income":  0.0,
+				"Expense": 0.0,
+			}
+		}
+
+		if transaction.Type == "credit" {
+			result[transaction.Currency]["Income"] += transaction.Amount
+		} else if transaction.Type == "debit" {
+			result[transaction.Currency]["Expense"] += transaction.Amount
+		}
+	}
+
+	return result
 }

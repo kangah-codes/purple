@@ -2,8 +2,12 @@ import { GenericAPIResponse } from '@/@types/request';
 import { nativeStorage } from '@/lib/utils/storage';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { UseMutationResult, useMutation } from 'react-query';
+import { UseMutationResult, useMutation, useQueryClient } from 'react-query';
+import { createAccountStore } from '../Accounts/state';
 import { SessionData, SessionDataResponse } from './schema';
+import { createPlanStore } from '../Plans/state';
+import { createStatsStore } from '../Stats/state';
+import { createTransactionStore } from '../Transactions/state';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -104,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [error, setError] = useState<Error | null>(null);
     const [sessionData, _setSessionData] = useState<SessionData | null>(null);
     const [hasOnboarded, setHasOnboarded] = useState(false);
+    const queryClient = useQueryClient();
 
     const getToken = useCallback(async <T = any,>(key: string): Promise<T | null> => {
         try {
@@ -170,6 +175,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         [checkAuth],
     );
 
+    const destroyStores = () => {
+        createAccountStore.getState().reset();
+        createPlanStore.getState().reset();
+        createStatsStore.getState().reset();
+        createTransactionStore.getState().reset();
+    };
+
     const setOnboarded = useCallback(async (onboarded: boolean) => {
         try {
             await SecureStore.setItemAsync('has_onboarded', JSON.stringify(onboarded));
@@ -183,8 +195,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const destroySession = useCallback(async () => {
         setIsLoading(true);
         try {
-            await SecureStore.deleteItemAsync('session_data');
+            destroyStores();
             nativeStorage.clear();
+            queryClient.clear();
+            console.log(createTransactionStore.getState(), 'AFTER LOGOUT');
+
+            await SecureStore.deleteItemAsync('session_data');
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {

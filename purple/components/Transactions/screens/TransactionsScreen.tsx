@@ -20,6 +20,7 @@ import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
+import { FlashList } from '@shopify/flash-list';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -49,6 +50,8 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 },
             },
         });
+
+    console.log('TRANSACTIONS', transactions);
 
     // flatten the data
     useEffect(() => {
@@ -116,7 +119,8 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                     </TouchableOpacity>
                 )}
             </View>
-            <FlatList
+            <FlashList
+                estimatedItemSize={100}
                 data={transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}

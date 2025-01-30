@@ -11,15 +11,10 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React from 'react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import { useStatsStore } from '../hooks';
 import HeatmapLoading from './HeatmapLoading';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
-import { usePlanStatus } from '@/components/Plans/hooks';
-import Toast from 'react-native-toast-message';
-import { useMonthlyStats } from '../hooks';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -35,33 +30,26 @@ const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
 function StatsHeatmap() {
-    const { sessionData } = useAuth();
-    const {
-        isLoading,
-        refetch: refetchPlanStatus,
-        isFetching,
-        data,
-    } = useMonthlyStats({
-        sessionData: sessionData as SessionData,
-    });
+    const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const values = useMemo(
         () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
         [finalMonthDays],
     );
+
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {
                 const date = format(day, 'dd/MM/yy');
 
                 return {
-                    value: data?.data.DailyActivity[date] ?? 0, // this is where i need to injext
+                    value: stats.DailyActivity[date] ?? 0, // this is where i need to injext
                     key: format(day, 'dd/MM/yyyy'),
                     index: index + offset,
                 };
             }),
-        [monthDays],
+        [monthDays, stats],
     );
 
     const click = useCallback(
@@ -79,7 +67,7 @@ function StatsHeatmap() {
             setSelectedDate(data.key);
             setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
         },
-        [data],
+        [stats],
     );
 
     const renderCell = useCallback(
@@ -100,7 +88,7 @@ function StatsHeatmap() {
                 );
             }
         },
-        [data],
+        [stats],
     );
 
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
@@ -146,7 +134,7 @@ function StatsHeatmap() {
                         </Text>
                     ))}
                 </View>
-                {isFetching ? (
+                {isStatsLoading ? (
                     <HeatmapLoading blockSize={blockSize} />
                 ) : (
                     <Heatmap

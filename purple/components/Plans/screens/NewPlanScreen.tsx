@@ -7,6 +7,7 @@ import SelectField from '@/components/Shared/atoms/SelectField';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
     InputField,
+    LinearGradient,
     SafeAreaView,
     ScrollView,
     Text,
@@ -539,7 +540,7 @@ export default function NewPlanScreen() {
 
                     <View className='h-1 border-b border-gray-100 w-full' />
 
-                    <View>
+                    <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
@@ -581,19 +582,25 @@ export default function NewPlanScreen() {
                 </ScrollView>
 
                 <TouchableOpacity
+                    className='items-center self-center justify-center px-4 absolute bottom-5'
                     onPress={handleSubmit(onSubmit)}
                     disabled={isLoading}
-                    className='items-center self-center w-full justify-center px-4 absolute bottom-8'
                 >
-                    <View className='bg-purple-600 py-4 w-full flex items-center justify-center rounded-full'>
+                    <LinearGradient
+                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                        colors={['#c084fc', '#9333ea']}
+                    >
                         {isLoading ? (
-                            <ActivityIndicator size={18} color='#fff' />
+                            <ActivityIndicator size={15} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white'>
+                            <Text
+                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                className='text-white text-center'
+                            >
                                 Create Plan
                             </Text>
                         )}
-                    </View>
+                    </LinearGradient>
                 </TouchableOpacity>
             </SafeAreaView>
         </>

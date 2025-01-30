@@ -100,8 +100,6 @@ export default function SignInScreen() {
         );
     };
 
-    console.log(transactions);
-
     // TODO: figure out how to refactor the code so race conditions on sign out are fixed
     useEffect(() => {
         if (nativeStorage.getAllKeys().length > 0) {

@@ -55,10 +55,7 @@ export default function TransactionHistoryCard({
                             )}
                         </Text>
                     )}
-                    <Text
-                        style={GLOBAL_STYLESHEET.satoshiMedium}
-                        className='text-sm text-gray-500 tracking-tighter'
-                    >
+                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-500'>
                         {date.date} • {date.time}
                     </Text>
                 </View>
