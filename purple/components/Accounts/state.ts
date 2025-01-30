@@ -12,6 +12,7 @@ type AccountStore = {
     setCurrentAccount: (account: Account) => void;
     currentAccountTransactions: Transaction[];
     setCurrentAccountTransactions: (transactions: Transaction[]) => void;
+    reset: () => void;
 };
 
 export const createAccountStore = create<AccountStore>()(
@@ -26,6 +27,8 @@ export const createAccountStore = create<AccountStore>()(
             currentAccountTransactions: [],
             setCurrentAccountTransactions: (transactions) =>
                 set({ currentAccountTransactions: transactions }),
+            reset: () =>
+                set({ accounts: [], currentAccount: undefined, currentAccountTransactions: [] }),
         }),
         {
             name: 'account-store',

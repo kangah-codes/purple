@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -62,9 +63,11 @@ export default function RootLayout() {
 
     return (
         <ErrorBoundary>
-            <AuthProvider>
-                <RootLayoutNav />
-            </AuthProvider>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <RootLayoutNav />
+                </AuthProvider>
+            </QueryClientProvider>
         </ErrorBoundary>
     );
 }
@@ -96,8 +99,8 @@ function RootLayoutNav() {
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <BottomSheetModalProvider>
                     <PortalProvider>
-                        <ThemeProvider value={DefaultTheme}>
-                            <QueryClientProvider client={queryClient}>
+                        <SafeAreaProvider>
+                            <ThemeProvider value={DefaultTheme}>
                                 {/** Portal Rendering  */}
                                 {/* {transactionPortal} */}
                                 <CurrentTransactionModal modalKey='transactionReceipt' />
@@ -126,8 +129,8 @@ function RootLayoutNav() {
                                     />
                                     <Stack.Screen name='auth' options={{ headerShown: false }} />
                                 </Stack>
-                            </QueryClientProvider>
-                        </ThemeProvider>
+                            </ThemeProvider>
+                        </SafeAreaProvider>
                     </PortalProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

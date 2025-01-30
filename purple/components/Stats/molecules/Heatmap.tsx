@@ -11,15 +11,10 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React from 'react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import { useStatsStore } from '../hooks';
 import HeatmapLoading from './HeatmapLoading';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
-import { usePlanStatus } from '@/components/Plans/hooks';
-import Toast from 'react-native-toast-message';
-import { useMonthlyStats } from '../hooks';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -35,35 +30,27 @@ const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
 function StatsHeatmap() {
-    const { sessionData } = useAuth();
-    const {
-        isLoading,
-        refetch: refetchPlanStatus,
-        isFetching,
-        data,
-    } = useMonthlyStats({
-        sessionData: sessionData as SessionData,
-    });
+    const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const values = useMemo(
         () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
         [finalMonthDays],
     );
+
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {
                 const date = format(day, 'dd/MM/yy');
+
                 return {
-                    value: data?.data.DailyActivity[date] ?? 0, // this is where i need to injext
-                    key: date,
+                    value: stats.DailyActivity[date] ?? 0, // this is where i need to injext
+                    key: format(day, 'dd/MM/yyyy'),
                     index: index + offset,
                 };
             }),
-        [values],
+        [monthDays, stats],
     );
-
-    console.log(data);
 
     const click = useCallback(
         (item: CellData) => {
@@ -80,29 +67,28 @@ function StatsHeatmap() {
             setSelectedDate(data.key);
             setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
         },
-        [data],
+        [stats],
     );
 
     const renderCell = useCallback(
         (data: CellData, index: number) => {
             const colorIndex = getColorIndex(values[index], 0, Math.max(...values), colors.length);
 
-            if (format(now, 'dd/MM/yyyy') === data.key)
+            if (format(now, 'dd/MM/yyyy') === data.key) {
                 return (
                     <TouchableOpacity key={data.key} onPress={handleCellPress.bind(null, data)}>
                         <LinearGradient
                             style={styles.linearGradient}
                             colors={colors[colorIndex]}
-                            className='flex items-center justify-center border border-purple-300'
+                            className='flex items-center justify-center'
                         >
                             <StarsIcon stroke='#fff' fill={'#fff'} />
                         </LinearGradient>
                     </TouchableOpacity>
                 );
-
-            return undefined;
+            }
         },
-        [data],
+        [stats],
     );
 
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
@@ -137,18 +123,18 @@ function StatsHeatmap() {
                 Daily Activity
             </Text>
             <View>
-                <View className='flex flex-row justify-between'>
+                <View className='flex flex-row justify-between py-2'>
                     {days.map((day, key) => (
                         <Text
                             key={key}
-                            className='text-black text-base mx-auto'
+                            className='text-black text-xs mx-auto'
                             style={GLOBAL_STYLESHEET.satoshiBlack}
                         >
                             {day}
                         </Text>
                     ))}
                 </View>
-                {isFetching ? (
+                {isStatsLoading ? (
                     <HeatmapLoading blockSize={blockSize} />
                 ) : (
                     <Heatmap

@@ -14,6 +14,7 @@ type PlanStore = {
     setSavingPlans: (plans: Plan[]) => void;
     updateExpenseplans: (plan: Plan | Plan[]) => void;
     updateSavingPlans: (plan: Plan | Plan[]) => void;
+    reset: () => void;
 };
 
 export const createPlanStore = create<PlanStore>()(
@@ -39,6 +40,7 @@ export const createPlanStore = create<PlanStore>()(
                         ? [...plan, ...state.savingPlans]
                         : [plan, ...state.savingPlans],
                 })),
+            reset: () => set({ plans: [], currentPlan: null, expensePlans: [], savingPlans: [] }),
         }),
         {
             name: 'plan-store',

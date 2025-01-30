@@ -27,7 +27,7 @@ export default function Landing() {
                 <View className='flex flex-col space-y-2.5'>
                     <Text
                         style={GLOBAL_STYLESHEET.satoshiBlack}
-                        className='text-2xl text-black text-center'
+                        className='text-2xl text-black text-center tracking-tighter'
                     >
                         Take your personal finance into your own hands!
                     </Text>
@@ -62,17 +62,17 @@ export default function Landing() {
                         className='w-full'
                         onPress={() => router.replace('/auth/sign-in')}
                     >
-                        <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-gray-100'>
+                        <View className='flex items-center justify-center rounded-full px-5 py-2.5 bg-purple-100'>
                             <Text
                                 style={GLOBAL_STYLESHEET.satoshiBold}
-                                className='text-base text-black tracking-tight'
+                                className='text-base text-black'
                             >
                                 Sign In
                             </Text>
                         </View>
                     </TouchableOpacity>
 
-                    <ExternalLink href='https://purpleapp.vercel.app'>
+                    <ExternalLink href='https://mypurpleapp.vercel.app'>
                         <Text
                             style={GLOBAL_STYLESHEET.satoshiMedium}
                             className='text-xs text-purple-500 text-center'

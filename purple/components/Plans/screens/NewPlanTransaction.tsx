@@ -1,6 +1,7 @@
 import { useAuth } from '@/components/Auth/hooks';
 import {
     InputField,
+    LinearGradient,
     SafeAreaView,
     ScrollView,
     Text,
@@ -230,19 +231,25 @@ export default function NewPlanTransactionScreen() {
                 </ScrollView>
 
                 <TouchableOpacity
+                    className='items-center self-center justify-center px-4 absolute bottom-5'
                     onPress={handleSubmit(onSubmit)}
                     disabled={isLoading}
-                    className='items-center self-center w-[95%] justify-center px-4 absolute bottom-8'
                 >
-                    <View className='bg-purple-600 py-4 w-full flex items-center justify-center rounded-full'>
+                    <LinearGradient
+                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                        colors={['#c084fc', '#9333ea']}
+                    >
                         {isLoading ? (
-                            <ActivityIndicator size={18} color='#fff' />
+                            <ActivityIndicator size={15} color='#fff' />
                         ) : (
-                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-white'>
+                            <Text
+                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                className='text-white text-center'
+                            >
                                 Save
                             </Text>
                         )}
-                    </View>
+                    </LinearGradient>
                 </TouchableOpacity>
             </SafeAreaView>
         </>

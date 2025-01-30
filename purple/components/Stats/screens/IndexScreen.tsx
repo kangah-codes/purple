@@ -5,14 +5,17 @@ import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Portal } from '@gorhom/portal';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
 import { keyExtractor } from '@/lib/utils/number';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
+import { useMonthlyStats, useStatsStore } from '../hooks';
 
-export default function AccountsScreen() {
+export default function StatsScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
     const renderItem = useCallback(
@@ -30,6 +33,19 @@ export default function AccountsScreen() {
         ),
         [],
     );
+    const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
+    const { sessionData } = useAuth();
+    const { isLoading, refetch, isFetching, data } = useMonthlyStats({
+        sessionData: sessionData as SessionData,
+    });
+
+    useEffect(() => {
+        setIsStatsLoading(isLoading);
+
+        if (data?.data) {
+            setStats(data?.data);
+        }
+    }, [isLoading, data]);
 
     return (
         <SafeAreaView className='relative h-full bg-white'>
@@ -71,6 +87,8 @@ export default function AccountsScreen() {
                     ItemSeparatorComponent={itemSeparator}
                     keyExtractor={keyExtractor}
                     ListHeaderComponent={<StatsHeader />}
+                    onRefresh={refetch}
+                    refreshing={isFetching}
                 />
             </View>
         </SafeAreaView>

@@ -35,6 +35,7 @@ export default function Heatmap({
     startColumn,
 }: HeatmapProps) {
     const maxValue = useMemo(() => Math.max(...data.map((d) => d.value)), [data]);
+
     const fullData = useMemo(() => {
         const offsetData = Array(startColumn).fill({
             value: 0,
@@ -43,17 +44,7 @@ export default function Heatmap({
         });
         return [...offsetData, ...data];
     }, [data, startColumn]);
-    const getItemLayout = useCallback(
-        (_data: ArrayLike<CellData> | null | undefined, index: number) => {
-            const row = Math.floor(index / cols);
-            return {
-                length: cellSize,
-                offset: row * cellSize,
-                index,
-            };
-        },
-        [cellSize, cols],
-    );
+
     const handleCellPress = useCallback(
         (item: CellData) => {
             onPressCallback && onPressCallback(item);

@@ -26,16 +26,38 @@ func CalculateMonthlyStats(c *gin.Context) {
 	for each day, add up the total transactions & plantransactions
 	**/
 
+	// get start and end date from query params
+	// if not provided, default to current month
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+
 	db := utils.GetDB()
 	transactions := []models.Transaction{}
 	planTransactions := []models.PlanTransaction{}
 	userID, exists := c.Get("userID")
-	now := time.Now()
-	currentYear, currentMonth, _ := now.Date()
-	currentLocation := now.Location()
-	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-	monthDays := utils.EachDayOfInterval(firstOfMonth, lastOfMonth)
+
+	var startQueryDate, endQueryDate time.Time
+	if startDate == "" || endDate == "" {
+		now := time.Now()
+		currentYear, currentMonth, _ := now.Date()
+		currentLocation := now.Location()
+		startQueryDate = time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+		endQueryDate = startQueryDate.AddDate(0, 1, -1)
+	} else {
+		var err error
+		startQueryDate, err = time.Parse("02/01/06", startDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date format"})
+			return
+		}
+		endQueryDate, err = time.Parse("02/01/06", endDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end_date format"})
+			return
+		}
+	}
+
+	monthDays := utils.EachDayOfInterval(startQueryDate, endQueryDate)
 	userDailyActivity := DailyActivity{Heatmap: make(map[string]float64)}
 
 	if !exists {
@@ -44,7 +66,7 @@ func CalculateMonthlyStats(c *gin.Context) {
 	}
 
 	// Fetch all user transactions
-	transactionsResult := db.Model(&models.Transaction{}).Where("user_id = ? and created_at >= ? and created_at <= ?", userID, firstOfMonth, lastOfMonth).Find(&transactions)
+	transactionsResult := db.Model(&models.Transaction{}).Select("id, amount, created_at, type, category, currency").Where("user_id = ? and created_at >= ? and created_at <= ?", userID, startQueryDate, endQueryDate).Find(&transactions)
 	if transactionsResult.Error != nil {
 		log.ErrorLogger.Printf("Error fetching month transactions: %v", transactionsResult.Error)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error calculating daily activity", Data: nil})
@@ -52,7 +74,7 @@ func CalculateMonthlyStats(c *gin.Context) {
 	}
 
 	// Fetch all plan transactions
-	planTransactionsResult := db.Model(&models.PlanTransaction{}).Where("user_id = ? and created_at >= ? and created_at <= ?", userID, firstOfMonth, lastOfMonth).Find(&planTransactions)
+	planTransactionsResult := db.Model(&models.PlanTransaction{}).Where("user_id = ? and created_at >= ? and created_at <= ?", userID, startQueryDate, endQueryDate).Find(&planTransactions)
 	if planTransactionsResult.Error != nil {
 		log.ErrorLogger.Printf("Error fetching month plan transactions: %v", planTransactionsResult.Error)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error calculating daily activity", Data: nil})
@@ -82,7 +104,9 @@ func CalculateMonthlyStats(c *gin.Context) {
 	}
 
 	response := types.Response{Status: http.StatusOK, Message: "Monthly stats fetched successfully", Data: gin.H{
-		"DailyActivity": userDailyActivity.Heatmap,
+		"DailyActivity":   userDailyActivity.Heatmap,
+		"TransactionData": transactions,
+		"SpendOverview":   utils.CalculateIncomeAndExpenseByCurrency(transactions),
 	}}
 
 	c.JSON(http.StatusOK, response)

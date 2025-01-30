@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { Transaction } from './schema';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { dedupeByKey } from '@/lib/utils/array';
 import { nativeStorage } from '@/lib/utils/storage';
-import { dedupe, dedupeByKey } from '@/lib/utils/array';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { Transaction } from './schema';
 
 type TransactionStore = {
     transactions: Transaction[];
@@ -10,6 +10,7 @@ type TransactionStore = {
     currentTransaction: Transaction | null;
     setCurrentTransaction: (transaction: Transaction | null) => void;
     updateTransactions: (transaction: Transaction | Transaction[]) => void;
+    reset: () => void;
 };
 
 export const createTransactionStore = create<TransactionStore>()(
@@ -29,6 +30,7 @@ export const createTransactionStore = create<TransactionStore>()(
                         'ID',
                     ),
                 })),
+            reset: () => set({ transactions: [], currentTransaction: null }),
         }),
         {
             name: 'transaction-store',

@@ -43,7 +43,7 @@ export function BalanceDisplay({
             </View>
             <Text
                 style={GLOBAL_STYLESHEET.satoshiBlack}
-                className='text-black text-3xl tracking- mt-1.5'
+                className='text-black text-3xl tracking-tighter mt-1.5'
             >
                 {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
             </Text>

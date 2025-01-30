@@ -100,8 +100,6 @@ export default function SignInScreen() {
         );
     };
 
-    console.log(transactions);
-
     // TODO: figure out how to refactor the code so race conditions on sign out are fixed
     useEffect(() => {
         if (nativeStorage.getAllKeys().length > 0) {
@@ -129,7 +127,7 @@ export default function SignInScreen() {
                         <View className='flex flex-col space-y-2.5'>
                             <Text
                                 style={GLOBAL_STYLESHEET.satoshiBlack}
-                                className='text-2xl text-black text-center'
+                                className='text-2xl text-black text-center tracking-tighter'
                             >
                                 Welcome back!
                             </Text>

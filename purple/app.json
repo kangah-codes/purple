@@ -61,6 +61,14 @@
                         "newArchEnabled": false
                     }
                 }
+            ],
+            [
+                "expo-splash-screen",
+                {
+                    "backgroundColor": "#ffffff",
+                    "image": "./assets/images/splash.png",
+                    "imageWidth": 320
+                }
             ]
         ],
         "experiments": {

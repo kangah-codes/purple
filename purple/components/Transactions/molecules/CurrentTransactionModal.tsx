@@ -80,7 +80,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                                             : '#9333EA',
                                 },
                             ]}
-                            className='text-3xl mb-5'
+                            className='text-3xl mb-5 text-center'
                         >
                             {currentTransaction.Type == 'debit'
                                 ? '-'

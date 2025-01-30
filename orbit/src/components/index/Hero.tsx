@@ -48,7 +48,7 @@ export default function Hero() {
                             style={{ objectFit: 'cover', objectPosition: 'top' }}
                         />
                     </div>
-                    <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
+                    {/* <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
                         <Image
                             src='/graphics/mockup-1.webp'
                             alt='Screenshot 1'
@@ -56,7 +56,7 @@ export default function Hero() {
                             height={400}
                             style={{ objectFit: 'cover', objectPosition: 'top' }}
                         />
-                    </div>
+                    </div> */}
                 </div>
                 {/* </div> */}
             </div>

@@ -1,10 +1,10 @@
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
-import { View, Text, LinearGradient, TouchableOpacity } from '@/components/Shared/styled';
-import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
-import { Image } from 'expo-image';
-import tw from 'twrnc';
 import { StyleSheet } from 'react-native';
+import tw from 'twrnc';
 
 export default function NotFoundScreen() {
     return (
