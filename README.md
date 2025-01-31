@@ -27,19 +27,19 @@ For now Purple is going to work exclusively offline, probably going to use sqlit
 
 ### Sample Screens
 
-Here are a few (outdated) screenshots of the app so far:
+Here are a few screenshots of the app so far:
 
 <div style="display: flex; flex-direction: row;">
-<img src="/assets/screenshots/home.png" style="width: 150px" />
-<img src="/assets/screenshots/plans.png" style="width: 150px" />
-<img src="/assets/screenshots/receipt.png" style="width: 150px" />
-<img src="/assets/screenshots/transactions.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165853.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165858.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165902.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165911.png" style="width: 150px" />
 </div>
 
 <div style="display: flex; flex-direction: row;">
-<img src="/assets/screenshots/new-transaction.png" style="width: 150px" />
-<img src="/assets/screenshots/plans.png" style="width: 150px" />
-<img src="/assets/screenshots/new-plan.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170005.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170017.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170032.png" style="width: 150px" />
 </div>
 
 ### Building the app
