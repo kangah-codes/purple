@@ -12,6 +12,7 @@ Purple is a budget and expense tracker mobile app I'm currently building for per
 
 -   [`purple/`](#purple-react-native-app): Contains the Expo-based React Native app.
 -   [`nucleus/`](#nucleus-backend): Contains the Go backend using Gin and GORM with PostgreSQL.
+- [`orbit/`](#orbit-frontend): Contains the React frontend for the landing page & future web app.
 
 ## Purple (React Native App)
 
@@ -68,12 +69,12 @@ Right now, Purple is still just a pet project, I'm not entirely sure I have the 
 -   Reporting 📈 (Cashflow analysis)
 -   Iris 🪻
 -   Offline Syncing 🔄
--   Calender Integration 📅
+-   Calendar Integration 📅
 -   Web Version? 🌐
 -   Integration with bank/mobile money services for automatic expense tracking 🏦
 -   Opt-in encryption (Users can choose to have their sensitive data in the db encrypted)
 
-## Nucleus (Backend)
+## Nucleus (Go Backend)
 
 Nucleus is the backend for Purple, it's built with Go using the Gin framework and GORM for database operations. The database used is PostgreSQL. It's essentially just a CRUD API in terms of functionality (isn't everything?).
 
