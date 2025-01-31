@@ -12,6 +12,7 @@ Purple is a budget and expense tracker mobile app I'm currently building for per
 
 -   [`purple/`](#purple-react-native-app): Contains the Expo-based React Native app.
 -   [`nucleus/`](#nucleus-backend): Contains the Go backend using Gin and GORM with PostgreSQL.
+- [`orbit/`](#orbit-frontend): Contains the React frontend for the landing page & future web app.
 
 ## Purple (React Native App)
 
@@ -27,19 +28,19 @@ For now Purple is going to work exclusively offline, probably going to use sqlit
 
 ### Sample Screens
 
-Here are a few (outdated) screenshots of the app so far:
+Here are a few screenshots of the app so far:
 
 <div style="display: flex; flex-direction: row;">
-<img src="/assets/screenshots/home.png" style="width: 150px" />
-<img src="/assets/screenshots/plans.png" style="width: 150px" />
-<img src="/assets/screenshots/receipt.png" style="width: 150px" />
-<img src="/assets/screenshots/transactions.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165853.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165858.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165902.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-165911.png" style="width: 150px" />
 </div>
 
 <div style="display: flex; flex-direction: row;">
-<img src="/assets/screenshots/new-transaction.png" style="width: 150px" />
-<img src="/assets/screenshots/plans.png" style="width: 150px" />
-<img src="/assets/screenshots/new-plan.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170005.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170017.png" style="width: 150px" />
+<img src="assets/screenshots/Screenshot_20250130-170032.png" style="width: 150px" />
 </div>
 
 ### Building the app
@@ -68,12 +69,12 @@ Right now, Purple is still just a pet project, I'm not entirely sure I have the 
 -   Reporting 📈 (Cashflow analysis)
 -   Iris 🪻
 -   Offline Syncing 🔄
--   Calender Integration 📅
+-   Calendar Integration 📅
 -   Web Version? 🌐
 -   Integration with bank/mobile money services for automatic expense tracking 🏦
 -   Opt-in encryption (Users can choose to have their sensitive data in the db encrypted)
 
-## Nucleus (Backend)
+## Nucleus (Go Backend)
 
 Nucleus is the backend for Purple, it's built with Go using the Gin framework and GORM for database operations. The database used is PostgreSQL. It's essentially just a CRUD API in terms of functionality (isn't everything?).
 
