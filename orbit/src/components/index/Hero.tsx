@@ -14,11 +14,18 @@ export default function Hero() {
             <div className='w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-2 relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
                     <div className='pt-48 pb-12 space-y-5 flex flex-col text-center'>
-                        <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
+                        {/* <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
                             <span>The budgeting platform</span>
                             <br />
                             <span className='text-gradient bg-gradient-to-br from-purple-500 to-purple-700 animate-gradient-x'>
                                 you&apos;ve been waiting for
+                            </span>
+                        </h1> */}
+                        <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
+                            <span>Oh hey, it&apos;s</span>
+                            <br />
+                            <span className='text-gradient bg-gradient-to-br from-purple-500 to-purple-700 animate-gradient-x-2000'>
+                                Purple
                             </span>
                         </h1>
                         <div className='space-y-5 flex flex-col items-center justify-center max-w-2xl mx-auto'>
@@ -46,17 +53,9 @@ export default function Hero() {
                             width={400}
                             height={400}
                             style={{ objectFit: 'cover', objectPosition: 'top' }}
+                            className='mx-auto'
                         />
                     </div>
-                    {/* <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
-                        <Image
-                            src='/graphics/mockup-1.webp'
-                            alt='Screenshot 1'
-                            width={400}
-                            height={400}
-                            style={{ objectFit: 'cover', objectPosition: 'top' }}
-                        />
-                    </div> */}
                 </div>
                 {/* </div> */}
             </div>
