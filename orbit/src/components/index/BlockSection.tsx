@@ -11,7 +11,7 @@ export default function BlockSection() {
                     eveniet doloribus magni ullam temporibus eligendi, dolores dignissimos deleniti?
                 </p>
             </div>
-            <div className='max-w-xl lg:max-w-6xl mx-auto'>
+            <div className='mx-auto'>
                 <div className='mt-10'>
                     <div className='space-y-5 md:space-y-0 grid grid-cols-1 lg:grid-cols-3 md:gap-5'>
                         <div className='flex flex-col overflow-hidden bg-gradient-to-br from-purple-100 to-purple-400 rounded-[3rem] h-[32.5rem] md:h-[35rem] py-[3.75rem] items-center'>

@@ -7,9 +7,9 @@ export default function Home() {
     return (
         <div>
             <Hero />
-            {/* <Section /> */}
-            <BlockSection />
+            <Section />
             <Features />
+            <BlockSection />
         </div>
     );
 }
