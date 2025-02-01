@@ -33,10 +33,6 @@ function StatsHeatmap() {
     const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const values = useMemo(
-        () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
-        [finalMonthDays],
-    );
 
     const heatmapData = useMemo(
         () =>
@@ -62,6 +58,7 @@ function StatsHeatmap() {
         },
         [selectedDate],
     );
+
     const handleCellPress = useCallback(
         (data: CellData) => {
             setSelectedDate(data.key);
@@ -72,6 +69,7 @@ function StatsHeatmap() {
 
     const renderCell = useCallback(
         (data: CellData, index: number) => {
+            const values = heatmapData.map((data) => data.value);
             const colorIndex = getColorIndex(values[index], 0, Math.max(...values), colors.length);
 
             if (format(now, 'dd/MM/yyyy') === data.key) {

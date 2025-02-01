@@ -15,15 +15,7 @@ export default function StatsHeader() {
                 <StatsHeatmap />
 
                 {/* Spend Overview Section */}
-                <View
-                    className='space-y-5 border border-purple-200 rounded-3xl p-5 bg-white'
-                    style={styles.card}
-                >
-                    <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
-                        Spend Overview
-                    </Text>
-                    <SpendOverview />
-                </View>
+                <SpendOverview />
 
                 {/* Savings Overview Section */}
                 <View>

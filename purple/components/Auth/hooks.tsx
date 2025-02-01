@@ -198,7 +198,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             destroyStores();
             nativeStorage.clear();
             queryClient.clear();
-            console.log(createTransactionStore.getState(), 'AFTER LOGOUT');
 
             await SecureStore.deleteItemAsync('session_data');
         } catch (err) {
