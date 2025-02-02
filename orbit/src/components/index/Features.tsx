@@ -3,7 +3,7 @@ import Image from 'next/image';
 export default function Features() {
     return (
         <div className='w-full bg-white'>
-            <div className='w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5 flex flex-col space-y-10'>
+            <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5 flex flex-col space-y-10'>
                 <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
                     <h1 className='font-bold text-5xl'>Insert header</h1>
                     <p className='text-lg text-black'>

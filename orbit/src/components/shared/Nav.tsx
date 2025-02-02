@@ -30,24 +30,24 @@ export default function Nav() {
                                         className='group flex items-center focus:outline-none'
                                         aria-expanded='false'
                                     >
-                                        <p className='text-sm flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
+                                        <h3 className='text-sm font-bold flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
                                             Features
-                                        </p>
+                                        </h3>
                                         {/* <ChevronDownIcon className='text-gray-900 ml-1 w-4 h-4' /> */}
                                     </button>
                                 </li>
                                 <li className='items-center flex'>
                                     <Link href='#'>
-                                        <p className='text-sm flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
-                                            About Us
-                                        </p>
+                                        <h3 className='text-sm font-bold flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
+                                            About
+                                        </h3>
                                     </Link>
                                 </li>
                                 <li className='items-center flex'>
                                     <Link href='#'>
-                                        <p className='text-sm flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
+                                        <h3 className='text-sm font-bold flex justify-center transition duration-200 cursor-pointer z-2 hover:opacity-[0.7]'>
                                             Legal
-                                        </p>
+                                        </h3>
                                     </Link>
                                 </li>
                             </ul>

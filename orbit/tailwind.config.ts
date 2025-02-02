@@ -25,8 +25,28 @@ export default {
                 'gradient-xy': 'gradient-xy 5s ease infinite',
                 blob: 'blob 20s linear infinite',
                 widen: 'widen 20s linear infinite',
+                drop: 'drop 0.5s linear infinite',
+                stem: 'stem 0.5s linear infinite',
+                splat: 'splat 0.5s linear infinite',
             },
             keyframes: {
+                drop: {
+                    '0%': { transform: 'translateY(0vh)' },
+                    '75%': { transform: 'translateY(90vh)' },
+                    '100%': { transform: 'translateY(90vh)' },
+                },
+                stem: {
+                    '0%': { opacity: '1' },
+                    '65%': { opacity: '1' },
+                    '75%': { opacity: '0' },
+                    '100%': { opacity: '0' },
+                },
+                splat: {
+                    '0%': { opacity: '1', transform: 'scale(0)' },
+                    '80%': { opacity: '1', transform: 'scale(0)' },
+                    '90%': { opacity: '0.5', transform: 'scale(1)' },
+                    '100%': { opacity: '0', transform: 'scale(1.5)' },
+                },
                 'gradient-y': {
                     '0%, 100%': {
                         'background-size': '400% 400%',

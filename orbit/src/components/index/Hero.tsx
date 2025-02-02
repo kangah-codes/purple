@@ -1,4 +1,4 @@
-import AnimatedClouds from './AnimatedClouds';
+import AnimatedClouds from '../shared/AnimatedClouds';
 import Image from 'next/image';
 
 export default function Hero() {

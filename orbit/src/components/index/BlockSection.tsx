@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function BlockSection() {
     return (
-        <div className='w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl pt-20 mx-auto px-5'>
+        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl pt-20 mx-auto px-5'>
             <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
                 <h1 className='font-bold text-5xl'>Insert header</h1>
                 <p className='text-lg text-black'>
@@ -17,9 +17,9 @@ export default function BlockSection() {
                         <div className='flex flex-col overflow-hidden bg-gradient-to-br from-purple-100 to-purple-400 rounded-[3rem] h-[32.5rem] md:h-[35rem] py-[3.75rem] items-center'>
                             <div className='px-5 text-black text-center flex'>
                                 <div className='flex flex-col space-y-2.5 mx-auto max-w-sm w-full'>
-                                    <p className='inline text-4xl tracking-tight font-bold'>
+                                    <h1 className='inline text-4xl tracking-tight font-bold'>
                                         Beautiful, and blah blah blah
-                                    </p>
+                                    </h1>
                                     <p className='text-base text-black'>
                                         Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                                         Nisi nesciunt a, provident quaerat similique dolore!
@@ -101,13 +101,18 @@ export default function BlockSection() {
                                 </div>
 
                                 <div className='text-black text-center flex z-[1]'>
-                                    <div className='flex flex-col mx-auto max-w-sm w-full'>
+                                    <div className='flex flex-col mx-auto max-w-sm w-full space-y-2.5'>
                                         <h1 className='inline text-4xl tracking-tight font-bold'>
                                             Something cool.
                                         </h1>
+                                        <p className='text-base text-black'>
+                                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                                            Esse, magnam rerum, necessitatibus quia, aspernatur odit
+                                            qui ut quibusdam.
+                                        </p>
                                     </div>
                                 </div>
-                                <div className='grid grid-cols-8 gap-3 max-w-md w-full mx-auto h-full relative'>
+                                {/* <div className='grid grid-cols-8 gap-3 max-w-md w-full mx-auto h-full relative'>
                                     <div className='col-span-4 bg-white bg-opacity-50 backdrop-blur rounded-[2.5rem] items-center justify-center flex overflow-hidden relative'>
                                         <div className='flex flex-col space-y-1 text-black text-center'>
                                             <p className='inline text-4xl xl:text-5xl tracking-tight font-semibold bg-gradient-to-r from-purple-300 to-purple-600 bg-clip-text text-transparent z-10'>
@@ -124,7 +129,7 @@ export default function BlockSection() {
                                             <p className='inline text-sm'>Another metric</p>
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div className='grid grid-rows-6 h-[32.5rem] md:h-[35rem] gap-5'>
@@ -142,58 +147,13 @@ export default function BlockSection() {
                                     </div>
                                 </div>
                             </div>
-                            <div className='relative row-span-4 overflow-hidden rounded-[3rem] items-center border border-purple-100 grid grid-cols-2 gap-2.5 px-5 lg:px-10'>
-                                <div className='w-full h-full bg-gradient-to-b from-purple-300 to-white absolute z-[1]' />
-
-                                <div className='col-span-1 z-[2] flex flex-col'>
+                            <div className='relative row-span-4 overflow-hidden rounded-[3rem] items-center border border-purple-100 bg-gradient-to-b from-purple-300 to-white'>
+                                <div className='z-[2] h-full w-full flex items-center justify-center'>
                                     <Image
                                         alt='Logo'
-                                        loading='lazy'
-                                        width={276}
-                                        height={600}
-                                        decoding='async'
-                                        data-nimg={1}
-                                        style={{ color: 'transparent' }}
-                                        src='/graphics/mockup-1.webp'
-                                        className='translate-y-[-150px]'
-                                    />
-
-                                    <Image
-                                        alt='Logo'
-                                        loading='lazy'
-                                        width={276}
-                                        height={600}
-                                        decoding='async'
-                                        data-nimg={1}
-                                        style={{ color: 'transparent' }}
-                                        src='/graphics/mockup-1.webp'
-                                        className='translate-y-[-140px]'
-                                    />
-                                </div>
-
-                                <div className='col-span-1 z-[2] flex flex-col'>
-                                    <Image
-                                        alt='Logo'
-                                        loading='lazy'
-                                        width={276}
-                                        height={600}
-                                        decoding='async'
-                                        data-nimg={1}
-                                        style={{ color: 'transparent' }}
-                                        src='/graphics/mockup-1.webp'
-                                        className='translate-y-[-90px]'
-                                    />
-
-                                    <Image
-                                        alt='Logo'
-                                        loading='lazy'
-                                        width={276}
-                                        height={600}
-                                        decoding='async'
-                                        data-nimg={1}
-                                        style={{ color: 'transparent' }}
-                                        src='/graphics/mockup-1.webp'
-                                        className='translate-y-[-80px]'
+                                        objectFit='cover'
+                                        fill
+                                        src='/graphics/masonry.png'
                                     />
                                 </div>
                             </div>
