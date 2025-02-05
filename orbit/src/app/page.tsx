@@ -10,7 +10,7 @@ export default function Home() {
             <Hero />
             <Section />
             <Rain />
-            <Features />
+            {/* <Features /> */}
             <BlockSection />
         </div>
     );

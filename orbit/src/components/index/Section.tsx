@@ -3,9 +3,9 @@ import Image from 'next/image';
 export default function Section() {
     return (
         <div className='py-20 bg-white w-full'>
-            <div className='max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto px-4'>
+            <div className='max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto px-5'>
                 <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
-                    <h1 className='font-bold text-5xl'>
+                    <h1 className='font-semibold text-5xl'>
                         Spend, <span className='text-purple-600'>Responsively</span>
                     </h1>
                     <p className='text-lg text-black'>

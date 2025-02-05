@@ -5,7 +5,7 @@ export default function Features() {
         <div className='w-full bg-white'>
             <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5 flex flex-col space-y-10'>
                 <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
-                    <h1 className='font-bold text-5xl'>Insert header</h1>
+                    <h1 className='font-semibold text-5xl'>Insert header</h1>
                     <p className='text-lg text-black'>
                         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi nesciunt a,
                         provident quaerat similique dolore! Earum, eaque molestiae autem dolor, quos
@@ -18,7 +18,7 @@ export default function Features() {
                     <div className='flex flex-col overflow-hidden bg-purple-100 rounded-[3rem] p-5 lg:p-10 border border-purple-100 bg-opacity-80 backdrop-blur'>
                         <div className='px-5 2xl:px-8 text-black text-center flex'>
                             <div className='flex flex-col mx-auto max-w-sm w-full'>
-                                <h1 className='inline text-4xl tracking-tight font-bold'>
+                                <h1 className='inline text-4xl tracking-tight font-semibold'>
                                     Products
                                 </h1>
                                 <p className='text-black text-base'>

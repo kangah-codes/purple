@@ -2,9 +2,9 @@ import Image from 'next/image';
 
 export default function BlockSection() {
     return (
-        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl pt-20 mx-auto px-5'>
+        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5'>
             <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
-                <h1 className='font-bold text-5xl'>Insert header</h1>
+                <h1 className='font-semibold text-5xl'>Insert header</h1>
                 <p className='text-lg text-black'>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi nesciunt a,
                     provident quaerat similique dolore! Earum, eaque molestiae autem dolor, quos
@@ -17,7 +17,7 @@ export default function BlockSection() {
                         <div className='flex flex-col overflow-hidden bg-gradient-to-br from-purple-100 to-purple-400 rounded-[3rem] h-[32.5rem] md:h-[35rem] py-[3.75rem] items-center'>
                             <div className='px-5 text-black text-center flex'>
                                 <div className='flex flex-col space-y-2.5 mx-auto max-w-sm w-full'>
-                                    <h1 className='inline text-4xl tracking-tight font-bold'>
+                                    <h1 className='inline text-4xl tracking-tight font-semibold'>
                                         Beautiful, and blah blah blah
                                     </h1>
                                     <p className='text-base text-black'>
@@ -29,15 +29,13 @@ export default function BlockSection() {
                             <div className='flex items-center mt-5'>
                                 <div className='mx-auto max-w-sm w-full px-10 lg:px-0 flex items-center'>
                                     <div className='mx-auto relative'>
-                                        <img
+                                        <Image
                                             alt='Pixel 6 Pro Mockup'
-                                            loading='lazy'
                                             width={273}
                                             height={746}
                                             decoding='async'
                                             data-nimg={1}
                                             className='mx-auto'
-                                            style={{ color: 'transparent' }}
                                             src='/graphics/mockup-1.webp'
                                         />
                                     </div>
@@ -48,7 +46,7 @@ export default function BlockSection() {
                             <div className='row-span-3 flex flex-col overflow-hidden bg-purple-100 border border-purple-100 rounded-[3rem] py-20 items-center justify-center'>
                                 <div className='px-5 text-black text-center flex'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full space-y-2.5'>
-                                        <p className='inline text-4xl tracking-tight font-bold'>
+                                        <p className='inline text-4xl tracking-tight font-semibold'>
                                             Make budgeting <br /> fun again
                                         </p>
                                         <p className='text-base text-black'>
@@ -102,7 +100,7 @@ export default function BlockSection() {
 
                                 <div className='text-black text-center flex z-[1]'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full space-y-2.5'>
-                                        <h1 className='inline text-4xl tracking-tight font-bold'>
+                                        <h1 className='inline text-4xl tracking-tight font-semibold'>
                                             Something cool.
                                         </h1>
                                         <p className='text-base text-black'>
@@ -136,7 +134,7 @@ export default function BlockSection() {
                             <div className='row-span-2 flex flex-col overflow-hidden bg-purple-100 rounded-full py-20 items-center justify-center'>
                                 <div className='px-5 text-white text-center flex'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full'>
-                                        <p className='inline text-6xl tracking-tight font-bold'>
+                                        <p className='inline text-6xl tracking-tight font-semibold'>
                                             <span className='animate-gradient-x-2000 bg-gradient-to-r from-purple-300 to-purple-600 bg-clip-text text-transparent'>
                                                 100%
                                             </span>
@@ -160,8 +158,8 @@ export default function BlockSection() {
                         </div>
                         <div className='grid grid-cols-5 overflow-hidden border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-300 rounded-[3rem] col-span-full relative backdrop-blur-xl backdrop-opacity-50'>
                             <div className='col-span-full lg:col-span-2 z-10 text-black p-5 flex items-center justify-center'>
-                                <div className='flex flex-col p-5 lg:px-10'>
-                                    <h1 className='text-4xl tracking-tight font-bold'>
+                                <div className='flex flex-col p-5 lg:px-10 space-y-2.5'>
+                                    <h1 className='text-4xl tracking-tight font-semibold'>
                                         Something cool.
                                     </h1>
                                     <p className='text-base'>

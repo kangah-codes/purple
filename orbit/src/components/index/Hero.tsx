@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function Hero() {
     return (
-        <div className='w-full flex overflow-hidden px-4 relative bg-gradient-to-b from-purple-400 to-white min-h-screen'>
+        <div className='w-full flex overflow-hidden px-5 relative bg-gradient-to-b from-purple-400 to-white min-h-screen'>
             <AnimatedClouds
                 baseSpeed={1}
                 minHeight={10}
@@ -11,7 +11,7 @@ export default function Hero() {
                 spawnRate={5}
                 className='left-0 right-0 absolute'
             />
-            <div className='w-full max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-2 relative'>
+            <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-2 relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
                     <div className='pt-48 pb-12 space-y-5 flex flex-col text-center'>
                         {/* <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
