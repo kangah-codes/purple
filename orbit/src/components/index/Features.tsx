@@ -5,7 +5,7 @@ export default function Features() {
         <div className='w-full bg-white'>
             <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5 flex flex-col space-y-10'>
                 <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
-                    <h1 className='font-semibold text-5xl'>Insert header</h1>
+                    <h1 className='font-semibold text-4xl lg:text-5xl'>Insert header</h1>
                     <p className='text-lg text-black'>
                         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi nesciunt a,
                         provident quaerat similique dolore! Earum, eaque molestiae autem dolor, quos
