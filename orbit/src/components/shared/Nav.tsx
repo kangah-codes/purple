@@ -1,8 +1,9 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Nav() {
     return (
-        <div className='bg-purple-400'>
+        <div className='absolute z-[1] w-full'>
             <header className='mx-auto max-w-2xl lg:max-w-7xl p-5 '>
                 <div className=''>
                     <div className='relative flex justify-between group/row isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
@@ -16,7 +17,7 @@ export default function Nav() {
                             <div className='absolute inset-x-0 bottom-2 hidden border-b border-black/5 group-last/row:block' />
                         </div>
                         <div className='relative flex gap-6'>
-                            <div className='py-3 group/item relative'>
+                            <Link href='/' className='py-3 group/item relative'>
                                 <Image
                                     alt='Logo'
                                     src='/logo.png'
@@ -24,14 +25,14 @@ export default function Nav() {
                                     height={35}
                                     className='rounded-md'
                                 />
-                            </div>
+                            </Link>
                         </div>
                         <nav className='relative hidden lg:flex'>
                             <div className='flex group/item relative'>
                                 <a
                                     className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                     data-headlessui-state=''
-                                    href='/pricing'
+                                    href='/features'
                                 >
                                     Features
                                 </a>
@@ -40,12 +41,20 @@ export default function Nav() {
                                 <a
                                     className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                     data-headlessui-state=''
-                                    href='/company'
+                                    href='/pricing'
+                                >
+                                    Pricing
+                                </a>
+                            </div>
+                            <div className='flex group/item relative'>
+                                <a
+                                    className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
+                                    data-headlessui-state=''
+                                    href='/about'
                                 >
                                     About
                                 </a>
                             </div>
-                            
                         </nav>
                         <button
                             className='flex size-12 items-center justify-center self-center rounded-lg data-hover:bg-black/5 lg:hidden'

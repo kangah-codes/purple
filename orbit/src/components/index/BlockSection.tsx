@@ -134,13 +134,13 @@ export default function BlockSection() {
                             <div className='row-span-2 flex flex-col overflow-hidden bg-purple-100 rounded-full py-20 items-center justify-center'>
                                 <div className='px-5 text-white text-center flex'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full'>
-                                        <p className='inline text-6xl tracking-tight font-semibold'>
+                                        <h1 className='inline text-6xl tracking-tight font-bold'>
                                             <span className='animate-gradient-x-2000 bg-gradient-to-r from-purple-300 to-purple-600 bg-clip-text text-transparent'>
                                                 100%
                                             </span>
-                                        </p>
+                                        </h1>
                                         <p className='text-base mt-2.5 text-black'>
-                                            Another metric
+                                            Cruelty-free & Open Source
                                         </p>
                                     </div>
                                 </div>
