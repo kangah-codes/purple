@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import type { Config } from 'tailwindcss';
 
 export default {
@@ -96,5 +97,5 @@ export default {
             },
         },
     },
-    plugins: [],
+    plugins: [require('@tailwindcss/typography')],
 } satisfies Config;

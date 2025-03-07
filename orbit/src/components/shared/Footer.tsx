@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
     return (
@@ -10,7 +11,7 @@ export default function Footer() {
                         <div className='relative pt-20 pb-16 text-center sm:py-24'>
                             <hgroup>
                                 <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
-                                    Ready to join the Purple side?
+                                    Coming soon to an Android near you
                                 </h1>
                             </hgroup>
                             <p className='mx-auto mt-6 max-w-lg text-base text-black'>
@@ -141,12 +142,12 @@ export default function Footer() {
                                             </h3>
                                             <ul className='mt-6 space-y-4 text-sm/6'>
                                                 <li>
-                                                    <a
+                                                    <Link
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='#'
+                                                        href='/terms'
                                                     >
                                                         Terms of service
-                                                    </a>
+                                                    </Link>
                                                 </li>
                                                 <li>
                                                     <a
@@ -181,7 +182,9 @@ export default function Footer() {
                                 </div>
                                 <div>
                                     <div className='py-3 group/item relative'>
-                                        <div className='text-sm/6 text-black'>© 2025 Purple</div>
+                                        <div className='text-sm/6 text-black'>
+                                            © {new Date().getFullYear()} Purple
+                                        </div>
                                     </div>
                                 </div>
                                 <div className='flex'>
