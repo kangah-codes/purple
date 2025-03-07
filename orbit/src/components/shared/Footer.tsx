@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image';
 
 export default function Footer() {
     return (
@@ -40,8 +40,8 @@ export default function Footer() {
                                     <div className='absolute inset-x-0 bottom-0 hidden border-b border-black/5 group-last/row:block' />
                                     <div className='absolute inset-x-0 bottom-2 hidden border-b border-black/5 group-last/row:block' />
                                 </div>
-                                <div className='grid grid-cols-2 gap-y-10 py-5 lg:grid-cols-6 lg:gap-8'>
-                                    <div className='col-span-4 flex'>
+                                <div className='grid grid-cols-2 gap-y-10 py-5 lg:grid-cols-9 lg:gap-8'>
+                                    <div className='col-span-6 flex'>
                                         <div className='pt-6 lg:pb-6 group/item relative'>
                                             <Image
                                                 alt='Logo'
@@ -52,7 +52,7 @@ export default function Footer() {
                                             />
                                         </div>
                                     </div>
-                                    <div className='col-span-2 grid grid-cols-2 gap-x-8 gap-y-12 lg:col-span-2 lg:grid-cols-2 lg:pt-6'>
+                                    <div className='col-span-2 grid grid-cols-2 gap-x-8 gap-y-12 lg:col-span-3 lg:grid-cols-2 lg:pt-6'>
                                         <div>
                                             <h3 className='text-sm/6 font-medium text-purple-600'>
                                                 Purple
@@ -61,7 +61,6 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
                                                         href='/pricing'
                                                     >
                                                         Pricing
@@ -70,7 +69,6 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
                                                         href='#'
                                                     >
                                                         Features
@@ -145,7 +143,6 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
                                                         href='#'
                                                     >
                                                         Terms of service
@@ -154,7 +151,6 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
                                                         href='#'
                                                     >
                                                         Privacy policy
@@ -163,7 +159,6 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
                                                         href='#'
                                                     >
                                                         License
@@ -191,7 +186,7 @@ export default function Footer() {
                                 </div>
                                 <div className='flex'>
                                     <div className='flex items-center gap-8 py-3 group/item relative'>
-                                        <a
+                                        {/* <a
                                             target='_blank'
                                             aria-label='Visit us on Facebook'
                                             className='text-black data-hover:text-black/75'
@@ -236,7 +231,7 @@ export default function Footer() {
                                             >
                                                 <path d='M14.82 0H1.18A1.169 1.169 0 000 1.154v13.694A1.168 1.168 0 001.18 16h13.64A1.17 1.17 0 0016 14.845V1.15A1.171 1.171 0 0014.82 0zM4.744 13.64H2.369V5.996h2.375v7.644zm-1.18-8.684a1.377 1.377 0 11.52-.106 1.377 1.377 0 01-.527.103l.007.003zm10.075 8.683h-2.375V9.921c0-.885-.015-2.025-1.234-2.025-1.218 0-1.425.966-1.425 1.968v3.775H6.233V5.997H8.51v1.05h.032c.317-.601 1.09-1.235 2.246-1.235 2.405-.005 2.851 1.578 2.851 3.63v4.197z' />
                                             </svg>
-                                        </a>
+                                        </a> */}
                                     </div>
                                 </div>
                             </div>

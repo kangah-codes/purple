@@ -15,7 +15,9 @@ export default function StatsHeader() {
                 <StatsHeatmap />
 
                 {/* Spend Overview Section */}
-                <SpendOverview />
+                <View>
+                    <SpendOverview />
+                </View>
 
                 {/* Savings Overview Section */}
                 <View>

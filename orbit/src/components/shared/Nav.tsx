@@ -15,7 +15,7 @@ export default function Nav() {
                             <div className='absolute inset-x-0 bottom-0 hidden border-b border-black/5 group-last/row:block' />
                             <div className='absolute inset-x-0 bottom-2 hidden border-b border-black/5 group-last/row:block' />
                         </div>
-                        <div className='relative flex gap-6'>
+                        <div className='relative flex gap-2 flex-row items-center'>
                             <div className='py-3 group/item relative'>
                                 <Image
                                     alt='Logo'
@@ -45,7 +45,6 @@ export default function Nav() {
                                     About
                                 </a>
                             </div>
-                            
                         </nav>
                         <button
                             className='flex size-12 items-center justify-center self-center rounded-lg data-hover:bg-black/5 lg:hidden'

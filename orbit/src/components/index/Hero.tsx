@@ -33,12 +33,19 @@ export default function Hero() {
                                 Revolutionizing the way you budget your money. Get started today and
                                 take control of your finances.
                             </p>
-                            <div className='flex items-center justify-end flex-row space-x-2 cursor-pointer'>
-                                <div className='bg-gradient-to-br from-purple-800 to-purple-400 animate-gradient-xy rounded-full flex p-[2px] text-white transition duration-500 overflow-hidden'>
+                            <div className='flex flex-col items-center justify-end space-y-2 cursor-pointer'>
+                                <div className='flex flex-row items-center justify-center space-x-2 bg-gradient-to-br from-purple-200 to-purple-300 rounded-full p-2'>
+                                    <input className='rounded-full px-4 py-2 bg-purple-100 border border-purple-300 focus:outline-none' />
+                                    <div className='bg-purple-500 rounded-full flex px-4 py-2 text-white transition duration-500 text-sm font-bold items-center justify-center'>
+                                        <p className='tracking-tight'>Sign Up</p>
+                                    </div>
+                                </div>
+
+                                {/* <div className='bg-gradient-to-br from-purple-800 to-purple-400 animate-gradient-xy rounded-full flex p-[2px] text-white transition duration-500 overflow-hidden'>
                                     <div className='bg-black rounded-full flex px-4 py-2 text-white transition duration-500 text-[12px] 2xl:text-sm'>
                                         <p className='my-auto tracking-tight'>Coming Soon</p>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

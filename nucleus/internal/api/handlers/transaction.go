@@ -291,6 +291,8 @@ func FetchTransactions(c *gin.Context) {
 
 	// Access query parameters
 	accountID := c.Query("accountID")
+	startDate := c.Query("startDate")
+	endDate := c.Query("endDate")
 
 	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), fmt.Sprintf("%d", page), fmt.Sprintf("%d", pageSize), accountID)
 	var cachedResponse types.Response
@@ -310,8 +312,48 @@ func FetchTransactions(c *gin.Context) {
 
 	// Apply filters based on query parameters
 	if accountID != "" {
-		log.InfoLogger.Debugln("Account id is not null")
 		query = query.Where("account_id = ?", accountID)
+	}
+
+	if startDate != "" && endDate != "" {
+		// Parse the start date
+		parsedStartDate, err := time.Parse("02/01/06", startDate)
+		if err != nil {
+			log.ErrorLogger.Errorf("Error parsing start date: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid start date format"})
+			return
+		}
+		// Set start date to midnight (00:00:00) of that day
+		startDateMidnight := time.Date(
+			parsedStartDate.Year(),
+			parsedStartDate.Month(),
+			parsedStartDate.Day(),
+			0, 0, 0, 0, // Hour, Minute, Second, Nanosecond
+			parsedStartDate.Location(),
+		)
+
+		// Parse the end date
+		parsedEndDate, err := time.Parse("02/01/06", endDate)
+		if err != nil {
+			log.ErrorLogger.Errorf("Error parsing end date: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid end date format"})
+			return
+		}
+		// Set end date to 11:59:59 PM (23:59:59) of that day
+		endDateEndOfDay := time.Date(
+			parsedEndDate.Year(),
+			parsedEndDate.Month(),
+			parsedEndDate.Day(),
+			23, 59, 59, 0, // Hour, Minute, Second, Nanosecond
+			parsedEndDate.Location(),
+		)
+
+		fmt.Printf("startdate: %v\nenddate: %v", startDateMidnight, endDateEndOfDay)
+
+		log.ErrorLogger.Fatalf("DIE")
+
+		// Add the timestamp range to the query using GORM
+		query = query.Where("created_at >= ? AND created_at <= ?", startDateMidnight, endDateEndOfDay)
 	}
 
 	result := query.Preload("Account").Where("user_id = ?", userID).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&transactions)
