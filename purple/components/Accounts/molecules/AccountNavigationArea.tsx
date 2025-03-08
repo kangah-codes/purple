@@ -65,7 +65,7 @@ export default function AccountNavigationArea() {
                         >
                             <View className='flex flex-row items-center space-x-1'>
                                 <EditSquareIcon stroke='#A855F7' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='text-sm'>
+                                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                                     Edit Plan
                                 </Text>
                             </View>
@@ -77,7 +77,7 @@ export default function AccountNavigationArea() {
                         >
                             <View className='flex flex-row items-center space-x-1'>
                                 <TrashIcon stroke='#EF4444' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.monaSansMedium} className='text-sm'>
+                                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                                     Delete
                                 </Text>
                             </View>

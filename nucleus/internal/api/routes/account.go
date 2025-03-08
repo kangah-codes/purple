@@ -12,9 +12,26 @@ func RegisterAccountRoutes(r *gin.RouterGroup) {
 	db := utils.GetDB()
 	accountGroup := r.Group("/account")
 	{
-		accountGroup.POST("/", middleware.AuthMiddleware(db), handlers.CreateAccount)
-		accountGroup.GET("/", middleware.AuthMiddleware(db), middleware.PaginationMiddleware(), handlers.FetchUserAccounts)
-		accountGroup.DELETE("/:accountID", middleware.AuthMiddleware(db), handlers.DeleteUserAccount)
-		accountGroup.PATCH("/:accountID", middleware.AuthMiddleware(db), handlers.UpdateUserAccount)
+		accountGroup.POST(
+			"/",
+			middleware.AuthMiddleware(db), middleware.RequireParams([]string{"userID"}),
+			handlers.CreateAccount,
+		)
+		accountGroup.GET(
+			"/",
+			middleware.AuthMiddleware(db), middleware.PaginationMiddleware(),
+			middleware.RequireParams([]string{"userID"}),
+			handlers.FetchUserAccounts,
+		)
+		accountGroup.DELETE(
+			"/:accountID",
+			middleware.AuthMiddleware(db), middleware.RequireParams([]string{"userID"}),
+			handlers.DeleteUserAccount,
+		)
+		accountGroup.PATCH(
+			"/:accountID",
+			middleware.AuthMiddleware(db), middleware.RequireParams([]string{"userID"}),
+			handlers.UpdateUserAccount,
+		)
 	}
 }

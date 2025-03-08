@@ -127,7 +127,7 @@ func FetchPlans(c *gin.Context) {
 	// build cache key
 	cacheKey := redis.BuildCacheKey("plans", fmt.Sprintf("%v", userID), fmt.Sprintf("%d", page), fmt.Sprintf("%d", pageSize), name, startDate, endDate, planType)
 	var cachedResponse types.Response
-	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+	cacheHit, err := redis.GetEncryptedCache(cacheKey, &cachedResponse)
 
 	if err != nil {
 		log.ErrorLogger.Printf("Error fetching data from cache: %v\nContinuing to use results from db", err)
@@ -180,7 +180,7 @@ func FetchPlans(c *gin.Context) {
 		TotalItems: int(totalItems),
 	}
 
-	if err := redis.SetCache(cacheKey, response, 30*time.Minute); err != nil {
+	if err := redis.SetEncryptedCache(cacheKey, response, 30*time.Minute); err != nil {
 		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	}
 
@@ -387,7 +387,7 @@ func FetchPlan(c *gin.Context) {
 
 	cacheKey := redis.BuildCacheKey("plans", fmt.Sprintf("%v", userID), fmt.Sprintf("%v", planID))
 	var cachedResponse types.Response
-	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+	cacheHit, err := redis.GetEncryptedCache(cacheKey, &cachedResponse)
 	if err != nil {
 		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
 	}
@@ -420,7 +420,7 @@ func FetchPlan(c *gin.Context) {
 
 	response := types.Response{Status: http.StatusOK, Message: "Plan fetched successfully", Data: plan}
 
-	if err := redis.SetCache(cacheKey, response, 30*time.Minute); err != nil {
+	if err := redis.SetEncryptedCache(cacheKey, response, 30*time.Minute); err != nil {
 		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	}
 

@@ -1,4 +1,5 @@
-import { transactionData } from '@/components/Index/constants';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
@@ -6,21 +7,17 @@ import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { StarsIcon } from '@/components/SVG/24x24';
+import { useInfiniteTransactions } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useStatsStore } from '../hooks';
 import HeatmapLoading from './HeatmapLoading';
-import { SessionData } from '@/components/Auth/schema';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
-import { Transaction } from '@/components/Transactions/schema';
-import Toast from 'react-native-toast-message';
-import { useAuth } from '@/components/Auth/hooks';
-import { convertToJSDate } from '@/lib/utils/date';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -46,12 +43,8 @@ function StatsHeatmap() {
             sessionData: sessionData as SessionData,
             requestQuery: {
                 page_size: 10,
-                startDate: selectedDate
-                    ? format(convertToJSDate(selectedDate) as Date, 'dd/mm/yy')
-                    : '',
-                endDate: selectedDate
-                    ? format(convertToJSDate(selectedDate) as Date, 'dd/mm/yy')
-                    : '',
+                startDate: selectedDate ? selectedDate : '',
+                endDate: selectedDate ? selectedDate : '',
             },
             options: {
                 onError: (err) => {
@@ -66,8 +59,6 @@ function StatsHeatmap() {
                 enabled: selectedDate !== null,
             },
         });
-
-    console.log(selectedDate, 'selected', new Date(selectedDate));
 
     const handleLoadMore = () => {
         if (hasNextPage) {
@@ -97,16 +88,39 @@ function StatsHeatmap() {
         [monthDays, stats],
     );
 
-    const click = useCallback(
-        (item: CellData) => {
-            const newDate = format(finalMonthDays[item.index], 'dd/MM/yyyy');
-            if (newDate !== selectedDate) {
-                setSelectedDate(newDate);
-                setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
+    const renderCell = useCallback(
+        (data: CellData) => {
+            const maxValue = Math.max(...heatmapData.map((d) => d.value));
+            const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
+
+            if (format(now, 'dd/MM/yyyy') === data.key) {
+                return (
+                    <TouchableOpacity key={data.key}>
+                        <LinearGradient
+                            style={styles.linearGradient}
+                            colors={colors[colorIndex]}
+                            className='flex items-center justify-center'
+                        >
+                            <StarsIcon stroke='#fff' fill={'#fff'} />
+                        </LinearGradient>
+                    </TouchableOpacity>
+                );
             }
         },
-        [selectedDate],
+        [stats],
     );
+
+    // TODO: come back to this in the future
+    // const click = useCallback(
+    //     (item: CellData) => {
+    //         const newDate = format(finalMonthDays[item.index], 'dd/MM/yyyy');
+    //         if (newDate !== selectedDate) {
+    //             setSelectedDate(newDate);
+    //             setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
+    //         }
+    //     },
+    //     [selectedDate],
+    // );
 
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
     const renderItem = useCallback(
@@ -159,9 +173,9 @@ function StatsHeatmap() {
                         rows={4}
                         cols={numBlocksPerRow}
                         data={heatmapData}
-                        onPressCallback={click}
+                        // onPressCallback={click}
                         startColumn={getDay(start)}
-                        // renderCell={renderCell}
+                        renderCell={renderCell}
                     />
                 )}
             </View>

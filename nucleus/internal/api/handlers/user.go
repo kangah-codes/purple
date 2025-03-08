@@ -157,7 +157,7 @@ func FetchUser(c *gin.Context) {
 	cacheKey := redis.BuildCacheKey("users", userID)
 
 	var cachedResponse types.Response
-	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+	cacheHit, err := redis.GetEncryptedCache(cacheKey, &cachedResponse)
 
 	if err != nil {
 		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
@@ -193,7 +193,7 @@ func FetchUser(c *gin.Context) {
 	}
 
 	response := types.Response{Status: 200, Message: "User fetched successfully", Data: user}
-	if err := redis.SetCache(cacheKey, response, 5*time.Minute); err != nil {
+	if err := redis.SetEncryptedCache(cacheKey, response, 5*time.Minute); err != nil {
 		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	}
 

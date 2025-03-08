@@ -1,32 +1,28 @@
-import { Text, View } from '@/components/Shared/styled';
+import { View } from '@/components/Shared/styled';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import StatsHeatmap from './Heatmap';
 import SpendOverview from './SpendOverview';
-import SpendTrendAreaChart from './SpendTrendAreaChart';
-import MonthSavings from './MonthSavings';
-import { StyleSheet } from 'react-native';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function StatsHeader() {
     return (
-        <>
-            <View className='flex flex-col space-y-5 px-5'>
-                {/* Daily Activity Section */}
-                <StatsHeatmap />
+        <View className='flex flex-col space-y-5 px-5'>
+            {/* Daily Activity Section */}
+            <StatsHeatmap />
 
-                {/* Spend Overview Section */}
-                <View>
-                    <SpendOverview />
-                </View>
+            {/* Spend Overview Section */}
+            <View>
+                <SpendOverview />
+            </View>
 
-                {/* Savings Overview Section */}
-                <View>
+            {/* Savings Overview Section */}
+            {/* <View>
                     <MonthSavings />
-                </View>
+                </View> */}
 
-                {/* Spend Overview Section */}
+            {/* Spend Overview Section */}
 
-                <View className='space-y-5 border border-purple-200 rounded-3xl px-5 pt-5'>
+            {/* <View className='space-y-5 border border-purple-200 rounded-3xl px-5 pt-5'>
                     <Text className='text-sm text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                         Spend Trend
                     </Text>
@@ -34,11 +30,10 @@ export default function StatsHeader() {
                     <View className=''>
                         <SpendTrendAreaChart />
                     </View>
-                </View>
+                </View> */}
 
-                <View style={{ marginTop: 20 }} />
-            </View>
-        </>
+            <View style={{ marginTop: 20 }} />
+        </View>
     );
 }
 

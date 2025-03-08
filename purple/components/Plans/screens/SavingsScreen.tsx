@@ -32,7 +32,7 @@ function SavingsScreen() {
         if (savingPlans.length === 0) return null;
         return (
             <View className='flex flex-col space-y-5 -px-5'>
-                <PlanInfoCard type='saving' />
+                {/* <PlanInfoCard type='saving' /> */}
                 <View style={styles.listHeaderView} />
             </View>
         );
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     listHeaderView: {
-        marginTop: 20,
+        // marginTop: 20,
     },
     itemSeparator: {
         height: 20,

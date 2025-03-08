@@ -23,7 +23,7 @@ export default function PlanInfoCard({ type }: PlanInfoCardProps) {
 
     return (
         <LinearGradient
-            className='w-full p-5 rounded-3xl flex flex-col justify-center space-y-4 relative'
+            className='w-full p-5 rounded-full flex flex-col justify-center space-y-4 relative'
             colors={linearGradientColours}
             style={style.linearGradient}
         >

@@ -9,10 +9,9 @@ import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import { Plan } from '../schema';
-import PlanInfoCard from '../molecules/PlanInfoCard';
 
 function ExpensesScreen() {
-    const { setExpensePlans, expensePlans, updateExpenseplans } = usePlanStore();
+    const { setExpensePlans, expensePlans } = usePlanStore();
     const { sessionData } = useAuth();
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
@@ -31,7 +30,7 @@ function ExpensesScreen() {
         if (expensePlans.length === 0) return null;
         return (
             <View className='flex flex-col space-y-5 -px-5'>
-                <PlanInfoCard type='expense' />
+                {/* <PlanInfoCard type='expense' /> */}
                 <View style={styles.listHeaderView} />
             </View>
         );
@@ -100,7 +99,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     listHeaderView: {
-        marginTop: 20,
+        // marginTop: 20,
     },
     itemSeparator: {
         height: 20,

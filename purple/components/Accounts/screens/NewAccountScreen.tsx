@@ -58,6 +58,7 @@ export default function NewAccountScreen() {
                 },
                 onSuccess: (res) => {
                     const { data } = res;
+
                     updateAccounts(data);
                     Toast.show({
                         type: 'success',

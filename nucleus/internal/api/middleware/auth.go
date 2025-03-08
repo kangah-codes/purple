@@ -3,6 +3,7 @@ package middleware
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"nucleus/internal/api/types"
 	"nucleus/internal/models"
@@ -47,8 +48,9 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 
 		cacheKey := redis.BuildCacheKey("sessions", HashToken(token))
 		var session models.Session
-		cacheHit, _ := redis.GetCache(cacheKey, &session)
+		cacheHit, _ := redis.GetEncryptedCache(cacheKey, &session)
 		if cacheHit && session.UserID != uuid.Nil {
+			fmt.Println(session.Token)
 			c.Set("userID", session.UserID)
 			c.Next()
 			return
@@ -61,7 +63,7 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := redis.SetCache(cacheKey, session, 30*(time.Hour*24)); err != nil {
+		if err := redis.SetEncryptedCache(cacheKey, session, 30*(time.Hour*24)); err != nil {
 			log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 		}
 

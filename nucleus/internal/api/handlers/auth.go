@@ -98,7 +98,7 @@ func SignIn(c *gin.Context) {
 		TransactionTypes:     utils.TransactionTypes,
 	}
 
-	if err := redis.SetCache(cacheKey, session, 30*(time.Hour*24)); err != nil {
+	if err := redis.SetEncryptedCache(cacheKey, session, (time.Minute * 10)); err != nil {
 		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	}
 	c.JSON(200, types.Response{Status: 200, Message: "Sign in successful", Data: response})

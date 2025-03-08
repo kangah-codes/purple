@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"nucleus/internal/encryption"
 	"nucleus/log"
 	"nucleus/utils"
 	"strings"
@@ -60,19 +61,53 @@ func GetCache(key string, object interface{}) (bool, error) {
 	data, err := RedisClient.Get(context.Background(), key).Result()
 
 	if err == redis.Nil {
-		// Key does not exist in the cache
 		return false, nil
 	} else if err != nil {
-		// Some other Redis error occurred
 		return false, err
 	}
 
-	// Key exists; unmarshal the data into the provided object
 	if err := json.Unmarshal([]byte(data), object); err != nil {
 		return false, err
 	}
 
 	log.InfoLogger.Debugf("Cache hit for key %s returned %v", key, object)
+
+	return true, nil
+}
+
+func SetEncryptedCache(key string, value interface{}, expiration time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	encryptedData, err := encryption.Encrypt(string(data))
+	if err != nil {
+		return err
+	}
+
+	return RedisClient.Set(context.Background(), key, encryptedData, expiration).Err()
+}
+
+func GetEncryptedCache(key string, object interface{}) (bool, error) {
+	encryptedData, err := RedisClient.Get(context.Background(), key).Result()
+
+	if err == redis.Nil {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	decryptedData, err := encryption.Decrypt(encryptedData)
+	if err != nil {
+		return false, err
+	}
+
+	if err := json.Unmarshal([]byte(decryptedData), object); err != nil {
+		return false, err
+	}
+
+	log.InfoLogger.Debugf("Encrypted cache hit for key %s", key)
 
 	return true, nil
 }

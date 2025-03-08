@@ -6,11 +6,17 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
+	"nucleus/utils"
 )
 
 func Encrypt(plainText string) (string, error) {
-	key := []byte("your-32-byte-secret-key-here!") // Should be stored securely
+	encryptionKey := utils.EnvValue("ENCRYPTION_KEY", "")
+	key, err := base64.StdEncoding.DecodeString(encryptionKey)
+	if err != nil {
+		return "", fmt.Errorf("invalid encryption key format: %w", err)
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -35,7 +41,11 @@ func Decrypt(encryptedStr string) (string, error) {
 		return "", errors.New("empty encrypted string")
 	}
 
-	key := []byte("your-32-byte-secret-key-here!")
+	encryptionKey := utils.EnvValue("ENCRYPTION_KEY", "")
+	key, err := base64.StdEncoding.DecodeString(encryptionKey)
+	if err != nil {
+		return "", fmt.Errorf("invalid encryption key format: %w", err)
+	}
 	cipherText, err := base64.StdEncoding.DecodeString(encryptedStr)
 	if err != nil {
 		return "", err

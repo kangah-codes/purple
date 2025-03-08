@@ -296,7 +296,7 @@ func FetchTransactions(c *gin.Context) {
 
 	cacheKey := redis.BuildCacheKey("transactions", fmt.Sprintf("%v", userID), fmt.Sprintf("%d", page), fmt.Sprintf("%d", pageSize), accountID)
 	var cachedResponse types.Response
-	cacheHit, err := redis.GetCache(cacheKey, &cachedResponse)
+	cacheHit, err := redis.GetEncryptedCache(cacheKey, &cachedResponse)
 
 	if err != nil {
 		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
@@ -317,7 +317,7 @@ func FetchTransactions(c *gin.Context) {
 
 	if startDate != "" && endDate != "" {
 		// Parse the start date
-		parsedStartDate, err := time.Parse("02/01/06", startDate)
+		parsedStartDate, err := time.Parse("02/01/2006", startDate)
 		if err != nil {
 			log.ErrorLogger.Errorf("Error parsing start date: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid start date format"})
@@ -333,7 +333,7 @@ func FetchTransactions(c *gin.Context) {
 		)
 
 		// Parse the end date
-		parsedEndDate, err := time.Parse("02/01/06", endDate)
+		parsedEndDate, err := time.Parse("02/01/2006", endDate)
 		if err != nil {
 			log.ErrorLogger.Errorf("Error parsing end date: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid end date format"})
@@ -373,7 +373,7 @@ func FetchTransactions(c *gin.Context) {
 		TotalItems: int(totalItems),
 	}
 
-	if err := redis.SetCache(cacheKey, response, 30*time.Minute); err != nil {
+	if err := redis.SetEncryptedCache(cacheKey, response, 30*time.Minute); err != nil {
 		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	}
 

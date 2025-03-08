@@ -46,7 +46,6 @@ function CustomBottomSheetFlatList<T>({
 
     // Memoize default snap points
     const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '50%'], [rest.snapPoints]);
-
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();
 

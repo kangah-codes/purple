@@ -1,16 +1,18 @@
-import { groupBy } from '@/lib/utils/helpers';
 import { keyExtractor } from '@/lib/utils/number';
-import { useCallback } from 'react';
-import { ListRenderItem, StyleSheet } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import React, { useCallback, useEffect } from 'react';
 import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
-import AccountCard from './AccountCard';
-import React from 'react';
-import { FlashList } from '@shopify/flash-list';
 import { groupAccountsByCategory } from '../utils';
+import AccountCard from './AccountCard';
 
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();
+
+    useEffect(() => {
+        console.log('Accounts updated:', accounts);
+    }, [accounts]);
+
     const renderItem = useCallback(
         ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
             <AccountCard groupName={item.groupName} accounts={item.accounts} />
@@ -18,17 +20,26 @@ export default function AccountsAccordion() {
         [],
     );
 
+    const groupedAccounts = groupAccountsByCategory(accounts);
+    console.log('Grouped accounts:', groupedAccounts);
+
+    const data = Object.entries(groupedAccounts)
+        .map(([key, value]) => {
+            const [category, currency] = key.split('_');
+            return {
+                groupName: category,
+                currency: currency,
+                accounts: value,
+            };
+        })
+        .filter((item) => item.accounts && item.accounts.length > 0);
+
+    console.log('Data for FlashList:', data);
+
     return (
         <FlashList
             estimatedItemSize={50}
-            data={Object.entries(groupAccountsByCategory(accounts)).map(([key, value]) => {
-                const [category, currency] = key.split('_');
-                return {
-                    groupName: category,
-                    currency: currency,
-                    accounts: value,
-                };
-            })}
+            data={data}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
         />
