@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"nucleus/cmd/workers"
+	"nucleus/internal/api/handlers"
 	"nucleus/internal/api/middleware"
+	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/routes"
+	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/internal/redis"
+	"nucleus/internal/cache"
 	"nucleus/log"
 	"nucleus/utils"
 	"os"
@@ -42,7 +45,8 @@ func main() {
 
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
-	redis.InitRedis()
+	cache.InitRedis()
+	redisCache := cache.NewRedisCache(cache.RedisClient)
 
 	// get db instance
 	db := utils.GetDB()
@@ -72,19 +76,30 @@ func main() {
 		},
 	})
 
+	// initialise auth stuff
+	postgresAuthRepo := repositories.NewPostgresAuthRepository(db)
+	userRepo := repositories.NewPostgresUserRepository(db)
+	cacheAuthRepo := repositories.NewCachingAuthRepository(postgresAuthRepo, redisCache, "auth", time.Minute*10)
+	authService := services.NewAuthService(cacheAuthRepo, userRepo, db)
+	authHandler := handlers.NewAuthHandler(authService)
+	authMiddlewareConfig := &middleware.AuthMiddlewareConfig{
+		AuthService: authService,
+	}
+
 	// models.Migrate(db)
 	r := gin.Default()
 	r.Use(rateLimit)
 	r.Use(middleware.CorsMiddleware())
 	r.Use(middleware.APIKeyMiddleware())
+	r.Use(middleware.AuthMiddleware(authMiddlewareConfig))
 
 	// create api group
 	v1 := utils.CreateV1Group(r)
-	routes.RegisterUserRoutes(v1)
-	routes.RegisterAuthRoutes(v1)
-	routes.RegisterAccountRoutes(v1)
-	routes.RegisterTransactionRoutes(v1)
-	routes.RegisterPlanRoutes(v1)
+	routes.RegisterAuthRoutes(v1, authHandler)
+	routes.RegisterUserRoutes(v1, db, redisCache)
+	routes.RegisterAccountRoutes(v1, db, redisCache)
+	routes.RegisterPlanRoutes(v1, db, redisCache)
+	routes.RegisterTransactionRoutes(v1, db, redisCache)
 	routes.RegisterUtilRoutes(v1)
 	routes.RegisterStatsRoutes(v1)
 

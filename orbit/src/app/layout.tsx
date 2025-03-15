@@ -1,18 +1,8 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import Nav from '@/components/shared/Nav';
-
-const geistSans = Geist({
-    variable: '--font-geist-sans',
-    subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-});
+import Footer from '@/components/shared/Footer';
 
 const satoshi = localFont({
     src: '../../public/fonts/satoshi/Satoshi-Variable.woff2',
@@ -31,13 +21,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang='en'>
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} ${satoshi.className} antialiased relative`}
-            >
-                <div className='fixed top-0 left-0 w-full z-50'>
-                    <Nav />
-                </div>
+            <body className={`${satoshi.className} antialiased relative`}>
+                {/* <div className='fixed top-0 left-0 w-full z-50'> */}
+                <Nav />
+                {/* </div> */}
                 {children}
+                <Footer />
             </body>
         </html>
     );

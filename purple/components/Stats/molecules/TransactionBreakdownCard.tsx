@@ -2,14 +2,14 @@ import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { StyleSheet } from 'react-native';
+import React from 'react';
 
 type TransactionBreakdownCardProps = {
     data: {
         type: string;
         category: string;
-        description: string;
+        percentage: string;
         amount: string;
-        dateTime: string;
     };
     onPress: () => void;
 };
@@ -18,12 +18,12 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
     return (
         <TouchableOpacity
             onPress={onPress}
-            className='flex w-full flex-row items-center justify-between space-x-3.5 py-3.5'
+            className='flex w-full flex-row items-center justify-between space-x-3.5 py-3.5 px-5'
         >
             <View className='relative items-center justify-center flex flex-row space-x-2.5'>
                 <View className='flex items-center justify-center rounded-full bg-purple-100 px-2 py-1'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xs'>
-                        89%
+                        {Math.abs(Number(data.percentage)).toFixed(0)}%
                     </Text>
                 </View>
 
@@ -39,7 +39,7 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
                 ]}
                 className='text-xs'
             >
-                {data.type === 'debit' ? '-' : '+'}
+                {data.type === 'debit' ? '' : '+'}
                 {data.amount}
             </Text>
         </TouchableOpacity>

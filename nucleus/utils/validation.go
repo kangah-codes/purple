@@ -46,7 +46,6 @@ func validateNumber(fl validator.FieldLevel) bool {
 func validateCurrency(fl validator.FieldLevel) bool {
 	currency := fl.Field().String()
 
-	// check if the currency is in the Currencies slice which is a slice of Currency structs
 	for _, c := range Currencies {
 		if c.Code == currency {
 			return true

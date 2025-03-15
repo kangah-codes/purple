@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"nucleus/internal/models"
-	"nucleus/log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -115,25 +114,4 @@ func GenerateSessionToken() (string, error) {
 	}
 
 	return base64.StdEncoding.EncodeToString(token), nil
-}
-
-func CreateSession(db *gorm.DB, userID uuid.UUID) (models.Session, error) {
-	token, err := GenerateSessionToken()
-	if err != nil {
-		log.ErrorLogger.Println(err)
-		return models.Session{}, err
-	}
-
-	session := models.Session{
-		UserID:    userID,
-		Token:     token,
-		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
-	}
-	result := db.Create(&session)
-	if result.Error != nil {
-		log.ErrorLogger.Println(result.Error)
-		return models.Session{}, result.Error
-	}
-
-	return session, nil
 }

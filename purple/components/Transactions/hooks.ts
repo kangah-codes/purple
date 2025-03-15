@@ -135,7 +135,6 @@ export function useInfiniteTransactions({
                     ? nextPage
                     : undefined;
             },
-            enabled: !!sessionData,
         },
     );
 }

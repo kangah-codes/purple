@@ -1,4 +1,5 @@
-import { transactionData } from '@/components/Index/constants';
+import { useAuth } from '@/components/Auth/hooks';
+import { SessionData } from '@/components/Auth/schema';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
@@ -6,13 +7,15 @@ import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { StarsIcon } from '@/components/SVG/24x24';
+import { useInfiniteTransactions } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { deepCompare } from '@/lib/utils/object';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useStatsStore } from '../hooks';
 import HeatmapLoading from './HeatmapLoading';
 
@@ -30,13 +33,46 @@ const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
 function StatsHeatmap() {
+    const { sessionData } = useAuth();
     const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const values = useMemo(
-        () => finalMonthDays.map(() => Math.floor(Math.random() * 24)),
-        [finalMonthDays],
-    );
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const { data, fetchNextPage, hasNextPage, isLoading, refetch, isFetching } =
+        useInfiniteTransactions({
+            sessionData: sessionData as SessionData,
+            requestQuery: {
+                page_size: 10,
+                startDate: selectedDate ? selectedDate : '',
+                endDate: selectedDate ? selectedDate : '',
+            },
+            options: {
+                onError: (err) => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: err.message,
+                        },
+                    });
+                },
+                enabled: selectedDate !== null,
+            },
+        });
+
+    const handleLoadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
+
+    // flatten the data
+    useEffect(() => {
+        if (data) {
+            const tx = data.pages.flatMap((page) => page.data);
+            setTransactions(tx);
+        }
+    }, [data]);
 
     const heatmapData = useMemo(
         () =>
@@ -52,31 +88,14 @@ function StatsHeatmap() {
         [monthDays, stats],
     );
 
-    const click = useCallback(
-        (item: CellData) => {
-            const newDate = format(finalMonthDays[item.index], 'dd/MM/yyyy');
-            if (newDate !== selectedDate) {
-                setSelectedDate(newDate);
-                setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
-            }
-        },
-        [selectedDate],
-    );
-    const handleCellPress = useCallback(
-        (data: CellData) => {
-            setSelectedDate(data.key);
-            setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
-        },
-        [stats],
-    );
-
     const renderCell = useCallback(
-        (data: CellData, index: number) => {
-            const colorIndex = getColorIndex(values[index], 0, Math.max(...values), colors.length);
+        (data: CellData) => {
+            const maxValue = Math.max(...heatmapData.map((d) => d.value));
+            const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
 
             if (format(now, 'dd/MM/yyyy') === data.key) {
                 return (
-                    <TouchableOpacity key={data.key} onPress={handleCellPress.bind(null, data)}>
+                    <TouchableOpacity key={data.key}>
                         <LinearGradient
                             style={styles.linearGradient}
                             colors={colors[colorIndex]}
@@ -90,6 +109,18 @@ function StatsHeatmap() {
         },
         [stats],
     );
+
+    // TODO: come back to this in the future
+    // const click = useCallback(
+    //     (item: CellData) => {
+    //         const newDate = format(finalMonthDays[item.index], 'dd/MM/yyyy');
+    //         if (newDate !== selectedDate) {
+    //             setSelectedDate(newDate);
+    //             setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
+    //         }
+    //     },
+    //     [selectedDate],
+    // );
 
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
     const renderItem = useCallback(
@@ -111,7 +142,7 @@ function StatsHeatmap() {
                         </Text>
                     }
                     sheetKey={'statsDailyTransactionBreakdownList'}
-                    data={transactionData}
+                    data={transactions}
                     renderItem={renderItem}
                     containerStyle={styles.bottomSheetContainer}
                     handleIndicatorStyle={styles.handleIndicator}
@@ -142,7 +173,7 @@ function StatsHeatmap() {
                         rows={4}
                         cols={numBlocksPerRow}
                         data={heatmapData}
-                        onPressCallback={click}
+                        // onPressCallback={click}
                         startColumn={getDay(start)}
                         renderCell={renderCell}
                     />
@@ -150,10 +181,6 @@ function StatsHeatmap() {
             </View>
         </View>
     );
-}
-
-function arePropsEqual(prevProps: any, nextProps: any) {
-    return deepCompare(prevProps, nextProps);
 }
 
 const styles = StyleSheet.create({
@@ -176,4 +203,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default memo(StatsHeatmap, arePropsEqual);
+export default StatsHeatmap;

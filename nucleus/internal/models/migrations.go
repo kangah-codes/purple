@@ -44,6 +44,7 @@ func Migrate(db *gorm.DB) {
 			log.ErrorLogger.Fatalf("Failed to run migrations: %v", err)
 		}
 		log.InfoLogger.Println("Migrations completed")
+		return
 	}
 
 	log.InfoLogger.Println("Skipping migrations")

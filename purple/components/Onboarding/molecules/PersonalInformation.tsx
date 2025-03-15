@@ -5,6 +5,7 @@ import { forwardRef, useImperativeHandle } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import tw from 'twrnc';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import React from 'react';
 
 const PersonalInformation = forwardRef((props, ref) => {
     const {

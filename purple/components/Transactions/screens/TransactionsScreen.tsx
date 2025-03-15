@@ -51,8 +51,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             },
         });
 
-    console.log('TRANSACTIONS', transactions);
-
     // flatten the data
     useEffect(() => {
         if (data) {

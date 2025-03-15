@@ -57,3 +57,4 @@ expo-env.d.ts
 # **/bin/
 nucleus/bin/air
 nucleus/bin/main.exe
+/nucleus/bin

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +12,11 @@ import (
 	"strconv"
 	"time"
 )
+
+func HashToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
+}
 
 func EnvValue(envKey string, defaultValue string) string {
 	val, present := os.LookupEnv(envKey)

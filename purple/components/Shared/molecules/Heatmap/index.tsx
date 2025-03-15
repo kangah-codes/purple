@@ -35,7 +35,6 @@ export default function Heatmap({
     startColumn,
 }: HeatmapProps) {
     const maxValue = useMemo(() => Math.max(...data.map((d) => d.value)), [data]);
-
     const fullData = useMemo(() => {
         const offsetData = Array(startColumn).fill({
             value: 0,
