@@ -77,6 +77,7 @@ func main() {
 	})
 
 	// initialise auth stuff
+	// TODO: figure out a prettier way to do this
 	postgresAuthRepo := repositories.NewPostgresAuthRepository(db)
 	userRepo := repositories.NewPostgresUserRepository(db)
 	cacheAuthRepo := repositories.NewCachingAuthRepository(postgresAuthRepo, redisCache, "auth", time.Minute*10)
