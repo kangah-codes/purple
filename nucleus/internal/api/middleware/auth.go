@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
@@ -18,6 +19,18 @@ type AuthMiddlewareConfig struct {
 
 func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		disabledRoutes := map[string]bool{
+			"/api/v1/auth/sign-in": true,
+			"/api/v1/auth/sign-up": true,
+		}
+
+		fmt.Println(c.FullPath(), "PATH")
+
+		if disabledRoutes[c.FullPath()] {
+			c.Next()
+			return
+		}
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, types.Response{

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
@@ -29,6 +30,11 @@ type PlanQuery struct {
 	EndDate   string `json:"end_date"`
 	PlanType  string `json:"type"`
 }
+
+var ErrPlanNotFound = errors.New("plan not found")
+var ErrAccountNotFound = errors.New("account not found")
+var ErrUnauthAccess = errors.New("invalid permissions")
+var ErrCurrencyMismatch = errors.New("account currency  does not match plan currency")
 
 func (s *PlanService) CreatePlan(ctx context.Context, payload types.CreatePlanDTO, userID uuid.UUID) (*models.Plan, error) {
 	plan := models.Plan{
@@ -129,10 +135,9 @@ func (s *PlanService) DeletePlan(ctx context.Context, planIDStr string, userIDSt
 	return tx.Commit().Error
 }
 
-func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, transaction types.CreatePlanTransaction) (*models.PlanTransaction, error) {
+func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (*models.Transaction, error) {
 	var account models.Account
 
-	// Start database transaction
 	tx := s.db.Begin()
 	if tx.Error != nil {
 		log.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
@@ -145,115 +150,91 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		}
 	}()
 
-	// Fetch the plan
 	plan, err := s.planRepo.FindByIDAndUserID(ctx, planID, userID)
 	if err != nil {
 		tx.Rollback()
-		return nil, fmt.Errorf("plan not found")
+		return nil, ErrPlanNotFound
 	}
 	if plan == nil {
 		tx.Rollback()
-		return nil, fmt.Errorf("plan not found")
+		return nil, ErrPlanNotFound
 	}
 
-	// Handle account debit if specified
-	if transaction.DebitAccountId != uuid.Nil {
+	if createTransaction.DebitAccountId != uuid.Nil {
 		accountRepo := repositories.NewPostgresAccountRepository(s.db)
-		acc, err := accountRepo.FindByIDAndUserID(ctx, transaction.DebitAccountId, userID)
+
+		acc, err := accountRepo.FindByIDAndUserID(ctx, createTransaction.DebitAccountId, userID)
 		if err != nil {
 			tx.Rollback()
-			return nil, fmt.Errorf("account not found: %w", err)
+			return nil, ErrAccountNotFound
 		}
-		account = *acc // Dereference the pointer
+		account = *acc
 
-		// Validate currency match
-		if account.Currency != plan.Currency {
+		if acc.Currency != plan.Currency {
 			tx.Rollback()
-			return nil, fmt.Errorf("account currency does not match plan currency")
+			return nil, ErrCurrencyMismatch
 		}
 
-		// Debit the account
-		account.Balance -= transaction.Amount
+		account.Balance -= createTransaction.Amount
 		if err := accountRepo.Update(ctx, &account); err != nil {
 			tx.Rollback()
 			log.ErrorLogger.Printf("Error updating account balance: %v", err)
 			return nil, fmt.Errorf("error updating account balance")
 		}
 
-		// Create account transaction (consider moving this to AccountService if it becomes more complex)
-		if err := s.createAccountTransaction(tx, *plan, account, transaction, userID); err != nil {
+		var planEmoji string
+		if plan.Type == "saving" {
+			planEmoji = "💰"
+		} else {
+			planEmoji = "📉"
+		}
+		transaction := models.Transaction{
+			AccountId:   account.ID,
+			UserId:      userID,
+			Type:        "debit",
+			Amount:      createTransaction.Amount,
+			Note:        createTransaction.Note,
+			Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
+			FromAccount: account.ID,
+			ToAccount:   uuid.Nil,
+			Currency:    account.Currency,
+		}
+
+		if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
 			tx.Rollback()
 			return nil, err
 		}
 	}
 
-	// Create plan transaction
-	planTransaction := models.PlanTransaction{
-		Amount: transaction.Amount,
-		Note:   transaction.Note,
+	transaction := models.Transaction{
+		Amount: createTransaction.Amount,
+		Note:   createTransaction.Note,
 		UserId: userID,
-		PlanId: plan.ID,
 	}
 
-	if transaction.DebitAccountId != uuid.Nil {
-		planTransaction.DebitAccountId = &transaction.DebitAccountId
-		planTransaction.DebitAccount = account
+	if createTransaction.DebitAccountId != uuid.Nil {
+		transaction.FromAccount = createTransaction.DebitAccountId
+		transaction.ToAccount = account.ID
 	}
 
-	// Create plan transaction within the database transaction
-	if err := s.transactionRepo.CreateForPlan(ctx, tx, &planTransaction); err != nil {
+	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
 		tx.Rollback()
 		log.ErrorLogger.Printf("Error creating plan transaction: %v", err)
 		return nil, fmt.Errorf("error creating plan transaction")
 	}
 
-	// Update plan balance
-	plan.Balance += transaction.Amount
+	plan.Balance += createTransaction.Amount
 	if err := s.planRepo.Update(ctx, plan); err != nil {
 		tx.Rollback()
 		log.ErrorLogger.Printf("Error updating plan balance: %v", err)
 		return nil, fmt.Errorf("error updating plan balance")
 	}
 
-	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		log.ErrorLogger.Printf("Error committing transaction: %v", err)
 		return nil, fmt.Errorf("error processing request: %v", err)
 	}
 
-	// Cache invalidation is handled by the caching repository
-
-	return &planTransaction, nil
-}
-
-func (s *PlanService) createAccountTransaction(tx *gorm.DB, plan models.Plan, account models.Account, transaction types.CreatePlanTransaction, userID uuid.UUID) error {
-	// Create emoji for plan type
-	var planEmoji string
-	if plan.Type == "saving" {
-		planEmoji = "💰"
-	} else {
-		planEmoji = "📉"
-	}
-
-	// Create a transaction for the account
-	accTransaction := models.Transaction{
-		AccountId:   account.ID,
-		UserId:      userID,
-		Type:        "debit",
-		Amount:      transaction.Amount,
-		Note:        transaction.Note,
-		Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
-		FromAccount: account.ID,
-		ToAccount:   uuid.Nil,
-		Currency:    account.Currency,
-	}
-
-	accountTransactionRepo := repositories.NewPostgresTransactionRepository(tx) // Create repo within transaction
-	if err := accountTransactionRepo.Create(context.Background(), tx, &accTransaction); err != nil {
-		log.ErrorLogger.Printf("Error creating account transaction: %v", err)
-		return fmt.Errorf("error creating account transaction")
-	}
-
-	return nil
+	return &transaction, nil
 }

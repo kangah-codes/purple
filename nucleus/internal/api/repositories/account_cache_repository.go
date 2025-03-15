@@ -86,7 +86,6 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 	}
 
 	if found {
-		// Even if we found cached accounts, we still need to get the total count
 		totalItems, err := r.next.CountByUserID(ctx, userID)
 		if err != nil {
 			log.ErrorLogger.Printf("Error getting account count: %v", err)
@@ -137,5 +136,5 @@ func (r *CachingAccountRepository) Delete(ctx context.Context, account *models.A
 
 func (r *CachingAccountRepository) invalidateUserAccountsCache(ctx context.Context, userID uuid.UUID) {
 	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String())) // Consider if user details need invalidation
+	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String()))
 }

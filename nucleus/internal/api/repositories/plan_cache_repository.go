@@ -91,12 +91,9 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 		log.ErrorLogger.Printf("Error getting paginated plans from cache: %v", err)
 	}
 	if found {
-		// We don't cache the total count in this simple example,
-		// so we'll always fetch it from the underlying repository.
 		totalItems, err := r.next.CountByUserID(ctx, userID)
 		if err != nil {
-			// TODO: come back to this
-			log.ErrorLogger.Println("")
+			return nil, -1, err
 		}
 		return cachedPlans, totalItems, nil
 	}

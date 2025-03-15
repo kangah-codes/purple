@@ -56,23 +56,6 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 	return err
 }
 
-func (r *CachingTransactionRepository) CreateForPlan(ctx context.Context, tx *gorm.DB, transaction *models.PlanTransaction) error {
-	err := r.next.CreateForPlan(ctx, tx, transaction)
-	if err == nil {
-		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-	}
-	return err
-}
-
-// func (r *CachingTransactionRepository) Update(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
-// 	err := r.next.Update(ctx, tx, transaction)
-// 	if err == nil {
-// 		r.cache.Invalidate(ctx, r.buildTransactionCacheKey(transaction.UserId, transaction.ID))
-// 		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-// 	}
-// 	return err
-// }
-
 func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
 	key := r.buildTransactionCacheKey(userID, transactionID)
 	var cachedTransaction models.Transaction
@@ -124,14 +107,13 @@ func (r *CachingTransactionRepository) CountByUserID(ctx context.Context, userID
 	return r.next.CountByUserID(ctx, userID)
 }
 
-// func (r *CachingTransactionRepository) Delete(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
-// 	err := r.next.Delete(ctx, tx, transaction)
-// 	if err == nil {
-// 		r.cache.Invalidate(ctx, r.buildTransactionCacheKey(transaction.UserId, transaction.ID))
-// 		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-// 	}
-// 	return err
-// }
+func (r *CachingTransactionRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	err := r.next.DeleteByUserID(ctx, tx, userID)
+	if err == nil {
+		r.invalidateUserTransactionsCache(ctx, userID)
+	}
+	return err
+}
 
 func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx context.Context, userID uuid.UUID) {
 	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))

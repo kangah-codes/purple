@@ -14,8 +14,9 @@ import (
 
 func RegisterAccountRoutes(r *gin.RouterGroup, db *gorm.DB, cache *cache.RedisCache) {
 	postgresAccountRepo := repositories.NewPostgresAccountRepository(db)
+	postgresTransactionRepo := repositories.NewPostgresTransactionRepository(db)
 	cacheAccountRepo := repositories.NewCachingAccountRepository(postgresAccountRepo, cache, "accounts", time.Minute*5)
-	accountService := services.NewAccountService(cacheAccountRepo, db)
+	accountService := services.NewAccountService(cacheAccountRepo, postgresTransactionRepo, db)
 	accountHandler := handlers.NewAccountHandler(accountService)
 
 	accountGroup := r.Group("/account")

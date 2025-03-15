@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/internal/models"
 	"nucleus/log"
 	"nucleus/utils"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,7 +13,6 @@ import (
 
 type AuthHandler struct {
 	authService *services.AuthService
-	userService *services.UserService
 }
 
 func NewAuthHandler(authService *services.AuthService) *AuthHandler {
@@ -48,10 +44,10 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.SignUp(c.Request.Context(), &signUp, ipInfo)
+	user, err := h.authService.SignUp(c.Request.Context(), &signUp, ipInfo)
 	if err != nil {
 		log.ErrorLogger.Printf("Failed to sign up user: %v", err)
-		if fmt.Sprint(err) == "user already exists with these details: sql: statement error" { // Adjust error checking as needed
+		if err == services.ErrUserAlreadyExists {
 			c.JSON(http.StatusConflict, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
 		} else {
 			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
@@ -91,24 +87,13 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	type Response struct {
-		AccessToken           string           `json:"access_token"`
-		AccessTokenExpiresAt  time.Time        `json:"access_token_expires_at"`
-		RefreshToken          string           `json:"refresh_token"`
-		RefreshTokenExpiresAt time.Time        `json:"refresh_token_expires_at"`
-		User                  models.User      `json:"user"`
-		AccountGroups         []string         `json:"account_groups"`
-		Currencies            []utils.Currency `json:"currencies"`
-		TransactionTypes      []string         `json:"transaction_types"`
-	}
-
-	response := Response{
-		AccessToken:          session.Token,
-		AccessTokenExpiresAt: session.ExpiresAt,
-		User:                 *user,
-		AccountGroups:        utils.AccountGroups,
-		Currencies:           utils.Currencies,
-		TransactionTypes:     utils.TransactionTypes,
+	response := gin.H{
+		"AccessToken":          session.Token,
+		"AccessTokenExpiresAt": session.ExpiresAt,
+		"User":                 *user,
+		"AccountGroups":        utils.AccountGroups,
+		"Currencies":           utils.Currencies,
+		"TransactionTypes":     utils.TransactionTypes,
 	}
 
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Sign in successful", Data: response})
@@ -119,7 +104,7 @@ func (h *AuthHandler) SignOut(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, types.Response{Status: 401, Message: "Unauthorized"})
 		return
 	}
 

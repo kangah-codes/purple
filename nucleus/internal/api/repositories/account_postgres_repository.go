@@ -35,14 +35,11 @@ func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accou
 
 func (r *PostgresAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int64, error) {
 	var accounts []models.Account
-	var totalItems int64
-
-	// Get the total count first
-	if err := r.db.WithContext(ctx).Model(&models.Account{}).Where("user_id = ?", userID).Count(&totalItems).Error; err != nil {
-		return nil, 0, err
+	totalItems, err := r.CountByUserID(ctx, userID)
+	if err != nil {
+		return accounts, -1, err
 	}
 
-	// Then get the paginated results
 	result := r.db.WithContext(ctx).Where("user_id = ?", userID).Offset((page - 1) * limit).Limit(limit).Find(&accounts)
 	if result.Error != nil {
 		return nil, 0, result.Error

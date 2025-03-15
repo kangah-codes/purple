@@ -121,7 +121,6 @@ func (h *PlanHandler) DeletePlan(c *gin.Context) {
 
 func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 	transaction := types.CreatePlanTransaction{}
-
 	if err := c.ShouldBindJSON(&transaction); err != nil {
 		log.ErrorLogger.Printf("Invalid client request: %v", err)
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
@@ -140,14 +139,14 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 
 	planTransaction, err := h.planService.AddPlanTransaction(c.Request.Context(), userUUID, planUUID, transaction)
 	if err != nil {
-		switch err.Error() {
-		case "plan not found":
+		switch err {
+		case services.ErrPlanNotFound:
 			c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
-		case "account not found":
+		case services.ErrAccountNotFound:
 			c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Account not found", Data: nil})
-		case "unauthorized access to plan":
+		case services.ErrUnauthAccess:
 			c.JSON(http.StatusUnauthorized, types.Response{Status: http.StatusUnauthorized, Message: "Cannot add transaction to this plan", Data: nil})
-		case "account currency does not match plan currency":
+		case services.ErrCurrencyMismatch:
 			c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Account currency does not match plan currency", Data: nil})
 		default:
 			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error processing request", Data: nil})

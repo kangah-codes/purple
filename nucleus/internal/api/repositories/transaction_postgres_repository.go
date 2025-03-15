@@ -39,12 +39,10 @@ func (r *PostgresTransactionRepository) FindByUserIDPaginated(ctx context.Contex
 	var transactions []models.Transaction
 	var totalItems int64
 
-	// Get the total count first
 	if err := r.db.WithContext(ctx).Model(&models.Account{}).Where("user_id = ?", userID).Count(&totalItems).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Then get the paginated results
 	result := r.db.WithContext(ctx).Where("user_id = ?", userID).Offset((page - 1) * limit).Limit(limit).Find(&transactions)
 	if result.Error != nil {
 		return nil, 0, result.Error
@@ -60,4 +58,8 @@ func (r *PostgresTransactionRepository) CountByUserID(ctx context.Context, userI
 		return 0, result.Error
 	}
 	return count, nil
+}
+
+func (r *PostgresTransactionRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	return tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.Transaction{}).Error
 }

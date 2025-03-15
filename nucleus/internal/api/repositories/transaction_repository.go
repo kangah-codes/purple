@@ -10,8 +10,8 @@ import (
 
 type TransactionRepository interface {
 	Create(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error
-	CreateForPlan(ctx context.Context, tx *gorm.DB, transaction *models.PlanTransaction) error
 	FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Transaction, error)
 	FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error)
 	CountByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
+	DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error
 }

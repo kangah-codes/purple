@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nucleus/internal/api/repositories"
+	"nucleus/internal/api/types"
 	"nucleus/internal/models"
 	"nucleus/log"
 	"nucleus/utils"
@@ -57,6 +58,58 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 	}
 
 	return &session, tx.Commit().Error
+}
+
+func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInfo *utils.IPInfo) (*models.User, error) {
+	hashedPassword, err := utils.HashPassword(signUp.Password)
+	if err != nil {
+		log.ErrorLogger.Printf("Error hashing password: %v", err)
+		return nil, err
+	}
+
+	user := models.User{
+		Username: signUp.Username,
+		Email:    signUp.Email,
+		Password: hashedPassword,
+		Accounts: []models.Account{
+			{
+				Name:             "Cash",
+				Category:         "💵 Cash",
+				Balance:          0.00,
+				IsDefaultAccount: true,
+				Currency:         ipInfo.Currency,
+				Transactions:     []models.Transaction{},
+			},
+		},
+		Plans:        []models.Plan{},
+		Transactions: []models.Transaction{},
+	}
+
+	tx := s.db.Begin()
+	defer tx.Rollback()
+
+	if err := s.userRepo.Create(ctx, tx, &user); err != nil {
+		tx.Rollback()
+		if err == gorm.ErrDuplicatedKey {
+			return nil, ErrUserAlreadyExists
+		}
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	createdUser, err := s.userRepo.FindByUsername(ctx, signUp.Username)
+	if err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
+		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		log.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	log.InfoLogger.Printf("Created user: %+v\n", createdUser)
+	return createdUser, nil
 }
 
 func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token string) error {

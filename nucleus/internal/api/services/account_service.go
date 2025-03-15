@@ -15,12 +15,13 @@ import (
 )
 
 type AccountService struct {
-	accountRepo repositories.AccountRepository
-	db          *gorm.DB
+	accountRepo     repositories.AccountRepository
+	transactionRepo repositories.TransactionRepository
+	db              *gorm.DB
 }
 
-func NewAccountService(accountRepo repositories.AccountRepository, db *gorm.DB) *AccountService {
-	return &AccountService{accountRepo: accountRepo, db: db}
+func NewAccountService(accountRepo repositories.AccountRepository, transactionRepo repositories.TransactionRepository, db *gorm.DB) *AccountService {
+	return &AccountService{accountRepo: accountRepo, transactionRepo: transactionRepo, db: db}
 }
 
 func (s *AccountService) CreateAccount(ctx context.Context, payload types.CreateAccountDTO, userID uuid.UUID) (*models.Account, error) {
@@ -139,8 +140,7 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 	return account, nil
 }
 
-func (s *AccountService) CreateAccountTransaction(tx *gorm.DB, plan models.Plan, account models.Account, transaction types.CreatePlanTransaction, userID uuid.UUID) error {
-	// ... (This logic might belong in a TransactionService or be part of the AccountService depending on complexity)
+func (s *AccountService) CreateAccountTransaction(ctx context.Context, tx *gorm.DB, plan models.Plan, account models.Account, createTransaction types.CreatePlanTransaction, userID uuid.UUID) error {
 	var planEmoji string
 	if plan.Type == "saving" {
 		planEmoji = "💰"
@@ -148,20 +148,20 @@ func (s *AccountService) CreateAccountTransaction(tx *gorm.DB, plan models.Plan,
 		planEmoji = "📉"
 	}
 
-	accTransaction := models.Transaction{
+	transaction := models.Transaction{
 		AccountId:   account.ID,
 		UserId:      userID,
 		Type:        "debit",
-		Amount:      transaction.Amount,
-		Note:        transaction.Note,
+		Amount:      createTransaction.Amount,
+		Note:        createTransaction.Note,
 		Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
 		FromAccount: account.ID,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
 	}
 
-	if err := tx.Create(&accTransaction).Error; err != nil {
-		log.ErrorLogger.Printf("Error creating account transaction: %v", err)
+	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
+		log.ErrorLogger.Printf("Error creating account transaction: %v", err.Error())
 		return fmt.Errorf("error creating account transaction")
 	}
 
