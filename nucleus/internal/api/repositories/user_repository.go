@@ -1,0 +1,17 @@
+package repositories
+
+import (
+	"context"
+	"nucleus/internal/models"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type UserRepository interface {
+	Create(ctx context.Context, tx *gorm.DB, user *models.User) error
+	FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
+	FindByUsername(ctx context.Context, username string) (*models.User, error)
+	Update(ctx context.Context, user *models.User) error
+	Delete(ctx context.Context, id uuid.UUID) error
+}
