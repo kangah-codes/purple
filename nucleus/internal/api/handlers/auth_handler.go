@@ -88,12 +88,12 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	}
 
 	response := gin.H{
-		"AccessToken":          session.Token,
-		"AccessTokenExpiresAt": session.ExpiresAt,
-		"User":                 &user,
-		"AccountGroups":        utils.AccountGroups,
-		"Currencies":           utils.Currencies,
-		"TransactionTypes":     utils.TransactionTypes,
+		"access_token":            session.Token,
+		"access_token_expires_at": session.ExpiresAt,
+		"user":                    &user,
+		"account_groups":          utils.AccountGroups,
+		"currencies":              utils.Currencies,
+		"transaction_types":       utils.TransactionTypes,
 	}
 
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Sign in successful", Data: response})

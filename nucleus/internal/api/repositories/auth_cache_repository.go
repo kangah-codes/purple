@@ -38,7 +38,7 @@ func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Sess
 	}
 
 	cacheKey := r.buildUserAuthCacheKey(session.Token)
-	err = r.cache.SetEncrypted(ctx, cacheKey, session, time.Minute*5)
+	err = r.cache.Set(ctx, cacheKey, session, time.Minute*5)
 	if err != nil {
 		log.ErrorLogger.Printf("Error setting user session in cache: %v", err)
 	}
@@ -58,7 +58,7 @@ func (r *CachingAuthRepository) Clear(ctx context.Context, token string) error {
 func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.Session, error) {
 	cacheKey := r.buildUserAuthCacheKey(token)
 	var cachedSession models.Session
-	found, err := r.cache.GetEncrypted(ctx, cacheKey, &cachedSession)
+	found, err := r.cache.Get(ctx, cacheKey, &cachedSession)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting session from cache: %v", err)
 	}
@@ -68,7 +68,7 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 
 	session, err := r.next.Get(ctx, token)
 	if err == nil && session != nil {
-		err := r.cache.SetEncrypted(ctx, cacheKey, session, r.expiration)
+		err := r.cache.Set(ctx, cacheKey, session, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting session in cache: %v", err)
 		}

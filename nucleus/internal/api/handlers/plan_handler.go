@@ -70,12 +70,10 @@ func (h *PlanHandler) UpdatePlanBalance(c *gin.Context) {
 
 func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 	userID, _ := c.Get("userID")
-
 	name := c.Query("name")
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
 	planType := c.Query("type")
-
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
@@ -108,8 +106,13 @@ func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 func (h *PlanHandler) DeletePlan(c *gin.Context) {
 	planID, _ := c.Params.Get("planID")
 	userID, _ := c.Get("userID")
+	parsedPlanID, err := uuid.Parse(planID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
+		return
+	}
 
-	err := h.planService.DeletePlan(c.Request.Context(), planID, userID.(string))
+	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
 	if err != nil {
 		log.ErrorLogger.Printf("Error deleting plan: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})
@@ -160,14 +163,13 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 func (h *PlanHandler) FetchPlan(c *gin.Context) {
 	planID := c.Param("planID")
 	userID, _ := c.Get("userID")
-
-	if _, err := uuid.Parse(planID); err != nil {
-		log.ErrorLogger.Println("Invalid UUID", planID, err)
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid plan id"})
+	parsedPlanID, err := uuid.Parse(planID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
 		return
 	}
 
-	plan, err := h.planService.FetchPlan(c.Request.Context(), planID, userID.(string))
+	plan, err := h.planService.FetchPlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})

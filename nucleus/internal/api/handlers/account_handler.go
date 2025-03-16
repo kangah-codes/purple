@@ -76,14 +76,21 @@ func (h *AccountHandler) FetchUserAccounts(c *gin.Context) {
 		pageSize = 10
 	}
 
-	accounts, totalItems, err := h.accountService.FetchPaginatedAccounts(c.Request.Context(), userID.(uuid.UUID), page, pageSize)
+	count, err := h.accountService.FetchTotalAccounts(c.Request.Context(), userID.(uuid.UUID))
+	if err != nil {
+		log.ErrorLogger.Printf("Error fetching total user accounts: %v", err)
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})
+		return
+	}
+
+	accounts, totalItems, err := h.accountService.FetchPaginatedAccounts(c.Request.Context(), userID.(uuid.UUID), page, int(count))
 	if err != nil {
 		log.ErrorLogger.Println(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})
 		return
 	}
 
-	totalPages := int((totalItems + int64(pageSize) - 1) / int64(pageSize))
+	totalPages := (totalItems + pageSize - 1) / pageSize
 	response := types.Response{
 		Status:     http.StatusOK,
 		Message:    "Accounts fetched successfully",

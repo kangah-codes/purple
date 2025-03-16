@@ -48,8 +48,8 @@ func (r *CachingAccountRepository) Create(ctx context.Context, account *models.A
 	return err
 }
 
-func (r *CachingAccountRepository) Update(ctx context.Context, account *models.Account) error {
-	err := r.next.Update(ctx, account)
+func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
+	err := r.next.Update(ctx, tx, account)
 	if err == nil {
 		r.cache.Invalidate(ctx, r.buildAccountCacheKey(account.UserId, account.ID))
 		r.invalidateUserAccountsCache(ctx, account.UserId)
@@ -60,7 +60,7 @@ func (r *CachingAccountRepository) Update(ctx context.Context, account *models.A
 func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
 	key := r.buildAccountCacheKey(userID, accountID)
 	var cachedAccount models.Account
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedAccount)
+	found, err := r.cache.Get(ctx, key, &cachedAccount)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting account from cache: %v", err)
 	}
@@ -70,7 +70,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 
 	account, err := r.next.FindByIDAndUserID(ctx, accountID, userID)
 	if err == nil && account != nil {
-		err := r.cache.SetEncrypted(ctx, key, account, r.expiration)
+		err := r.cache.Set(ctx, key, account, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting account in cache: %v", err)
 		}
@@ -78,10 +78,10 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 	return account, err
 }
 
-func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int64, error) {
+func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
 	key := r.buildUserAccountsCacheKey(userID, page, limit)
 	var cachedAccounts []models.Account
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedAccounts)
+	found, err := r.cache.Get(ctx, key, &cachedAccounts)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting paginated accounts from cache: %v", err)
 	}
@@ -96,7 +96,7 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 
 	accounts, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, page, limit)
 	if err == nil && len(accounts) > 0 {
-		err := r.cache.SetEncrypted(ctx, key, accounts, r.expiration)
+		err := r.cache.Set(ctx, key, accounts, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting paginated accounts in cache: %v", err)
 		}
@@ -105,9 +105,9 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 	return accounts, totalItems, err
 }
 
-func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {
+func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int, error) {
 	key := r.buildUserAccountsCountCacheKey(userID)
-	var cachedCount int64
+	var cachedCount int
 	found, err := r.cache.Get(ctx, key, &cachedCount)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting account count from cache: %v", err)

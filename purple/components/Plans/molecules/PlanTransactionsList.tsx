@@ -1,19 +1,19 @@
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import { View, Text } from '@/components/Shared/styled';
+import { Text, View } from '@/components/Shared/styled';
+import { Transaction } from '@/components/Transactions/schema';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
+import { FlashList } from '@shopify/flash-list';
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { usePlanStore } from '../hooks';
 import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
-import { PlanTransaction } from '../schema';
-import { FlashList } from '@shopify/flash-list';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function PlanTransactionsList() {
     const { currentPlan } = usePlanStore();
 
     const renderItem = useCallback(
-        ({ item }: { item: PlanTransaction }) => <PlanTransactionHistoryCard data={item} />,
+        ({ item }: { item: Transaction }) => <PlanTransactionHistoryCard data={item} />,
         [],
     );
     const renderEmptylist = useCallback(

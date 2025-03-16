@@ -71,7 +71,11 @@ export default function SignInScreen() {
                     setSessionData({
                         access_token,
                         access_token_expires_at,
-                        user,
+                        user: {
+                            ID: user.ID,
+                            username: user.username,
+                            email: user.email,
+                        },
                     })
                         .then(() => {
                             router.replace('/(tabs)/');

@@ -52,6 +52,7 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 	err := r.next.Create(ctx, tx, transaction)
 	if err == nil {
 		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
+		r.invalidateUserPlansCache(ctx, transaction.UserId, transaction.PlanId)
 	}
 	return err
 }
@@ -59,7 +60,7 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
 	key := r.buildTransactionCacheKey(userID, transactionID)
 	var cachedTransaction models.Transaction
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedTransaction)
+	found, err := r.cache.Get(ctx, key, &cachedTransaction)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting transaction from cache: %v", err)
 	}
@@ -69,7 +70,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 
 	transaction, err := r.next.FindByIDAndUserID(ctx, transactionID, userID)
 	if err == nil && transaction != nil {
-		err := r.cache.SetEncrypted(ctx, key, transaction, r.expiration)
+		err := r.cache.Set(ctx, key, transaction, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting transaction in cache: %v", err)
 		}
@@ -81,7 +82,8 @@ func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context
 	query := TransactionQuery{}
 	key := r.buildUserTransactionsCacheKey(userID, query, page, limit)
 	var cachedTransactions []models.Transaction
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedTransactions)
+	found, err := r.cache.Get(ctx, key, &cachedTransactions)
+	fmt.Println("FOUND, ", found)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting paginated transactions from cache: %v", err)
 	}
@@ -95,7 +97,7 @@ func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context
 
 	transactions, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, page, limit)
 	if err == nil && len(transactions) > 0 {
-		err := r.cache.SetEncrypted(ctx, key, transactions, r.expiration)
+		err := r.cache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting paginated transactions in cache: %v", err)
 		}
@@ -118,4 +120,9 @@ func (r *CachingTransactionRepository) DeleteByUserID(ctx context.Context, tx *g
 func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx context.Context, userID uuid.UUID) {
 	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))
 	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String()))
+}
+
+func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID, planID uuid.UUID) {
+	fmt.Println(r.cache.BuildKey("plans", userID.String(), planID.String()), "KL")
+	r.cache.Invalidate(ctx, r.cache.BuildKey("plans", userID.String(), planID.String()))
 }

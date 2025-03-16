@@ -163,6 +163,9 @@ export default function NewPlanTransactionScreen() {
                         <>
                             <Controller
                                 control={control}
+                                rules={{
+                                    required: "Debit Account can't be empty",
+                                }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
                                         <SelectField

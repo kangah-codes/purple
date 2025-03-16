@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"nucleus/utils"
 	"strconv"
-	"time"
 
 	"nucleus/internal/api/types"
-	"nucleus/internal/cache"
 	"nucleus/internal/models"
 	"nucleus/log"
 
@@ -137,13 +135,13 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	cacheKey := cache.BuildCacheKey("*", fmt.Sprintf("%v", userID), "*")
-	if err := cache.InvalidateCache(cacheKey); err != nil {
-		log.ErrorLogger.Debugf("Error invalidating cache with key %s: %v", cacheKey, err)
-		// we rollback just to be safe in case user data is still in the cache & we don't want that if the account is deleted & there's still cached data
-		tx.Rollback()
-		c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
-	}
+	// cacheKey := cache.BuildCacheKey("*", fmt.Sprintf("%v", userID), "*")
+	// if err := cache.InvalidateCache(cacheKey); err != nil {
+	// 	log.ErrorLogger.Debugf("Error invalidating cache with key %s: %v", cacheKey, err)
+	// 	// we rollback just to be safe in case user data is still in the cache & we don't want that if the account is deleted & there's still cached data
+	// 	tx.Rollback()
+	// 	c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+	// }
 
 	tx.Commit()
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "User deleted successfully", Data: nil})
@@ -154,19 +152,19 @@ func FetchUser(c *gin.Context) {
 	db = db.Debug()
 	user := models.User{}
 	userID := c.Param("id")
-	cacheKey := cache.BuildCacheKey("users", userID)
+	// cacheKey := cache.BuildKey("users", userID)
 
-	var cachedResponse types.Response
-	cacheHit, err := cache.GetEncryptedCache(cacheKey, &cachedResponse)
+	// var cachedResponse types.Response
+	// cacheHit, err := cache.GetCache(cacheKey, &cachedResponse)
 
-	if err != nil {
-		log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
-	}
+	// if err != nil {
+	// 	log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
+	// }
 
-	if cacheHit {
-		c.JSON(http.StatusOK, cachedResponse)
-		return
-	}
+	// if cacheHit {
+	// 	c.JSON(http.StatusOK, cachedResponse)
+	// 	return
+	// }
 
 	result := db.Preload("Accounts", func(db *gorm.DB) *gorm.DB {
 		return db.Where("user_id = ?", userID)
@@ -193,9 +191,9 @@ func FetchUser(c *gin.Context) {
 	}
 
 	response := types.Response{Status: 200, Message: "User fetched successfully", Data: user}
-	if err := cache.SetEncryptedCache(cacheKey, response, 5*time.Minute); err != nil {
-		log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
-	}
+	// if err := cache.CacheService.Set(c.Request.Context(), cacheKey, response, 5*time.Minute); err != nil {
+	// 	log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
+	// }
 
 	c.JSON(200, response)
 }

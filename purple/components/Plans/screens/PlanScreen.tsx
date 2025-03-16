@@ -1,7 +1,7 @@
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -40,6 +40,7 @@ function PlanScreen(props: PlanScreenProps) {
                         text2: "We couldn't fetch this plan",
                     },
                 });
+                router.back();
             },
         },
     });

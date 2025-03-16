@@ -42,7 +42,7 @@ func (r *CachingUserRepository) Create(ctx context.Context, tx *gorm.DB, user *m
 func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	key := r.buildUserCacheKey(id)
 	var cachedUser models.User
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedUser)
+	found, err := r.cache.Get(ctx, key, &cachedUser)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting user by ID from cache: %v", err)
 	}
@@ -52,7 +52,7 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 
 	user, err := r.next.FindByID(ctx, id)
 	if err == nil && user != nil {
-		err := r.cache.SetEncrypted(ctx, key, user, r.expiration)
+		err := r.cache.Set(ctx, key, user, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting user by ID in cache: %v", err)
 		}
@@ -63,7 +63,7 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 func (r *CachingUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	key := r.buildUserByUsernameCacheKey(username)
 	var cachedUser models.User
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedUser)
+	found, err := r.cache.Get(ctx, key, &cachedUser)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting user by username from cache: %v", err)
 	}
@@ -73,7 +73,7 @@ func (r *CachingUserRepository) FindByUsername(ctx context.Context, username str
 
 	user, err := r.next.FindByUsername(ctx, username)
 	if err == nil && user != nil {
-		err := r.cache.SetEncrypted(ctx, key, user, r.expiration)
+		err := r.cache.Set(ctx, key, user, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting user by username in cache: %v", err)
 		}

@@ -26,4 +26,6 @@ type Transaction struct {
 	ToAccount   uuid.UUID `json:"to_account"`
 	CreatedAt   time.Time `gorm:"type:timestamptz;not null"`
 	Currency    string    `gorm:"size:5" json:"currency"`
+	PlanId      uuid.UUID `json:"plan_id"`
+	Plan        Plan      `gorm:"foreignKey:PlanId" json:"plan"`
 }

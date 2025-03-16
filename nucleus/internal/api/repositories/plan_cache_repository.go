@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type CachingPlanRepository struct {
@@ -52,8 +53,16 @@ func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) e
 	return err
 }
 
-func (r *CachingPlanRepository) Update(ctx context.Context, plan *models.Plan) error {
-	err := r.next.Update(ctx, plan)
+func (r *CachingPlanRepository) CreateTransaction(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
+	err := r.next.CreateTransaction(ctx, tx, transaction)
+	if err == nil {
+		r.invalidateUserPlansCache(ctx, transaction.UserId)
+	}
+	return err
+}
+
+func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
+	err := r.next.Update(ctx, tx, plan)
 	if err == nil {
 		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.UserId, plan.ID))
 		r.invalidateUserPlansCache(ctx, plan.UserId)
@@ -64,7 +73,7 @@ func (r *CachingPlanRepository) Update(ctx context.Context, plan *models.Plan) e
 func (r *CachingPlanRepository) FindByIDAndUserID(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
 	key := r.buildPlanCacheKey(userID, planID)
 	var cachedPlan models.Plan
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedPlan)
+	found, err := r.cache.Get(ctx, key, &cachedPlan)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting plan from cache: %v", err)
 	}
@@ -74,7 +83,7 @@ func (r *CachingPlanRepository) FindByIDAndUserID(ctx context.Context, planID uu
 
 	plan, err := r.next.FindByIDAndUserID(ctx, planID, userID)
 	if err == nil && plan != nil {
-		err := r.cache.SetEncrypted(ctx, key, plan, r.expiration)
+		err := r.cache.Set(ctx, key, plan, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting plan in cache: %v", err)
 		}
@@ -86,7 +95,7 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 	query := PlanQuery{Name: name, StartDate: startDate, EndDate: endDate, PlanType: planType}
 	key := r.buildUserPlansCacheKey(userID, query, page, limit)
 	var cachedPlans []models.Plan
-	found, err := r.cache.GetEncrypted(ctx, key, &cachedPlans)
+	found, err := r.cache.Get(ctx, key, &cachedPlans)
 	if err != nil {
 		log.ErrorLogger.Printf("Error getting paginated plans from cache: %v", err)
 	}
@@ -100,7 +109,7 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 
 	plans, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, name, startDate, endDate, planType, page, limit)
 	if err == nil && len(plans) > 0 {
-		err := r.cache.SetEncrypted(ctx, key, plans, r.expiration)
+		err := r.cache.Set(ctx, key, plans, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Printf("Error setting paginated plans in cache: %v", err)
 		}
@@ -123,5 +132,4 @@ func (r *CachingPlanRepository) Delete(ctx context.Context, plan *models.Plan) e
 
 func (r *CachingPlanRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID) {
 	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String()))
 }

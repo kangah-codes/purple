@@ -17,11 +17,12 @@ import (
 type PlanService struct {
 	planRepo        repositories.PlanRepository
 	transactionRepo repositories.TransactionRepository
+	accountRepo     repositories.PostgresAccountRepository
 	db              *gorm.DB
 }
 
-func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, db *gorm.DB) *PlanService {
-	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, db: db}
+func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.PostgresAccountRepository, db *gorm.DB) *PlanService {
+	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
 }
 
 type PlanQuery struct {
@@ -68,7 +69,7 @@ func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, u
 	}
 
 	plan.Balance = balance
-	if err := s.planRepo.Update(ctx, plan); err != nil {
+	if err := s.planRepo.Update(ctx, s.db, plan); err != nil {
 		return nil, err
 	}
 
@@ -80,28 +81,11 @@ func (s *PlanService) FetchPaginatedPlans(ctx context.Context, userID uuid.UUID,
 	return plans, int(totalItems), err
 }
 
-func (s *PlanService) FetchPlan(ctx context.Context, planIDStr string, userIDStr string) (*models.Plan, error) {
-	planID, err := uuid.Parse(planIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid plan ID: %w", err)
-	}
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
-	}
+func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
 	return s.planRepo.FindByIDAndUserID(ctx, planID, userID)
 }
 
-func (s *PlanService) DeletePlan(ctx context.Context, planIDStr string, userIDStr string) error {
-	planID, err := uuid.Parse(planIDStr)
-	if err != nil {
-		return fmt.Errorf("invalid plan ID: %w", err)
-	}
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return fmt.Errorf("invalid user ID: %w", err)
-	}
-
+func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) error {
 	plan, err := s.planRepo.FindByIDAndUserID(ctx, planID, userID)
 	if err != nil {
 		return fmt.Errorf("plan not found")
@@ -127,7 +111,7 @@ func (s *PlanService) DeletePlan(ctx context.Context, planIDStr string, userIDSt
 		return err
 	}
 
-	if err := tx.WithContext(ctx).Where("plan_id = ? AND user_id = ?", plan.ID, userID).Delete(&models.PlanTransaction{}).Error; err != nil {
+	if err := tx.WithContext(ctx).Where("plan_id = ? AND user_id = ?", plan.ID, userID).Delete(&models.Transaction{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -160,74 +144,57 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		return nil, ErrPlanNotFound
 	}
 
-	if createTransaction.DebitAccountId != uuid.Nil {
-		accountRepo := repositories.NewPostgresAccountRepository(s.db)
-
-		acc, err := accountRepo.FindByIDAndUserID(ctx, createTransaction.DebitAccountId, userID)
-		if err != nil {
-			tx.Rollback()
-			return nil, ErrAccountNotFound
-		}
-		account = *acc
-
-		if acc.Currency != plan.Currency {
-			tx.Rollback()
-			return nil, ErrCurrencyMismatch
-		}
-
-		account.Balance -= createTransaction.Amount
-		if err := accountRepo.Update(ctx, &account); err != nil {
-			tx.Rollback()
-			log.ErrorLogger.Printf("Error updating account balance: %v", err)
-			return nil, fmt.Errorf("error updating account balance")
-		}
-
-		var planEmoji string
-		if plan.Type == "saving" {
-			planEmoji = "💰"
-		} else {
-			planEmoji = "📉"
-		}
-		transaction := models.Transaction{
-			AccountId:   account.ID,
-			UserId:      userID,
-			Type:        "debit",
-			Amount:      createTransaction.Amount,
-			Note:        createTransaction.Note,
-			Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
-			FromAccount: account.ID,
-			ToAccount:   uuid.Nil,
-			Currency:    account.Currency,
-		}
-
-		if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
-
-	transaction := models.Transaction{
-		Amount: createTransaction.Amount,
-		Note:   createTransaction.Note,
-		UserId: userID,
-	}
-
-	if createTransaction.DebitAccountId != uuid.Nil {
-		transaction.FromAccount = createTransaction.DebitAccountId
-		transaction.ToAccount = account.ID
-	}
-
-	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		tx.Rollback()
-		log.ErrorLogger.Printf("Error creating plan transaction: %v", err)
-		return nil, fmt.Errorf("error creating plan transaction")
-	}
-
+	// update plan balance
 	plan.Balance += createTransaction.Amount
-	if err := s.planRepo.Update(ctx, plan); err != nil {
+
+	// debit account
+	acc, err := s.accountRepo.FindByIDAndUserID(ctx, createTransaction.DebitAccountId, userID)
+	if err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Error updating plan balance: %v", err)
-		return nil, fmt.Errorf("error updating plan balance")
+		return nil, ErrAccountNotFound
+	}
+	account = *acc
+
+	if acc.Currency != plan.Currency {
+		tx.Rollback()
+		return nil, ErrCurrencyMismatch
+	}
+
+	account.Balance -= createTransaction.Amount
+	if err := s.accountRepo.Update(ctx, tx, &account); err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Error updating account balance: %v", err)
+		return nil, fmt.Errorf("error updating account balance")
+	}
+
+	var planEmoji string
+	if plan.Type == "saving" {
+		planEmoji = "💰"
+	} else {
+		planEmoji = "📉"
+	}
+	transaction := models.Transaction{
+		AccountId:   account.ID,
+		UserId:      userID,
+		Type:        "debit",
+		Amount:      createTransaction.Amount,
+		Note:        createTransaction.Note,
+		Category:    fmt.Sprintf("%v %v", planEmoji, plan.Name),
+		FromAccount: account.ID,
+		ToAccount:   uuid.Nil,
+		Currency:    account.Currency,
+		PlanId:      plan.ID,
+	}
+
+	if err := s.planRepo.CreateTransaction(ctx, tx, &transaction); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	err = s.planRepo.Update(ctx, tx, plan)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {

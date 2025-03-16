@@ -20,8 +20,8 @@ func (r *PostgresAccountRepository) Create(ctx context.Context, account *models.
 	return r.db.WithContext(ctx).Create(account).Error
 }
 
-func (r *PostgresAccountRepository) Update(ctx context.Context, account *models.Account) error {
-	return r.db.WithContext(ctx).Save(account).Error
+func (r *PostgresAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
+	return tx.WithContext(ctx).Save(account).Error
 }
 
 func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
@@ -33,7 +33,7 @@ func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accou
 	return &account, nil
 }
 
-func (r *PostgresAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int64, error) {
+func (r *PostgresAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
 	var accounts []models.Account
 	totalItems, err := r.CountByUserID(ctx, userID)
 	if err != nil {
@@ -48,13 +48,13 @@ func (r *PostgresAccountRepository) FindByUserIDPaginated(ctx context.Context, u
 	return accounts, totalItems, nil
 }
 
-func (r *PostgresAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {
+func (r *PostgresAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int, error) {
 	var count int64
 	result := r.db.WithContext(ctx).Model(&models.Account{}).Where("user_id = ?", userID).Count(&count)
 	if result.Error != nil {
 		return 0, result.Error
 	}
-	return count, nil
+	return int(count), nil
 }
 
 func (r *PostgresAccountRepository) Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error {

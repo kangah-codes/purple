@@ -45,8 +45,7 @@ func main() {
 
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
-	cache.InitRedis()
-	redisCache := cache.NewRedisCache(cache.RedisClient)
+	redisCache := cache.NewRedisCache()
 
 	// get db instance
 	db := utils.GetDB()

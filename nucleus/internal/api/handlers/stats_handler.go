@@ -33,7 +33,7 @@ func CalculateMonthlyStats(c *gin.Context) {
 
 	db := utils.GetDB()
 	transactions := []models.Transaction{}
-	planTransactions := []models.PlanTransaction{}
+	planTransactions := []models.Transaction{}
 	userID, exists := c.Get("userID")
 
 	var startQueryDate, endQueryDate time.Time
@@ -74,7 +74,7 @@ func CalculateMonthlyStats(c *gin.Context) {
 	}
 
 	// Fetch all plan transactions
-	planTransactionsResult := db.Model(&models.PlanTransaction{}).Where("user_id = ? and created_at >= ? and created_at <= ?", userID, startQueryDate, endQueryDate).Find(&planTransactions)
+	planTransactionsResult := db.Model(&models.Transaction{}).Where("user_id = ? and created_at >= ? and created_at <= ?", userID, startQueryDate, endQueryDate).Find(&planTransactions)
 	if planTransactionsResult.Error != nil {
 		log.ErrorLogger.Printf("Error fetching month plan transactions: %v", planTransactionsResult.Error)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error calculating daily activity", Data: nil})

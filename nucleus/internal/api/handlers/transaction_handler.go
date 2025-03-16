@@ -21,23 +21,29 @@ func NewTransactionHandler(service *services.TransactionService) *TransactionHan
 }
 
 func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
+	var (
+		transaction *models.Transaction
+		err         error
+	)
+
 	createTransaction := types.CreateTransactionDTO{}
 	userID, _ := c.Get("userID")
+
+	// parsedUserID, err := uuid.Parse(userID.(string))
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
+	// 	return
+	// }
 
 	if err := c.ShouldBindJSON(&createTransaction); err != nil {
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
 		return
 	}
 
-	var (
-		transaction *models.Transaction
-		err         error
-	)
-
 	if createTransaction.Type == models.Transfer {
-		transaction, err = h.transactionService.CreateTransferTransaction(c.Request.Context(), createTransaction, userID.(string))
+		transaction, err = h.transactionService.CreateTransferTransaction(c.Request.Context(), createTransaction, userID.(uuid.UUID))
 	} else {
-		transaction, err = h.transactionService.CreateTransaction(c.Request.Context(), createTransaction, userID.(string))
+		transaction, err = h.transactionService.CreateTransaction(c.Request.Context(), createTransaction, userID.(uuid.UUID))
 	}
 
 	if err != nil {

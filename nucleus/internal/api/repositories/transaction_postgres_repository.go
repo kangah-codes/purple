@@ -22,13 +22,9 @@ func (r *PostgresTransactionRepository) Create(ctx context.Context, tx *gorm.DB,
 	return tx.WithContext(ctx).Create(transaction).Error
 }
 
-func (r *PostgresTransactionRepository) CreateForPlan(ctx context.Context, tx *gorm.DB, transaction *models.PlanTransaction) error {
-	return tx.WithContext(ctx).Create(transaction).Error
-}
-
 func (r *PostgresTransactionRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
 	var transaction models.Transaction
-	result := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", accountID, userID).First(&transaction)
+	result := r.db.WithContext(ctx).Preload("Account").Where("id = ? AND user_id = ?", accountID, userID).First(&transaction)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -43,7 +39,7 @@ func (r *PostgresTransactionRepository) FindByUserIDPaginated(ctx context.Contex
 		return nil, 0, err
 	}
 
-	result := r.db.WithContext(ctx).Where("user_id = ?", userID).Offset((page - 1) * limit).Limit(limit).Find(&transactions)
+	result := r.db.WithContext(ctx).Preload("Account").Where("user_id = ?", userID).Order("created_at DESC").Offset((page - 1) * limit).Limit(limit).Find(&transactions)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}

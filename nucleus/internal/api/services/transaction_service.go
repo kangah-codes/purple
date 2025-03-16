@@ -25,16 +25,16 @@ func NewTransactionService(transactionRepo repositories.TransactionRepository, a
 	return &TransactionService{transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
 }
 
-func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO, userIDStr string) (*models.Transaction, error) {
-	parsedUserID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
+func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
 	tx := s.db.Begin()
-	defer tx.Rollback()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			log.ErrorLogger.Printf("Failed to create transaction: %v", r)
+		}
+	}()
 
-	account, err := s.accountRepo.FindByIDAndUserID(ctx, payload.AccountId, parsedUserID)
+	account, err := s.accountRepo.FindByIDAndUserID(ctx, payload.AccountId, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 
 	transaction := models.Transaction{
 		AccountId:   payload.AccountId,
-		UserId:      parsedUserID,
+		UserId:      userID,
 		Type:        payload.Type,
 		Amount:      payload.Amount,
 		Note:        payload.Note,
@@ -61,7 +61,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 		account.Balance += payload.Amount
 	}
 
-	if err := s.accountRepo.Update(ctx, account); err != nil {
+	if err := s.accountRepo.Update(ctx, tx, account); err != nil {
 		log.ErrorLogger.Printf("Error updating account balance: %v", err)
 		return nil, err
 	}
@@ -74,16 +74,16 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 	return &transaction, tx.Commit().Error
 }
 
-func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payload types.CreateTransactionDTO, userIDStr string) (*models.Transaction, error) {
-	parsedUserID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user id: %w", err)
-	}
-
+func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
 	tx := s.db.Begin()
-	defer tx.Rollback()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			log.ErrorLogger.Printf("Failed to delete plan: %v", r)
+		}
+	}()
 
-	fromAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.FromAccount, parsedUserID)
+	fromAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.FromAccount, userID)
 	if err != nil {
 		return nil, fmt.Errorf("source account not found: %w", err)
 	}
@@ -91,7 +91,7 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 		return nil, fmt.Errorf("source account not found")
 	}
 
-	toAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.ToAccount, parsedUserID)
+	toAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.ToAccount, userID)
 	if err != nil {
 		return nil, fmt.Errorf("destination account not found: %w", err)
 	}
@@ -105,7 +105,7 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 
 	transaction := models.Transaction{
 		AccountId:   payload.AccountId,
-		UserId:      parsedUserID,
+		UserId:      userID,
 		Type:        models.Transfer,
 		Amount:      payload.Amount,
 		Note:        payload.Note,
@@ -119,12 +119,12 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 	fromAccount.Balance -= payload.Amount
 	toAccount.Balance += payload.Amount
 
-	if err := s.accountRepo.Update(ctx, fromAccount); err != nil {
+	if err := s.accountRepo.Update(ctx, tx, fromAccount); err != nil {
 		log.ErrorLogger.Printf("Error updating source account balance: %v", err)
 		return nil, err
 	}
 
-	if err := s.accountRepo.Update(ctx, toAccount); err != nil {
+	if err := s.accountRepo.Update(ctx, tx, toAccount); err != nil {
 		log.ErrorLogger.Printf("Error updating destination account balance: %v", err)
 		return nil, err
 	}

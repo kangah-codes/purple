@@ -7,14 +7,15 @@ import { usePlanStore } from '../hooks';
 import { formatDateTime } from '@/lib/utils/date';
 import { useGetAccountFromStore } from '@/components/Accounts/utils';
 import { ArrowNarrowDownRightIcon } from '@/components/SVG/noscale';
+import { Transaction } from '@/components/Transactions/schema';
 
 type TransactionHistoryCardProps = {
-    data: PlanTransaction;
+    data: Transaction;
 };
 
 export default function PlanTransactionHistoryCard({ data }: TransactionHistoryCardProps) {
     const { currentPlan } = usePlanStore();
-    const account = useGetAccountFromStore(data.debit_account_id as string);
+    const account = useGetAccountFromStore(data.from_account);
 
     if (!currentPlan) return null;
 
@@ -28,7 +29,7 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
             <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-500'>
                 {date.date} • {date.time}
             </Text>
-            {data.debit_account_id && account && (
+            {data.from_account && account && (
                 <View className='flex flex-row items-center space-x-1'>
                     <ArrowNarrowDownRightIcon width={16} height={16} stroke='#F87171' />
                     <Text

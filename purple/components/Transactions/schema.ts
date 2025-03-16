@@ -20,8 +20,8 @@ export type Transaction = {
     account: Account;
     note: string;
     category: string;
-    from_account: number;
-    to_account: number;
+    from_account: string;
+    to_account: string;
     created_at: string;
     currency: string;
 };

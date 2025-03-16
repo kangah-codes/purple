@@ -47,8 +47,6 @@ type UpdatePlanBalanceDTO struct {
 }
 
 type CreatePlanTransaction struct {
-	PlanId         uuid.UUID `json:"plan_id" binding:"required"`
-	UserId         uuid.UUID `json:"user_id" binding:"required"`
 	DebitAccountId uuid.UUID `json:"debit_account_id"`
 	Amount         float64   `json:"amount" validate:"number"`
 	Note           string    `json:"note"`

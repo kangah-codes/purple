@@ -6,14 +6,21 @@ import (
 	"fmt"
 	"nucleus/internal/encryption"
 	"nucleus/log"
+	"nucleus/utils"
 	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
+type RedisCacheOptions struct {
+	Encrypt bool
+	Logger  *log.Logger
+}
+
 type RedisCache struct {
-	client *redis.Client
+	client  *redis.Client
+	options RedisCacheOptions
 }
 
 const (
@@ -21,8 +28,30 @@ const (
 	CacheVersion = "v1"
 )
 
-func NewRedisCache(client *redis.Client) *RedisCache {
-	return &RedisCache{client: client}
+var RedisClient *redis.Client
+
+func InitRedis() {
+	ctx := context.Background()
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr:     utils.EnvValue("REDIS_HOST", ""),
+		Password: utils.EnvValue("REDIS_PASSWORD", ""),
+		DB:       0,
+	})
+
+	_, err := RedisClient.Ping(ctx).Result()
+	if err != nil {
+		log.ErrorLogger.Errorf("Failed to connect to Redis: %v", err.Error())
+	} else {
+		log.InfoLogger.Println("Connected to Redis")
+	}
+}
+
+func NewRedisCache() *RedisCache {
+	InitRedis()
+	log.InfoLogger.Printf("Initialised Redis with options: \nEncryption: %v\n", utils.EnvValueBool("ENCRYPTION_ENABLED", false))
+	return &RedisCache{client: RedisClient, options: RedisCacheOptions{
+		Encrypt: utils.EnvValueBool("ENCRYPTION_ENABLED", false),
+	}}
 }
 
 func (r *RedisCache) BuildKey(parts ...string) string {
@@ -32,6 +61,18 @@ func (r *RedisCache) BuildKey(parts ...string) string {
 }
 
 func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	if r.options.Encrypt {
+		data, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+		encryptedData, err := encryption.Encrypt(string(data))
+		if err != nil {
+			return err
+		}
+		return r.client.Set(ctx, key, encryptedData, expiration).Err()
+	}
+
 	data, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -40,6 +81,23 @@ func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, exp
 }
 
 func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (bool, error) {
+	if r.options.Encrypt {
+		encryptedData, err := r.client.Get(ctx, key).Result()
+		if err == redis.Nil {
+			return false, nil
+		} else if err != nil {
+			return false, err
+		}
+		decryptedData, err := encryption.Decrypt(encryptedData)
+		if err != nil {
+			return false, err
+		}
+		if err := json.Unmarshal([]byte(decryptedData), object); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+
 	data, err := r.client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return false, nil
@@ -49,37 +107,7 @@ func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (b
 	if err := json.Unmarshal([]byte(data), object); err != nil {
 		return false, err
 	}
-	log.InfoLogger.Debugf("Cache hit for key %s returned %v", key, object)
-	return true, nil
-}
-
-func (r *RedisCache) SetEncrypted(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
-	data, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-	encryptedData, err := encryption.Encrypt(string(data))
-	if err != nil {
-		return err
-	}
-	return r.client.Set(ctx, key, encryptedData, expiration).Err()
-}
-
-func (r *RedisCache) GetEncrypted(ctx context.Context, key string, object interface{}) (bool, error) {
-	encryptedData, err := r.client.Get(ctx, key).Result()
-	if err == redis.Nil {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	decryptedData, err := encryption.Decrypt(encryptedData)
-	if err != nil {
-		return false, err
-	}
-	if err := json.Unmarshal([]byte(decryptedData), object); err != nil {
-		return false, err
-	}
-	log.InfoLogger.Debugf("Encrypted cache hit for key %s", key)
+	// log.InfoLogger.Debugf("Cache hit for key %s returned %v", key, object)
 	return true, nil
 }
 
@@ -92,7 +120,9 @@ func (r *RedisCache) Invalidate(ctx context.Context, pattern string) error {
 	if err := iter.Err(); err != nil {
 		return fmt.Errorf("failed to scan cache keys: %w", err)
 	}
+
 	if len(keys) > 0 {
+		fmt.Printf("KEYYSSS: %v\n", keys)
 		err := r.client.Del(ctx, keys...).Err()
 		if err != nil {
 			return fmt.Errorf("failed to delete cache keys: %w", err)

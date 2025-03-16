@@ -62,18 +62,18 @@ func (s *AccountService) UpdateAccount(ctx context.Context, accountIDStr string,
 	account.Balance = payload.Balance
 	account.Category = payload.Category
 
-	if err := s.accountRepo.Update(ctx, account); err != nil {
+	if err := s.accountRepo.Update(ctx, s.db, account); err != nil {
 		return nil, err
 	}
 
 	return account, nil
 }
 
-func (s *AccountService) FetchPaginatedAccounts(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int64, error) {
+func (s *AccountService) FetchPaginatedAccounts(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
 	return s.accountRepo.FindByUserIDPaginated(ctx, userID, page, limit)
 }
 
-func (s *AccountService) FetchTotalAccounts(ctx context.Context, userID uuid.UUID) (int64, error) {
+func (s *AccountService) FetchTotalAccounts(ctx context.Context, userID uuid.UUID) (int, error) {
 	return s.accountRepo.CountByUserID(ctx, userID)
 }
 

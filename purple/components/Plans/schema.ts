@@ -1,4 +1,5 @@
 import { Account } from '../Accounts/schema';
+import { Transaction } from '../Transactions/schema';
 
 export type BudgetPlan = {
     category: string;
@@ -30,7 +31,7 @@ export type Plan = {
     UpdatedAt: string;
     name: string;
     currency: string;
-    Transactions: PlanTransaction[];
+    Transactions: Transaction[];
 };
 
 export type CreatePlan = {

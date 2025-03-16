@@ -42,7 +42,7 @@ export type SessionDataResponse = {
 export type SessionData = {
     access_token: string;
     access_token_expires_at: string;
-    user: User;
+    user: Partial<User>;
 };
 
 export type SignUpScreenData = {
