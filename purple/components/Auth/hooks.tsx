@@ -27,7 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataResponse>, Error> => {
     return useMutation(['sign-in'], async (loginInformation) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth`, {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`, {
             method: 'POST',
             headers: {
                 'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
@@ -51,7 +51,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataRes
 
 export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataResponse>, Error> => {
     return useMutation(['sign-up'], async (signUpInformation) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/sign-up`, {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`, {
             method: 'POST',
             headers: {
                 'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
