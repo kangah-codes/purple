@@ -30,7 +30,7 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*m
 
 func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).Where("username = ?", username).Preload("Profile").Preload("Accounts").First(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Profile").Preload("Accounts").Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

@@ -90,7 +90,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	response := gin.H{
 		"AccessToken":          session.Token,
 		"AccessTokenExpiresAt": session.ExpiresAt,
-		"User":                 *user,
+		"User":                 &user,
 		"AccountGroups":        utils.AccountGroups,
 		"Currencies":           utils.Currencies,
 		"TransactionTypes":     utils.TransactionTypes,
