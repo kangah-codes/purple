@@ -43,7 +43,7 @@ func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Sess
 		log.ErrorLogger.Printf("Error setting user session in cache: %v", err)
 	}
 
-	return err
+	return nil
 }
 
 func (r *CachingAuthRepository) Clear(ctx context.Context, token string) error {
