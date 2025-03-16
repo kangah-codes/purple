@@ -111,10 +111,6 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 		return nil, fmt.Errorf("cannot delete default account")
 	}
 
-	// Note: Transaction handling for deleting associated transactions
-	// should ideally be within a unit of work pattern or a dedicated
-	// transaction management service. For simplicity here, we'll keep
-	// it within the service, but be aware of this potential improvement.
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -123,12 +119,14 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 		}
 	}()
 
-	if err := tx.WithContext(ctx).Where("id = ?", account.ID).Delete(&models.Account{}).Error; err != nil {
+	err = s.accountRepo.Delete(ctx, tx, account)
+	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	if err := tx.WithContext(ctx).Where("account_id = ? AND user_id = ?", account.ID, userID).Delete(&models.Transaction{}).Error; err != nil {
+	err = s.transactionRepo.DeleteByUserID(ctx, tx, account.UserId)
+	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}

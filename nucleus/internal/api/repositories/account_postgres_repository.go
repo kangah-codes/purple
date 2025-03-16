@@ -57,6 +57,6 @@ func (r *PostgresAccountRepository) CountByUserID(ctx context.Context, userID uu
 	return count, nil
 }
 
-func (r *PostgresAccountRepository) Delete(ctx context.Context, account *models.Account) error {
-	return r.db.WithContext(ctx).Delete(account).Error
+func (r *PostgresAccountRepository) Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error {
+	return tx.WithContext(ctx).Delete(account).Error
 }

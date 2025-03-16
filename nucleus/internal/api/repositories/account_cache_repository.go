@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type CachingAccountRepository struct {
@@ -125,8 +126,8 @@ func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uui
 	return count, err
 }
 
-func (r *CachingAccountRepository) Delete(ctx context.Context, account *models.Account) error {
-	err := r.next.Delete(ctx, account)
+func (r *CachingAccountRepository) Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error {
+	err := r.next.Delete(ctx, tx, account)
 	if err == nil {
 		r.cache.Invalidate(ctx, r.buildAccountCacheKey(account.UserId, account.ID))
 		r.invalidateUserAccountsCache(ctx, account.UserId)
