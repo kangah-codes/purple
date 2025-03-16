@@ -76,7 +76,7 @@ export default function NewAccountScreen() {
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-gray-100'>
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='tracking-tight'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight'>
                     {item.label}
                 </Text>
             </View>

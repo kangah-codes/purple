@@ -50,7 +50,7 @@ func NewRedisCache() *RedisCache {
 	InitRedis()
 	log.InfoLogger.Printf("Initialised Redis with options: \nEncryption: %v\n", utils.EnvValueBool("ENCRYPTION_ENABLED", false))
 	return &RedisCache{client: RedisClient, options: RedisCacheOptions{
-		Encrypt: utils.EnvValueBool("ENCRYPTION_ENABLED", false),
+		Encrypt: true,
 	}}
 }
 

@@ -338,7 +338,7 @@ export function calculateAmountAddedOnDay(
 }
 
 export function getAccountTransactionStats(
-    transactions: PlanTransaction[] | undefined,
+    transactions: Transaction[] | undefined,
     accounts: Account[],
 ): PlanAccountPieChartStats[] {
     if (!transactions) return [];
@@ -351,11 +351,11 @@ export function getAccountTransactionStats(
 
     // Process all transactions
     transactions.forEach((transaction) => {
-        if (transaction.debit_account_id) {
-            const account = accountMap.get(transaction.debit_account_id);
+        if (transaction.from_account) {
+            const account = accountMap.get(transaction.from_account);
             if (!account) return;
 
-            let stats = statsMap.get(transaction.debit_account_id);
+            let stats = statsMap.get(transaction.from_account);
 
             if (!stats) {
                 const palette = generatePalette(account.ID);
