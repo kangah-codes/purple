@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"nucleus/internal/api/types"
-	"nucleus/utils"
+	"nucleus/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

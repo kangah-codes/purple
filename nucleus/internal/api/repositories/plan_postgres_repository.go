@@ -70,8 +70,8 @@ func (r *PostgresPlanRepository) FindByUserIDPaginated(ctx context.Context, user
 	return plans, totalItems, nil
 }
 
-func (r *PostgresPlanRepository) Delete(ctx context.Context, plan *models.Plan) error {
-	return r.db.WithContext(ctx).Delete(plan).Error
+func (r *PostgresPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
+	return tx.WithContext(ctx).Delete(plan).Error
 }
 
 func (r *PostgresPlanRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {

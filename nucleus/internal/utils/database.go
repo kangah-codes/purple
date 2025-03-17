@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"nucleus/log"
+	"nucleus/internal/log"
 	"sync"
 
 	"gorm.io/driver/postgres"

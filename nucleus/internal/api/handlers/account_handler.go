@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/log"
+	"nucleus/internal/log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"

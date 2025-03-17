@@ -18,7 +18,7 @@ export default function Hero() {
                         <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold text-center'>
                             Did somebody say{' '}
                             <span className='text-gradient bg-gradient-to-br from-purple-500 to-purple-700 animate-gradient-x-2000'>
-                                freeeeeeeee
+                                freeeee
                             </span>
                             ?
                         </h1>

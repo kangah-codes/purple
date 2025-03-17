@@ -1,7 +1,7 @@
 package models
 
 import (
-	"nucleus/log"
+	"nucleus/internal/log"
 	"os"
 	"strconv"
 

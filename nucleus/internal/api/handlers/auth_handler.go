@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/log"
+	"nucleus/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

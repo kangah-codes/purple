@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"nucleus/internal/cache"
+	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/log"
 	"strconv"
 	"time"
 
@@ -121,8 +121,8 @@ func (r *CachingPlanRepository) CountByUserID(ctx context.Context, userID uuid.U
 	return 0, nil
 }
 
-func (r *CachingPlanRepository) Delete(ctx context.Context, plan *models.Plan) error {
-	err := r.next.Delete(ctx, plan)
+func (r *CachingPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
+	err := r.next.Delete(ctx, tx, plan)
 	if err == nil {
 		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.UserId, plan.ID))
 		r.invalidateUserPlansCache(ctx, plan.UserId)

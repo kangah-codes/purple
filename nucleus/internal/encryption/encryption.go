@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"nucleus/utils"
+	"nucleus/internal/utils"
 )
 
 func Encrypt(plainText string) (string, error) {

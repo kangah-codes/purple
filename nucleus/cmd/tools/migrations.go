@@ -1,9 +1,9 @@
 package main
 
 import (
+	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/utils"
 
 	"github.com/joho/godotenv"
 )

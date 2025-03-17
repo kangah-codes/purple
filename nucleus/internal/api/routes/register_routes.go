@@ -12,3 +12,7 @@ func RegisterUtilRoutes(r *gin.RouterGroup) {
 		userGroup.POST("/account-groups", handlers.FetchAccountGroups)
 	}
 }
+
+func CreateV1Group(r *gin.Engine) *gin.RouterGroup {
+	return r.Group("/api/v1")
+}

@@ -2,12 +2,11 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/log"
+	"nucleus/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -23,8 +22,6 @@ func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 			"/api/v1/auth/sign-in": true,
 			"/api/v1/auth/sign-up": true,
 		}
-
-		fmt.Println(c.FullPath(), "PATH")
 
 		if disabledRoutes[c.FullPath()] {
 			c.Next()

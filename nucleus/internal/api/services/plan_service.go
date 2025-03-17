@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
+	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/utils"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -94,10 +94,6 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID u
 		return fmt.Errorf("plan not found")
 	}
 
-	// Note: Transaction handling for deleting associated plan transactions
-	// should ideally be within a unit of work pattern or a dedicated
-	// transaction management service. For simplicity here, we'll keep
-	// it within the service, but be aware of this potential improvement.
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -106,12 +102,14 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID u
 		}
 	}()
 
-	if err := tx.WithContext(ctx).Where("id = ?", plan.ID).Delete(&models.Plan{}).Error; err != nil {
+	err = s.planRepo.Delete(ctx, tx, plan)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.WithContext(ctx).Where("plan_id = ? AND user_id = ?", plan.ID, userID).Delete(&models.Transaction{}).Error; err != nil {
+	err = s.transactionRepo.DeleteByUserID(ctx, tx, userID)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -121,12 +119,12 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID u
 
 func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (*models.Transaction, error) {
 	var account models.Account
-
 	tx := s.db.Begin()
 	if tx.Error != nil {
 		log.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
 		return nil, fmt.Errorf("error starting database transaction: %v", tx.Error)
 	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -183,7 +181,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		FromAccount: account.ID,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
-		PlanId:      plan.ID,
+		PlanId:      &plan.ID,
 	}
 
 	if err := s.planRepo.CreateTransaction(ctx, tx, &transaction); err != nil {

@@ -10,8 +10,8 @@ import (
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/log"
+	"nucleus/internal/utils"
 	"os"
 	"os/signal"
 	"syscall"
@@ -56,9 +56,27 @@ func main() {
 	// context for workers
 	ctx, cancel := context.WithCancel(context.Background())
 
+	// dispatch client
+	// dispatchClient, err := dispatch.NewDispatchClient(cache.RedisClient)
+	// if err != nil {
+	// 	log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
+	// }
+
 	// session cleaners
 	cleaner := workers.NewSessionCleaner(db)
 	cleaner.Start(ctx)
+
+	// register listeners
+	// listeners := []dispatch.BaseListener{}
+
+	// if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
+	// 	log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
+	// }
+
+	// start listening for internal events
+	// if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
+	// 	log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
+	// }
 
 	// rate limiting
 	rateLimitStore := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
@@ -94,7 +112,7 @@ func main() {
 	r.Use(middleware.AuthMiddleware(authMiddlewareConfig))
 
 	// create api group
-	v1 := utils.CreateV1Group(r)
+	v1 := routes.CreateV1Group(r)
 	routes.RegisterAuthRoutes(v1, authHandler)
 	routes.RegisterUserRoutes(v1, db, redisCache)
 	routes.RegisterAccountRoutes(v1, db, redisCache)
@@ -123,6 +141,11 @@ func main() {
 		// stop workers
 		cancel()
 		cleaner.Stop()
+
+		// stop dispatch client
+		// if err := dispatchClient.Close(); err != nil {
+		// 	log.ErrorLogger.Printf("Failed to close dispatch client: %v", err)
+		// }
 	}()
 
 	// disable trusted proxies

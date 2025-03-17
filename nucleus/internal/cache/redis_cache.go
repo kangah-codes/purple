@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"nucleus/internal/encryption"
-	"nucleus/log"
-	"nucleus/utils"
+	"nucleus/internal/log"
+	"nucleus/internal/utils"
 	"strings"
 	"time"
 

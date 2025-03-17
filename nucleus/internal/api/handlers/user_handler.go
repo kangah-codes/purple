@@ -3,12 +3,12 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"nucleus/utils"
+	"nucleus/internal/utils"
 	"strconv"
 
 	"nucleus/internal/api/types"
+	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/log"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
