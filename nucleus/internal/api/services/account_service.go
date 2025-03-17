@@ -115,7 +115,7 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			log.ErrorLogger.Printf("Failed to delete account: %v", r)
+			log.ErrorLogger.Errorf("Failed to delete account: %v", r)
 		}
 	}()
 
@@ -159,7 +159,7 @@ func (s *AccountService) CreateAccountTransaction(ctx context.Context, tx *gorm.
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		log.ErrorLogger.Printf("Error creating account transaction: %v", err.Error())
+		log.ErrorLogger.Errorf("Error creating account transaction: %v", err.Error())
 		return fmt.Errorf("error creating account transaction")
 	}
 

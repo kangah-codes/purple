@@ -40,7 +40,7 @@ func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Sess
 	cacheKey := r.buildUserAuthCacheKey(session.Token)
 	err = r.cache.Set(ctx, cacheKey, session, time.Minute*5)
 	if err != nil {
-		log.ErrorLogger.Printf("Error setting user session in cache: %v", err)
+		log.ErrorLogger.Errorf("Error setting user session in cache: %v", err)
 	}
 
 	return nil
@@ -60,7 +60,7 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	var cachedSession models.Session
 	found, err := r.cache.Get(ctx, cacheKey, &cachedSession)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting session from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting session from cache: %v", err)
 	}
 	if found {
 		return &cachedSession, nil
@@ -70,7 +70,7 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	if err == nil && session != nil {
 		err := r.cache.Set(ctx, cacheKey, session, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting session in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting session in cache: %v", err)
 		}
 	}
 

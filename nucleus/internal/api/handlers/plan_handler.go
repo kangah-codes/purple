@@ -35,7 +35,7 @@ func (h *PlanHandler) CreatePlan(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	plan, err := h.planService.CreatePlan(c.Request.Context(), createPlan, userID.(uuid.UUID))
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create plan", Data: nil})
 		return
 	}
@@ -60,7 +60,7 @@ func (h *PlanHandler) UpdatePlanBalance(c *gin.Context) {
 
 	plan, err := h.planService.UpdatePlanBalance(c.Request.Context(), planUUID, userID.(uuid.UUID), updatePlanBalance.Balance)
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update plan balance", Data: nil})
 		return
 	}
@@ -84,7 +84,7 @@ func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 		PlanType:  planType,
 	}, page, pageSize)
 	if err != nil {
-		log.ErrorLogger.Println("Error fetching user plans: %v", err)
+		log.ErrorLogger.Errorln("Error fetching user plans: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: nil})
 		return
 	}
@@ -114,7 +114,7 @@ func (h *PlanHandler) DeletePlan(c *gin.Context) {
 
 	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
 	if err != nil {
-		log.ErrorLogger.Printf("Error deleting plan: %v", err)
+		log.ErrorLogger.Errorf("Error deleting plan: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})
 		return
 	}
@@ -125,7 +125,7 @@ func (h *PlanHandler) DeletePlan(c *gin.Context) {
 func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 	transaction := types.CreatePlanTransaction{}
 	if err := c.ShouldBindJSON(&transaction); err != nil {
-		log.ErrorLogger.Printf("Invalid client request: %v", err)
+		log.ErrorLogger.Errorf("Invalid client request: %v", err)
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
 	}
@@ -194,7 +194,7 @@ func CalculatePlanOnTrack(c *gin.Context) {
 	}
 
 	if _, err := uuid.Parse(planID); err != nil {
-		log.ErrorLogger.Println("Invalid UUID", planID, err)
+		log.ErrorLogger.Errorln("Invalid UUID", planID, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
 		return
 	}
@@ -208,7 +208,7 @@ func CalculatePlanOnTrack(c *gin.Context) {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: http.StatusNotFound, Message: "Plan not found", Data: nil})
 		} else {
-			log.ErrorLogger.Println("Error fetching plan", result.Error)
+			log.ErrorLogger.Errorln("Error fetching plan", result.Error)
 			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Error fetching plan", Data: nil})
 		}
 		return

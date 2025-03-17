@@ -31,7 +31,7 @@ func (s *AuthService) FindUserByUsername(ctx context.Context, username string) (
 func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models.Session, error) {
 	tx := s.db.Begin()
 	if tx.Error != nil {
-		log.ErrorLogger.Printf("Failed to start transaction: %v", tx.Error)
+		log.ErrorLogger.Errorf("Failed to start transaction: %v", tx.Error)
 		return nil, tx.Error
 	}
 	defer tx.Rollback()
@@ -42,7 +42,7 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 
 	token, err := utils.GenerateSessionToken()
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInfo *utils.IPInfo) (*models.User, error) {
 	hashedPassword, err := utils.HashPassword(signUp.Password)
 	if err != nil {
-		log.ErrorLogger.Printf("Error hashing password: %v", err)
+		log.ErrorLogger.Errorf("Error hashing password: %v", err)
 		return nil, err
 	}
 
@@ -99,12 +99,12 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 	createdUser, err := s.userRepo.FindByUsername(ctx, signUp.Username)
 	if err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
+		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
 		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		log.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
+		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
@@ -115,7 +115,7 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token string) error {
 	tx := s.db.Begin()
 	if tx.Error != nil {
-		log.ErrorLogger.Printf("Failed to start transaction: %v", tx.Error)
+		log.ErrorLogger.Errorf("Failed to start transaction: %v", tx.Error)
 		return tx.Error
 	}
 	defer tx.Rollback()
@@ -126,23 +126,23 @@ func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token s
 	}
 
 	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.Session{}).Error; err != nil {
-		log.ErrorLogger.Printf("Failed to delete sessions: %v", err)
+		log.ErrorLogger.Errorf("Failed to delete sessions: %v", err)
 		return err
 	}
 
 	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error; err != nil { // Assuming you have RefreshToken model/repository
-		log.ErrorLogger.Printf("Failed to delete refresh tokens: %v", err)
+		log.ErrorLogger.Errorf("Failed to delete refresh tokens: %v", err)
 		return err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		log.ErrorLogger.Printf("Failed to commit transaction: %v", err)
+		log.ErrorLogger.Errorf("Failed to commit transaction: %v", err)
 		return err
 	}
 
 	err := s.authRepo.Clear(ctx, session.Token)
 	if err != nil {
-		log.ErrorLogger.Printf("Error clearing user sessions from cache: %v", err)
+		log.ErrorLogger.Errorf("Error clearing user sessions from cache: %v", err)
 	}
 
 	return nil

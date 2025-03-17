@@ -131,7 +131,7 @@ func (c *DispatchClient) handleMessage(msg *redis.Message) {
 	c.mu.RUnlock()
 
 	if !exists {
-		log.ErrorLogger.Printf("No subscribers for channel %s", msg.Channel)
+		log.ErrorLogger.Errorf("No subscribers for channel %s", msg.Channel)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (c *DispatchClient) handleMessage(msg *redis.Message) {
 
 		// unmarshal JSON into the payload instance
 		if err := json.Unmarshal([]byte(msg.Payload), payloadPtr); err != nil {
-			log.ErrorLogger.Printf("Error unmarshaling message from channel %s: %v", msg.Channel, err)
+			log.ErrorLogger.Errorf("Error unmarshaling message from channel %s: %v", msg.Channel, err)
 			continue
 		}
 
@@ -153,7 +153,7 @@ func (c *DispatchClient) handleMessage(msg *redis.Message) {
 		results := callbackValue.Call([]reflect.Value{payloadValue})
 		if len(results) > 0 && !results[0].IsNil() {
 			if err, ok := results[0].Interface().(error); ok {
-				log.ErrorLogger.Printf("Error in callback for channel %s: %v", msg.Channel, err)
+				log.ErrorLogger.Errorf("Error in callback for channel %s: %v", msg.Channel, err)
 			}
 		}
 	}

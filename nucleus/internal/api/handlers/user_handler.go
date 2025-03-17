@@ -21,7 +21,7 @@ func SignUp(c *gin.Context) {
 
 	ipInfo, err := utils.GetCountryAndCurrencyFromIP(clientIP)
 	if err != nil {
-		log.ErrorLogger.Printf("Failed to get country info: %s", err.Error())
+		log.ErrorLogger.Errorf("Failed to get country info: %s", err.Error())
 		ipInfo = &utils.IPInfo{Currency: "GHS"} // Default to GHS
 	}
 
@@ -80,14 +80,14 @@ func SignUp(c *gin.Context) {
 	// Preload the user settings and accounts
 	if err := tx.Preload("Profile").Preload("Accounts").First(&user, user.ID).Error; err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Failed to preload user data: %s", err.Error())
+		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to retrieve user data", Data: nil})
 		return
 	}
 
 	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
-		log.ErrorLogger.Printf("Failed to commit transaction: %s", err.Error())
+		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
 		return
 	}
@@ -158,7 +158,7 @@ func FetchUser(c *gin.Context) {
 	// cacheHit, err := cache.GetCache(cacheKey, &cachedResponse)
 
 	// if err != nil {
-	// 	log.ErrorLogger.Printf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
+	// 	log.ErrorLogger.Errorf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
 	// }
 
 	// if cacheHit {
@@ -174,7 +174,7 @@ func FetchUser(c *gin.Context) {
 		return db.Omit("user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
 	}).First(&user, "id = ?", userID)
 	if result.Error != nil {
-		log.ErrorLogger.Printf("Error fetching user: %v", result.Error)
+		log.ErrorLogger.Errorf("Error fetching user: %v", result.Error)
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
 		} else {
@@ -184,7 +184,7 @@ func FetchUser(c *gin.Context) {
 	}
 
 	if result.Error != nil {
-		log.ErrorLogger.Printf("Error fetching user: %v", result.Error)
+		log.ErrorLogger.Errorf("Error fetching user: %v", result.Error)
 
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
 		return
@@ -192,7 +192,7 @@ func FetchUser(c *gin.Context) {
 
 	response := types.Response{Status: 200, Message: "User fetched successfully", Data: user}
 	// if err := cache.CacheService.Set(c.Request.Context(), cacheKey, response, 5*time.Minute); err != nil {
-	// 	log.ErrorLogger.Printf("Failed to set value in cache with key %s: %v", cacheKey, err)
+	// 	log.ErrorLogger.Errorf("Failed to set value in cache with key %s: %v", cacheKey, err)
 	// }
 
 	c.JSON(200, response)

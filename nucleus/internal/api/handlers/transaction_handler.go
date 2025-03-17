@@ -47,7 +47,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 	}
 
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error creating transaction"})
 		return
 	}
@@ -58,7 +58,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 // func (h *TransactionHandler) UpdateTransaction(c *gin.Context) {
 // 	updateTransaction := types.UpdateTransactionDTO{}
 // 	if err := c.ShouldBindJSON(&updateTransaction); err != nil {
-// 		log.ErrorLogger.Println(err)
+// 		log.ErrorLogger.Errorln(err)
 // 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 // 		return
 // 	}
@@ -78,7 +78,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 
 // 	err = fmt.Errorf("update transaction not yet implemented with dependency injection") // Placeholder
 // 	if err != nil {
-// 		log.ErrorLogger.Println(err)
+// 		log.ErrorLogger.Errorln(err)
 // 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update transaction", Data: nil})
 // 		return
 // 	}
@@ -116,7 +116,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 
 // 	err = fmt.Errorf("delete transaction not yet implemented with dependency injection") // Placeholder
 // 	if err != nil {
-// 		log.ErrorLogger.Println(err)
+// 		log.ErrorLogger.Errorln(err)
 // 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete transaction", Data: nil})
 // 		return
 // 	}
@@ -149,7 +149,7 @@ func (h *TransactionHandler) FetchTransactions(c *gin.Context) {
 
 	accounts, totalItems, err := h.transactionService.FetchPaginatedTransactions(c.Request.Context(), userID.(uuid.UUID), page, pageSize)
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch transactions", Data: nil})
 		return
 	}

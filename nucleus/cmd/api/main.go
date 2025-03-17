@@ -2,157 +2,33 @@ package main
 
 import (
 	"context"
-	"nucleus/cmd/workers"
-	"nucleus/internal/api/handlers"
-	"nucleus/internal/api/middleware"
-	"nucleus/internal/api/repositories"
-	"nucleus/internal/api/routes"
-	"nucleus/internal/api/services"
-	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
 	"nucleus/internal/log"
-	"nucleus/internal/utils"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"time"
-
-	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	log.InitLogger()
-	// validate := validator.New()
-	// utils.RegisterCustomValidations(validate)
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		utils.RegisterCustomValidations(v)
-	}
+	// initialise core components
+	setupLogger()
+	setupValidator()
+	loadEnvironment()
 
-	// load env variables only in dev
-	if os.Getenv("GIN_MODE") != "release" {
-		err := godotenv.Load()
-		if err != nil {
-			log.ErrorLogger.Fatal("Error loading .env file")
-		} else {
-			log.InfoLogger.Println("Loaded env variables")
-		}
-	}
-
-	dsn := utils.EnvValue("DSN", "")
-	utils.InitDB(dsn)
+	// initialise database and cache
+	db := setupDatabase()
 	redisCache := cache.NewRedisCache()
 
-	// get db instance
-	db := utils.GetDB()
-	if db == nil {
-		log.ErrorLogger.Fatal("Failed to connect to the database")
-	}
-
-	// context for workers
+	// setup background workers
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	setupWorkers(ctx, db)
 
-	// dispatch client
-	// dispatchClient, err := dispatch.NewDispatchClient(cache.RedisClient)
-	// if err != nil {
-	// 	log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
-	// }
+	// setup API server
+	r := setupRouter(db, redisCache)
 
-	// session cleaners
-	cleaner := workers.NewSessionCleaner(db)
-	cleaner.Start(ctx)
+	// setup shutdown handler
+	setupGracefulShutdown(cancel)
 
-	// register listeners
-	// listeners := []dispatch.BaseListener{}
-
-	// if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-	// 	log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
-	// }
-
-	// start listening for internal events
-	// if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-	// 	log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
-	// }
-
-	// rate limiting
-	rateLimitStore := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
-		Rate:  time.Second,
-		Limit: 5,
-	})
-	rateLimit := ratelimit.RateLimiter(rateLimitStore, &ratelimit.Options{
-		ErrorHandler: func(ctx *gin.Context, i ratelimit.Info) {
-			ctx.JSON(429, gin.H{"error": "Too many requests"})
-			ctx.Abort()
-		},
-		KeyFunc: func(ctx *gin.Context) string {
-			return ctx.ClientIP()
-		},
-	})
-
-	// initialise auth stuff
-	// TODO: figure out a prettier way to do this
-	postgresAuthRepo := repositories.NewPostgresAuthRepository(db)
-	userRepo := repositories.NewPostgresUserRepository(db)
-	cacheAuthRepo := repositories.NewCachingAuthRepository(postgresAuthRepo, redisCache, "auth", time.Minute*10)
-	authService := services.NewAuthService(cacheAuthRepo, userRepo, db)
-	authHandler := handlers.NewAuthHandler(authService)
-	authMiddlewareConfig := &middleware.AuthMiddlewareConfig{
-		AuthService: authService,
-	}
-
-	// models.Migrate(db)
-	r := gin.Default()
-	r.Use(rateLimit)
-	r.Use(middleware.CorsMiddleware())
-	r.Use(middleware.APIKeyMiddleware())
-	r.Use(middleware.AuthMiddleware(authMiddlewareConfig))
-
-	// create api group
-	v1 := routes.CreateV1Group(r)
-	routes.RegisterAuthRoutes(v1, authHandler)
-	routes.RegisterUserRoutes(v1, db, redisCache)
-	routes.RegisterAccountRoutes(v1, db, redisCache)
-	routes.RegisterPlanRoutes(v1, db, redisCache)
-	routes.RegisterTransactionRoutes(v1, db, redisCache)
-	routes.RegisterUtilRoutes(v1)
-	routes.RegisterStatsRoutes(v1)
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, types.Response{
-			Status:  200,
-			Message: "pong",
-			Data:    nil,
-		})
-	})
-
+	// start server
 	log.InfoLogger.Printf("Starting server on port 8080")
-
-	// setup graceful shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-quit
-		log.InfoLogger.Println("Shutting down server")
-
-		// stop workers
-		cancel()
-		cleaner.Stop()
-
-		// stop dispatch client
-		// if err := dispatchClient.Close(); err != nil {
-		// 	log.ErrorLogger.Printf("Failed to close dispatch client: %v", err)
-		// }
-	}()
-
-	// disable trusted proxies
-	engine := gin.Default()
-	engine.SetTrustedProxies(nil)
-
-	// Run the server on the specified port
 	if err := r.Run("0.0.0.0:8080"); err != nil {
 		log.InfoLogger.Fatalf("Failed to run server: %v", err)
 	}

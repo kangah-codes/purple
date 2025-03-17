@@ -40,7 +40,7 @@ func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 
 		session, err := config.AuthService.GetSession(c.Request.Context(), authHeader)
 		if err != nil {
-			log.ErrorLogger.Printf("Error validating session token: %v", err)
+			log.ErrorLogger.Errorf("Error validating session token: %v", err)
 			statusCode := http.StatusUnauthorized
 			message := "Invalid or expired session token"
 			if errors.Is(err, gorm.ErrRecordNotFound) {

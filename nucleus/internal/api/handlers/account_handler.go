@@ -23,14 +23,14 @@ func (h *AccountHandler) CreateAccount(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	createAccount := types.CreateAccountDTO{}
 	if err := c.ShouldBindJSON(&createAccount); err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
 	}
 
 	account, err := h.accountService.CreateAccount(c.Request.Context(), createAccount, userID.(uuid.UUID))
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create account", Data: nil})
 		return
 	}
@@ -50,14 +50,14 @@ func (h *AccountHandler) UpdateUserAccount(c *gin.Context) {
 	accountID := c.Param("accountID")
 	updateAccount := types.UpdateAccountDTO{}
 	if err := c.ShouldBindJSON(&updateAccount); err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
 	}
 
 	account, err := h.accountService.UpdateAccount(c.Request.Context(), accountID, userID.(string), updateAccount)
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update account", Data: nil})
 		return
 	}
@@ -78,14 +78,14 @@ func (h *AccountHandler) FetchUserAccounts(c *gin.Context) {
 
 	count, err := h.accountService.FetchTotalAccounts(c.Request.Context(), userID.(uuid.UUID))
 	if err != nil {
-		log.ErrorLogger.Printf("Error fetching total user accounts: %v", err)
+		log.ErrorLogger.Errorf("Error fetching total user accounts: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})
 		return
 	}
 
 	accounts, totalItems, err := h.accountService.FetchPaginatedAccounts(c.Request.Context(), userID.(uuid.UUID), page, int(count))
 	if err != nil {
-		log.ErrorLogger.Println(err)
+		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})
 		return
 	}
@@ -110,7 +110,7 @@ func (h *AccountHandler) DeleteUserAccount(c *gin.Context) {
 
 	account, err := h.accountService.DeleteAccount(c.Request.Context(), accountID, userID.(string))
 	if err != nil {
-		log.ErrorLogger.Printf("Failed to delete account: %v", err)
+		log.ErrorLogger.Errorf("Failed to delete account: %v", err)
 
 		if err.Error() == "cannot delete default account" {
 			c.JSON(http.StatusForbidden, types.Response{Status: http.StatusForbidden, Message: err.Error(), Data: nil})

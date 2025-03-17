@@ -62,7 +62,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 	var cachedTransaction models.Transaction
 	found, err := r.cache.Get(ctx, key, &cachedTransaction)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting transaction from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting transaction from cache: %v", err)
 	}
 	if found {
 		return &cachedTransaction, nil
@@ -72,7 +72,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 	if err == nil && transaction != nil {
 		err := r.cache.Set(ctx, key, transaction, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting transaction in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting transaction in cache: %v", err)
 		}
 	}
 	return transaction, err
@@ -85,12 +85,12 @@ func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context
 	found, err := r.cache.Get(ctx, key, &cachedTransactions)
 	fmt.Println("FOUND, ", found)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting paginated transactions from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting paginated transactions from cache: %v", err)
 	}
 	if found {
 		totalItems, err := r.next.CountByUserID(ctx, userID)
 		if err != nil {
-			log.ErrorLogger.Printf("Error getting transaction count: %v", err)
+			log.ErrorLogger.Errorf("Error getting transaction count: %v", err)
 		}
 		return cachedTransactions, totalItems, nil
 	}
@@ -99,7 +99,7 @@ func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context
 	if err == nil && len(transactions) > 0 {
 		err := r.cache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting paginated transactions in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting paginated transactions in cache: %v", err)
 		}
 	}
 	return transactions, totalItems, err

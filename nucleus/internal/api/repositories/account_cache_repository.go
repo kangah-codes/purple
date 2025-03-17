@@ -62,7 +62,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 	var cachedAccount models.Account
 	found, err := r.cache.Get(ctx, key, &cachedAccount)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting account from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting account from cache: %v", err)
 	}
 	if found {
 		return &cachedAccount, nil
@@ -72,7 +72,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 	if err == nil && account != nil {
 		err := r.cache.Set(ctx, key, account, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting account in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting account in cache: %v", err)
 		}
 	}
 	return account, err
@@ -83,13 +83,13 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 	var cachedAccounts []models.Account
 	found, err := r.cache.Get(ctx, key, &cachedAccounts)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting paginated accounts from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting paginated accounts from cache: %v", err)
 	}
 
 	if found {
 		totalItems, err := r.next.CountByUserID(ctx, userID)
 		if err != nil {
-			log.ErrorLogger.Printf("Error getting account count: %v", err)
+			log.ErrorLogger.Errorf("Error getting account count: %v", err)
 		}
 		return cachedAccounts, totalItems, nil
 	}
@@ -98,7 +98,7 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 	if err == nil && len(accounts) > 0 {
 		err := r.cache.Set(ctx, key, accounts, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting paginated accounts in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting paginated accounts in cache: %v", err)
 		}
 	}
 
@@ -110,7 +110,7 @@ func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uui
 	var cachedCount int
 	found, err := r.cache.Get(ctx, key, &cachedCount)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting account count from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting account count from cache: %v", err)
 	}
 	if found {
 		return cachedCount, nil
@@ -120,7 +120,7 @@ func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uui
 	if err == nil {
 		err := r.cache.Set(ctx, key, count, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting account count in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting account count in cache: %v", err)
 		}
 	}
 	return count, err

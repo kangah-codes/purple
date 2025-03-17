@@ -67,12 +67,12 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 	}
 
 	if err := s.accountRepo.Update(ctx, tx, account); err != nil {
-		log.ErrorLogger.Printf("Error updating account balance: %v", err)
+		log.ErrorLogger.Errorf("Error updating account balance: %v", err)
 		return nil, err
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		log.ErrorLogger.Printf("Error creating transaction: %v", err)
+		log.ErrorLogger.Errorf("Error creating transaction: %v", err)
 		return nil, err
 	}
 
@@ -84,7 +84,7 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			log.ErrorLogger.Printf("Failed to delete plan: %v", r)
+			log.ErrorLogger.Errorf("Failed to delete plan: %v", r)
 		}
 	}()
 
@@ -125,17 +125,17 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 	toAccount.Balance += payload.Amount
 
 	if err := s.accountRepo.Update(ctx, tx, fromAccount); err != nil {
-		log.ErrorLogger.Printf("Error updating source account balance: %v", err)
+		log.ErrorLogger.Errorf("Error updating source account balance: %v", err)
 		return nil, err
 	}
 
 	if err := s.accountRepo.Update(ctx, tx, toAccount); err != nil {
-		log.ErrorLogger.Printf("Error updating destination account balance: %v", err)
+		log.ErrorLogger.Errorf("Error updating destination account balance: %v", err)
 		return nil, err
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		log.ErrorLogger.Printf("Error creating transfer transaction: %v", err)
+		log.ErrorLogger.Errorf("Error creating transfer transaction: %v", err)
 		return nil, err
 	}
 

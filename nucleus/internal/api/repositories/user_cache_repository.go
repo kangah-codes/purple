@@ -44,7 +44,7 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 	var cachedUser models.User
 	found, err := r.cache.Get(ctx, key, &cachedUser)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting user by ID from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting user by ID from cache: %v", err)
 	}
 	if found {
 		return &cachedUser, nil
@@ -54,7 +54,7 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 	if err == nil && user != nil {
 		err := r.cache.Set(ctx, key, user, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting user by ID in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting user by ID in cache: %v", err)
 		}
 	}
 	return user, err
@@ -65,7 +65,7 @@ func (r *CachingUserRepository) FindByUsername(ctx context.Context, username str
 	var cachedUser models.User
 	found, err := r.cache.Get(ctx, key, &cachedUser)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting user by username from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting user by username from cache: %v", err)
 	}
 	if found {
 		return &cachedUser, nil
@@ -75,7 +75,7 @@ func (r *CachingUserRepository) FindByUsername(ctx context.Context, username str
 	if err == nil && user != nil {
 		err := r.cache.Set(ctx, key, user, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting user by username in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting user by username in cache: %v", err)
 		}
 	}
 	return user, err

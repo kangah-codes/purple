@@ -75,7 +75,7 @@ func (r *CachingPlanRepository) FindByIDAndUserID(ctx context.Context, planID uu
 	var cachedPlan models.Plan
 	found, err := r.cache.Get(ctx, key, &cachedPlan)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting plan from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting plan from cache: %v", err)
 	}
 	if found {
 		return &cachedPlan, nil
@@ -85,7 +85,7 @@ func (r *CachingPlanRepository) FindByIDAndUserID(ctx context.Context, planID uu
 	if err == nil && plan != nil {
 		err := r.cache.Set(ctx, key, plan, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting plan in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting plan in cache: %v", err)
 		}
 	}
 	return plan, err
@@ -97,7 +97,7 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 	var cachedPlans []models.Plan
 	found, err := r.cache.Get(ctx, key, &cachedPlans)
 	if err != nil {
-		log.ErrorLogger.Printf("Error getting paginated plans from cache: %v", err)
+		log.ErrorLogger.Errorf("Error getting paginated plans from cache: %v", err)
 	}
 	if found {
 		totalItems, err := r.next.CountByUserID(ctx, userID)
@@ -111,7 +111,7 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 	if err == nil && len(plans) > 0 {
 		err := r.cache.Set(ctx, key, plans, r.expiration)
 		if err != nil {
-			log.ErrorLogger.Printf("Error setting paginated plans in cache: %v", err)
+			log.ErrorLogger.Errorf("Error setting paginated plans in cache: %v", err)
 		}
 	}
 	return plans, totalItems, err

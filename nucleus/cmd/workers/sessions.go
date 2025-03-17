@@ -54,14 +54,14 @@ func (sc *SessionCleaner) deleteExpiredSessions() {
 	now := time.Now()
 	sessionResult := sc.db.Where("expires_at <= ?", now).Delete(&models.Session{})
 	if sessionResult.Error != nil {
-		log.ErrorLogger.Printf("Error deleting expired sessions: %v", sessionResult.Error)
+		log.ErrorLogger.Errorf("Error deleting expired sessions: %v", sessionResult.Error)
 	} else {
 		log.InfoLogger.Printf("Deleted %d expired sessions", sessionResult.RowsAffected)
 	}
 
 	refreshTokenResult := sc.db.Where("expires_at <= ?", now).Delete(&models.RefreshToken{})
 	if refreshTokenResult.Error != nil {
-		log.ErrorLogger.Printf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
+		log.ErrorLogger.Errorf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
 	} else {
 		log.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
 	}

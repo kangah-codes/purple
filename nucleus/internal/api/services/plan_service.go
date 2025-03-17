@@ -98,7 +98,7 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID u
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			log.ErrorLogger.Printf("Failed to delete plan: %v", r)
+			log.ErrorLogger.Errorf("Failed to delete plan: %v", r)
 		}
 	}()
 
@@ -121,14 +121,14 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 	var account models.Account
 	tx := s.db.Begin()
 	if tx.Error != nil {
-		log.ErrorLogger.Printf("Error starting transaction: %v", tx.Error)
+		log.ErrorLogger.Errorf("Error starting transaction: %v", tx.Error)
 		return nil, fmt.Errorf("error starting database transaction: %v", tx.Error)
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			log.ErrorLogger.Printf("Failed to add plan transaction: %v", r)
+			log.ErrorLogger.Errorf("Failed to add plan transaction: %v", r)
 		}
 	}()
 
@@ -161,7 +161,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 	account.Balance -= createTransaction.Amount
 	if err := s.accountRepo.Update(ctx, tx, &account); err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Error updating account balance: %v", err)
+		log.ErrorLogger.Errorf("Error updating account balance: %v", err)
 		return nil, fmt.Errorf("error updating account balance")
 	}
 
@@ -198,7 +198,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Error committing transaction: %v", err)
+		log.ErrorLogger.Errorf("Error committing transaction: %v", err)
 		return nil, fmt.Errorf("error processing request: %v", err)
 	}
 
