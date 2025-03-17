@@ -11,6 +11,7 @@ type CreateTransactionDTO struct {
 	FromAccount uuid.UUID `json:"from_account"`
 	ToAccount   uuid.UUID `json:"to_account"`
 	CreatedAt   string    `json:"created_at"`
+	PlanId      uuid.UUID `json:"plan_id"`
 }
 
 type UpdateTransactionDTO struct {

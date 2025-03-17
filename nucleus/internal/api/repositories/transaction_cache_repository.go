@@ -52,7 +52,7 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 	err := r.next.Create(ctx, tx, transaction)
 	if err == nil {
 		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-		r.invalidateUserPlansCache(ctx, transaction.UserId, *transaction.PlanId)
+		r.invalidateUserPlansCache(ctx, transaction.UserId, transaction.PlanId)
 	}
 	return err
 }

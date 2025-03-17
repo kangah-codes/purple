@@ -171,6 +171,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 	} else {
 		planEmoji = "📉"
 	}
+
 	transaction := models.Transaction{
 		AccountId:   account.ID,
 		UserId:      userID,
@@ -181,7 +182,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		FromAccount: account.ID,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
-		PlanId:      &plan.ID,
+		PlanId:      plan.ID,
 	}
 
 	if err := s.planRepo.CreateTransaction(ctx, tx, &transaction); err != nil {

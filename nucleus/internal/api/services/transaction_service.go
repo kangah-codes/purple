@@ -30,7 +30,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			log.ErrorLogger.Printf("Failed to create transaction: %v", r)
+			log.ErrorLogger.Errorf("Failed to create transaction: %v", r)
 		}
 	}()
 
@@ -40,6 +40,10 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 	}
 	if account == nil {
 		return nil, fmt.Errorf("account not found")
+	}
+
+	if payload.PlanId == uuid.Nil {
+		payload.PlanId = uuid.Nil
 	}
 
 	transaction := models.Transaction{
@@ -53,6 +57,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 		FromAccount: uuid.Nil,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
+		PlanId:      payload.PlanId,
 	}
 
 	if payload.Type == models.Debit {
