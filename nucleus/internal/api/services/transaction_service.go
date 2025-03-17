@@ -1,5 +1,3 @@
-// internal/services/transaction_service.go
-
 package services
 
 import (
