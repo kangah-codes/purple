@@ -22,7 +22,13 @@ func (r *PostgresUserRepository) Create(ctx context.Context, tx *gorm.DB, user *
 
 func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).First(&user, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Accounts", func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id = ?", id)
+	}).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("account", "user").Where("user_id = ?", id).Order("created_at desc").Limit(5)
+	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("user").Where("user_id = ?", id).Order("created_at desc").Limit(5)
+	}).First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -30,7 +36,13 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*m
 
 func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).Preload("Profile").Preload("Accounts").Where("username = ?", username).First(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Accounts", func(db *gorm.DB) *gorm.DB {
+		return db.Where("user_id = ?", username)
+	}).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("account", "user").Where("user_id = ?", username).Order("created_at desc").Limit(5)
+	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("user").Where("user_id = ?", username).Order("created_at desc").Limit(5)
+	}).First(&user, "id = ?", username).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -40,6 +52,6 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) 
 	return r.db.WithContext(ctx).Save(user).Error
 }
 
-func (r *PostgresUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	return r.db.WithContext(ctx).Delete(&models.User{}, id).Error
+func (r *PostgresUserRepository) Delete(ctx context.Context, tx *gorm.DB, id uuid.UUID) error {
+	return tx.WithContext(ctx).Delete(&models.User{}, id).Error
 }

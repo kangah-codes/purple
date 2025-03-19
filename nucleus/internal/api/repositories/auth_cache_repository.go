@@ -46,6 +46,17 @@ func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Sess
 	return nil
 }
 
+func (r *CachingAuthRepository) SignOut(ctx context.Context, session *models.Session) error {
+	err := r.next.SignOut(ctx, session)
+	if err == nil {
+		r.invalidateUserAuthCache(ctx, session.Token)
+	} else {
+		return err
+	}
+
+	return nil
+}
+
 func (r *CachingAuthRepository) Clear(ctx context.Context, token string) error {
 	err := r.next.Clear(ctx, token)
 	if err == nil {
@@ -75,6 +86,10 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	}
 
 	return session, err
+}
+
+func (r *CachingAuthRepository) GenerateResetPin(ctx context.Context, resetPin *models.PasswordResetPin) error {
+	return r.next.GenerateResetPin(ctx, resetPin)
 }
 
 func (r *CachingAuthRepository) invalidateUserAuthCache(ctx context.Context, token string) {

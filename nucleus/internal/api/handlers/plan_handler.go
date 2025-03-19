@@ -105,14 +105,13 @@ func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 
 func (h *PlanHandler) DeletePlan(c *gin.Context) {
 	planID, _ := c.Params.Get("planID")
-	userID, _ := c.Get("userID")
 	parsedPlanID, err := uuid.Parse(planID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
 		return
 	}
 
-	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
+	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error deleting plan: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})

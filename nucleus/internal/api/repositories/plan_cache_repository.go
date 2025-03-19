@@ -70,28 +70,29 @@ func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *m
 	return err
 }
 
-func (r *CachingPlanRepository) FindByIDAndUserID(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
-	key := r.buildPlanCacheKey(userID, planID)
-	var cachedPlan models.Plan
-	found, err := r.cache.Get(ctx, key, &cachedPlan)
-	if err != nil {
-		log.ErrorLogger.Errorf("Error getting plan from cache: %v", err)
-	}
-	if found {
-		return &cachedPlan, nil
-	}
+func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
+	// TODO: get user id here
+	// key := r.buildPlanCacheKey(userID, planID)
+	// var cachedPlan models.Plan
+	// found, err := r.cache.Get(ctx, key, &cachedPlan)
+	// if err != nil {
+	// 	log.ErrorLogger.Errorf("Error getting plan from cache: %v", err)
+	// }
+	// if found {
+	// 	return &cachedPlan, nil
+	// }
 
-	plan, err := r.next.FindByIDAndUserID(ctx, planID, userID)
+	plan, err := r.next.FindByID(ctx, planID)
 	if err == nil && plan != nil {
-		err := r.cache.Set(ctx, key, plan, r.expiration)
-		if err != nil {
-			log.ErrorLogger.Errorf("Error setting plan in cache: %v", err)
-		}
+		// err := r.cache.Set(ctx, key, plan, r.expiration)
+		// if err != nil {
+		log.ErrorLogger.Errorf("Error setting plan in cache: %v", err)
+		// }
 	}
 	return plan, err
 }
 
-func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
+func (r *CachingPlanRepository) FindByUserID(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
 	query := PlanQuery{Name: name, StartDate: startDate, EndDate: endDate, PlanType: planType}
 	key := r.buildUserPlansCacheKey(userID, query, page, limit)
 	var cachedPlans []models.Plan
@@ -107,7 +108,7 @@ func (r *CachingPlanRepository) FindByUserIDPaginated(ctx context.Context, userI
 		return cachedPlans, totalItems, nil
 	}
 
-	plans, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, name, startDate, endDate, planType, page, limit)
+	plans, totalItems, err := r.next.FindByUserID(ctx, userID, name, startDate, endDate, planType, page, limit)
 	if err == nil && len(plans) > 0 {
 		err := r.cache.Set(ctx, key, plans, r.expiration)
 		if err != nil {
@@ -128,6 +129,17 @@ func (r *CachingPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *m
 		r.invalidateUserPlansCache(ctx, plan.UserId)
 	}
 	return err
+}
+
+func (r *CachingPlanRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	err := r.next.DeleteByUserID(ctx, tx, userID)
+	if err != nil {
+		return err
+	}
+
+	r.invalidateUserPlansCache(ctx, userID)
+
+	return nil
 }
 
 func (r *CachingPlanRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID) {

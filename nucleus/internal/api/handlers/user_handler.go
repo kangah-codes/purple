@@ -1,204 +1,125 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"nucleus/internal/utils"
 	"strconv"
 
+	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/internal/log"
 	"nucleus/internal/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func SignUp(c *gin.Context) {
-	signUp := types.SignUpDTO{}
-	db := utils.GetDB()
-	clientIP := c.ClientIP()
-
-	ipInfo, err := utils.GetCountryAndCurrencyFromIP(clientIP)
-	if err != nil {
-		log.ErrorLogger.Errorf("Failed to get country info: %s", err.Error())
-		ipInfo = &utils.IPInfo{Currency: "GHS"} // Default to GHS
-	}
-
-	if err := c.ShouldBindJSON(&signUp); err != nil {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
-		return
-	}
-
-	if !utils.ValidatePassword(signUp.Password) {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid password", Data: nil})
-		return
-	}
-
-	if !utils.ValidateEmail(signUp.Email) {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid email", Data: nil})
-		return
-	}
-
-	hashedPassword, err := utils.HashPassword(signUp.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
-		return
-	}
-
-	// Start transaction
-	tx := db.Begin()
-
-	user := models.User{
-		Username: signUp.Username,
-		Email:    signUp.Email,
-		Password: hashedPassword,
-		Accounts: []models.Account{
-			{
-				Name:             "Cash",
-				Category:         "💵 Cash",
-				Balance:          0.00,
-				IsDefaultAccount: true,
-				Currency:         ipInfo.Currency,
-				Transactions:     []models.Transaction{},
-			},
-		},
-		Plans:        []models.Plan{},
-		Transactions: []models.Transaction{},
-	}
-
-	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback()
-		if err == gorm.ErrDuplicatedKey {
-			c.JSON(http.StatusConflict, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
-		} else {
-			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: fmt.Sprintf("Failed to create user: %s", err.Error()), Data: nil})
-		}
-		return
-	}
-
-	// Preload the user settings and accounts
-	if err := tx.Preload("Profile").Preload("Accounts").First(&user, user.ID).Error; err != nil {
-		tx.Rollback()
-		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to retrieve user data", Data: nil})
-		return
-	}
-
-	// Commit transaction
-	if err := tx.Commit().Error; err != nil {
-		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
-		return
-	}
-
-	log.InfoLogger.Printf("Created user: %+v\n", user)
-
-	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
+type UserHandler struct {
+	userService        *services.UserService
+	planService        *services.PlanService
+	accountService     *services.AccountService
+	transactionService *services.TransactionService
+	authService        *services.AuthService
 }
 
-func DeleteUser(c *gin.Context) {
-	db := utils.GetDB()
-	user := models.User{}
-	userID := c.Param("id")
+func NewUserHandler(userService *services.UserService, planService *services.PlanService, accountService *services.AccountService, transactionService *services.TransactionService, authService *services.AuthService) *UserHandler {
+	return &UserHandler{
+		userService:        userService,
+		planService:        planService,
+		accountService:     accountService,
+		transactionService: transactionService,
+		authService:        authService,
+	}
+}
 
-	result := db.First(&user, userID)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "User not found", Data: nil})
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	db := utils.GetDB()
+	userID := c.Param("id")
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Bad request"})
 		return
 	}
 
-	// db.Delete(&user)
+	user, err := h.userService.FetchUserByID(c.Request.Context(), parsedUserID)
+	if user == nil {
+		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "User not found"})
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error fetching user"})
+		return
+	}
+
 	tx := db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
 		}
 	}()
 
-	if err := tx.Where("user_id = ?", userID).Delete(&models.Account{}).Error; err != nil {
+	// delete user
+	err = h.userService.DeleteUser(c.Request.Context(), tx, user.ID)
+	if err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
 		return
 	}
 
-	if err := tx.Where("user_id = ?", userID).Delete(&models.Plan{}).Error; err != nil {
+	// delete user accounts
+	err = h.accountService.DeleteByUserID(c.Request.Context(), tx, parsedUserID)
+	if err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
 		return
 	}
 
-	if err := tx.Where("user_id = ?", userID).Delete(&models.Transaction{}).Error; err != nil {
+	// delete user plans
+	err = h.planService.DeleteByUserID(c.Request.Context(), tx, parsedUserID)
+	if err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
 		return
 	}
 
-	// cacheKey := cache.BuildCacheKey("*", fmt.Sprintf("%v", userID), "*")
-	// if err := cache.InvalidateCache(cacheKey); err != nil {
-	// 	log.ErrorLogger.Debugf("Error invalidating cache with key %s: %v", cacheKey, err)
-	// 	// we rollback just to be safe in case user data is still in the cache & we don't want that if the account is deleted & there's still cached data
-	// 	tx.Rollback()
-	// 	c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user", Data: nil})
-	// }
+	// delete user transactions
+	err = h.transactionService.DeleteByUserID(c.Request.Context(), tx, parsedUserID)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
+		return
+	}
 
-	tx.Commit()
-	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "User deleted successfully", Data: nil})
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "User deleted successfully"})
 }
 
-func FetchUser(c *gin.Context) {
-	db := utils.GetDB()
-	db = db.Debug()
-	user := models.User{}
+func (h *UserHandler) FetchUser(c *gin.Context) {
+	user := &models.User{}
 	userID := c.Param("id")
-	// cacheKey := cache.BuildKey("users", userID)
 
-	// var cachedResponse types.Response
-	// cacheHit, err := cache.GetCache(cacheKey, &cachedResponse)
-
-	// if err != nil {
-	// 	log.ErrorLogger.Errorf("Error fetching from cache with key %s: %v\nContinuing to use results from db", cacheKey, err)
-	// }
-
-	// if cacheHit {
-	// 	c.JSON(http.StatusOK, cachedResponse)
-	// 	return
-	// }
-
-	result := db.Preload("Accounts", func(db *gorm.DB) *gorm.DB {
-		return db.Where("user_id = ?", userID)
-	}).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Omit("account", "user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
-	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Omit("user").Where("user_id = ?", userID).Order("created_at desc").Limit(5)
-	}).First(&user, "id = ?", userID)
-	if result.Error != nil {
-		log.ErrorLogger.Errorf("Error fetching user: %v", result.Error)
-		if result.Error == gorm.ErrRecordNotFound {
-			c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
-		} else {
-			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error", Data: nil})
-		}
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(400, types.Response{Status: 400, Message: "Invalid request"})
 		return
 	}
 
-	if result.Error != nil {
-		log.ErrorLogger.Errorf("Error fetching user: %v", result.Error)
-
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
+	user, err = h.userService.FetchUserByID(c.Request.Context(), parsedUserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user"})
 		return
 	}
 
-	response := types.Response{Status: 200, Message: "User fetched successfully", Data: user}
-	// if err := cache.CacheService.Set(c.Request.Context(), cacheKey, response, 5*time.Minute); err != nil {
-	// 	log.ErrorLogger.Errorf("Failed to set value in cache with key %s: %v", cacheKey, err)
-	// }
-
-	c.JSON(200, response)
+	c.JSON(200, types.Response{Status: 200, Message: "User fetched successfully", Data: *user})
 }
 
-func FetchUsers(c *gin.Context) {
+func (h *UserHandler) FetchUsers(c *gin.Context) {
 	db := utils.GetDB()
 	users := []models.User{}
 
@@ -215,7 +136,7 @@ func FetchUsers(c *gin.Context) {
 		return db.Order("created_at desc").Limit(5)
 	}).Limit(pageSize).Offset(offset).Find(&users)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch users", Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch users"})
 		return
 	}
 
@@ -232,20 +153,20 @@ func FetchUsers(c *gin.Context) {
 	})
 }
 
-func UpdateUser(c *gin.Context) {
+func (h *UserHandler) UpdateUser(c *gin.Context) {
 	db := utils.GetDB()
 	user := models.User{}
 	userID := c.Param("id")
 
 	result := db.First(&user, userID)
 	if result.Error != nil {
-		c.JSON(404, types.Response{Status: 404, Message: "User not found", Data: nil})
+		c.JSON(404, types.Response{Status: 404, Message: "User not found"})
 		return
 	}
 
 	update := types.UpdateUserAccountDTO{}
 	if err := c.ShouldBindJSON(&update); err != nil {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
 		return
 	}
 
@@ -254,33 +175,33 @@ func UpdateUser(c *gin.Context) {
 	result = db.Save(&user)
 	if result.Error != nil {
 		if result.Error == gorm.ErrDuplicatedKey {
-			c.JSON(400, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
+			c.JSON(400, types.Response{Status: http.StatusConflict, Message: "User already exists with these details"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: nil})
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update user"})
 		return
 	}
 
 	c.JSON(200, types.Response{Status: 200, Message: "User updated successfully", Data: user})
 }
 
-func CheckAvailableUsername(c *gin.Context) {
-	db := utils.GetDB()
+func (h *UserHandler) CheckAvailableUsername(c *gin.Context) {
 	checkUsername := types.CheckAvailableUsernameDTO{}
 	if err := c.ShouldBindJSON(&checkUsername); err != nil {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
 		return
 	}
 
-	result := db.Where("username = ?", checkUsername.Username).First(&models.User{})
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			c.JSON(200, types.Response{Status: http.StatusOK, Message: "Username available", Data: nil})
-		} else {
-			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error", Data: nil})
-		}
+	exists, err := h.authService.CheckAvailableUsername(c.Request.Context(), checkUsername.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
 		return
 	}
 
-	c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available", Data: nil})
+	if !exists {
+		c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available"})
+		return
+	}
+
+	c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available"})
 }

@@ -70,7 +70,7 @@ func (s *AccountService) UpdateAccount(ctx context.Context, accountIDStr string,
 }
 
 func (s *AccountService) FetchPaginatedAccounts(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
-	return s.accountRepo.FindByUserIDPaginated(ctx, userID, page, limit)
+	return s.accountRepo.FindByUserID(ctx, userID, page, limit)
 }
 
 func (s *AccountService) FetchTotalAccounts(ctx context.Context, userID uuid.UUID) (int, error) {
@@ -89,6 +89,7 @@ func (s *AccountService) FetchAccount(ctx context.Context, accountIDStr string, 
 	return s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
 }
 
+// TODO: revisit this and pass ids as uuid
 func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string, userIDStr string) (*models.Account, error) {
 	accountID, err := uuid.Parse(accountIDStr)
 	if err != nil {
@@ -112,10 +113,12 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 	}
 
 	tx := s.db.Begin()
+	var returnErr error
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 			log.ErrorLogger.Errorf("Failed to delete account: %v", r)
+			returnErr = fmt.Errorf("failed to delete account: %v", r)
 		}
 	}()
 
@@ -135,7 +138,20 @@ func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string,
 		return nil, err
 	}
 
-	return account, nil
+	return account, returnErr
+}
+
+func (s *AccountService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) (err error) {
+	err = s.accountRepo.DeleteByUserID(ctx, tx, userID)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *AccountService) CreateAccountTransaction(ctx context.Context, tx *gorm.DB, plan models.Plan, account models.Account, createTransaction types.CreatePlanTransaction, userID uuid.UUID) error {

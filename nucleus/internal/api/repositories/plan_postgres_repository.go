@@ -27,19 +27,19 @@ func (r *PostgresPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *
 	return tx.WithContext(ctx).Save(plan).Error
 }
 
-func (r *PostgresPlanRepository) FindByIDAndUserID(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
+func (r *PostgresPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
 	var plan models.Plan
 	result := r.db.WithContext(ctx).
 		Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 			return db.Omit("plan", "user").Preload("Account").Order("created_at desc")
-		}).Where("id = ? AND user_id = ?", planID, userID).First(&plan)
+		}).Where("id = ?", planID).First(&plan)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &plan, nil
 }
 
-func (r *PostgresPlanRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
+func (r *PostgresPlanRepository) FindByUserID(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
 	var plans []models.Plan
 	var totalItems int64
 	db := r.db.WithContext(ctx).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
@@ -72,6 +72,10 @@ func (r *PostgresPlanRepository) FindByUserIDPaginated(ctx context.Context, user
 
 func (r *PostgresPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	return tx.WithContext(ctx).Delete(plan).Error
+}
+
+func (r *PostgresPlanRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	return tx.WithContext(ctx).Where("user_id = ?", userID).Delete(models.Plan{}).Error
 }
 
 func (r *PostgresPlanRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int64, error) {

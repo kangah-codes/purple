@@ -31,7 +31,7 @@ func (r *PostgresTransactionRepository) FindByIDAndUserID(ctx context.Context, a
 	return &transaction, nil
 }
 
-func (r *PostgresTransactionRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
+func (r *PostgresTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
 	var transactions []models.Transaction
 	var totalItems int64
 
@@ -58,4 +58,12 @@ func (r *PostgresTransactionRepository) CountByUserID(ctx context.Context, userI
 
 func (r *PostgresTransactionRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
 	return tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.Transaction{}).Error
+}
+
+func (r *PostgresTransactionRepository) DeleteByAccountID(ctx context.Context, tx *gorm.DB, accountID uuid.UUID) error {
+	return tx.WithContext(ctx).Where("user_id = ?", accountID).Delete(&models.Account{}).Error
+}
+
+func (r *PostgresTransactionRepository) DeleteByPlanID(ctx context.Context, tx *gorm.DB, planID uuid.UUID) error {
+	return tx.WithContext(ctx).Where("user_id = ?", planID).Delete(&models.Plan{}).Error
 }

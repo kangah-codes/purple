@@ -140,6 +140,10 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 	return &transaction, tx.Commit().Error
 }
 
+func (s *TransactionService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	return s.transactionRepo.DeleteByUserID(ctx, tx, userID)
+}
+
 func (s *TransactionService) FetchPaginatedTransactions(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
-	return s.transactionRepo.FindByUserIDPaginated(ctx, userID, page, limit)
+	return s.transactionRepo.FindByUserID(ctx, userID, page, limit)
 }

@@ -17,11 +17,11 @@ import (
 type PlanService struct {
 	planRepo        repositories.PlanRepository
 	transactionRepo repositories.TransactionRepository
-	accountRepo     repositories.PostgresAccountRepository
+	accountRepo     repositories.AccountRepository
 	db              *gorm.DB
 }
 
-func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.PostgresAccountRepository, db *gorm.DB) *PlanService {
+func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, db *gorm.DB) *PlanService {
 	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
 }
 
@@ -60,7 +60,7 @@ func (s *PlanService) CreatePlan(ctx context.Context, payload types.CreatePlanDT
 }
 
 func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, userID uuid.UUID, balance float64) (*models.Plan, error) {
-	plan, err := s.planRepo.FindByIDAndUserID(ctx, planID, userID)
+	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,16 +77,16 @@ func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, u
 }
 
 func (s *PlanService) FetchPaginatedPlans(ctx context.Context, userID uuid.UUID, queryParams PlanQuery, page int, limit int) ([]models.Plan, int, error) {
-	plans, totalItems, err := s.planRepo.FindByUserIDPaginated(ctx, userID, queryParams.Name, queryParams.StartDate, queryParams.EndDate, queryParams.PlanType, page, limit)
+	plans, totalItems, err := s.planRepo.FindByUserID(ctx, userID, queryParams.Name, queryParams.StartDate, queryParams.EndDate, queryParams.PlanType, page, limit)
 	return plans, int(totalItems), err
 }
 
 func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
-	return s.planRepo.FindByIDAndUserID(ctx, planID, userID)
+	return s.planRepo.FindByID(ctx, planID)
 }
 
-func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) error {
-	plan, err := s.planRepo.FindByIDAndUserID(ctx, planID, userID)
+func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID) error {
+	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
 		return fmt.Errorf("plan not found")
 	}
@@ -108,13 +108,25 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID, userID u
 		return err
 	}
 
-	err = s.transactionRepo.DeleteByUserID(ctx, tx, userID)
+	err = s.transactionRepo.DeleteByPlanID(ctx, tx, planID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	return tx.Commit().Error
+}
+
+func (s *PlanService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	err := s.planRepo.DeleteByUserID(ctx, tx, userID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// TODO; figure out how to delete plan transactions in bulk by user id
+
+	return nil
 }
 
 func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (*models.Transaction, error) {
@@ -132,7 +144,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		}
 	}()
 
-	plan, err := s.planRepo.FindByIDAndUserID(ctx, planID, userID)
+	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
 		tx.Rollback()
 		return nil, ErrPlanNotFound

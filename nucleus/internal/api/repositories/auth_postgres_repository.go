@@ -20,8 +20,16 @@ func (r *PostgresAuthRepository) SignIn(ctx context.Context, session *models.Ses
 	return r.db.WithContext(ctx).Create(session).Error
 }
 
+func (r *PostgresAuthRepository) SignOut(ctx context.Context, session *models.Session) error {
+	return r.db.WithContext(ctx).Delete(session).Error
+}
+
 func (r *PostgresAuthRepository) Clear(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&models.Session{}).Error
+}
+
+func (r *PostgresAuthRepository) GenerateResetPin(ctx context.Context, resetPin *models.PasswordResetPin) error {
+	return r.db.WithContext(ctx).Create(resetPin).Error
 }
 
 func (r PostgresAuthRepository) Get(ctx context.Context, token string) (*models.Session, error) {

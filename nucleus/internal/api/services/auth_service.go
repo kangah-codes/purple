@@ -120,18 +120,12 @@ func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token s
 	}
 	defer tx.Rollback()
 
-	var session models.Session
-	if err := tx.WithContext(ctx).Where("token = ?", token).First(&session).Error; err != nil {
+	session, err := s.authRepo.Get(ctx, token)
+	if err != nil {
 		return err
 	}
 
-	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.Session{}).Error; err != nil {
-		log.ErrorLogger.Errorf("Failed to delete sessions: %v", err)
-		return err
-	}
-
-	if err := tx.WithContext(ctx).Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error; err != nil { // Assuming you have RefreshToken model/repository
-		log.ErrorLogger.Errorf("Failed to delete refresh tokens: %v", err)
+	if err := s.authRepo.SignOut(ctx, session); err != nil {
 		return err
 	}
 
@@ -140,12 +134,20 @@ func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token s
 		return err
 	}
 
-	err := s.authRepo.Clear(ctx, session.Token)
+	return nil
+}
+
+func (s *AuthService) CheckAvailableUsername(ctx context.Context, userName string) (bool, error) {
+	user, err := s.userRepo.FindByUsername(ctx, userName)
 	if err != nil {
-		log.ErrorLogger.Errorf("Error clearing user sessions from cache: %v", err)
+		return false, err
 	}
 
-	return nil
+	if user != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (s *AuthService) clearSessions(ctx context.Context, userID uuid.UUID, tx *gorm.DB) error {

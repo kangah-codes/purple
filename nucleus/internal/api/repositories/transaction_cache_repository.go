@@ -78,7 +78,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 	return transaction, err
 }
 
-func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
+func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
 	query := TransactionQuery{}
 	key := r.buildUserTransactionsCacheKey(userID, query, page, limit)
 	var cachedTransactions []models.Transaction
@@ -95,7 +95,7 @@ func (r *CachingTransactionRepository) FindByUserIDPaginated(ctx context.Context
 		return cachedTransactions, totalItems, nil
 	}
 
-	transactions, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, page, limit)
+	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, page, limit)
 	if err == nil && len(transactions) > 0 {
 		err := r.cache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {
@@ -111,10 +111,33 @@ func (r *CachingTransactionRepository) CountByUserID(ctx context.Context, userID
 
 func (r *CachingTransactionRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
 	err := r.next.DeleteByUserID(ctx, tx, userID)
-	if err == nil {
-		r.invalidateUserTransactionsCache(ctx, userID)
+	if err != nil {
+		return err
 	}
-	return err
+
+	r.invalidateUserTransactionsCache(ctx, userID)
+
+	return nil
+}
+func (r *CachingTransactionRepository) DeleteByAccountID(ctx context.Context, tx *gorm.DB, accountID uuid.UUID) error {
+	err := r.next.DeleteByAccountID(ctx, tx, accountID)
+	if err != nil {
+		return err
+	}
+
+	// TODO: find a way to get the user id and clear cache
+	// r.invalidateUserTransactionsCache(ctx, userID)
+
+	return nil
+}
+
+func (r *CachingTransactionRepository) DeleteByPlanID(ctx context.Context, tx *gorm.DB, planID uuid.UUID) error {
+	err := r.next.DeleteByPlanID(ctx, tx, planID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx context.Context, userID uuid.UUID) {
@@ -123,6 +146,5 @@ func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx conte
 }
 
 func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID, planID uuid.UUID) {
-	fmt.Println(r.cache.BuildKey("plans", userID.String(), planID.String()), "KL")
 	r.cache.Invalidate(ctx, r.cache.BuildKey("plans", userID.String(), planID.String()))
 }

@@ -90,11 +90,19 @@ func (r *CachingUserRepository) Update(ctx context.Context, user *models.User) e
 	return err
 }
 
-func (r *CachingUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *CachingUserRepository) Delete(ctx context.Context, tx *gorm.DB, id uuid.UUID) error {
 	user, err := r.next.FindByID(ctx, id)
-	if err == nil && user != nil {
-		r.cache.Invalidate(ctx, r.buildUserCacheKey(id))
-		r.cache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
+	if user == nil || err != nil {
+		return err
 	}
-	return r.next.Delete(ctx, id)
+
+	err = r.next.Delete(ctx, tx, id)
+	if err != nil {
+		return err
+	}
+
+	r.cache.Invalidate(ctx, r.buildUserCacheKey(id))
+	r.cache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
+
+	return nil
 }

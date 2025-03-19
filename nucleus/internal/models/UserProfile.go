@@ -22,5 +22,5 @@ type UserProfile struct {
 	Base
 	// i only renamed it to PUserId because I was fucking getting errors for migrating that column from a string to a uuid
 	PUserId     uuid.UUID       `json:"user_id"`
-	Preferences UserPreferences `gorm:"type:jsonb" json:"preferences"` // JSONB column for flexible fields
+	Preferences UserPreferences `gorm:"type:jsonb" json:"preferences"`
 }

@@ -33,7 +33,7 @@ func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accou
 	return &account, nil
 }
 
-func (r *PostgresAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
+func (r *PostgresAccountRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
 	var accounts []models.Account
 	totalItems, err := r.CountByUserID(ctx, userID)
 	if err != nil {
@@ -59,4 +59,8 @@ func (r *PostgresAccountRepository) CountByUserID(ctx context.Context, userID uu
 
 func (r *PostgresAccountRepository) Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	return tx.WithContext(ctx).Delete(account).Error
+}
+
+func (r *PostgresAccountRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	return tx.WithContext(ctx).Where("user_id = ?", userID).Delete(models.Account{}).Error
 }

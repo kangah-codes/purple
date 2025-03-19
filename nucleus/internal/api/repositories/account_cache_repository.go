@@ -78,7 +78,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 	return account, err
 }
 
-func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
+func (r *CachingAccountRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
 	key := r.buildUserAccountsCacheKey(userID, page, limit)
 	var cachedAccounts []models.Account
 	found, err := r.cache.Get(ctx, key, &cachedAccounts)
@@ -94,7 +94,7 @@ func (r *CachingAccountRepository) FindByUserIDPaginated(ctx context.Context, us
 		return cachedAccounts, totalItems, nil
 	}
 
-	accounts, totalItems, err := r.next.FindByUserIDPaginated(ctx, userID, page, limit)
+	accounts, totalItems, err := r.next.FindByUserID(ctx, userID, page, limit)
 	if err == nil && len(accounts) > 0 {
 		err := r.cache.Set(ctx, key, accounts, r.expiration)
 		if err != nil {
@@ -128,14 +128,28 @@ func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uui
 
 func (r *CachingAccountRepository) Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	err := r.next.Delete(ctx, tx, account)
-	if err == nil {
-		r.cache.Invalidate(ctx, r.buildAccountCacheKey(account.UserId, account.ID))
-		r.invalidateUserAccountsCache(ctx, account.UserId)
+	if err != nil {
+		return err
 	}
-	return err
+
+	r.invalidateUserAccountsCache(ctx, account.UserId)
+
+	return nil
+}
+
+func (r *CachingAccountRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
+	err := r.next.DeleteByUserID(ctx, tx, userID)
+	if err != nil {
+		return err
+	}
+
+	r.invalidateUserAccountsCache(ctx, userID)
+
+	return nil
 }
 
 func (r *CachingAccountRepository) invalidateUserAccountsCache(ctx context.Context, userID uuid.UUID) {
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String()))
+	r.cache.InvalidateMultiple(ctx, []string{
+		r.cache.BuildKey(r.keyPrefix, userID.String(), "*"),
+	})
 }
