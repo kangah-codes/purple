@@ -115,6 +115,14 @@ func (h *AuthHandler) CheckAvailableUsername(c *gin.Context) {
 	c.JSON(200, types.Response{Status: 200, Message: "Username available"})
 }
 
+func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
+	// flow for password request reset
+	// user makes request to reset password
+	// handler takes request and fires off a dispatch event to password_reset_request email queue for processing
+	// email service generates user_password_reset with otp & details
+	// email service sends email to user
+}
+
 func (h *AuthHandler) SignOut(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	token := c.GetHeader("Authorization")

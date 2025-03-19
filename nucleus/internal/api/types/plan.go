@@ -27,7 +27,7 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 
 // MarshalJSON implements the json.Marshaler interface for Date
 func (d Date) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", time.Time(d).Format(DateFormat))), nil
+	return fmt.Appendf(nil, "\"%s\"", time.Time(d).Format(DateFormat)), nil
 }
 
 type CreatePlanDTO struct {

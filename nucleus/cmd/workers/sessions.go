@@ -33,6 +33,7 @@ func (sc *SessionCleaner) Start(ctx context.Context) {
 			select {
 			case <-sc.ticker.C:
 				sc.deleteExpiredSessions()
+				sc.deleteExpiredPasswordResetTokens()
 			case <-ctx.Done():
 				return
 			case <-sc.done:
@@ -59,10 +60,20 @@ func (sc *SessionCleaner) deleteExpiredSessions() {
 		log.InfoLogger.Printf("Deleted %d expired sessions", sessionResult.RowsAffected)
 	}
 
-	refreshTokenResult := sc.db.Where("expires_at <= ?", now).Delete(&models.RefreshToken{})
-	if refreshTokenResult.Error != nil {
-		log.ErrorLogger.Errorf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
+	// refreshTokenResult := sc.db.Where("expires_at <= ?", now).Delete(&models.RefreshToken{})
+	// if refreshTokenResult.Error != nil {
+	// 	log.ErrorLogger.Errorf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
+	// } else {
+	// 	log.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
+	// }
+}
+
+func (sc *SessionCleaner) deleteExpiredPasswordResetTokens() {
+	now := time.Now()
+	sessionResult := sc.db.Where("expires_at <= ?", now).Delete(&models.PasswordResetPin{})
+	if sessionResult.Error != nil {
+		log.ErrorLogger.Errorf("Error deleting expired password reset tokens: %v", sessionResult.Error)
 	} else {
-		log.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
+		log.InfoLogger.Printf("Deleted %d expired password reset tokens", sessionResult.RowsAffected)
 	}
 }
