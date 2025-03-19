@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"nucleus/cmd/workers"
-	"nucleus/internal/api/handlers"
+	"nucleus/internal/api/containers"
 	"nucleus/internal/api/middleware"
-	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/routes"
-	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
 	"nucleus/internal/log"
@@ -95,8 +93,8 @@ func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 		},
 	})
 
-	// Setup auth components
-	authHandler, authMiddlewareConfig := setupAuthComponents(db, redisCache)
+	// register container
+	container := containers.NewAPIContainer(db, redisCache)
 
 	// Initialize router
 	r := gin.Default()
@@ -106,29 +104,17 @@ func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 	r.Use(rateLimit)
 	r.Use(middleware.CorsMiddleware())
 	r.Use(middleware.APIKeyMiddleware())
-	r.Use(middleware.AuthMiddleware(authMiddlewareConfig))
+	r.Use(middleware.AuthMiddleware(&middleware.AuthMiddlewareConfig{
+		AuthService: container.AuthService,
+	}))
 
 	// Register routes
-	registerRoutes(r, db, redisCache, authHandler)
+	registerRoutes(r, container)
 
 	return r
 }
 
-func setupAuthComponents(db *gorm.DB, redisCache *cache.RedisCache) (*handlers.AuthHandler, *middleware.AuthMiddlewareConfig) {
-	postgresAuthRepo := repositories.NewPostgresAuthRepository(db)
-	userRepo := repositories.NewPostgresUserRepository(db)
-	cacheAuthRepo := repositories.NewCachingAuthRepository(postgresAuthRepo, redisCache, "auth", time.Minute*10)
-	authService := services.NewAuthService(cacheAuthRepo, userRepo, db)
-	authHandler := handlers.NewAuthHandler(authService)
-
-	authMiddlewareConfig := &middleware.AuthMiddlewareConfig{
-		AuthService: authService,
-	}
-
-	return authHandler, authMiddlewareConfig
-}
-
-func registerRoutes(r *gin.Engine, db *gorm.DB, redisCache *cache.RedisCache, authHandler *handlers.AuthHandler) {
+func registerRoutes(r *gin.Engine, container *containers.Container) {
 	// Health check endpoint
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{
@@ -140,11 +126,11 @@ func registerRoutes(r *gin.Engine, db *gorm.DB, redisCache *cache.RedisCache, au
 
 	// API routes
 	v1 := routes.CreateV1Group(r)
-	routes.RegisterAuthRoutes(v1, authHandler)
-	routes.RegisterUserRoutes(v1, db, redisCache)
-	routes.RegisterAccountRoutes(v1, db, redisCache)
-	routes.RegisterPlanRoutes(v1, db, redisCache)
-	routes.RegisterTransactionRoutes(v1, db, redisCache)
+	routes.RegisterAuthRoutes(v1, container)
+	routes.RegisterUserRoutes(v1, container)
+	routes.RegisterAccountRoutes(v1, container)
+	routes.RegisterPlanRoutes(v1, container)
+	routes.RegisterTransactionRoutes(v1, container)
 	routes.RegisterUtilRoutes(v1)
 	routes.RegisterStatsRoutes(v1)
 }

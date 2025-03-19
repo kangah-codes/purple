@@ -99,6 +99,22 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Sign in successful", Data: response})
 }
 
+func (h *AuthHandler) CheckAvailableUsername(c *gin.Context) {
+	username := c.Param("username")
+	exists, err := h.authService.CheckAvailableUsername(c.Request.Context(), username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
+		return
+	}
+
+	if exists {
+		c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available"})
+		return
+	}
+
+	c.JSON(200, types.Response{Status: 200, Message: "Username available"})
+}
+
 func (h *AuthHandler) SignOut(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	token := c.GetHeader("Authorization")

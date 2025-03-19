@@ -1,24 +1,15 @@
 package routes
 
 import (
+	"nucleus/internal/api/containers"
 	"nucleus/internal/api/handlers"
 	"nucleus/internal/api/middleware"
-	"nucleus/internal/api/repositories"
-	"nucleus/internal/api/services"
-	"nucleus/internal/cache"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func RegisterPlanRoutes(r *gin.RouterGroup, db *gorm.DB, cache *cache.RedisCache) {
-	postgresPlanRepo := repositories.NewPostgresPlanRepository(db)
-	postgresTransactionRepo := repositories.NewPostgresTransactionRepository(db)
-	postgresAccountRepo := repositories.NewPostgresAccountRepository(db)
-	cachePlanRepo := repositories.NewCachingPlanRepository(postgresPlanRepo, cache, "plans", time.Minute*5)
-	planService := services.NewPlanService(cachePlanRepo, postgresTransactionRepo, postgresAccountRepo, db)
-	planHandler := handlers.NewPlanHandler(planService)
+func RegisterPlanRoutes(r *gin.RouterGroup, container *containers.Container) {
+	planHandler := handlers.NewPlanHandler(container.PlanService)
 
 	planGroup := r.Group("/plan")
 	{

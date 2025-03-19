@@ -184,24 +184,3 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	c.JSON(200, types.Response{Status: 200, Message: "User updated successfully", Data: user})
 }
-
-func (h *UserHandler) CheckAvailableUsername(c *gin.Context) {
-	checkUsername := types.CheckAvailableUsernameDTO{}
-	if err := c.ShouldBindJSON(&checkUsername); err != nil {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
-		return
-	}
-
-	exists, err := h.authService.CheckAvailableUsername(c.Request.Context(), checkUsername.Username)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
-		return
-	}
-
-	if !exists {
-		c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available"})
-		return
-	}
-
-	c.JSON(409, types.Response{Status: http.StatusConflict, Message: "Username not available"})
-}
