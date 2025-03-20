@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type CacheService interface {
+type CacheRepository interface {
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
 	Get(ctx context.Context, key string, object interface{}) (bool, error)
 	Invalidate(ctx context.Context, pattern string) error

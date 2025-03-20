@@ -17,7 +17,7 @@ import (
 
 type CachingTransactionRepository struct {
 	next       TransactionRepository
-	cache      cache.CacheService
+	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
 }
@@ -30,10 +30,10 @@ type TransactionQuery struct {
 	MaxAmount string `json:"max_amount"`
 }
 
-func NewCachingTransactionRepository(next TransactionRepository, cacheService cache.CacheService, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
+func NewCachingTransactionRepository(next TransactionRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
 	return &CachingTransactionRepository{
 		next:       next,
-		cache:      cacheService,
+		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
 	}

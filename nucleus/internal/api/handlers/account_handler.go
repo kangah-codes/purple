@@ -48,6 +48,12 @@ func (h *AccountHandler) CreateAccount(c *gin.Context) {
 func (h *AccountHandler) UpdateUserAccount(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	accountID := c.Param("accountID")
+	parsedAccountID, err := uuid.Parse(accountID)
+	if err != nil {
+		c.JSON(400, types.Response{Status: 400, Message: "Invalid request", Data: nil})
+		return
+	}
+
 	updateAccount := types.UpdateAccountDTO{}
 	if err := c.ShouldBindJSON(&updateAccount); err != nil {
 		log.ErrorLogger.Errorln(err)
@@ -55,7 +61,7 @@ func (h *AccountHandler) UpdateUserAccount(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountService.UpdateAccount(c.Request.Context(), accountID, userID.(string), updateAccount)
+	account, err := h.accountService.UpdateAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID), updateAccount)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update account", Data: nil})
@@ -108,7 +114,13 @@ func (h *AccountHandler) DeleteUserAccount(c *gin.Context) {
 	accountID := c.Param("id")
 	userID, _ := c.Get("userID")
 
-	account, err := h.accountService.DeleteAccount(c.Request.Context(), accountID, userID.(string))
+	parsedAccountID, err := uuid.Parse(accountID)
+	if err != nil {
+		c.JSON(400, types.Response{Status: 400, Message: "Invalid request", Data: nil})
+		return
+	}
+
+	account, err := h.accountService.DeleteAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID))
 	if err != nil {
 		log.ErrorLogger.Errorf("Failed to delete account: %v", err)
 

@@ -40,16 +40,7 @@ func (s *AccountService) CreateAccount(ctx context.Context, payload types.Create
 	return &account, nil
 }
 
-func (s *AccountService) UpdateAccount(ctx context.Context, accountIDStr string, userIDStr string, payload types.UpdateAccountDTO) (*models.Account, error) {
-	accountID, err := uuid.Parse(accountIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid account ID: %w", err)
-	}
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
-	}
-
+func (s *AccountService) UpdateAccount(ctx context.Context, accountID, userID uuid.UUID, payload types.UpdateAccountDTO) (*models.Account, error) {
 	account, err := s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
 	if err != nil {
 		return nil, err
@@ -77,29 +68,11 @@ func (s *AccountService) FetchTotalAccounts(ctx context.Context, userID uuid.UUI
 	return s.accountRepo.CountByUserID(ctx, userID)
 }
 
-func (s *AccountService) FetchAccount(ctx context.Context, accountIDStr string, userIDStr string) (*models.Account, error) {
-	accountID, err := uuid.Parse(accountIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid account ID: %w", err)
-	}
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
-	}
+func (s *AccountService) FetchAccount(ctx context.Context, accountID, userID uuid.UUID) (*models.Account, error) {
 	return s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
 }
 
-// TODO: revisit this and pass ids as uuid
-func (s *AccountService) DeleteAccount(ctx context.Context, accountIDStr string, userIDStr string) (*models.Account, error) {
-	accountID, err := uuid.Parse(accountIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid account ID: %w", err)
-	}
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
-	}
-
+func (s *AccountService) DeleteAccount(ctx context.Context, accountID, userID uuid.UUID) (*models.Account, error) {
 	account, err := s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
 	if err != nil {
 		return nil, fmt.Errorf("account not found")

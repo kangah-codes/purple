@@ -13,15 +13,15 @@ import (
 
 type CachingUserRepository struct {
 	next       UserRepository
-	cache      cache.CacheService
+	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
 }
 
-func NewCachingUserRepository(next UserRepository, cacheService cache.CacheService, keyPrefix string, expiration time.Duration) *CachingUserRepository {
+func NewCachingUserRepository(next UserRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingUserRepository {
 	return &CachingUserRepository{
 		next:       next,
-		cache:      cacheService,
+		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
 	}

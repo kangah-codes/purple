@@ -14,30 +14,26 @@ import (
 
 type CachingAccountRepository struct {
 	next       AccountRepository
-	cache      cache.CacheService
+	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
 }
 
-func NewCachingAccountRepository(next AccountRepository, cacheService cache.CacheService, keyPrefix string, expiration time.Duration) *CachingAccountRepository {
+func NewCachingAccountRepository(next AccountRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingAccountRepository {
 	return &CachingAccountRepository{
 		next:       next,
-		cache:      cacheService,
+		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
 	}
 }
 
-func (r *CachingAccountRepository) buildAccountCacheKey(userID uuid.UUID, accountID uuid.UUID) string {
-	return r.cache.BuildKey(r.keyPrefix, userID.String(), accountID.String())
+func (r *CachingAccountRepository) buildAccountCacheKey(accountID uuid.UUID) string {
+	return r.cache.BuildKey(r.keyPrefix, accountID.String())
 }
 
 func (r *CachingAccountRepository) buildUserAccountsCacheKey(userID uuid.UUID, page int, limit int) string {
 	return r.cache.BuildKey(r.keyPrefix, userID.String(), "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
-}
-
-func (r *CachingAccountRepository) buildUserAccountsCountCacheKey(userID uuid.UUID) string {
-	return r.cache.BuildKey(r.keyPrefix, userID.String(), "count")
 }
 
 func (r *CachingAccountRepository) Create(ctx context.Context, account *models.Account) error {
@@ -51,14 +47,14 @@ func (r *CachingAccountRepository) Create(ctx context.Context, account *models.A
 func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	err := r.next.Update(ctx, tx, account)
 	if err == nil {
-		r.cache.Invalidate(ctx, r.buildAccountCacheKey(account.UserId, account.ID))
+		r.cache.Invalidate(ctx, r.buildAccountCacheKey(account.ID))
 		r.invalidateUserAccountsCache(ctx, account.UserId)
 	}
 	return err
 }
 
 func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
-	key := r.buildAccountCacheKey(userID, accountID)
+	key := r.buildAccountCacheKey(accountID)
 	var cachedAccount models.Account
 	found, err := r.cache.Get(ctx, key, &cachedAccount)
 	if err != nil {
@@ -106,23 +102,11 @@ func (r *CachingAccountRepository) FindByUserID(ctx context.Context, userID uuid
 }
 
 func (r *CachingAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int, error) {
-	key := r.buildUserAccountsCountCacheKey(userID)
-	var cachedCount int
-	found, err := r.cache.Get(ctx, key, &cachedCount)
-	if err != nil {
-		log.ErrorLogger.Errorf("Error getting account count from cache: %v", err)
-	}
-	if found {
-		return cachedCount, nil
-	}
-
 	count, err := r.next.CountByUserID(ctx, userID)
 	if err == nil {
-		err := r.cache.Set(ctx, key, count, r.expiration)
-		if err != nil {
-			log.ErrorLogger.Errorf("Error setting account count in cache: %v", err)
-		}
+		return 0, err
 	}
+
 	return count, err
 }
 

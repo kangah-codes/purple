@@ -11,15 +11,15 @@ import (
 
 type CachingAuthRepository struct {
 	next       AuthRepository
-	cache      cache.CacheService
+	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
 }
 
-func NewCachingAuthRepository(next AuthRepository, cacheService cache.CacheService, keyPrefix string, expiration time.Duration) *CachingAuthRepository {
+func NewCachingAuthRepository(next AuthRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingAuthRepository {
 	return &CachingAuthRepository{
 		next:       next,
-		cache:      cacheService,
+		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
 	}

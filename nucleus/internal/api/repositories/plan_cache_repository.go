@@ -15,7 +15,7 @@ import (
 
 type CachingPlanRepository struct {
 	next       PlanRepository
-	cache      cache.CacheService
+	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
 }
@@ -27,20 +27,20 @@ type PlanQuery struct {
 	PlanType  string `json:"type"`
 }
 
-func NewCachingPlanRepository(next PlanRepository, cacheService cache.CacheService, keyPrefix string, expiration time.Duration) *CachingPlanRepository {
+func NewCachingPlanRepository(next PlanRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingPlanRepository {
 	return &CachingPlanRepository{
 		next:       next,
-		cache:      cacheService,
+		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
 	}
 }
 
-func (r *CachingPlanRepository) buildPlanCacheKey(userID uuid.UUID, planID uuid.UUID) string {
-	return r.cache.BuildKey(r.keyPrefix, userID.String(), planID.String())
+func (r *CachingPlanRepository) buildPlanCacheKey(planID uuid.UUID) string {
+	return r.cache.BuildKey(r.keyPrefix, planID.String())
 }
 
-func (r *CachingPlanRepository) buildUserPlansCacheKey(userID uuid.UUID, query PlanQuery, page int, limit int) string {
+func (r *CachingPlanRepository) buildUserPlansCacheKey(query PlanQuery, userID uuid.UUID, page int, limit int) string {
 	queryStr := fmt.Sprintf("name:%s-start:%s-end:%s-type:%s", query.Name, query.StartDate, query.EndDate, query.PlanType)
 	return r.cache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
 }
@@ -64,37 +64,36 @@ func (r *CachingPlanRepository) CreateTransaction(ctx context.Context, tx *gorm.
 func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Update(ctx, tx, plan)
 	if err == nil {
-		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.UserId, plan.ID))
+		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.ID))
 		r.invalidateUserPlansCache(ctx, plan.UserId)
 	}
 	return err
 }
 
 func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
-	// TODO: get user id here
-	// key := r.buildPlanCacheKey(userID, planID)
-	// var cachedPlan models.Plan
-	// found, err := r.cache.Get(ctx, key, &cachedPlan)
-	// if err != nil {
-	// 	log.ErrorLogger.Errorf("Error getting plan from cache: %v", err)
-	// }
-	// if found {
-	// 	return &cachedPlan, nil
-	// }
+	key := r.buildPlanCacheKey(planID)
+	var cachedPlan models.Plan
+	found, err := r.cache.Get(ctx, key, &cachedPlan)
+	if err != nil {
+		log.ErrorLogger.Errorf("Error getting plan from cache: %v", err)
+	}
+	if found {
+		return &cachedPlan, nil
+	}
 
 	plan, err := r.next.FindByID(ctx, planID)
 	if err == nil && plan != nil {
-		// err := r.cache.Set(ctx, key, plan, r.expiration)
-		// if err != nil {
-		log.ErrorLogger.Errorf("Error setting plan in cache: %v", err)
-		// }
+		err := r.cache.Set(ctx, key, plan, r.expiration)
+		if err != nil {
+			log.ErrorLogger.Errorf("Error setting plan in cache: %v", err)
+		}
 	}
 	return plan, err
 }
 
 func (r *CachingPlanRepository) FindByUserID(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
 	query := PlanQuery{Name: name, StartDate: startDate, EndDate: endDate, PlanType: planType}
-	key := r.buildUserPlansCacheKey(userID, query, page, limit)
+	key := r.buildUserPlansCacheKey(query, userID, page, limit)
 	var cachedPlans []models.Plan
 	found, err := r.cache.Get(ctx, key, &cachedPlans)
 	if err != nil {
@@ -125,7 +124,7 @@ func (r *CachingPlanRepository) CountByUserID(ctx context.Context, userID uuid.U
 func (r *CachingPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Delete(ctx, tx, plan)
 	if err == nil {
-		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.UserId, plan.ID))
+		r.cache.Invalidate(ctx, r.buildPlanCacheKey(plan.ID))
 		r.invalidateUserPlansCache(ctx, plan.UserId)
 	}
 	return err
