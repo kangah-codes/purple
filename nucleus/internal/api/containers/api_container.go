@@ -12,17 +12,17 @@ import (
 type Container struct {
 	// repositories
 	UserRepo        repositories.UserRepository
-	AccountRepo     repositories.AccountRepository
 	AuthRepo        repositories.AuthRepository
 	PlanRepo        repositories.PlanRepository
+	AccountRepo     repositories.AccountRepository
 	TransactionRepo repositories.TransactionRepository
 
 	// services
 	UserService        *services.UserService
-	AccountService     *services.AccountService
 	PlanService        *services.PlanService
-	TransactionService *services.TransactionService
 	AuthService        *services.AuthService
+	AccountService     *services.AccountService
+	TransactionService *services.TransactionService
 }
 
 func NewAPIContainer(db *gorm.DB, cache *cache.RedisCache) *Container {

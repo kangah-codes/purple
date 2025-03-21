@@ -31,7 +31,7 @@ func (r *PostgresTransactionRepository) FindByIDAndUserID(ctx context.Context, a
 	return &transaction, nil
 }
 
-func (r *PostgresTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
+func (r *PostgresTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
 	var transactions []models.Transaction
 	var totalItems int64
 
@@ -39,7 +39,13 @@ func (r *PostgresTransactionRepository) FindByUserID(ctx context.Context, userID
 		return nil, 0, err
 	}
 
-	result := r.db.WithContext(ctx).Preload("Account").Where("user_id = ?", userID).Order("created_at DESC").Offset((page - 1) * limit).Limit(limit).Find(&transactions)
+	dbQuery := r.db.WithContext(ctx).Preload("Account").Where("user_id = ?", userID)
+
+	if query.AccountID != "" {
+		dbQuery = dbQuery.Where("account_id = ?", query.AccountID)
+	}
+
+	result := dbQuery.Order("created_at DESC").Offset((page - 1) * limit).Limit(limit).Find(&transactions)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}

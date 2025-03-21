@@ -21,15 +21,16 @@ import { getCurrentMonthYear } from '../utils';
 const currentMonthYear = getCurrentMonthYear();
 
 export default function StatsScreen() {
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    // const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    // const renderItem = useCallback(
+    //     ({ item }: { item: any }) => (
+    //         <TransactionHistoryCard showTitle={false} data={item} onPress={() => {}} />
+    //     ),
+    //     [],
+    // );
+
     const { transactions } = useTransactionStore();
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: any }) => (
-            <TransactionHistoryCard showTitle={false} data={item} onPress={() => {}} />
-        ),
-        [],
-    );
     const renderBreakdownItem = useCallback(
         ({ item }: { item: any }) => (
             <TransactionBreakdownCard

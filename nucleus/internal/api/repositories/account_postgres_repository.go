@@ -26,7 +26,9 @@ func (r *PostgresAccountRepository) Update(ctx context.Context, tx *gorm.DB, acc
 
 func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
 	var account models.Account
-	result := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", accountID, userID).First(&account)
+	result := r.db.WithContext(ctx).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at desc")
+	}).Where("id = ? AND user_id = ?", accountID, userID).First(&account)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -37,10 +39,19 @@ func (r *PostgresAccountRepository) FindByUserID(ctx context.Context, userID uui
 	var accounts []models.Account
 	totalItems, err := r.CountByUserID(ctx, userID)
 	if err != nil {
-		return accounts, -1, err
+		return accounts, 0, err
 	}
 
-	result := r.db.WithContext(ctx).Where("user_id = ?", userID).Offset((page - 1) * limit).Limit(limit).Find(&accounts)
+	result := r.db.WithContext(ctx).
+		Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at desc")
+		}).
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Offset((page - 1) * limit).
+		Limit(limit).
+		Find(&accounts)
+
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -51,9 +62,11 @@ func (r *PostgresAccountRepository) FindByUserID(ctx context.Context, userID uui
 func (r *PostgresAccountRepository) CountByUserID(ctx context.Context, userID uuid.UUID) (int, error) {
 	var count int64
 	result := r.db.WithContext(ctx).Model(&models.Account{}).Where("user_id = ?", userID).Count(&count)
+
 	if result.Error != nil {
 		return 0, result.Error
 	}
+
 	return int(count), nil
 }
 

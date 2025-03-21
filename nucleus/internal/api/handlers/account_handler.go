@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type AccountHandler struct {
@@ -71,6 +72,33 @@ func (h *AccountHandler) UpdateUserAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Account updated successfully", Data: account})
 }
 
+func (h *AccountHandler) FetchUserAccount(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	accountID := c.Param("accountID")
+
+	parsedAccountID, err := uuid.Parse(accountID)
+	if err != nil {
+		c.JSON(400, types.Response{Status: 400, Message: "Invalid request", Details: []string{"Account ID is invalid"}})
+		return
+	}
+
+	account, err := h.accountService.FetchAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(404, types.Response{Status: 404, Message: "Account not found"})
+			return
+		}
+	}
+
+	response := types.Response{
+		Status:  http.StatusOK,
+		Message: "Account fetched successfully",
+		Data:    *account,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *AccountHandler) FetchUserAccounts(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -82,14 +110,7 @@ func (h *AccountHandler) FetchUserAccounts(c *gin.Context) {
 		pageSize = 10
 	}
 
-	count, err := h.accountService.FetchTotalAccounts(c.Request.Context(), userID.(uuid.UUID))
-	if err != nil {
-		log.ErrorLogger.Errorf("Error fetching total user accounts: %v", err)
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})
-		return
-	}
-
-	accounts, totalItems, err := h.accountService.FetchPaginatedAccounts(c.Request.Context(), userID.(uuid.UUID), page, int(count))
+	accounts, totalItems, err := h.accountService.FetchPaginatedAccounts(c.Request.Context(), userID.(uuid.UUID), page, pageSize)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch accounts", Data: nil})

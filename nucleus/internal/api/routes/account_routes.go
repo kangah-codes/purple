@@ -24,6 +24,11 @@ func RegisterAccountRoutes(r *gin.RouterGroup, container *containers.Container) 
 			middleware.RequireParams([]string{"userID"}),
 			accountHandler.FetchUserAccounts,
 		)
+		accountGroup.GET(
+			"/:accountID",
+			middleware.RequireParams([]string{"userID"}),
+			accountHandler.FetchUserAccount,
+		)
 		accountGroup.DELETE(
 			"/:accountID",
 			middleware.RequireParams([]string{"userID"}),

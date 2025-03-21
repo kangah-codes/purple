@@ -197,7 +197,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		PlanId:      plan.ID,
 	}
 
-	if err := s.planRepo.CreateTransaction(ctx, tx, &transaction); err != nil {
+	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
 		tx.Rollback()
 		return nil, err
 	}

@@ -20,9 +20,6 @@ func (r *PostgresPlanRepository) Create(ctx context.Context, plan *models.Plan) 
 	return r.db.WithContext(ctx).Create(plan).Error
 }
 
-func (r *PostgresPlanRepository) CreateTransaction(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
-	return tx.WithContext(ctx).Create(transaction).Error
-}
 func (r *PostgresPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	return tx.WithContext(ctx).Save(plan).Error
 }

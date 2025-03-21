@@ -36,15 +36,34 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*m
 
 func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).Preload("Accounts", func(db *gorm.DB) *gorm.DB {
-		return db.Where("user_id = ?", username)
-	}).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Omit("account", "user").Where("user_id = ?", username).Order("created_at desc").Limit(5)
-	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Omit("user").Where("user_id = ?", username).Order("created_at desc").Limit(5)
-	}).First(&user, "id = ?", username).Error; err != nil {
+
+	// fetch the user first
+	if err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
 	}
+
+	// load associations using the found user's ID
+	if err := r.db.WithContext(ctx).
+		Preload("Accounts", func(db *gorm.DB) *gorm.DB {
+			return db.Where("user_id = ?", user.ID)
+		}).
+		Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+			return db.Omit("account", "user").
+				Where("user_id = ?", user.ID).
+				Order("created_at desc").
+				Limit(5)
+		}).
+		Preload("Plans", func(db *gorm.DB) *gorm.DB {
+			return db.Omit("user").
+				Where("user_id = ?", user.ID).
+				Order("created_at desc").
+				Limit(5)
+		}).
+		First(&user, user.ID).Error; err != nil {
+
+		return nil, err
+	}
+
 	return &user, nil
 }
 

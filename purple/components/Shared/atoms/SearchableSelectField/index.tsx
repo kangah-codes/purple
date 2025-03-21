@@ -43,7 +43,7 @@ export default function SearchableSelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-purple-200'>
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>

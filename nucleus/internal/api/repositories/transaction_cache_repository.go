@@ -26,8 +26,9 @@ type TransactionQuery struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
 	Category  string `json:"category"`
-	MinAmount string `json:"min_amount"`
-	MaxAmount string `json:"max_amount"`
+	MinAmount int    `json:"min_amount"`
+	MaxAmount int    `json:"max_amount"`
+	AccountID string `json:"account_id"`
 }
 
 func NewCachingTransactionRepository(next TransactionRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
@@ -44,7 +45,7 @@ func (r *CachingTransactionRepository) buildTransactionCacheKey(userID uuid.UUID
 }
 
 func (r *CachingTransactionRepository) buildUserTransactionsCacheKey(userID uuid.UUID, query TransactionQuery, page int, limit int) string {
-	queryStr := fmt.Sprintf("start:%s-end:%s-category:%s-min:%s-max:%s", query.StartDate, query.EndDate, query.Category, query.MinAmount, query.MaxAmount)
+	queryStr := fmt.Sprintf("start:%s-end:%s-category:%s-min:%d-max:%d-accountID:%s", query.StartDate, query.EndDate, query.Category, query.MinAmount, query.MaxAmount, query.AccountID)
 	return r.cache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
 }
 
@@ -78,12 +79,11 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 	return transaction, err
 }
 
-func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
-	query := TransactionQuery{}
+func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
 	key := r.buildUserTransactionsCacheKey(userID, query, page, limit)
 	var cachedTransactions []models.Transaction
 	found, err := r.cache.Get(ctx, key, &cachedTransactions)
-	fmt.Println("FOUND, ", found)
+
 	if err != nil {
 		log.ErrorLogger.Errorf("Error getting paginated transactions from cache: %v", err)
 	}
@@ -95,7 +95,7 @@ func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID 
 		return cachedTransactions, totalItems, nil
 	}
 
-	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, page, limit)
+	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, query, page, limit)
 	if err == nil && len(transactions) > 0 {
 		err := r.cache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {

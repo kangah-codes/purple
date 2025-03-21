@@ -22,6 +22,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useCreateTransaction, useTransactionStore } from '../hooks';
+import { capitaliseFirstLetter } from '@/lib/utils/string';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -82,11 +83,12 @@ export default function NewTransactionScreen() {
             ]) as typeof transformedData; // looks hacky af
         }
 
+        // TODO: refactor all creates to use server errors
         mutate(transformedData, {
-            onError: () => {
+            onError: (err) => {
                 Toast.show({
                     type: 'error',
-                    props: { text1: 'Error!', text2: 'There was an issue creating transaction' },
+                    props: { text1: 'Error!', text2: capitaliseFirstLetter(err.message) },
                 });
             },
             onSuccess: (res) => {

@@ -88,7 +88,7 @@ export default function NewAccountScreen() {
 
         return (
             <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm'>
                     {currency?.emojiFlag}
                     {'  '}
                     {currency?.name}

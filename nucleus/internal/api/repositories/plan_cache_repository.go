@@ -53,14 +53,6 @@ func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) e
 	return err
 }
 
-func (r *CachingPlanRepository) CreateTransaction(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
-	err := r.next.CreateTransaction(ctx, tx, transaction)
-	if err == nil {
-		r.invalidateUserPlansCache(ctx, transaction.UserId)
-	}
-	return err
-}
-
 func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Update(ctx, tx, plan)
 	if err == nil {

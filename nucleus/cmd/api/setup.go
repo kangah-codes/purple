@@ -115,7 +115,7 @@ func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 }
 
 func registerRoutes(r *gin.Engine, container *containers.Container) {
-	// Health check endpoint
+	// health check endpoint
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{
 			Status:  200,

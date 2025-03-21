@@ -66,15 +66,20 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 
 	if err := s.accountRepo.Update(ctx, tx, account); err != nil {
 		log.ErrorLogger.Errorf("Error updating account balance: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating transaction")
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
 		log.ErrorLogger.Errorf("Error creating transaction: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating transaction")
 	}
 
-	return &transaction, tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Error commiting transaction: %v", err)
+	}
+
+	return &transaction, nil
 }
 
 func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
@@ -124,26 +129,31 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 
 	if err := s.accountRepo.Update(ctx, tx, fromAccount); err != nil {
 		log.ErrorLogger.Errorf("Error updating source account balance: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating transaction")
 	}
 
 	if err := s.accountRepo.Update(ctx, tx, toAccount); err != nil {
 		log.ErrorLogger.Errorf("Error updating destination account balance: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating transaction")
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
 		log.ErrorLogger.Errorf("Error creating transfer transaction: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("error creating transaction")
 	}
 
-	return &transaction, tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Error commiting transaction: %v", err)
+	}
+
+	return &transaction, nil
 }
 
 func (s *TransactionService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
 	return s.transactionRepo.DeleteByUserID(ctx, tx, userID)
 }
 
-func (s *TransactionService) FetchPaginatedTransactions(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Transaction, int64, error) {
-	return s.transactionRepo.FindByUserID(ctx, userID, page, limit)
+func (s *TransactionService) FetchPaginatedTransactions(ctx context.Context, userID uuid.UUID, query *repositories.TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
+	return s.transactionRepo.FindByUserID(ctx, userID, *query, page, limit)
 }
