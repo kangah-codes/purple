@@ -1,8 +1,7 @@
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { StyleSheet } from 'react-native';
 import React from 'react';
+import { Text, TouchableOpacity, View } from '../../Shared/styled';
 
 type TransactionBreakdownCardProps = {
     data: {
@@ -23,7 +22,7 @@ export default function TransactionBreakdownCard({ data, onPress }: TransactionB
             <View className='relative items-center justify-center flex flex-row space-x-2.5'>
                 <View className='flex items-center justify-center rounded-full bg-purple-100 px-2 py-1'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xs'>
-                        {Math.abs(Number(data.percentage)).toFixed(0)}%
+                        {Math.abs(Number(data.percentage)).toFixed(2)}%
                     </Text>
                 </View>
 

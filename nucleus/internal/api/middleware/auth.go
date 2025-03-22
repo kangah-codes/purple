@@ -19,8 +19,9 @@ type AuthMiddlewareConfig struct {
 func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		disabledRoutes := map[string]bool{
-			"/api/v1/auth/sign-in": true,
-			"/api/v1/auth/sign-up": true,
+			"/api/v1/auth/sign-in":        true,
+			"/api/v1/auth/sign-up":        true,
+			"/api/v1/auth/check-username": true,
 		}
 
 		if disabledRoutes[c.FullPath()] {

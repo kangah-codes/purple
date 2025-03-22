@@ -8,8 +8,8 @@ type AccountStore = {
     accounts: Account[];
     setAccounts: (accounts: Account[]) => void;
     updateAccounts: (account: Account) => void;
-    currentAccount?: Account;
-    setCurrentAccount: (account: Account) => void;
+    currentAccount?: Account | null;
+    setCurrentAccount: (account: Account | null) => void;
     currentAccountTransactions: Transaction[];
     setCurrentAccountTransactions: (transactions: Transaction[]) => void;
     reset: () => void;

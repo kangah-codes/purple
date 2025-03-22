@@ -15,21 +15,13 @@ import { ActivityIndicator, Button, StatusBar as RNStatusBar, StyleSheet } from 
 import Toast from 'react-native-toast-message';
 import ProfilePages from '../molecules/ProfilePages';
 import { nativeStorage } from '@/lib/utils/storage';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
 
 export default function ProfileScreen() {
     const { destroySession, sessionData, hasOnboarded, setOnboarded, isLoading } = useAuth();
-    const showToast = () => {
-        Toast.show({
-            type: 'error',
-            props: {
-                text1: 'USER',
-                text2: 'account creation failed!',
-            },
-        });
-    };
+    const [isSignOutLoading, setIsSignOutLoading] = useState(false);
 
     if (isLoading) {
         return null;
@@ -105,6 +97,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity
                     className='items-center self-center justify-center px-4'
                     onPress={() => {
+                        setIsSignOutLoading(true);
                         destroySession().then(() => {
                             Toast.show({
                                 type: 'info',
@@ -121,7 +114,7 @@ export default function ProfileScreen() {
                         className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
                         colors={['#c084fc', '#9333ea']}
                     >
-                        {false ? (
+                        {isSignOutLoading ? (
                             <ActivityIndicator size={15} color='#fff' />
                         ) : (
                             <Text

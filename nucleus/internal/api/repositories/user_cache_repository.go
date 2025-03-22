@@ -60,6 +60,14 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 	return user, err
 }
 
+func (r *CachingUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
+	return r.next.CheckAvailableUsernameExists(ctx, username)
+}
+
+func (r *CachingUserRepository) FindByUsernameAuth(ctx context.Context, username string) (*models.User, error) {
+	return r.next.FindByUsernameAuth(ctx, username)
+}
+
 func (r *CachingUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	key := r.buildUserByUsernameCacheKey(username)
 	var cachedUser models.User

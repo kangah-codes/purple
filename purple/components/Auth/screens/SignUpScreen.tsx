@@ -1,3 +1,5 @@
+import AsyncInput from '@/components/Shared/atoms/Input/AsyncInput';
+import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import {
     InputField,
     LinearGradient,
@@ -7,9 +9,10 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { useDebounce } from '@/lib/utils/debounce';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -20,21 +23,15 @@ import {
     StyleSheet,
     TouchableWithoutFeedback,
 } from 'react-native';
-import tw from 'twrnc';
-import { useAuth, useCheckUsername, useSignUp } from '../hooks';
-import { SignUpScreenData } from '../schema';
-import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
-import AsyncInput from '@/components/Shared/atoms/Input/AsyncInput';
-import { useDebounce } from '@/lib/utils/debounce';
 import Toast from 'react-native-toast-message';
-import React from 'react';
+import tw from 'twrnc';
+import { useCheckUsername, useSignUp } from '../hooks';
+import { SignUpScreenData } from '../schema';
 
 export default function SignUpScreen() {
     const [usernameLoading, setUsernameLoading] = useState(false);
     const [usernameTaken, setUsernameTaken] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [index, _setIndex] = useState(0);
-    const { setOnboarded } = useAuth();
     const {
         control,
         handleSubmit,
@@ -71,6 +68,7 @@ export default function SignUpScreen() {
             },
         });
     };
+
     const signUp = (data: SignUpScreenData) => {
         Keyboard.dismiss();
         setLoading(true);
@@ -105,14 +103,6 @@ export default function SignUpScreen() {
                 },
             },
         );
-    };
-
-    // const signUp = (data: SignUpScreenData) => {
-    //     alert(JSON.stringify(data));
-    // };
-
-    const setIndex = (index: number) => {
-        _setIndex(index);
     };
 
     const debouncedCheckUsername = useDebounce((username: string) => {

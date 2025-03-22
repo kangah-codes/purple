@@ -99,9 +99,20 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, types.Response{Status: http.StatusOK, Message: "Sign in successful", Data: response})
 }
 
-func (h *AuthHandler) CheckAvailableUsername(c *gin.Context) {
-	username := c.Param("username")
-	exists, err := h.authService.CheckAvailableUsername(c.Request.Context(), username)
+func (h *AuthHandler) CheckAvailableUsernameExists(c *gin.Context) {
+	checkUsername := types.CheckAvailableUsernameExistsDTO{}
+	if err := c.ShouldBindJSON(&checkUsername); err != nil {
+		log.ErrorLogger.Errorf("Failed to bind JSON: %v", err)
+		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Details: []string{"Invalid request payload"}})
+		return
+	}
+
+	if checkUsername.Username == "" {
+		c.JSON(200, types.Response{Status: 200, Message: "Username available"})
+		return
+	}
+
+	exists, err := h.authService.CheckAvailableUsernameExists(c.Request.Context(), checkUsername.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
 		return
@@ -124,13 +135,8 @@ func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
 }
 
 func (h *AuthHandler) SignOut(c *gin.Context) {
-	userID, exists := c.Get("userID")
+	userID, _ := c.Get("userID")
 	token := c.GetHeader("Authorization")
-
-	if !exists {
-		c.JSON(http.StatusUnauthorized, types.Response{Status: 401, Message: "Unauthorized"})
-		return
-	}
 
 	err := h.authService.SignOutUser(c.Request.Context(), userID.(uuid.UUID), token)
 	if err != nil {

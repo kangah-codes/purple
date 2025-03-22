@@ -11,8 +11,8 @@ type SignInDTO struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type CheckAvailableUsernameDTO struct {
-	Username string `json:"username" binding:"required"`
+type CheckAvailableUsernameExistsDTO struct {
+	Username string `json:"username"`
 }
 
 type RequestPasswordResetDTO struct {

@@ -10,6 +10,7 @@ import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
 import { Account } from './schema';
 import { createAccountStore } from './state';
+import { stringify } from '@/lib/utils/string';
 
 export function useAccountStore() {
     const [
@@ -53,7 +54,51 @@ export function useAccounts({
     return useQuery(
         ['accounts', requestQuery],
         async () => {
-            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/account`, {
+            const res = await fetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/account?${stringify(requestQuery)}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                        Authorization: sessionData.access_token,
+                    },
+                },
+            );
+
+            const statusCode = res.status;
+            const json = await res.json();
+
+            if (!res.ok) {
+                const err = new Error(json.message || 'Unknown error occurred');
+                // @ts-ignore
+                err.statusCode = statusCode;
+                throw err;
+            }
+
+            return json;
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+        },
+    );
+}
+
+export function useAccount({
+    sessionData,
+    options,
+    accountID,
+}: {
+    sessionData: SessionData;
+    options?: UseQueryOptions;
+    accountID: string;
+}): UseQueryResult<GenericAPIResponse<Account>, Error> {
+    return useQuery(
+        [`account-${accountID}`],
+        async () => {
+            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/account/${accountID}`, {
                 method: 'GET',
                 headers: {
                     'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,

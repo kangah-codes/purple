@@ -76,7 +76,7 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataRes
 
 export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, Error> => {
     return useMutation(['check-username'], async (data) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/check-username`, {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/check-username`, {
             method: 'POST',
             headers: {
                 'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
@@ -193,13 +193,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const destroySession = useCallback(async () => {
-        setIsLoading(true);
         try {
+            const sessionData = await getToken<SessionData>('session_data');
+
+            if (!sessionData) {
+                throw new Error('Session data does not exist');
+            }
+
             destroyStores();
             nativeStorage.clear();
             queryClient.clear();
-
             await SecureStore.deleteItemAsync('session_data');
+
+            // send a sign out request
+            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-out`, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                    Authorization: sessionData.access_token,
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error(`Error signing out. Received status: ${res.status}`);
+            }
         } catch (err) {
             console.error('Error destroying session:', err);
         } finally {

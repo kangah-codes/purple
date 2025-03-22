@@ -25,20 +25,17 @@ func NewAuthService(authRepo repositories.AuthRepository, userRepo repositories.
 }
 
 func (s *AuthService) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	return s.userRepo.FindByUsername(ctx, username)
+	return s.userRepo.FindByUsernameAuth(ctx, username)
 }
 
 func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models.Session, error) {
 	tx := s.db.Begin()
-	if tx.Error != nil {
-		log.ErrorLogger.Errorf("Failed to start transaction: %v", tx.Error)
-		return nil, tx.Error
-	}
-	defer tx.Rollback()
-
-	if err := s.clearSessions(ctx, userID, tx); err != nil {
-		return nil, err
-	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			log.ErrorLogger.Printf("Recovered from panic: %v", r)
+		}
+	}()
 
 	token, err := utils.GenerateSessionToken()
 	if err != nil {
@@ -47,9 +44,14 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 	}
 
 	session := models.Session{
-		UserID:    userID,
-		Token:     token,
+		UserID: userID,
+		Token:  token,
+		// expire token in 1 month
 		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
+	}
+
+	if err := s.clearSessions(ctx, userID, tx); err != nil {
+		return nil, err
 	}
 
 	if err := s.authRepo.SignIn(ctx, &session); err != nil {
@@ -57,7 +59,13 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 		return nil, err
 	}
 
-	return &session, tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Error signing user in: %v", err)
+		return nil, err
+	}
+
+	return &session, nil
 }
 
 func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInfo *utils.IPInfo) (*models.User, error) {
@@ -96,19 +104,17 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	createdUser, err := s.userRepo.FindByUsername(ctx, signUp.Username)
-	if err != nil {
-		tx.Rollback()
-		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
-		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
-	}
-
 	if err := tx.Commit().Error; err != nil {
 		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	log.InfoLogger.Printf("Created user: %+v\n", createdUser)
+	createdUser, err := s.userRepo.FindByUsername(ctx, signUp.Username)
+	if err != nil {
+		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
+		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
+	}
+
 	return createdUser, nil
 }
 
@@ -137,17 +143,8 @@ func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token s
 	return nil
 }
 
-func (s *AuthService) CheckAvailableUsername(ctx context.Context, userName string) (bool, error) {
-	user, err := s.userRepo.FindByUsername(ctx, userName)
-	if err != nil {
-		return false, err
-	}
-
-	if user != nil {
-		return false, err
-	}
-
-	return true, nil
+func (s *AuthService) CheckAvailableUsernameExists(ctx context.Context, userName string) (bool, error) {
+	return s.userRepo.CheckAvailableUsernameExists(ctx, userName)
 }
 
 func (s *AuthService) clearSessions(ctx context.Context, userID uuid.UUID, tx *gorm.DB) error {

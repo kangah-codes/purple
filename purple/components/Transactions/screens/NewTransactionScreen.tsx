@@ -23,10 +23,12 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useCreateTransaction, useTransactionStore } from '../hooks';
 import { capitaliseFirstLetter } from '@/lib/utils/string';
+import { useQueryClient } from 'react-query';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
     const { sessionData } = useAuth();
+    const queryClient = useQueryClient();
     const { accounts } = useAccountStore();
     const { updateTransactions } = useTransactionStore();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
@@ -93,6 +95,7 @@ export default function NewTransactionScreen() {
             },
             onSuccess: (res) => {
                 updateTransactions(res.data);
+                queryClient.invalidateQueries([`account-${data.fromAccount}`]);
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },
