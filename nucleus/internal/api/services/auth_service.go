@@ -115,6 +115,18 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
 	}
 
+	// dispatch a user.signup event for async verification email
+	// event := dispatch.UserSignUpEvent{
+	// 	Username:         createdUser.Username,
+	// 	Email:            createdUser.Email,
+	// 	VerificationCode: "999",
+	// }
+
+	// err = dispatch.Publish(dispatch.GetDispatchClient(), " channel string", event)
+	// if err != nil {
+
+	// }
+
 	return createdUser, nil
 }
 

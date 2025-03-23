@@ -8,6 +8,7 @@ import (
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
+	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/utils"
 	"os"
@@ -20,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -54,26 +56,26 @@ func setupDatabase() *gorm.DB {
 	return db
 }
 
-func setupWorkers(ctx context.Context, db *gorm.DB) {
+func setupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
 	// Session cleaner
 	cleaner := workers.NewSessionCleaner(db)
 	cleaner.Start(ctx)
 
-	/*
-		dispatchClient, err := dispatch.NewDispatchClient(cache.RedisClient)
-		if err != nil {
-			log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
-		}
+	dispatchClient, err := dispatch.NewDispatchClient(redis)
+	if err != nil {
+		log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
+	}
 
-		listeners := []dispatch.BaseListener{}
-		if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-			log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
-		}
+	listeners := []dispatch.BaseListener{
+		dispatch.CreateUserSignUpListener(),
+	}
+	if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
+		log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
+	}
 
-		if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-			log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
-		}
-	*/
+	if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
+		log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
+	}
 }
 
 func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
@@ -146,10 +148,9 @@ func setupGracefulShutdown(cancel context.CancelFunc) {
 		// Stop workers
 		cancel()
 
-		/*
-			if err := dispatchClient.Close(); err != nil {
-				log.ErrorLogger.Errorf("Failed to close dispatch client: %v", err)
-			}
-		*/
+		// TODO: find a better way to close
+		// if err := dispatchClient.Close(); err != nil {
+		// 	log.ErrorLogger.Errorf("Failed to close dispatch client: %v", err)
+		// }
 	}()
 }

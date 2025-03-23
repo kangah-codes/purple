@@ -1,8 +1,8 @@
-import Hero from '@/components/pricing/Hero';
-import Plans from '@/components/pricing/Plans';
+import Feature from '@/components/about/Feature';
+import Hero from '@/components/about/Hero';
 import AnimatedClouds from '@/components/shared/AnimatedClouds';
 
-export default function Terms() {
+export default function About() {
     return (
         <div className='relative w-full flex bg-gradient-to-b from-purple-400 to-white flex-col'>
             <AnimatedClouds
@@ -13,7 +13,7 @@ export default function Terms() {
                 className='left-0 right-0 absolute z-[4]'
             />
             <Hero />
-            <Plans />
+            <Feature />
         </div>
     );
 }

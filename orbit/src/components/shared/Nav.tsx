@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Nav() {
     return (
-        <div className='absolute z-[1] w-full'>
+        <div className='absolute z-[99999] w-full'>
             <header className='mx-auto max-w-2xl lg:max-w-7xl p-5 '>
                 <div className=''>
                     <div className='relative flex justify-between group/row isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
@@ -20,7 +20,7 @@ export default function Nav() {
                             <Link href='/' className='py-3 group/item relative'>
                                 <Image
                                     alt='Logo'
-                                    src='/logo.png'
+                                    src='/logo-white.svg'
                                     width={35}
                                     height={35}
                                     className='rounded-md'

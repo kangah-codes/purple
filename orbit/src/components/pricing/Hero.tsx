@@ -1,17 +1,6 @@
-import AnimatedClouds from '../shared/AnimatedClouds';
-
 export default function Hero() {
     return (
-        <div className='w-full flex overflow-auto px-5 relative bg-gradient-to-b from-purple-400 to-white pt-[59px]'>
-            <AnimatedClouds
-                baseSpeed={1}
-                minHeight={10}
-                maxHeight={300}
-                spawnRate={5}
-                minScale={0.1}
-                maxScale={0.4}
-                className='left-0 right-0 absolute'
-            />
+        <div className='w-full flex overflow-hidden px-5 pt-[100px] z-[4]'>
             <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-2 relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
                     <div className='pt-20 lg:pt-32 pb-12 space-y-5 flex flex-col text-center'>

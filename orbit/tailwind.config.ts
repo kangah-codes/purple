@@ -29,8 +29,16 @@ export default {
                 drop: 'drop 0.5s linear infinite',
                 stem: 'stem 0.5s linear infinite',
                 splat: 'splat 0.5s linear infinite',
+                'spin-slow': 'spin 4s linear infinite',
+                'spin-slower': 'spin 6s linear infinite',
+                'spin-reverse': 'spin-reverse 1s linear infinite',
+                'spin-reverse-slower': 'spin-reverse 6s linear infinite',
             },
             keyframes: {
+                'spin-reverse': {
+                    from: { transform: 'rotate(0deg)' },
+                    to: { transform: 'rotate(-360deg)' },
+                },
                 drop: {
                     '0%': { transform: 'translateY(0vh)' },
                     '75%': { transform: 'translateY(90vh)' },

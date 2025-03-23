@@ -19,7 +19,7 @@ func main() {
 	// setup background workers
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	setupWorkers(ctx, db)
+	setupWorkers(ctx, db, cache.RedisClient)
 
 	// setup API server
 	r := setupRouter(db, redisCache)

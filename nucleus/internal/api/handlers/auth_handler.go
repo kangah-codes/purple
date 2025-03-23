@@ -55,7 +55,6 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	log.InfoLogger.Printf("Created user: %+v\n", user)
 	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
 }
 

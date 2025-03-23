@@ -46,7 +46,7 @@ export default function Footer() {
                                         <div className='pt-6 lg:pb-6 group/item relative'>
                                             <Image
                                                 alt='Logo'
-                                                src='/logo-purple.svg'
+                                                src='/logo.svg'
                                                 width={35}
                                                 height={35}
                                                 className='rounded-md'
@@ -85,7 +85,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
+
                                                         href='#'
                                                     >
                                                         Careers
@@ -94,7 +94,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
+
                                                         href='/blog'
                                                     >
                                                         Blog
@@ -103,7 +103,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
+
                                                         href='/company'
                                                     >
                                                         Company
@@ -119,7 +119,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
+
                                                         href='#'
                                                     >
                                                         Help center
@@ -128,7 +128,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-        
+
                                                         href='#'
                                                     >
                                                         Community
