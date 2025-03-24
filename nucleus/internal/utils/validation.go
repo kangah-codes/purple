@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"slices"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -30,12 +32,7 @@ func RegisterCustomValidations(v *validator.Validate) {
 func validateOneOf(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	params := fl.Param()
-	for _, param := range strings.Split(params, " ") {
-		if value == param {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Split(params, " "), value)
 }
 
 func validateNumber(fl validator.FieldLevel) bool {

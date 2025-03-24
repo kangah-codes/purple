@@ -20,7 +20,7 @@ type DispatchClient struct {
 
 type subscription struct {
 	payloadType reflect.Type
-	callback    interface{}
+	callback    any
 }
 
 type BaseListener interface {
