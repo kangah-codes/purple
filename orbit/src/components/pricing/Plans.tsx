@@ -40,7 +40,7 @@ export default function Plans() {
                                     ))}
                                 </ul>
                             </div>
-                            <a
+                            {/* <a
                                 className={`
                                   inline-flex justify-center rounded-full py-3 px-5 text-sm
                                   font-semibold transition-colors bg-purple-100 text-purple-500
@@ -51,7 +51,7 @@ export default function Plans() {
                                 href='/register'
                             >
                                 Get started for free
-                            </a>
+                            </a> */}
                         </section>
 
                         <section
@@ -84,7 +84,7 @@ export default function Plans() {
                                     ))}
                                 </ul>
                             </div>
-                            <a
+                            {/* <a
                                 className={`
                                   inline-flex justify-center rounded-full py-3 px-5 text-sm
                                   font-semibold transition-colors bg-purple-100 text-purple-500
@@ -94,8 +94,8 @@ export default function Plans() {
                                 aria-label='Get started with the Supporter plan'
                                 href='/register'
                             >
-                                Get Started
-                            </a>
+                                Coming Soon
+                            </a> */}
                         </section>
                     </div>
                 </div>

@@ -44,7 +44,7 @@ func GenerateTokenPair(userID uuid.UUID) (models.TokenPair, error) {
 
 func RefreshTokens(refreshToken string) (models.TokenPair, error) {
 	// Validate refresh token
-	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (any, error) {
 		return []byte("your_refresh_token_secret"), nil
 	})
 
