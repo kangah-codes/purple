@@ -63,18 +63,18 @@ func SetupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
 
 	dispatchClient, err := dispatch.NewDispatchClient(redis)
 	if err != nil {
-		log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
+		log.ErrorLogger.Printf("Failed to initialise dispatch client: %v", err)
 	}
 
 	listeners := []dispatch.BaseListener{
 		dispatch.CreateUserSignUpListener(),
 	}
 	if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-		log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
+		log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
 	}
 
 	if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-		log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
+		log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
 	}
 }
 
