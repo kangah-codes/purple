@@ -8,7 +8,6 @@ import (
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
-	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/utils"
 	"os"
@@ -61,21 +60,21 @@ func SetupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
 	cleaner := workers.NewSessionCleaner(db)
 	cleaner.Start(ctx)
 
-	dispatchClient, err := dispatch.NewDispatchClient(redis)
-	if err != nil {
-		log.ErrorLogger.Printf("Failed to initialise dispatch client: %v", err)
-	}
+	// dispatchClient, err := dispatch.NewDispatchClient(redis)
+	// if err != nil {
+	// 	log.ErrorLogger.Printf("Failed to initialise dispatch client: %v", err)
+	// }
 
-	listeners := []dispatch.BaseListener{
-		dispatch.CreateUserSignUpListener(),
-	}
-	if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-		log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
-	}
+	// listeners := []dispatch.BaseListener{
+	// 	dispatch.CreateUserSignUpListener(),
+	// }
+	// if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
+	// 	log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
+	// }
 
-	if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-		log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
-	}
+	// if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
+	// 	log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
+	// }
 }
 
 func SetupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
