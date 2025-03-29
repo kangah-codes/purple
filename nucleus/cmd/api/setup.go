@@ -8,7 +8,6 @@ import (
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
 	"nucleus/internal/cache"
-	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/utils"
 	"os"
@@ -25,17 +24,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupLogger() {
+func SetupLogger() {
 	log.InitLogger()
 }
 
-func setupValidator() {
+func SetupValidator() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		utils.RegisterCustomValidations(v)
 	}
 }
 
-func loadEnvironment() {
+func LoadEnvironment() {
 	if os.Getenv("GIN_MODE") != "release" {
 		if err := godotenv.Load(); err != nil {
 			log.ErrorLogger.Fatal("Error loading .env file")
@@ -45,7 +44,7 @@ func loadEnvironment() {
 	}
 }
 
-func setupDatabase() *gorm.DB {
+func SetupDatabase() *gorm.DB {
 	dsn := utils.EnvValue("DSN", "")
 	utils.InitDB(dsn)
 
@@ -56,29 +55,29 @@ func setupDatabase() *gorm.DB {
 	return db
 }
 
-func setupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
+func SetupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
 	// Session cleaner
 	cleaner := workers.NewSessionCleaner(db)
 	cleaner.Start(ctx)
 
-	dispatchClient, err := dispatch.NewDispatchClient(redis)
-	if err != nil {
-		log.ErrorLogger.Fatalf("Failed to initialise dispatch client: %v", err)
-	}
+	// dispatchClient, err := dispatch.NewDispatchClient(redis)
+	// if err != nil {
+	// 	log.ErrorLogger.Printf("Failed to initialise dispatch client: %v", err)
+	// }
 
-	listeners := []dispatch.BaseListener{
-		dispatch.CreateUserSignUpListener(),
-	}
-	if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-		log.ErrorLogger.Fatalf("Failed to initialize listeners: %v", err)
-	}
+	// listeners := []dispatch.BaseListener{
+	// 	dispatch.CreateUserSignUpListener(),
+	// }
+	// if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
+	// 	log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
+	// }
 
-	if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-		log.ErrorLogger.Fatalf("Failed to start dispatch listener: %v", err)
-	}
+	// if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
+	// 	log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
+	// }
 }
 
-func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
+func SetupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 	// Setup rate limiting
 	rateLimitStore := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
 		Rate:  time.Second,
@@ -111,12 +110,12 @@ func setupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 	}))
 
 	// Register routes
-	registerRoutes(r, container)
+	RegisterRoutes(r, container)
 
 	return r
 }
 
-func registerRoutes(r *gin.Engine, container *containers.Container) {
+func RegisterRoutes(r *gin.Engine, container *containers.Container) {
 	// health check endpoint
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, types.Response{

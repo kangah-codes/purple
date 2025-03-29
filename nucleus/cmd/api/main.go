@@ -8,21 +8,21 @@ import (
 
 func main() {
 	// initialise core components
-	setupLogger()
-	setupValidator()
-	loadEnvironment()
+	SetupLogger()
+	SetupValidator()
+	LoadEnvironment()
 
 	// initialise database and cache
-	db := setupDatabase()
+	db := SetupDatabase()
 	redisCache := cache.NewRedisCache()
 
 	// setup background workers
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	setupWorkers(ctx, db, cache.RedisClient)
+	SetupWorkers(ctx, db, cache.RedisClient)
 
 	// setup API server
-	r := setupRouter(db, redisCache)
+	r := SetupRouter(db, redisCache)
 
 	// setup shutdown handler
 	setupGracefulShutdown(cancel)

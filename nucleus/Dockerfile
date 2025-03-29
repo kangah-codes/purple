@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o /main cmd/api/main.go
+RUN go build -o main ./cmd/api
 
 # Start a new stage from scratch
 FROM alpine:latest
@@ -23,7 +23,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /main .
+COPY --from=builder /app/main .
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
