@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 	"time"
 
@@ -12,8 +13,8 @@ type PostgresAuthRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresAuthRepository(db *gorm.DB) *PostgresAuthRepository {
-	return &PostgresAuthRepository{db: db}
+func NewPostgresAuthRepository(cfg *config.Config) *PostgresAuthRepository {
+	return &PostgresAuthRepository{db: cfg.DB}
 }
 
 func (r *PostgresAuthRepository) SignIn(ctx context.Context, session *models.Session) error {

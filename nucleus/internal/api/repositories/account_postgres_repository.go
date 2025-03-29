@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 
 	"github.com/google/uuid"
@@ -12,8 +13,8 @@ type PostgresAccountRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresAccountRepository(db *gorm.DB) *PostgresAccountRepository {
-	return &PostgresAccountRepository{db: db}
+func NewPostgresAccountRepository(cfg *config.Config) *PostgresAccountRepository {
+	return &PostgresAccountRepository{db: cfg.DB}
 }
 
 func (r *PostgresAccountRepository) Create(ctx context.Context, account *models.Account) error {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -18,11 +19,11 @@ type PlanService struct {
 	planRepo        repositories.PlanRepository
 	transactionRepo repositories.TransactionRepository
 	accountRepo     repositories.AccountRepository
-	db              *gorm.DB
+	config          *config.Config
 }
 
-func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, db *gorm.DB) *PlanService {
-	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
+func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, cfg *config.Config) *PlanService {
+	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg}
 }
 
 type PlanQuery struct {
@@ -69,7 +70,7 @@ func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, u
 	}
 
 	plan.Balance = balance
-	if err := s.planRepo.Update(ctx, s.db, plan); err != nil {
+	if err := s.planRepo.Update(ctx, s.config.DB, plan); err != nil {
 		return nil, err
 	}
 
@@ -94,7 +95,7 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID) error {
 		return fmt.Errorf("plan not found")
 	}
 
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -131,7 +132,7 @@ func (s *PlanService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uu
 
 func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (*models.Transaction, error) {
 	var account models.Account
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	if tx.Error != nil {
 		log.ErrorLogger.Errorf("Error starting transaction: %v", tx.Error)
 		return nil, fmt.Errorf("error starting database transaction: %v", tx.Error)

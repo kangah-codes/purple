@@ -4,6 +4,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 
 	"github.com/google/uuid"
@@ -14,8 +15,8 @@ type PostgresTransactionRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresTransactionRepository(db *gorm.DB) *PostgresTransactionRepository {
-	return &PostgresTransactionRepository{db: db}
+func NewPostgresTransactionRepository(cfg *config.Config) *PostgresTransactionRepository {
+	return &PostgresTransactionRepository{db: cfg.DB}
 }
 
 func (r *PostgresTransactionRepository) Create(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {

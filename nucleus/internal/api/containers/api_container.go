@@ -3,10 +3,8 @@ package containers
 import (
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/services"
-	"nucleus/internal/cache"
+	"nucleus/internal/config"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Container struct {
@@ -25,27 +23,27 @@ type Container struct {
 	TransactionService *services.TransactionService
 }
 
-func NewAPIContainer(db *gorm.DB, cache *cache.RedisCache) *Container {
+func NewAPIContainer(cfg *config.Config) *Container {
 	// init all repositories
-	userRepo := repositories.NewPostgresUserRepository(db)
-	accountRepo := repositories.NewPostgresAccountRepository(db)
-	authRepo := repositories.NewPostgresAuthRepository(db)
-	planRepo := repositories.NewPostgresPlanRepository(db)
-	transactionRepo := repositories.NewPostgresTransactionRepository(db)
+	userRepo := repositories.NewPostgresUserRepository(cfg)
+	accountRepo := repositories.NewPostgresAccountRepository(cfg)
+	authRepo := repositories.NewPostgresAuthRepository(cfg)
+	planRepo := repositories.NewPostgresPlanRepository(cfg)
+	transactionRepo := repositories.NewPostgresTransactionRepository(cfg)
 
 	// add caching
-	cacheUserRepo := repositories.NewCachingUserRepository(userRepo, cache, "user", time.Minute*5)
-	cacheAccountRepo := repositories.NewCachingAccountRepository(accountRepo, cache, "accounts", time.Minute*5)
-	cachePlanRepo := repositories.NewCachingPlanRepository(planRepo, cache, "plans", time.Minute*5)
-	cacheTransactionRepo := repositories.NewCachingTransactionRepository(transactionRepo, cache, "transactions", time.Minute*5)
-	cacheAuthRepo := repositories.NewCachingAuthRepository(authRepo, cache, "auth", time.Minute*10)
+	cacheUserRepo := repositories.NewCachingUserRepository(userRepo, cfg, "user", time.Minute*5)
+	cacheAccountRepo := repositories.NewCachingAccountRepository(accountRepo, cfg, "accounts", time.Minute*5)
+	cachePlanRepo := repositories.NewCachingPlanRepository(planRepo, cfg, "plans", time.Minute*5)
+	cacheTransactionRepo := repositories.NewCachingTransactionRepository(transactionRepo, cfg, "transactions", time.Minute*5)
+	cacheAuthRepo := repositories.NewCachingAuthRepository(authRepo, cfg, "auth", time.Minute*10)
 
 	// init services
-	userService := services.NewUserService(cacheUserRepo, authRepo, db)
-	accountService := services.NewAccountService(cacheAccountRepo, cacheTransactionRepo, db)
-	planService := services.NewPlanService(cachePlanRepo, cacheTransactionRepo, cacheAccountRepo, db)
-	transactionService := services.NewTransactionService(cacheTransactionRepo, cacheAccountRepo, db)
-	authService := services.NewAuthService(cacheAuthRepo, cacheUserRepo, db)
+	userService := services.NewUserService(cacheUserRepo, authRepo, cfg)
+	accountService := services.NewAccountService(cacheAccountRepo, cacheTransactionRepo, cfg)
+	planService := services.NewPlanService(cachePlanRepo, cacheTransactionRepo, cacheAccountRepo, cfg)
+	transactionService := services.NewTransactionService(cacheTransactionRepo, cacheAccountRepo, cfg)
+	authService := services.NewAuthService(cacheAuthRepo, cacheUserRepo, cfg)
 
 	return &Container{
 		// repos

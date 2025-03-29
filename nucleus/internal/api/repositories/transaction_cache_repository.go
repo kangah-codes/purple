@@ -5,7 +5,7 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"nucleus/internal/cache"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"strconv"
@@ -17,9 +17,9 @@ import (
 
 type CachingTransactionRepository struct {
 	next       TransactionRepository
-	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
+	config     *config.Config
 }
 
 type TransactionQuery struct {
@@ -31,22 +31,22 @@ type TransactionQuery struct {
 	AccountID string `json:"account_id"`
 }
 
-func NewCachingTransactionRepository(next TransactionRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
+func NewCachingTransactionRepository(next TransactionRepository, cfg *config.Config, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
 	return &CachingTransactionRepository{
 		next:       next,
-		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
+		config:     cfg,
 	}
 }
 
 func (r *CachingTransactionRepository) buildTransactionCacheKey(userID uuid.UUID, transactionID uuid.UUID) string {
-	return r.cache.BuildKey(r.keyPrefix, userID.String(), transactionID.String())
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), transactionID.String())
 }
 
 func (r *CachingTransactionRepository) buildUserTransactionsCacheKey(userID uuid.UUID, query TransactionQuery, page int, limit int) string {
 	queryStr := fmt.Sprintf("start:%s-end:%s-category:%s-min:%d-max:%d-accountID:%s", query.StartDate, query.EndDate, query.Category, query.MinAmount, query.MaxAmount, query.AccountID)
-	return r.cache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
 }
 
 func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
@@ -61,7 +61,7 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
 	key := r.buildTransactionCacheKey(userID, transactionID)
 	var cachedTransaction models.Transaction
-	found, err := r.cache.Get(ctx, key, &cachedTransaction)
+	found, err := r.config.RedisCache.Get(ctx, key, &cachedTransaction)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error getting transaction from cache: %v", err)
 	}
@@ -71,7 +71,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 
 	transaction, err := r.next.FindByIDAndUserID(ctx, transactionID, userID)
 	if err == nil && transaction != nil {
-		err := r.cache.Set(ctx, key, transaction, r.expiration)
+		err := r.config.RedisCache.Set(ctx, key, transaction, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Errorf("Error setting transaction in cache: %v", err)
 		}
@@ -82,7 +82,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
 	key := r.buildUserTransactionsCacheKey(userID, query, page, limit)
 	var cachedTransactions []models.Transaction
-	found, err := r.cache.Get(ctx, key, &cachedTransactions)
+	found, err := r.config.RedisCache.Get(ctx, key, &cachedTransactions)
 
 	if err != nil {
 		log.ErrorLogger.Errorf("Error getting paginated transactions from cache: %v", err)
@@ -97,7 +97,7 @@ func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID 
 
 	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, query, page, limit)
 	if err == nil && len(transactions) > 0 {
-		err := r.cache.Set(ctx, key, transactions, r.expiration)
+		err := r.config.RedisCache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Errorf("Error setting paginated transactions in cache: %v", err)
 		}
@@ -141,10 +141,10 @@ func (r *CachingTransactionRepository) DeleteByPlanID(ctx context.Context, tx *g
 }
 
 func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx context.Context, userID uuid.UUID) {
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, userID.String(), "*"))
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, "users", userID.String()))
+	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "*"))
+	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, "users", userID.String()))
 }
 
 func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID, planID uuid.UUID) {
-	r.cache.Invalidate(ctx, r.cache.BuildKey("plans", userID.String(), planID.String()))
+	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey("plans", userID.String(), planID.String()))
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -17,11 +18,11 @@ import (
 type AuthService struct {
 	authRepo repositories.AuthRepository
 	userRepo repositories.UserRepository
-	db       *gorm.DB
+	config   *config.Config
 }
 
-func NewAuthService(authRepo repositories.AuthRepository, userRepo repositories.UserRepository, db *gorm.DB) *AuthService {
-	return &AuthService{authRepo: authRepo, userRepo: userRepo, db: db}
+func NewAuthService(authRepo repositories.AuthRepository, userRepo repositories.UserRepository, cfg *config.Config) *AuthService {
+	return &AuthService{authRepo: authRepo, userRepo: userRepo, config: cfg}
 }
 
 func (s *AuthService) FindUserByUsername(ctx context.Context, username string) (*models.User, error) {
@@ -29,7 +30,7 @@ func (s *AuthService) FindUserByUsername(ctx context.Context, username string) (
 }
 
 func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models.Session, error) {
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -93,7 +94,7 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		Transactions: []models.Transaction{},
 	}
 
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer tx.Rollback()
 
 	if err := s.userRepo.Create(ctx, tx, &user); err != nil {
@@ -122,16 +123,16 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 	// 	VerificationCode: "999",
 	// }
 
-	// err = dispatch.Publish(dispatch.GetDispatchClient(), " channel string", event)
+	// err = dispatch.Publish(dispatch., " channel string", event)
 	// if err != nil {
-
+	// 	log.ErrorLogger.Printf("Error dispatching signup event: %v", err)
 	// }
 
 	return createdUser, nil
 }
 
 func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token string) error {
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	if tx.Error != nil {
 		log.ErrorLogger.Errorf("Failed to start transaction: %v", tx.Error)
 		return tx.Error

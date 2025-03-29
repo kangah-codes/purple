@@ -7,9 +7,9 @@ import (
 	"nucleus/internal/api/middleware"
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
-	"nucleus/internal/cache"
+	"nucleus/internal/config"
+	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
-	"nucleus/internal/utils"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,67 +17,26 @@ import (
 
 	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
-func SetupLogger() {
-	log.InitLogger()
-}
-
-func SetupValidator() {
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		utils.RegisterCustomValidations(v)
-	}
-}
-
-func LoadEnvironment() {
-	if os.Getenv("GIN_MODE") != "release" {
-		if err := godotenv.Load(); err != nil {
-			log.ErrorLogger.Fatal("Error loading .env file")
-		} else {
-			log.InfoLogger.Println("Loaded env variables")
-		}
-	}
-}
-
-func SetupDatabase() *gorm.DB {
-	dsn := utils.EnvValue("DSN", "")
-	utils.InitDB(dsn)
-
-	db := utils.GetDB()
-	if db == nil {
-		log.ErrorLogger.Fatal("Failed to connect to the database")
-	}
-	return db
-}
-
-func SetupWorkers(ctx context.Context, db *gorm.DB, redis *redis.Client) {
+func SetupWorkers(ctx context.Context, cfg *config.Config) {
 	// Session cleaner
-	cleaner := workers.NewSessionCleaner(db)
+	cleaner := workers.NewSessionCleaner(cfg.DB)
 	cleaner.Start(ctx)
 
-	// dispatchClient, err := dispatch.NewDispatchClient(redis)
-	// if err != nil {
-	// 	log.ErrorLogger.Printf("Failed to initialise dispatch client: %v", err)
-	// }
+	listeners := []dispatch.BaseListener{
+		dispatch.CreateUserSignUpListener(),
+	}
+	if err := dispatch.InitListeners(cfg.Dispatch, listeners); err != nil {
+		log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
+	}
 
-	// listeners := []dispatch.BaseListener{
-	// 	dispatch.CreateUserSignUpListener(),
-	// }
-	// if err := dispatch.InitListeners(dispatchClient, listeners); err != nil {
-	// 	log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
-	// }
-
-	// if err := dispatch.StartListening(dispatchClient, ctx); err != nil {
-	// 	log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
-	// }
+	if err := dispatch.StartListening(cfg.Dispatch, ctx); err != nil {
+		log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
+	}
 }
 
-func SetupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
+func SetupRouter(cfg *config.Config) *gin.Engine {
 	// Setup rate limiting
 	rateLimitStore := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
 		Rate:  time.Second,
@@ -95,7 +54,7 @@ func SetupRouter(db *gorm.DB, redisCache *cache.RedisCache) *gin.Engine {
 	})
 
 	// register container
-	container := containers.NewAPIContainer(db, redisCache)
+	container := containers.NewAPIContainer(cfg)
 
 	// Initialize router
 	r := gin.Default()
@@ -136,7 +95,7 @@ func RegisterRoutes(r *gin.Engine, container *containers.Container) {
 	routes.RegisterStatsRoutes(v1)
 }
 
-func setupGracefulShutdown(cancel context.CancelFunc) {
+func setupGracefulShutdown(cancel context.CancelFunc, cfg *config.Config) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -147,9 +106,8 @@ func setupGracefulShutdown(cancel context.CancelFunc) {
 		// Stop workers
 		cancel()
 
-		// TODO: find a better way to close
-		// if err := dispatchClient.Close(); err != nil {
-		// 	log.ErrorLogger.Errorf("Failed to close dispatch client: %v", err)
-		// }
+		if err := cfg.Dispatch.Close(); err != nil {
+			log.ErrorLogger.Errorf("Failed to close dispatch client: %v", err)
+		}
 	}()
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -16,15 +17,15 @@ import (
 type TransactionService struct {
 	transactionRepo repositories.TransactionRepository
 	accountRepo     repositories.AccountRepository
-	db              *gorm.DB
+	config          *config.Config
 }
 
-func NewTransactionService(transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, db *gorm.DB) *TransactionService {
-	return &TransactionService{transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
+func NewTransactionService(transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, cfg *config.Config) *TransactionService {
+	return &TransactionService{transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg}
 }
 
 func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -83,7 +84,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 }
 
 func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
