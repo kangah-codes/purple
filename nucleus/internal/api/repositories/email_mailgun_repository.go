@@ -18,11 +18,9 @@ func NewMailgunEmailRepository(apiKey, domain string) *MailgunEmailRepository {
 
 func (m *MailgunEmailRepository) SendEmail(ctx context.Context, information EmailInformation) (string, error) {
 	mg := mailgun.NewMailgun(m.Domain, m.APIKey)
-
-	var _ *mailgun.MailgunImpl = mg
-	msg := mailgun.NewMessage("Purple Sandbox", "Verify your email address", "")
+	msg := mailgun.NewMessage(fmt.Sprintf("Purple Sandbox <postmaster@%s>", mg.Domain()), "Verify your email address", "")
 	msg.SetTemplate("sign-up-confirmation")
-	msg.AddRecipient(fmt.Sprintf("%s <%s>", information.Recipient.name, information.Recipient.email))
+	msg.AddRecipient(fmt.Sprintf("%s <%s>", information.Recipient.Name, information.Recipient.Email))
 
 	for key, val := range information.Variables {
 		msg.AddTemplateVariable(key, val)

@@ -60,8 +60,8 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 	return user, err
 }
 
-func (r *CachingUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
-	return r.next.CheckAvailableUsernameExists(ctx, username)
+func (r *CachingUserRepository) FindByUsernameOrEmail(ctx context.Context, username, email string) (*models.User, error) {
+	return r.next.FindByUsernameOrEmail(ctx, username, email)
 }
 
 func (r *CachingUserRepository) FindByUsernameAuth(ctx context.Context, username string) (*models.User, error) {
@@ -113,4 +113,8 @@ func (r *CachingUserRepository) Delete(ctx context.Context, tx *gorm.DB, id uuid
 	r.config.RedisCache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
 
 	return nil
+}
+
+func (r *CachingUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
+	return r.next.CheckAvailableUsernameExists(ctx, username)
 }

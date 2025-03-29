@@ -13,8 +13,9 @@ import (
 )
 
 type RedisCacheOptions struct {
-	Encrypt bool
-	Logger  *log.Logger
+	Encrypt    bool
+	EncryptKey []byte
+	Logger     *log.Logger
 }
 
 type RedisCache struct {

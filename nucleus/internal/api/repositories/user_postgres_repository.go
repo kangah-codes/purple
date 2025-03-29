@@ -35,16 +35,14 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*m
 	return &user, nil
 }
 
-func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
-	err := r.db.WithContext(ctx).Where("username = ?", username).First(models.User{}).Error
-
-	switch err {
-	// if the record is not found the username is not taken
-	case gorm.ErrRecordNotFound:
-		return false, nil
-	default:
-		return true, err
+func (r *PostgresUserRepository) FindByUsernameOrEmail(ctx context.Context, username, email string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(ctx).
+		Where("username = ? OR email = ?", username, email).
+		First(&user).Error; err != nil {
+		return nil, err
 	}
+	return &user, nil
 }
 
 func (r *PostgresUserRepository) FindByUsernameAuth(ctx context.Context, username string) (*models.User, error) {
@@ -87,6 +85,18 @@ func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username st
 	}
 
 	return &user, nil
+}
+
+func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
+	err := r.db.WithContext(ctx).Where("username = ?", username).First(models.User{}).Error
+
+	switch err {
+	// if the record is not found the username is not taken
+	case gorm.ErrRecordNotFound:
+		return false, nil
+	default:
+		return true, err
+	}
 }
 
 func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) error {

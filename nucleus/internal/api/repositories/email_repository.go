@@ -4,8 +4,8 @@ import "context"
 
 type EmailInformation struct {
 	Recipient struct {
-		email string
-		name  string
+		Email string
+		Name  string
 	}
 	Subject   string
 	Template  string
@@ -13,5 +13,5 @@ type EmailInformation struct {
 }
 
 type EmailRepository interface {
-	SendEmail(ctx context.Context, information EmailInformation) (any, error)
+	SendEmail(ctx context.Context, information EmailInformation) (string, error)
 }

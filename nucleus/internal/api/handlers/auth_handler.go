@@ -44,18 +44,19 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := h.authService.SignUp(c.Request.Context(), &signUp, ipInfo)
+	err = h.authService.SignUp(c.Request.Context(), &signUp, ipInfo)
 	if err != nil {
 		log.ErrorLogger.Errorf("Failed to sign up user: %v", err)
-		if err == services.ErrUserAlreadyExists {
+		switch err {
+		case services.ErrUserAlreadyExists:
 			c.JSON(http.StatusConflict, types.Response{Status: http.StatusConflict, Message: "User already exists with these details", Data: nil})
-		} else {
+		default:
 			c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create user", Data: nil})
 		}
 		return
 	}
 
-	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully", Data: user})
+	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "User created successfully"})
 }
 
 func (h *AuthHandler) SignIn(c *gin.Context) {

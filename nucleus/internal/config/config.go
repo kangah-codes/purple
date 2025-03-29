@@ -44,6 +44,12 @@ type EnvConfig struct {
 	// Server
 	ServerPort string `mapstructure:"SERVER_PORT"`
 	ENV        string `mapstructure:"ENV"`
+
+	// Email
+	EmailAPIKey string `mapstructure:"EMAIL_API_KEY"`
+	EmailDomain string `mapstructure:"EMAIL_DOMAIN"`
+
+	EncryptionKey string `mapstructure:"ENCRYPTION_KEY"`
 }
 
 var (
@@ -83,6 +89,10 @@ func loadEnv() *EnvConfig {
 
 	env.ServerPort = os.Getenv("SERVER_PORT")
 	env.ENV = os.Getenv("ENV")
+
+	env.EncryptionKey = os.Getenv("ENCRYPTION_KEY")
+	env.EmailAPIKey = os.Getenv("EMAIL_API_KEY")
+	env.EmailDomain = os.Getenv("EMAIL_DOMAIN")
 
 	return env
 }
@@ -145,9 +155,13 @@ func (c *Config) InitialiseRedis() error {
 
 // InitialiseRedisCache inits the redis cache
 func (c *Config) InitialiseRedisCache() {
-	c.RedisCache = &cache.RedisCache{Client: c.Redis, Options: cache.RedisCacheOptions{
-		Encrypt: true,
-	}}
+	c.RedisCache = &cache.RedisCache{
+		Client: c.Redis,
+		Options: cache.RedisCacheOptions{
+			Encrypt:    true,
+			EncryptKey: []byte(c.Env.EncryptionKey),
+		},
+	}
 }
 
 // InitialiseDispatchClient initializes the dispatch client

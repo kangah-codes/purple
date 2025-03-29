@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"nucleus/cmd/workers"
 	"nucleus/internal/api/containers"
 	"nucleus/internal/api/middleware"
 	"nucleus/internal/api/routes"
@@ -10,6 +9,7 @@ import (
 	"nucleus/internal/config"
 	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
+	"nucleus/internal/workers"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,7 +25,7 @@ func SetupWorkers(ctx context.Context, cfg *config.Config) {
 	cleaner.Start(ctx)
 
 	listeners := []dispatch.BaseListener{
-		dispatch.CreateUserSignUpListener(),
+		workers.CreateUserSignUpListener(),
 	}
 	if err := dispatch.InitListeners(cfg.Dispatch, listeners); err != nil {
 		log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)

@@ -13,6 +13,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	FindByUsernameAuth(ctx context.Context, username string) (*models.User, error)
 	FindByUsername(ctx context.Context, username string) (*models.User, error)
+	FindByUsernameOrEmail(ctx context.Context, username, email string) (*models.User, error)
 	CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error)
 	Update(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, tx *gorm.DB, id uuid.UUID) error

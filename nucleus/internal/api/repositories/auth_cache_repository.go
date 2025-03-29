@@ -88,10 +88,6 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	return session, err
 }
 
-func (r *CachingAuthRepository) GenerateResetPin(ctx context.Context, resetPin *models.PasswordResetPin) error {
-	return r.next.GenerateResetPin(ctx, resetPin)
-}
-
 func (r *CachingAuthRepository) invalidateUserAuthCache(ctx context.Context, token string) {
 	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, utils.HashToken(token)))
 }

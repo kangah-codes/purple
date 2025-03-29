@@ -6,6 +6,7 @@ import (
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
 	"nucleus/internal/config"
+	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -69,11 +70,20 @@ func (s *AuthService) SignInUser(ctx context.Context, userID uuid.UUID) (*models
 	return &session, nil
 }
 
-func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInfo *utils.IPInfo) (*models.User, error) {
+func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInfo *utils.IPInfo) error {
+	// Check if username or email already exists
+	existingUser, err := s.userRepo.FindByUsernameOrEmail(ctx, signUp.Username, signUp.Email)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return fmt.Errorf("failed to check existing user: %w", err)
+	}
+	if existingUser != nil {
+		return ErrUserAlreadyExists
+	}
+
 	hashedPassword, err := utils.HashPassword(signUp.Password)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error hashing password: %v", err)
-		return nil, err
+		return err
 	}
 
 	user := models.User{
@@ -92,43 +102,43 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		},
 		Plans:        []models.Plan{},
 		Transactions: []models.Transaction{},
+		Activated:    false,
+		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	}
 
 	tx := s.config.DB.Begin()
 	defer tx.Rollback()
 
 	if err := s.userRepo.Create(ctx, tx, &user); err != nil {
+		return fmt.Errorf("failed to create user: %w", err)
+	}
+
+	confirmation := models.AccountConfirmationPin{
+		UserId:    user.ID,
+		Pin:       utils.GenerateOTP(5),
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+	}
+
+	if err = tx.WithContext(ctx).Create(&confirmation).Error; err != nil {
 		tx.Rollback()
-		if err == gorm.ErrDuplicatedKey {
-			return nil, ErrUserAlreadyExists
-		}
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		log.ErrorLogger.Printf("Error creating confirmation OTP: %v", err)
+	}
+
+	if err = dispatch.Publish(s.config.Dispatch, "user.signup", types.UserSignUpEvent{
+		Username:         signUp.Username,
+		Email:            signUp.Email,
+		VerificationCode: "99999",
+	}); err != nil {
+		tx.Rollback()
+		log.ErrorLogger.Printf("Error dispatching signup event: %v", err)
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		return fmt.Errorf("failed to create user: %w", err)
 	}
 
-	createdUser, err := s.userRepo.FindByUsername(ctx, signUp.Username)
-	if err != nil {
-		log.ErrorLogger.Errorf("Failed to preload user data: %s", err.Error())
-		return nil, fmt.Errorf("failed to retrieve user data after creation: %w", err)
-	}
-
-	// dispatch a user.signup event for async verification email
-	// event := dispatch.UserSignUpEvent{
-	// 	Username:         createdUser.Username,
-	// 	Email:            createdUser.Email,
-	// 	VerificationCode: "999",
-	// }
-
-	// err = dispatch.Publish(dispatch., " channel string", event)
-	// if err != nil {
-	// 	log.ErrorLogger.Printf("Error dispatching signup event: %v", err)
-	// }
-
-	return createdUser, nil
+	return nil
 }
 
 func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token string) error {
