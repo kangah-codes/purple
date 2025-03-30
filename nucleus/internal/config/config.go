@@ -30,27 +30,28 @@ type Config struct {
 
 type EnvConfig struct {
 	// Database
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	DBName     string `mapstructure:"DB_NAME"`
+	DBHost     string `mapstructure:"DB_HOST" validate:"required"`
+	DBPort     string `mapstructure:"DB_PORT" validate:"required,numeric"`
+	DBUser     string `mapstructure:"DB_USER" validate:"required"`
+	DBPassword string `mapstructure:"DB_PASSWORD" validate:"required"`
+	DBName     string `mapstructure:"DB_NAME" validate:"required"`
 
 	// Redis
-	RedisHost     string `mapstructure:"REDIS_HOST"`
-	RedisPort     string `mapstructure:"REDIS_PORT"`
+	RedisHost     string `mapstructure:"REDIS_HOST" validate:"required"`
+	RedisPort     string `mapstructure:"REDIS_PORT" validate:"required,numeric"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
 	RedisUsername string `mapstructure:"REDIS_USERNAME"`
 
 	// Server
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	ENV        string `mapstructure:"ENV"`
+	ServerPort string `mapstructure:"SERVER_PORT" validate:"required,numeric"`
+	ENV        string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
 
 	// Email
-	EmailAPIKey string `mapstructure:"EMAIL_API_KEY"`
-	EmailDomain string `mapstructure:"EMAIL_DOMAIN"`
+	EmailAPIKey string `mapstructure:"EMAIL_API_KEY" validate:"required"`
+	EmailDomain string `mapstructure:"EMAIL_DOMAIN" validate:"required,email"`
 
-	EncryptionKey string `mapstructure:"ENCRYPTION_KEY"`
+	// Encryption Key
+	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required,len=32"`
 }
 
 var (
@@ -63,6 +64,10 @@ func GetConfig() *Config {
 	once.Do(func() {
 		config = &Config{
 			Env: loadEnv(),
+		}
+
+		if err := config.ValidateEnv(); err != nil {
+			log.ErrorLogger.Fatal("Invalid environment configuration:", err)
 		}
 	})
 	return config
@@ -97,6 +102,19 @@ func loadEnv() *EnvConfig {
 	env.EmailDomain = os.Getenv("EMAIL_DOMAIN")
 
 	return env
+}
+
+func (c *Config) ValidateEnv() error {
+	validate := validator.New()
+	err := validate.Struct(c.Env)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			log.ErrorLogger.Printf("Config validation failed: Field '%s' failed on '%s' constraint", err.Field(), err.Tag())
+		}
+		return err
+	}
+	log.InfoLogger.Println("Config validation successful ✅")
+	return nil
 }
 
 func (c *Config) InitialiseValidator() {
