@@ -36,9 +36,6 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/bin/main .
 
-# Copy necessary configuration files
-COPY --from=builder /app/.env .
-
 # Set environment variables
 ENV GIN_MODE=release \
     TZ=UTC
