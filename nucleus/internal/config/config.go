@@ -105,7 +105,7 @@ func (c *Config) InitialiseValidator() {
 
 // InitialiseDB initializes the database connection
 func (c *Config) InitialiseDB() error {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=verify-full",
 		c.Env.DBHost,
 		c.Env.DBUser,
 		c.Env.DBPassword,
