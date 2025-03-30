@@ -43,15 +43,16 @@ type EnvConfig struct {
 	RedisUsername string `mapstructure:"REDIS_USERNAME"`
 
 	// Server
-	ServerPort string `mapstructure:"SERVER_PORT" validate:"required,numeric"`
-	ENV        string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
+	ServerPort string `mapstructure:"SERVER_PORT"`
+	// ENV        string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
+	ENV string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
 
 	// Email
 	EmailAPIKey string `mapstructure:"EMAIL_API_KEY" validate:"required"`
-	EmailDomain string `mapstructure:"EMAIL_DOMAIN" validate:"required,email"`
+	EmailDomain string `mapstructure:"EMAIL_DOMAIN" validate:"required"`
 
 	// Encryption Key
-	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required,len=32"`
+	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required"`
 }
 
 var (
