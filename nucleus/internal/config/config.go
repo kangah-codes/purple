@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"nucleus/internal/cache"
 	"nucleus/internal/dispatch"
@@ -166,6 +167,7 @@ func (c *Config) InitialiseRedis() error {
 		DB:          0,
 		DialTimeout: 10 * time.Second,
 		MaxRetries:  3,
+		TLSConfig:   &tls.Config{InsecureSkipVerify: true},
 	})
 
 	_, err := c.Redis.Ping(ctx).Result()
