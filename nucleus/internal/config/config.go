@@ -40,6 +40,7 @@ type EnvConfig struct {
 	RedisHost     string `mapstructure:"REDIS_HOST"`
 	RedisPort     string `mapstructure:"REDIS_PORT"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+	RedisUsername string `mapstructure:"REDIS_USERNAME"`
 
 	// Server
 	ServerPort string `mapstructure:"SERVER_PORT"`
@@ -86,6 +87,7 @@ func loadEnv() *EnvConfig {
 	env.RedisHost = os.Getenv("REDIS_HOST")
 	env.RedisPort = os.Getenv("REDIS_PORT")
 	env.RedisPassword = os.Getenv("REDIS_PASSWORD")
+	env.RedisUsername = os.Getenv("REDIS_USERNAME")
 
 	env.ServerPort = os.Getenv("SERVER_PORT")
 	env.ENV = os.Getenv("ENV")
@@ -137,15 +139,19 @@ func (c *Config) InitialiseDB() error {
 // InitialiseRedis initializes the Redis connection
 func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
+
 	c.Redis = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
-		Password: c.Env.RedisPassword,
-		DB:       0,
+		Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
+		Username:    c.Env.RedisUsername,
+		Password:    c.Env.RedisPassword,
+		DB:          0,
+		DialTimeout: 10 * time.Second,
+		MaxRetries:  3,
 	})
 
 	_, err := c.Redis.Ping(ctx).Result()
 	if err != nil {
-		log.ErrorLogger.Fatalf("Failed to connect to Redis: %v", err.Error())
+		log.ErrorLogger.Printf("Failed to connect to Redis: %v", err)
 		return err
 	}
 
