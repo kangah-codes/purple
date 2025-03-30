@@ -45,7 +45,7 @@ type EnvConfig struct {
 	// Server
 	ServerPort string `mapstructure:"SERVER_PORT"`
 	// ENV        string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
-	ENV string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
+	ENV string `mapstructure:"ENV"`
 
 	// Email
 	EmailAPIKey string `mapstructure:"EMAIL_API_KEY" validate:"required"`
