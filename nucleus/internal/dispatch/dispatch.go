@@ -3,7 +3,6 @@ package dispatch
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"nucleus/internal/log"
 	"reflect"
@@ -19,6 +18,22 @@ type DispatchClient struct {
 	pubsub *redis.PubSub
 	mu     sync.RWMutex
 	subs   map[string][]subscription
+}
+
+type AckError struct {
+	MessageID string
+	Details   string
+}
+
+func (e *AckError) Error() string {
+	return fmt.Sprintf("message %s failed: %s", e.MessageID, e.Details)
+}
+
+func NewAckError(messageID, details string) *AckError {
+	return &AckError{
+		MessageID: messageID,
+		Details:   details,
+	}
 }
 
 type subscription struct {
@@ -37,10 +52,10 @@ type Listener[T any] struct {
 }
 
 type Message struct {
-	ID        string      `json:"id"`
-	Channel   string      `json:"channel"`
-	Data      interface{} `json:"data"`
-	Timestamp int64       `json:"timestamp"`
+	ID        string `json:"id"`
+	Channel   string `json:"channel"`
+	Data      any    `json:"data"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 type Acknowledgement struct {
@@ -121,12 +136,11 @@ func Publish[T any](c *DispatchClient, channel string, payload T) error {
 		Timestamp: time.Now().Unix(),
 	}
 
-	data, err := json.Marshal(msg.Data)
+	msgJSON, err := json.Marshal(msg)
 	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
+		return fmt.Errorf("failed to marshal message: %w", err)
 	}
-
-	if err := c.redis.Publish(ctx, channel, data).Err(); err != nil {
+	if err := c.redis.Publish(ctx, channel, msgJSON).Err(); err != nil {
 		return err
 	}
 
@@ -142,11 +156,11 @@ func Publish[T any](c *DispatchClient, channel string, payload T) error {
 			return err
 		}
 		if ack.Status == "error" {
-			return fmt.Errorf("message processing failed: %s", ack.Error)
+			return NewAckError(msg.ID, ack.Error)
 		}
 		return nil
 	case <-time.After(5 * time.Second):
-		return errors.New("msg ack timeout")
+		return NewAckError(msg.ID, "acknowledgment timeout")
 	}
 }
 
@@ -196,8 +210,13 @@ func sendAcknowledgment(c *DispatchClient, msg Message, success bool, errMsg str
 }
 
 // handleMessage processes the incoming message
-func (c *DispatchClient) handleMessage(redisMsg *redis.Message) {
+func (c *DispatchClient) handleMessage(m any) {
 	var msg Message
+	redisMsg, ok := m.(*redis.Message)
+	if !ok {
+		log.ErrorLogger.Errorf("Invalid message type: expected *redis.Message")
+		return
+	}
 	if err := json.Unmarshal([]byte(redisMsg.Payload), &msg); err != nil {
 		log.ErrorLogger.Errorf("Failed to unmarshal message: %v", err)
 		_ = sendAcknowledgment(c, msg, false, "Invalid message format")
@@ -245,7 +264,11 @@ func (c *DispatchClient) handleMessage(redisMsg *redis.Message) {
 	}
 
 	// Send acknowledgment based on processing result
-	if err := sendAcknowledgment(c, msg, processingError == nil, processingError.Error()); err != nil {
+	errMsg := ""
+	if processingError != nil {
+		errMsg = processingError.Error()
+	}
+	if err := sendAcknowledgment(c, msg, processingError == nil, errMsg); err != nil {
 		log.ErrorLogger.Errorf("Failed to send acknowledgment: %v", err)
 	}
 }

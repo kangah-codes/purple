@@ -49,8 +49,9 @@ type EnvConfig struct {
 	ENV string `mapstructure:"ENV"`
 
 	// Email
-	EmailAPIKey string `mapstructure:"EMAIL_API_KEY" validate:"required"`
-	EmailDomain string `mapstructure:"EMAIL_DOMAIN" validate:"required"`
+	MailgunAPIKey string `mapstructure:"MAILGUN_API_KEY" validate:"required"`
+	EmailDomain   string `mapstructure:"EMAIL_DOMAIN" validate:"required"`
+	ResendAPIKey  string `mapstructure:"RESEND_API_KEY" validate:"required"`
 
 	// Encryption Key
 	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required"`
@@ -100,8 +101,9 @@ func loadEnv() *EnvConfig {
 	env.ENV = os.Getenv("ENV")
 
 	env.EncryptionKey = os.Getenv("ENCRYPTION_KEY")
-	env.EmailAPIKey = os.Getenv("EMAIL_API_KEY")
+	env.MailgunAPIKey = os.Getenv("MAILGUN_API_KEY")
 	env.EmailDomain = os.Getenv("EMAIL_DOMAIN")
+	env.ResendAPIKey = os.Getenv("RESEND_API_KEY")
 
 	return env
 }
@@ -127,12 +129,20 @@ func (c *Config) InitialiseValidator() {
 
 // InitialiseDB initializes the database connection
 func (c *Config) InitialiseDB() error {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=verify-full",
+	var sslMode string
+	if config.Env.ENV == "dev" {
+		sslMode = "disable"
+	} else {
+		sslMode = "verify-full"
+	}
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		c.Env.DBHost,
 		c.Env.DBUser,
 		c.Env.DBPassword,
 		c.Env.DBName,
 		c.Env.DBPort,
+		sslMode,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -159,20 +169,26 @@ func (c *Config) InitialiseDB() error {
 // InitialiseRedis initializes the Redis connection
 func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
+	var tlsConfig *tls.Config
+	if config.Env.ENV == "dev" {
+		tlsConfig = nil
+	} else {
+		tlsConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 
 	c.Redis = redis.NewClient(&redis.Options{
 		Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
 		Username:    c.Env.RedisUsername,
 		Password:    c.Env.RedisPassword,
 		DB:          0,
-		DialTimeout: 10 * time.Second,
-		MaxRetries:  3,
-		TLSConfig:   &tls.Config{InsecureSkipVerify: true},
+		DialTimeout: 30 * time.Second,
+		MaxRetries:  5,
+		TLSConfig:   tlsConfig,
 	})
 
 	_, err := c.Redis.Ping(ctx).Result()
 	if err != nil {
-		log.ErrorLogger.Printf("Failed to connect to Redis: %v", err)
+		log.ErrorLogger.Errorf("Failed to connect to Redis: %v", err)
 		return err
 	}
 

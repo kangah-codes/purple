@@ -88,7 +88,8 @@ func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username st
 }
 
 func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
-	err := r.db.WithContext(ctx).Where("username = ?", username).First(models.User{}).Error
+	var user models.User
+	err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
 
 	switch err {
 	// if the record is not found the username is not taken
@@ -97,6 +98,26 @@ func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context
 	default:
 		return true, err
 	}
+}
+
+func (r *PostgresUserRepository) Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
+	tx := r.db.Begin()
+
+	// update the user activated and delete all otps associated with user
+	user.Activated = true
+	user.ExpiresAt = nil
+
+	if err := tx.Save(user).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Where("user_id = ?", user.ID).Delete(confirmation).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) error {

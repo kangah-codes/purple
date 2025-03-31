@@ -9,13 +9,14 @@ import (
 )
 
 func RegisterAuthRoutes(r *gin.RouterGroup, container *containers.Container) {
-	authHandler := handlers.NewAuthHandler(container.AuthService)
+	authHandler := handlers.NewAuthHandler(container.AuthService, container.UserService)
 
-	userGroup := r.Group("/auth")
+	authGroup := r.Group("/auth")
 	{
-		userGroup.POST("/sign-in", authHandler.SignIn)
-		userGroup.POST("/sign-up", authHandler.SignUp)
-		userGroup.POST("/sign-out", middleware.RequireParams([]string{"userID"}), authHandler.SignOut)
-		userGroup.POST("/check-username", authHandler.CheckAvailableUsernameExists)
+		authGroup.POST("/sign-in", authHandler.SignIn)
+		authGroup.POST("/sign-up", authHandler.SignUp)
+		authGroup.POST("/sign-out", middleware.RequireParams([]string{"userID"}), authHandler.SignOut)
+		authGroup.POST("/check-username", authHandler.CheckAvailableUsernameExists)
+		authGroup.POST("/activate", authHandler.ActivateUserAccount)
 	}
 }

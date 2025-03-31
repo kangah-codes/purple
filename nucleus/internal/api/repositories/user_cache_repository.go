@@ -89,6 +89,15 @@ func (r *CachingUserRepository) FindByUsername(ctx context.Context, username str
 	return user, err
 }
 
+func (r *CachingUserRepository) Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
+	err := r.next.Activate(ctx, user, confirmation)
+	if err == nil {
+		r.config.RedisCache.Invalidate(ctx, r.buildUserCacheKey(user.ID))
+		r.config.RedisCache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
+	}
+	return err
+}
+
 func (r *CachingUserRepository) Update(ctx context.Context, user *models.User) error {
 	err := r.next.Update(ctx, user)
 	if err == nil {

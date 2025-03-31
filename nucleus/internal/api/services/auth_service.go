@@ -6,7 +6,6 @@ import (
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
 	"nucleus/internal/config"
-	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -86,6 +85,7 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		return err
 	}
 
+	expiresAt := time.Now().Add(24 * time.Hour)
 	user := models.User{
 		Username: signUp.Username,
 		Email:    signUp.Email,
@@ -103,7 +103,7 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		Plans:        []models.Plan{},
 		Transactions: []models.Transaction{},
 		Activated:    false,
-		ExpiresAt:    time.Now().Add(24 * time.Hour),
+		ExpiresAt:    &expiresAt,
 	}
 
 	tx := s.config.DB.Begin()
@@ -113,25 +113,32 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 
+	expiryTime := time.Now().Add(24 * time.Hour)
 	confirmation := models.AccountConfirmationPin{
 		UserId:    user.ID,
 		Pin:       utils.GenerateOTP(5),
-		ExpiresAt: time.Now().Add(24 * time.Hour),
+		ExpiresAt: &expiryTime,
 	}
 
 	if err = tx.WithContext(ctx).Create(&confirmation).Error; err != nil {
 		tx.Rollback()
-		log.ErrorLogger.Printf("Error creating confirmation OTP: %v", err)
+		log.ErrorLogger.Errorf("Error creating confirmation OTP: %v", err)
 	}
 
-	if err = dispatch.Publish(s.config.Dispatch, "user.signup", types.UserSignUpEvent{
-		Username:         signUp.Username,
-		Email:            signUp.Email,
-		VerificationCode: "99999",
-	}); err != nil {
-		tx.Rollback()
-		log.ErrorLogger.Printf("Error dispatching signup event: %v", err)
-	}
+	// if err = dispatch.Publish(s.config.Dispatch, "user.signup", types.UserSignUpEvent{
+	// 	Username:         signUp.Username,
+	// 	Email:            signUp.Email,
+	// 	VerificationCode: confirmation.Pin, // Use actual PIN instead of hardcoded value
+	// }); err != nil {
+	// 	if ackErr, ok := err.(*dispatch.AckError); ok {
+	// 		log.ErrorLogger.Errorf("Message acknowledged with error: %v", ackErr.Error())
+	// 		tx.Rollback()
+	// 		return fmt.Errorf("email service error: %w", ackErr)
+	// 	}
+	// 	tx.Rollback()
+	// 	log.ErrorLogger.Errorf("Error dispatching signup event: %v", err)
+	// 	return fmt.Errorf("message dispatch error: %w", err)
+	// }
 
 	if err := tx.Commit().Error; err != nil {
 		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())
@@ -164,6 +171,25 @@ func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token s
 	}
 
 	return nil
+}
+
+// TODO: use repository pattern for this
+func (s *AuthService) GetConfirmationPin(ctx context.Context, userName, otp string) (*models.User, *models.AccountConfirmationPin, error) {
+	var confirmation models.AccountConfirmationPin
+	user, err := s.userRepo.FindByUsernameAuth(ctx, userName)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err := s.config.DB.WithContext(ctx).Where("user_id = ? AND expires_at > ?", user.ID, time.Now()).First(&confirmation).Error; err != nil {
+		return nil, nil, err
+	}
+
+	return user, &confirmation, nil
+}
+
+func (s *AuthService) DeleteConfirmationPin(ctx context.Context, userId, otp string, tx *gorm.DB) error {
+	return tx.WithContext(ctx).Where("user_id = ? AND pin = ?", userId, otp).Delete(&models.AccountConfirmationPin{}).Error
 }
 
 func (s *AuthService) CheckAvailableUsernameExists(ctx context.Context, userName string) (bool, error) {

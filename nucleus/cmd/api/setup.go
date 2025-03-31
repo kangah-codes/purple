@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"nucleus/internal/api/containers"
 	"nucleus/internal/api/middleware"
 	"nucleus/internal/api/routes"
 	"nucleus/internal/api/types"
+	"nucleus/internal/api/workers"
 	"nucleus/internal/config"
 	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
-	"nucleus/internal/workers"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,7 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupWorkers(ctx context.Context, cfg *config.Config) {
+func SetupWorkers(ctx context.Context, cfg *config.Config) error {
 	// Session cleaner
 	cleaner := workers.NewSessionCleaner(cfg.DB)
 	cleaner.Start(ctx)
@@ -29,11 +30,15 @@ func SetupWorkers(ctx context.Context, cfg *config.Config) {
 	}
 	if err := dispatch.InitListeners(cfg.Dispatch, listeners); err != nil {
 		log.ErrorLogger.Printf("Failed to initialize listeners: %v", err)
+		return fmt.Errorf("failed to initialize listeners: %w", err)
 	}
 
 	if err := dispatch.StartListening(cfg.Dispatch, ctx); err != nil {
 		log.ErrorLogger.Printf("Failed to start dispatch listener: %v", err)
+		return fmt.Errorf("failed to start listening: %w", err)
 	}
+
+	return nil
 }
 
 func SetupRouter(cfg *config.Config) *gin.Engine {

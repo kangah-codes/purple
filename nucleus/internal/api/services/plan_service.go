@@ -60,7 +60,7 @@ func (s *PlanService) CreatePlan(ctx context.Context, payload types.CreatePlanDT
 	return &plan, nil
 }
 
-func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, userID uuid.UUID, balance float64) (*models.Plan, error) {
+func (s *PlanService) UpdatePlan(ctx context.Context, planID uuid.UUID, balance float64) (*models.Plan, error) {
 	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 	plan.Balance += createTransaction.Amount
 
 	// debit account
-	acc, err := s.accountRepo.FindByIDAndUserID(ctx, createTransaction.DebitAccountId, userID)
+	acc, err := s.accountRepo.FindByID(ctx, createTransaction.DebitAccountId)
 	if err != nil {
 		tx.Rollback()
 		return nil, ErrAccountNotFound
@@ -195,7 +195,7 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		FromAccount: account.ID,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
-		PlanId:      plan.ID,
+		PlanId:      &plan.ID,
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {

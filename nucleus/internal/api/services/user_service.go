@@ -37,6 +37,10 @@ func (s *UserService) UpdateUser(ctx context.Context, user *models.User) error {
 	return s.userRepo.Update(ctx, user)
 }
 
+func (s *UserService) ActivateUser(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
+	return s.userRepo.Activate(ctx, user, confirmation)
+}
+
 func (s *UserService) DeleteUser(ctx context.Context, tx *gorm.DB, id uuid.UUID) error {
 	return s.userRepo.Delete(ctx, tx, id)
 }

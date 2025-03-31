@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UseMutationResult, useMutation, useQueryClient } from 'react-query';
 import { createAccountStore } from '../Accounts/state';
-import { SessionData, SessionDataResponse } from './schema';
+import { SessionData, SessionDataResponse, SignUpResponse } from './schema';
 import { createPlanStore } from '../Plans/state';
 import { createStatsStore } from '../Stats/state';
 import { createTransactionStore } from '../Transactions/state';
@@ -49,7 +49,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataRes
     });
 };
 
-export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataResponse>, Error> => {
+export const useSignUp = (): UseMutationResult<GenericAPIResponse<SignUpResponse>, Error> => {
     return useMutation(['sign-up'], async (signUpInformation) => {
         const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`, {
             method: 'POST',
@@ -73,6 +73,31 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SessionDataRes
         return json;
     });
 };
+
+export function useActivateAccount(): UseMutationResult<GenericAPIResponse<undefined>, Error> {
+    return useMutation(['activate-account'], async (signUpInformation) => {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/activate`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(signUpInformation),
+        });
+
+        const statusCode = res.status;
+        const json = await res.json();
+
+        if (!res.ok) {
+            const err = new Error(json.message || 'Unknown error occurred');
+            // @ts-ignore
+            err.statusCode = statusCode;
+            throw err;
+        }
+
+        return json;
+    });
+}
 
 export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, Error> => {
     return useMutation(['check-username'], async (data) => {

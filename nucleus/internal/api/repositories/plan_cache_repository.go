@@ -36,13 +36,13 @@ func NewCachingPlanRepository(next PlanRepository, cfg *config.Config, keyPrefix
 	}
 }
 
-func (r *CachingPlanRepository) buildPlanCacheKey(planID uuid.UUID) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, planID.String())
+func (r *CachingPlanRepository) buildPlanCacheKey(userID, planID string) string {
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, planID)
 }
 
-func (r *CachingPlanRepository) buildUserPlansCacheKey(query PlanQuery, userID uuid.UUID, page int, limit int) string {
+func (r *CachingPlanRepository) buildUserPlansCacheKey(query PlanQuery, userID string, page int, limit int) string {
 	queryStr := fmt.Sprintf("name:%s-start:%s-end:%s-type:%s", query.Name, query.StartDate, query.EndDate, query.PlanType)
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
 }
 
 func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) error {
@@ -56,14 +56,14 @@ func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) e
 func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Update(ctx, tx, plan)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey(plan.ID))
+		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey("", plan.ID.String()))
 		r.invalidateUserPlansCache(ctx, plan.UserId)
 	}
 	return err
 }
 
 func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
-	key := r.buildPlanCacheKey(planID)
+	key := r.buildPlanCacheKey(ctx.Value("userID").(string), planID.String())
 	var cachedPlan models.Plan
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedPlan)
 	if err != nil {
@@ -85,7 +85,7 @@ func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) 
 
 func (r *CachingPlanRepository) FindByUserID(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
 	query := PlanQuery{Name: name, StartDate: startDate, EndDate: endDate, PlanType: planType}
-	key := r.buildUserPlansCacheKey(query, userID, page, limit)
+	key := r.buildUserPlansCacheKey(query, userID.String(), page, limit)
 	var cachedPlans []models.Plan
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedPlans)
 	if err != nil {
@@ -116,7 +116,7 @@ func (r *CachingPlanRepository) CountByUserID(ctx context.Context, userID uuid.U
 func (r *CachingPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Delete(ctx, tx, plan)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey(plan.ID))
+		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey("", plan.ID.String()))
 		r.invalidateUserPlansCache(ctx, plan.UserId)
 	}
 	return err

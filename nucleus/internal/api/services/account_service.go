@@ -41,8 +41,8 @@ func (s *AccountService) CreateAccount(ctx context.Context, payload types.Create
 	return &account, nil
 }
 
-func (s *AccountService) UpdateAccount(ctx context.Context, accountID, userID uuid.UUID, payload types.UpdateAccountDTO) (*models.Account, error) {
-	account, err := s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
+func (s *AccountService) UpdateAccount(ctx context.Context, accountID uuid.UUID, payload types.UpdateAccountDTO) (*models.Account, error) {
+	account, err := s.accountRepo.FindByID(ctx, accountID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,12 +69,12 @@ func (s *AccountService) FetchTotalAccounts(ctx context.Context, userID uuid.UUI
 	return s.accountRepo.CountByUserID(ctx, userID)
 }
 
-func (s *AccountService) FetchAccount(ctx context.Context, accountID, userID uuid.UUID) (*models.Account, error) {
-	return s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
+func (s *AccountService) FetchAccount(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
+	return s.accountRepo.FindByID(ctx, accountID)
 }
 
-func (s *AccountService) DeleteAccount(ctx context.Context, accountID, userID uuid.UUID) (*models.Account, error) {
-	account, err := s.accountRepo.FindByIDAndUserID(ctx, accountID, userID)
+func (s *AccountService) DeleteAccount(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
+	account, err := s.accountRepo.FindByID(ctx, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("account not found")
 	}

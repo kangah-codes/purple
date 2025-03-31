@@ -12,10 +12,11 @@ func Init() *config.Config {
 	cfg := config.GetConfig()
 	cfg.InitialiseValidator()
 
-	emailRepo := repositories.NewMailgunEmailRepository(
-		cfg.Env.EmailAPIKey,
-		cfg.Env.EmailDomain,
-	)
+	// emailRepo := repositories.NewMailgunEmailRepository(
+	// 	cfg.Env.MailgunAPIKey,
+	// 	cfg.Env.EmailDomain,
+	// )
+	emailRepo := repositories.NewResendEmailRepository(cfg.Env.ResendAPIKey)
 
 	// init singleton email service
 	_ = services.GetEmailService(emailRepo)

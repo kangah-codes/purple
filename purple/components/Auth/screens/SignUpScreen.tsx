@@ -26,7 +26,9 @@ import {
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useCheckUsername, useSignUp } from '../hooks';
-import { SignUpScreenData } from '../schema';
+import { SignUpResponse, SignUpScreenData } from '../schema';
+import { nativeStorage } from '@/lib/utils/storage';
+import { GenericAPIResponse } from '@/@types/request';
 
 export default function SignUpScreen() {
     const [usernameLoading, setUsernameLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function SignUpScreen() {
     const { mutate: signUpMutate, isLoading: signUpLoading } = useSignUp();
     const checkUsername = (loginInformation: { username: string }) => {
         mutate(loginInformation, {
-            onSuccess: () => {
+            onSuccess: (res) => {
                 // delete error if username is available
                 setUsernameTaken(false);
                 clearErrors('username');
@@ -74,12 +76,12 @@ export default function SignUpScreen() {
         setLoading(true);
         signUpMutate(
             {
-                username: data.username,
-                email: data.email,
-                password: data.password,
+                username: data.username.trim(),
+                email: data.email.trim(),
+                password: data.password.trim(),
             },
             {
-                onSuccess: () => {
+                onSuccess: (res) => {
                     Toast.show({
                         type: 'success',
                         props: {
@@ -87,7 +89,8 @@ export default function SignUpScreen() {
                             text2: 'Your Purple account has been created successfully!',
                         },
                     });
-                    router.push('/auth/sign-in');
+                    nativeStorage.setItem('onboardingUsername', res.data.username);
+                    router.push('/auth/activate');
                 },
                 onError: (error) => {
                     Toast.show({
@@ -310,6 +313,17 @@ export default function SignUpScreen() {
                                             className='text-xs text-purple-500'
                                         >
                                             Already a user? Sign in
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => router.replace('/auth/activate')}
+                                    >
+                                        <Text
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
+                                            className='text-xs text-purple-500'
+                                        >
+                                            Activate account
                                         </Text>
                                     </TouchableOpacity>
                                 </View>

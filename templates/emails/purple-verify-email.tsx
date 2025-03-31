@@ -12,8 +12,9 @@ import {
   Text,
 } from "@react-email/components";
 import React from "react";
+import { render } from "@react-email/render";
 
-interface AWSVerifyEmailProps {
+interface PurpleVerifyEmailProps {
   verificationCode?: string;
 }
 
@@ -21,9 +22,9 @@ const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "";
 
-export default function AWSVerifyEmail({
+export default function PurpleVerifyEmail({
   verificationCode,
-}: AWSVerifyEmailProps) {
+}: PurpleVerifyEmailProps) {
   return (
     <Html>
       <Head />
@@ -64,9 +65,9 @@ export default function AWSVerifyEmail({
   );
 }
 
-AWSVerifyEmail.PreviewProps = {
+PurpleVerifyEmail.PreviewProps = {
   verificationCode: "59685",
-} satisfies AWSVerifyEmailProps;
+} satisfies PurpleVerifyEmailProps;
 
 const main = {
   backgroundColor: "#fff",
@@ -154,3 +155,9 @@ const verificationSection = {
 const mainText = { ...text, marginBottom: "14px" };
 
 const cautionText = { ...text, margin: "0px" };
+
+const html = await render(<PurpleVerifyEmail verificationCode="12345" />, {
+  pretty: true,
+});
+
+console.log(html);

@@ -18,3 +18,8 @@ type CheckAvailableUsernameExistsDTO struct {
 type RequestPasswordResetDTO struct {
 	Username string `json:"username" binding:"required"`
 }
+
+type ActivateUserAccountDTO struct {
+	Username         string `json:"username" binding:"required" validate:"required"`
+	VerificationCode string `json:"verification_code" binding:"required" validate:"required,len=5"`
+}

@@ -26,25 +26,32 @@ func NewTransactionService(transactionRepo repositories.TransactionRepository, a
 
 func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
 	tx := s.config.DB.Begin()
+	var err error
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 			log.ErrorLogger.Errorf("Failed to create transaction: %v", r)
+			err = fmt.Errorf("failed to create transaction due to a panic: %v", r)
+		}
+		if err != nil {
+			if rbErr := tx.Rollback().Error; rbErr != nil {
+				log.ErrorLogger.Errorf("Error rolling back transaction after error: %v, original error: %v", rbErr, err)
+			}
+		} else {
+			if commitErr := tx.Commit().Error; commitErr != nil {
+				log.ErrorLogger.Printf("Error committing transaction: %v", commitErr)
+				err = commitErr // Set the error if commit fails
+			}
 		}
 	}()
 
-	account, err := s.accountRepo.FindByIDAndUserID(ctx, payload.AccountId, userID)
-	if err != nil {
-		return nil, err
+	account, findErr := s.accountRepo.FindByID(ctx, payload.AccountId)
+	if findErr != nil {
+		return nil, findErr
 	}
 	if account == nil {
 		return nil, fmt.Errorf("account not found")
 	}
-
-	if payload.PlanId == uuid.Nil {
-		payload.PlanId = uuid.Nil
-	}
-
 	transaction := models.Transaction{
 		AccountId:   payload.AccountId,
 		UserId:      userID,
@@ -58,29 +65,21 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 		Currency:    account.Currency,
 		PlanId:      payload.PlanId,
 	}
-
 	if payload.Type == models.Debit {
 		account.Balance -= payload.Amount
 	} else {
 		account.Balance += payload.Amount
 	}
-
-	if err := s.accountRepo.Update(ctx, tx, account); err != nil {
-		log.ErrorLogger.Errorf("Error updating account balance: %v", err)
-		return nil, fmt.Errorf("error creating transaction")
+	if updateErr := s.accountRepo.Update(ctx, tx, account); updateErr != nil {
+		log.ErrorLogger.Errorf("Error updating account balance: %v", updateErr)
+		return nil, fmt.Errorf("error creating transaction: %w", updateErr)
+	}
+	if createErr := s.transactionRepo.Create(ctx, tx, &transaction); createErr != nil {
+		log.ErrorLogger.Errorf("Error creating transaction: %v", createErr)
+		return nil, fmt.Errorf("error creating transaction: %w", createErr)
 	}
 
-	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		log.ErrorLogger.Errorf("Error creating transaction: %v", err)
-		return nil, fmt.Errorf("error creating transaction")
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		log.ErrorLogger.Printf("Error commiting transaction: %v", err)
-	}
-
-	return &transaction, nil
+	return &transaction, err
 }
 
 func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
@@ -92,7 +91,7 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 		}
 	}()
 
-	fromAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.FromAccount, userID)
+	fromAccount, err := s.accountRepo.FindByID(ctx, payload.FromAccount)
 	if err != nil {
 		return nil, fmt.Errorf("source account not found: %w", err)
 	}
@@ -100,7 +99,7 @@ func (s *TransactionService) CreateTransferTransaction(ctx context.Context, payl
 		return nil, fmt.Errorf("source account not found")
 	}
 
-	toAccount, err := s.accountRepo.FindByIDAndUserID(ctx, payload.ToAccount, userID)
+	toAccount, err := s.accountRepo.FindByID(ctx, payload.ToAccount)
 	if err != nil {
 		return nil, fmt.Errorf("destination account not found: %w", err)
 	}

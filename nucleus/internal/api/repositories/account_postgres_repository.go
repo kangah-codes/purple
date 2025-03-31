@@ -25,11 +25,11 @@ func (r *PostgresAccountRepository) Update(ctx context.Context, tx *gorm.DB, acc
 	return tx.WithContext(ctx).Save(account).Error
 }
 
-func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
+func (r *PostgresAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
 	var account models.Account
 	result := r.db.WithContext(ctx).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at desc")
-	}).Where("id = ? AND user_id = ?", accountID, userID).First(&account)
+	}).Where("id = ?", accountID).First(&account)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Polygon } from 'react-native-svg';
 
 /**

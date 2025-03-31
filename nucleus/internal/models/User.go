@@ -18,5 +18,5 @@ type User struct {
 	Profile      UserProfile   `gorm:"foreignKey:PUserId;constraint:OnDelete:CASCADE;" json:"profile"`
 	Role         string        `gorm:"default:user" json:"role"`
 	Activated    bool          `gorm:"default:false" json:"activated"`
-	ExpiresAt    time.Time     `gorm:"" json:"expired_at"`
+	ExpiresAt    *time.Time    `gorm:"" json:"expired_at"`
 }

@@ -53,7 +53,7 @@ func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, 
 	err := r.next.Create(ctx, tx, transaction)
 	if err == nil {
 		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-		r.invalidateUserPlansCache(ctx, transaction.UserId, transaction.PlanId)
+		r.invalidateUserPlansCache(ctx, transaction.UserId)
 	}
 	return err
 }
@@ -145,6 +145,6 @@ func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx conte
 	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, "users", userID.String()))
 }
 
-func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID, planID uuid.UUID) {
-	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey("plans", userID.String(), planID.String()))
+func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID) {
+	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey("plans", userID.String(), "*"))
 }

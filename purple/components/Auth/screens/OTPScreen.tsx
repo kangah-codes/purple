@@ -24,6 +24,7 @@ import {} from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ChevronLeftIcon } from '@/components/SVG/24x24';
 import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import React from 'react';
 
 export default function OTPScreen() {
     const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
@@ -67,7 +68,7 @@ export default function OTPScreen() {
                 <TouchableOpacity onPress={router.back}>
                     <View className='flex flex-row space-x-2 items-center'>
                         <ChevronLeftIcon strokeWidth={3} width={17} stroke='#9333ea' />
-                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-600'>
                             Back
                         </Text>
                     </View>

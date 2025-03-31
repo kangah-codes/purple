@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"math"
 	"net/http"
 	"nucleus/internal/api/services"
@@ -58,7 +59,8 @@ func (h *PlanHandler) UpdatePlanBalance(c *gin.Context) {
 		return
 	}
 
-	plan, err := h.planService.UpdatePlanBalance(c.Request.Context(), planUUID, userID.(uuid.UUID), updatePlanBalance.Balance)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	plan, err := h.planService.UpdatePlan(ctx, planUUID, updatePlanBalance.Balance)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update plan balance", Data: nil})

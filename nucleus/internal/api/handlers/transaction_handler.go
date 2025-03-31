@@ -47,7 +47,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "Transaction created", Data: transaction})
+	c.JSON(http.StatusCreated, types.Response{Status: http.StatusCreated, Message: "Transaction created", Data: &transaction})
 }
 
 func (h *TransactionHandler) FetchTransactions(c *gin.Context) {

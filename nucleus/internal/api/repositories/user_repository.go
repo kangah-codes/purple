@@ -16,5 +16,7 @@ type UserRepository interface {
 	FindByUsernameOrEmail(ctx context.Context, username, email string) (*models.User, error)
 	CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error)
 	Update(ctx context.Context, user *models.User) error
+	Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error
+	// TODO: remove tx from here
 	Delete(ctx context.Context, tx *gorm.DB, id uuid.UUID) error
 }

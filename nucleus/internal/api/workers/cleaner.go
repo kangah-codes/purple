@@ -34,6 +34,7 @@ func (sc *SessionCleaner) Start(ctx context.Context) {
 			case <-sc.ticker.C:
 				sc.deleteExpiredSessions()
 				sc.deleteExpiredPasswordResetTokens()
+				sc.deleteExpiredActivationOTPs()
 			case <-ctx.Done():
 				return
 			case <-sc.done:
@@ -59,13 +60,6 @@ func (sc *SessionCleaner) deleteExpiredSessions() {
 	} else {
 		log.InfoLogger.Printf("Deleted %d expired sessions", sessionResult.RowsAffected)
 	}
-
-	// refreshTokenResult := sc.db.Where("expires_at <= ?", now).Delete(&models.RefreshToken{})
-	// if refreshTokenResult.Error != nil {
-	// 	log.ErrorLogger.Errorf("Error deleting expired refresh tokens: %v", refreshTokenResult.Error)
-	// } else {
-	// 	log.InfoLogger.Printf("Deleted %d expired refresh tokens", refreshTokenResult.RowsAffected)
-	// }
 }
 
 func (sc *SessionCleaner) deleteExpiredPasswordResetTokens() {
@@ -75,5 +69,15 @@ func (sc *SessionCleaner) deleteExpiredPasswordResetTokens() {
 		log.ErrorLogger.Errorf("Error deleting expired password reset tokens: %v", sessionResult.Error)
 	} else {
 		log.InfoLogger.Printf("Deleted %d expired password reset tokens", sessionResult.RowsAffected)
+	}
+}
+
+func (sc *SessionCleaner) deleteExpiredActivationOTPs() {
+	now := time.Now()
+	sessionResult := sc.db.Where("expires_at <= ?", now).Delete(&models.AccountConfirmationPin{})
+	if sessionResult.Error != nil {
+		log.ErrorLogger.Errorf("Error deleting expired activation OTPs: %v", sessionResult.Error)
+	} else {
+		log.InfoLogger.Printf("Deleted %d expired activation OTPs", sessionResult.RowsAffected)
 	}
 }

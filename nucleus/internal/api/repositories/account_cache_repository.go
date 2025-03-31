@@ -28,18 +28,18 @@ func NewCachingAccountRepository(next AccountRepository, cfg *config.Config, key
 	}
 }
 
-func (r *CachingAccountRepository) buildAccountCacheKey(accountID uuid.UUID) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, accountID.String())
+func (r *CachingAccountRepository) buildAccountCacheKey(userID, accountID string) string {
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, accountID)
 }
 
-func (r *CachingAccountRepository) buildUserAccountsCacheKey(userID uuid.UUID, page int, limit int) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
+func (r *CachingAccountRepository) buildUserAccountsCacheKey(userID string, page int, limit int) string {
+	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
 }
 
 func (r *CachingAccountRepository) Create(ctx context.Context, account *models.Account) error {
 	err := r.next.Create(ctx, account)
 	if err == nil {
-		r.invalidateUserAccountsCache(ctx, account.UserId)
+		r.invalidateUserAccountsCache(ctx, account.UserId.String())
 	}
 	return err
 }
@@ -47,14 +47,15 @@ func (r *CachingAccountRepository) Create(ctx context.Context, account *models.A
 func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	err := r.next.Update(ctx, tx, account)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildAccountCacheKey(account.ID))
-		r.invalidateUserAccountsCache(ctx, account.UserId)
+		r.config.RedisCache.Invalidate(ctx, r.buildAccountCacheKey(ctx.Value("userID").(string), account.ID.String()))
+		r.invalidateUserAccountsCache(ctx, ctx.Value("userID").(string))
 	}
 	return err
 }
 
-func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
-	key := r.buildAccountCacheKey(accountID)
+func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
+	userID := ctx.Value("userID").(string)
+	key := r.buildAccountCacheKey(userID, accountID.String())
 	var cachedAccount models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccount)
 	if err != nil {
@@ -64,7 +65,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 		return &cachedAccount, nil
 	}
 
-	account, err := r.next.FindByIDAndUserID(ctx, accountID, userID)
+	account, err := r.next.FindByID(ctx, accountID)
 	if err == nil && account != nil {
 		err := r.config.RedisCache.Set(ctx, key, account, r.expiration)
 		if err != nil {
@@ -75,7 +76,7 @@ func (r *CachingAccountRepository) FindByIDAndUserID(ctx context.Context, accoun
 }
 
 func (r *CachingAccountRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
-	key := r.buildUserAccountsCacheKey(userID, page, limit)
+	key := r.buildUserAccountsCacheKey(userID.String(), page, limit)
 	var cachedAccounts []models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccounts)
 	if err != nil {
@@ -116,8 +117,7 @@ func (r *CachingAccountRepository) Delete(ctx context.Context, tx *gorm.DB, acco
 		return err
 	}
 
-	r.invalidateUserAccountsCache(ctx, account.UserId)
-
+	r.invalidateUserAccountsCache(ctx, account.UserId.String())
 	return nil
 }
 
@@ -127,13 +127,12 @@ func (r *CachingAccountRepository) DeleteByUserID(ctx context.Context, tx *gorm.
 		return err
 	}
 
-	r.invalidateUserAccountsCache(ctx, userID)
-
+	r.invalidateUserAccountsCache(ctx, userID.String())
 	return nil
 }
 
-func (r *CachingAccountRepository) invalidateUserAccountsCache(ctx context.Context, userID uuid.UUID) {
+func (r *CachingAccountRepository) invalidateUserAccountsCache(ctx context.Context, userID string) {
 	r.config.RedisCache.InvalidateMultiple(ctx, []string{
-		r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "*"),
+		r.config.RedisCache.BuildKey(r.keyPrefix, userID),
 	})
 }
