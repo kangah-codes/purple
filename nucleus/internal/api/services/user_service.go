@@ -15,13 +15,13 @@ import (
 type UserService struct {
 	userRepo repositories.UserRepository
 	authRepo repositories.AuthRepository
-	config   *config.Config
+	Config   *config.Config
 }
 
 var ErrUserAlreadyExists = errors.New("user already exists with these details")
 
 func NewUserService(userRepo repositories.UserRepository, authRepo repositories.AuthRepository, cfg *config.Config) *UserService {
-	return &UserService{userRepo: userRepo, authRepo: authRepo, config: cfg}
+	return &UserService{userRepo: userRepo, authRepo: authRepo, Config: cfg}
 }
 
 func (s *UserService) FetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {

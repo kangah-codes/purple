@@ -47,15 +47,15 @@ func (r *CachingAccountRepository) Create(ctx context.Context, account *models.A
 func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	err := r.next.Update(ctx, tx, account)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildAccountCacheKey(ctx.Value("userID").(string), account.ID.String()))
-		r.invalidateUserAccountsCache(ctx, ctx.Value("userID").(string))
+		r.config.RedisCache.Invalidate(ctx, r.buildAccountCacheKey(ctx.Value("userID").(uuid.UUID).String(), account.ID.String()))
+		r.invalidateUserAccountsCache(ctx, ctx.Value("userID").(uuid.UUID).String())
 	}
 	return err
 }
 
 func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
-	userID := ctx.Value("userID").(string)
-	key := r.buildAccountCacheKey(userID, accountID.String())
+	userID := ctx.Value("userID").(uuid.UUID)
+	key := r.buildAccountCacheKey(userID.String(), accountID.String())
 	var cachedAccount models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccount)
 	if err != nil {

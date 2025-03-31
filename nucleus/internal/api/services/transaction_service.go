@@ -24,7 +24,7 @@ func NewTransactionService(transactionRepo repositories.TransactionRepository, a
 	return &TransactionService{transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg}
 }
 
-func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO, userID uuid.UUID) (*models.Transaction, error) {
+func (s *TransactionService) CreateTransaction(ctx context.Context, payload types.CreateTransactionDTO) (*models.Transaction, error) {
 	tx := s.config.DB.Begin()
 	var err error
 	defer func() {
@@ -52,6 +52,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, payload type
 	if account == nil {
 		return nil, fmt.Errorf("account not found")
 	}
+	userID := ctx.Value("userID").(uuid.UUID)
 	transaction := models.Transaction{
 		AccountId:   payload.AccountId,
 		UserId:      userID,

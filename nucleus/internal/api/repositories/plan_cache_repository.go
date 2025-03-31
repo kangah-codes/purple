@@ -63,7 +63,7 @@ func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *m
 }
 
 func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
-	key := r.buildPlanCacheKey(ctx.Value("userID").(string), planID.String())
+	key := r.buildPlanCacheKey(ctx.Value("userID").(uuid.UUID).String(), planID.String())
 	var cachedPlan models.Plan
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedPlan)
 	if err != nil {

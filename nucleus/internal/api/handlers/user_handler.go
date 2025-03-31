@@ -32,8 +32,8 @@ func NewUserHandler(userService *services.UserService, planService *services.Pla
 	}
 }
 
+// TODO: refactor all this
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	db := utils.GetDB()
 	userID := c.Param("id")
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
@@ -51,7 +51,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	tx := db.Begin()
+	tx := h.userService.Config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()

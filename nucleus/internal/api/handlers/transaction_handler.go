@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/services"
@@ -35,10 +36,11 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
 	if createTransaction.Type == models.Transfer {
-		transaction, err = h.transactionService.CreateTransferTransaction(c.Request.Context(), createTransaction, userID.(uuid.UUID))
+		transaction, err = h.transactionService.CreateTransferTransaction(ctx, createTransaction, userID.(uuid.UUID))
 	} else {
-		transaction, err = h.transactionService.CreateTransaction(c.Request.Context(), createTransaction, userID.(uuid.UUID))
+		transaction, err = h.transactionService.CreateTransaction(ctx, createTransaction)
 	}
 
 	if err != nil {

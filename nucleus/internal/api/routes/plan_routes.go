@@ -46,7 +46,7 @@ func RegisterPlanRoutes(r *gin.RouterGroup, container *containers.Container) {
 		planGroup.GET(
 			"/:planID/track-status",
 			middleware.RequireParams([]string{"userID"}),
-			handlers.CalculatePlanOnTrack,
+			planHandler.CalculatePlanOnTrack,
 		)
 	}
 }

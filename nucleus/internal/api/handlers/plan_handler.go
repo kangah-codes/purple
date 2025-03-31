@@ -8,7 +8,6 @@ import (
 	"nucleus/internal/api/types"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/internal/utils"
 	"strconv"
 	"time"
 
@@ -184,8 +183,8 @@ func (h *PlanHandler) FetchPlan(c *gin.Context) {
 }
 
 // TODO: come back to this
-func CalculatePlanOnTrack(c *gin.Context) {
-	db := utils.GetDB()
+// fuck, why tf did i write this ugly code
+func (h *PlanHandler) CalculatePlanOnTrack(c *gin.Context) {
 	planID := c.Param("planID")
 	userID, exists := c.Get("userID")
 
@@ -201,7 +200,7 @@ func CalculatePlanOnTrack(c *gin.Context) {
 	}
 
 	plan := models.Plan{}
-	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+	result := h.planService.Config.DB.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at desc")
 	}).Where("id = ?", planID).First(&plan)
 

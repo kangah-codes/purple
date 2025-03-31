@@ -20,10 +20,13 @@ type PlanService struct {
 	transactionRepo repositories.TransactionRepository
 	accountRepo     repositories.AccountRepository
 	config          *config.Config
+	// TODO: don't expose config outside service
+	// this is just a temp hack to prevent build errors, will refactor the code
+	Config *config.Config
 }
 
 func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, cfg *config.Config) *PlanService {
-	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg}
+	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg, Config: cfg}
 }
 
 type PlanQuery struct {
