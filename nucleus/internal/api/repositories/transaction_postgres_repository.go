@@ -23,9 +23,9 @@ func (r *PostgresTransactionRepository) Create(ctx context.Context, tx *gorm.DB,
 	return tx.WithContext(ctx).Create(transaction).Error
 }
 
-func (r *PostgresTransactionRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
+func (r *PostgresTransactionRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Transaction, error) {
 	var transaction models.Transaction
-	result := r.db.WithContext(ctx).Preload("Account").Where("id = ? AND user_id = ?", accountID, userID).First(&transaction)
+	result := r.db.WithContext(ctx).Preload("Account").Where("id = ?", accountID).First(&transaction)
 	if result.Error != nil {
 		return nil, result.Error
 	}

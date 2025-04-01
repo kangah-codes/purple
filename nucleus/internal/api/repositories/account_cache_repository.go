@@ -2,10 +2,10 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,18 +28,10 @@ func NewCachingAccountRepository(next AccountRepository, cfg *config.Config, key
 	}
 }
 
-func (r *CachingAccountRepository) buildAccountCacheKey(userID, accountID string) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, accountID)
-}
-
-func (r *CachingAccountRepository) buildUserAccountsCacheKey(userID string, page int, limit int) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
-}
-
 func (r *CachingAccountRepository) Create(ctx context.Context, account *models.Account) error {
 	err := r.next.Create(ctx, account)
 	if err == nil {
-		r.invalidateUserAccountsCache(ctx, account.UserId.String())
+		r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
 	}
 	return err
 }
@@ -47,15 +39,14 @@ func (r *CachingAccountRepository) Create(ctx context.Context, account *models.A
 func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
 	err := r.next.Update(ctx, tx, account)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildAccountCacheKey(ctx.Value("userID").(uuid.UUID).String(), account.ID.String()))
-		r.invalidateUserAccountsCache(ctx, ctx.Value("userID").(uuid.UUID).String())
+		r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
 	}
 	return err
 }
 
 func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
 	userID := ctx.Value("userID").(uuid.UUID)
-	key := r.buildAccountCacheKey(userID.String(), accountID.String())
+	key := fmt.Sprintf("%s:accounts:%s:%s", r.keyPrefix, userID.String(), accountID.String())
 	var cachedAccount models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccount)
 	if err != nil {
@@ -76,7 +67,7 @@ func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.
 }
 
 func (r *CachingAccountRepository) FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error) {
-	key := r.buildUserAccountsCacheKey(userID.String(), page, limit)
+	key := fmt.Sprintf("%s:accounts:%s:page-%d:limit-%d", r.keyPrefix, userID.String(), page, limit)
 	var cachedAccounts []models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccounts)
 	if err != nil {
@@ -117,7 +108,7 @@ func (r *CachingAccountRepository) Delete(ctx context.Context, tx *gorm.DB, acco
 		return err
 	}
 
-	r.invalidateUserAccountsCache(ctx, account.UserId.String())
+	r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
 	return nil
 }
 
@@ -127,12 +118,6 @@ func (r *CachingAccountRepository) DeleteByUserID(ctx context.Context, tx *gorm.
 		return err
 	}
 
-	r.invalidateUserAccountsCache(ctx, userID.String())
+	r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, userID.String()))
 	return nil
-}
-
-func (r *CachingAccountRepository) invalidateUserAccountsCache(ctx context.Context, userID string) {
-	r.config.RedisCache.InvalidateMultiple(ctx, []string{
-		r.config.RedisCache.BuildKey(r.keyPrefix, userID),
-	})
 }

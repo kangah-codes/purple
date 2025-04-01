@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
@@ -27,20 +28,12 @@ func NewCachingUserRepository(next UserRepository, cfg *config.Config, keyPrefix
 	}
 }
 
-func (r *CachingUserRepository) buildUserCacheKey(id uuid.UUID) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, "users", id.String())
-}
-
-func (r *CachingUserRepository) buildUserByUsernameCacheKey(username string) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, "users", "username", username)
-}
-
 func (r *CachingUserRepository) Create(ctx context.Context, tx *gorm.DB, user *models.User) error {
 	return r.next.Create(ctx, tx, user)
 }
 
 func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	key := r.buildUserCacheKey(id)
+	key := fmt.Sprintf("%s:users:%s", r.keyPrefix, id.String())
 	var cachedUser models.User
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedUser)
 	if err != nil {
@@ -69,7 +62,9 @@ func (r *CachingUserRepository) FindByUsernameAuth(ctx context.Context, username
 }
 
 func (r *CachingUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
-	key := r.buildUserByUsernameCacheKey(username)
+	// obviously not efficient to store 2 entries for the same user
+	// have to implement some cache referencing, this works for now
+	key := fmt.Sprintf("%s:users:username:%s", r.keyPrefix, username)
 	var cachedUser models.User
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedUser)
 	if err != nil {
@@ -90,19 +85,16 @@ func (r *CachingUserRepository) FindByUsername(ctx context.Context, username str
 }
 
 func (r *CachingUserRepository) Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
-	err := r.next.Activate(ctx, user, confirmation)
-	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildUserCacheKey(user.ID))
-		r.config.RedisCache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
-	}
-	return err
+	return r.next.Activate(ctx, user, confirmation)
 }
 
 func (r *CachingUserRepository) Update(ctx context.Context, user *models.User) error {
 	err := r.next.Update(ctx, user)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildUserCacheKey(user.ID))
-		r.config.RedisCache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
+		r.config.RedisCache.InvalidateMultiple(ctx, []string{
+			fmt.Sprintf("%s:users:%s", r.keyPrefix, user.ID.String()),
+			fmt.Sprintf("%s:users:username:%s", r.keyPrefix, user.Username),
+		})
 	}
 	return err
 }
@@ -113,13 +105,17 @@ func (r *CachingUserRepository) Delete(ctx context.Context, tx *gorm.DB, id uuid
 		return err
 	}
 
-	err = r.next.Delete(ctx, tx, id)
-	if err != nil {
+	if err := r.next.Delete(ctx, tx, id); err != nil {
 		return err
 	}
 
-	r.config.RedisCache.Invalidate(ctx, r.buildUserCacheKey(id))
-	r.config.RedisCache.Invalidate(ctx, r.buildUserByUsernameCacheKey(user.Username))
+	r.config.RedisCache.InvalidateMultiple(ctx, []string{
+		fmt.Sprintf("%s:users:%s", r.keyPrefix, user.ID.String()),
+		fmt.Sprintf("%s:users:username:%s", r.keyPrefix, user.Username),
+		fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, user.ID.String()),
+		fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, user.ID.String()),
+		fmt.Sprintf("%s:plans:%s:*", r.keyPrefix, user.ID.String()),
+	})
 
 	return nil
 }

@@ -106,13 +106,15 @@ func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 
 func (h *PlanHandler) DeletePlan(c *gin.Context) {
 	planID, _ := c.Params.Get("planID")
+	userID, _ := c.Get("userID")
 	parsedPlanID, err := uuid.Parse(planID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
 		return
 	}
 
-	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	err = h.planService.DeletePlan(ctx, parsedPlanID)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error deleting plan: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})
@@ -169,7 +171,8 @@ func (h *PlanHandler) FetchPlan(c *gin.Context) {
 		return
 	}
 
-	plan, err := h.planService.FetchPlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	plan, err := h.planService.FetchPlan(ctx, parsedPlanID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})

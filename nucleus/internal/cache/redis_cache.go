@@ -34,7 +34,7 @@ func (r *RedisCache) BuildKey(parts ...string) string {
 	return strings.Join(keyParts, ":")
 }
 
-func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+func (r *RedisCache) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
 	if r.Options.Encrypt {
 		data, err := json.Marshal(value)
 		if err != nil {
@@ -54,7 +54,7 @@ func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, exp
 	return r.Client.Set(ctx, key, data, expiration).Err()
 }
 
-func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (bool, error) {
+func (r *RedisCache) Get(ctx context.Context, key string, object any) (bool, error) {
 	if r.Options.Encrypt {
 		encryptedData, err := r.Client.Get(ctx, key).Result()
 		if err == redis.Nil {
@@ -96,7 +96,6 @@ func (r *RedisCache) Invalidate(ctx context.Context, pattern string) error {
 	}
 
 	if len(keys) > 0 {
-		fmt.Printf("KEYYSSS: %v\n", keys)
 		err := r.Client.Del(ctx, keys...).Err()
 		if err != nil {
 			return fmt.Errorf("failed to delete cache keys: %w", err)

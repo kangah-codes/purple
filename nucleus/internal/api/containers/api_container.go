@@ -32,11 +32,11 @@ func NewAPIContainer(cfg *config.Config) *Container {
 	transactionRepo := repositories.NewPostgresTransactionRepository(cfg)
 
 	// add caching
-	cacheUserRepo := repositories.NewCachingUserRepository(userRepo, cfg, "user", time.Minute*5)
-	cacheAccountRepo := repositories.NewCachingAccountRepository(accountRepo, cfg, "accounts", time.Minute*5)
-	cachePlanRepo := repositories.NewCachingPlanRepository(planRepo, cfg, "plans", time.Minute*5)
-	cacheTransactionRepo := repositories.NewCachingTransactionRepository(transactionRepo, cfg, "transactions", time.Minute*5)
-	cacheAuthRepo := repositories.NewCachingAuthRepository(authRepo, cfg, "auth", time.Minute*10)
+	cacheUserRepo := repositories.NewCachingUserRepository(userRepo, cfg, "app:v1", time.Minute*5)
+	cacheAccountRepo := repositories.NewCachingAccountRepository(accountRepo, cfg, "app:v1", time.Minute*5)
+	cachePlanRepo := repositories.NewCachingPlanRepository(planRepo, cfg, "app:v1", time.Minute*5)
+	cacheTransactionRepo := repositories.NewCachingTransactionRepository(transactionRepo, cfg, "app:v1", time.Minute*5)
+	cacheAuthRepo := repositories.NewCachingAuthRepository(authRepo, cfg, "app:v1", time.Minute*10)
 
 	// init services
 	userService := services.NewUserService(cacheUserRepo, authRepo, cfg)

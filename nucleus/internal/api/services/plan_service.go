@@ -85,7 +85,7 @@ func (s *PlanService) FetchPaginatedPlans(ctx context.Context, userID uuid.UUID,
 	return plans, int(totalItems), err
 }
 
-func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
+func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
 	return s.planRepo.FindByID(ctx, planID)
 }
 

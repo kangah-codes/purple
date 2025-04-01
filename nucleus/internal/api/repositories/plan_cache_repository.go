@@ -6,7 +6,6 @@ import (
 	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,19 +35,13 @@ func NewCachingPlanRepository(next PlanRepository, cfg *config.Config, keyPrefix
 	}
 }
 
-func (r *CachingPlanRepository) buildPlanCacheKey(userID, planID string) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, planID)
-}
-
-func (r *CachingPlanRepository) buildUserPlansCacheKey(query PlanQuery, userID string, page int, limit int) string {
-	queryStr := fmt.Sprintf("name:%s-start:%s-end:%s-type:%s", query.Name, query.StartDate, query.EndDate, query.PlanType)
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID, "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
-}
-
 func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) error {
 	err := r.next.Create(ctx, plan)
 	if err == nil {
-		r.invalidateUserPlansCache(ctx, plan.UserId)
+		r.config.RedisCache.InvalidateMultiple(ctx, []string{
+			fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, plan.User.ID.String(), plan.ID.String()),
+			fmt.Sprintf("%s:users:%s", r.keyPrefix, plan.User.ID.String()),
+		})
 	}
 	return err
 }
@@ -56,14 +49,17 @@ func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) e
 func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Update(ctx, tx, plan)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey("", plan.ID.String()))
-		r.invalidateUserPlansCache(ctx, plan.UserId)
+		r.config.RedisCache.InvalidateMultiple(ctx, []string{
+			fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, plan.User.ID.String(), plan.ID.String()),
+			fmt.Sprintf("%s:users:%s", r.keyPrefix, plan.User.ID.String()),
+		})
 	}
 	return err
 }
 
 func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
-	key := r.buildPlanCacheKey(ctx.Value("userID").(uuid.UUID).String(), planID.String())
+	userID := ctx.Value("userID").(uuid.UUID)
+	key := fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, userID.String(), planID.String())
 	var cachedPlan models.Plan
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedPlan)
 	if err != nil {
@@ -84,8 +80,10 @@ func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) 
 }
 
 func (r *CachingPlanRepository) FindByUserID(ctx context.Context, userID uuid.UUID, name, startDate, endDate, planType string, page int, limit int) ([]models.Plan, int64, error) {
-	query := PlanQuery{Name: name, StartDate: startDate, EndDate: endDate, PlanType: planType}
-	key := r.buildUserPlansCacheKey(query, userID.String(), page, limit)
+	key := fmt.Sprintf(
+		"%s:plans:%s:page-%d:limit-%d:name-%s:startDate-%s:endDate-%s:type-%s",
+		r.keyPrefix, userID.String(), page, limit, name, startDate, endDate, planType,
+	)
 	var cachedPlans []models.Plan
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedPlans)
 	if err != nil {
@@ -94,7 +92,7 @@ func (r *CachingPlanRepository) FindByUserID(ctx context.Context, userID uuid.UU
 	if found {
 		totalItems, err := r.next.CountByUserID(ctx, userID)
 		if err != nil {
-			return nil, -1, err
+			return nil, 0, err
 		}
 		return cachedPlans, totalItems, nil
 	}
@@ -115,9 +113,15 @@ func (r *CachingPlanRepository) CountByUserID(ctx context.Context, userID uuid.U
 
 func (r *CachingPlanRepository) Delete(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
 	err := r.next.Delete(ctx, tx, plan)
+	userID := ctx.Value("userID").(uuid.UUID)
 	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, r.buildPlanCacheKey("", plan.ID.String()))
-		r.invalidateUserPlansCache(ctx, plan.UserId)
+		cacheKeys := []string{
+			fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, userID.String()),
+			fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, userID.String()),
+			fmt.Sprintf("%s:plans:%s:*", r.keyPrefix, userID.String()),
+			fmt.Sprintf("%s:users:%s", r.keyPrefix, userID.String()),
+		}
+		r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 	}
 	return err
 }
@@ -128,11 +132,11 @@ func (r *CachingPlanRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB,
 		return err
 	}
 
-	r.invalidateUserPlansCache(ctx, userID)
+	cacheKeys := []string{
+		fmt.Sprintf("%s:plans:%s:*", r.keyPrefix, userID.String()),
+		fmt.Sprintf("%s:users:%s", r.keyPrefix, userID.String()),
+	}
+	r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 
 	return nil
-}
-
-func (r *CachingPlanRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID) {
-	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "*"))
 }

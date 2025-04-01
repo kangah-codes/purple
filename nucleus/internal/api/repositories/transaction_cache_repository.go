@@ -8,7 +8,6 @@ import (
 	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,26 +39,30 @@ func NewCachingTransactionRepository(next TransactionRepository, cfg *config.Con
 	}
 }
 
-func (r *CachingTransactionRepository) buildTransactionCacheKey(userID uuid.UUID, transactionID uuid.UUID) string {
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), transactionID.String())
-}
-
-func (r *CachingTransactionRepository) buildUserTransactionsCacheKey(userID uuid.UUID, query TransactionQuery, page int, limit int) string {
-	queryStr := fmt.Sprintf("start:%s-end:%s-category:%s-min:%d-max:%d-accountID:%s", query.StartDate, query.EndDate, query.Category, query.MinAmount, query.MaxAmount, query.AccountID)
-	return r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "query", queryStr, "page", strconv.Itoa(page), "limit", strconv.Itoa(limit))
-}
-
 func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
 	err := r.next.Create(ctx, tx, transaction)
 	if err == nil {
-		r.invalidateUserTransactionsCache(ctx, transaction.UserId)
-		r.invalidateUserPlansCache(ctx, transaction.UserId)
+		// invalidate user transactions
+		cacheKeys := []string{fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, transaction.User.ID.String())}
+		if transaction.PlanId != nil {
+			// if transaction is associated with a plan, clear that plan from cache
+			cacheKeys = append(cacheKeys, fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, transaction.User.ID.String(), string(transaction.PlanId.String())))
+		}
+		// clear account cache associated with the transaction
+		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:accounts:%s:%s", r.keyPrefix, transaction.User.ID.String(), transaction.Account.ID.String()))
+		// clear user cache
+		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:users:%s", r.keyPrefix, transaction.User.ID.String()))
+		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:users:username:%s", r.keyPrefix, transaction.User.Username))
+
+		r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 	}
 	return err
 }
 
-func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, transactionID uuid.UUID, userID uuid.UUID) (*models.Transaction, error) {
-	key := r.buildTransactionCacheKey(userID, transactionID)
+func (r *CachingTransactionRepository) FindByID(ctx context.Context, transactionID uuid.UUID) (*models.Transaction, error) {
+	// TODO: setting in ctx is not implemented but we're not calling this anyway
+	userID := ctx.Value("userID").(uuid.UUID)
+	key := fmt.Sprintf("%s:transactions:%s:%s", r.keyPrefix, userID.String(), transactionID.String())
 	var cachedTransaction models.Transaction
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedTransaction)
 	if err != nil {
@@ -69,7 +72,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 		return &cachedTransaction, nil
 	}
 
-	transaction, err := r.next.FindByIDAndUserID(ctx, transactionID, userID)
+	transaction, err := r.next.FindByID(ctx, transactionID)
 	if err == nil && transaction != nil {
 		err := r.config.RedisCache.Set(ctx, key, transaction, r.expiration)
 		if err != nil {
@@ -80,7 +83,7 @@ func (r *CachingTransactionRepository) FindByIDAndUserID(ctx context.Context, tr
 }
 
 func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
-	key := r.buildUserTransactionsCacheKey(userID, query, page, limit)
+	key := fmt.Sprintf("%s:transactions:%s:page-%d:limit-%d", r.keyPrefix, userID.String(), page, limit)
 	var cachedTransactions []models.Transaction
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedTransactions)
 
@@ -115,18 +118,27 @@ func (r *CachingTransactionRepository) DeleteByUserID(ctx context.Context, tx *g
 		return err
 	}
 
-	r.invalidateUserTransactionsCache(ctx, userID)
-
+	cacheKeys := []string{
+		fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, userID.String()),
+		fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, userID.String()),
+		fmt.Sprintf("%s:users:%s", r.keyPrefix, userID.String()),
+	}
+	r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 	return nil
 }
+
 func (r *CachingTransactionRepository) DeleteByAccountID(ctx context.Context, tx *gorm.DB, accountID uuid.UUID) error {
 	err := r.next.DeleteByAccountID(ctx, tx, accountID)
 	if err != nil {
 		return err
 	}
 
-	// TODO: find a way to get the user id and clear cache
-	// r.invalidateUserTransactionsCache(ctx, userID)
+	// TODO: doesn't seem like we're using this so userID will not be defined
+	userID := ctx.Value("userID").(uuid.UUID)
+	cacheKeys := []string{
+		fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, userID.String()),
+	}
+	r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 
 	return nil
 }
@@ -137,14 +149,11 @@ func (r *CachingTransactionRepository) DeleteByPlanID(ctx context.Context, tx *g
 		return err
 	}
 
+	userID := ctx.Value("userID").(uuid.UUID)
+	cacheKeys := []string{
+		fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, userID.String()),
+	}
+	r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
+
 	return nil
-}
-
-func (r *CachingTransactionRepository) invalidateUserTransactionsCache(ctx context.Context, userID uuid.UUID) {
-	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, userID.String(), "*"))
-	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, "users", userID.String()))
-}
-
-func (r *CachingTransactionRepository) invalidateUserPlansCache(ctx context.Context, userID uuid.UUID) {
-	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey("plans", userID.String(), "*"))
 }
