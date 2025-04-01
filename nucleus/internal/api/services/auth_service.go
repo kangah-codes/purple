@@ -6,6 +6,7 @@ import (
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
 	"nucleus/internal/config"
+	"nucleus/internal/dispatch"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -123,22 +124,23 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 	if err = tx.WithContext(ctx).Create(&confirmation).Error; err != nil {
 		tx.Rollback()
 		log.ErrorLogger.Errorf("Error creating confirmation OTP: %v", err)
+		return err
 	}
 
-	// if err = dispatch.Publish(s.config.Dispatch, "user.signup", types.UserSignUpEvent{
-	// 	Username:         signUp.Username,
-	// 	Email:            signUp.Email,
-	// 	VerificationCode: confirmation.Pin, // Use actual PIN instead of hardcoded value
-	// }); err != nil {
-	// 	if ackErr, ok := err.(*dispatch.AckError); ok {
-	// 		log.ErrorLogger.Errorf("Message acknowledged with error: %v", ackErr.Error())
-	// 		tx.Rollback()
-	// 		return fmt.Errorf("email service error: %w", ackErr)
-	// 	}
-	// 	tx.Rollback()
-	// 	log.ErrorLogger.Errorf("Error dispatching signup event: %v", err)
-	// 	return fmt.Errorf("message dispatch error: %w", err)
-	// }
+	if err = dispatch.Publish(s.config.Dispatch, "user.signup", types.UserSignUpEvent{
+		Username:         signUp.Username,
+		Email:            signUp.Email,
+		VerificationCode: confirmation.Pin, // Use actual PIN instead of hardcoded value
+	}); err != nil {
+		if ackErr, ok := err.(*dispatch.AckError); ok {
+			log.ErrorLogger.Errorf("Message acknowledged with error: %v", ackErr.Error())
+			tx.Rollback()
+			return fmt.Errorf("email service error: %w", ackErr)
+		}
+		tx.Rollback()
+		log.ErrorLogger.Errorf("Error dispatching signup event: %v", err)
+		return fmt.Errorf("message dispatch error: %w", err)
+	}
 
 	if err := tx.Commit().Error; err != nil {
 		log.ErrorLogger.Errorf("Failed to commit transaction: %s", err.Error())

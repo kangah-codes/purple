@@ -4,6 +4,7 @@ import { View, Text, LinearGradient, TouchableOpacity } from '@/components/Share
 import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
+import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -38,13 +39,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                     />
                     <View className='flex flex-col space-y-2.5'>
                         <Text
-                            style={{ fontFamily: 'GramatikaBlack' }}
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
                             className='text-2xl text-black text-center'
                         >
                             Oops! Something went wrong!
                         </Text>
                         <Text
-                            style={{ fontFamily: 'GramatikaMedium' }}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-sm text-black text-center'
                         >
                             We've been alerted and are looking into this. Hang tight!
@@ -64,7 +65,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={{ fontFamily: 'GramatikaBold' }}
+                                style={GLOBAL_STYLESHEET.satoshiBold}
                                 className='text-base text-white tracking-tight'
                             >
                                 Try again

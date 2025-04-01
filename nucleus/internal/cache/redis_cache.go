@@ -112,11 +112,13 @@ func (r *RedisCache) InvalidateMultiple(ctx context.Context, patterns []string) 
 			keys = append(keys, iter.Val())
 		}
 		if err := iter.Err(); err != nil {
+			log.ErrorLogger.Errorf("failed to scan cache keys for pattern %s: %w", pattern, err)
 			return fmt.Errorf("failed to scan cache keys for pattern %s: %w", pattern, err)
 		}
 		if len(keys) > 0 {
 			err := r.Client.Del(ctx, keys...).Err()
 			if err != nil {
+				log.ErrorLogger.Errorf("failed to delete cache keys for pattern %s: %w", pattern, err)
 				return fmt.Errorf("failed to delete cache keys for pattern %s: %w", pattern, err)
 			}
 		}

@@ -29,23 +29,27 @@ func NewCachingAccountRepository(next AccountRepository, cfg *config.Config, key
 }
 
 func (r *CachingAccountRepository) Create(ctx context.Context, account *models.Account) error {
-	err := r.next.Create(ctx, account)
-	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
+	if err := r.next.Create(ctx, account); err != nil {
+		return err
 	}
-	return err
+
+	return r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
 }
 
 func (r *CachingAccountRepository) Update(ctx context.Context, tx *gorm.DB, account *models.Account) error {
-	err := r.next.Update(ctx, tx, account)
-	if err == nil {
-		r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
+	if err := r.next.Update(ctx, tx, account); err != nil {
+		return err
 	}
-	return err
+
+	return r.config.RedisCache.Invalidate(ctx, fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, account.User.ID.String()))
 }
 
 func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
-	userID := ctx.Value("userID").(uuid.UUID)
+	userID, ok := ctx.Value("userID").(uuid.UUID)
+	if !ok {
+		return nil, fmt.Errorf("invalid or missing userID in context")
+	}
+
 	key := fmt.Sprintf("%s:accounts:%s:%s", r.keyPrefix, userID.String(), accountID.String())
 	var cachedAccount models.Account
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedAccount)
@@ -58,11 +62,11 @@ func (r *CachingAccountRepository) FindByID(ctx context.Context, accountID uuid.
 
 	account, err := r.next.FindByID(ctx, accountID)
 	if err == nil && account != nil {
-		err := r.config.RedisCache.Set(ctx, key, account, r.expiration)
-		if err != nil {
-			log.ErrorLogger.Errorf("Error setting account in cache: %v", err)
+		if cacheErr := r.config.RedisCache.Set(ctx, key, account, r.expiration); cacheErr != nil {
+			log.ErrorLogger.Errorf("Error setting account in cache: %v", cacheErr)
 		}
 	}
+
 	return account, err
 }
 
@@ -84,8 +88,7 @@ func (r *CachingAccountRepository) FindByUserID(ctx context.Context, userID uuid
 
 	accounts, totalItems, err := r.next.FindByUserID(ctx, userID, page, limit)
 	if err == nil && len(accounts) > 0 {
-		err := r.config.RedisCache.Set(ctx, key, accounts, r.expiration)
-		if err != nil {
+		if err := r.config.RedisCache.Set(ctx, key, accounts, r.expiration); err != nil {
 			log.ErrorLogger.Errorf("Error setting paginated accounts in cache: %v", err)
 		}
 	}

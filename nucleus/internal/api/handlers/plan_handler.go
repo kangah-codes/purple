@@ -134,7 +134,6 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	planID, _ := c.Params.Get("planID")
-
 	userUUID := userID.(uuid.UUID)
 	planUUID, err := uuid.Parse(planID)
 	if err != nil {
@@ -142,7 +141,8 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 		return
 	}
 
-	planTransaction, err := h.planService.AddPlanTransaction(c.Request.Context(), userUUID, planUUID, transaction)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	planTransaction, err := h.planService.AddPlanTransaction(ctx, userUUID, planUUID, transaction)
 	if err != nil {
 		switch err {
 		case services.ErrPlanNotFound:

@@ -44,12 +44,14 @@ func (r *CachingUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 	}
 
 	user, err := r.next.FindByID(ctx, id)
-	if err == nil && user != nil {
-		err := r.config.RedisCache.Set(ctx, key, user, r.expiration)
-		if err != nil {
-			log.ErrorLogger.Errorf("Error setting user by ID in cache: %v", err)
-		}
+	if err != nil || user == nil {
+		return user, err
 	}
+
+	if err := r.config.RedisCache.Set(ctx, key, user, r.expiration); err != nil {
+		log.ErrorLogger.Errorf("Error setting user by ID in cache: %v", err)
+	}
+
 	return user, err
 }
 
@@ -62,26 +64,37 @@ func (r *CachingUserRepository) FindByUsernameAuth(ctx context.Context, username
 }
 
 func (r *CachingUserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
-	// obviously not efficient to store 2 entries for the same user
-	// have to implement some cache referencing, this works for now
-	key := fmt.Sprintf("%s:users:username:%s", r.keyPrefix, username)
-	var cachedUser models.User
-	found, err := r.config.RedisCache.Get(ctx, key, &cachedUser)
-	if err != nil {
-		log.ErrorLogger.Errorf("Error getting user by username from cache: %v", err)
+	usernameMappingKey := fmt.Sprintf("%s:username_to_id:%s", r.keyPrefix, username)
+	var userID string
+	mappingFound, mappingErr := r.config.RedisCache.Get(ctx, usernameMappingKey, &userID)
+	if mappingErr != nil {
+		log.ErrorLogger.Errorf("Error getting username mapping from cache: %v", mappingErr)
 	}
-	if found {
-		return &cachedUser, nil
+
+	// If mapping exists, use it to get the user by ID
+	if mappingFound && userID != "" {
+		id, err := uuid.Parse(userID)
+		if err == nil {
+			return r.FindByID(ctx, id)
+		}
+		log.ErrorLogger.Errorf("Error parsing cached user ID: %v", err)
 	}
 
 	user, err := r.next.FindByUsername(ctx, username)
-	if err == nil && user != nil {
-		err := r.config.RedisCache.Set(ctx, key, user, r.expiration)
-		if err != nil {
-			log.ErrorLogger.Errorf("Error setting user by username in cache: %v", err)
-		}
+	if err != nil || user == nil {
+		return user, err
 	}
-	return user, err
+
+	userKey := fmt.Sprintf("%s:users:%s", r.keyPrefix, user.ID.String())
+	if cacheErr := r.config.RedisCache.Set(ctx, userKey, user, r.expiration); cacheErr != nil {
+		log.ErrorLogger.Errorf("Error setting user in cache: %v", cacheErr)
+	}
+
+	if cacheErr := r.config.RedisCache.Set(ctx, usernameMappingKey, user.ID.String(), r.expiration); cacheErr != nil {
+		log.ErrorLogger.Errorf("Error setting username mapping in cache: %v", cacheErr)
+	}
+
+	return user, nil
 }
 
 func (r *CachingUserRepository) Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
@@ -93,7 +106,6 @@ func (r *CachingUserRepository) Update(ctx context.Context, user *models.User) e
 	if err == nil {
 		r.config.RedisCache.InvalidateMultiple(ctx, []string{
 			fmt.Sprintf("%s:users:%s", r.keyPrefix, user.ID.String()),
-			fmt.Sprintf("%s:users:username:%s", r.keyPrefix, user.Username),
 		})
 	}
 	return err
@@ -111,7 +123,6 @@ func (r *CachingUserRepository) Delete(ctx context.Context, tx *gorm.DB, id uuid
 
 	r.config.RedisCache.InvalidateMultiple(ctx, []string{
 		fmt.Sprintf("%s:users:%s", r.keyPrefix, user.ID.String()),
-		fmt.Sprintf("%s:users:username:%s", r.keyPrefix, user.Username),
 		fmt.Sprintf("%s:accounts:%s:*", r.keyPrefix, user.ID.String()),
 		fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, user.ID.String()),
 		fmt.Sprintf("%s:plans:%s:*", r.keyPrefix, user.ID.String()),

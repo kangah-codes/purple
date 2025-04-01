@@ -47,14 +47,26 @@ func (r *CachingPlanRepository) Create(ctx context.Context, plan *models.Plan) e
 }
 
 func (r *CachingPlanRepository) Update(ctx context.Context, tx *gorm.DB, plan *models.Plan) error {
-	err := r.next.Update(ctx, tx, plan)
-	if err == nil {
-		r.config.RedisCache.InvalidateMultiple(ctx, []string{
-			fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, plan.User.ID.String(), plan.ID.String()),
-			fmt.Sprintf("%s:users:%s", r.keyPrefix, plan.User.ID.String()),
-		})
+	if err := r.next.Update(ctx, tx, plan); err != nil {
+		return err
 	}
-	return err
+
+	userID, ok := ctx.Value("userID").(uuid.UUID)
+	if !ok {
+		return fmt.Errorf("invalid or missing userID in context")
+	}
+
+	cacheKeys := []string{
+		fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, userID.String(), plan.ID.String()),
+		fmt.Sprintf("%s:users:%s", r.keyPrefix, userID.String()),
+	}
+
+	if err := r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys); err != nil {
+		log.ErrorLogger.Errorf("Failed to invalidate cache keys: %v", cacheKeys)
+		return err
+	}
+
+	return nil
 }
 
 func (r *CachingPlanRepository) FindByID(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {

@@ -3,96 +3,9 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
-	"nucleus/internal/models"
-	"time"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
-
-func GenerateTokenPair(userID uuid.UUID) (models.TokenPair, error) {
-	// Generate access token
-	db := GetDB()
-	accessToken := jwt.New(jwt.SigningMethodHS256)
-	accessClaims := accessToken.Claims.(jwt.MapClaims)
-	accessClaims["user_id"] = userID
-	accessClaims["exp"] = time.Now().Add(time.Minute * 15).Unix() // Short-lived
-
-	accessTokenString, err := accessToken.SignedString([]byte("your_access_token_secret"))
-	if err != nil {
-		return models.TokenPair{}, err
-	}
-
-	session := models.Session{
-		UserID:    userID,
-		Token:     accessTokenString,
-		ExpiresAt: time.Now().Add(time.Minute * 15),
-	}
-	sessionTokenResult := db.Create(&session)
-
-	if sessionTokenResult.Error != nil {
-		return models.TokenPair{}, sessionTokenResult.Error
-	}
-
-	return models.TokenPair{
-		AccessToken: session,
-	}, nil
-}
-
-func RefreshTokens(refreshToken string) (models.TokenPair, error) {
-	// Validate refresh token
-	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (any, error) {
-		return []byte("your_refresh_token_secret"), nil
-	})
-
-	if err != nil || !token.Valid {
-		return models.TokenPair{}, err
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	userID := claims["user_id"].(uuid.UUID)
-
-	// Generate new token pair
-	return GenerateTokenPair(userID)
-}
-
-func ValidateSessionToken(db *gorm.DB, token string) (models.Session, error) {
-	var session models.Session
-	if err := db.Where("token = ? AND expires_at > ?", token, time.Now()).First(&session).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Session{}, errors.New("invalid or expired session token")
-		}
-		return models.Session{}, err
-	}
-
-	return session, nil
-}
-
-func ValidateRefreshToken(db *gorm.DB, token string) (*models.RefreshToken, error) {
-	var refreshToken models.RefreshToken
-	if err := db.Where("token = ? AND is_revoked = ? AND expires_at > ?", token, false, time.Now()).First(&refreshToken).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("invalid or expired refresh token")
-		}
-		return nil, err
-	}
-	return &refreshToken, nil
-}
-
-func RevokeRefreshToken(db *gorm.DB, token string) error {
-	return db.Model(&models.RefreshToken{}).Where("token = ?", token).Update("is_revoked", true).Error
-}
-
-func RevokeAllUserTokens(db *gorm.DB, userID int64) error {
-	return db.Model(&models.RefreshToken{}).Where("user_id = ?", userID).Update("is_revoked", true).Error
-}
-
-func CleanExpiredTokens(db *gorm.DB) error {
-	return db.Where("expires_at < ?", time.Now()).Delete(&models.RefreshToken{}).Error
-}
 
 func HashPassword(pw string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)

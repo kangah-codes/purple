@@ -49,7 +49,7 @@ export default function SignUpScreen() {
             username: '',
         },
     });
-    const { mutate, isLoading } = useCheckUsername();
+    const { mutate } = useCheckUsername();
     const { mutate: signUpMutate, isLoading: signUpLoading } = useSignUp();
     const checkUsername = (loginInformation: { username: string }) => {
         mutate(loginInformation, {
@@ -70,6 +70,8 @@ export default function SignUpScreen() {
             },
         });
     };
+
+    console.log(errors);
 
     const signUp = (data: SignUpScreenData) => {
         Keyboard.dismiss();

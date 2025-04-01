@@ -30,7 +30,6 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 
 	createTransaction := types.CreateTransactionDTO{}
 	userID, _ := c.Get("userID")
-
 	if err := c.ShouldBindJSON(&createTransaction); err != nil {
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
 		return
@@ -54,23 +53,17 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 
 func (h *TransactionHandler) FetchTransactions(c *gin.Context) {
 	userID, _ := c.Get("userID")
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-	pageSize, err := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	if err != nil || pageSize < 1 {
-		pageSize = 10
-	}
-
-	// TODO: find a better way to extract query params
 	accountID := c.Query("accountID")
-
+	page, _ := strconv.Atoi(c.Query("page"))
+	pageSize, _ := strconv.Atoi(c.Query("page_size"))
 	transactionQuery := &repositories.TransactionQuery{
-		AccountID: accountID,
+		Page:  page,
+		Limit: pageSize,
 	}
-
-	accounts, totalItems, err := h.transactionService.FetchPaginatedTransactions(c.Request.Context(), userID.(uuid.UUID), transactionQuery, page, pageSize)
+	if accountID != "" {
+		transactionQuery.AccountID = &accountID
+	}
+	accounts, totalItems, err := h.transactionService.FetchPaginatedTransactions(c.Request.Context(), userID.(uuid.UUID), transactionQuery)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch transactions", Data: nil})

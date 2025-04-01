@@ -155,6 +155,6 @@ func (s *TransactionService) DeleteByUserID(ctx context.Context, tx *gorm.DB, us
 	return s.transactionRepo.DeleteByUserID(ctx, tx, userID)
 }
 
-func (s *TransactionService) FetchPaginatedTransactions(ctx context.Context, userID uuid.UUID, query *repositories.TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
-	return s.transactionRepo.FindByUserID(ctx, userID, *query, page, limit)
+func (s *TransactionService) FetchPaginatedTransactions(ctx context.Context, userID uuid.UUID, query *repositories.TransactionQuery) ([]models.Transaction, int64, error) {
+	return s.transactionRepo.FindByUserID(ctx, userID, *query)
 }

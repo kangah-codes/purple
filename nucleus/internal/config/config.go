@@ -201,7 +201,7 @@ func (c *Config) InitialiseRedisCache() {
 	c.RedisCache = &cache.RedisCache{
 		Client: c.Redis,
 		Options: cache.RedisCacheOptions{
-			Encrypt:    true,
+			Encrypt:    false,
 			EncryptKey: []byte(c.Env.EncryptionKey),
 		},
 	}

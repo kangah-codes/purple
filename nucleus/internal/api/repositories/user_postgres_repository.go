@@ -47,7 +47,7 @@ func (r *PostgresUserRepository) FindByUsernameOrEmail(ctx context.Context, user
 
 func (r *PostgresUserRepository) FindByUsernameAuth(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).Select("id, email, username, password").Where("username = ?", username).First(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Select("id, email, username, password").Where("username = ? AND activated = true", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 

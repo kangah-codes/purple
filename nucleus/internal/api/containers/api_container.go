@@ -21,6 +21,7 @@ type Container struct {
 	AuthService        *services.AuthService
 	AccountService     *services.AccountService
 	TransactionService *services.TransactionService
+	StatsService       *services.StatsService
 }
 
 func NewAPIContainer(cfg *config.Config) *Container {
@@ -44,6 +45,7 @@ func NewAPIContainer(cfg *config.Config) *Container {
 	planService := services.NewPlanService(cachePlanRepo, cacheTransactionRepo, cacheAccountRepo, cfg)
 	transactionService := services.NewTransactionService(cacheTransactionRepo, cacheAccountRepo, cfg)
 	authService := services.NewAuthService(cacheAuthRepo, cacheUserRepo, cfg)
+	statsService := services.NewStatsService(planRepo, transactionRepo, cfg)
 
 	return &Container{
 		// repos
@@ -59,5 +61,6 @@ func NewAPIContainer(cfg *config.Config) *Container {
 		PlanService:        planService,
 		TransactionService: transactionService,
 		AuthService:        authService,
+		StatsService:       statsService,
 	}
 }

@@ -97,7 +97,7 @@ func RegisterRoutes(r *gin.Engine, container *containers.Container) {
 	routes.RegisterPlanRoutes(v1, container)
 	routes.RegisterTransactionRoutes(v1, container)
 	routes.RegisterUtilRoutes(v1)
-	routes.RegisterStatsRoutes(v1)
+	routes.RegisterStatsRoutes(v1, container)
 }
 
 func setupGracefulShutdown(cancel context.CancelFunc, cfg *config.Config) {

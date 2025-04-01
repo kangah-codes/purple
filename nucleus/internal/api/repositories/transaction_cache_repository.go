@@ -22,12 +22,14 @@ type CachingTransactionRepository struct {
 }
 
 type TransactionQuery struct {
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
-	Category  string `json:"category"`
-	MinAmount int    `json:"min_amount"`
-	MaxAmount int    `json:"max_amount"`
-	AccountID string `json:"account_id"`
+	StartDate *string `json:"start_date,omitempty"`
+	EndDate   *string `json:"end_date,omitempty"`
+	Category  *string `json:"category,omitempty"`
+	MinAmount *int    `json:"min_amount,omitempty"`
+	MaxAmount *int    `json:"max_amount,omitempty"`
+	AccountID *string `json:"account_id,omitempty"`
+	Page      int     `json:"page"`
+	Limit     int     `json:"limit"`
 }
 
 func NewCachingTransactionRepository(next TransactionRepository, cfg *config.Config, keyPrefix string, expiration time.Duration) *CachingTransactionRepository {
@@ -41,18 +43,18 @@ func NewCachingTransactionRepository(next TransactionRepository, cfg *config.Con
 
 func (r *CachingTransactionRepository) Create(ctx context.Context, tx *gorm.DB, transaction *models.Transaction) error {
 	err := r.next.Create(ctx, tx, transaction)
+	userID := ctx.Value("userID").(uuid.UUID).String()
 	if err == nil {
 		// invalidate user transactions
-		cacheKeys := []string{fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, transaction.User.ID.String())}
+		cacheKeys := []string{fmt.Sprintf("%s:transactions:%s:*", r.keyPrefix, userID)}
 		if transaction.PlanId != nil {
 			// if transaction is associated with a plan, clear that plan from cache
-			cacheKeys = append(cacheKeys, fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, transaction.User.ID.String(), string(transaction.PlanId.String())))
+			cacheKeys = append(cacheKeys, fmt.Sprintf("%s:plans:%s:%s", r.keyPrefix, userID, string(transaction.PlanId.String())))
 		}
 		// clear account cache associated with the transaction
-		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:accounts:%s:%s", r.keyPrefix, transaction.User.ID.String(), transaction.Account.ID.String()))
+		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:accounts:%s:%s", r.keyPrefix, userID, transaction.AccountId.String()))
 		// clear user cache
-		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:users:%s", r.keyPrefix, transaction.User.ID.String()))
-		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:users:username:%s", r.keyPrefix, transaction.User.Username))
+		cacheKeys = append(cacheKeys, fmt.Sprintf("%s:users:%s", r.keyPrefix, userID))
 
 		r.config.RedisCache.InvalidateMultiple(ctx, cacheKeys)
 	}
@@ -82,8 +84,8 @@ func (r *CachingTransactionRepository) FindByID(ctx context.Context, transaction
 	return transaction, err
 }
 
-func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery, page int, limit int) ([]models.Transaction, int64, error) {
-	key := fmt.Sprintf("%s:transactions:%s:page-%d:limit-%d", r.keyPrefix, userID.String(), page, limit)
+func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID uuid.UUID, query TransactionQuery) ([]models.Transaction, int64, error) {
+	key := fmt.Sprintf("%s:transactions:%s:page-%d:limit-%d", r.keyPrefix, userID.String(), query.Page, query.Limit)
 	var cachedTransactions []models.Transaction
 	found, err := r.config.RedisCache.Get(ctx, key, &cachedTransactions)
 
@@ -98,7 +100,7 @@ func (r *CachingTransactionRepository) FindByUserID(ctx context.Context, userID 
 		return cachedTransactions, totalItems, nil
 	}
 
-	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, query, page, limit)
+	transactions, totalItems, err := r.next.FindByUserID(ctx, userID, query)
 	if err == nil && len(transactions) > 0 {
 		err := r.config.RedisCache.Set(ctx, key, transactions, r.expiration)
 		if err != nil {
@@ -112,6 +114,10 @@ func (r *CachingTransactionRepository) CountByUserID(ctx context.Context, userID
 	return r.next.CountByUserID(ctx, userID)
 }
 
+func (r *CachingTransactionRepository) CountByQuery(ctx context.Context, userID uuid.UUID, query TransactionQuery) (int64, error) {
+	// TODO: implement caching
+	return r.next.CountByQuery(ctx, userID, query)
+}
 func (r *CachingTransactionRepository) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error {
 	err := r.next.DeleteByUserID(ctx, tx, userID)
 	if err != nil {
