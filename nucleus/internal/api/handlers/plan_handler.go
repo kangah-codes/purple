@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"math"
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
-	"nucleus/internal/utils"
 	"strconv"
 	"time"
 
@@ -58,7 +58,8 @@ func (h *PlanHandler) UpdatePlanBalance(c *gin.Context) {
 		return
 	}
 
-	plan, err := h.planService.UpdatePlanBalance(c.Request.Context(), planUUID, userID.(uuid.UUID), updatePlanBalance.Balance)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	plan, err := h.planService.UpdatePlan(ctx, planUUID, updatePlanBalance.Balance)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update plan balance", Data: nil})
@@ -105,13 +106,15 @@ func (h *PlanHandler) FetchUserPlans(c *gin.Context) {
 
 func (h *PlanHandler) DeletePlan(c *gin.Context) {
 	planID, _ := c.Params.Get("planID")
+	userID, _ := c.Get("userID")
 	parsedPlanID, err := uuid.Parse(planID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
 		return
 	}
 
-	err = h.planService.DeletePlan(c.Request.Context(), parsedPlanID)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	err = h.planService.DeletePlan(ctx, parsedPlanID)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error deleting plan: %v", err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Error deleting plan"})
@@ -131,7 +134,6 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	planID, _ := c.Params.Get("planID")
-
 	userUUID := userID.(uuid.UUID)
 	planUUID, err := uuid.Parse(planID)
 	if err != nil {
@@ -139,7 +141,8 @@ func (h *PlanHandler) AddPlanTransaction(c *gin.Context) {
 		return
 	}
 
-	planTransaction, err := h.planService.AddPlanTransaction(c.Request.Context(), userUUID, planUUID, transaction)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	planTransaction, err := h.planService.AddPlanTransaction(ctx, userUUID, planUUID, transaction)
 	if err != nil {
 		switch err {
 		case services.ErrPlanNotFound:
@@ -168,7 +171,8 @@ func (h *PlanHandler) FetchPlan(c *gin.Context) {
 		return
 	}
 
-	plan, err := h.planService.FetchPlan(c.Request.Context(), parsedPlanID, userID.(uuid.UUID))
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	plan, err := h.planService.FetchPlan(ctx, parsedPlanID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, types.Response{Status: http.StatusNotFound, Message: "Plan not found"})
@@ -182,8 +186,8 @@ func (h *PlanHandler) FetchPlan(c *gin.Context) {
 }
 
 // TODO: come back to this
-func CalculatePlanOnTrack(c *gin.Context) {
-	db := utils.GetDB()
+// fuck, why tf did i write this ugly code
+func (h *PlanHandler) CalculatePlanOnTrack(c *gin.Context) {
 	planID := c.Param("planID")
 	userID, exists := c.Get("userID")
 
@@ -199,7 +203,7 @@ func CalculatePlanOnTrack(c *gin.Context) {
 	}
 
 	plan := models.Plan{}
-	result := db.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+	result := h.planService.Config.DB.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at desc")
 	}).Where("id = ?", planID).First(&plan)
 

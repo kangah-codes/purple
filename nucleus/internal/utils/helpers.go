@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"nucleus/internal/models"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -142,4 +144,16 @@ func CalculateIncomeAndExpenseByCurrency(transactions []models.Transaction) map[
 	}
 
 	return result
+}
+
+func GenerateOTP(digits int) string {
+	var otp strings.Builder
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for range digits {
+		otp.WriteByte(charset[r.Intn(len(charset))])
+	}
+
+	return otp.String()
 }

@@ -17,18 +17,12 @@ import { useMonthlyStats, useStatsStore } from '../hooks';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { groupBy } from '@/lib/utils/helpers';
 import { getCurrentMonthYear } from '../utils';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 const currentMonthYear = getCurrentMonthYear();
+const now = new Date();
 
 export default function StatsScreen() {
-    // const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    // const renderItem = useCallback(
-    //     ({ item }: { item: any }) => (
-    //         <TransactionHistoryCard showTitle={false} data={item} onPress={() => {}} />
-    //     ),
-    //     [],
-    // );
-
     const { transactions } = useTransactionStore();
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
     const renderBreakdownItem = useCallback(
@@ -46,6 +40,15 @@ export default function StatsScreen() {
     const { sessionData } = useAuth();
     const { isLoading, refetch, isFetching, data } = useMonthlyStats({
         sessionData: sessionData as SessionData,
+        requestQuery: {
+            start_date: format(startOfMonth(now), 'dd/MM/yy'),
+            end_date: format(now, 'dd/MM/yy'),
+        },
+        options: {
+            onSuccess: (data) => {
+                console.log('GOT ', data);
+            },
+        },
     });
 
     const groupedTransactions = useMemo(() => {

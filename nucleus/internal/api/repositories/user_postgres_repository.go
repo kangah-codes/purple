@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 
 	"github.com/google/uuid"
@@ -12,8 +13,8 @@ type PostgresUserRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
-	return &PostgresUserRepository{db: db}
+func NewPostgresUserRepository(cfg *config.Config) *PostgresUserRepository {
+	return &PostgresUserRepository{db: cfg.DB}
 }
 
 func (r *PostgresUserRepository) Create(ctx context.Context, tx *gorm.DB, user *models.User) error {
@@ -34,21 +35,19 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*m
 	return &user, nil
 }
 
-func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
-	err := r.db.WithContext(ctx).Where("username = ?", username).First(models.User{}).Error
-
-	switch err {
-	// if the record is not found the username is not taken
-	case gorm.ErrRecordNotFound:
-		return false, nil
-	default:
-		return true, err
+func (r *PostgresUserRepository) FindByUsernameOrEmail(ctx context.Context, username, email string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(ctx).
+		Where("username = ? OR email = ?", username, email).
+		First(&user).Error; err != nil {
+		return nil, err
 	}
+	return &user, nil
 }
 
 func (r *PostgresUserRepository) FindByUsernameAuth(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).Select("id, email, username, password").Where("username = ?", username).First(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Select("id, email, username, password").Where("username = ? AND activated = true", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -86,6 +85,39 @@ func (r *PostgresUserRepository) FindByUsername(ctx context.Context, username st
 	}
 
 	return &user, nil
+}
+
+func (r PostgresUserRepository) CheckAvailableUsernameExists(ctx context.Context, username string) (bool, error) {
+	var user models.User
+	err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
+
+	switch err {
+	// if the record is not found the username is not taken
+	case gorm.ErrRecordNotFound:
+		return false, nil
+	default:
+		return true, err
+	}
+}
+
+func (r *PostgresUserRepository) Activate(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
+	tx := r.db.Begin()
+
+	// update the user activated and delete all otps associated with user
+	user.Activated = true
+	user.ExpiresAt = nil
+
+	if err := tx.Save(user).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Where("user_id = ?", user.ID).Delete(confirmation).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *PostgresUserRepository) Update(ctx context.Context, user *models.User) error {

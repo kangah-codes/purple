@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"nucleus/internal/cache"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -11,22 +11,22 @@ import (
 
 type CachingAuthRepository struct {
 	next       AuthRepository
-	cache      cache.CacheRepository
 	keyPrefix  string
 	expiration time.Duration
+	config     *config.Config
 }
 
-func NewCachingAuthRepository(next AuthRepository, CacheRepository cache.CacheRepository, keyPrefix string, expiration time.Duration) *CachingAuthRepository {
+func NewCachingAuthRepository(next AuthRepository, cfg *config.Config, keyPrefix string, expiration time.Duration) *CachingAuthRepository {
 	return &CachingAuthRepository{
 		next:       next,
-		cache:      CacheRepository,
 		keyPrefix:  keyPrefix,
 		expiration: expiration,
+		config:     cfg,
 	}
 }
 
 func (r *CachingAuthRepository) buildUserAuthCacheKey(token string) string {
-	return r.cache.BuildKey(r.keyPrefix, utils.HashToken(token))
+	return r.config.RedisCache.BuildKey(r.keyPrefix, utils.HashToken(token))
 }
 
 func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Session) error {
@@ -38,7 +38,7 @@ func (r *CachingAuthRepository) SignIn(ctx context.Context, session *models.Sess
 	}
 
 	cacheKey := r.buildUserAuthCacheKey(session.Token)
-	err = r.cache.Set(ctx, cacheKey, session, time.Minute*5)
+	err = r.config.RedisCache.Set(ctx, cacheKey, session, time.Minute*5)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error setting user session in cache: %v", err)
 	}
@@ -69,7 +69,7 @@ func (r *CachingAuthRepository) Clear(ctx context.Context, token string) error {
 func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.Session, error) {
 	cacheKey := r.buildUserAuthCacheKey(token)
 	var cachedSession models.Session
-	found, err := r.cache.Get(ctx, cacheKey, &cachedSession)
+	found, err := r.config.RedisCache.Get(ctx, cacheKey, &cachedSession)
 	if err != nil {
 		log.ErrorLogger.Errorf("Error getting session from cache: %v", err)
 	}
@@ -79,7 +79,7 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 
 	session, err := r.next.Get(ctx, token)
 	if err == nil && session != nil {
-		err := r.cache.Set(ctx, cacheKey, session, r.expiration)
+		err := r.config.RedisCache.Set(ctx, cacheKey, session, r.expiration)
 		if err != nil {
 			log.ErrorLogger.Errorf("Error setting session in cache: %v", err)
 		}
@@ -88,10 +88,6 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	return session, err
 }
 
-func (r *CachingAuthRepository) GenerateResetPin(ctx context.Context, resetPin *models.PasswordResetPin) error {
-	return r.next.GenerateResetPin(ctx, resetPin)
-}
-
 func (r *CachingAuthRepository) invalidateUserAuthCache(ctx context.Context, token string) {
-	r.cache.Invalidate(ctx, r.cache.BuildKey(r.keyPrefix, utils.HashToken(token)))
+	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, utils.HashToken(token)))
 }

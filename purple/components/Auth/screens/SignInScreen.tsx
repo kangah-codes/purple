@@ -241,7 +241,7 @@ export default function SignInScreen() {
                                 <View className='flex flex-row justify-between'>
                                     <TouchableOpacity onPress={() => router.push('/auth/otp')}>
                                         <Text
-                                            style={GLOBAL_STYLESHEET.satoshiMedium}
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
                                             className='text-xs text-purple-500'
                                         >
                                             Forgot your password?
@@ -252,7 +252,7 @@ export default function SignInScreen() {
                                         onPress={() => router.replace('/auth/sign-up')}
                                     >
                                         <Text
-                                            style={GLOBAL_STYLESHEET.satoshiMedium}
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
                                             className='text-xs text-purple-500'
                                         >
                                             New here? Sign Up

@@ -1,9 +1,11 @@
 package repositories
 
+import "context"
+
 type EmailInformation struct {
 	Recipient struct {
-		email string
-		name  string
+		Email string
+		Name  string
 	}
 	Subject   string
 	Template  string
@@ -11,5 +13,5 @@ type EmailInformation struct {
 }
 
 type EmailRepository interface {
-	SendEmail(information EmailInformation) error
+	SendEmail(ctx context.Context, information EmailInformation) (string, error)
 }

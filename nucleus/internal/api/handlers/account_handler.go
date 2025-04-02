@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
@@ -62,7 +63,8 @@ func (h *AccountHandler) UpdateUserAccount(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountService.UpdateAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID), updateAccount)
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	account, err := h.accountService.UpdateAccount(ctx, parsedAccountID, updateAccount)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update account", Data: nil})
@@ -82,7 +84,8 @@ func (h *AccountHandler) FetchUserAccount(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountService.FetchAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID))
+	ctx := context.WithValue(c.Request.Context(), "userID", userID)
+	account, err := h.accountService.FetchAccount(ctx, parsedAccountID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(404, types.Response{Status: 404, Message: "Account not found"})
@@ -133,7 +136,6 @@ func (h *AccountHandler) FetchUserAccounts(c *gin.Context) {
 
 func (h *AccountHandler) DeleteUserAccount(c *gin.Context) {
 	accountID := c.Param("id")
-	userID, _ := c.Get("userID")
 
 	parsedAccountID, err := uuid.Parse(accountID)
 	if err != nil {
@@ -141,7 +143,7 @@ func (h *AccountHandler) DeleteUserAccount(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountService.DeleteAccount(c.Request.Context(), parsedAccountID, userID.(uuid.UUID))
+	account, err := h.accountService.DeleteAccount(c.Request.Context(), parsedAccountID)
 	if err != nil {
 		log.ErrorLogger.Errorf("Failed to delete account: %v", err)
 

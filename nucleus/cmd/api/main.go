@@ -2,30 +2,25 @@ package main
 
 import (
 	"context"
-	"nucleus/internal/cache"
+	"nucleus/internal/bootstrap"
 	"nucleus/internal/log"
 )
 
 func main() {
-	// initialise core components
-	SetupLogger()
-	SetupValidator()
-	LoadEnvironment()
-
-	// initialise database and cache
-	db := SetupDatabase()
-	redisCache := cache.NewRedisCache()
+	cfg := bootstrap.Init()
 
 	// setup background workers
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	SetupWorkers(ctx, db, cache.RedisClient)
+
+	// setup workers
+	SetupWorkers(ctx, cfg)
 
 	// setup API server
-	r := SetupRouter(db, redisCache)
+	r := SetupRouter(cfg)
 
 	// setup shutdown handler
-	setupGracefulShutdown(cancel)
+	setupGracefulShutdown(cancel, cfg)
 
 	// start server
 	log.InfoLogger.Printf("Starting server on port 8080")

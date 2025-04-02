@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 
 	"github.com/google/uuid"
@@ -12,8 +13,8 @@ type PostgresAccountRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresAccountRepository(db *gorm.DB) *PostgresAccountRepository {
-	return &PostgresAccountRepository{db: db}
+func NewPostgresAccountRepository(cfg *config.Config) *PostgresAccountRepository {
+	return &PostgresAccountRepository{db: cfg.DB}
 }
 
 func (r *PostgresAccountRepository) Create(ctx context.Context, account *models.Account) error {
@@ -24,11 +25,11 @@ func (r *PostgresAccountRepository) Update(ctx context.Context, tx *gorm.DB, acc
 	return tx.WithContext(ctx).Save(account).Error
 }
 
-func (r *PostgresAccountRepository) FindByIDAndUserID(ctx context.Context, accountID uuid.UUID, userID uuid.UUID) (*models.Account, error) {
+func (r *PostgresAccountRepository) FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error) {
 	var account models.Account
 	result := r.db.WithContext(ctx).Preload("Transactions", func(db *gorm.DB) *gorm.DB {
 		return db.Order("created_at desc")
-	}).Where("id = ? AND user_id = ?", accountID, userID).First(&account)
+	}).Where("id = ?", accountID).First(&account)
 	if result.Error != nil {
 		return nil, result.Error
 	}

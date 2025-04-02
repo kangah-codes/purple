@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 	"time"
 
@@ -12,8 +13,8 @@ type PostgresAuthRepository struct {
 	db *gorm.DB
 }
 
-func NewPostgresAuthRepository(db *gorm.DB) *PostgresAuthRepository {
-	return &PostgresAuthRepository{db: db}
+func NewPostgresAuthRepository(cfg *config.Config) *PostgresAuthRepository {
+	return &PostgresAuthRepository{db: cfg.DB}
 }
 
 func (r *PostgresAuthRepository) SignIn(ctx context.Context, session *models.Session) error {
@@ -26,10 +27,6 @@ func (r *PostgresAuthRepository) SignOut(ctx context.Context, session *models.Se
 
 func (r *PostgresAuthRepository) Clear(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&models.Session{}).Error
-}
-
-func (r *PostgresAuthRepository) GenerateResetPin(ctx context.Context, resetPin *models.PasswordResetPin) error {
-	return r.db.WithContext(ctx).Create(resetPin).Error
 }
 
 func (r PostgresAuthRepository) Get(ctx context.Context, token string) (*models.Session, error) {

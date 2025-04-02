@@ -28,6 +28,10 @@ export type UserPreferences = {
     ID: string;
 };
 
+export type SignUpResponse = {
+    username: string;
+};
+
 export type SessionDataResponse = {
     access_token: string;
     access_token_expires_at: string;

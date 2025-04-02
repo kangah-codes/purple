@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nucleus/internal/api/repositories"
+	"nucleus/internal/config"
 	"nucleus/internal/models"
 	"time"
 
@@ -14,13 +15,13 @@ import (
 type UserService struct {
 	userRepo repositories.UserRepository
 	authRepo repositories.AuthRepository
-	db       *gorm.DB
+	Config   *config.Config
 }
 
 var ErrUserAlreadyExists = errors.New("user already exists with these details")
 
-func NewUserService(userRepo repositories.UserRepository, authRepo repositories.AuthRepository, db *gorm.DB) *UserService {
-	return &UserService{userRepo: userRepo, authRepo: authRepo, db: db}
+func NewUserService(userRepo repositories.UserRepository, authRepo repositories.AuthRepository, cfg *config.Config) *UserService {
+	return &UserService{userRepo: userRepo, authRepo: authRepo, Config: cfg}
 }
 
 func (s *UserService) FetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
@@ -34,6 +35,10 @@ func (s *UserService) FetchUserByUsername(ctx context.Context, username string) 
 func (s *UserService) UpdateUser(ctx context.Context, user *models.User) error {
 	user.UpdatedAt = time.Now()
 	return s.userRepo.Update(ctx, user)
+}
+
+func (s *UserService) ActivateUser(ctx context.Context, user *models.User, confirmation *models.AccountConfirmationPin) error {
+	return s.userRepo.Activate(ctx, user, confirmation)
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, tx *gorm.DB, id uuid.UUID) error {

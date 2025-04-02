@@ -44,26 +44,6 @@ function PlanScreen(props: PlanScreenProps) {
             },
         },
     });
-    // const {
-    //     data: planStatus,
-    //     isLoading: planStatusLoading,
-    //     refetch: refetchPlanStatus,
-    //     isFetching: planStatusFetching,
-    // } = usePlanStatus({
-    //     sessionData: sessionData as SessionData,
-    //     planID: id as string,
-    //     options: {
-    //         onError: () => {
-    //             Toast.show({
-    //                 type: 'error',
-    //                 props: {
-    //                     text1: 'Error!',
-    //                     text2: "We couldn't fetch your transactions",
-    //                 },
-    //             });
-    //         },
-    //     },
-    // });
 
     useEffect(() => {
         if (data) {

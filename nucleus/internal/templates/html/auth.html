@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Purple Email Verification</title>
+        <style>
+            body {
+                background-color: #fff;
+                color: #212121;
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                padding: 20px;
+                margin: 0 auto;
+                background-color: #eee;
+                max-width: 600px;
+            }
+            .image-section {
+                background-color: #a855f7;
+                text-align: center;
+                padding: 20px 0;
+            }
+            .image-section img {
+                width: 45px;
+                height: 45px;
+            }
+            .upper-section {
+                padding: 25px 35px;
+                background-color: #fff;
+            }
+            h1 {
+                color: #333;
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+            .text {
+                color: #333;
+                font-size: 14px;
+                margin: 24px 0;
+            }
+            .verification-section {
+                text-align: center;
+                margin-top: 20px;
+            }
+            .verify-text {
+                font-weight: bold;
+            }
+            .code-text {
+                font-weight: bold;
+                font-size: 36px;
+                margin: 10px 0;
+            }
+            .title-text {
+                font-weight: bold;
+                font-size: 36px;
+                margin: 10px 0;
+                color: #fff;
+            }
+            .validity-text {
+                margin: 0;
+            }
+            .footer-text {
+                font-size: 12px;
+                padding: 0 20px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="image-section">
+                <h1 class="title-text">Purple</h1>
+            </div>
+            <div class="upper-section">
+                <h1>Verify your email address</h1>
+                <p class="text">
+                    Hi {{.Username}}!, thanks for creating a Purple Account. We
+                    want to make sure it's really you. Please enter the
+                    following verification code when prompted. If you don’t want
+                    to create an account, you can ignore this message.
+                </p>
+                <div class="verification-section">
+                    <p class="verify-text">Verification code</p>
+                    <p class="code-text">{{.VerificationCode}}</p>
+                    <p class="validity-text">
+                        (This code is valid for 24 hours, after which your
+                        account will be deleted if not verified.)
+                    </p>
+                </div>
+            </div>
+            <p class="footer-text">&copy; 2025, Purple.</p>
+        </div>
+    </body>
+</html>

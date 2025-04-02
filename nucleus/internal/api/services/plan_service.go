@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nucleus/internal/api/repositories"
 	"nucleus/internal/api/types"
+	"nucleus/internal/config"
 	"nucleus/internal/log"
 	"nucleus/internal/models"
 	"nucleus/internal/utils"
@@ -18,13 +19,17 @@ type PlanService struct {
 	planRepo        repositories.PlanRepository
 	transactionRepo repositories.TransactionRepository
 	accountRepo     repositories.AccountRepository
-	db              *gorm.DB
+	config          *config.Config
+	// TODO: don't expose config outside service
+	// this is just a temp hack to prevent build errors, will refactor the code
+	Config *config.Config
 }
 
-func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, db *gorm.DB) *PlanService {
-	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, db: db}
+func NewPlanService(planRepo repositories.PlanRepository, transactionRepo repositories.TransactionRepository, accountRepo repositories.AccountRepository, cfg *config.Config) *PlanService {
+	return &PlanService{planRepo: planRepo, transactionRepo: transactionRepo, accountRepo: accountRepo, config: cfg, Config: cfg}
 }
 
+// TODO: convert these to use pointers
 type PlanQuery struct {
 	Name      string `json:"name"`
 	StartDate string `json:"start_date"`
@@ -59,7 +64,7 @@ func (s *PlanService) CreatePlan(ctx context.Context, payload types.CreatePlanDT
 	return &plan, nil
 }
 
-func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, userID uuid.UUID, balance float64) (*models.Plan, error) {
+func (s *PlanService) UpdatePlan(ctx context.Context, planID uuid.UUID, balance float64) (*models.Plan, error) {
 	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
 		return nil, err
@@ -69,7 +74,7 @@ func (s *PlanService) UpdatePlanBalance(ctx context.Context, planID uuid.UUID, u
 	}
 
 	plan.Balance = balance
-	if err := s.planRepo.Update(ctx, s.db, plan); err != nil {
+	if err := s.planRepo.Update(ctx, s.config.DB, plan); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +86,7 @@ func (s *PlanService) FetchPaginatedPlans(ctx context.Context, userID uuid.UUID,
 	return plans, int(totalItems), err
 }
 
-func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID, userID uuid.UUID) (*models.Plan, error) {
+func (s *PlanService) FetchPlan(ctx context.Context, planID uuid.UUID) (*models.Plan, error) {
 	return s.planRepo.FindByID(ctx, planID)
 }
 
@@ -94,7 +99,7 @@ func (s *PlanService) DeletePlan(ctx context.Context, planID uuid.UUID) error {
 		return fmt.Errorf("plan not found")
 	}
 
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -129,52 +134,56 @@ func (s *PlanService) DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uu
 	return nil
 }
 
-func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (*models.Transaction, error) {
+func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, planID uuid.UUID, createTransaction types.CreatePlanTransaction) (retTx *models.Transaction, retErr error) {
 	var account models.Account
-	tx := s.db.Begin()
+	tx := s.config.DB.Begin()
 	if tx.Error != nil {
 		log.ErrorLogger.Errorf("Error starting transaction: %v", tx.Error)
-		return nil, fmt.Errorf("error starting database transaction: %v", tx.Error)
+		retErr = fmt.Errorf("error starting database transaction: %v", tx.Error)
+		return
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 			log.ErrorLogger.Errorf("Failed to add plan transaction: %v", r)
+			retErr = fmt.Errorf("failed to add plan transaction")
+		} else if retErr != nil {
+			tx.Rollback()
 		}
 	}()
 
 	plan, err := s.planRepo.FindByID(ctx, planID)
 	if err != nil {
-		tx.Rollback()
-		return nil, ErrPlanNotFound
+		retErr = ErrPlanNotFound
+		return
 	}
 	if plan == nil {
-		tx.Rollback()
-		return nil, ErrPlanNotFound
+		retErr = ErrPlanNotFound
+		return
 	}
 
 	// update plan balance
 	plan.Balance += createTransaction.Amount
 
 	// debit account
-	acc, err := s.accountRepo.FindByIDAndUserID(ctx, createTransaction.DebitAccountId, userID)
+	acc, err := s.accountRepo.FindByID(ctx, createTransaction.DebitAccountId)
 	if err != nil {
-		tx.Rollback()
-		return nil, ErrAccountNotFound
+		retErr = ErrAccountNotFound
+		return
 	}
 	account = *acc
 
 	if acc.Currency != plan.Currency {
-		tx.Rollback()
-		return nil, ErrCurrencyMismatch
+		retErr = ErrCurrencyMismatch
+		return
 	}
 
 	account.Balance -= createTransaction.Amount
 	if err := s.accountRepo.Update(ctx, tx, &account); err != nil {
-		tx.Rollback()
 		log.ErrorLogger.Errorf("Error updating account balance: %v", err)
-		return nil, fmt.Errorf("error updating account balance")
+		retErr = fmt.Errorf("error updating account balance")
+		return
 	}
 
 	var planEmoji string
@@ -194,25 +203,26 @@ func (s *PlanService) AddPlanTransaction(ctx context.Context, userID uuid.UUID, 
 		FromAccount: account.ID,
 		ToAccount:   uuid.Nil,
 		Currency:    account.Currency,
-		PlanId:      plan.ID,
+		PlanId:      &plan.ID,
 	}
 
 	if err := s.transactionRepo.Create(ctx, tx, &transaction); err != nil {
-		tx.Rollback()
-		return nil, err
+		retErr = err
+		return
 	}
 
 	err = s.planRepo.Update(ctx, tx, plan)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		retErr = err
+		return
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
 		log.ErrorLogger.Errorf("Error committing transaction: %v", err)
-		return nil, fmt.Errorf("error processing request: %v", err)
+		retErr = fmt.Errorf("error processing request: %v", err)
+		return
 	}
 
-	return &transaction, nil
+	retTx = &transaction
+	return
 }

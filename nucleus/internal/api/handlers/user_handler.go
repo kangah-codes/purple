@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"nucleus/internal/utils"
-	"strconv"
 
 	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
@@ -11,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -32,8 +29,8 @@ func NewUserHandler(userService *services.UserService, planService *services.Pla
 	}
 }
 
+// TODO: refactor all this
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	db := utils.GetDB()
 	userID := c.Param("id")
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
@@ -51,7 +48,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	tx := db.Begin()
+	tx := h.userService.Config.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -120,67 +117,67 @@ func (h *UserHandler) FetchUser(c *gin.Context) {
 }
 
 func (h *UserHandler) FetchUsers(c *gin.Context) {
-	db := utils.GetDB()
-	users := []models.User{}
+	// db := utils.GetDB()
+	// users := []models.User{}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	offset := (page - 1) * pageSize
+	// page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	// pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	// offset := (page - 1) * pageSize
 
-	var totalItems int64
-	db.Model(&models.User{}).Count(&totalItems)
+	// var totalItems int64
+	// db.Model(&models.User{}).Count(&totalItems)
 
-	result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc").Limit(5)
-	}).Preload("Plans", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at desc").Limit(5)
-	}).Limit(pageSize).Offset(offset).Find(&users)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch users"})
-		return
-	}
+	// result := db.Preload("Accounts").Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+	// 	return db.Order("created_at desc").Limit(5)
+	// }).Preload("Plans", func(db *gorm.DB) *gorm.DB {
+	// 	return db.Order("created_at desc").Limit(5)
+	// }).Limit(pageSize).Offset(offset).Find(&users)
+	// if result.Error != nil {
+	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch users"})
+	// 	return
+	// }
 
-	totalPages := int((totalItems + int64(pageSize) - 1) / int64(pageSize))
+	// totalPages := int((totalItems + int64(pageSize) - 1) / int64(pageSize))
 
-	c.JSON(200, types.Response{
-		Status:     200,
-		Message:    "Users fetched successfully",
-		Data:       users,
-		Page:       page,
-		PageSize:   pageSize,
-		TotalPages: totalPages,
-		TotalItems: int(totalItems),
-	})
+	// c.JSON(200, types.Response{
+	// 	Status:     200,
+	// 	Message:    "Users fetched successfully",
+	// 	Data:       users,
+	// 	Page:       page,
+	// 	PageSize:   pageSize,
+	// 	TotalPages: totalPages,
+	// 	TotalItems: int(totalItems),
+	// })
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-	db := utils.GetDB()
-	user := models.User{}
-	userID := c.Param("id")
+	// db := utils.GetDB()
+	// user := models.User{}
+	// userID := c.Param("id")
 
-	result := db.First(&user, userID)
-	if result.Error != nil {
-		c.JSON(404, types.Response{Status: 404, Message: "User not found"})
-		return
-	}
+	// result := db.First(&user, userID)
+	// if result.Error != nil {
+	// 	c.JSON(404, types.Response{Status: 404, Message: "User not found"})
+	// 	return
+	// }
 
-	update := types.UpdateUserAccountDTO{}
-	if err := c.ShouldBindJSON(&update); err != nil {
-		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
-		return
-	}
+	// update := types.UpdateUserAccountDTO{}
+	// if err := c.ShouldBindJSON(&update); err != nil {
+	// 	c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request"})
+	// 	return
+	// }
 
-	user.Username = update.Username
+	// user.Username = update.Username
 
-	result = db.Save(&user)
-	if result.Error != nil {
-		if result.Error == gorm.ErrDuplicatedKey {
-			c.JSON(400, types.Response{Status: http.StatusConflict, Message: "User already exists with these details"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update user"})
-		return
-	}
+	// result = db.Save(&user)
+	// if result.Error != nil {
+	// 	if result.Error == gorm.ErrDuplicatedKey {
+	// 		c.JSON(400, types.Response{Status: http.StatusConflict, Message: "User already exists with these details"})
+	// 		return
+	// 	}
+	// 	c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to update user"})
+	// 	return
+	// }
 
-	c.JSON(200, types.Response{Status: 200, Message: "User updated successfully", Data: user})
+	// c.JSON(200, types.Response{Status: 200, Message: "User updated successfully", Data: user})
 }

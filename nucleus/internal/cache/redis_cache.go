@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nucleus/internal/encryption"
 	"nucleus/internal/log"
-	"nucleus/internal/utils"
 	"strings"
 	"time"
 
@@ -14,13 +13,14 @@ import (
 )
 
 type RedisCacheOptions struct {
-	Encrypt bool
-	Logger  *log.Logger
+	Encrypt    bool
+	EncryptKey []byte
+	Logger     *log.Logger
 }
 
 type RedisCache struct {
-	client  *redis.Client
-	options RedisCacheOptions
+	Client  *redis.Client
+	Options RedisCacheOptions
 }
 
 const (
@@ -28,40 +28,14 @@ const (
 	CacheVersion = "v1"
 )
 
-var RedisClient *redis.Client
-
-func InitRedis() {
-	ctx := context.Background()
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     utils.EnvValue("REDIS_HOST", ""),
-		Password: utils.EnvValue("REDIS_PASSWORD", ""),
-		DB:       0,
-	})
-
-	_, err := RedisClient.Ping(ctx).Result()
-	if err != nil {
-		log.ErrorLogger.Errorf("Failed to connect to Redis: %v", err.Error())
-	} else {
-		log.InfoLogger.Println("Connected to Redis")
-	}
-}
-
-func NewRedisCache() *RedisCache {
-	InitRedis()
-	log.InfoLogger.Printf("Initialised Redis with options: \nEncryption: %v\n", utils.EnvValueBool("ENCRYPTION_ENABLED", false))
-	return &RedisCache{client: RedisClient, options: RedisCacheOptions{
-		Encrypt: true,
-	}}
-}
-
 func (r *RedisCache) BuildKey(parts ...string) string {
 	keyParts := []string{AppPrefix, CacheVersion}
 	keyParts = append(keyParts, parts...)
 	return strings.Join(keyParts, ":")
 }
 
-func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
-	if r.options.Encrypt {
+func (r *RedisCache) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
+	if r.Options.Encrypt {
 		data, err := json.Marshal(value)
 		if err != nil {
 			return err
@@ -70,19 +44,19 @@ func (r *RedisCache) Set(ctx context.Context, key string, value interface{}, exp
 		if err != nil {
 			return err
 		}
-		return r.client.Set(ctx, key, encryptedData, expiration).Err()
+		return r.Client.Set(ctx, key, encryptedData, expiration).Err()
 	}
 
 	data, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
-	return r.client.Set(ctx, key, data, expiration).Err()
+	return r.Client.Set(ctx, key, data, expiration).Err()
 }
 
-func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (bool, error) {
-	if r.options.Encrypt {
-		encryptedData, err := r.client.Get(ctx, key).Result()
+func (r *RedisCache) Get(ctx context.Context, key string, object any) (bool, error) {
+	if r.Options.Encrypt {
+		encryptedData, err := r.Client.Get(ctx, key).Result()
 		if err == redis.Nil {
 			return false, nil
 		} else if err != nil {
@@ -98,7 +72,7 @@ func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (b
 		return true, nil
 	}
 
-	data, err := r.client.Get(ctx, key).Result()
+	data, err := r.Client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return false, nil
 	} else if err != nil {
@@ -112,7 +86,7 @@ func (r *RedisCache) Get(ctx context.Context, key string, object interface{}) (b
 }
 
 func (r *RedisCache) Invalidate(ctx context.Context, pattern string) error {
-	iter := r.client.Scan(ctx, 0, pattern, 0).Iterator()
+	iter := r.Client.Scan(ctx, 0, pattern, 0).Iterator()
 	var keys []string
 	for iter.Next(ctx) {
 		keys = append(keys, iter.Val())
@@ -122,8 +96,7 @@ func (r *RedisCache) Invalidate(ctx context.Context, pattern string) error {
 	}
 
 	if len(keys) > 0 {
-		fmt.Printf("KEYYSSS: %v\n", keys)
-		err := r.client.Del(ctx, keys...).Err()
+		err := r.Client.Del(ctx, keys...).Err()
 		if err != nil {
 			return fmt.Errorf("failed to delete cache keys: %w", err)
 		}
@@ -133,17 +106,19 @@ func (r *RedisCache) Invalidate(ctx context.Context, pattern string) error {
 
 func (r *RedisCache) InvalidateMultiple(ctx context.Context, patterns []string) error {
 	for _, pattern := range patterns {
-		iter := r.client.Scan(ctx, 0, pattern, 0).Iterator()
+		iter := r.Client.Scan(ctx, 0, pattern, 0).Iterator()
 		var keys []string
 		for iter.Next(ctx) {
 			keys = append(keys, iter.Val())
 		}
 		if err := iter.Err(); err != nil {
+			log.ErrorLogger.Errorf("failed to scan cache keys for pattern %s: %w", pattern, err)
 			return fmt.Errorf("failed to scan cache keys for pattern %s: %w", pattern, err)
 		}
 		if len(keys) > 0 {
-			err := r.client.Del(ctx, keys...).Err()
+			err := r.Client.Del(ctx, keys...).Err()
 			if err != nil {
+				log.ErrorLogger.Errorf("failed to delete cache keys for pattern %s: %w", pattern, err)
 				return fmt.Errorf("failed to delete cache keys for pattern %s: %w", pattern, err)
 			}
 		}
