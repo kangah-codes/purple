@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24 AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install git and basic build tools
 RUN apk add --no-cache git make gcc libc-dev
