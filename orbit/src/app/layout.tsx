@@ -1,8 +1,9 @@
+import './globals.css';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import './globals.css';
 import Nav from '@/components/shared/Nav';
 import Footer from '@/components/shared/Footer';
+import { Analytics } from '@vercel/analytics/react';
 
 const satoshi = localFont({
     src: '../../public/fonts/satoshi/Satoshi-Variable.woff2',
@@ -22,6 +23,7 @@ export default function RootLayout({
     return (
         <html lang='en'>
             <body className={`${satoshi.className} antialiased relative`}>
+                <Analytics />
                 {/* <div className='fixed top-0 left-0 w-full z-50'> */}
                 <Nav />
                 {/* </div> */}
