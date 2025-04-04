@@ -88,6 +88,9 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	return session, err
 }
 
+func (r *CachingAuthRepository)
+
+// TODO; clean this out
 func (r *CachingAuthRepository) invalidateUserAuthCache(ctx context.Context, token string) {
 	r.config.RedisCache.Invalidate(ctx, r.config.RedisCache.BuildKey(r.keyPrefix, utils.HashToken(token)))
 }

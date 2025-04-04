@@ -150,6 +150,8 @@ func (s *AuthService) SignUp(ctx context.Context, signUp *types.SignUpDTO, ipInf
 	return nil
 }
 
+func (s *AuthService) ResetPassword(ctx context.Context, )
+
 func (s *AuthService) SignOutUser(ctx context.Context, userID uuid.UUID, token string) error {
 	tx := s.config.DB.Begin()
 	if tx.Error != nil {
