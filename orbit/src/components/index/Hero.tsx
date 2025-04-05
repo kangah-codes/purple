@@ -11,7 +11,7 @@ export default function Hero() {
                 spawnRate={5}
                 className='left-0 right-0 absolute z-[2]'
             />
-            <div className='absolute top-[30%] left-1/2 h-[1026px] w-[1026px] -translate-x-1/2 stroke-purple-500/70 [mask-image:linear-gradient(to_bottom,white_5%,transparent_60%)] sm:top-[35%] lg:top-[40%] xl:top-[38%]'>
+            {/* <div className='absolute top-[30%] left-1/2 h-[1026px] w-[1026px] -translate-x-1/2 stroke-purple-500/70 [mask-image:linear-gradient(to_bottom,white_5%,transparent_60%)] sm:top-[35%] lg:top-[40%] xl:top-[38%]'>
                 <svg
                     viewBox='0 0 1026 1026'
                     fill='none'
@@ -72,7 +72,7 @@ export default function Hero() {
                         </linearGradient>
                     </defs>
                 </svg>
-            </div>
+            </div> */}
 
             <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-[3] relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
@@ -89,23 +89,14 @@ export default function Hero() {
                                 Take control of your money without the stress. Purple makes
                                 budgeting simple, fun, and easy to stick with.
                             </p>
-                            {/* <div className='flex flex-col items-center justify-end space-y-2 cursor-pointer'>
-                                <div className='flex flex-row items-center justify-center space-x-2 bg-gradient-to-br from-purple-200 to-purple-300 rounded-full p-2'>
-                                    <input className='rounded-full px-4 py-2 bg-purple-100 border border-purple-300 focus:outline-none' />
-                                    <div className='bg-purple-500 rounded-full flex px-4 py-2 text-white transition duration-500 text-sm font-bold items-center justify-center'>
-                                        <p className='tracking-tight'>Sign Up</p>
-                                    </div>
-                                </div>
-                            </div> */}
                         </div>
                     </div>
                 </div>
 
-                {/* <div className='absolute bottom-0 w-full overflow-hidden'> */}
-                <div className='flex justify-center h-full space-x-5'>
-                    <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px] '>
+                <div className='flex justify-center h-full space-x-5 relative'>
+                    <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px]'>
                         <Image
-                            src='/graphics/mockup-1.webp'
+                            src='/graphics/pixel-mockup.png'
                             alt='Screenshot 1'
                             width={400}
                             height={400}
@@ -114,7 +105,6 @@ export default function Hero() {
                         />
                     </div>
                 </div>
-                {/* </div> */}
             </div>
         </div>
     );
