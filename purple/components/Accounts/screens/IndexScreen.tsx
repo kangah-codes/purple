@@ -41,7 +41,11 @@ export default function AccountsScreen() {
                 });
             },
         },
-        requestQuery: {},
+        requestQuery: {
+            page: 1,
+            // we would want to fetch all user accounts on the index screen
+            limit: 999,
+        },
     });
 
     const handleNavigation = useCallback(() => {

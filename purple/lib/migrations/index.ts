@@ -1,4 +1,4 @@
-const migrations: Record<string, string> = {
+const migrations_v1: Record<string, string> = {
     accounts: `
       PRAGMA journal_mode = WAL
   		CREATE TABLE IF NOT EXISTS accounts (
@@ -16,7 +16,7 @@ const migrations: Record<string, string> = {
   		);
   		CREATE INDEX IF NOT EXISTS idx_accounts_deleted_at ON accounts(deleted_at);`,
     plans: `
-      PRAGMA journal_mode = WAL
+      PRAGMA journal_mode = WAL;
   		CREATE TABLE IF NOT EXISTS plans (
   			id TEXT NOT NULL,
   			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
@@ -39,7 +39,7 @@ const migrations: Record<string, string> = {
   		);
   		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,
     transactions: `
-      PRAGMA journal_mode = WAL
+      PRAGMA journal_mode = WAL;
   		CREATE TABLE IF NOT EXISTS transactions (
   			id TEXT NOT NULL,
   			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
@@ -60,4 +60,4 @@ const migrations: Record<string, string> = {
   		CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);`,
 };
 
-export default migrations;
+export default migrations_v1;

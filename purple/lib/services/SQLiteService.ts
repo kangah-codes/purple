@@ -11,23 +11,6 @@ export abstract class BaseSQLiteService<T> implements DataService<T> {
         protected sqlite: SQLite.SQLiteDatabase,
     ) {
         this.db = sqlite;
-        this.initializeTable().catch((error) => {
-            console.error(`Failed to initialize table ${tableName}:`, error);
-        });
-    }
-
-    private async initializeTable(): Promise<void> {
-        const migration = migrations[this.tableName];
-        if (!migration) {
-            throw new Error(`No migration found for table ${this.tableName}`);
-        }
-
-        return new Promise((resolve, reject) => {
-            this.db
-                .execAsync(migration)
-                .then(() => resolve())
-                .catch((err) => reject(err));
-        });
     }
 
     protected formatResponse<R>({

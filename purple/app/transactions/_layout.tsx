@@ -1,5 +1,6 @@
 import { useAuth } from '@/components/Auth/hooks';
 import { Redirect, Stack } from 'expo-router';
+import React from 'react';
 
 export default function Transactions() {
     const { isAuthenticated } = useAuth();

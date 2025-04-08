@@ -22,17 +22,14 @@ export default function Section() {
                                 <div className='w-[100px] h-[100px] relative'>
                                     <Image
                                         src={'/graphics/watchtower.png'}
-                                        // width={80}
-                                        // height={40}
                                         alt='Watchtower'
                                         priority
-                                        objectFit='cover'
                                         fill
                                         className='w-full h-full top-0 left-0 object-cover'
                                     />
                                 </div>
                                 <dt className='text-2xl pt-2 leading-6 text-gray-800 font-semibold mb-2'>
-                                    Integrations
+                                    Watch your spend
                                 </dt>
                                 <dd className='text-base'>
                                     Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi
@@ -43,11 +40,8 @@ export default function Section() {
                                 <div className='w-[100px] h-[100px] relative'>
                                     <Image
                                         src={'/graphics/pos.png'}
-                                        // width={80}
-                                        // height={40}
                                         alt='Watchtower'
                                         priority
-                                        objectFit='cover'
                                         fill
                                         className='w-full h-full top-0 left-0 object-cover'
                                     />
@@ -64,17 +58,14 @@ export default function Section() {
                                 <div className='w-[100px] h-[100px] relative'>
                                     <Image
                                         src={'/graphics/computer-crash.png'}
-                                        // width={80}
-                                        // height={40}
                                         alt='Watchtower'
                                         priority
-                                        objectFit='cover'
                                         fill
                                         className='w-full h-full top-0 left-0 object-cover'
                                     />
                                 </div>
                                 <dt className='text-2xl pt-2 leading-6 text-gray-800 font-semibold mb-2'>
-                                    Support
+                                    Budget smarter
                                 </dt>
                                 <dd className='text-base'>
                                     Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi

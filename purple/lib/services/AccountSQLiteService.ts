@@ -2,26 +2,28 @@ import { BaseSQLiteService } from './SQLiteService';
 import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import HTTPError from '../utils/error';
-import * as SQLite from 'expo-sqlite';
+import { type SQLiteDatabase } from 'expo-sqlite';
+import { UUID } from '../utils/helpers';
 
 export class AccountSQLiteService extends BaseSQLiteService<Account> {
-    constructor(db: SQLite.SQLiteDatabase) {
-        super('accounts', db);
+    constructor(db: SQLiteDatabase) {
+        super('account', db);
     }
 
     async create(data: Partial<Account>): Promise<GenericAPIResponse<Account>> {
         let account!: Account;
+        const uuid = UUID();
         const now = new Date().toISOString();
         await this.db.withTransactionAsync(async () => {
-            const { lastInsertRowId } = await this.db.runAsync(
+            await this.db.runAsync(
                 `
-                INSERT INTO accounts
+                INSERT INTO account
                   (id, created_at, updated_at, user_id, category, name, balance, is_default_account, currency)
                 VALUES
                   (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 [
-                    'test',
+                    uuid,
                     now,
                     now,
                     data.user_id!,
@@ -33,8 +35,8 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
                 ],
             );
             const result = await this.db.getFirstAsync<Account>(
-                'SELECT * FROM accounts where id = ?',
-                [lastInsertRowId],
+                'SELECT * FROM account where id = ?',
+                [uuid],
             );
             if (!result) throw new HTTPError('Error creating account', 500);
             account = result;
@@ -53,7 +55,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
 
     async get(id: string): Promise<GenericAPIResponse<Account>> {
         const account = await this.db.getFirstAsync<Account>(
-            `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
+            `SELECT * FROM account WHERE deleted_at IS NULL AND id = ?`,
             [id],
         );
 
@@ -73,18 +75,18 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Account[]>> {
         const { page, limit } = query;
         const offset = (page - 1) * limit;
-        const result = await this.db.getFirstAsync<{ count: number }>(
-            'SELECT COUNT(*) FROM accounts WHERE deleted_at IS NULL',
-        );
-        console.log(result, 'RESULT');
-        if (!result) throw new HTTPError('Error fetching accounts', 500);
-        const accounts = await this.db.getAllAsync<Account>(
-            `SELECT * FROM accounts
-             WHERE deleted_at IS NULL
-             ORDER BY created_at DESC
+        const result = await this.db.getAllAsync<Account & { total_count: number }>(
+            `SELECT t.*, (SELECT COUNT(*) FROM account WHERE deleted_at IS NULL) as total_count
+             FROM transactions t
+             WHERE t.deleted_at IS NULL
+             ORDER BY t.created_at DESC
              LIMIT ? OFFSET ?`,
             [limit, offset],
         );
+
+        if (!result || result.length === 0) throw new Error('Error fetching accounts');
+        const total_count = result[0]?.total_count ?? 0;
+        const accounts = result.map(({ total_count: _, ...transaction }) => transaction);
 
         return this.formatResponse({
             data: accounts,
@@ -92,7 +94,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
             page: Number(page),
             page_size: Number(limit),
             total: 1,
-            total_items: result.count,
+            total_items: total_count,
             message: 'Success',
         });
     }

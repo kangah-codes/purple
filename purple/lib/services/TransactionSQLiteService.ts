@@ -3,26 +3,20 @@ import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Transaction } from '@/components/Transactions/schema';
 import HTTPError from '../utils/error';
+import { type SQLiteDatabase } from 'expo-sqlite';
+import { UUID } from '../utils/helpers';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
-    private static instance: TransactionSQLiteService;
-
-    constructor() {
-        super('transactions');
-    }
-
-    public static getInstance(): TransactionSQLiteService {
-        if (!TransactionSQLiteService.instance) {
-            TransactionSQLiteService.instance = new TransactionSQLiteService();
-        }
-        return TransactionSQLiteService.instance;
+    constructor(db: SQLiteDatabase) {
+        super('transactions', db);
     }
 
     async create(data: Partial<Transaction>): Promise<GenericAPIResponse<Transaction>> {
         let transaction!: Transaction;
         const now = new Date().toISOString();
+        const uuid = UUID();
         await this.db.withTransactionAsync(async () => {
-            const { lastInsertRowId } = await this.db.runAsync(
+            await this.db.runAsync(
                 `
                 INSERT INTO transactions
                   (
@@ -33,7 +27,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                   (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 [
-                    'test',
+                    uuid,
                     now,
                     now,
                     data.account_id!,
@@ -50,7 +44,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             );
             const result = await this.db.getFirstAsync<Transaction>(
                 'SELECT * FROM transactions where id = ?',
-                [lastInsertRowId],
+                [uuid],
             );
             if (!result) throw new HTTPError('Error creating transaction', 500);
             transaction = result;
@@ -89,7 +83,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
         const { page, limit } = query;
         const offset = (page - 1) * limit;
-        const result = await this.db.getFirstAsync<{ count: number }>(
+        const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             'SELECT COUNT(*) FROM transactions WHERE deleted_at IS NULL',
         );
         if (!result) throw new Error('Error fetching transactions');
@@ -107,7 +101,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             page: Number(page),
             page_size: Number(limit),
             total: 1,
-            total_items: result.count,
+            total_items: result['COUNT(*)'],
             message: 'Success',
         });
     }

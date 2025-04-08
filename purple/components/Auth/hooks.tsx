@@ -8,6 +8,7 @@ import { SessionData, SessionDataResponse, SignUpResponse } from './schema';
 import { createPlanStore } from '../Plans/state';
 import { createStatsStore } from '../Stats/state';
 import { createTransactionStore } from '../Transactions/state';
+import HTTPError from '@/lib/utils/error';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -39,10 +40,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataRes
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -64,10 +62,7 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SignUpResponse
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -89,10 +84,7 @@ export function useActivateAccount(): UseMutationResult<GenericAPIResponse<undef
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -114,10 +106,7 @@ export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, E
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;

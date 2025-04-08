@@ -1,17 +1,17 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useSQLiteContext } from 'expo-sqlite';
 import {
-    useMutation,
     UseMutationResult,
-    useQuery,
     UseQueryOptions,
     UseQueryResult,
+    useMutation,
+    useQuery,
 } from 'react-query';
 import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
 import { Account } from './schema';
 import { createAccountStore } from './state';
-import { stringify } from '@/lib/utils/string';
-import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 
 export function useAccountStore() {
     const [
@@ -52,11 +52,11 @@ export function useAccounts({
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useQuery(
         ['accounts', requestQuery],
         async () => {
-            console.log('ABOUT TO CALL SERVICE');
-            const service = await ServiceFactory.create<Account>('accounts', sessionData);
+            const service = await ServiceFactory.create<Account>('account', db, sessionData);
             return service.list(requestQuery);
         },
         {
@@ -77,10 +77,11 @@ export function useAccount({
     options?: UseQueryOptions;
     accountID: string;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useQuery(
         [`account-${accountID}`],
         async () => {
-            const service = await ServiceFactory.create<Account>('accounts', sessionData);
+            const service = await ServiceFactory.create<Account>('account', db, sessionData);
             return service.get(accountID);
         },
         {
@@ -136,8 +137,9 @@ export function useCreateAccount({
 }: {
     sessionData: SessionData;
 }): UseMutationResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useMutation(['create-account'], async (accountInformation) => {
-        const service = await ServiceFactory.create<Account>('accounts', sessionData);
+        const service = await ServiceFactory.create<Account>('account', db, sessionData);
         return service.create(accountInformation as Partial<Account>);
     });
 }

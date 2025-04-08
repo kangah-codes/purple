@@ -5,24 +5,28 @@ import { DataService } from '../services/DataService';
 import { GenericAPIResponse } from '@/@types/request';
 import { AccountSQLiteService } from '../services/AccountSQLiteService';
 import * as SQLite from 'expo-sqlite';
+import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
 
 export class ServiceFactory {
     private static accountService: AccountSQLiteService | null = null;
+    private static transactionService: TransactionSQLiteService | null = null;
 
     static async create<T>(
-        endpoint: string,
+        endpoint: 'account' | 'transaction' | 'plan',
         db: SQLite.SQLiteDatabase,
         sessionData?: SessionData,
     ): Promise<DataService<T>> {
         const isOffline = await nativeStorage.getItem('isOfflineMode');
 
-        if (true) {
+        if (isOffline) {
             switch (endpoint) {
-                case 'accounts':
-                    if (!this.accountService) {
-                        this.accountService = new AccountSQLiteService(db);
-                    }
+                case 'account':
+                    if (!this.accountService) this.accountService = new AccountSQLiteService(db);
                     return this.accountService as unknown as DataService<T>;
+                case 'transaction':
+                    if (!this.transactionService)
+                        this.transactionService = new TransactionSQLiteService(db);
+                    return this.transactionService as unknown as DataService<T>;
                 default:
                     throw new Error(`No offline service implementation for ${endpoint}`);
             }

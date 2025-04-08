@@ -36,9 +36,9 @@ function AccountScreen(props: AccountScreenProps) {
         sessionData: sessionData as SessionData,
         accountID: currentAccount!.ID,
         options: {
-            cacheTime: 0, // Disable caching
-            staleTime: 0, // Consider data stale immediately
-            refetchOnMount: true, // Refetch on component mount
+            cacheTime: 0,
+            staleTime: 0,
+            refetchOnMount: true,
             refetchOnWindowFocus: true,
             onError: () => {
                 Toast.show({

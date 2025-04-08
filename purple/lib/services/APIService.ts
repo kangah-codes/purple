@@ -2,6 +2,7 @@ import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { stringify } from '../utils/string';
 import { DataService } from './DataService';
 import { SessionData } from '@/components/Auth/schema';
+import HTTPError from '../utils/error';
 
 export class APIService<T> implements DataService<T> {
     constructor(
@@ -29,12 +30,7 @@ export class APIService<T> implements DataService<T> {
         });
         const statusCode = res.status;
         const json = (await res.json()) as GenericAPIResponse<T>;
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
+        if (!res.ok) throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         return json;
     }
 
@@ -49,14 +45,8 @@ export class APIService<T> implements DataService<T> {
             },
         );
         const statusCode = res.status;
-        console.log(res);
         const json = (await res.json()) as GenericAPIResponse<T[]>;
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
+        if (!res.ok) throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         return json;
     }
 }
