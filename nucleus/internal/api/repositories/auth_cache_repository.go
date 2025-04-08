@@ -88,7 +88,10 @@ func (r *CachingAuthRepository) Get(ctx context.Context, token string) (*models.
 	return session, err
 }
 
-func (r *CachingAuthRepository)
+// TODO: implement
+func (r *CachingAuthRepository) CreateResetPin(ctx context.Context, reset *models.PasswordResetPin) error {
+	return nil
+}
 
 // TODO; clean this out
 func (r *CachingAuthRepository) invalidateUserAuthCache(ctx context.Context, token string) {

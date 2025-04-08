@@ -31,6 +31,7 @@ export default function AccountsScreen() {
             },
             // @ts-ignore wtf is this
             onError: (err: Error) => {
+                console.log(err, 'ERR', err.stack);
                 Toast.show({
                     type: 'error',
                     props: {

@@ -9,10 +9,6 @@ import AccountCard from './AccountCard';
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();
 
-    useEffect(() => {
-        console.log('Accounts updated:', accounts);
-    }, [accounts]);
-
     const renderItem = useCallback(
         ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
             <AccountCard groupName={item.groupName} accounts={item.accounts} />
@@ -21,7 +17,6 @@ export default function AccountsAccordion() {
     );
 
     const groupedAccounts = groupAccountsByCategory(accounts);
-    console.log('Grouped accounts:', groupedAccounts);
 
     const data = Object.entries(groupedAccounts)
         .map(([key, value]) => {
@@ -33,8 +28,6 @@ export default function AccountsAccordion() {
             };
         })
         .filter((item) => item.accounts && item.accounts.length > 0);
-
-    console.log('Data for FlashList:', data);
 
     return (
         <FlashList
