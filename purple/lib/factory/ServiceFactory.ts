@@ -9,14 +9,18 @@ import * as SQLite from 'expo-sqlite';
 export class ServiceFactory {
     private static accountService: AccountSQLiteService | null = null;
 
-    static async create<T>(endpoint: string, sessionData?: SessionData): Promise<DataService<T>> {
+    static async create<T>(
+        endpoint: string,
+        db: SQLite.SQLiteDatabase,
+        sessionData?: SessionData,
+    ): Promise<DataService<T>> {
         const isOffline = await nativeStorage.getItem('isOfflineMode');
 
-        if (isOffline || false) {
+        if (true) {
             switch (endpoint) {
                 case 'accounts':
                     if (!this.accountService) {
-                        this.accountService = new AccountSQLiteService();
+                        this.accountService = new AccountSQLiteService(db);
                     }
                     return this.accountService as unknown as DataService<T>;
                 default:

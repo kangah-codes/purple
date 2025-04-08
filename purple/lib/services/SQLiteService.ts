@@ -6,17 +6,27 @@ import migrations from '../migrations';
 export abstract class BaseSQLiteService<T> implements DataService<T> {
     protected db: SQLite.SQLiteDatabase;
 
-    constructor(protected tableName: string) {
-        this.db = SQLite.openDatabaseSync('purple.db');
-        this.initialiseTable();
+    constructor(
+        protected tableName: string,
+        protected sqlite: SQLite.SQLiteDatabase,
+    ) {
+        this.db = sqlite;
+        this.initializeTable().catch((error) => {
+            console.error(`Failed to initialize table ${tableName}:`, error);
+        });
     }
 
-    private initialiseTable(): void {
-        if (!migrations[this.tableName]) {
-            throw new Error(`Migration does not exist for table ${this.tableName}`);
+    private async initializeTable(): Promise<void> {
+        const migration = migrations[this.tableName];
+        if (!migration) {
+            throw new Error(`No migration found for table ${this.tableName}`);
         }
-        this.db.withTransactionAsync(async () => {
-            await this.db.runAsync(migrations[this.tableName], []);
+
+        return new Promise((resolve, reject) => {
+            this.db
+                .execAsync(migration)
+                .then(() => resolve())
+                .catch((err) => reject(err));
         });
     }
 

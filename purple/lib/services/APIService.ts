@@ -39,7 +39,6 @@ export class APIService<T> implements DataService<T> {
     }
 
     async list(query?: RequestParamQuery): Promise<GenericAPIResponse<T[]>> {
-        console.log('LIST');
         const res = await fetch(
             `${this.baseUrl}/${this.endpoint}${query && '?' + stringify(query)}`,
             {

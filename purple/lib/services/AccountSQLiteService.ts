@@ -2,19 +2,11 @@ import { BaseSQLiteService } from './SQLiteService';
 import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import HTTPError from '../utils/error';
+import * as SQLite from 'expo-sqlite';
 
 export class AccountSQLiteService extends BaseSQLiteService<Account> {
-    private static instance: AccountSQLiteService;
-
-    constructor() {
-        super('accounts');
-    }
-
-    public static getInstance(): AccountSQLiteService {
-        if (!AccountSQLiteService.instance) {
-            AccountSQLiteService.instance = new AccountSQLiteService();
-        }
-        return AccountSQLiteService.instance;
+    constructor(db: SQLite.SQLiteDatabase) {
+        super('accounts', db);
     }
 
     async create(data: Partial<Account>): Promise<GenericAPIResponse<Account>> {
@@ -93,8 +85,6 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
              LIMIT ? OFFSET ?`,
             [limit, offset],
         );
-
-        console.log(result, accounts, 'LIST');
 
         return this.formatResponse({
             data: accounts,

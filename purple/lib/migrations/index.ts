@@ -1,5 +1,5 @@
 const migrations: Record<string, string> = {
-    account: `
+    accounts: `
       PRAGMA journal_mode = WAL
   		CREATE TABLE IF NOT EXISTS accounts (
   			id TEXT NOT NULL,
@@ -15,7 +15,7 @@ const migrations: Record<string, string> = {
   			PRIMARY KEY (id)
   		);
   		CREATE INDEX IF NOT EXISTS idx_accounts_deleted_at ON accounts(deleted_at);`,
-    plan: `
+    plans: `
       PRAGMA journal_mode = WAL
   		CREATE TABLE IF NOT EXISTS plans (
   			id TEXT NOT NULL,
@@ -38,7 +38,7 @@ const migrations: Record<string, string> = {
   			PRIMARY KEY (id)
   		);
   		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,
-    transaction: `
+    transactions: `
       PRAGMA journal_mode = WAL
   		CREATE TABLE IF NOT EXISTS transactions (
   			id TEXT NOT NULL,

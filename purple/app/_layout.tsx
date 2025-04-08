@@ -2,7 +2,7 @@ import 'expo-dev-client';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { AuthProvider, useAuth } from '@/components/Auth/hooks';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
@@ -16,6 +16,9 @@ import Toast from 'react-native-toast-message';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SQLiteProvider } from 'expo-sqlite';
+import { migrateDbIfNeeded } from '@/lib/utils/database';
+import { Text } from '@/components/Shared/styled';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -97,42 +100,55 @@ function RootLayoutNav() {
     return (
         <>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <BottomSheetModalProvider>
-                    <PortalProvider>
-                        <SafeAreaProvider>
-                            <ThemeProvider value={DefaultTheme}>
-                                {/** Portal Rendering  */}
-                                {/* {transactionPortal} */}
-                                <CurrentTransactionModal modalKey='transactionReceipt' />
+                <Suspense fallback={<Text>Loading...</Text>}>
+                    <SQLiteProvider databaseName='purple.db' onInit={migrateDbIfNeeded} useSuspense>
+                        <BottomSheetModalProvider>
+                            <PortalProvider>
+                                <SafeAreaProvider>
+                                    <ThemeProvider value={DefaultTheme}>
+                                        {/** Portal Rendering  */}
+                                        {/* {transactionPortal} */}
+                                        <CurrentTransactionModal modalKey='transactionReceipt' />
 
-                                {/** Main Navigation Stack */}
-                                <Stack
-                                    screenOptions={{
-                                        contentStyle: {
-                                            backgroundColor: '#fff',
-                                        },
-                                    }}
-                                >
-                                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                                    <Stack.Screen name='plans' options={{ headerShown: false }} />
-                                    <Stack.Screen
-                                        name='accounts'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name='transactions'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name='onboarding'
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen name='auth' options={{ headerShown: false }} />
-                                </Stack>
-                            </ThemeProvider>
-                        </SafeAreaProvider>
-                    </PortalProvider>
-                </BottomSheetModalProvider>
+                                        {/** Main Navigation Stack */}
+                                        <Stack
+                                            screenOptions={{
+                                                contentStyle: {
+                                                    backgroundColor: '#fff',
+                                                },
+                                            }}
+                                        >
+                                            <Stack.Screen
+                                                name='(tabs)'
+                                                options={{ headerShown: false }}
+                                            />
+                                            <Stack.Screen
+                                                name='plans'
+                                                options={{ headerShown: false }}
+                                            />
+                                            <Stack.Screen
+                                                name='accounts'
+                                                options={{ headerShown: false }}
+                                            />
+                                            <Stack.Screen
+                                                name='transactions'
+                                                options={{ headerShown: false }}
+                                            />
+                                            <Stack.Screen
+                                                name='onboarding'
+                                                options={{ headerShown: false }}
+                                            />
+                                            <Stack.Screen
+                                                name='auth'
+                                                options={{ headerShown: false }}
+                                            />
+                                        </Stack>
+                                    </ThemeProvider>
+                                </SafeAreaProvider>
+                            </PortalProvider>
+                        </BottomSheetModalProvider>
+                    </SQLiteProvider>
+                </Suspense>
             </GestureHandlerRootView>
             <Toast config={toastConfig} />
         </>
