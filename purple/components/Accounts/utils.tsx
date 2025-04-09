@@ -1,4 +1,4 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateLabel } from '../Plans/utils';
 import { Text } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';

@@ -11,7 +11,7 @@ import {
     TrendDataPoint,
 } from './schema';
 import { formatDateTime } from '@/lib/utils/date';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Account } from '../Accounts/schema';
 import { generatePalette } from '@/lib/utils/colour';
 import { Transaction } from '../Transactions/schema';

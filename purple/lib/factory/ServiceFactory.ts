@@ -12,7 +12,7 @@ export class ServiceFactory {
     private static transactionService: TransactionSQLiteService | null = null;
 
     static async create<T>(
-        endpoint: 'account' | 'transaction' | 'plan',
+        endpoint: 'accounts' | 'transactions' | 'plans',
         db: SQLite.SQLiteDatabase,
         sessionData?: SessionData,
     ): Promise<DataService<T>> {
@@ -20,10 +20,10 @@ export class ServiceFactory {
 
         if (isOffline) {
             switch (endpoint) {
-                case 'account':
+                case 'accounts':
                     if (!this.accountService) this.accountService = new AccountSQLiteService(db);
                     return this.accountService as unknown as DataService<T>;
-                case 'transaction':
+                case 'transactions':
                     if (!this.transactionService)
                         this.transactionService = new TransactionSQLiteService(db);
                     return this.transactionService as unknown as DataService<T>;

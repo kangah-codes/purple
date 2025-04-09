@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';

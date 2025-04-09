@@ -1,5 +1,5 @@
 import { ArrowNarrowDownRightIcon } from '@/components/SVG/noscale';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import React from 'react';

@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect } from 'react';
@@ -170,13 +170,19 @@ export default function NewPlanTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanTransactionDebitAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.ID] = {
-                                                    label: curr.name,
-                                                    value: curr.ID,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accounts.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.ID] = {
+                                                        label: curr.name,
+                                                        value: curr.ID,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {

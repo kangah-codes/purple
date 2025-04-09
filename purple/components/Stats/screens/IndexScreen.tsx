@@ -10,7 +10,7 @@ import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
 import { keyExtractor } from '@/lib/utils/number';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { useMonthlyStats, useStatsStore } from '../hooks';
@@ -45,9 +45,7 @@ export default function StatsScreen() {
             end_date: format(now, 'dd/MM/yy'),
         },
         options: {
-            onSuccess: (data) => {
-                console.log('GOT ', data);
-            },
+            onSuccess: (data) => {},
         },
     });
 

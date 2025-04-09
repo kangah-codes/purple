@@ -4,7 +4,7 @@ import { Plan } from '@/components/Plans/schema';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';

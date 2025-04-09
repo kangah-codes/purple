@@ -1,7 +1,7 @@
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback } from 'react';

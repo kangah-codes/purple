@@ -14,7 +14,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
@@ -33,10 +33,10 @@ import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
-import { currencies } from '@/constants/currencies';
+import { currencies } from '@/lib/constants/currencies';
 
 /**
- * 
+ *
  * @returns type CreatePlanDTO struct {
 	AccountId        uuid.UUID `json:"account_id" binding:"required"`
 	Type             string    `json:"type" binding:"required,oneof=saving expense"`
@@ -343,13 +343,19 @@ export default function NewPlanScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanCategory'
-                                            options={planCategories.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={planCategories.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
@@ -397,13 +403,19 @@ export default function NewPlanScreen() {
                                     <>
                                         <SearchableSelectField
                                             selectKey='newCurrencyType'
-                                            options={currencies.reduce((acc, curr) => {
-                                                acc[curr.code] = {
-                                                    label: curr.name,
-                                                    value: curr.code,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={currencies.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.code] = {
+                                                        label: curr.name,
+                                                        value: curr.code,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
                                             value={value}

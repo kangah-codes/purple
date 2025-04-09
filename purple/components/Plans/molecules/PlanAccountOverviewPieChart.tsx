@@ -2,7 +2,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import { View, Text } from '@/components/Shared/styled';
 import { memo, useCallback, useMemo } from 'react';
 import React from 'react';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { usePlanStore } from '../hooks';
 import { getAccountTransactionStats } from '../utils';

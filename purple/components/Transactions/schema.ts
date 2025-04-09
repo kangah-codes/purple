@@ -9,13 +9,12 @@ export type TransactionData = {
 };
 
 export type Transaction = {
-    ID: string;
-    CreatedAt: string;
-    UpdatedAt: string;
-    DeletedAt: string | null;
+    id: string;
+    updated_at: string;
+    deleted_at: string | null;
     account_id: string;
     user_id: string;
-    Type: 'debit' | 'credit' | 'transfer';
+    type: 'debit' | 'credit' | 'transfer';
     amount: number;
     account: Account;
     note: string;

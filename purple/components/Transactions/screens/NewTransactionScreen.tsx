@@ -11,8 +11,8 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { TRANSACTION_TYPES } from '@/constants/transactionTypes';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { TRANSACTION_TYPES, transactionTypes } from '@/lib/constants/transactionTypes';
 import { omit, transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -85,6 +85,8 @@ export default function NewTransactionScreen() {
             ]) as typeof transformedData; // looks hacky af
         }
 
+        console.log(transformedData, 'MUTATE');
+
         // TODO: refactor all creates to use server errors
         mutate(transformedData, {
             onError: (err) => {
@@ -94,8 +96,8 @@ export default function NewTransactionScreen() {
                 });
             },
             onSuccess: (res) => {
-                updateTransactions(res.data);
-                queryClient.invalidateQueries([`account-${data.fromAccount}`]);
+                // updateTransactions(res.data);
+                queryClient.invalidateQueries([`transactions`]);
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },
@@ -129,9 +131,9 @@ export default function NewTransactionScreen() {
                                             selectKey='newTransactionDebitAccount'
                                             options={accounts.reduce(
                                                 (acc, curr) => {
-                                                    acc[curr.ID] = {
+                                                    acc[curr.id] = {
                                                         label: curr.name,
-                                                        value: curr.ID,
+                                                        value: curr.id,
                                                     };
                                                     return acc;
                                                 },
@@ -180,9 +182,9 @@ export default function NewTransactionScreen() {
                                             selectKey='newTransactionCreditAccount'
                                             options={accounts.reduce(
                                                 (acc, curr) => {
-                                                    acc[curr.ID] = {
+                                                    acc[curr.id] = {
                                                         label: curr.name,
-                                                        value: curr.ID,
+                                                        value: curr.id,
                                                     };
                                                     return acc;
                                                 },
@@ -232,9 +234,9 @@ export default function NewTransactionScreen() {
                                     selectKey='newTransactionAccount'
                                     options={accounts.reduce(
                                         (acc, curr) => {
-                                            acc[curr.ID] = {
+                                            acc[curr.id] = {
                                                 label: curr.name,
-                                                value: curr.ID,
+                                                value: curr.id,
                                             };
                                             return acc;
                                         },
@@ -378,7 +380,7 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCategory'
-                                            options={transactionCategories.reduce(
+                                            options={transactionTypes.reduce(
                                                 (acc, curr) => {
                                                     acc[curr] = {
                                                         label: curr,

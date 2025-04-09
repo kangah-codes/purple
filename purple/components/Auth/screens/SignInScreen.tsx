@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';

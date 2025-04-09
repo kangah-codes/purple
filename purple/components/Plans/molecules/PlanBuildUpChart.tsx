@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 import { usePlanStore } from '../hooks';
 import { generateSpendingTrendData } from '../utils';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 export default function PlanBuildUpChart() {
     const { currentPlan } = usePlanStore();

@@ -14,6 +14,8 @@ import { SessionData } from '../Auth/schema';
 import { Transaction } from './schema';
 import { createTransactionStore } from './state';
 import { stringify } from '@/lib/utils/string';
+import { useSQLiteContext } from 'expo-sqlite';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 
 export function useTransactionStore() {
     const [
@@ -95,6 +97,7 @@ export function useInfiniteTransactions({
         'queryKey' | 'queryFn'
     >;
 }): UseInfiniteQueryResult<GenericAPIResponse<Transaction[]>, Error> {
+    const db = useSQLiteContext();
     return useInfiniteQuery<GenericAPIResponse<Transaction[]>, Error>(
         ['transactions', requestQuery],
         async ({ pageParam = 1 }) => {
@@ -103,29 +106,12 @@ export function useInfiniteTransactions({
                 page: pageParam,
                 page_size: requestQuery.page_size || 10,
             };
-
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/transaction?${stringify(queryParams)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
+            const service = await ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
             );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || "Couldn't fetch transactions");
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            return service.list(queryParams);
         },
         {
             ...options,
@@ -144,26 +130,9 @@ export function useCreateTransaction({
 }: {
     sessionData: SessionData;
 }): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
+    const db = useSQLiteContext();
     return useMutation(['create-transaction'], async (transactionInformation) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transaction`, {
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                Authorization: sessionData.access_token,
-            },
-            body: JSON.stringify(transactionInformation),
-        });
-
-        const statusCode = res.status;
-        const json = await res.json();
-
-        if (!res.ok) {
-            const err = new Error(json.message || "Couldn't create transaction");
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
-
-        return json;
+        const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.create(transactionInformation as Partial<Transaction>);
     });
 }

@@ -3,7 +3,7 @@ import { Redirect, Stack } from 'expo-router';
 import React from 'react';
 
 export default function Onboarding() {
-    const { isAuthenticated, hasOnboarded } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     if (isAuthenticated) return <Redirect href={'/(tabs)/'} />;
 

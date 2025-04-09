@@ -3,8 +3,8 @@ import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSh
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { ZIGZAG_VIEW } from '@/constants/ZigZagView';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
 import { formatDate, formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
@@ -22,11 +22,9 @@ type CurrentTransactionModalProps = {
 
 export default function CurrentTransactionModal({ modalKey }: CurrentTransactionModalProps) {
     const { currentTransaction } = useTransactionStore();
-
-    const account = useGetAccountFromStore(currentTransaction?.account_id ?? '');
     const transactionDate = useMemo(
-        () => formatDateTime(currentTransaction?.CreatedAt ?? ''),
-        [currentTransaction?.CreatedAt],
+        () => formatDateTime(currentTransaction?.created_at ?? ''),
+        [currentTransaction?.created_at],
     );
 
     if (!currentTransaction) return null;
@@ -73,20 +71,20 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                                 GLOBAL_STYLESHEET.satoshiBlack,
                                 {
                                     color:
-                                        currentTransaction.Type === 'debit'
+                                        currentTransaction.type === 'debit'
                                             ? '#DC2626'
-                                            : currentTransaction.Type === 'credit'
-                                            ? 'rgb(22 163 74)'
-                                            : '#9333EA',
+                                            : currentTransaction.type === 'credit'
+                                              ? 'rgb(22 163 74)'
+                                              : '#9333EA',
                                 },
                             ]}
                             className='text-3xl mb-5 text-center'
                         >
-                            {currentTransaction.Type == 'debit'
+                            {currentTransaction.type == 'debit'
                                 ? '-'
-                                : currentTransaction.Type == 'credit'
-                                ? '+'
-                                : ''}
+                                : currentTransaction.type == 'credit'
+                                  ? '+'
+                                  : ''}
                             {formatCurrencyAccurate(
                                 currentTransaction.currency,
                                 currentTransaction.amount,
@@ -102,7 +100,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             label='Date'
                             value={`${transactionDate.date} at ${transactionDate.time}`}
                         />
-                        <ReceiptDetail label='Account' value={account?.name} />
+                        <ReceiptDetail label='Account' value={currentTransaction.account?.name} />
                         {isNotEmptyString(currentTransaction.note) && (
                             <ReceiptDetail label='Note' value={currentTransaction.note} />
                         )}

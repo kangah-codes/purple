@@ -74,7 +74,7 @@ export default function Screen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={5000}
+                timePerPage={1000}
                 enableNavigation={false}
                 onPageChange={(index: number) => console.log(`Page ${index}`)}
                 // disableAutomaticScroll

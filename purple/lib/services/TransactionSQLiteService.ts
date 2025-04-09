@@ -12,10 +12,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     }
 
     async create(data: Partial<Transaction>): Promise<GenericAPIResponse<Transaction>> {
+        let debitAccount: Account | null;
+        let creditAccount: Account | null;
+        const uuid = UUID();
         let transaction!: Transaction;
         const now = new Date().toISOString();
-        const uuid = UUID();
         await this.db.withTransactionAsync(async () => {
+            // create the transaction
             await this.db.runAsync(
                 `
                 INSERT INTO transactions
@@ -24,15 +27,15 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     amount, note, category, from_account, to_account, currency, plan_id
                   )
                 VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 [
                     uuid,
                     now,
                     now,
                     data.account_id!,
-                    data.user_id!,
-                    data.Type!,
+                    null,
+                    data.type!,
                     data.amount!,
                     data.note ?? null,
                     data.category!,
@@ -42,6 +45,37 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     data.plan_id ?? null,
                 ],
             );
+
+            // if the type is transfer, we need the debit & credit accounts to do math correctly
+            if (data.type! == 'transfer') {
+                debitAccount = await this.db.getFirstAsync<Account>(
+                    'SELECT * from accounts where id = ?',
+                    [data.from_account!],
+                );
+                creditAccount = await this.db.getFirstAsync<Account>(
+                    'SELECT * from accounts where id = ?',
+                    [data.to_account!],
+                );
+
+                if (!creditAccount || !debitAccount) throw new Error("Couldn't find accounts");
+            }
+
+            // update the account balance
+            const accountBalance = await this.db.getFirstAsync<{ balance: number }>(
+                'SELECT balance from accounts where id = ?',
+                [data.account_id!],
+            );
+
+            if (!accountBalance?.balance) throw Error('Account not found');
+
+            switch (data.type!) {
+                case 'debit':
+                    accountBalance.balance -= data.amount!;
+                case 'credit':
+                    accountBalance.balance += data.amount!;
+                case 'transfer':
+            }
+
             const result = await this.db.getFirstAsync<Transaction>(
                 'SELECT * FROM transactions where id = ?',
                 [uuid],
@@ -81,25 +115,43 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     }
 
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
-        const { page, limit } = query;
-        const offset = (page - 1) * limit;
+        const { page, page_size } = query;
+        const offset = (page - 1) * page_size;
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             'SELECT COUNT(*) FROM transactions WHERE deleted_at IS NULL',
         );
         if (!result) throw new Error('Error fetching transactions');
-        const transactions = await this.db.getAllAsync<Transaction>(
-            `SELECT * FROM transactions
-             WHERE deleted_at IS NULL
-             ORDER BY created_at DESC
-             LIMIT ? OFFSET ?`,
-            [limit, offset],
+        const transactions = await this.db.getAllAsync<
+            Transaction & {
+                account_id: string;
+                account_currency: string;
+                account_name: string;
+            }
+        >(
+            `SELECT t.*,
+                a.id AS account_id,
+                a.name AS account_name,
+                a.currency AS account_currency
+            FROM transactions t
+            INNER JOIN accounts a ON t.account_id = a.id
+            WHERE t.deleted_at IS NULL
+            ORDER BY t.created_at DESC
+            LIMIT ? OFFSET ?`,
+            [page_size, offset],
         );
 
         return this.formatResponse({
-            data: transactions,
+            data: transactions.map((transaction) => ({
+                ...transaction,
+                currency: transaction.account_currency,
+                account: {
+                    id: transaction.account_id,
+                    name: transaction.account_name,
+                },
+            })) as unknown as Transaction[],
             status: 200,
             page: Number(page),
-            page_size: Number(limit),
+            page_size: Number(page_size),
             total: 1,
             total_items: result['COUNT(*)'],
             message: 'Success',

@@ -1,4 +1,4 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';

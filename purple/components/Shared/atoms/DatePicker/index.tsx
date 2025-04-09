@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React from 'react';
 
 const snapPoints = ['35%', '35%'];

@@ -77,15 +77,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
-    const { isLoading } = useAuth();
-
-    // portals
-    const { transactionPortal } = useMemo(
-        () => ({
-            transactionPortal: <PortalHost name='transactionReceipt' />,
-        }),
-        [],
-    );
+    const { isLoading, sessionData, hasOnboarded } = useAuth();
 
     useEffect(() => {
         async function hideSplashScreen() {
@@ -101,7 +93,11 @@ function RootLayoutNav() {
         <>
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <Suspense fallback={<Text>Loading...</Text>}>
-                    <SQLiteProvider databaseName='purple.db' onInit={migrateDbIfNeeded} useSuspense>
+                    <SQLiteProvider
+                        databaseName='purple_test_1.db'
+                        onInit={migrateDbIfNeeded}
+                        useSuspense
+                    >
                         <BottomSheetModalProvider>
                             <PortalProvider>
                                 <SafeAreaProvider>

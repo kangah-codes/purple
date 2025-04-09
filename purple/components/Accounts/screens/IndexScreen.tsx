@@ -9,7 +9,7 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { PlusIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
@@ -31,7 +31,6 @@ export default function AccountsScreen() {
             },
             // @ts-ignore wtf is this
             onError: (err: Error) => {
-                console.log(err, 'ERR', err.stack);
                 Toast.show({
                     type: 'error',
                     props: {

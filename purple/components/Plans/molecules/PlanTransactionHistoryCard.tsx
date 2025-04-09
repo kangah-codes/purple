@@ -1,4 +1,4 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Text, View } from '../../Shared/styled';
 import { PlanTransaction } from '../schema';
 import React, { useMemo } from 'react';

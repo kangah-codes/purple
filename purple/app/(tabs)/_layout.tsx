@@ -10,7 +10,7 @@ import {
     SafeIcon,
     UserCircleIcon,
 } from '@/components/SVG/noscale';
-import Colors from '@/constants/Colors';
+import Colors from '@/lib/constants/Colors';
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();
@@ -21,7 +21,7 @@ export default function TabLayout() {
 
     return (
         <Tabs
-            initialRouteName='plans'
+            initialRouteName='index'
             screenOptions={{
                 tabBarActiveTintColor: Colors['light'].tint,
                 tabBarLabelStyle: {

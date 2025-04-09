@@ -1,5 +1,5 @@
 import { View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React from 'react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { TextInput, Animated, Dimensions, InputModeOptions } from 'react-native';

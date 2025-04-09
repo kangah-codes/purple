@@ -4,7 +4,7 @@ import { useAuth } from '@/components/Auth/hooks';
 import { SessionData, User } from '@/components/Auth/schema';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';

@@ -1,6 +1,6 @@
 const migrations_v1: Record<string, string> = {
     accounts: `
-      PRAGMA journal_mode = WAL
+      PRAGMA journal_mode = WAL;
   		CREATE TABLE IF NOT EXISTS accounts (
   			id TEXT NOT NULL,
   			created_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
@@ -40,24 +40,24 @@ const migrations_v1: Record<string, string> = {
   		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,
     transactions: `
       PRAGMA journal_mode = WAL;
-  		CREATE TABLE IF NOT EXISTS transactions (
-  			id TEXT NOT NULL,
-  			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-  			updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-  			deleted_at TEXT,
-  			account_id TEXT,
-  			user_id TEXT,
-  			type TEXT NOT NULL,
-  			amount NUMERIC NOT NULL,
-  			note TEXT,
-  			category TEXT,
-  			from_account TEXT,
-  			to_account TEXT,
-  			currency TEXT,
-  			plan_id TEXT,
-  			PRIMARY KEY (id)
-  		);
-  		CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);`,
+      CREATE TABLE IF NOT EXISTS transactions (
+        id TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+        updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+        deleted_at TEXT,
+        account_id TEXT,
+        user_id TEXT,
+        type TEXT NOT NULL,
+        amount NUMERIC NOT NULL,
+        note TEXT,
+        category TEXT,
+        from_account TEXT,
+        to_account TEXT,
+        currency TEXT,
+        plan_id TEXT,
+        PRIMARY KEY (id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);`,
 };
 
 export default migrations_v1;

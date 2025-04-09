@@ -5,7 +5,7 @@ import { Portal } from '@gorhom/portal';
 import React, { useCallback, useEffect, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { LRUCache } from '@/lib/utils/cache';
 
 type SelectOption = {

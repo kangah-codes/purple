@@ -10,7 +10,7 @@ import { StarsIcon } from '@/components/SVG/24x24';
 import { useInfiniteTransactions } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Portal } from '@gorhom/portal';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

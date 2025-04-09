@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDate } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';

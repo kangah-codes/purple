@@ -1,5 +1,5 @@
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React, { useMemo } from 'react';
 import { usePlanStore } from '../hooks';
 import calculateTotalExpenseDetails, { calculateTotalSavingDetails } from '../utils';
