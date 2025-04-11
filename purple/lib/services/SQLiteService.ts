@@ -33,11 +33,11 @@ export abstract class BaseSQLiteService<T> implements DataService<T> {
         throw new Error('Not implemented');
     }
 
-    async create(data: Partial<T>): Promise<GenericAPIResponse<T>> {
+    async create(data: any): Promise<GenericAPIResponse<T>> {
         throw new Error('Not implemented');
     }
 
-    async update(id: string, data: Partial<T>): Promise<GenericAPIResponse<T>> {
+    async update(id: string, data: any): Promise<GenericAPIResponse<T>> {
         throw new Error('Not implemented');
     }
 

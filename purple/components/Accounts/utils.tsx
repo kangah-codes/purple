@@ -16,8 +16,12 @@ export function createTransactionChartData(
     }
 
     // Get the oldest and newest dates
-    const minDate = new Date(Math.min(...transactions.map((t) => new Date(t.CreatedAt).getTime())));
-    const maxDate = new Date(Math.max(...transactions.map((t) => new Date(t.CreatedAt).getTime())));
+    const minDate = new Date(
+        Math.min(...transactions.map((t) => new Date(t.created_at).getTime())),
+    );
+    const maxDate = new Date(
+        Math.max(...transactions.map((t) => new Date(t.created_at).getTime())),
+    );
 
     // Pre-calculate the label indices for even spacing
     const labelIndices = new Set<number>();
@@ -42,7 +46,7 @@ export function createTransactionChartData(
     // Aggregate the transaction data
     const data = allDates.reduce<{ [key: string]: number }>((acc, date) => {
         const transaction = transactions.find(
-            (t) => new Date(t.CreatedAt).toLocaleDateString() === date,
+            (t) => new Date(t.created_at).toLocaleDateString() === date,
         );
         acc[date] = transaction ? transaction.amount : 0;
         return acc;
@@ -52,7 +56,7 @@ export function createTransactionChartData(
     const chartData: { date: string; value: number }[] = [];
     for (let i = transactions.length - 1; i >= 0; i--) {
         const shouldAddLabel = labelIndices.has(i);
-        const dateStr = new Date(transactions[i].CreatedAt).toISOString().split('T')[0];
+        const dateStr = new Date(transactions[i].created_at).toISOString().split('T')[0];
         chartData.push({
             date: dateStr,
             value: transactions[i].amount,
@@ -70,7 +74,7 @@ export function createTransactionChartData(
 
 export function useGetAccountFromStore(accountID: string) {
     const { accounts } = useAccountStore();
-    return accounts.find((account) => account.ID === accountID);
+    return accounts.find((account) => account.id === accountID);
 }
 
 export function groupAccountsByCategory(accounts: Account[]): Record<string, Account[]> {

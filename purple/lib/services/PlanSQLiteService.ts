@@ -4,22 +4,14 @@ import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import HTTPError from '../utils/error';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { UUID } from '../utils/helpers';
+import { Plan } from '@/components/Plans/schema';
 
-type CreateAccountPayload = {
-    user_id?: string;
-    category: string;
-    name: string;
-    balance: number;
-    is_default_account: boolean;
-    currency: string;
-};
-
-export class AccountSQLiteService extends BaseSQLiteService<Account> {
+export class AccountSQLiteService extends BaseSQLiteService<Plan> {
     constructor(db: SQLiteDatabase) {
-        super('accounts', db);
+        super('plans', db);
     }
 
-    async create(data: CreateAccountPayload): Promise<GenericAPIResponse<Account>> {
+    async create(data: Partial<Plan>): Promise<GenericAPIResponse<Plan>> {
         let account!: Account;
         const uuid = UUID();
         const now = new Date().toISOString();
@@ -35,15 +27,15 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
                     uuid,
                     now,
                     now,
-                    null,
-                    data.category,
-                    data.name,
-                    data.balance,
-                    data.is_default_account,
-                    data.currency,
+                    data.user_id!,
+                    data.category!,
+                    data.name!,
+                    data.balance!,
+                    data.is_default_account!,
+                    data.currency!,
                 ],
             );
-            const result = await this.db.getFirstAsync<Account>(
+            const result = await this.db.getFirstAsync<Plan>(
                 'SELECT * FROM accounts where id = ?',
                 [uuid],
             );
@@ -62,8 +54,8 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         });
     }
 
-    async get(id: string): Promise<GenericAPIResponse<Account>> {
-        const account = await this.db.getFirstAsync<Account>(
+    async get(id: string): Promise<GenericAPIResponse<Plan>> {
+        const account = await this.db.getFirstAsync<Plan>(
             `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
             [id],
         );
@@ -81,14 +73,14 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         });
     }
 
-    async list(query: RequestParamQuery): Promise<GenericAPIResponse<Account[]>> {
+    async list(query: RequestParamQuery): Promise<GenericAPIResponse<Plan[]>> {
         const { page, limit } = query;
         const offset = (page - 1) * limit;
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             'SELECT COUNT(*) FROM accounts WHERE deleted_at IS NULL',
         );
         if (!result) throw new Error('Error fetching transactions');
-        const accounts = await this.db.getAllAsync<Account>(
+        const accounts = await this.db.getAllAsync<Plan>(
             `SELECT * FROM accounts
              WHERE deleted_at IS NULL
              ORDER BY created_at DESC

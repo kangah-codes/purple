@@ -97,7 +97,7 @@ export default function NewTransactionScreen() {
             },
             onSuccess: (res) => {
                 // updateTransactions(res.data);
-                queryClient.invalidateQueries([`transactions`]);
+                queryClient.invalidateQueries(['transactions', 'accounts']);
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },

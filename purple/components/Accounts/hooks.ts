@@ -54,10 +54,6 @@ export function useAccounts({
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
     const db = useSQLiteContext();
-    console.log(db, 'database');
-    db.getFirstAsync<{ user_version: number }>('PRAGMA user_version').then((res) => {
-        console.log('res', res);
-    });
     return useQuery(
         ['accounts', requestQuery],
         async () => {

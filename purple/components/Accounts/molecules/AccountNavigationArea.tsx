@@ -34,7 +34,7 @@ export default function AccountNavigationArea() {
                     href={{
                         pathname: '/transactions/new-transaction',
                         params: {
-                            accountId: currentAccount.ID,
+                            accountId: currentAccount.id,
                         },
                     }}
                 >

@@ -3,7 +3,7 @@ import { SessionData } from '@/components/Auth/schema';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import { useInfiniteTransactions } from '@/components/Transactions/hooks';
 import { Transaction } from '@/components/Transactions/schema';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -24,7 +24,7 @@ type AccountScreenProps = {
 
 function AccountScreen(props: AccountScreenProps) {
     const { sessionData } = useAuth();
-    const { accountID } = useLocalSearchParams();
+    const { accountID }: { accountID: string } = useLocalSearchParams();
     const { currentAccount, setCurrentAccount } = useAccountStore();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const {
@@ -34,7 +34,7 @@ function AccountScreen(props: AccountScreenProps) {
         refetch: accountRefetch,
     } = useAccount({
         sessionData: sessionData as SessionData,
-        accountID: currentAccount!.ID,
+        accountID,
         options: {
             cacheTime: 0,
             staleTime: 0,
@@ -66,9 +66,9 @@ function AccountScreen(props: AccountScreenProps) {
             page_size: 10,
         },
         options: {
-            cacheTime: 0, // Disable caching
-            staleTime: 0, // Consider data stale immediately
-            refetchOnMount: true, // Refetch on component mount
+            cacheTime: 0,
+            staleTime: 0,
+            refetchOnMount: true,
             refetchOnWindowFocus: true,
             onError: (err) => {
                 Toast.show({
@@ -91,11 +91,11 @@ function AccountScreen(props: AccountScreenProps) {
     // TODO: look for better way to refetch on focus
     useFocusEffect(
         useCallback(() => {
-            if (currentAccount?.ID) {
+            if (currentAccount?.id) {
                 accountRefetch();
                 refetch();
             }
-        }, [currentAccount?.ID, accountRefetch, refetch]),
+        }, [currentAccount?.id, accountRefetch, refetch]),
     );
 
     useEffect(() => {
@@ -117,7 +117,7 @@ function AccountScreen(props: AccountScreenProps) {
         }
     }, [dataTransactions]);
 
-    if (transactionsFetching || accountFetching || !currentAccount) return <LoadingScreen />;
+    // if (transactionsFetching || accountFetching || !currentAccount) return <LoadingScreen />;
     if (!currentAccount && (!transactionsFetching || !accountFetching)) return null;
 
     return (

@@ -27,7 +27,7 @@ export default function AccountCard({
                 setCurrentAccount(item);
                 router.push({
                     pathname: '/accounts/account-transactions',
-                    params: { accountName: item.name, accountID: item.ID },
+                    params: { accountName: item.name, accountID: item.id },
                 });
             }}
         >
