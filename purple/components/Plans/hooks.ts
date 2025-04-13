@@ -12,8 +12,10 @@ import {
 } from 'react-query';
 import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
-import { Plan, PlanTransaction } from './schema';
+import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './schema';
 import { createPlanStore } from './state';
+import { useSQLiteContext } from 'expo-sqlite';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 
 export function usePlanStore() {
     const [
@@ -137,28 +139,12 @@ export function usePlan({
     options?: UseQueryOptions;
     planID: string;
 }): UseQueryResult<GenericAPIResponse<Plan>, Error> {
+    const db = useSQLiteContext();
     return useQuery(
         [`plan-${planID}`],
         async () => {
-            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}`, {
-                method: 'GET',
-                headers: {
-                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                    Authorization: sessionData.access_token,
-                },
-            });
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+            return service.get(planID);
         },
         {
             ...(options as Omit<
@@ -225,6 +211,7 @@ export function useInfinitePlans({
         'queryKey' | 'queryFn'
     >;
 }): UseInfiniteQueryResult<GenericAPIResponse<Plan[]>, Error> {
+    const db = useSQLiteContext();
     return useInfiniteQuery<GenericAPIResponse<Plan[]>, Error>(
         ['plans', requestQuery],
         async ({ pageParam = 1 }) => {
@@ -234,28 +221,8 @@ export function useInfinitePlans({
                 page_size: requestQuery.page_size || 10,
             };
 
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/plan?${stringify(queryParams)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
-            );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+            return service.list(queryParams);
         },
         {
             ...options,
@@ -275,58 +242,30 @@ export function useCreatePlan({
 }: {
     sessionData: SessionData;
 }): UseMutationResult<GenericAPIResponse<Plan>, Error> {
+    const db = useSQLiteContext();
     return useMutation(['create-plan'], async (data) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan`, {
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                Authorization: sessionData.access_token,
-            },
-            body: JSON.stringify(data),
-        });
-
-        const statusCode = res.status;
-        const json = await res.json();
-
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
-
-        return json;
+        const service = await ServiceFactory.create<Plan>('plans', db);
+        return service.create(data as CreatePlan);
     });
 }
 
 export function useCreatePlanTransaction({
     sessionData,
-    planId,
+    planData,
 }: {
     sessionData: SessionData;
-    planId: string;
+    planData: { type: Plan['type']; id: string; name: string };
 }): UseMutationResult<GenericAPIResponse<PlanTransaction>, Error> {
+    const db = useSQLiteContext();
     return useMutation(['create-plan'], async (data) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan/${planId}/transaction`, {
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                Authorization: sessionData.access_token,
-            },
-            body: JSON.stringify(data),
-        });
-
-        const statusCode = res.status;
-        const json = await res.json();
-
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
-
-        return json;
+        const service = await ServiceFactory.create<Plan>('plans', db);
+        const planService = service as typeof service & {
+            createTransaction(
+                data: CreatePlanTransaction,
+                planData: { type: Plan['type']; id: string; name: string },
+            ): Promise<GenericAPIResponse<PlanTransaction>>;
+        };
+        return planService.createTransaction(data as CreatePlanTransaction, planData);
     });
 }
 

@@ -6,10 +6,12 @@ import { GenericAPIResponse } from '@/@types/request';
 import { AccountSQLiteService } from '../services/AccountSQLiteService';
 import * as SQLite from 'expo-sqlite';
 import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
+import { PlanSQLiteService } from '../services/PlanSQLiteService';
 
 export class ServiceFactory {
     private static accountService: AccountSQLiteService | null = null;
     private static transactionService: TransactionSQLiteService | null = null;
+    private static planService: PlanSQLiteService | null = null;
 
     static async create<T>(
         endpoint: 'accounts' | 'transactions' | 'plans',
@@ -27,6 +29,9 @@ export class ServiceFactory {
                     if (!this.transactionService)
                         this.transactionService = new TransactionSQLiteService(db);
                     return this.transactionService as unknown as DataService<T>;
+                case 'plans':
+                    if (!this.planService) this.planService = new PlanSQLiteService(db);
+                    return this.planService as unknown as DataService<T>;
                 default:
                     throw new Error(`No offline service implementation for ${endpoint}`);
             }

@@ -25,3 +25,15 @@ export type Transaction = {
     currency: string;
     plan_id: string;
 };
+
+export type CreateTransaction = {
+    account_id: string;
+    type: Transaction['type'];
+    amount: number;
+    note?: string;
+    category: string;
+    from_account?: string;
+    to_account?: string;
+    currency: string;
+    plan_id?: string;
+};

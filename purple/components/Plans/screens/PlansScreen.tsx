@@ -22,7 +22,7 @@ const linearGradientColours = ['#c084fc', '#9333ea'];
 export default function PlansScreen() {
     const [index, setIndex] = useState(0);
     const [routes] = useState([
-        { key: 'expenses', title: 'Expenses' },
+        { key: 'expenses', title: 'Budgets' },
         { key: 'savings', title: 'Savings' },
     ]);
     const handleNavigation = () => {
@@ -58,7 +58,6 @@ export default function PlansScreen() {
                             backgroundColor: '#fff',
                             borderRadius: 999,
                             transform: [{ translateX: translateXAnim }],
-                            // ...tw`mx-3`,
                             left: horizontalPadding,
                         }}
                     />

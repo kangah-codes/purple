@@ -9,10 +9,32 @@ import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import { Plan } from '../schema';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 function ExpensesScreen() {
-    const { setExpensePlans, expensePlans } = usePlanStore();
     const { sessionData } = useAuth();
+    const { setExpensePlans, expensePlans } = usePlanStore();
+    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
+        useInfinitePlans({
+            sessionData: sessionData as SessionData,
+            requestQuery: {
+                type: 'expense',
+                page_size: 10,
+            },
+            options: {
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: "We couldn't fetch your plans",
+                        },
+                    });
+                },
+            },
+        });
+
+    useRefreshOnFocus(refetch);
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
         ({ item }: { item: Plan }) => <BudgetPlanCard data={item} />,
@@ -36,27 +58,6 @@ function ExpensesScreen() {
         );
     }, []);
 
-    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
-        useInfinitePlans({
-            sessionData: sessionData as SessionData,
-            requestQuery: {
-                type: 'expense',
-                page_size: 10,
-            },
-            options: {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: "We couldn't fetch your transactions",
-                        },
-                    });
-                },
-            },
-        });
-
-    // flatten the data
     useEffect(() => {
         if (data) {
             const tx = data.pages.flatMap((page) => page.data);

@@ -85,9 +85,6 @@ export default function NewTransactionScreen() {
             ]) as typeof transformedData; // looks hacky af
         }
 
-        console.log(transformedData, 'MUTATE');
-
-        // TODO: refactor all creates to use server errors
         mutate(transformedData, {
             onError: (err) => {
                 Toast.show({
@@ -96,13 +93,11 @@ export default function NewTransactionScreen() {
                 });
             },
             onSuccess: (res) => {
-                // updateTransactions(res.data);
-                queryClient.invalidateQueries(['transactions', 'accounts']);
+                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },
                 });
-                // router.replace('/(tabs)/transactions');
                 router.back();
             },
         });

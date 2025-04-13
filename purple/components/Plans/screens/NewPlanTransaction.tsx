@@ -26,10 +26,13 @@ export default function NewPlanTransactionScreen() {
     const { currentPlan } = usePlanStore();
     const { accounts } = useAccountStore();
     const queryClient = useQueryClient();
-
     const { mutate, isLoading } = useCreatePlanTransaction({
         sessionData: sessionData!,
-        planId: currentPlan?.ID ?? '',
+        planData: {
+            id: currentPlan!.id,
+            type: currentPlan!.type,
+            name: currentPlan!.name,
+        },
     });
     const {
         control,
@@ -60,7 +63,7 @@ export default function NewPlanTransactionScreen() {
         ]);
 
         mutate(
-            { ...transformedData, plan_id: currentPlan!.ID, user_id: sessionData?.user.ID },
+            { ...transformedData, plan_id: currentPlan!.id, user_id: sessionData?.user.ID },
             {
                 onError: (err) => {
                     Toast.show({
@@ -77,7 +80,7 @@ export default function NewPlanTransactionScreen() {
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction created successfully' },
                     });
-                    queryClient.invalidateQueries(`plan-${currentPlan?.ID}`);
+                    queryClient.invalidateQueries(`plan-${currentPlan?.id}`);
                     router.back();
                 },
             },
@@ -172,9 +175,9 @@ export default function NewPlanTransactionScreen() {
                                             selectKey='newPlanTransactionDebitAccount'
                                             options={accounts.reduce(
                                                 (acc, curr) => {
-                                                    acc[curr.ID] = {
+                                                    acc[curr.id] = {
                                                         label: curr.name,
-                                                        value: curr.ID,
+                                                        value: curr.id,
                                                     };
                                                     return acc;
                                                 },

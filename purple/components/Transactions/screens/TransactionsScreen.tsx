@@ -21,6 +21,7 @@ import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
 import { FlashList } from '@shopify/flash-list';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -50,6 +51,9 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 },
             },
         });
+
+    // reresh page on focus
+    useRefreshOnFocus(refetch);
 
     // flatten the data
     useEffect(() => {

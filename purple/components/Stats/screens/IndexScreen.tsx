@@ -55,7 +55,7 @@ export default function StatsScreen() {
         const groupedTransactions = Object.keys(groupedTransactionsByCategory).map((category) => {
             const categoryTransactions = groupedTransactionsByCategory[category];
             const categoryTotal = categoryTransactions.reduce((acc, curr) => {
-                if (curr.Type === 'debit') {
+                if (curr.type === 'debit') {
                     return acc - curr.amount;
                 }
                 return acc + curr.amount;

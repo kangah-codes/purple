@@ -23,6 +23,7 @@ export class APIService<T> implements DataService<T> {
 
     async get(id: string): Promise<GenericAPIResponse<T>> {
         const res = await fetch(`${this.baseUrl}/${this.endpoint}/${id}`, {
+            method: 'GET',
             headers: {
                 'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
                 Authorization: this.sessionData.access_token,
@@ -38,6 +39,7 @@ export class APIService<T> implements DataService<T> {
         const res = await fetch(
             `${this.baseUrl}/${this.endpoint}${query && '?' + stringify(query)}`,
             {
+                method: 'GET',
                 headers: {
                     'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
                     Authorization: this.sessionData.access_token,

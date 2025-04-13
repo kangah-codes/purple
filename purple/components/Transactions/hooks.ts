@@ -11,7 +11,7 @@ import {
 } from 'react-query';
 import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
-import { Transaction } from './schema';
+import { CreateTransaction, Transaction } from './schema';
 import { createTransactionStore } from './state';
 import { stringify } from '@/lib/utils/string';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -133,6 +133,6 @@ export function useCreateTransaction({
     const db = useSQLiteContext();
     return useMutation(['create-transaction'], async (transactionInformation) => {
         const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
-        return service.create(transactionInformation as Partial<Transaction>);
+        return service.create(transactionInformation as CreateTransaction);
     });
 }

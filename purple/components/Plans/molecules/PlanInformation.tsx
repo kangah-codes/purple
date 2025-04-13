@@ -51,20 +51,6 @@ export default function PlanInformation() {
                     </View>
                 )}
             </View>
-            <View className='h-10 bg-purple-100 border border-purple-300 py-1 px-1.5 rounded-full w-full flex flex-row space-x-1.5 items-center'>
-                <View className='bg-purple-300 rounded-full flex items-center justify-center w-7 h-7'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.satoshiMedium}
-                        className='text-purple-500 text-sm tracking-tight'
-                    >
-                        🔥
-                    </Text>
-                </View>
-
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-500 text-sm'>
-                    You're on a 3-day streak!
-                </Text>
-            </View>
         </View>
     );
 }

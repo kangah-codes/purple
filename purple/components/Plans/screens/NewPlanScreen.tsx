@@ -67,10 +67,8 @@ const depositFrequency = {
 
 export default function NewPlanScreen() {
     const { sessionData } = useAuth();
-    const [isEnabled, setIsEnabled] = useState(false);
     const [planCategories, setPlanCategories] = useState<string[]>([]);
     const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
-    // const [currencies, setCurrencies] = useState<Currency[]>([]);
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const {
@@ -81,7 +79,7 @@ export default function NewPlanScreen() {
     } = useForm<CreatePlan>({
         defaultValues: {
             type: '',
-            category: '',
+            category: 'test',
             target: 0.0,
             start_date: new Date().toISOString(),
             end_date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
@@ -129,11 +127,8 @@ export default function NewPlanScreen() {
     };
 
     useEffect(() => {
-        const getCachedConstants = async () => {
-            const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
-            if (cachedTypes) setPlanCategories(cachedTypes);
-        };
-        getCachedConstants();
+        const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
+        if (cachedTypes) setPlanCategories(cachedTypes);
     }, []);
 
     return (

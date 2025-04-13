@@ -1,29 +1,17 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Account } from '@/components/Accounts/schema';
-import { Transaction } from '@/components/Transactions/schema';
+import { CreateTransaction, Transaction } from '@/components/Transactions/schema';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
 import { BaseSQLiteService } from './SQLiteService';
-
-type CreateTransactionPayload = {
-    account_id: string;
-    type: Transaction['type'];
-    amount: number;
-    note?: string;
-    category: string;
-    from_account?: string;
-    to_account?: string;
-    currency: string;
-    plan_id?: string;
-};
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
         super('transactions', db);
     }
 
-    async create(data: CreateTransactionPayload): Promise<GenericAPIResponse<Transaction>> {
+    async create(data: CreateTransaction): Promise<GenericAPIResponse<Transaction>> {
         const uuid = UUID();
         let transaction!: Transaction;
         let debitAccount: Account | null;
@@ -32,15 +20,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         const errorMessage = "Couldn't create transaction";
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
-                `
-                INSERT INTO transactions
+                `INSERT INTO transactions
                   (
                     id, created_at, updated_at, account_id, user_id, type,
                     amount, note, category, from_account, to_account, currency, plan_id
                   )
                 VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                `,
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     uuid,
                     now,
@@ -84,24 +70,24 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             switch (data.type!) {
                 case 'debit':
                     await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        accountBalance.balance - data.amount!,
-                        data.account_id!,
+                        accountBalance.balance - data.amount,
+                        data.account_id,
                     ]);
                     break;
                 case 'credit':
                     await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        accountBalance.balance + data.amount!,
-                        data.account_id!,
+                        accountBalance.balance + data.amount,
+                        data.account_id,
                     ]);
                     break;
                 case 'transfer':
                     if (!debitAccount || !creditAccount) throw new Error(errorMessage);
                     await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        debitAccount.balance - data.amount!,
+                        debitAccount.balance - data.amount,
                         debitAccount.id,
                     ]);
                     await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        creditAccount.balance + data.amount!,
+                        creditAccount.balance + data.amount,
                         creditAccount.id,
                     ]);
             }
