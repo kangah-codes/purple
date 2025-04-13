@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+    react-native-builder:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/app
+            - node-modules:/app/node_modules
+            - eas-build-cache:/root/.eas-cli
+            # Mount for output APK
+            - ./output:/app/output
+        env_file:
+            - .env
+        environment:
+            - EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL}
+            - EXPO_PUBLIC_API_KEY=${EXPO_PUBLIC_API_KEY}
+            - EXPO_TOKEN=${EXPO_TOKEN}
+            - EAS_NO_VCS=1
+        command: >
+            bash -c "cd /app &&
+            yarn install --frozen-lockfile &&
+            npx dotenv -c -- eas build --non-interactive -p android --profile rc --local --output /app/output/purple.apk"
+
+volumes:
+    node-modules:
+    eas-build-cache:

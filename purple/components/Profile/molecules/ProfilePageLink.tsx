@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { ProfilePageLinkProps } from '../schema';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 export default function ProfilePageLink({ icon, title, link }: ProfilePageLinkProps) {
     return (

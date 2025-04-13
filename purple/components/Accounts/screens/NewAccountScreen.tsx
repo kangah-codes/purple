@@ -10,8 +10,8 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { currencies } from '@/constants/currencies';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { currencies } from '@/lib/constants/currencies';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -20,10 +20,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
+import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 
 export default function NewAccountScreen() {
     const { sessionData } = useAuth();
-    const [accountGroups, setAccountsGroups] = useState<string[]>([]);
+    const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
     const { updateAccounts } = useAccountStore();
     const {
         control,

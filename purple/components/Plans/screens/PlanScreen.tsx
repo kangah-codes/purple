@@ -25,9 +25,9 @@ type PlanScreenProps = {
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
 function PlanScreen(props: PlanScreenProps) {
-    const { currentPlan, setCurrentPlan } = usePlanStore();
-    const { id } = useLocalSearchParams();
     const { sessionData } = useAuth();
+    const { id } = useLocalSearchParams();
+    const { currentPlan, setCurrentPlan } = usePlanStore();
     const { data, isLoading, refetch, isFetching } = usePlan({
         sessionData: sessionData as SessionData,
         planID: id as string,

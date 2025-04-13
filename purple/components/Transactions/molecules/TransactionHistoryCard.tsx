@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate, formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
@@ -20,7 +20,7 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle,
 }: TransactionHistoryCardProps) {
-    const date = useMemo(() => formatDateTime(data.CreatedAt), [data.CreatedAt]);
+    const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
 
     const showActionMenu = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -65,15 +65,15 @@ export default function TransactionHistoryCard({
                         style={{
                             ...GLOBAL_STYLESHEET.satoshiBlack,
                             color:
-                                data.Type === 'debit'
+                                data.type === 'debit'
                                     ? '#DC2626'
-                                    : data.Type === 'credit'
-                                    ? 'rgb(22 163 74)'
-                                    : '#9333EA',
+                                    : data.type === 'credit'
+                                      ? 'rgb(22 163 74)'
+                                      : '#9333EA',
                         }}
                         className='text-sm'
                     >
-                        {data.Type === 'debit' ? '-' : data.Type === 'credit' ? '+' : ''}
+                        {data.type === 'debit' ? '-' : data.type === 'credit' ? '+' : ''}
                         {formatCurrencyRounded(data.amount, data.currency)}
                     </Text>
 

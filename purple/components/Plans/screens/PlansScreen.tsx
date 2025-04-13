@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,7 +22,7 @@ const linearGradientColours = ['#c084fc', '#9333ea'];
 export default function PlansScreen() {
     const [index, setIndex] = useState(0);
     const [routes] = useState([
-        { key: 'expenses', title: 'Expenses' },
+        { key: 'expenses', title: 'Budgets' },
         { key: 'savings', title: 'Savings' },
     ]);
     const handleNavigation = () => {
@@ -58,7 +58,6 @@ export default function PlansScreen() {
                             backgroundColor: '#fff',
                             borderRadius: 999,
                             transform: [{ translateX: translateXAnim }],
-                            // ...tw`mx-3`,
                             left: horizontalPadding,
                         }}
                     />

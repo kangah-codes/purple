@@ -1,5 +1,5 @@
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Image } from 'expo-image';
 import React from 'react';
 import { useCallback } from 'react';

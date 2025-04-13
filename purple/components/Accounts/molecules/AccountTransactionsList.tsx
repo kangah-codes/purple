@@ -4,7 +4,7 @@ import { keyExtractor } from '@/lib/utils/number';
 import React, { useCallback } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Transaction } from '@/components/Transactions/schema';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { useTransactionStore } from '@/components/Transactions/hooks';

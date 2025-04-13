@@ -1,6 +1,6 @@
 import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { useAccountStore } from '../hooks';

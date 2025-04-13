@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -21,6 +21,7 @@ import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
 import { FlashList } from '@shopify/flash-list';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 type TransactionsScreenProps = {
     showBackButton?: boolean;
@@ -50,6 +51,9 @@ function TransactionsScreen(props: TransactionsScreenProps) {
                 },
             },
         });
+
+    // reresh page on focus
+    useRefreshOnFocus(refetch);
 
     // flatten the data
     useEffect(() => {

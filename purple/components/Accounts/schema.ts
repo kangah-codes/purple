@@ -8,10 +8,10 @@ export type IAccountCard = {
 };
 
 export type Account = {
-    ID: string;
-    CreatedAt: string;
-    UpdatedAt: string;
-    DeletedAt: null;
+    id: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: null;
     user_id: string;
     category: string;
     name: string;

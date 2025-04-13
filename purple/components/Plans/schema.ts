@@ -12,7 +12,7 @@ export type BudgetPlan = {
 };
 
 export type Plan = {
-    ID: string;
+    id: string;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -42,6 +42,24 @@ export type CreatePlan = {
     end_date: string;
     deposit_frequency: string;
     push_notification: boolean;
+    name: string;
+    currency: string;
+};
+
+export type CreatePlanTransaction = {
+    amount: number;
+    note: string;
+    debit_account_id: string;
+};
+
+type CreatePlanPayload = {
+    type: string;
+    category: string;
+    target: number;
+    balance: number;
+    start_date: string;
+    end_date: string;
+    deposit_frequency: string;
     name: string;
     currency: string;
 };

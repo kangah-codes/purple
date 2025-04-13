@@ -1,6 +1,6 @@
 import { PieChartSkeleton } from '@/components/Shared/molecules/Skeleton';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useStatsStore } from '../hooks';

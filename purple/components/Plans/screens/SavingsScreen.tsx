@@ -4,17 +4,37 @@ import { SessionData } from '@/components/Auth/schema';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { usePlanStore, usePlans } from '../hooks';
+import { useInfinitePlans, usePlanStore, usePlans } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import PlanInfoCard from '../molecules/PlanInfoCard';
 import { Plan } from '../schema';
 
 function SavingsScreen() {
-    const { setSavingPlans, savingPlans } = usePlanStore();
     const { sessionData } = useAuth();
+    const { setSavingPlans, savingPlans } = usePlanStore();
+    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
+        useInfinitePlans({
+            sessionData: sessionData as SessionData,
+            requestQuery: {
+                type: 'saving',
+                page_size: 10,
+            },
+            options: {
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: "We couldn't fetch your plans",
+                        },
+                    });
+                },
+            },
+        });
+
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
         ({ item }: { item: Plan }) => <BudgetPlanCard data={item} />,
@@ -37,27 +57,19 @@ function SavingsScreen() {
             </View>
         );
     }, [savingPlans]);
-    const { isLoading, refetch } = usePlans({
-        sessionData: sessionData as SessionData,
-        options: {
-            onSuccess: (data) => {
-                const res = data as GenericAPIResponse<Plan[]>;
-                setSavingPlans(res.data);
-            },
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: "We couldn't fetch your plans",
-                    },
-                });
-            },
-        },
-        requestQuery: {
-            type: 'saving',
-        },
-    });
+
+    useEffect(() => {
+        if (data) {
+            const tx = data.pages.flatMap((page) => page.data);
+            setSavingPlans(tx);
+        }
+    }, [data]);
+
+    const handleLoadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
 
     return (
         <FlatList

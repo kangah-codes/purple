@@ -4,7 +4,7 @@ import { View, Text, LinearGradient, TouchableOpacity } from '@/components/Share
 import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 interface ErrorBoundaryState {
     hasError: boolean;

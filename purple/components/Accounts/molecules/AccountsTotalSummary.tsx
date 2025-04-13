@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Account } from '../schema';
 
 function AccountSummary({

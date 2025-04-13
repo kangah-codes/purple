@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { useRouter } from 'expo-router';
@@ -27,7 +27,7 @@ export default function AccountCard({
                 setCurrentAccount(item);
                 router.push({
                     pathname: '/accounts/account-transactions',
-                    params: { accountName: item.name, accountID: item.ID },
+                    params: { accountName: item.name, accountID: item.id },
                 });
             }}
         >

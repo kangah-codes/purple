@@ -24,7 +24,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {} from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ChevronLeftIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React from 'react';
 import { nativeStorage } from '@/lib/utils/storage';
 import { useActivateAccount } from '../hooks';

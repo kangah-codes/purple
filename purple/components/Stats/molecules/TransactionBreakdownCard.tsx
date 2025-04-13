@@ -1,4 +1,4 @@
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import React from 'react';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';

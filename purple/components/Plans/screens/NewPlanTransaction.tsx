@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect } from 'react';
@@ -26,10 +26,13 @@ export default function NewPlanTransactionScreen() {
     const { currentPlan } = usePlanStore();
     const { accounts } = useAccountStore();
     const queryClient = useQueryClient();
-
     const { mutate, isLoading } = useCreatePlanTransaction({
         sessionData: sessionData!,
-        planId: currentPlan?.ID ?? '',
+        planData: {
+            id: currentPlan!.id,
+            type: currentPlan!.type,
+            name: currentPlan!.name,
+        },
     });
     const {
         control,
@@ -60,7 +63,7 @@ export default function NewPlanTransactionScreen() {
         ]);
 
         mutate(
-            { ...transformedData, plan_id: currentPlan!.ID, user_id: sessionData?.user.ID },
+            { ...transformedData, plan_id: currentPlan!.id, user_id: sessionData?.user.ID },
             {
                 onError: (err) => {
                     Toast.show({
@@ -77,7 +80,7 @@ export default function NewPlanTransactionScreen() {
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction created successfully' },
                     });
-                    queryClient.invalidateQueries(`plan-${currentPlan?.ID}`);
+                    queryClient.invalidateQueries(`plan-${currentPlan?.id}`);
                     router.back();
                 },
             },
@@ -170,13 +173,19 @@ export default function NewPlanTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanTransactionDebitAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.ID] = {
-                                                    label: curr.name,
-                                                    value: curr.ID,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accounts.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.id] = {
+                                                        label: curr.name,
+                                                        value: curr.id,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {

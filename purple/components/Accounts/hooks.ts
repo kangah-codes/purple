@@ -11,6 +11,8 @@ import { SessionData } from '../Auth/schema';
 import { Account } from './schema';
 import { createAccountStore } from './state';
 import { stringify } from '@/lib/utils/string';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export function useAccountStore() {
     const [
@@ -51,31 +53,12 @@ export function useAccounts({
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useQuery(
         ['accounts', requestQuery],
         async () => {
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/account?${stringify(requestQuery)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
-            );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+            return service.list(requestQuery);
         },
         {
             ...(options as Omit<
@@ -95,28 +78,12 @@ export function useAccount({
     options?: UseQueryOptions;
     accountID: string;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useQuery(
         [`account-${accountID}`],
         async () => {
-            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/account/${accountID}`, {
-                method: 'GET',
-                headers: {
-                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                    Authorization: sessionData.access_token,
-                },
-            });
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+            return service.get(accountID);
         },
         {
             ...(options as Omit<
@@ -171,26 +138,9 @@ export function useCreateAccount({
 }: {
     sessionData: SessionData;
 }): UseMutationResult<GenericAPIResponse<Account>, Error> {
+    const db = useSQLiteContext();
     return useMutation(['create-account'], async (accountInformation) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/account`, {
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                Authorization: sessionData.access_token,
-            },
-            body: JSON.stringify(accountInformation),
-        });
-
-        const statusCode = res.status;
-        const json = await res.json();
-
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
-
-        return json;
+        const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+        return service.create(accountInformation as Partial<Account>);
     });
 }

@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { useDebounce } from '@/lib/utils/debounce';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -70,8 +70,6 @@ export default function SignUpScreen() {
             },
         });
     };
-
-    console.log(errors);
 
     const signUp = (data: SignUpScreenData) => {
         Keyboard.dismiss();

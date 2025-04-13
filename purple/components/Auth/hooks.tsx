@@ -8,6 +8,8 @@ import { SessionData, SessionDataResponse, SignUpResponse } from './schema';
 import { createPlanStore } from '../Plans/state';
 import { createStatsStore } from '../Stats/state';
 import { createTransactionStore } from '../Transactions/state';
+import HTTPError from '@/lib/utils/error';
+import { deleteSecureValue, getSecureValue, setSecureValue } from '@/lib/utils/secureStorage';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -21,6 +23,7 @@ interface AuthContextType {
     destroySession: () => Promise<void>;
     hasOnboarded: boolean;
     setOnboarded: (onboarded: boolean) => Promise<void>;
+    isOfflineMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,10 +42,7 @@ export const useSignIn = (): UseMutationResult<GenericAPIResponse<SessionDataRes
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -64,10 +64,7 @@ export const useSignUp = (): UseMutationResult<GenericAPIResponse<SignUpResponse
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -89,10 +86,7 @@ export function useActivateAccount(): UseMutationResult<GenericAPIResponse<undef
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -114,10 +108,7 @@ export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, E
         const json = await res.json();
 
         if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
+            throw new HTTPError(json.message || 'Unknown error occurred', statusCode);
         }
 
         return json;
@@ -126,6 +117,7 @@ export const useCheckUsername = (): UseMutationResult<GenericAPIResponse<any>, E
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isOfflineMode, setIsOfflineMode] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [sessionExpiry, setSessionExpiry] = useState<Date | null>(null);
     const [refreshExpiry, setRefreshExpiry] = useState<Date | null>(null);
@@ -135,19 +127,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [hasOnboarded, setHasOnboarded] = useState(false);
     const queryClient = useQueryClient();
 
-    const getToken = useCallback(async <T = any,>(key: string): Promise<T | null> => {
-        try {
-            const data = await SecureStore.getItemAsync(key);
-
-            if (!data) return null;
-
-            return JSON.parse(data) as T;
-        } catch (err) {
-            console.error(`Error retrieving ${key}:`, err);
-            throw err;
-        }
-    }, []);
-
     const isTokenExpired = useCallback((expiryDate: string | null): boolean => {
         if (!expiryDate) return true;
         return new Date(expiryDate) <= new Date();
@@ -156,9 +135,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = useCallback(async () => {
         setIsLoading(true);
         try {
-            const sessionData = await getToken<SessionData>('session_data');
+            const isOffline = nativeStorage.getItem<boolean>('isOfflineMode');
+            const sessionData = await getSecureValue<SessionData>('session_data');
+            const onboarded = await getSecureValue<boolean>('has_onboarded');
             const isSessionValid =
                 sessionData?.access_token && !isTokenExpired(sessionData.access_token_expires_at);
+
+            setHasOnboarded(!!onboarded);
+            console.log('is offline', isOffline);
+            if (isOffline && onboarded) {
+                setIsAuthenticated(true);
+                setIsOfflineMode(true);
+                setSessionExpiry(null);
+                _setSessionData(null);
+                return;
+            }
 
             setIsAuthenticated(!!(isSessionValid && sessionData));
             setSessionExpiry(
@@ -167,9 +158,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     : null,
             );
             _setSessionData(sessionData);
-
-            const onboarded = await getToken<boolean>('has_onboarded');
-            setHasOnboarded(!!onboarded);
         } catch (err) {
             console.error('Error checking authentication:', err);
             setIsAuthenticated(false);
@@ -177,11 +165,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSessionExpiry(null);
             setRefreshExpiry(null);
             _setSessionData(null);
+            setIsOfflineMode(false);
             nativeStorage.clear();
         } finally {
             setIsLoading(false);
         }
-    }, [getToken, isTokenExpired]);
+    }, [isTokenExpired]);
 
     const setSessionData = useCallback(
         async (sessionData: SessionData) => {
@@ -189,7 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setError(null);
 
             try {
-                await SecureStore.setItemAsync('session_data', JSON.stringify(sessionData));
+                await setSecureValue('session_data', JSON.stringify(sessionData));
                 await checkAuth();
             } catch (err) {
                 setError(err instanceof Error ? err : new Error('Unknown error occurred'));
@@ -209,7 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const setOnboarded = useCallback(async (onboarded: boolean) => {
         try {
-            await SecureStore.setItemAsync('has_onboarded', JSON.stringify(onboarded));
+            await setSecureValue('has_onboarded', JSON.stringify(onboarded));
             setHasOnboarded(onboarded);
         } catch (err) {
             console.error('Error setting onboarded flag:', err);
@@ -219,28 +208,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const destroySession = useCallback(async () => {
         try {
-            const sessionData = await getToken<SessionData>('session_data');
-
-            if (!sessionData) {
-                throw new Error('Session data does not exist');
+            const isOffline = nativeStorage.getItem<boolean>('isOfflineMode');
+            if (isOffline) {
+                await deleteSecureValue('session_data');
+                destroyStores();
+                nativeStorage.clear();
+                queryClient.clear();
+                return;
             }
 
+            const sessionData = await getSecureValue<SessionData>('session_data');
             destroyStores();
             nativeStorage.clear();
             queryClient.clear();
-            await SecureStore.deleteItemAsync('session_data');
-
-            // send a sign out request
+            await deleteSecureValue('session_data');
             const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-out`, {
                 method: 'POST',
                 headers: {
                     'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                    Authorization: sessionData.access_token,
+                    Authorization: sessionData?.access_token ?? '',
                 },
             });
 
             if (!res.ok) {
-                throw new Error(`Error signing out. Received status: ${res.status}`);
+                console.error("Coouldn't sign out");
             }
         } catch (err) {
             console.error('Error destroying session:', err);
@@ -266,6 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             destroySession,
             hasOnboarded,
             setOnboarded,
+            isOfflineMode,
         }),
         [
             isAuthenticated,
@@ -279,6 +271,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             destroySession,
             hasOnboarded,
             setOnboarded,
+            isOfflineMode,
         ],
     );
 

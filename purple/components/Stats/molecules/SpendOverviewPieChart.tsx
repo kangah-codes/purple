@@ -1,5 +1,5 @@
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import React from 'react';
 import { PieChart } from 'react-native-gifted-charts';

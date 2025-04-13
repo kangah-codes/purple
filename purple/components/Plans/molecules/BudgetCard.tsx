@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDate } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
@@ -23,8 +23,10 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     );
     const labels = getLabelsByType();
 
+    console.log(data);
+
     return (
-        <TouchableOpacity onPress={() => router.push(`/plans/${data.ID}`)} activeOpacity={0.9}>
+        <TouchableOpacity onPress={() => router.push(`/plans/${data.id}`)} activeOpacity={0.9}>
             <View
                 className='p-4 border border-purple-200 rounded-3xl flex flex-col space-y-2.5 w-full bg-white'
                 style={styles.planCard}
@@ -116,13 +118,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
 
 const styles = StyleSheet.create({
     planCard: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 8,
-        elevation: 5,
+        // shadowColor: '#A855F7',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 2,
+        // },
+        // shadowOpacity: 0.125,
+        // shadowRadius: 8,
+        // elevation: 5,
     },
 });

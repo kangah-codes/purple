@@ -1,3 +1,9 @@
+import uuid from 'react-native-uuid';
+
+export function UUID(): string {
+    return uuid.v4();
+}
+
 export function isNotNilUUID(id: string) {
     return id !== '00000000-0000-0000-0000-000000000000';
 }
@@ -33,12 +39,15 @@ export function getKey<T, K extends KeyOf<T>>(obj: T, key: K): string {
 }
 
 export function groupBy<T, K extends KeyOf<T>>(arr: T[], key: K): Record<string, T[]> {
-    return arr.reduce((acc, obj) => {
-        const groupKey = getKey(obj, key);
-        if (!acc[groupKey]) {
-            acc[groupKey] = [];
-        }
-        acc[groupKey].push(obj);
-        return acc;
-    }, {} as Record<string, T[]>);
+    return arr.reduce(
+        (acc, obj) => {
+            const groupKey = getKey(obj, key);
+            if (!acc[groupKey]) {
+                acc[groupKey] = [];
+            }
+            acc[groupKey].push(obj);
+            return acc;
+        },
+        {} as Record<string, T[]>,
+    );
 }

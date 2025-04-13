@@ -1,6 +1,6 @@
 import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { usePlanStore } from '../hooks';
@@ -50,20 +50,6 @@ export default function PlanInformation() {
                         </Text>
                     </View>
                 )}
-            </View>
-            <View className='h-10 bg-purple-100 border border-purple-300 py-1 px-1.5 rounded-full w-full flex flex-row space-x-1.5 items-center'>
-                <View className='bg-purple-300 rounded-full flex items-center justify-center w-7 h-7'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.satoshiMedium}
-                        className='text-purple-500 text-sm tracking-tight'
-                    >
-                        🔥
-                    </Text>
-                </View>
-
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-500 text-sm'>
-                    You're on a 3-day streak!
-                </Text>
             </View>
         </View>
     );

@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { StyleSheet } from 'react-native';
 import { SvgProps } from 'react-native-svg';
 import {

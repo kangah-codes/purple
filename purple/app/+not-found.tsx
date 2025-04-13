@@ -1,5 +1,5 @@
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { GLOBAL_STYLESHEET } from '../lib/constants/Stylesheet';
 import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
