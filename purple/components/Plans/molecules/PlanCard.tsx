@@ -10,7 +10,7 @@ import { Plan } from '../schema';
 export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
         <TouchableOpacity
-            className='p-4 border bg-white border-purple-200 rounded-3xl flex flex-col w-72 space-y-2.5'
+            className='p-4 bg-purple-50 rounded-3xl flex flex-col w-72 space-y-2.5'
             style={[
                 {
                     marginLeft: index !== 0 ? 20 : 0,
@@ -18,7 +18,7 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
                 styles.planCard,
             ]}
             onPress={() => {
-                router.push(`/plans/${data.ID}`);
+                router.push(`/plans/${data.id}`);
             }}
         >
             <View className='flex flex-row w-full justify-between items-center'>
@@ -63,13 +63,13 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
 
 const styles = StyleSheet.create({
     planCard: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 80,
-        elevation: 3,
+        // shadowColor: '#A855F7',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 1,
+        // },
+        // shadowOpacity: 0.125,
+        // shadowRadius: 80,
+        // elevation: 3,
     },
 });

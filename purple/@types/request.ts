@@ -10,4 +10,7 @@ export type GenericAPIResponse<T> = {
 
 export type RequestParamQuery = {
     [key: string]: any;
+} & {
+    page?: number;
+    page_size?: number;
 };

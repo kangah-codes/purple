@@ -14,6 +14,7 @@ import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -23,8 +24,8 @@ export default function IndexScreen() {
     const { updateTransactions } = useTransactionStore();
     const { setUser } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
-    const { refetch } = useUser({
-        sessionData: sessionData as SessionData,
+    // TODO: refactor this to a better named hook
+    const { refetch, data } = useUser({
         id: sessionData?.user.ID,
         options: {
             onError: () => {
@@ -36,7 +37,9 @@ export default function IndexScreen() {
                     },
                 });
             },
-            onSettled: () => setRefreshing(false),
+            onSettled: () => {
+                setRefreshing(false);
+            },
             onSuccess: (data) => {
                 const res = data as GenericAPIResponse<User>;
                 setUser(res.data);
@@ -45,6 +48,7 @@ export default function IndexScreen() {
             },
         },
     });
+    useRefreshOnFocus(refetch);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -60,15 +64,10 @@ export default function IndexScreen() {
                     colors={linearGradientColours}
                 />
                 <AnimatedClouds baseSpeed={0.1} minHeight={10} maxHeight={450} spawnRate={10} />
-                <View
-                    className='flex flex-col'
-                    // style={{
-                    //     paddingTop: RNStatusBar.currentHeight,
-                    // }}
-                >
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg px-5'>
+                <View className='flex flex-col'>
+                    {/* <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg px-5'>
                         Hi, {sessionData?.user.username} 👋
-                    </Text>
+                    </Text> */}
 
                     <ScrollView
                         className='mt-5 h-full'
@@ -80,7 +79,7 @@ export default function IndexScreen() {
                     >
                         <AccountCardCarousel />
                         <PlanHistoryList />
-                        <TransactionHistoryList />
+                        <TransactionHistoryList transactions={data?.data.transactions} />
                     </ScrollView>
                 </View>
             </View>

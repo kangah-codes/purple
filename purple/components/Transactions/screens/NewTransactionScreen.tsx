@@ -1,5 +1,4 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
-import { useAuth } from '@/components/Auth/hooks';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
@@ -15,25 +14,23 @@ import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { TRANSACTION_TYPES, transactionTypes } from '@/lib/constants/transactionTypes';
 import { omit, transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
+import { capitaliseFirstLetter } from '@/lib/utils/string';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useCreateTransaction, useTransactionStore } from '../hooks';
-import { capitaliseFirstLetter } from '@/lib/utils/string';
 import { useQueryClient } from 'react-query';
+import { useCreateTransaction } from '../hooks';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
-    const { sessionData } = useAuth();
     const queryClient = useQueryClient();
     const { accounts } = useAccountStore();
-    const { updateTransactions } = useTransactionStore();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const [transactionCategories, setTransactionCategories] = useState<string[]>([]);
-    const { mutate, isLoading } = useCreateTransaction({ sessionData: sessionData! });
+    const { mutate, isLoading } = useCreateTransaction();
     const {
         control,
         handleSubmit,

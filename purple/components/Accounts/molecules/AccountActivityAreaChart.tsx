@@ -22,7 +22,6 @@ export default function AccountActivityAreaChart({
         { value: 300, label: 'S' },
     ];
     if (transactions.length < 2) return null;
-    console.log(transactions);
 
     return (
         <View className='pt-10 px-5'>

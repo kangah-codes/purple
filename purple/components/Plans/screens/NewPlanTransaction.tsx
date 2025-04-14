@@ -27,7 +27,6 @@ export default function NewPlanTransactionScreen() {
     const { accounts } = useAccountStore();
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlanTransaction({
-        sessionData: sessionData!,
         planData: {
             id: currentPlan!.id,
             type: currentPlan!.type,

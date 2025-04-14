@@ -25,27 +25,12 @@ export function BalanceDisplay({
                 <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
                     Available Balance
                 </Text>
-                {showAmount ? (
-                    <EyeOpenIcon
-                        width={16}
-                        height={16}
-                        stroke='black'
-                        onPress={() => setShowAmount(false)}
-                    />
-                ) : (
-                    <EyeCloseIcon
-                        width={16}
-                        height={16}
-                        stroke='black'
-                        onPress={() => setShowAmount(true)}
-                    />
-                )}
             </View>
             <Text
                 style={GLOBAL_STYLESHEET.satoshiBlack}
                 className='text-black text-3xl tracking-tighter mt-1.5'
             >
-                {showAmount ? formatCurrencyRounded(account.balance, account.currency) : '********'}
+                {formatCurrencyRounded(account.balance, account.currency)}
             </Text>
             <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-base mt-1.5'>
                 {accountName}

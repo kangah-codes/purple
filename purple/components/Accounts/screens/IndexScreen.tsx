@@ -20,10 +20,8 @@ import AccountsAccordion from '../molecules/AccountsAccordion';
 import { Account } from '../schema';
 
 export default function AccountsScreen() {
-    const { sessionData } = useAuth();
     const { setAccounts, accounts } = useAccountStore();
     const { refetch, isFetching } = useAccounts({
-        sessionData: sessionData as SessionData,
         options: {
             onSuccess: (data) => {
                 const res = data as GenericAPIResponse<Account[]>;

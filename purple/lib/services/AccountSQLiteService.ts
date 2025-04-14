@@ -82,8 +82,8 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
     }
 
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Account[]>> {
-        const { page, limit } = query;
-        const offset = (page - 1) * limit;
+        const { page = 1, page_size = 10 } = query;
+        const offset = (page - 1) * page_size;
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             'SELECT COUNT(*) FROM accounts WHERE deleted_at IS NULL',
         );
@@ -93,14 +93,14 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
              WHERE deleted_at IS NULL
              ORDER BY created_at DESC
              LIMIT ? OFFSET ?`,
-            [limit, offset],
+            [page_size, offset],
         );
 
         return this.formatResponse({
             data: accounts,
             status: 200,
             page: Number(page),
-            page_size: Number(limit),
+            page_size: Number(page_size),
             total: 1,
             total_items: result['COUNT(*)'],
             message: 'Success',

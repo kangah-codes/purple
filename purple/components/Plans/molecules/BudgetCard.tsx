@@ -7,12 +7,17 @@ import { router } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Plan } from '../schema';
 import { StyleSheet } from 'react-native';
+import { currencies } from '@/lib/constants/currencies';
+import { differenceInDays } from 'date-fns';
 
+const now = new Date();
 export default function BudgetPlanCard({ data }: { data: Plan }) {
     const { start_date, end_date, balance, target, name, currency, type } = data;
     const isExpense = type === 'expense';
     const progressAmount = isExpense ? target - balance : balance;
     const remainingAmount = isExpense ? Math.max(balance, 0) : Math.max(target - balance, 0);
+    const amountSpent = Math.abs(Math.min((data.balance / data.target) * 100, 100));
+    const daysLeft = differenceInDays(new Date(data.end_date), now);
     const getLabelsByType = useCallback(
         () => ({
             progressLabel: isExpense ? 'Remaining budget' : 'Saved so far',
@@ -23,93 +28,58 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     );
     const labels = getLabelsByType();
 
-    console.log(data);
-
     return (
         <TouchableOpacity onPress={() => router.push(`/plans/${data.id}`)} activeOpacity={0.9}>
             <View
-                className='p-4 border border-purple-200 rounded-3xl flex flex-col space-y-2.5 w-full bg-white'
+                className='p-4 rounded-3xl flex flex-col space-y-5 w-full bg-purple-50'
                 style={styles.planCard}
             >
-                <View className='flex flex-row w-full justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
-                        {truncateStringIfLongerThan(name, 20)}
+                <View className='flex flex-col space-y-0.5 w-full'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
+                        {data.category}
+                    </Text>
+                    <Text
+                        style={[
+                            GLOBAL_STYLESHEET.satoshiBold,
+                            {
+                                color: daysLeft < 0 ? '#fb2c36' : '#ad46ff',
+                            },
+                        ]}
+                        className='text-xs'
+                    >
+                        {Math.abs(daysLeft)} day{Math.abs(daysLeft) > 1 && 's'}{' '}
+                        {daysLeft < 0 ? 'overdue' : 'left'}
                     </Text>
                 </View>
 
-                <View className='flex flex-col space-y-2.5'>
-                    <View className='flex flex-row items-center space-x-0.5'>
-                        <View
-                            className='h-2 bg-purple-600 rounded-md'
-                            style={{
-                                width: `${Math.min((data.balance / data.target) * 100, 100)}%`,
-                            }}
-                        />
-                        <View className='h-2 flex-grow bg-purple-200 rounded-full' />
-                    </View>
-
-                    <View className='flex flex-row justify-between items-center'>
+                <View className='flex flex-col w-full'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-black'>
+                        {amountSpent.toFixed(0)}% {type === 'expense' ? 'spent' : 'saved'}
+                    </Text>
+                    <View className='flex flex-row'>
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-sm text-black'
+                            style={GLOBAL_STYLESHEET.satoshiBold}
+                            className='text-sm text-purple-400 mt-0.5'
                         >
-                            {formatDate(start_date, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            })}
+                            {currencies.find((cur) => cur.code === data.currency)?.symbol}
                         </Text>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
-                            {formatDate(end_date, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            })}
+                        <Text
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
+                            className='text-3xl text-black'
+                        >
+                            {balance}
                         </Text>
                     </View>
                 </View>
 
-                <View className='h-[1.5px] bg-purple-50 w-full' />
-
-                <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-sm text-gray-700 tracking-tight'
-                        >
-                            {labels.progressLabel}
-                        </Text>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
-                            {formatCurrencyAccurate(currency, progressAmount)}
-                        </Text>
-                    </View>
-                    <View className='border-b border-purple-200 w-full' />
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-sm text-gray-700 tracking-tight'
-                        >
-                            {labels.remainingLabel}
-                        </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-sm text-black tracking-tight'
-                        >
-                            {formatCurrencyAccurate(currency, remainingAmount)}
-                        </Text>
-                    </View>
-                    <View className='border-b border-purple-200 w-full' />
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-sm text-gray-700 tracking-tight'
-                        >
-                            {labels.targetLabel}
-                        </Text>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
-                            {formatCurrencyAccurate(currency, target)}
-                        </Text>
-                    </View>
+                <View className='flex flex-row items-center space-x-0.5'>
+                    <View
+                        className='h-5 bg-purple-600 rounded-md'
+                        style={{
+                            width: `${Math.min(amountSpent, 100)}%`,
+                        }}
+                    />
+                    <View className='h-5 flex-grow bg-purple-200 rounded-lg' />
                 </View>
             </View>
         </TouchableOpacity>

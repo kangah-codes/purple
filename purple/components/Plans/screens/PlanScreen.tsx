@@ -29,7 +29,6 @@ function PlanScreen(props: PlanScreenProps) {
     const { id } = useLocalSearchParams();
     const { currentPlan, setCurrentPlan } = usePlanStore();
     const { data, isLoading, refetch, isFetching } = usePlan({
-        sessionData: sessionData as SessionData,
         planID: id as string,
         options: {
             onError: () => {

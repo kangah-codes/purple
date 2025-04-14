@@ -16,6 +16,7 @@ import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './sche
 import { createPlanStore } from './state';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useAuth } from '../Auth/hooks';
 
 export function usePlanStore() {
     const [
@@ -131,15 +132,15 @@ export function useDeletePlan({
 }
 
 export function usePlan({
-    sessionData,
     options,
     planID,
 }: {
-    sessionData: SessionData;
     options?: UseQueryOptions;
     planID: string;
 }): UseQueryResult<GenericAPIResponse<Plan>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useQuery(
         [`plan-${planID}`],
         async () => {
@@ -200,11 +201,9 @@ export function usePlanStatus({
 }
 
 export function useInfinitePlans({
-    sessionData,
     requestQuery,
     options,
 }: {
-    sessionData: SessionData;
     requestQuery: RequestParamQuery;
     options?: Omit<
         UseInfiniteQueryOptions<GenericAPIResponse<Plan[]>, Error>,
@@ -212,6 +211,8 @@ export function useInfinitePlans({
     >;
 }): UseInfiniteQueryResult<GenericAPIResponse<Plan[]>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useInfiniteQuery<GenericAPIResponse<Plan[]>, Error>(
         ['plans', requestQuery],
         async ({ pageParam = 1 }) => {
@@ -237,28 +238,27 @@ export function useInfinitePlans({
     );
 }
 
-export function useCreatePlan({
-    sessionData,
-}: {
-    sessionData: SessionData;
-}): UseMutationResult<GenericAPIResponse<Plan>, Error> {
+export function useCreatePlan(): UseMutationResult<GenericAPIResponse<Plan>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useMutation(['create-plan'], async (data) => {
-        const service = await ServiceFactory.create<Plan>('plans', db);
+        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
         return service.create(data as CreatePlan);
     });
 }
 
+// todo: refactor this to take the data in one object and not pass plandata
 export function useCreatePlanTransaction({
-    sessionData,
     planData,
 }: {
-    sessionData: SessionData;
     planData: { type: Plan['type']; id: string; name: string };
 }): UseMutationResult<GenericAPIResponse<PlanTransaction>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useMutation(['create-plan'], async (data) => {
-        const service = await ServiceFactory.create<Plan>('plans', db);
+        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
         const planService = service as typeof service & {
             createTransaction(
                 data: CreatePlanTransaction,
@@ -267,65 +267,4 @@ export function useCreatePlanTransaction({
         };
         return planService.createTransaction(data as CreatePlanTransaction, planData);
     });
-}
-
-export function useInfinitePlanTransactions({
-    sessionData,
-    requestQuery,
-    options,
-    planID,
-}: {
-    sessionData: SessionData;
-    requestQuery: RequestParamQuery;
-    options?: Omit<
-        UseInfiniteQueryOptions<GenericAPIResponse<PlanTransaction[]>, Error>,
-        'queryKey' | 'queryFn'
-    >;
-    planID: string;
-}): UseInfiniteQueryResult<GenericAPIResponse<PlanTransaction[]>, Error> {
-    return useInfiniteQuery<GenericAPIResponse<PlanTransaction[]>, Error>(
-        ['plan-transactions', requestQuery],
-        async ({ pageParam = 1 }) => {
-            const queryParams = {
-                ...requestQuery,
-                page: pageParam,
-                page_size: requestQuery.page_size || 10,
-            };
-
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}/transactions?${stringify(
-                    queryParams,
-                )}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
-            );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
-        },
-        {
-            ...options,
-            getNextPageParam: (lastPage) => {
-                const nextPage = lastPage.page + 1;
-                return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
-                    ? nextPage
-                    : undefined;
-            },
-            enabled: !!sessionData,
-        },
-    );
 }

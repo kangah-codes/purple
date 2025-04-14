@@ -5,7 +5,7 @@ import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Portal } from '@gorhom/portal';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
@@ -14,16 +14,18 @@ import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { useAuth } from '@/components/Auth/hooks';
 import { SessionData } from '@/components/Auth/schema';
 import { useMonthlyStats, useStatsStore } from '../hooks';
-import { useTransactionStore } from '@/components/Transactions/hooks';
+import { useTransactionStore, useTransactions } from '@/components/Transactions/hooks';
 import { groupBy } from '@/lib/utils/helpers';
 import { getCurrentMonthYear } from '../utils';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
+import { GenericAPIResponse } from '@/@types/request';
+import { Transaction } from '@/components/Transactions/schema';
 
 const currentMonthYear = getCurrentMonthYear();
 const now = new Date();
 
 export default function StatsScreen() {
-    const { transactions } = useTransactionStore();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
     const renderBreakdownItem = useCallback(
         ({ item }: { item: any }) => (
@@ -38,47 +40,46 @@ export default function StatsScreen() {
     );
     const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const { sessionData } = useAuth();
-    const { isLoading, refetch, isFetching, data } = useMonthlyStats({
-        sessionData: sessionData as SessionData,
+    const { isLoading, refetch, isFetching, data } = useTransactions({
         requestQuery: {
-            start_date: format(startOfMonth(now), 'dd/MM/yy'),
-            end_date: format(now, 'dd/MM/yy'),
+            // start_date: startOfMonth(now),
+            // end_date: now,
+            page_size: 9999999,
         },
         options: {
-            onSuccess: (data) => {},
+            onSuccess: (data) => {
+                console.log(data.data, 'STATS');
+                setTransactions((data as GenericAPIResponse<Transaction[]>).data);
+            },
         },
     });
 
-    const groupedTransactions = useMemo(() => {
-        const groupedTransactionsByCategory = groupBy(transactions, 'category');
-        const totalAmount = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-        const groupedTransactions = Object.keys(groupedTransactionsByCategory).map((category) => {
-            const categoryTransactions = groupedTransactionsByCategory[category];
-            const categoryTotal = categoryTransactions.reduce((acc, curr) => {
-                if (curr.type === 'debit') {
-                    return acc - curr.amount;
-                }
-                return acc + curr.amount;
-            }, 0);
-            const categoryPercentage = (categoryTotal / totalAmount) * 100;
+    // const groupedTransactions = useMemo(() => {
+    //     const groupedTransactionsByCategory = groupBy(transactions, 'category');
+    //     const totalAmount = transactions.reduce((acc, curr) => acc + curr.amount, 0);
+    //     const groupedTransactions = Object.keys(groupedTransactionsByCategory).map((category) => {
+    //         const categoryTransactions = groupedTransactionsByCategory[category];
+    //         const categoryTotal = categoryTransactions.reduce((acc, curr) => {
+    //             if (curr.type === 'debit') {
+    //                 return acc - curr.amount;
+    //             }
+    //             return acc + curr.amount;
+    //         }, 0);
+    //         const categoryPercentage = (categoryTotal / totalAmount) * 100;
 
-            return {
-                category,
-                percentage: categoryPercentage.toFixed(2),
-                amount: categoryTotal.toFixed(2),
-                type: categoryTotal >= 0 ? 'credit' : 'debit',
-            };
-        });
+    //         return {
+    //             category,
+    //             percentage: categoryPercentage.toFixed(2),
+    //             amount: categoryTotal.toFixed(2),
+    //             type: categoryTotal >= 0 ? 'credit' : 'debit',
+    //         };
+    //     });
 
-        return groupedTransactions;
-    }, [transactions]);
+    //     return groupedTransactions;
+    // }, [transactions]);
 
     useEffect(() => {
         setIsStatsLoading(isLoading);
-
-        if (data?.data) {
-            setStats(data?.data);
-        }
     }, [isLoading, data]);
 
     return (
@@ -121,11 +122,11 @@ export default function StatsScreen() {
                 <FlatList
                     contentContainerStyle={styles.flatlist}
                     showsVerticalScrollIndicator={false}
-                    data={groupedTransactions}
+                    data={[]}
                     renderItem={renderBreakdownItem}
                     ItemSeparatorComponent={itemSeparator}
                     keyExtractor={keyExtractor}
-                    ListHeaderComponent={<StatsHeader />}
+                    ListHeaderComponent={<StatsHeader transactions={transactions} />}
                     onRefresh={refetch}
                     refreshing={isFetching}
                 />

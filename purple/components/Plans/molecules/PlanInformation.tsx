@@ -11,7 +11,7 @@ export default function PlanInformation() {
     const { currentPlan } = usePlanStore();
 
     const amountAdded = useMemo(
-        () => calculateAmountAddedOnDay(currentPlan?.Transactions),
+        () => calculateAmountAddedOnDay(currentPlan?.transactions),
         [currentPlan],
     );
     const [startDate, endDate] = useMemo(
@@ -31,7 +31,7 @@ export default function PlanInformation() {
                     style={GLOBAL_STYLESHEET.satoshiBlack}
                     className='text-black text-3xl tracking-tighter leading-[1.4] mt-1.5'
                 >
-                    {formatCurrencyAccurate(currentPlan.currency, currentPlan.balance)}
+                    {formatCurrencyAccurate(currentPlan.currency, currentPlan.target)}
                 </Text>
                 <Text
                     style={GLOBAL_STYLESHEET.satoshiBold}

@@ -16,7 +16,6 @@ function ExpensesScreen() {
     const { setExpensePlans, expensePlans } = usePlanStore();
     const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
         useInfinitePlans({
-            sessionData: sessionData as SessionData,
             requestQuery: {
                 type: 'expense',
                 page_size: 10,
@@ -75,9 +74,15 @@ function ExpensesScreen() {
         <FlatList
             contentContainerStyle={styles.contentContainer}
             style={styles.container}
+            numColumns={2}
+            columnWrapperStyle={{ gap: 10 }}
             showsHorizontalScrollIndicator={false}
             data={expensePlans}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+                <View style={{ flex: 0.5 }}>
+                    <BudgetPlanCard data={item} />
+                </View>
+            )}
             keyExtractor={keyExtractor}
             ItemSeparatorComponent={itemSeparator}
             initialNumToRender={5}
@@ -93,17 +98,17 @@ function ExpensesScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        // paddingHorizontal: 20,
+        paddingHorizontal: 20,
     },
     contentContainer: {
         paddingBottom: 100,
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
     },
     listHeaderView: {
         // marginTop: 20,
     },
     itemSeparator: {
-        height: 20,
+        height: 10,
     },
 });
 export default memo(ExpensesScreen);

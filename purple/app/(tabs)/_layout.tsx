@@ -94,9 +94,19 @@ export default function TabLayout() {
                         <UserCircleIcon width={24} height={24} stroke={color} />
                     ),
                     headerShown: false,
-                    href: isOfflineMode && !process.env.EXPO_PUBLIC_DEV_MODE ? null : undefined,
+                    // href: isOfflineMode && !process.env.EXPO_PUBLIC_DEV_MODE ? null : undefined,
                 }}
             />
+            {/* <Tabs.Screen
+                name='settings'
+                options={{
+                    title: 'Settings',
+                    tabBarIcon: ({ color }) => (
+                        <UserCircleIcon width={24} height={24} stroke={color} />
+                    ),
+                    headerShown: false,
+                }}
+            /> */}
         </Tabs>
     );
 }

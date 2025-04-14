@@ -1,4 +1,3 @@
-import { useAuth } from '@/components/Auth/hooks';
 import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
@@ -10,8 +9,9 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { currencies } from '@/lib/constants/currencies';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
+import { currencies } from '@/lib/constants/currencies';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -20,12 +20,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
-import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 
 export default function NewAccountScreen() {
-    const { sessionData } = useAuth();
     const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
     const { updateAccounts } = useAccountStore();
+    const { mutate, isLoading } = useCreateAccount();
     const {
         control,
         handleSubmit,
@@ -38,7 +37,6 @@ export default function NewAccountScreen() {
             currency: '',
         },
     });
-    const { mutate, isLoading } = useCreateAccount({ sessionData: sessionData! });
 
     const onSubmit = (data: { category: string; name: string; balance: string }) => {
         Keyboard.dismiss();
@@ -145,13 +143,19 @@ export default function NewAccountScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanType'
-                                            options={accountGroups.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accountGroups.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '55%', '60%']}
                                             renderItem={renderItem}
                                             value={value}
@@ -264,13 +268,19 @@ export default function NewAccountScreen() {
                                     <>
                                         <SearchableSelectField
                                             selectKey='newCurrencyType'
-                                            options={currencies.reduce((acc, curr) => {
-                                                acc[curr.code] = {
-                                                    label: curr.name,
-                                                    value: curr.code,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={currencies.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.code] = {
+                                                        label: curr.name,
+                                                        value: curr.code,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
                                             value={value}

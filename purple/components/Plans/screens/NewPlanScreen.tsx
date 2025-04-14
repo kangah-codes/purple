@@ -34,6 +34,7 @@ import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
 import { currencies } from '@/lib/constants/currencies';
+import { transactionTypes } from '@/lib/constants/transactionTypes';
 
 /**
  *
@@ -68,7 +69,7 @@ const depositFrequency = {
 export default function NewPlanScreen() {
     const { sessionData } = useAuth();
     const [planCategories, setPlanCategories] = useState<string[]>([]);
-    const { mutate, isLoading } = useCreatePlan({ sessionData: sessionData! });
+    const { mutate, isLoading } = useCreatePlan();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
     const {
@@ -79,7 +80,7 @@ export default function NewPlanScreen() {
     } = useForm<CreatePlan>({
         defaultValues: {
             type: '',
-            category: 'test',
+            category: '',
             target: 0.0,
             start_date: new Date().toISOString(),
             end_date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
@@ -338,19 +339,13 @@ export default function NewPlanScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanCategory'
-                                            options={planCategories.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={transactionTypes.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
@@ -398,19 +393,13 @@ export default function NewPlanScreen() {
                                     <>
                                         <SearchableSelectField
                                             selectKey='newCurrencyType'
-                                            options={currencies.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.code] = {
-                                                        label: curr.name,
-                                                        value: curr.code,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={currencies.reduce((acc, curr) => {
+                                                acc[curr.code] = {
+                                                    label: curr.name,
+                                                    value: curr.code,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
                                             value={value}

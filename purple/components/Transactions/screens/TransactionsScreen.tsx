@@ -34,7 +34,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { data, fetchNextPage, hasNextPage, isError, refetch, isFetching } =
         useInfiniteTransactions({
-            sessionData: sessionData as SessionData,
             requestQuery: {
                 accountID,
                 page_size: 10,

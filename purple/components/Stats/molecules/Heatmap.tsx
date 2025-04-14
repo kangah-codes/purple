@@ -40,7 +40,6 @@ function StatsHeatmap() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const { data, fetchNextPage, hasNextPage, isLoading, refetch, isFetching } =
         useInfiniteTransactions({
-            sessionData: sessionData as SessionData,
             requestQuery: {
                 page_size: 10,
                 startDate: selectedDate ? selectedDate : '',

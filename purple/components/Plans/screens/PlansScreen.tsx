@@ -45,7 +45,7 @@ export default function PlansScreen() {
         return (
             <View className='px-5'>
                 <View
-                    className='w-full bg-purple-100 rounded-full py-2 flex flex-row mb-5 items-center'
+                    className='w-full bg-purple-50 rounded-full py-2 flex flex-row mb-5 items-center'
                     style={{
                         paddingHorizontal: horizontalPadding,
                     }}

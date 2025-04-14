@@ -142,7 +142,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 sessionData?.access_token && !isTokenExpired(sessionData.access_token_expires_at);
 
             setHasOnboarded(!!onboarded);
-            console.log('is offline', isOffline);
             if (isOffline && onboarded) {
                 setIsAuthenticated(true);
                 setIsOfflineMode(true);

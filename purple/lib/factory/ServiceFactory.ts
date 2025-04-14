@@ -16,7 +16,7 @@ export class ServiceFactory {
     static async create<T>(
         endpoint: 'accounts' | 'transactions' | 'plans',
         db: SQLite.SQLiteDatabase,
-        sessionData?: SessionData,
+        sessionData: SessionData | null,
     ): Promise<DataService<T>> {
         const isOffline = await nativeStorage.getItem('isOfflineMode');
 

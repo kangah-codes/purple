@@ -1,23 +1,18 @@
-import { GenericAPIResponse } from '@/@types/request';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
 import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useInfinitePlans, usePlanStore, usePlans } from '../hooks';
+import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import PlanInfoCard from '../molecules/PlanInfoCard';
 import { Plan } from '../schema';
 
 function SavingsScreen() {
-    const { sessionData } = useAuth();
     const { setSavingPlans, savingPlans } = usePlanStore();
     const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
         useInfinitePlans({
-            sessionData: sessionData as SessionData,
             requestQuery: {
                 type: 'saving',
                 page_size: 10,
@@ -34,7 +29,7 @@ function SavingsScreen() {
                 },
             },
         });
-
+    useRefreshOnFocus(refetch);
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderItem = useCallback(
         ({ item }: { item: Plan }) => <BudgetPlanCard data={item} />,
@@ -74,10 +69,15 @@ function SavingsScreen() {
     return (
         <FlatList
             contentContainerStyle={styles.contentContainer}
-            style={styles.container}
+            numColumns={2}
+            columnWrapperStyle={{ gap: 10 }}
             showsHorizontalScrollIndicator={false}
             data={savingPlans}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+                <View style={{ flex: 0.5 }}>
+                    <BudgetPlanCard data={item} />
+                </View>
+            )}
             keyExtractor={keyExtractor}
             ItemSeparatorComponent={itemSeparator}
             initialNumToRender={5}
@@ -85,6 +85,8 @@ function SavingsScreen() {
             refreshing={isLoading}
             onRefresh={refetch}
             ListEmptyComponent={renderEmptylist}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
         />
     );
 }

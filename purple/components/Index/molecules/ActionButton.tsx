@@ -30,7 +30,7 @@ export function ActionButton({
                     pathname: '/transactions/new-transaction',
                     params: {
                         type,
-                        accountId: account.ID,
+                        accountId: account.id,
                     },
                 }}
             >

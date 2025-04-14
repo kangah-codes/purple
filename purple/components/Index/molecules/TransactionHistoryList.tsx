@@ -13,13 +13,22 @@ import { router } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
-export default function TransactionHistoryList() {
+type TransactionHistoryList = {
+    transactions?: Transaction[];
+};
+
+export default function TransactionHistoryList({
+    transactions: propTransactions,
+}: TransactionHistoryList) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { transactions, setCurrentTransaction } = useTransactionStore();
-    const getTopFiveTransactions = useCallback(() => {
-        // TODO: research why duplicate transactions were being sent in the first place instead of this shit
-        return dedupeByKey(transactions.slice(0, 5), 'ID');
-    }, [transactions]);
+    const getTopFiveTransactions = useCallback(
+        (transactions: Transaction[]) => {
+            // TODO: research why duplicate transactions were being sent in the first place instead of this shit
+            return dedupeByKey(transactions.slice(0, 5), 'id');
+        },
+        [transactions],
+    );
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
@@ -73,7 +82,12 @@ export default function TransactionHistoryList() {
 
                 <FlashList
                     estimatedItemSize={50}
-                    data={getTopFiveTransactions()}
+                    data={
+                        // TODO: refactor this to be neater later
+                        propTransactions
+                            ? getTopFiveTransactions(propTransactions)
+                            : getTopFiveTransactions(transactions)
+                    }
                     keyExtractor={keyExtractor}
                     contentContainerStyle={styles.flatlistContainerStyle}
                     showsVerticalScrollIndicator={true}

@@ -13,6 +13,7 @@ import { createAccountStore } from './state';
 import { stringify } from '@/lib/utils/string';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useAuth } from '../Auth/hooks';
 
 export function useAccountStore() {
     const [
@@ -45,15 +46,15 @@ export function useAccountStore() {
 }
 
 export function useAccounts({
-    sessionData,
     requestQuery,
     options,
 }: {
-    sessionData: SessionData;
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useQuery(
         ['accounts', requestQuery],
         async () => {
@@ -70,15 +71,15 @@ export function useAccounts({
 }
 
 export function useAccount({
-    sessionData,
     options,
     accountID,
 }: {
-    sessionData: SessionData;
     options?: UseQueryOptions;
     accountID: string;
 }): UseQueryResult<GenericAPIResponse<Account>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useQuery(
         [`account-${accountID}`],
         async () => {
@@ -133,12 +134,10 @@ export function useAccountGroups({
     );
 }
 
-export function useCreateAccount({
-    sessionData,
-}: {
-    sessionData: SessionData;
-}): UseMutationResult<GenericAPIResponse<Account>, Error> {
+export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useMutation(['create-account'], async (accountInformation) => {
         const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
         return service.create(accountInformation as Partial<Account>);

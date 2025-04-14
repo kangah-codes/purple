@@ -41,7 +41,7 @@ export default function PlanTransactionsList() {
 
             <FlashList
                 estimatedItemSize={40}
-                data={currentPlan.Transactions}
+                data={currentPlan.transactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}

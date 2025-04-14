@@ -111,7 +111,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
             ]);
 
             await this.db.runAsync('UPDATE plans SET balance = ? where id = ?', [
-                plan.balance - data.amount,
+                plan.balance + data.amount,
                 plan.id,
             ]);
 
@@ -177,7 +177,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     }
 
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Plan[]>> {
-        const { page, page_size, type } = query;
+        const { page = 1, page_size = 10, type } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 

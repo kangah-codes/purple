@@ -15,11 +15,10 @@ type TransactionHistoryCardProps = {
 
 export default function PlanTransactionHistoryCard({ data }: TransactionHistoryCardProps) {
     const { currentPlan } = usePlanStore();
-    const account = useGetAccountFromStore(data.from_account);
+    const account = useGetAccountFromStore(data.account.id);
+    const date = formatDateTime(data.created_at);
 
     if (!currentPlan) return null;
-
-    const date = formatDateTime(data.CreatedAt);
 
     return (
         <View className='flex flex-col py-2.5'>
@@ -29,7 +28,7 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
             <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-500'>
                 {date.date} • {date.time}
             </Text>
-            {data.from_account && account && (
+            {data.account && account && (
                 <View className='flex flex-row items-center space-x-1'>
                     <ArrowNarrowDownRightIcon width={16} height={16} stroke='#F87171' />
                     <Text

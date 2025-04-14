@@ -131,7 +131,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     }
 
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
-        const { page, page_size, accountID } = query;
+        const {
+            page = 1,
+            page_size = 10,
+            accountID = false,
+            start_date = false,
+            end_date = false,
+        } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 
@@ -140,10 +146,18 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
         }
+        if (start_date) {
+            whereClause += ` AND t.created_at >= ?`;
+            params.push(start_date);
+        }
+        if (end_date) {
+            whereClause += ` AND t.created_at <= ?`;
+            params.push(end_date);
+        }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             `SELECT COUNT(*) FROM transactions t WHERE ${whereClause}`,
-            accountID ? [accountID] : [],
+            [...params],
         );
         if (!result) throw new Error('Error fetching transactions');
 

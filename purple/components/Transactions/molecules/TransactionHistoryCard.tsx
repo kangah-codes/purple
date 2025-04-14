@@ -36,7 +36,7 @@ export default function TransactionHistoryCard({
         >
             <View
                 style={styles.categoryIcon}
-                className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'
+                className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'
             >
                 <Text className='absolute text-lg'>
                     {extractEmojiOrDefault(data.category, '❔')}
@@ -90,13 +90,13 @@ TransactionHistoryCard.defaultProps = {
 
 const styles = StyleSheet.create({
     categoryIcon: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 80,
-        elevation: 3,
+        // shadowColor: '#A855F7',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 1,
+        // },
+        // shadowOpacity: 0.125,
+        // shadowRadius: 80,
+        // elevation: 3,
     },
 });

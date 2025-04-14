@@ -27,11 +27,9 @@ export type Plan = {
     end_date: string;
     deposit_frequency: string;
     push_notification: boolean;
-    CreatedAt: string;
-    UpdatedAt: string;
     name: string;
     currency: string;
-    Transactions: Transaction[];
+    transactions: Transaction[];
 };
 
 export type CreatePlan = {

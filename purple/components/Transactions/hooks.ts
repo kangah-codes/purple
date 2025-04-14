@@ -16,6 +16,7 @@ import { createTransactionStore } from './state';
 import { stringify } from '@/lib/utils/string';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useAuth } from '../Auth/hooks';
 
 export function useTransactionStore() {
     const [
@@ -42,39 +43,24 @@ export function useTransactionStore() {
 }
 
 export function useTransactions({
-    sessionData,
     requestQuery,
     options,
 }: {
-    sessionData: SessionData;
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Transaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useQuery(
         ['transactions', requestQuery],
         async () => {
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/transaction?${stringify(requestQuery)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
+            const service = await ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
             );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || "Couldn't fetch transactions");
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            return service.list(requestQuery);
         },
         {
             ...(options as Omit<
@@ -86,11 +72,9 @@ export function useTransactions({
 }
 
 export function useInfiniteTransactions({
-    sessionData,
     requestQuery,
     options,
 }: {
-    sessionData: SessionData;
     requestQuery: RequestParamQuery;
     options?: Omit<
         UseInfiniteQueryOptions<GenericAPIResponse<Transaction[]>, Error>,
@@ -98,6 +82,8 @@ export function useInfiniteTransactions({
     >;
 }): UseInfiniteQueryResult<GenericAPIResponse<Transaction[]>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useInfiniteQuery<GenericAPIResponse<Transaction[]>, Error>(
         ['transactions', requestQuery],
         async ({ pageParam = 1 }) => {
@@ -125,12 +111,10 @@ export function useInfiniteTransactions({
     );
 }
 
-export function useCreateTransaction({
-    sessionData,
-}: {
-    sessionData: SessionData;
-}): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
+export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
     const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useMutation(['create-transaction'], async (transactionInformation) => {
         const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.create(transactionInformation as CreateTransaction);
