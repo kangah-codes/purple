@@ -5,24 +5,29 @@ import StatsHeatmap from './Heatmap';
 import SpendOverview from './SpendOverview';
 import TransactionsAccordion from './TransactionAccordion';
 import { Transaction } from '@/components/Transactions/schema';
+import SpendOverviewChart from './SpendOverviewChart';
 
 type StatsHeaderProps = {
     transactions: Transaction[];
 };
 export default function StatsHeader({ transactions }: StatsHeaderProps) {
     return (
-        <View className='flex flex-col space-y-5 px-5'>
+        <View className='flex flex-col space-y-5'>
             {/* Daily Activity Section */}
             {/* <StatsHeatmap /> */}
 
-            <View>
+            <SpendOverview />
+            <SpendOverviewChart />
+            <TransactionsAccordion transactions={transactions} />
+
+            {/* <View>
                 <TransactionsAccordion transactions={transactions} />
-            </View>
+            </View> */}
 
             {/* Spend Overview Section */}
-            <View>
+            {/* <View>
                 <SpendOverview />
-            </View>
+            </View> */}
 
             {/* Savings Overview Section */}
             {/* <View>

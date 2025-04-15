@@ -1,7 +1,7 @@
 import { transactionData } from '@/components/Index/constants';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import { SafeAreaView, Text, View } from '@/components/Shared/styled';
+import { SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Portal } from '@gorhom/portal';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
@@ -20,6 +20,8 @@ import { getCurrentMonthYear } from '../utils';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { GenericAPIResponse } from '@/@types/request';
 import { Transaction } from '@/components/Transactions/schema';
+import SpendOverview from '../molecules/SpendOverview';
+import TransactionsAccordion from '../molecules/TransactionAccordion';
 
 const currentMonthYear = getCurrentMonthYear();
 const now = new Date();
@@ -48,7 +50,6 @@ export default function StatsScreen() {
         },
         options: {
             onSuccess: (data) => {
-                console.log(data.data, 'STATS');
                 setTransactions((data as GenericAPIResponse<Transaction[]>).data);
             },
         },
@@ -107,8 +108,8 @@ export default function StatsScreen() {
                 />
             </Portal> */}
 
-            <View className='' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5 px-5'>
+            <View className='px-5' style={styles.parentView}>
+                <View className='flex flex-row items-center justify-between py-2.5'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
                     </Text>

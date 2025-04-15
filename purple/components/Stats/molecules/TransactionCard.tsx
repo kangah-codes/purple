@@ -5,6 +5,7 @@ import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
+import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
@@ -17,7 +18,10 @@ export default function TransactionCard({
     transactions: Transaction[];
 }) {
     const router = useRouter();
-    const renderItemSeparator = useCallback(() => <View style={styles.separator} />, []);
+    const renderItemSeparator = useCallback(
+        () => <View className='border-b border-purple-100' />,
+        [],
+    );
     const calculateTotalBalance = useMemo(() => {
         return transactions.reduce((acc, curr) => acc + curr.amount, 0);
     }, [transactions]);
@@ -46,8 +50,9 @@ export default function TransactionCard({
                     )}
                 </Text>
             </View>
-            <View className='flex flex-col divide-y divide-purple-50'>
-                <FlatList
+            <View className='flex flex-col '>
+                <FlashList
+                    estimatedItemSize={300}
                     data={transactions}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}

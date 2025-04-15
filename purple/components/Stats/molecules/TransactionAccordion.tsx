@@ -7,6 +7,7 @@ import TransactionCard from './TransactionCard';
 import { FlatList } from 'react-native';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { formatDate } from 'date-fns';
+import { View } from '@/components/Shared/styled';
 
 export default function TransactionsAccordion({ transactions }: { transactions: Transaction[] }) {
     // const { transactions } = useTransactionStore();
@@ -41,7 +42,7 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
     const renderTransactionAccordion = useCallback(
         () => (
             <FlashList
-                estimatedItemSize={50}
+                estimatedItemSize={100}
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
@@ -57,6 +58,7 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
             // ListHeaderComponent={renderHeader}
             contentContainerStyle={{ paddingBottom: 300 }}
             showsVerticalScrollIndicator={false}
+
             // refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
         />
     );

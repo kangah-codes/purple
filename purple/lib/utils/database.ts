@@ -17,7 +17,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     // version 0 to 1
     if (currentDBVersion === 0) {
         for (const migration of Object.values(migrations_v1)) {
-            console.log(migration);
             await db.execAsync(migration);
         }
         currentDBVersion = 1;

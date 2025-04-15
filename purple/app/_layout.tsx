@@ -19,6 +19,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/lib/utils/database';
 import { Text } from '@/components/Shared/styled';
+import { LogBox } from 'react-native';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -29,6 +30,7 @@ const queryClient = new QueryClient({
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(false);

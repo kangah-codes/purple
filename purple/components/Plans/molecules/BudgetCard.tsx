@@ -63,10 +63,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                         >
                             {currencies.find((cur) => cur.code === data.currency)?.symbol}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBlack}
-                            className='text-3xl text-black'
-                        >
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
                             {balance}
                         </Text>
                     </View>

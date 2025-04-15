@@ -5,6 +5,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useStatsStore } from '../hooks';
 import SpendOverviewPieChart from './SpendOverviewPieChart';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 
 export default function SpendOverview() {
     const {
@@ -31,45 +32,31 @@ export default function SpendOverview() {
         return data;
     }, [SpendOverview]);
 
-    if (pieData.length === 0) return null;
-
     return (
-        <View
-            className='space-y-5 border border-purple-200 rounded-3xl p-5 bg-white'
-            style={styles.card}
-        >
-            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
-                Spend Overview
-            </Text>
-            <View className='flex flex-col space-y-5'>
-                {isStatsLoading ? (
-                    <View className='my-5'>
-                        <PieChartSkeleton />
-                    </View>
-                ) : (
-                    pieData.map(({ currency, data }, idx) => (
-                        <>
-                            <SpendOverviewPieChart currency={currency} data={data} />
-                            {idx !== pieData.length - 1 && (
-                                <View className='border-b border-purple-100 h-[1] w-full mt-5' />
-                            )}
-                        </>
-                    ))
-                )}
+        <View className='flex flex-col'>
+            <View className='flex flex-row space-x-2.5'>
+                <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-400'>
+                        Total Income
+                    </Text>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
+                        {formatCurrencyRounded(9994, 'USD')}
+                    </Text>
+                </View>
+
+                <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-400'>
+                        Total Expenses
+                    </Text>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
+                        {formatCurrencyRounded(9994, 'USD')}
+                    </Text>
+                </View>
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    card: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.125,
-        shadowRadius: 80,
-        elevation: 3,
-    },
+    card: {},
 });
