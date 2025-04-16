@@ -26,7 +26,6 @@ export default function IndexScreen() {
     const [refreshing, setRefreshing] = useState(false);
     // TODO: refactor this to a better named hook
     const { refetch, data } = useUser({
-        id: sessionData?.user.ID,
         options: {
             onError: () => {
                 Toast.show({

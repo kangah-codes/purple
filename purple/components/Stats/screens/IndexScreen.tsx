@@ -8,7 +8,7 @@ import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
-import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
+// import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
 import { keyExtractor } from '@/lib/utils/number';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { useAuth } from '@/components/Auth/hooks';
@@ -55,30 +55,6 @@ export default function StatsScreen() {
         },
     });
 
-    // const groupedTransactions = useMemo(() => {
-    //     const groupedTransactionsByCategory = groupBy(transactions, 'category');
-    //     const totalAmount = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-    //     const groupedTransactions = Object.keys(groupedTransactionsByCategory).map((category) => {
-    //         const categoryTransactions = groupedTransactionsByCategory[category];
-    //         const categoryTotal = categoryTransactions.reduce((acc, curr) => {
-    //             if (curr.type === 'debit') {
-    //                 return acc - curr.amount;
-    //             }
-    //             return acc + curr.amount;
-    //         }, 0);
-    //         const categoryPercentage = (categoryTotal / totalAmount) * 100;
-
-    //         return {
-    //             category,
-    //             percentage: categoryPercentage.toFixed(2),
-    //             amount: categoryTotal.toFixed(2),
-    //             type: categoryTotal >= 0 ? 'credit' : 'debit',
-    //         };
-    //     });
-
-    //     return groupedTransactions;
-    // }, [transactions]);
-
     useEffect(() => {
         setIsStatsLoading(isLoading);
     }, [isLoading, data]);
@@ -86,29 +62,7 @@ export default function StatsScreen() {
     return (
         <SafeAreaView className='relative h-full bg-white'>
             <ExpoStatusBar style='dark' />
-            {/* <Portal>
-                <CustomBottomSheetFlatList
-                    snapPoints={['50%', '70%']}
-                    children={
-                        <View className='px-5 py-2.5'>
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiBlack}
-                                className='text-base text-gray-900'
-                            >
-                                🏠 Housing
-                            </Text>
-                        </View>
-                    }
-                    sheetKey={'statsTransactionBreakdownList'}
-                    data={transactionData}
-                    renderItem={renderItem}
-                    containerStyle={styles.container}
-                    handleIndicatorStyle={styles.handleIndicator}
-                    flatListContentContainerStyle={styles.flatlistContentContainer}
-                />
-            </Portal> */}
-
-            <View className='px-5' style={styles.parentView}>
+            <ScrollView className='px-5' style={styles.parentView}>
                 <View className='flex flex-row items-center justify-between py-2.5'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
@@ -120,18 +74,20 @@ export default function StatsScreen() {
                     </View>
                 </View>
 
-                <FlatList
+                <StatsHeader />
+
+                {/* <FlatList
                     contentContainerStyle={styles.flatlist}
                     showsVerticalScrollIndicator={false}
                     data={[]}
-                    renderItem={renderBreakdownItem}
+                    renderItem={() => <></>}
                     ItemSeparatorComponent={itemSeparator}
                     keyExtractor={keyExtractor}
-                    ListHeaderComponent={<StatsHeader transactions={transactions} />}
+                    ListHeaderComponent={<StatsHeader />}
                     onRefresh={refetch}
                     refreshing={isFetching}
-                />
-            </View>
+                /> */}
+            </ScrollView>
         </SafeAreaView>
     );
 }

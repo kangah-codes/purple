@@ -1,3 +1,4 @@
+import React from 'react';
 import { Path, Svg, SvgProps } from 'react-native-svg';
 
 export function EditSquareIcon(props: SvgProps) {

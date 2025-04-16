@@ -27,16 +27,14 @@ export function useUserStore() {
 
 export function useUser({
     options,
-    id,
 }: {
     options?: UseQueryOptions;
-    id: number | string | undefined;
 }): UseQueryResult<GenericAPIResponse<User>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
 
     return useQuery(
-        ['user', id],
+        ['user'],
         async () => {
             const planService = await ServiceFactory.create<Plan>('plans', db, sessionData);
             const transactionService = await ServiceFactory.create<Transaction>(

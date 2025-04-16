@@ -27,7 +27,7 @@ export const createTransactionStore = create<TransactionStore>()(
                         Array.isArray(transaction)
                             ? [...transaction, ...state.transactions]
                             : [transaction, ...state.transactions],
-                        'ID',
+                        'id',
                     ),
                 })),
             reset: () => set({ transactions: [], currentTransaction: null }),

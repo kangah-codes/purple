@@ -30,6 +30,8 @@ export function usePlanStore() {
         setSavingPlans,
         updateExpenseplans,
         updateSavingPlans,
+        removeSavingPlan,
+        removeExpensePlan,
     ] = useStore(createPlanStore, (state) => [
         state.plans,
         state.setPlans,
@@ -41,6 +43,8 @@ export function usePlanStore() {
         state.setSavingPlans,
         state.updateExpenseplans,
         state.updateSavingPlans,
+        state.removeSavingPlan,
+        state.removeExpensePlan,
     ]);
 
     return {
@@ -54,6 +58,8 @@ export function usePlanStore() {
         setSavingPlans,
         updateExpenseplans,
         updateSavingPlans,
+        removeSavingPlan,
+        removeExpensePlan,
     };
 }
 
@@ -102,32 +108,16 @@ export function usePlans({
 }
 
 export function useDeletePlan({
-    sessionData,
     planID,
 }: {
-    sessionData: SessionData;
     planID: string;
-}): UseMutationResult<GenericAPIResponse<undefined>, Error> {
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useMutation(['delete-plan'], async () => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/plan/${planID}`, {
-            method: 'DELETE',
-            headers: {
-                'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                Authorization: sessionData.access_token,
-            },
-        });
-
-        const statusCode = res.status;
-        const json = await res.json();
-
-        if (!res.ok) {
-            const err = new Error(json.message || 'Unknown error occurred');
-            // @ts-ignore
-            err.statusCode = statusCode;
-            throw err;
-        }
-
-        return json;
+        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+        return service.delete(planID);
     });
 }
 

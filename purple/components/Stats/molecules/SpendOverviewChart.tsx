@@ -15,28 +15,84 @@ export default function SpendOverviewChart() {
         { value: 256, label: 'S' },
     ];
 
+    const stackData = [
+        {
+            stacks: [
+                { value: 30, color: '#ad46ff' },
+                { value: 70, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'S',
+        },
+        {
+            stacks: [
+                { value: 45, color: '#ad46ff' },
+                { value: 55, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'M',
+        },
+        {
+            stacks: [
+                { value: 70, color: '#ad46ff' },
+                { value: 30, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'T',
+        },
+        {
+            stacks: [
+                { value: 28, color: '#ad46ff' },
+                { value: 72, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'W',
+        },
+        {
+            stacks: [
+                { value: 14, color: '#ad46ff' },
+                { value: 86, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'T',
+        },
+        {
+            stacks: [
+                { value: 19, color: '#ad46ff' },
+                { value: 81, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'F',
+        },
+        {
+            stacks: [
+                { value: 40, color: '#ad46ff' },
+                { value: 60, color: '#faf5ff', marginBottom: 2 },
+            ],
+            label: 'S',
+        },
+    ];
+
     return (
-        <View className='pt-10'>
+        <View className='pt-5'>
             <BarChart
                 // width={Dimensions.get('window').width}
                 adjustToWidth
                 barWidth={40}
-                spacing={7.5}
+                spacing={5}
                 noOfSections={2}
                 barBorderRadius={9}
                 frontColor='#A855F7'
-                data={barData}
+                // data={barData}
+                stackData={stackData}
                 yAxisThickness={0}
                 xAxisThickness={0}
                 color='#A855F7'
                 yAxisTextStyle={{
                     fontSize: 12,
-                    fontFamily: 'SatoshiBold',
+                    fontFamily: 'SatoshiBlack',
                 }}
                 xAxisLabelTextStyle={{
                     fontSize: 12,
                     fontFamily: 'SatoshiBlack',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
                 }}
+                hideRules
             />
         </View>
         // <ScrollView

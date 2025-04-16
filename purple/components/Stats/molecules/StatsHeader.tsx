@@ -1,16 +1,17 @@
 import { View } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
+import { Transaction } from '@/components/Transactions/schema';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import StatsHeatmap from './Heatmap';
 import SpendOverview from './SpendOverview';
-import TransactionsAccordion from './TransactionAccordion';
-import { Transaction } from '@/components/Transactions/schema';
 import SpendOverviewChart from './SpendOverviewChart';
+import TransactionsAccordion from './TransactionAccordion';
 
 type StatsHeaderProps = {
     transactions: Transaction[];
 };
-export default function StatsHeader({ transactions }: StatsHeaderProps) {
+export default function StatsHeader() {
+    const { transactions } = useTransactionStore();
     return (
         <View className='flex flex-col space-y-5'>
             {/* Daily Activity Section */}

@@ -1,7 +1,7 @@
 import { ChevronRightIcon } from '@/components/SVG/16x16';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
-import { formatCurrencyAccurate, formatCurrencyRounded } from '@/lib/utils/number';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useMemo } from 'react';
@@ -21,7 +21,6 @@ export default function TransactionHistoryCard({
     showTitle,
 }: TransactionHistoryCardProps) {
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
-
     const showActionMenu = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }, []);
@@ -55,24 +54,13 @@ export default function TransactionHistoryCard({
                             )}
                         </Text>
                     )}
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-gray-500'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-400'>
                         {date.date} • {date.time}
                     </Text>
                 </View>
 
                 <View className='flex flex-row space-x-2 items-center'>
-                    <Text
-                        style={{
-                            ...GLOBAL_STYLESHEET.satoshiBlack,
-                            color:
-                                data.type === 'debit'
-                                    ? '#DC2626'
-                                    : data.type === 'credit'
-                                      ? 'rgb(22 163 74)'
-                                      : '#9333EA',
-                        }}
-                        className='text-sm'
-                    >
+                    <Text style={[GLOBAL_STYLESHEET.satoshiBlack]} className='text-sm'>
                         {data.type === 'debit' ? '-' : data.type === 'credit' ? '+' : ''}
                         {formatCurrencyRounded(data.amount, data.currency)}
                     </Text>

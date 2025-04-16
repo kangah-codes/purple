@@ -135,6 +135,19 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         });
     }
 
+    async delete(id: string): Promise<GenericAPIResponse<null>> {
+        await this.db.runAsync(`DELETE from plans where id = ?`, [id]);
+        return this.formatResponse({
+            data: null,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Deleted plan',
+        });
+    }
+
     async get(id: string): Promise<GenericAPIResponse<Plan>> {
         const plan = await this.db.getFirstAsync<Plan>(
             `SELECT * FROM plans WHERE deleted_at IS NULL AND id = ?`,

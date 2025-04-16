@@ -22,23 +22,63 @@ export function splitArrayIntoSubarrays<T>(arr: T[], subarrays: number): T[][] {
 }
 
 /**
- * Removes duplicate objects from an array based on deep comparison.
+ * Removes duplicate objects from an array with O(n) time complexity
+ * Works with both primitive values and complex objects
  *
- * @template T - The type of objects in the array, extending DeepObject.
- * @param {T[]} array - The array from which to remove duplicates.
- * @returns {T[]} A new array with duplicates removed.
+ * @param array The array to deduplicate
+ * @param keyFn Optional custom key generation function
+ * @returns A new array with duplicates removed
  */
-export function dedupe<T extends DeepObject>(array: T[]): T[] {
+export function dedupe<T>(array: T[], keyFn?: (item: T) => string): T[] {
+    if (!array.length) return [];
+
+    if (typeof array[0] !== 'object' || array[0] === null) {
+        return [...new Set(array)];
+    }
+
+    const seen = new Set<string>();
     const result: T[] = [];
 
+    const getKey =
+        keyFn ||
+        ((item: T): string => {
+            if (typeof item !== 'object' || item === null) {
+                return String(item);
+            }
+            return JSON.stringify(sortObjectKeys(item as any));
+        });
+
     for (const item of array) {
-        // Check if the current item is already present in the result array
-        if (!result.some((existingItem) => deepCompare(item, existingItem))) {
-            result.push(item); // Add to result if not a duplicate
+        const key = getKey(item);
+        if (!seen.has(key)) {
+            seen.add(key);
+            result.push(item);
         }
     }
 
     return result;
+}
+
+/**
+ * Recursively sort object keys for deterministic stringification
+ */
+function sortObjectKeys(obj: any): any {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(sortObjectKeys);
+    }
+
+    const sorted: Record<string, any> = {};
+    Object.keys(obj)
+        .sort()
+        .forEach((key) => {
+            sorted[key] = sortObjectKeys(obj[key]);
+        });
+
+    return sorted;
 }
 
 type KeyOf<T> = keyof T | keyof T[keyof T];

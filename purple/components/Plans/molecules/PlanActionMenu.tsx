@@ -8,15 +8,45 @@ import React from 'react';
 import Toast from 'react-native-toast-message';
 import CustomBottomSheetModal from '../../Shared/molecules/GlobalBottomSheetModal';
 import { useDeletePlan, usePlanStore } from '../hooks';
+import { useQueryClient } from 'react-query';
 
 export default function PlanActionMenu() {
-    const { currentPlan } = usePlanStore();
+    const queryClient = useQueryClient();
     const { id } = useLocalSearchParams();
-    const { sessionData } = useAuth();
     const { mutate, isLoading: deletePlanLoading } = useDeletePlan({
-        sessionData: sessionData!,
         planID: id as string,
     });
+    const { currentPlan, removeSavingPlan, removeExpensePlan } = usePlanStore();
+
+    const onDelete = () => {
+        mutate(undefined, {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'There was an issue deleting plan',
+                    },
+                });
+            },
+            onSuccess: () => {
+                if (currentPlan?.type === 'expense') {
+                    removeExpensePlan(currentPlan!.id);
+                } else {
+                    removeSavingPlan(currentPlan!.id);
+                }
+                queryClient.invalidateQueries({ queryKey: ['plans'] });
+                Toast.show({
+                    type: 'success',
+                    props: {
+                        text1: 'Success!',
+                        text2: 'Plan deleted successfully',
+                    },
+                });
+                router.replace('/(tabs)/plans');
+            },
+        });
+    };
 
     if (!currentPlan) return null;
 
@@ -59,29 +89,7 @@ export default function PlanActionMenu() {
                 </View>
                 <View>
                     <HoldButton
-                        onComplete={() =>
-                            mutate(undefined, {
-                                onError: () => {
-                                    Toast.show({
-                                        type: 'error',
-                                        props: {
-                                            text1: 'Error!',
-                                            text2: 'There was an issue deleting plan',
-                                        },
-                                    });
-                                },
-                                onSuccess: (res) => {
-                                    Toast.show({
-                                        type: 'success',
-                                        props: {
-                                            text1: 'Success!',
-                                            text2: 'Plan deleted successfully',
-                                        },
-                                    });
-                                    router.replace('/(tabs)/plans');
-                                },
-                            })
-                        }
+                        onComplete={onDelete}
                         isLoading={deletePlanLoading}
                         progressColor='#dc2626'
                         backgroundColor='#e5e7eb'

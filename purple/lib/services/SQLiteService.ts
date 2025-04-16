@@ -41,7 +41,7 @@ export abstract class BaseSQLiteService<T> implements DataService<T> {
         throw new Error('Not implemented');
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string): Promise<GenericAPIResponse<null>> {
         throw new Error('Not implemented');
     }
 }

@@ -1,15 +1,15 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
+import { Text, View } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { FlashList } from '@shopify/flash-list';
-import { useRouter } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
 
+const ItemSeparator = () => <View className='h-1 border-b border-purple-100' />;
 export default function TransactionCard({
     groupName,
     transactions,
@@ -17,56 +17,56 @@ export default function TransactionCard({
     groupName: string;
     transactions: Transaction[];
 }) {
-    const router = useRouter();
-    const renderItemSeparator = useCallback(
-        () => <View className='border-b border-purple-100' />,
-        [],
-    );
+    const { setCurrentTransaction } = useTransactionStore();
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
+
     const calculateTotalBalance = useMemo(() => {
         return transactions.reduce((acc, curr) => acc + curr.amount, 0);
     }, [transactions]);
-    const renderItem = ({ item, index }: { item: Transaction; index: number }) => (
-        <TransactionHistoryCard data={item} onPress={() => {}} />
+    const formattedDate = useMemo(() => {
+        return transactions.length > 0 ? formatDateTime(transactions[0].created_at).date : '';
+    }, [transactions]);
+    const formattedTotal = useMemo(() => {
+        if (transactions.length === 0) return '';
+        return formatCurrencyAccurate(transactions[0].currency, calculateTotalBalance);
+    }, [transactions, calculateTotalBalance]);
+    const renderItem = React.useCallback(
+        ({ item }: { item: Transaction }) => (
+            <TransactionHistoryCard
+                data={item}
+                onPress={() => {
+                    setCurrentTransaction(item);
+                    setShowBottomSheetModal('transactionReceipt', true);
+                }}
+            />
+        ),
+        [],
     );
+
+    if (!transactions || transactions.length === 0) {
+        return null;
+    }
 
     return (
         <>
             <View className='flex flex-row items-center justify-between py-2.5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-black'>
-                    {formatDateTime(transactions[0].created_at).date}
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
+                    {formattedDate}
                 </Text>
-                <Text
-                    style={[
-                        GLOBAL_STYLESHEET.satoshiBlack,
-                        {
-                            color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
-                        },
-                    ]}
-                    className='text-sm'
-                >
-                    {formatCurrencyAccurate(
-                        transactions[0].currency,
-                        transactions.reduce((acc, curr) => acc + curr.amount, 0),
-                    )}
+                <Text style={[GLOBAL_STYLESHEET.satoshiBold]} className='text-xs text-purple-500'>
+                    {formattedTotal}
                 </Text>
             </View>
-            <View className='flex flex-col '>
+            <View className='flex flex-col'>
                 <FlashList
                     estimatedItemSize={300}
                     data={transactions}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
-                    ItemSeparatorComponent={renderItemSeparator}
-                    scrollEnabled={false} // Disable scrolling for the nested FlatList
+                    ItemSeparatorComponent={ItemSeparator}
+                    scrollEnabled={false}
                 />
             </View>
         </>
     );
 }
-
-const styles = StyleSheet.create({
-    separator: {
-        height: 1,
-        backgroundColor: '#E9D8FD', // divide-purple-200
-    },
-});

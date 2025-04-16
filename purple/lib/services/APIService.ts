@@ -17,7 +17,7 @@ export class APIService<T> implements DataService<T> {
     update(id: string, data: Partial<T>): Promise<GenericAPIResponse<T>> {
         throw new Error('Method not implemented.');
     }
-    delete(id: string): Promise<void> {
+    delete(id: string): Promise<GenericAPIResponse<null>> {
         throw new Error('Method not implemented.');
     }
 

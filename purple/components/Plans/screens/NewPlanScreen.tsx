@@ -31,25 +31,11 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
-import { useCreatePlan } from '../hooks';
+import { useCreatePlan, usePlanStore } from '../hooks';
 import { CreatePlan } from '../schema';
 import { currencies } from '@/lib/constants/currencies';
 import { transactionTypes } from '@/lib/constants/transactionTypes';
-
-/**
- *
- * @returns type CreatePlanDTO struct {
-	AccountId        uuid.UUID `json:"account_id" binding:"required"`
-	Type             string    `json:"type" binding:"required,oneof=saving expense"`
-	Category         string    `json:"category" binding:"required"`
-	Target           float64   `json:"target" validate:"number"`
-	StartDate        string    `json:"start_date" binding:"required"`
-	EndDate          string    `json:"end_date" binding:"required"`
-	DepositFrequency string    `json:"deposit_frequency" binding:"required,oneof=daily weekly bi-weekly monthly yearly"`
-	PushNotification bool      `json:"push_notification" binding:"required"`
-	Name             string    `json:"name" binding:"required"`
-}
- */
+import { useQueryClient } from 'react-query';
 
 const depositFrequency = {
     weekly: {
@@ -69,9 +55,10 @@ const depositFrequency = {
 export default function NewPlanScreen() {
     const { sessionData } = useAuth();
     const [planCategories, setPlanCategories] = useState<string[]>([]);
+    const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlan();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-
+    const { updateExpenseplans, updateSavingPlans } = usePlanStore();
     const {
         control,
         handleSubmit,
@@ -117,7 +104,14 @@ export default function NewPlanScreen() {
                     props: { text1: 'Error!', text2: err.message },
                 });
             },
-            onSuccess: () => {
+            onSuccess: (res) => {
+                const { data: plan } = res;
+                queryClient.invalidateQueries({ queryKey: ['plans'] });
+                // if (plan.type == 'expense') {
+                //     updateExpenseplans(plan);
+                // } else {
+                //     updateSavingPlans(plan);
+                // }
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Plan created successfully' },
@@ -339,13 +333,19 @@ export default function NewPlanScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanCategory'
-                                            options={transactionTypes.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={transactionTypes.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
@@ -393,13 +393,19 @@ export default function NewPlanScreen() {
                                     <>
                                         <SearchableSelectField
                                             selectKey='newCurrencyType'
-                                            options={currencies.reduce((acc, curr) => {
-                                                acc[curr.code] = {
-                                                    label: curr.name,
-                                                    value: curr.code,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={currencies.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.code] = {
+                                                        label: curr.name,
+                                                        value: curr.code,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
                                             value={value}

@@ -53,22 +53,10 @@ export default function PlanNavigationArea() {
                     >
                         <MenuOption
                             onSelect={() => {
-                                setVisible(false);
-                            }}
-                        >
-                            <View className='flex flex-row items-center space-x-1'>
-                                <EditSquareIcon stroke='#A855F7' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
-                                    Edit Plan
-                                </Text>
-                            </View>
-                        </MenuOption>
-                        <MenuOption
-                            onSelect={() => {
                                 setShowBottomSheetModal('planScreenModal', true);
                             }}
                         >
-                            <View className='flex flex-row items-center space-x-1'>
+                            <View className='flex flex-row items-center space-x-1 bg-black'>
                                 <TrashIcon stroke='#EF4444' width={18} />
                                 <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                                     Delete

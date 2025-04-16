@@ -11,6 +11,7 @@ import {
     UserCircleIcon,
 } from '@/components/SVG/noscale';
 import Colors from '@/lib/constants/Colors';
+import { SettingsCogIcon } from '@/components/SVG/24x24';
 
 export default function TabLayout() {
     const { isAuthenticated, isOfflineMode } = useAuth();
@@ -87,6 +88,17 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name='settings'
+                options={{
+                    title: 'Settings',
+                    tabBarIcon: ({ color }) => (
+                        <SettingsCogIcon width={24} height={24} stroke={color} />
+                    ),
+                    headerShown: false,
+                    // href: isOfflineMode && !process.env.EXPO_PUBLIC_DEV_MODE ? null : undefined,
+                }}
+            />
+            <Tabs.Screen
                 name='profile'
                 options={{
                     title: 'Profile',
@@ -94,19 +106,9 @@ export default function TabLayout() {
                         <UserCircleIcon width={24} height={24} stroke={color} />
                     ),
                     headerShown: false,
-                    // href: isOfflineMode && !process.env.EXPO_PUBLIC_DEV_MODE ? null : undefined,
+                    href: null,
                 }}
             />
-            {/* <Tabs.Screen
-                name='settings'
-                options={{
-                    title: 'Settings',
-                    tabBarIcon: ({ color }) => (
-                        <UserCircleIcon width={24} height={24} stroke={color} />
-                    ),
-                    headerShown: false,
-                }}
-            /> */}
         </Tabs>
     );
 }

@@ -31,7 +31,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
     return (
         <TouchableOpacity onPress={() => router.push(`/plans/${data.id}`)} activeOpacity={0.9}>
             <View
-                className='p-4 rounded-3xl flex flex-col space-y-5 w-full bg-purple-50'
+                className='p-4 rounded-3xl flex flex-col w-full bg-purple-50'
                 style={styles.planCard}
             >
                 <View className='flex flex-col space-y-0.5 w-full'>
@@ -52,7 +52,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     </Text>
                 </View>
 
-                <View className='flex flex-col w-full'>
+                <View className='flex flex-col w-full mt-7'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-black'>
                         {amountSpent.toFixed(0)}% {type === 'expense' ? 'spent' : 'saved'}
                     </Text>
@@ -63,13 +63,27 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                         >
                             {currencies.find((cur) => cur.code === data.currency)?.symbol}
                         </Text>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.satoshiBlack}
+                            className='text-2xl text-black'
+                        >
                             {balance}
                         </Text>
                     </View>
+                    <Text
+                        style={[
+                            GLOBAL_STYLESHEET.satoshiBold,
+                            {
+                                color: daysLeft < 0 ? '#fb2c36' : '#ad46ff',
+                            },
+                        ]}
+                        className='text-xs'
+                    >
+                        left this week
+                    </Text>
                 </View>
 
-                <View className='flex flex-row items-center space-x-0.5'>
+                <View className='flex flex-row items-center space-x-0.5 mt-5'>
                     <View
                         className='h-5 bg-purple-600 rounded-md'
                         style={{
