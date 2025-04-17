@@ -56,7 +56,7 @@ export default function PlanNavigationArea() {
                                 setShowBottomSheetModal('planScreenModal', true);
                             }}
                         >
-                            <View className='flex flex-row items-center space-x-1 bg-black'>
+                            <View className='flex flex-row items-center space-x-1'>
                                 <TrashIcon stroke='#EF4444' width={18} />
                                 <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                                     Delete

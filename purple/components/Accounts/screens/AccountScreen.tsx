@@ -1,9 +1,8 @@
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import { useInfiniteTransactions } from '@/components/Transactions/hooks';
-import { Transaction } from '@/components/Transactions/schema';
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccount, useAccountStore } from '../hooks';
@@ -11,30 +10,29 @@ import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
 import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import AccountTransactionsList from '../molecules/AccountTransactionsList';
+import LoadingScreen from '../molecules/LoadingScreen';
+import { GenericAPIResponse } from '@/@types/request';
 import { Account } from '../schema';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useQueryClient } from 'react-query';
 
-const linearGradientColours = ['#D8B4FE', '#fff'];
+const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
-type AccountScreenProps = {
-    showBackButton?: boolean;
-};
-
-function AccountScreen(props: AccountScreenProps) {
-    const { accountID }: { accountID: string } = useLocalSearchParams();
-    const { currentAccount, setCurrentAccount } = useAccountStore();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+function AccountScreen() {
+    const { accountID } = useLocalSearchParams<{ accountID: string }>();
+    const { setCurrentAccount } = useAccountStore();
+    const queryClient = useQueryClient();
     const {
-        data: dataAccount,
-        isLoading: accountLoading,
+        data: accountData,
         isFetching: accountFetching,
         refetch: accountRefetch,
+        isLoading: accountsLoading,
     } = useAccount({
         accountID,
         options: {
-            cacheTime: 0,
-            staleTime: 0,
-            refetchOnMount: true,
-            refetchOnWindowFocus: true,
+            onSuccess: (data) => {
+                setCurrentAccount((data as GenericAPIResponse<Account>).data);
+            },
             onError: () => {
                 Toast.show({
                     type: 'error',
@@ -44,26 +42,22 @@ function AccountScreen(props: AccountScreenProps) {
                     },
                 });
             },
-            onSuccess: (data) => {},
         },
     });
+
     const {
-        data: dataTransactions,
+        data: transactionsData,
         fetchNextPage,
         hasNextPage,
-        isLoading: transactionsLoading,
-        refetch,
+        refetch: transactionsRefetch,
         isFetching: transactionsFetching,
+        isLoading: transactionsLoading,
     } = useInfiniteTransactions({
         requestQuery: {
             accountID,
             page_size: 10,
         },
         options: {
-            cacheTime: 0,
-            staleTime: 0,
-            refetchOnMount: true,
-            refetchOnWindowFocus: true,
             onError: (err) => {
                 Toast.show({
                     type: 'error',
@@ -76,49 +70,34 @@ function AccountScreen(props: AccountScreenProps) {
         },
     });
 
-    const handleLoadMore = () => {
+    useRefreshOnFocus(transactionsRefetch);
+    useRefreshOnFocus(accountRefetch);
+
+    useEffect(() => {
+        return () => {
+            queryClient.invalidateQueries([`account-${accountID}`]);
+        };
+    }, []);
+
+    const transactions = useMemo(() => {
+        if (!transactionsData) return [];
+        return transactionsData.pages.flatMap((page) => page.data);
+    }, [transactionsData]);
+
+    const handleLoadMore = useCallback(() => {
         if (hasNextPage) {
             fetchNextPage();
         }
-    };
+    }, [hasNextPage, fetchNextPage]);
 
-    // TODO: look for better way to refetch on focus
-    useFocusEffect(
-        useCallback(() => {
-            if (currentAccount?.id) {
-                accountRefetch();
-                refetch();
-            }
-        }, [currentAccount?.id, accountRefetch, refetch]),
-    );
-
-    useEffect(() => {
-        if (dataAccount) {
-            // may the ts gods forgive me
-            setCurrentAccount(dataAccount.data as unknown as Account);
-        }
-
-        return () => {
-            setCurrentAccount(null);
-        };
-    }, [dataAccount]);
-
-    // flatten the data
-    useEffect(() => {
-        if (dataTransactions) {
-            const tx = dataTransactions.pages.flatMap((page) => page.data);
-            setTransactions(tx);
-        }
-    }, [dataTransactions]);
-
-    // if (transactionsFetching || accountFetching || !currentAccount) return <LoadingScreen />;
-    if (!currentAccount && (!transactionsFetching || !accountFetching)) return null;
+    const isLoading = transactionsLoading || accountsLoading;
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <LinearGradient
                 className='flex px-5 py-2.5 h-[350] absolute w-full'
-                colors={linearGradientColours}
+                colors={LINEAR_GRADIENT_COLORS}
                 style={styles.parentView}
             />
             <ExpoStatusBar style='dark' />
@@ -130,7 +109,7 @@ function AccountScreen(props: AccountScreenProps) {
                     transactions={transactions}
                     queryData={{
                         handleLoadMore,
-                        refetch,
+                        refetch: transactionsRefetch,
                         refreshing: transactionsFetching,
                     }}
                 />
@@ -144,4 +123,5 @@ const styles = StyleSheet.create({
         paddingTop: RNStatusBar.currentHeight,
     },
 });
+
 export default AccountScreen;

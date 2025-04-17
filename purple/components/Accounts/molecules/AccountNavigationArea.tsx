@@ -64,7 +64,7 @@ export default function AccountNavigationArea() {
                             }}
                         >
                             <View className='flex flex-row items-center space-x-1'>
-                                <EditSquareIcon stroke='#A855F7' width={18} />
+                                <EditSquareIcon stroke='#ad46ff' width={18} />
                                 <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
                                     Edit Plan
                                 </Text>

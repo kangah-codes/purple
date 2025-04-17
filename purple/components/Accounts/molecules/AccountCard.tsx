@@ -31,10 +31,10 @@ export default function AccountCard({
                 });
             }}
         >
-            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-sm'>
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-black text-sm'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-gray-500 text-sm'>
                 {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>

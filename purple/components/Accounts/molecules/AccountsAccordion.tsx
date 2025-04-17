@@ -8,7 +8,6 @@ import AccountCard from './AccountCard';
 
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();
-
     const renderItem = useCallback(
         ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
             <AccountCard groupName={item.groupName} accounts={item.accounts} />
@@ -17,7 +16,6 @@ export default function AccountsAccordion() {
     );
 
     const groupedAccounts = groupAccountsByCategory(accounts);
-
     const data = Object.entries(groupedAccounts)
         .map(([key, value]) => {
             const [category, currency] = key.split('_');

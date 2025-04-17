@@ -62,8 +62,8 @@ export default function StatsScreen() {
     return (
         <SafeAreaView className='relative h-full bg-white'>
             <ExpoStatusBar style='dark' />
-            <ScrollView className='px-5' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5'>
+            <ScrollView className='' style={styles.parentView}>
+                <View className='flex flex-row items-center justify-between py-2.5 px-5'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
                     </Text>

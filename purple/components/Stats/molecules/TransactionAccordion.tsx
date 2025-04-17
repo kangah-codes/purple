@@ -37,7 +37,7 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
     );
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} className='px-5'>
             <FlashList
                 estimatedItemSize={300}
                 data={groupedTransactionData}

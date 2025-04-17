@@ -14,7 +14,7 @@ import Svg from 'react-native-svg';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];
-const drawerBackground = Platform.OS === 'android' ? '#F3F4F6' : '#fff';
+const drawerBackground = Platform.OS === 'android' ? '#faf5ff' : '#fff';
 
 type CurrentTransactionModalProps = {
     modalKey: string;
@@ -51,7 +51,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         className='w-full py-5 items-center justify-center'
                         colors={linearGradient}
                     >
-                        <View className='relative items-center justify-center flex rounded-xl h-10 w-10 border border-purple-200 bg-purple-50'>
+                        <View className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'>
                             <Text className='absolute text-lg'>
                                 {extractEmojiOrDefault(currentTransaction.category, '❔')}
                             </Text>
@@ -94,7 +94,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             {/** The little wedges in the receipt */}
                             <View className='h-5 w-5 bg-white absolute -left-[30] -top-[10] rounded-full' />
                             <View className='h-5 w-5 bg-white absolute -right-[30] -top-[10] rounded-full' />
-                            <View className='border-b border-gray-200 w-full mb-5' />
+                            <View className='border-b border-purple-100 w-full mb-5' />
                         </View>
                         <ReceiptDetail
                             label='Date'
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         paddingBottom: 200,
     },
     bottomDrawer: {
-        backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
+        backgroundColor: Platform.OS === 'android' ? '#faf5ff' : 'white',
     },
     arrowRight: {
         position: 'absolute',

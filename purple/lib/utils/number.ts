@@ -45,7 +45,7 @@ export const formatCurrencyRounded = (
     amount: number | undefined | null,
     currency: string | undefined | null,
     dp: number = 2,
-) => {
+): string => {
     if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
 
     if (amount === undefined || amount === null || currency === undefined || currency === '')
@@ -55,6 +55,11 @@ export const formatCurrencyRounded = (
     return `${currency} ${formattedValue}`;
 };
 
+export function formatNumberRounded(amount: number | undefined | null, dp: number = 2): string {
+    const formattedValue = numberFormatter(amount ?? 0, dp);
+    return `${formattedValue}`;
+}
+
 /**
  * @description Function to format a number as a currency string to an accurate value
  * @param {Number} amount the amount to be formatted
@@ -62,7 +67,7 @@ export const formatCurrencyRounded = (
  * @returns {String} the formatted amount
  * @author Joshua Akangah
  */
-export function formatCurrencyAccurate(currency: string, amount: number) {
+export function formatCurrencyAccurate(currency: string, amount: number): string {
     if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
 
     if (amount === undefined || currency === undefined || currency === '') return 'N/A';

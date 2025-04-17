@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDate } from '@/lib/utils/date';
-import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { formatCurrencyAccurate, formatNumberRounded } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import React, { useCallback } from 'react';
@@ -56,18 +56,12 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                     <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-black'>
                         {amountSpent.toFixed(0)}% {type === 'expense' ? 'spent' : 'saved'}
                     </Text>
-                    <View className='flex flex-row'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-sm text-purple-400 mt-0.5'
-                        >
+                    <View className='flex flex-row text-black'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm mt-0.5'>
                             {currencies.find((cur) => cur.code === data.currency)?.symbol}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBlack}
-                            className='text-2xl text-black'
-                        >
-                            {balance}
+                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-2xl'>
+                            {formatNumberRounded(balance)}
                         </Text>
                     </View>
                     <Text

@@ -16,7 +16,7 @@ export const ReceiptDetail = React.memo(({ label, value }: any) => (
         <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-sm text-black'>
             {label}
         </Text>
-        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-black'>
+        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-400'>
             {value}
         </Text>
     </View>

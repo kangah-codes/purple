@@ -6,6 +6,7 @@ import { StyleSheet } from 'react-native';
 import SpendOverview from './SpendOverview';
 import SpendOverviewChart from './SpendOverviewChart';
 import TransactionsAccordion from './TransactionAccordion';
+import StatsHeatmap from './Heatmap';
 
 type StatsHeaderProps = {
     transactions: Transaction[];
@@ -15,10 +16,10 @@ export default function StatsHeader() {
     return (
         <View className='flex flex-col space-y-5'>
             {/* Daily Activity Section */}
-            {/* <StatsHeatmap /> */}
 
             <SpendOverview />
             <SpendOverviewChart />
+            <StatsHeatmap />
             <TransactionsAccordion transactions={transactions} />
 
             {/* <View>

@@ -7,7 +7,7 @@ import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { StarsIcon } from '@/components/SVG/24x24';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
+import { useInfiniteTransactions, useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
@@ -18,6 +18,7 @@ import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useStatsStore } from '../hooks';
 import HeatmapLoading from './HeatmapLoading';
+import { groupBy } from '@/lib/utils/helpers';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -37,54 +38,25 @@ function StatsHeatmap() {
     const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
     const [selectedDate, setSelectedDate] = useState<string | null>();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const { data, fetchNextPage, hasNextPage, isLoading, refetch, isFetching } =
-        useInfiniteTransactions({
-            requestQuery: {
-                page_size: 10,
-                startDate: selectedDate ? selectedDate : '',
-                endDate: selectedDate ? selectedDate : '',
-            },
-            options: {
-                onError: (err) => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: err.message,
-                        },
-                    });
-                },
-                enabled: selectedDate !== null,
-            },
-        });
-
-    const handleLoadMore = () => {
-        if (hasNextPage) {
-            fetchNextPage();
-        }
-    };
-
-    // flatten the data
-    useEffect(() => {
-        if (data) {
-            const tx = data.pages.flatMap((page) => page.data);
-            setTransactions(tx);
-        }
-    }, [data]);
+    const { transactions } = useTransactionStore();
 
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {
+                const formattedTransactions = transactions.map((transaction) => ({
+                    ...transaction,
+                    created_at_formatted: format(new Date(transaction.created_at), 'dd/MM/yy'),
+                }));
                 const date = format(day, 'dd/MM/yy');
+                const groupedTransactions = groupBy(formattedTransactions, 'created_at_formatted');
 
                 return {
-                    value: stats.DailyActivity[date] ?? 0, // this is where i need to injext
+                    value: groupedTransactions[date]?.length ?? 0,
                     key: format(day, 'dd/MM/yyyy'),
                     index: index + offset,
                 };
             }),
-        [monthDays, stats],
+        [monthDays, stats, transactions],
     );
 
     const renderCell = useCallback(
@@ -128,27 +100,7 @@ function StatsHeatmap() {
     );
 
     return (
-        <View className='flex flex-col space-y-2.5'>
-            <Portal>
-                <CustomBottomSheetFlatList
-                    snapPoints={['50%', '70%']}
-                    children={
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBlack}
-                            className='text-base text-gray-900 px-5 py-2.5'
-                        >
-                            Transactions on {selectedDate}
-                        </Text>
-                    }
-                    sheetKey={'statsDailyTransactionBreakdownList'}
-                    data={transactions}
-                    renderItem={renderItem}
-                    containerStyle={styles.bottomSheetContainer}
-                    handleIndicatorStyle={styles.handleIndicator}
-                    flatListContentContainerStyle={styles.flatlistContentContainer}
-                    itemSeparator={itemSeparator}
-                />
-            </Portal>
+        <View className='flex flex-col space-y-2.5 px-5'>
             <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                 Daily Activity
             </Text>
