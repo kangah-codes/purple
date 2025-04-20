@@ -1,98 +1,101 @@
 {
-    "expo": {
-        "name": "Purple",
-        "slug": "purple",
-        "version": "0.1.0",
-        "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        "scheme": "com.akangah89.Purple",
-        "userInterfaceStyle": "automatic",
-        "splash": {
-            "image": "./assets/images/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff",
-            "width": 320,
-            "height": 320
-        },
-        "assetBundlePatterns": ["**/*"],
-        "ios": {
-            "supportsTablet": false,
-            "bundleIdentifier": "com.akangah89.Purple"
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#9333EA"
-            },
-            "package": "com.akangah89.Purple"
-        },
-        "plugins": [
-            "expo-router",
-            [
-                "expo-font",
-                {
-                    "fonts": [
-                        "./assets/fonts/satoshi/Satoshi-Black.otf",
-                        "./assets/fonts/satoshi/Satoshi-BlackItalic.otf",
-                        "./assets/fonts/satoshi/Satoshi-Bold.otf",
-                        "./assets/fonts/satoshi/Satoshi-BoldItalic.otf",
-                        "./assets/fonts/satoshi/Satoshi-Italic.otf",
-                        "./assets/fonts/satoshi/Satoshi-Light.otf",
-                        "./assets/fonts/satoshi/Satoshi-LightItalic.otf",
-                        "./assets/fonts/satoshi/Satoshi-Medium.otf",
-                        "./assets/fonts/satoshi/Satoshi-MediumItalic.otf",
-                        "./assets/fonts/satoshi/Satoshi-Regular.otf"
-                    ]
-                }
-            ],
-            "expo-secure-store",
-            [
-                "expo-build-properties",
-                {
-                    "ios": {
-                        "newArchEnabled": false
-                    },
-                    "android": {
-                        "newArchEnabled": false
-                    }
-                }
-            ],
-            [
-                "expo-splash-screen",
-                {
-                    "backgroundColor": "#ffffff",
-                    "image": "./assets/images/splash.png",
-                    "imageWidth": 320
-                }
-            ],
-            [
-                "expo-sqlite",
-                {
-                    "enableFTS": true,
-                    "useSQLCipher": true,
-                    "android": {
-                        "enableFTS": false,
-                        "useSQLCipher": false
-                    },
-                    "ios": {
-                        "customBuildFlags": [
-                            "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
-                        ]
-                    }
-                }
+  "expo": {
+    "name": "Purple",
+    "slug": "purple",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "com.akangah89.Purple",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "width": 320,
+      "height": 320
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.akangah89.Purple"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#9333EA"
+      },
+      "package": "com.akangah89.Purple"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/satoshi/Satoshi-Black.otf",
+            "./assets/fonts/satoshi/Satoshi-BlackItalic.otf",
+            "./assets/fonts/satoshi/Satoshi-Bold.otf",
+            "./assets/fonts/satoshi/Satoshi-BoldItalic.otf",
+            "./assets/fonts/satoshi/Satoshi-Italic.otf",
+            "./assets/fonts/satoshi/Satoshi-Light.otf",
+            "./assets/fonts/satoshi/Satoshi-LightItalic.otf",
+            "./assets/fonts/satoshi/Satoshi-Medium.otf",
+            "./assets/fonts/satoshi/Satoshi-MediumItalic.otf",
+            "./assets/fonts/satoshi/Satoshi-Regular.otf"
+          ]
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": false
+          },
+          "android": {
+            "newArchEnabled": false
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash.png",
+          "imageWidth": 320
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": true,
+          "android": {
+            "enableFTS": false,
+            "useSQLCipher": false
+          },
+          "ios": {
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
             ]
-        ],
-        "experiments": {
-            "typedRoutes": true
-        },
-        "extra": {
-            "router": {
-                "origin": false
-            },
-            "eas": {
-                "projectId": "381fc979-2396-4f04-93f0-bdfea57f48d2"
-            }
-        },
-        "owner": "akangah89"
-    }
+          }
+        }
+      ],
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "381fc979-2396-4f04-93f0-bdfea57f48d2"
+      }
+    },
+    "owner": "akangah89"
+  }
 }

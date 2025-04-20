@@ -1,4 +1,4 @@
-import { ScrollView, View } from '@/components/Shared/styled';
+import { ScrollView, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { Transaction } from '@/components/Transactions/schema';
 import React, { useMemo } from 'react';
@@ -10,6 +10,7 @@ import {
     getWeekRangesForMonth,
 } from '../utils';
 import WeekLegend from './SpendOverviewLegend';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 export default function SpendOverviewChart() {
     const { transactions } = useTransactionStore();
@@ -21,8 +22,11 @@ export default function SpendOverviewChart() {
     console.log(stackData.map((stack) => [stack.label, stack.stacks]));
 
     return (
-        <View className='pt-5'>
-            <View className='px-5 mb-5'>
+        <View className='pt-5 flex flex-col space-y-2.5 px-5 mb-5'>
+            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
+                Spend Overview
+            </Text>
+            <View className='mb-5'>
                 <BarChart
                     // width={Dimensions.get('window').width}
                     adjustToWidth

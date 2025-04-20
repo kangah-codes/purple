@@ -3,9 +3,9 @@ import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
 import React, { useMemo } from 'react';
-import {} from 'react-native';
 import TransactionCard from './TransactionCard';
 import { Text, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 export default function TransactionsAccordion({ transactions }: { transactions: Transaction[] }) {
     const groupedTransactionData = useMemo(() => {
@@ -37,7 +37,10 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
     );
 
     return (
-        <View style={{ flex: 1 }} className='px-5'>
+        <View style={{ flex: 1 }} className='px-5 flex flex-col space-y-2.5 mt-5'>
+            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
+                My transactions
+            </Text>
             <FlashList
                 estimatedItemSize={300}
                 data={groupedTransactionData}

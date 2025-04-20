@@ -1,13 +1,15 @@
 import { useAuth } from '@/components/Auth/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import useGetCountry from '@/lib/hooks/useGetCountry';
 import { setSecureValue } from '@/lib/utils/secureStorage';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Image, ImageSource } from 'expo-image';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
+import { getLocales, getCalendars, useLocales } from 'expo-localization';
 
 type OnboardingPageProps = {
     title: string;
@@ -25,10 +27,12 @@ export default function OnboardingPage({
     pages,
 }: OnboardingPageProps) {
     const { setOnboarded, setSessionData } = useAuth();
+    const a = useLocales();
+    console.log(a, 'locale');
 
     return (
         <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] bg-purple-50 relative'>
-            {image}
+            <>{image}</>
             <View className='flex flex-col space-y-2.5'>
                 <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-4xl text-black'>
                     {title}

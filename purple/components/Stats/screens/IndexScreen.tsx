@@ -67,8 +67,11 @@ export default function StatsScreen() {
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
                     </Text>
-                    <View className='border border-purple-100 px-2 py-1 rounded-full'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs'>
+                    <View className='bg-purple-50 px-2 py-1 rounded-full'>
+                        <Text
+                            style={GLOBAL_STYLESHEET.satoshiBold}
+                            className='text-xs text-purple-400'
+                        >
                             {currentMonthYear}
                         </Text>
                     </View>
