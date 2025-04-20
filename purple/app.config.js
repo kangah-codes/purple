@@ -1,5 +1,5 @@
-export default ({ config, ...env }) => {
-    const isDev = env.profile === 'development';
+export default ({ config }) => {
+    const isDev = process.env.NODE_ENV === 'dev';
 
     return {
         ...config,
