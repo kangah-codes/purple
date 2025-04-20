@@ -14,14 +14,14 @@ export default function NotFoundScreen() {
                 <Image source={require('@/assets/images/graphics/15.png')} style={tw`h-52 w-52`} />
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={{ fontFamily: 'Suprapower' }}
+                        style={GLOBAL_STYLESHEET.satoshiBlack}
                         className='text-2xl text-black text-center'
                     >
                         Looks like you're lost!
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiMedium}
-                        className='text-sm textblack text-center'
+                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        className='text-base textblack text-center'
                     >
                         The page you're looking for doesn't exist or has been moved.
                     </Text>
@@ -37,7 +37,7 @@ export default function NotFoundScreen() {
                         colors={['#c084fc', '#9333ea']}
                     >
                         <Text
-                            style={{ fontFamily: 'MonaSansBold' }}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-base text-white tracking-tight'
                         >
                             Take me home

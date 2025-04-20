@@ -1,6 +1,18 @@
 {
     "build": {
-        "production": {},
+        "production": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
+            },
+            "channel": "production",
+            "environment": "production"
+        },
         "development": {
             "developmentClient": true,
             "distribution": "internal",
@@ -20,8 +32,12 @@
             "android": {
                 "buildType": "apk"
             },
-            "channel": "development",
-            "environment": "development"
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
+            },
+            "channel": "rc",
+            "environment": "production"
         }
     }
 }

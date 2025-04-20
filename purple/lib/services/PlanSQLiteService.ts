@@ -6,6 +6,7 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import { UUID } from '../utils/helpers';
 import { CreatePlan, CreatePlanTransaction, Plan } from '@/components/Plans/schema';
 import { Transaction } from '@/components/Transactions/schema';
+import { format, parse } from 'date-fns';
 
 export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     constructor(db: SQLiteDatabase) {
@@ -15,7 +16,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     async create(data: CreatePlan): Promise<GenericAPIResponse<Plan>> {
         let plan!: Plan;
         const uuid = UUID();
-        const now = new Date().toISOString();
+        const now = format(new Date().toISOString(), 'yyyyMMdd');
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
                 `
@@ -47,7 +48,11 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         });
 
         return this.formatResponse({
-            data: plan,
+            data: {
+                ...plan,
+                created_at: parse(plan.created_at, 'yyyyMMdd', new Date()).toISOString(),
+                updated_at: parse(plan.updated_at, 'yyyyMMdd', new Date()).toISOString(),
+            },
             status: 201,
             page: 1,
             page_size: 1,
@@ -81,7 +86,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
 
         const uuid = UUID();
         let transaction!: Transaction;
-        const now = new Date().toISOString();
+        const now = format(new Date().toISOString(), 'yyyyMMdd');
 
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
@@ -125,7 +130,11 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         });
 
         return this.formatResponse({
-            data: transaction,
+            data: {
+                ...transaction,
+                created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
+                updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
+            },
             status: 201,
             page: 1,
             page_size: 1,
@@ -171,6 +180,8 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         return this.formatResponse({
             data: {
                 ...plan,
+                created_at: parse(plan.created_at, 'yyyyMMdd', new Date()).toISOString(),
+                updated_at: parse(plan.updated_at, 'yyyyMMdd', new Date()).toISOString(),
                 transactions: planTransactions.map((transaction) => ({
                     ...transaction,
                     currency: transaction.account_currency,
@@ -178,6 +189,8 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
                         id: transaction.account_id,
                         name: transaction.account_name,
                     },
+                    created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
+                    updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
                 })) as unknown as Transaction[],
             },
             status: 200,

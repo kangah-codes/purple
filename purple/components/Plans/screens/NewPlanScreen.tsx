@@ -1,8 +1,6 @@
-import { Currency } from '@/@types/common';
-import { useAuth } from '@/components/Auth/hooks';
+import { usePreferences } from '@/components/Settings/hooks';
 import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
-import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
@@ -15,12 +13,13 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { transformObject } from '@/lib/utils/object';
 import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -30,12 +29,10 @@ import {
     StyleSheet,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import tw from 'twrnc';
-import { useCreatePlan, usePlanStore } from '../hooks';
-import { CreatePlan } from '../schema';
-import { currencies } from '@/lib/constants/currencies';
-import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { useQueryClient } from 'react-query';
+import tw from 'twrnc';
+import { useCreatePlan } from '../hooks';
+import { CreatePlan } from '../schema';
 
 const depositFrequency = {
     weekly: {
@@ -53,12 +50,10 @@ const depositFrequency = {
 };
 
 export default function NewPlanScreen() {
-    const { sessionData } = useAuth();
-    const [planCategories, setPlanCategories] = useState<string[]>([]);
+    const { currency } = usePreferences();
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlan();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { updateExpenseplans, updateSavingPlans } = usePlanStore();
     const {
         control,
         handleSubmit,
@@ -70,26 +65,13 @@ export default function NewPlanScreen() {
             category: '',
             target: 0.0,
             start_date: new Date().toISOString(),
-            end_date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
+            end_date: new Date(new Date().getTime() + 24 * 30 * 60 * 60 * 1000).toISOString(),
             deposit_frequency: '',
             push_notification: false,
             name: '',
-            currency: sessionData?.user?.preferences?.preferred_currency ?? '',
+            currency,
         },
     });
-    const renderCurrencies = useCallback((item: any) => {
-        const currency = currencies.find((currency) => currency.code === item.value);
-
-        return (
-            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
-                    {currency?.emojiFlag}
-                    {'  '}
-                    {currency?.name}
-                </Text>
-            </View>
-        );
-    }, []);
 
     const onSubmit = (data: CreatePlan) => {
         Keyboard.dismiss();
@@ -107,11 +89,6 @@ export default function NewPlanScreen() {
             onSuccess: (res) => {
                 const { data: plan } = res;
                 queryClient.invalidateQueries({ queryKey: ['plans'] });
-                // if (plan.type == 'expense') {
-                //     updateExpenseplans(plan);
-                // } else {
-                //     updateSavingPlans(plan);
-                // }
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Plan created successfully' },
@@ -371,56 +348,6 @@ export default function NewPlanScreen() {
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
-                            Currency
-                        </Text>
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Currency can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SearchableSelectField
-                                            selectKey='newCurrencyType'
-                                            options={currencies.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.code] = {
-                                                        label: curr.name,
-                                                        value: curr.code,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
-                                            customSnapPoints={['80%', '90%']}
-                                            renderItem={renderCurrencies}
-                                            value={value}
-                                            onChange={onChange}
-                                        />
-                                    </>
-                                )}
-                                name='currency'
-                            />
-                            {errors.currency && (
-                                <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.currency.message}
                                 </Text>
                             )}
                         </View>

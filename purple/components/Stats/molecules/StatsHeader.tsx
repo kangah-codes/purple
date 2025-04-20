@@ -1,52 +1,46 @@
 import { View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
+import { useTransactionStore, useTransactions } from '@/components/Transactions/hooks';
 import { Transaction } from '@/components/Transactions/schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import SpendOverview from './SpendOverview';
 import SpendOverviewChart from './SpendOverviewChart';
 import TransactionsAccordion from './TransactionAccordion';
 import StatsHeatmap from './Heatmap';
+import { endOfMonth, format, startOfMonth } from 'date-fns';
+import { GenericAPIResponse } from '@/@types/request';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
-type StatsHeaderProps = {
-    transactions: Transaction[];
-};
+const now = new Date();
+const startDate = startOfMonth(now);
+const endDate = endOfMonth(now);
+
 export default function StatsHeader() {
-    const { transactions } = useTransactionStore();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const { data, refetch } = useTransactions({
+        requestQuery: {
+            // TODO: replace this
+            page_size: 999_999_999,
+            start_date: startDate,
+            end_date: endDate,
+        },
+        options: {
+            onSuccess: (response) => {
+                const { data } = response as GenericAPIResponse<Transaction[]>;
+                setTransactions(data);
+            },
+        },
+    });
+    useRefreshOnFocus(refetch);
+
     return (
         <View className='flex flex-col space-y-5'>
             {/* Daily Activity Section */}
 
-            <SpendOverview />
-            <SpendOverviewChart />
-            <StatsHeatmap />
+            <SpendOverview transactions={transactions} />
+            <SpendOverviewChart transactions={transactions} />
+            <StatsHeatmap transactions={transactions} />
             <TransactionsAccordion transactions={transactions} />
-
-            {/* <View>
-                <TransactionsAccordion transactions={transactions} />
-            </View> */}
-
-            {/* Spend Overview Section */}
-            {/* <View>
-                <SpendOverview />
-            </View> */}
-
-            {/* Savings Overview Section */}
-            {/* <View>
-                    <MonthSavings />
-                </View> */}
-
-            {/* Spend Overview Section */}
-
-            {/* <View className='space-y-5 border border-purple-200 rounded-3xl px-5 pt-5'>
-                    <Text className='text-sm text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
-                        Spend Trend
-                    </Text>
-
-                    <View className=''>
-                        <SpendTrendAreaChart />
-                    </View>
-                </View> */}
 
             <View style={{ marginTop: 20 }} />
         </View>

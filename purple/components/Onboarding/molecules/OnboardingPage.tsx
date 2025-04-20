@@ -1,4 +1,6 @@
+import { useCreateAccount } from '@/components/Accounts/hooks';
 import { useAuth } from '@/components/Auth/hooks';
+import { usePreferences } from '@/components/Settings/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import useGetCountry from '@/lib/hooks/useGetCountry';
@@ -9,7 +11,6 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
-import { getLocales, getCalendars, useLocales } from 'expo-localization';
 
 type OnboardingPageProps = {
     title: string;
@@ -27,8 +28,43 @@ export default function OnboardingPage({
     pages,
 }: OnboardingPageProps) {
     const { setOnboarded, setSessionData } = useAuth();
-    const a = useLocales();
-    console.log(a, 'locale');
+    const { currency } = usePreferences();
+    const { mutate, isLoading } = useCreateAccount();
+
+    async function handleOnboarding() {
+        nativeStorage.setItem('isOfflineMode', true);
+        mutate(
+            {
+                category: '💵 Cash',
+                name: 'Cash Account',
+                balance: 0,
+                currency: currency,
+            },
+            {
+                onSuccess: async () => {
+                    alert('ACCOUNT CREATED');
+                    // TODO: refactor this
+                    setSessionData({
+                        access_token: '',
+                        access_token_expires_at: '',
+                        user: {
+                            ID: 'test',
+                            username: 'test',
+                            email: 'test',
+                        },
+                    });
+                    await setOnboarded(true);
+                },
+                onError: (error) => {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Something went wrong!',
+                        text2: "We couldn't setup Purple for you, try again later.",
+                    });
+                },
+            },
+        );
+    }
 
     return (
         <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] bg-purple-50 relative'>
@@ -63,22 +99,7 @@ export default function OnboardingPage({
                             </Text>
                         </LinearGradient>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        className=''
-                        onPress={async () => {
-                            nativeStorage.setItem('isOfflineMode', true);
-                            setSessionData({
-                                access_token: '',
-                                access_token_expires_at: '',
-                                user: {
-                                    ID: 'test',
-                                    username: 'test',
-                                    email: 'test',
-                                },
-                            });
-                            await setOnboarded(true);
-                        }}
-                    >
+                    <TouchableOpacity onPress={handleOnboarding}>
                         <LinearGradient
                             className='flex items-center justify-center rounded-full px-4 py-2'
                             colors={['#c084fc', '#9333ea']}

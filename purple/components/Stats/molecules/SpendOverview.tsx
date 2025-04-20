@@ -1,36 +1,32 @@
-import { PieChartSkeleton } from '@/components/Shared/molecules/Skeleton';
+import { usePreferences } from '@/components/Settings/hooks';
 import { Text, View } from '@/components/Shared/styled';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { useStatsStore } from '../hooks';
-import SpendOverviewPieChart from './SpendOverviewPieChart';
-import { formatCurrencyRounded } from '@/lib/utils/number';
 
-export default function SpendOverview() {
-    const {
-        stats: { SpendOverview },
-        isStatsLoading,
-    } = useStatsStore();
+type SpendOverviewProps = {
+    transactions: Transaction[];
+};
 
-    const pieData = useMemo(() => {
-        const data = [];
-        const spendData = SpendOverview || {};
+export default function SpendOverview({ transactions }: SpendOverviewProps) {
+    const { currency } = usePreferences();
+    const { totalDebits, totalCredits } = useMemo(() => {
+        const totals = transactions.reduce(
+            (acc, tx) => {
+                if (tx.type === 'debit') {
+                    acc.totalDebits += tx.amount;
+                } else if (tx.type === 'credit') {
+                    acc.totalCredits += tx.amount;
+                }
+                return acc;
+            },
+            { totalDebits: 0, totalCredits: 0 },
+        );
 
-        for (const currency in spendData) {
-            if (Object.prototype.hasOwnProperty.call(spendData, currency)) {
-                const { Income, Expense } = spendData[currency];
-                data.push({
-                    currency,
-                    data: [
-                        { name: 'Income', value: Income, color: '#16A34A' },
-                        { name: 'Expenses', value: Expense, color: '#EF4444' },
-                    ],
-                });
-            }
-        }
-        return data;
-    }, [SpendOverview]);
+        return totals;
+    }, [transactions]);
 
     return (
         <View className='flex flex-col px-5'>
@@ -40,7 +36,7 @@ export default function SpendOverview() {
                         Total Income
                     </Text>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
-                        {formatCurrencyRounded(9994, 'USD')}
+                        {formatCurrencyRounded(totalCredits, currency)}
                     </Text>
                 </View>
 
@@ -49,7 +45,7 @@ export default function SpendOverview() {
                         Total Expenses
                     </Text>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
-                        {formatCurrencyRounded(9994, 'USD')}
+                        {formatCurrencyRounded(totalDebits, currency)}
                     </Text>
                 </View>
             </View>

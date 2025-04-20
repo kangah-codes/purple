@@ -4,6 +4,7 @@ import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import HTTPError from '../utils/error';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { UUID } from '../utils/helpers';
+import { format, parse } from 'date-fns';
 
 type CreateAccountPayload = {
     user_id?: string;
@@ -22,7 +23,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
     async create(data: CreateAccountPayload): Promise<GenericAPIResponse<Account>> {
         let account!: Account;
         const uuid = UUID();
-        const now = new Date().toISOString();
+        const now = format(new Date().toISOString(), 'yyyyMMdd');
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
                 `
@@ -71,7 +72,12 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         if (!account) throw new HTTPError('Account not found', 404);
 
         return this.formatResponse({
-            data: account,
+            data: {
+                ...account,
+                // TODO: hack for now
+                created_at: parse(account.created_at, 'yyyyMMdd', new Date()).toISOString(),
+                updated_at: parse(account.updated_at, 'yyyyMMdd', new Date()).toISOString(),
+            },
             status: 200,
             page: 1,
             page_size: 1,

@@ -64,6 +64,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
     });
 
     const maxTotal = Math.max(
+        1,
         ...rawChartData.map(({ stacks }) => stacks.reduce((sum, s) => sum + s.value, 0)),
     );
 
@@ -73,10 +74,10 @@ export const getStackedChartData = (transactions: Transaction[]) => {
 
         return {
             label,
-            stacks:
-                padding > 0
-                    ? [...stacks, { value: padding, color: '#faf5ff', marginBottom: 2 }]
-                    : stacks,
+            stacks: [
+                ...stacks,
+                ...(padding > 0 ? [{ value: padding, color: '#faf5ff', marginBottom: 2 }] : []),
+            ],
         };
     });
 

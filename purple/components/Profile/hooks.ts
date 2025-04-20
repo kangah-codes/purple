@@ -1,15 +1,14 @@
-import { useStore } from 'zustand';
-import { createUserStore } from './state';
-import { SessionData, User } from '../Auth/schema';
-import { RequestParamQuery, GenericAPIResponse } from '@/@types/request';
-import { UseQueryOptions, UseQueryResult, useQuery } from 'react-query';
-import { stringify } from '@/lib/utils/string';
-import { useSQLiteContext } from 'expo-sqlite';
+import { GenericAPIResponse } from '@/@types/request';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
-import { Plan } from '../Plans/schema';
-import { Transaction } from '../Transactions/schema';
+import { useSQLiteContext } from 'expo-sqlite';
+import { UseQueryOptions, UseQueryResult, useQuery } from 'react-query';
+import { useStore } from 'zustand';
 import { Account } from '../Accounts/schema';
 import { useAuth } from '../Auth/hooks';
+import { User } from '../Auth/schema';
+import { Plan } from '../Plans/schema';
+import { Transaction } from '../Transactions/schema';
+import { createUserStore } from './state';
 
 export function useUserStore() {
     const [user, setUser, reset] = useStore(createUserStore, (state) => [
@@ -20,11 +19,12 @@ export function useUserStore() {
 
     return {
         user,
-        setUser,
         reset,
+        setUser,
     };
 }
 
+// TODO: rename this hook
 export function useUser({
     options,
 }: {

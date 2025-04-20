@@ -17,7 +17,9 @@ import { nativeStorage } from '@/lib/utils/storage';
 import React, { useState } from 'react';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
-import ProfilePages from '@/components/Profile/molecules/ProfilePages';
+import ProfilePages from '../molecules/ProfilePages';
+
+const linearGradientColours = ['#D8B4FE', '#fff'];
 
 export default function SettingsScreen() {
     const { destroySession, sessionData, hasOnboarded, setOnboarded, isLoading } = useAuth();
@@ -30,6 +32,10 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
+            <LinearGradient
+                className='flex px-5 py-2.5 h-[350] absolute w-full'
+                colors={linearGradientColours}
+            />
             <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
                 <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                     Settings
@@ -42,15 +48,6 @@ export default function SettingsScreen() {
                         style={tw`h-12 w-12`}
                     />
                 </View>
-
-                <View className='flex flex-col items-center'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-2xl text-black'>
-                        @{sessionData?.user.username}
-                    </Text>
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-black'>
-                        {sessionData?.user.email}
-                    </Text>
-                </View>
             </View>
             <View className='mt-5'>
                 <ProfilePages />
@@ -60,7 +57,7 @@ export default function SettingsScreen() {
                 <View className='flex flex-row justify-center'>
                     <Text
                         style={GLOBAL_STYLESHEET.satoshiBold}
-                        className='text-sm text-gray-600 tracking-tight'
+                        className='text-sm text-purple-500 tracking-tight'
                     >
                         Purple v{pkg.version}
                     </Text>

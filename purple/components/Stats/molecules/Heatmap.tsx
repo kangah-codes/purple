@@ -1,19 +1,15 @@
-import { useAuth } from '@/components/Auth/hooks';
 import { StarsIcon } from '@/components/SVG/24x24';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
 import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { groupBy } from '@/lib/utils/helpers';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
-import { useStatsStore } from '../hooks';
-import HeatmapLoading from './HeatmapLoading';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -28,13 +24,11 @@ const offsetData = Array(offset).fill({ value: 0, key: '', index: 0 });
 const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
-function StatsHeatmap() {
-    const { sessionData } = useAuth();
-    const { isStatsLoading, setStats, stats, setIsStatsLoading } = useStatsStore();
-    const [selectedDate, setSelectedDate] = useState<string | null>();
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const { transactions } = useTransactionStore();
+type StatsHeatmapProps = {
+    transactions: Transaction[];
+};
 
+function StatsHeatmap({ transactions }: StatsHeatmapProps) {
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {
@@ -51,30 +45,27 @@ function StatsHeatmap() {
                     index: index + offset,
                 };
             }),
-        [monthDays, stats, transactions],
+        [monthDays, transactions],
     );
 
-    const renderCell = useCallback(
-        (data: CellData) => {
-            const maxValue = Math.max(...heatmapData.map((d) => d.value));
-            const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
+    const renderCell = useCallback((data: CellData) => {
+        const maxValue = Math.max(...heatmapData.map((d) => d.value));
+        const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
 
-            if (format(now, 'dd/MM/yyyy') === data.key) {
-                return (
-                    <TouchableOpacity key={data.key}>
-                        <LinearGradient
-                            style={styles.linearGradient}
-                            colors={colors[colorIndex]}
-                            className='flex items-center justify-center'
-                        >
-                            <StarsIcon stroke='#fff' fill={'#fff'} />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                );
-            }
-        },
-        [stats],
-    );
+        if (format(now, 'dd/MM/yyyy') === data.key) {
+            return (
+                <TouchableOpacity key={data.key}>
+                    <LinearGradient
+                        style={styles.linearGradient}
+                        colors={colors[colorIndex]}
+                        className='flex items-center justify-center'
+                    >
+                        <StarsIcon stroke='#fff' fill={'#fff'} />
+                    </LinearGradient>
+                </TouchableOpacity>
+            );
+        }
+    }, []);
 
     // TODO: come back to this in the future
     // const click = useCallback(
@@ -110,19 +101,15 @@ function StatsHeatmap() {
                     </Text>
                 ))}
             </View>
-            {isStatsLoading ? (
-                <HeatmapLoading blockSize={blockSize} />
-            ) : (
-                <Heatmap
-                    cellSize={blockSize}
-                    rows={4}
-                    cols={numBlocksPerRow}
-                    data={heatmapData}
-                    // onPressCallback={click}
-                    startColumn={getDay(start)}
-                    renderCell={renderCell}
-                />
-            )}
+            <Heatmap
+                cellSize={blockSize}
+                rows={4}
+                cols={numBlocksPerRow}
+                data={heatmapData}
+                // onPressCallback={click}
+                startColumn={getDay(start)}
+                renderCell={renderCell}
+            />
         </View>
     );
 }

@@ -1,7 +1,7 @@
 import { GenericAPIResponse } from '@/@types/request';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { useAuth } from '@/components/Auth/hooks';
-import { SessionData, User } from '@/components/Auth/schema';
+import { User } from '@/components/Auth/schema';
 import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { usePlanStore } from '@/components/Plans/hooks';
@@ -13,12 +13,10 @@ import Toast from 'react-native-toast-message';
 export default function Screen() {
     const { sessionData } = useAuth();
     const { user, setUser } = useUserStore();
-    const { setAccounts, accounts } = useAccountStore();
-    const { setTransactions, updateTransactions } = useTransactionStore();
+    const { setAccounts } = useAccountStore();
+    const { updateTransactions } = useTransactionStore();
     const { setPlans } = usePlanStore();
-    const { isLoading, isFetching, error } = useUser({
-        sessionData: sessionData as SessionData,
-        id: sessionData?.user.ID,
+    const { isLoading } = useUser({
         options: {
             onError: () => {
                 Toast.show({

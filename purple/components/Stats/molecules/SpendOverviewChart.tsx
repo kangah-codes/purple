@@ -1,25 +1,18 @@
-import { ScrollView, Text, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
+import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import React, { useMemo } from 'react';
-import { Dimensions } from 'react-native';
-import { BarChart, LineChart } from 'react-native-gifted-charts';
-import {
-    generateMockTransactionsForMonth,
-    getStackedChartData,
-    getWeekRangesForMonth,
-} from '../utils';
-import WeekLegend from './SpendOverviewLegend';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import React, { useMemo } from 'react';
+import { BarChart } from 'react-native-gifted-charts';
+import { getStackedChartData, getWeekRangesForMonth } from '../utils';
+import WeekLegend from './SpendOverviewLegend';
 
-export default function SpendOverviewChart() {
-    const { transactions } = useTransactionStore();
-    const mockAprilTx = generateMockTransactionsForMonth(new Date('2025-04-01'));
+type SpendOverviewChartProps = {
+    transactions: Transaction[];
+};
 
+export default function SpendOverviewChart({ transactions }: SpendOverviewChartProps) {
     const stackData = useMemo(() => getStackedChartData(transactions), [transactions]);
     const weekRanges = getWeekRangesForMonth(new Date());
-
-    console.log(stackData.map((stack) => [stack.label, stack.stacks]));
 
     return (
         <View className='pt-5 flex flex-col space-y-2.5 px-5 mb-5'>

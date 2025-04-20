@@ -54,7 +54,7 @@ export default function TransactionHistoryCard({
                             )}
                         </Text>
                     )}
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-400'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
                         {date.date} • {date.time}
                     </Text>
                 </View>

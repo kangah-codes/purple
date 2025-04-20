@@ -1,13 +1,7 @@
 import { nativeStorage } from '@/lib/utils/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { User } from '../Auth/schema';
-
-type UserStore = {
-    user: User | null;
-    setUser: (user: User | null) => void;
-    reset: () => void;
-};
+import { UserPreferenceStore, UserStore } from './schema';
 
 export const createUserStore = create<UserStore>()(
     persist(

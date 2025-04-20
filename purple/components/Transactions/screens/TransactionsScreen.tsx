@@ -51,8 +51,6 @@ function TransactionsScreen(props: TransactionsScreenProps) {
             },
         });
 
-    console.log(data, 'fetching transactions');
-
     // reresh page on focus
     useRefreshOnFocus(refetch);
 

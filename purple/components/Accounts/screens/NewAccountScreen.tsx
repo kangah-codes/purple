@@ -20,8 +20,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
+import { usePreferences } from '@/components/Settings/hooks';
 
 export default function NewAccountScreen() {
+    const { currency } = usePreferences();
     const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
     const { updateAccounts } = useAccountStore();
     const { mutate, isLoading } = useCreateAccount();
@@ -34,7 +36,7 @@ export default function NewAccountScreen() {
             category: '',
             name: '',
             balance: '0',
-            currency: '',
+            currency,
         },
     });
 
@@ -131,7 +133,7 @@ export default function NewAccountScreen() {
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
-                            Category
+                            Account Group
                         </Text>
                         <View>
                             <Controller
@@ -251,7 +253,7 @@ export default function NewAccountScreen() {
                             )}
                         </View>
                     </View>
-                    <View className='flex flex-col space-y-1'>
+                    {/* <View className='flex flex-col space-y-1'>
                         <Text
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
@@ -299,7 +301,7 @@ export default function NewAccountScreen() {
                                 </Text>
                             )}
                         </View>
-                    </View>
+                    </View> */}
                 </ScrollView>
 
                 <TouchableOpacity

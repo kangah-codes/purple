@@ -7,51 +7,45 @@ export function formatDate(
     return new Date(date).toLocaleDateString(undefined, options);
 }
 
+import { format, isToday, isYesterday, parse } from 'date-fns';
+
 export function formatDateTime(
     inputDateStr: string | undefined,
     showRelative: boolean = true,
 ): { date: string; time: string } {
     if (!inputDateStr) return { date: '', time: '' };
 
-    const inputDate = new Date(inputDateStr);
+    let inputDate: Date;
+
+    // Try to parse as yyyyMMdd format first
+    const yyyyMMddRegex = /^\d{8}$/;
+    if (yyyyMMddRegex.test(inputDateStr)) {
+        inputDate = parse(inputDateStr, 'yyyyMMdd', new Date());
+    } else {
+        inputDate = new Date(inputDateStr);
+        if (isNaN(inputDate.getTime())) return { date: '', time: '' }; // Invalid date
+    }
+
     const currentDate = new Date();
-    const yesterday = new Date(currentDate);
-    yesterday.setDate(currentDate.getDate() - 1);
 
     // Format time
-    const time = inputDate.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-    });
+    const time = format(inputDate, 'hh:mm a');
 
-    // Check if date is today or yesterday (only if showRelative is true)
     if (showRelative) {
-        if (
-            inputDate.getDate() === currentDate.getDate() &&
-            inputDate.getMonth() === currentDate.getMonth() &&
-            inputDate.getFullYear() === currentDate.getFullYear()
-        ) {
+        if (isToday(inputDate)) {
             return { date: 'Today', time };
         }
 
-        if (
-            inputDate.getDate() === yesterday.getDate() &&
-            inputDate.getMonth() === yesterday.getMonth() &&
-            inputDate.getFullYear() === yesterday.getFullYear()
-        ) {
+        if (isYesterday(inputDate)) {
             return { date: 'Yesterday', time };
         }
     }
 
-    // Format date
-    const month = inputDate.toLocaleString('en-US', { month: 'short' });
-    const date = inputDate.getDate();
-    const year = inputDate.getFullYear();
-    const currentYear = currentDate.getFullYear();
+    // Format date (e.g. 18 Apr or 18 Apr 2023 if not same year)
+    const dateFormat =
+        inputDate.getFullYear() !== currentDate.getFullYear() ? 'd MMM yyyy' : 'd MMM';
 
-    // Only include year if the date is from a different year
-    const formattedDate = year !== currentYear ? `${date} ${month} ${year}` : `${date} ${month}`;
+    const formattedDate = format(inputDate, dateFormat);
 
     return { date: formattedDate, time };
 }
