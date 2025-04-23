@@ -98,11 +98,6 @@ export default function NewPlanScreen() {
         });
     };
 
-    useEffect(() => {
-        const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
-        if (cachedTypes) setPlanCategories(cachedTypes);
-    }, []);
-
     return (
         <>
             <SafeAreaView className='bg-white relative h-full'>

@@ -35,7 +35,7 @@ export default function PlanInformation() {
                 </Text>
                 <Text
                     style={GLOBAL_STYLESHEET.satoshiBold}
-                    className='text-purple-700 text-sm tracking-tight'
+                    className='text-purple-500 text-sm tracking-tight'
                 >
                     {startDate.date} - {endDate.date}
                 </Text>
@@ -43,7 +43,7 @@ export default function PlanInformation() {
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-purple-500 text-sm tracking-tight'
                         >
                             {formatCurrencyAccurate(currentPlan.currency, amountAdded)} added today

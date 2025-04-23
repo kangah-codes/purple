@@ -3,7 +3,7 @@ import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import HTTPError from '../utils/error';
 import { type SQLiteDatabase } from 'expo-sqlite';
-import { UUID } from '../utils/helpers';
+import { UUID, groupBy } from '../utils/helpers';
 import { CreatePlan, CreatePlanTransaction, Plan } from '@/components/Plans/schema';
 import { Transaction } from '@/components/Transactions/schema';
 import { format, parse } from 'date-fns';
@@ -82,7 +82,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
 
         const uuid = UUID();
         let transaction!: Transaction;
-        const now = format(new Date().toISOString(), 'yyyyMMdd');
+        const now = new Date().toISOString();
 
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
@@ -203,10 +203,11 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             `SELECT COUNT(*) FROM plans p WHERE ${whereClause}`,
-            type ? [type] : [],
+            [...params],
         );
         if (!result) throw new Error('Error fetching plans');
 
+        // Add pagination params
         params.push(page_size, offset);
         const plans = await this.db.getAllAsync<Plan>(
             `SELECT p.* FROM plans p
@@ -216,8 +217,43 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
             params,
         );
 
+        // Fetch all transactions for returned plan IDs
+        const planIDs = plans.map((p) => p.id);
+        let transactions: (Transaction & {
+            plan_id: string;
+            account_id: string;
+            account_name: string;
+            account_currency: string;
+        })[] = [];
+
+        if (planIDs.length > 0) {
+            const placeholders = planIDs.map(() => '?').join(', ');
+            transactions = await this.db.getAllAsync(
+                `SELECT t.*,
+                        a.id AS account_id,
+                        a.name AS account_name,
+                        a.created_at AS created_at,
+                        a.updated_at AS updated_at,
+                        a.currency AS account_currency,
+                        t.plan_id
+                 FROM transactions t
+                 INNER JOIN accounts a ON t.account_id = a.id
+                 WHERE t.plan_id IN (${placeholders}) AND t.deleted_at IS NULL`,
+                planIDs,
+            );
+        }
+
+        // Group transactions by plan_id
+        const grouped = groupBy(transactions, 'plan_id');
+
+        // Attach transactions to each plan
+        const plansWithTransactions = plans.map((plan) => ({
+            ...plan,
+            transactions: grouped[plan.id] || [],
+        }));
+
         return this.formatResponse({
-            data: plans,
+            data: plansWithTransactions,
             status: 200,
             page: Number(page),
             page_size: Number(page_size),

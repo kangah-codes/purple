@@ -15,7 +15,7 @@ export default function PlanBuildUpChart() {
         }
 
         return generateSpendingTrendData(currentPlan, 30, 5);
-    }, [currentPlan?.Transactions]);
+    }, [currentPlan?.transactions]);
 
     if (!currentPlan) return null;
 
@@ -37,7 +37,15 @@ export default function PlanBuildUpChart() {
                 // hideYAxisText
                 yAxisTextStyle={{
                     fontSize: 12,
-                    fontFamily: 'GramatikaBold',
+                    fontFamily: 'SatoshiBlack',
+                }}
+                xAxisLabelTextStyle={{
+                    fontSize: 12,
+                    fontFamily: 'SatoshiBlack',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                    alignSelf: 'flex-end',
+                    marginTop: -44,
                 }}
                 // hide the line on the x axis
                 // hideAxesAndRules
@@ -75,11 +83,6 @@ export default function PlanBuildUpChart() {
                 adjustToWidth
                 // spacing={30}
                 thickness={2.5}
-                xAxisLabelTextStyle={{
-                    alignSelf: 'flex-end',
-                    marginRight: 40,
-                    marginTop: -44,
-                }}
                 labelsExtraHeight={50}
                 // labelWidth={100}
                 // showValuesAsTopLabel

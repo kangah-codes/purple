@@ -15,7 +15,7 @@ export default function EmptyList({ message }: EmptyListProps) {
                 source={require('@/assets/images/graphics/cactus.png')}
                 style={tw`h-[200px] w-[200px]`}
             />
-            <View className='flex flex-col space-y-2.5'>
+            <View className='flex flex-col space-y-2'>
                 <Text
                     style={GLOBAL_STYLESHEET.satoshiBlack}
                     className='text-2xl text-black text-center'
@@ -23,8 +23,8 @@ export default function EmptyList({ message }: EmptyListProps) {
                     Wow, such empty.
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.satoshiMedium}
-                    className='text-sm textblack text-center'
+                    style={GLOBAL_STYLESHEET.satoshiBold}
+                    className='text-sm text-purple-600 text-center'
                 >
                     {message}
                 </Text>

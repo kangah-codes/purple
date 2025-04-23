@@ -42,7 +42,7 @@ export default function AccountNavigationArea() {
                         <PlusIcon stroke={'#fff'} />
                     </View>
                 </Link>
-                <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
+                {/* <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
                     <DropdownMenu
                         visible={visible}
                         handleOpen={() => setVisible(true)}
@@ -83,7 +83,7 @@ export default function AccountNavigationArea() {
                             </View>
                         </MenuOption>
                     </DropdownMenu>
-                </View>
+                </View> */}
             </View>
         </View>
     );

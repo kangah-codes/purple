@@ -1,25 +1,23 @@
-import 'expo-dev-client';
-import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { Suspense, useEffect, useMemo, useState } from 'react';
 import { AuthProvider, useAuth } from '@/components/Auth/hooks';
+import LoadingScreen from '@/components/Plans/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
-import { useColorScheme } from '@/components/useColorScheme';
+import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { migrateDbIfNeeded } from '@/lib/utils/database';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { PortalHost, PortalProvider } from '@gorhom/portal';
+import { PortalProvider } from '@gorhom/portal';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import 'expo-dev-client';
 import * as Font from 'expo-font';
-import React from 'react';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { SQLiteProvider } from 'expo-sqlite';
+import React, { Suspense, useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { SQLiteProvider } from 'expo-sqlite';
-import { migrateDbIfNeeded } from '@/lib/utils/database';
-import { Text } from '@/components/Shared/styled';
-import { LogBox } from 'react-native';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -28,7 +26,6 @@ const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 LogBox.ignoreAllLogs(true);
 
@@ -38,7 +35,6 @@ export default function RootLayout() {
     useEffect(() => {
         async function prepare() {
             try {
-                // Pre-load fonts, make any API calls you need to do here
                 await Font.loadAsync({
                     SatoshiBlack: require('../assets/fonts/satoshi/Satoshi-Black.otf'),
                     SatoshiBlackItalic: require('../assets/fonts/satoshi/Satoshi-BlackItalic.otf'),
@@ -54,7 +50,6 @@ export default function RootLayout() {
             } catch (e) {
                 console.warn(e);
             } finally {
-                // Tell the application to render
                 setAppIsReady(true);
             }
         }
@@ -78,8 +73,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-    const colorScheme = useColorScheme();
-    const { isLoading, sessionData, hasOnboarded } = useAuth();
+    const { isLoading } = useAuth();
 
     useEffect(() => {
         async function hideSplashScreen() {
@@ -94,7 +88,7 @@ function RootLayoutNav() {
     return (
         <>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <Suspense fallback={<Text>Loading...</Text>}>
+                <Suspense fallback={<LoadingScreen />}>
                     <SQLiteProvider
                         databaseName='purple_test_1.db'
                         onInit={migrateDbIfNeeded}

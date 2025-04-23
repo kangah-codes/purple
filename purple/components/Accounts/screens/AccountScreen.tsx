@@ -1,33 +1,25 @@
+import { GenericAPIResponse } from '@/@types/request';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import { useInfiniteTransactions } from '@/components/Transactions/hooks';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccount, useAccountStore } from '../hooks';
-import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
 import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import AccountTransactionsList from '../molecules/AccountTransactionsList';
 import LoadingScreen from '../molecules/LoadingScreen';
-import { GenericAPIResponse } from '@/@types/request';
 import { Account } from '../schema';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
-import { useQueryClient } from 'react-query';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
     const { setCurrentAccount } = useAccountStore();
-    const queryClient = useQueryClient();
-    const {
-        data: accountData,
-        isFetching: accountFetching,
-        refetch: accountRefetch,
-        isLoading: accountsLoading,
-    } = useAccount({
+    const { refetch: accountRefetch, isLoading: accountsLoading } = useAccount({
         accountID,
         options: {
             onSuccess: (data) => {
@@ -73,12 +65,6 @@ function AccountScreen() {
     useRefreshOnFocus(transactionsRefetch);
     useRefreshOnFocus(accountRefetch);
 
-    useEffect(() => {
-        return () => {
-            queryClient.invalidateQueries([`account-${accountID}`]);
-        };
-    }, []);
-
     const transactions = useMemo(() => {
         if (!transactionsData) return [];
         return transactionsData.pages.flatMap((page) => page.data);
@@ -104,7 +90,7 @@ function AccountScreen() {
             <ScrollView>
                 <AccountNavigationArea />
                 <AccountInformation transactions={transactions} />
-                <AccountActivityAreaChart transactions={transactions} />
+                {/* <AccountActivityAreaChart transactions={transactions} /> */}
                 <AccountTransactionsList
                     transactions={transactions}
                     queryData={{

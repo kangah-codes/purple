@@ -48,44 +48,27 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
         [monthDays, transactions],
     );
 
-    const renderCell = useCallback((data: CellData) => {
-        const maxValue = Math.max(...heatmapData.map((d) => d.value));
-        const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
+    const renderCell = useCallback(
+        (data: CellData) => {
+            const maxValue = Math.max(...heatmapData.map((d) => d.value));
+            const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
 
-        if (format(now, 'dd/MM/yyyy') === data.key) {
-            return (
-                <TouchableOpacity key={data.key}>
-                    <LinearGradient
-                        style={styles.linearGradient}
-                        colors={colors[colorIndex]}
-                        className='flex items-center justify-center'
-                    >
-                        <StarsIcon stroke='#fff' fill={'#fff'} />
-                    </LinearGradient>
-                </TouchableOpacity>
-            );
-        }
-    }, []);
-
-    // TODO: come back to this in the future
-    // const click = useCallback(
-    //     (item: CellData) => {
-    //         const newDate = format(finalMonthDays[item.index], 'dd/MM/yyyy');
-    //         if (newDate !== selectedDate) {
-    //             setSelectedDate(newDate);
-    //             setShowBottomSheetFlatList('statsDailyTransactionBreakdownList', true);
-    //         }
-    //     },
-    //     [selectedDate],
-    // );
-
-    const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: any }) => <TransactionHistoryCard data={item} onPress={() => {}} />,
-        [],
+            if (format(now, 'dd/MM/yyyy') === data.key) {
+                return (
+                    <TouchableOpacity key={data.key}>
+                        <LinearGradient
+                            style={styles.linearGradient}
+                            colors={colors[colorIndex]}
+                            className='flex items-center justify-center'
+                        >
+                            <StarsIcon stroke='#fff' fill={'#fff'} />
+                        </LinearGradient>
+                    </TouchableOpacity>
+                );
+            }
+        },
+        [heatmapData],
     );
-
-    console.log(heatmapData, 'DATA');
 
     return (
         <View className='flex flex-col space-y-2.5 px-5'>
@@ -108,7 +91,6 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
                 rows={4}
                 cols={numBlocksPerRow}
                 data={heatmapData}
-                // onPressCallback={click}
                 startColumn={getDay(start)}
                 renderCell={renderCell}
             />

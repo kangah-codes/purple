@@ -2,7 +2,9 @@ import React from 'react';
 import { Text } from '../Shared/styled';
 import {
     BudgetPlan,
+    Deposit,
     ExpenseCalculationResult,
+    Frequency,
     Plan,
     PlanAccountPieChartStats,
     PlanTransaction,
@@ -216,14 +218,14 @@ export function generateSpendingTrendData(
     const ideal: TrendDataPoint[] = [];
 
     // Sort transactions by date
-    const sortedTransactions = [...(plan.Transactions || [])].sort(
-        (a, b) => new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime(),
+    const sortedTransactions = [...(plan.transactions || [])].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
     // Calculate cumulative transaction amounts up to each date
     function getAmountUpToDate(date: Date): number {
         const amount = sortedTransactions
-            .filter((t) => new Date(t.CreatedAt) <= date)
+            .filter((t) => new Date(t.created_at) <= date)
             .reduce((sum, t) => sum + (isNaN(t.amount) ? 0 : t.amount), 0);
         return isNaN(amount) ? 0 : amount;
     }
@@ -327,7 +329,7 @@ export function calculateAmountAddedOnDay(
 
     // check if any transactions were made on this day
     const transactionsOnDate = transactions.filter(
-        (t) => new Date(t.CreatedAt).toDateString() === dateToUse.toDateString(),
+        (t) => new Date(t.created_at).toDateString() === dateToUse.toDateString(),
     );
 
     // if no transactions were made, return 0
@@ -347,7 +349,7 @@ export function getAccountTransactionStats(
     const statsMap = new Map<string, PlanAccountPieChartStats>();
 
     // Create a lookup map for account details
-    const accountMap = new Map(accounts.map((account) => [account.ID, account]));
+    const accountMap = new Map(accounts.map((account) => [account.id, account]));
 
     // Process all transactions
     transactions.forEach((transaction) => {
@@ -358,9 +360,9 @@ export function getAccountTransactionStats(
             let stats = statsMap.get(transaction.from_account);
 
             if (!stats) {
-                const palette = generatePalette(account.ID);
+                const palette = generatePalette(account.id);
                 stats = {
-                    accountId: account.ID,
+                    accountId: account.id,
                     accountName: account.name,
                     value: 0,
                     amount: 0,
@@ -368,7 +370,7 @@ export function getAccountTransactionStats(
                     gradientCenterColor: palette.color300,
                     transactionCount: 0,
                 };
-                statsMap.set(account.ID, stats);
+                statsMap.set(account.id, stats);
             }
 
             stats.transactionCount += 1;
@@ -379,4 +381,50 @@ export function getAccountTransactionStats(
 
     // Convert map to array and return only accounts with transactions
     return Array.from(statsMap.values()).sort((a, b) => b.amount - a.amount);
+}
+
+export function calculateRemainingForCurrentPeriod(
+    startDate: Date,
+    endDate: Date,
+    targetAmount: number,
+    frequency: Frequency,
+    previousDeposits: Pick<Transaction, 'amount' | 'created_at'>[],
+    isSpendingPlan = false,
+): {
+    remainingAmount: number;
+    isOverPeriodAmount: boolean;
+    overageAmount: number;
+} {
+    const totalPeriods = getNumberOfPeriods(startDate, endDate, frequency);
+    const amountPerPeriod = targetAmount / totalPeriods;
+
+    const totalThisPeriod = previousDeposits.reduce((sum, tx) => {
+        const amount = isSpendingPlan ? Math.abs(tx.amount) : tx.amount;
+        return sum + amount;
+    }, 0);
+
+    const remaining = amountPerPeriod - totalThisPeriod;
+    const isOver = remaining < 0;
+
+    return {
+        remainingAmount: Math.max(remaining, 0),
+        isOverPeriodAmount: isOver,
+        overageAmount: isOver ? Math.abs(remaining) : 0,
+    };
+}
+
+export function getNumberOfPeriods(startDate: Date, endDate: Date, frequency: Frequency): number {
+    const days = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (frequency === 'weekly') return Math.ceil(days / 7);
+    if (frequency === 'bi-weekly') return Math.ceil(days / 14);
+    if (frequency === 'monthly') {
+        return Math.ceil(
+            (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+                (endDate.getMonth() - startDate.getMonth()) +
+                (endDate.getDate() >= startDate.getDate() ? 1 : 0),
+        );
+    }
+
+    return 0;
 }

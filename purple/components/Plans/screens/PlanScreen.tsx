@@ -16,14 +16,9 @@ import PlanNavigationArea from '../molecules/PlanNavigationArea';
 import PlanTransactionsList from '../molecules/PlanTransactionsList';
 import { Plan } from '../schema';
 
-type PlanScreenProps = {
-    showBackButton?: boolean;
-};
-
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
-function PlanScreen(props: PlanScreenProps) {
-    const { sessionData } = useAuth();
+function PlanScreen() {
     const { id } = useLocalSearchParams();
     const { currentPlan, setCurrentPlan } = usePlanStore();
     const { data, isLoading, refetch, isFetching } = usePlan({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { weekColors } from '../contants';
-import { ScrollView, View, Text } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { ScrollView, View, Text } from '@/components/Shared/styled';
 
 type Props = {
     weekRanges: string[];
@@ -22,15 +22,6 @@ export default function WeekLegend({ weekRanges }: Props) {
             {weekRanges.map((range, i) => (
                 <View
                     key={i}
-                    // style={{
-                    //     flexDirection: 'row',
-                    //     alignItems: 'center',
-                    //     gap: 6,
-                    //     backgroundColor: '#F3F4F6',
-                    //     paddingHorizontal: 10,
-                    //     paddingVertical: 6,
-                    //     borderRadius: 999,
-                    // }}
                     className='bg-purple-50 flex flex-row justify-center items-center space-x-2 px-4 py-2 rounded-full'
                 >
                     <View

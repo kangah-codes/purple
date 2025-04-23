@@ -34,7 +34,7 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
             <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base'>
                 {formatCurrencyAccurate(currentPlan.currency, data.amount)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-400'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-500'>
                 {date.date} • {date.time}
             </Text>
             {data.account && account && (
@@ -42,7 +42,7 @@ export default function PlanTransactionHistoryCard({ data }: TransactionHistoryC
                     <ArrowNarrowDownRightIcon width={16} height={16} stroke='#F87171' />
                     <Text
                         style={GLOBAL_STYLESHEET.satoshiBold}
-                        className='text-red-400 text-sm tracking-tight'
+                        className='text-red-500 text-sm tracking-tight'
                     >
                         Deducted from {account.name} account
                     </Text>

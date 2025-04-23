@@ -17,7 +17,7 @@ const endDate = endOfMonth(now);
 
 export default function StatsHeader() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const { data, refetch } = useTransactions({
+    const { refetch } = useTransactions({
         requestQuery: {
             // TODO: replace this
             page_size: 999_999_999,
@@ -27,6 +27,7 @@ export default function StatsHeader() {
         options: {
             onSuccess: (response) => {
                 const { data } = response as GenericAPIResponse<Transaction[]>;
+                console.log(data, 'tx');
                 setTransactions(data);
             },
         },

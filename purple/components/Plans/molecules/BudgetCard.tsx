@@ -1,32 +1,58 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { formatDate } from '@/lib/utils/date';
-import { formatCurrencyAccurate, formatNumberRounded } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { router } from 'expo-router';
-import React, { useCallback } from 'react';
-import { Plan } from '../schema';
-import { StyleSheet } from 'react-native';
 import { currencies } from '@/lib/constants/currencies';
+import { formatCurrencyRounded, formatNumberRounded } from '@/lib/utils/number';
 import { differenceInDays } from 'date-fns';
+import { router } from 'expo-router';
+import React, { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+import { Plan } from '../schema';
+import { calculateRemainingForCurrentPeriod } from '../utils';
 
 const now = new Date();
+
 export default function BudgetPlanCard({ data }: { data: Plan }) {
-    const { start_date, end_date, balance, target, name, currency, type } = data;
-    const isExpense = type === 'expense';
-    const progressAmount = isExpense ? target - balance : balance;
-    const remainingAmount = isExpense ? Math.max(balance, 0) : Math.max(target - balance, 0);
+    const {
+        start_date,
+        end_date,
+        balance,
+        target,
+        type,
+        transactions,
+        deposit_frequency,
+        currency,
+    } = data;
     const amountSpent = Math.abs(Math.min((data.balance / data.target) * 100, 100));
     const daysLeft = differenceInDays(new Date(data.end_date), now);
-    const getLabelsByType = useCallback(
-        () => ({
-            progressLabel: isExpense ? 'Remaining budget' : 'Saved so far',
-            remainingLabel: isExpense ? 'Spent so far' : 'Still to save',
-            targetLabel: isExpense ? 'Budget limit' : 'Savings goal',
-        }),
-        [data],
-    );
-    const labels = getLabelsByType();
+    const isExpense = type == 'expense';
+    const { remaining, frequency, isOverPeriodAmount, overageAmount } = useMemo(() => {
+        const { remainingAmount, isOverPeriodAmount, overageAmount } =
+            calculateRemainingForCurrentPeriod(
+                new Date(start_date),
+                new Date(end_date),
+                target,
+                deposit_frequency,
+                transactions,
+                isExpense,
+            );
+        const frequency = () => {
+            switch (deposit_frequency) {
+                case 'bi-weekly':
+                    return '2-week period';
+                case 'monthly':
+                    return 'month';
+                case 'weekly':
+                    return 'week';
+            }
+        };
+
+        return {
+            remaining: remainingAmount,
+            frequency: frequency(),
+            isOverPeriodAmount,
+            overageAmount,
+        };
+    }, [data]);
 
     return (
         <TouchableOpacity onPress={() => router.push(`/plans/${data.id}`)} activeOpacity={0.9}>
@@ -68,12 +94,22 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                         style={[
                             GLOBAL_STYLESHEET.satoshiBold,
                             {
-                                color: daysLeft < 0 ? '#fb2c36' : '#ad46ff',
+                                color: daysLeft < 0 || isOverPeriodAmount ? '#fb2c36' : '#ad46ff',
                             },
                         ]}
                         className='text-xs'
                     >
-                        left this week
+                        {isOverPeriodAmount ? (
+                            <>
+                                Over target amount for this {frequency} by{' '}
+                                {formatCurrencyRounded(overageAmount, currency)}
+                            </>
+                        ) : (
+                            <>
+                                {formatCurrencyRounded(remaining, currency)} left{' '}
+                                {isExpense ? 'to spend' : 'to save'} this {frequency}
+                            </>
+                        )}
                     </Text>
                 </View>
 
@@ -84,7 +120,7 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                             width: `${Math.min(amountSpent, 100)}%`,
                         }}
                     />
-                    <View className='h-5 flex-grow bg-purple-200 rounded-lg' />
+                    <View className='h-5 flex-grow bg-purple-200 rounded-md' />
                 </View>
             </View>
         </TouchableOpacity>

@@ -1,6 +1,13 @@
 import { Account } from '../Accounts/schema';
 import { Transaction } from '../Transactions/schema';
 
+export type Frequency = 'weekly' | 'bi-weekly' | 'monthly';
+
+export interface Deposit {
+    amount: number;
+    date: Date;
+}
+
 export type BudgetPlan = {
     category: string;
     startDate: string;
@@ -25,7 +32,7 @@ export type Plan = {
     account: Account;
     start_date: string;
     end_date: string;
-    deposit_frequency: string;
+    deposit_frequency: Frequency;
     push_notification: boolean;
     name: string;
     currency: string;
