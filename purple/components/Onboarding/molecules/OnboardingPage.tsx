@@ -3,14 +3,9 @@ import { useAuth } from '@/components/Auth/hooks';
 import { usePreferences } from '@/components/Settings/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import useGetCountry from '@/lib/hooks/useGetCountry';
-import { setSecureValue } from '@/lib/utils/secureStorage';
 import { nativeStorage } from '@/lib/utils/storage';
-import { Image, ImageSource } from 'expo-image';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Toast from 'react-native-toast-message';
-import tw from 'twrnc';
 
 type OnboardingPageProps = {
     title: string;
@@ -42,7 +37,6 @@ export default function OnboardingPage({
             },
             {
                 onSuccess: async () => {
-                    alert('ACCOUNT CREATED');
                     // TODO: refactor this
                     setSessionData({
                         access_token: '',
@@ -79,36 +73,17 @@ export default function OnboardingPage({
             </View>
 
             {currentIndex === pages - 1 && (
-                <View className='flex flex-row space-x-5 absolute bottom-5 right-5'>
-                    <TouchableOpacity
-                        className=''
-                        onPress={async () => {
-                            nativeStorage.setItem('isOfflineMode', false);
-                            await setOnboarded(true);
-                        }}
-                    >
-                        <LinearGradient
-                            className='flex items-center justify-center rounded-full px-4 py-2'
-                            colors={['#c084fc', '#9333ea']}
-                        >
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiBold}
-                                className='text-sm text-white'
-                            >
-                                Online Debug
-                            </Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                <View className='flex flex-row items-center justify-center space-x-5 absolute bottom-5 w-screen'>
                     <TouchableOpacity onPress={handleOnboarding}>
                         <LinearGradient
-                            className='flex items-center justify-center rounded-full px-4 py-2'
+                            className='flex items-center justify-center rounded-full px-4 py-2 w-[200] h-[50]'
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
                                 style={GLOBAL_STYLESHEET.satoshiBold}
-                                className='text-sm text-white'
+                                className='text-base text-white'
                             >
-                                Get Started
+                                Let's go!
                             </Text>
                         </LinearGradient>
                     </TouchableOpacity>

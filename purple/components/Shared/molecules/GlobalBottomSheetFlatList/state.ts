@@ -1,36 +1,65 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-/**
- * @description This function creates a store for the bottom sheet select component
- * @returns {Object} The bottom sheet select store
- */
-export const createBottomSheetFlatListStore = create<{
-	toggleShowBottomSheetFlatList: (key: string, show: boolean) => void;
-	createBottomSheetFlatList: (key: string) => void;
-	bottomSheetFlatListKeys: Record<string, boolean>;
-}>((set) => {
-	return {
-		toggleShowBottomSheetFlatList: (key: string, show: boolean) => {
-			set((state) => {
-				return {
-					...state,
-					bottomSheetFlatListKeys: {
-						...state.bottomSheetFlatListKeys,
-						[key]: show,
-					},
-				};
-			});
-		},
-		createBottomSheetFlatList: (key: string) =>
-			set((state) => {
-				return {
-					...state,
-					bottomSheetFlatListKeys: {
-						...state.bottomSheetFlatListKeys,
-						[key]: false,
-					},
-				};
-			}),
-		bottomSheetFlatListKeys: {},
-	};
+type BottomSheetFlatListState = {
+    bottomSheetFlatListKeys: Record<string, boolean>;
+    toggleShowBottomSheetFlatList: (key: string, show: boolean) => void;
+    createBottomSheetFlatList: (key: string) => void;
+    closeAllSheets: () => void;
+};
+
+export const createBottomSheetFlatListStore = create<BottomSheetFlatListState>((set) => {
+    return {
+        bottomSheetFlatListKeys: {},
+
+        toggleShowBottomSheetFlatList: (key: string, show: boolean) => {
+            set((state) => {
+                const updatedKeys = { ...state.bottomSheetFlatListKeys };
+
+                if (show) {
+                    Object.keys(updatedKeys).forEach((sheetKey) => {
+                        if (sheetKey !== key && updatedKeys[sheetKey]) {
+                            updatedKeys[sheetKey] = false;
+                        }
+                    });
+                }
+
+                updatedKeys[key] = show;
+
+                return {
+                    ...state,
+                    bottomSheetFlatListKeys: updatedKeys,
+                };
+            });
+        },
+
+        createBottomSheetFlatList: (key: string) => {
+            set((state) => {
+                if (state.bottomSheetFlatListKeys[key] === undefined) {
+                    return {
+                        ...state,
+                        bottomSheetFlatListKeys: {
+                            ...state.bottomSheetFlatListKeys,
+                            [key]: false,
+                        },
+                    };
+                }
+                return state;
+            });
+        },
+
+        closeAllSheets: () => {
+            set((state) => {
+                const updatedKeys = { ...state.bottomSheetFlatListKeys };
+
+                Object.keys(updatedKeys).forEach((key) => {
+                    updatedKeys[key] = false;
+                });
+
+                return {
+                    ...state,
+                    bottomSheetFlatListKeys: updatedKeys,
+                };
+            });
+        },
+    };
 });

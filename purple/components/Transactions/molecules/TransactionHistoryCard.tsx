@@ -18,12 +18,22 @@ type TransactionHistoryCardProps = {
 export default function TransactionHistoryCard({
     data,
     onPress,
-    showTitle,
+    showTitle = true,
 }: TransactionHistoryCardProps) {
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
     const showActionMenu = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }, []);
+    const getTransactionColour = (type: Transaction['type']) => {
+        switch (type) {
+            case 'debit':
+                return '#e7000b';
+            case 'credit':
+                return '#00a63e';
+            case 'transfer':
+                return '#9810fa';
+        }
+    };
 
     return (
         <TouchableOpacity
@@ -60,7 +70,13 @@ export default function TransactionHistoryCard({
                 </View>
 
                 <View className='flex flex-row space-x-2 items-center'>
-                    <Text style={[GLOBAL_STYLESHEET.satoshiBlack]} className='text-sm'>
+                    <Text
+                        style={[
+                            GLOBAL_STYLESHEET.satoshiBlack,
+                            { color: getTransactionColour(data.type) },
+                        ]}
+                        className='text-sm'
+                    >
                         {data.type === 'debit' ? '-' : data.type === 'credit' ? '+' : ''}
                         {formatCurrencyRounded(data.amount, data.currency)}
                     </Text>
@@ -71,10 +87,6 @@ export default function TransactionHistoryCard({
         </TouchableOpacity>
     );
 }
-
-TransactionHistoryCard.defaultProps = {
-    showTitle: true,
-};
 
 const styles = StyleSheet.create({
     categoryIcon: {

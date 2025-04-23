@@ -18,6 +18,8 @@ import React, { useState } from 'react';
 import { Image } from 'expo-image';
 import tw from 'twrnc';
 import ProfilePages from '../molecules/ProfilePages';
+import SelectCurrency from '../molecules/SelectCurrency';
+import { Portal } from '@gorhom/portal';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -32,6 +34,9 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
+            <Portal>
+                <SelectCurrency />
+            </Portal>
             <LinearGradient
                 className='flex px-5 py-2.5 h-[350] absolute w-full'
                 colors={linearGradientColours}

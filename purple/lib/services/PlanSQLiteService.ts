@@ -16,7 +16,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     async create(data: CreatePlan): Promise<GenericAPIResponse<Plan>> {
         let plan!: Plan;
         const uuid = UUID();
-        const now = format(new Date().toISOString(), 'yyyyMMdd');
+        const now = new Date().toISOString();
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
                 `
@@ -48,11 +48,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         });
 
         return this.formatResponse({
-            data: {
-                ...plan,
-                created_at: parse(plan.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(plan.updated_at, 'yyyyMMdd', new Date()).toISOString(),
-            },
+            data: plan,
             status: 201,
             page: 1,
             page_size: 1,
@@ -130,11 +126,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         });
 
         return this.formatResponse({
-            data: {
-                ...transaction,
-                created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
-            },
+            data: transaction,
             status: 201,
             page: 1,
             page_size: 1,
@@ -180,8 +172,6 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         return this.formatResponse({
             data: {
                 ...plan,
-                created_at: parse(plan.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(plan.updated_at, 'yyyyMMdd', new Date()).toISOString(),
                 transactions: planTransactions.map((transaction) => ({
                     ...transaction,
                     currency: transaction.account_currency,
@@ -189,8 +179,6 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
                         id: transaction.account_id,
                         name: transaction.account_name,
                     },
-                    created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                    updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
                 })) as unknown as Transaction[],
             },
             status: 200,

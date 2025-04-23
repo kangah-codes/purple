@@ -85,6 +85,8 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
         [],
     );
 
+    console.log(heatmapData, 'DATA');
+
     return (
         <View className='flex flex-col space-y-2.5 px-5'>
             <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>

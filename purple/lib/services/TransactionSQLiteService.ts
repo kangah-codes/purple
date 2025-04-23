@@ -17,7 +17,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         let transaction!: Transaction;
         let debitAccount: Account | null;
         let creditAccount: Account | null;
-        const now = format(new Date().toISOString(), 'yyyyMMdd');
+        const now = new Date().toISOString();
         const errorMessage = "Couldn't create transaction";
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
@@ -102,11 +102,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
 
         return this.formatResponse({
-            data: {
-                ...transaction,
-                created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
-            },
+            data: transaction,
             status: 201,
             page: 1,
             page_size: 1,
@@ -125,11 +121,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         if (!transaction) throw new HTTPError('Transaction not found', 404);
 
         return this.formatResponse({
-            data: {
-                ...transaction,
-                created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
-            },
+            data: transaction,
             status: 200,
             page: 1,
             page_size: 1,
@@ -157,11 +149,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         }
         if (start_date) {
             whereClause += ` AND t.created_at >= ?`;
-            params.push(format(new Date(start_date), 'yyyyMMdd'));
+            params.push(new Date(start_date).toISOString());
         }
         if (end_date) {
             whereClause += ` AND t.created_at <= ?`;
-            params.push(format(new Date(end_date), 'yyyyMMdd'));
+            params.push(new Date(end_date).toISOString());
         }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
@@ -198,8 +190,6 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     id: transaction.account_id,
                     name: transaction.account_name,
                 },
-                created_at: parse(transaction.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(transaction.updated_at, 'yyyyMMdd', new Date()).toISOString(),
             })) as unknown as Transaction[],
             status: 200,
             page: Number(page),

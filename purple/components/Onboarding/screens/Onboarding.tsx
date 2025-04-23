@@ -1,10 +1,9 @@
-import { useAuth } from '@/components/Auth/hooks';
 import Stories, { StoriesRef } from '@/components/Shared/molecules/Stories';
-import { View, Image } from 'react-native';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useRef } from 'react';
-import OnboardingPage from '../molecules/OnboardingPage';
+import { Image } from 'react-native';
 import tw from 'twrnc';
+import OnboardingPage from '../molecules/OnboardingPage';
 
 export default function Screen() {
     const storiesRef = useRef<StoriesRef>(null);
@@ -74,9 +73,8 @@ export default function Screen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={1000}
+                timePerPage={1500}
                 enableNavigation={false}
-                onPageChange={(index: number) => console.log(`Page ${index}`)}
                 // disableAutomaticScroll
             />
         </>

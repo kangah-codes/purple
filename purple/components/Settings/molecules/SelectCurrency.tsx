@@ -38,49 +38,47 @@ export default function SelectCurrency() {
     }, [searchValue]);
 
     return (
-        <Portal>
-            <CustomBottomSheetFlatList
-                snapPoints={['50%', '70%', '85%']}
-                children={
-                    <View className='flex flex-col space-y-2.5'>
-                        <View className='w-full px-5 pb-2.5'>
-                            <View className='relative flex justify-center mt-2.5'>
-                                <InputField
-                                    className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900'
-                                    style={GLOBAL_STYLESHEET.satoshiBold}
-                                    placeholder='Search'
-                                    cursorColor={'#000'}
-                                    onChangeText={setSearchValue}
-                                    value={searchValue}
-                                />
-                                <SearchIcon
-                                    width={16}
-                                    height={16}
-                                    style={styles.searchIcon}
-                                    stroke='#A855F7'
-                                />
-                            </View>
+        <CustomBottomSheetFlatList
+            snapPoints={['50%', '70%', '85%']}
+            children={
+                <View className='flex flex-col space-y-2.5'>
+                    <View className='w-full px-5 pb-2.5'>
+                        <View className='relative flex justify-center mt-2.5'>
+                            <InputField
+                                className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900'
+                                style={GLOBAL_STYLESHEET.satoshiBold}
+                                placeholder='Search'
+                                cursorColor={'#000'}
+                                onChangeText={setSearchValue}
+                                value={searchValue}
+                            />
+                            <SearchIcon
+                                width={16}
+                                height={16}
+                                style={styles.searchIcon}
+                                stroke='#A855F7'
+                            />
                         </View>
                     </View>
-                }
-                sheetKey={'preferences-currency'}
-                data={filteredData}
-                containerStyle={{
-                    paddingHorizontal: 20,
-                }}
-                handleIndicatorStyle={{
-                    backgroundColor: '#D4D4D4',
-                }}
-                flatListContentContainerStyle={{
-                    paddingBottom: 100,
-                    paddingHorizontal: 20,
-                    backgroundColor: 'white',
-                }}
-                // @ts-expect-error
-                renderItem={renderItem}
-                keyExtractor={(item: { code: string }) => item.code}
-            />
-        </Portal>
+                </View>
+            }
+            sheetKey={'preferences-currency'}
+            data={filteredData}
+            containerStyle={{
+                paddingHorizontal: 20,
+            }}
+            handleIndicatorStyle={{
+                backgroundColor: '#D4D4D4',
+            }}
+            flatListContentContainerStyle={{
+                paddingBottom: 100,
+                paddingHorizontal: 20,
+                backgroundColor: 'white',
+            }}
+            // @ts-expect-error
+            renderItem={renderItem}
+            keyExtractor={(item: { code: string }) => item.code}
+        />
     );
 }
 

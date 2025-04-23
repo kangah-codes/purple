@@ -49,40 +49,38 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
             setIsFirstRender(false);
         }, []);
 
-        const startProgressAnimation = React.useCallback(() => {
+        const resetAndStartProgressAnimation = React.useCallback(() => {
             if (disableAutomaticScroll) return;
 
-            // Ensure we start from 0 without a flash
-            Animated.sequence([
-                Animated.timing(progressAnimation, {
-                    toValue: 0,
-                    duration: 0,
-                    useNativeDriver: false,
-                }),
-                Animated.timing(progressAnimation, {
-                    toValue: 1,
-                    duration: timePerPage,
-                    useNativeDriver: false,
-                }),
-            ]).start(({ finished }) => {
+            // Reset progress value immediately
+            progressAnimation.setValue(0);
+
+            // Start the animation
+            Animated.timing(progressAnimation, {
+                toValue: 1,
+                duration: timePerPage,
+                useNativeDriver: false,
+            }).start(({ finished }) => {
                 if (finished && currentIndex < pages.length - 1) {
                     animatePageTransition(currentIndex + 1);
                 }
             });
-        }, [currentIndex, timePerPage, autoPlay, isPaused, pages.length, disableAutomaticScroll]);
+        }, [currentIndex, timePerPage, pages.length, disableAutomaticScroll]);
 
         const animatePageTransition = React.useCallback(
             (newIndex: number) => {
                 if (isAnimating.current) return;
                 isAnimating.current = true;
 
-                // Stop the progress animation immediately
+                // Stop any ongoing animations
                 progressAnimation.stopAnimation();
+                // Reset progress to 0 immediately to prevent the glitch
+                progressAnimation.setValue(0);
 
                 setPreviousIndex(currentIndex);
                 setCurrentIndex(newIndex);
 
-                // Reset animations
+                // Reset fade animations
                 fadeOutAnimation.setValue(1);
                 fadeInAnimation.setValue(0);
 
@@ -105,7 +103,7 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
 
                     // Only start progress animation after fade transition is complete
                     if (autoPlay && !isPaused) {
-                        startProgressAnimation();
+                        resetAndStartProgressAnimation();
                     }
                 });
             },
@@ -116,7 +114,7 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                 onPageChange,
                 autoPlay,
                 isPaused,
-                startProgressAnimation,
+                resetAndStartProgressAnimation,
             ],
         );
 
@@ -130,16 +128,21 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         }));
 
         React.useEffect(() => {
-            if (!disableAutomaticScroll && previousIndex === null && autoPlay && !isPaused) {
-                startProgressAnimation();
+            if (
+                !disableAutomaticScroll &&
+                previousIndex === null &&
+                autoPlay &&
+                !isPaused &&
+                !isFirstRender
+            ) {
+                resetAndStartProgressAnimation();
             }
             return () => progressAnimation.stopAnimation();
-        }, [disableAutomaticScroll, previousIndex, autoPlay, isPaused]);
+        }, [disableAutomaticScroll, previousIndex, autoPlay, isPaused, isFirstRender]);
 
         const navigate = React.useCallback(
             (direction: number) => {
                 if (!enableNavigation || isAnimating.current) return;
-
                 const newIndex = currentIndex + direction;
                 if (newIndex >= 0 && newIndex < pages.length) {
                     animatePageTransition(newIndex);
@@ -158,9 +161,9 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         const handlePressOut = React.useCallback(() => {
             if (!disableAutomaticScroll) {
                 setIsPaused(false);
-                startProgressAnimation();
+                resetAndStartProgressAnimation();
             }
-        }, [disableAutomaticScroll, startProgressAnimation]);
+        }, [disableAutomaticScroll, resetAndStartProgressAnimation]);
 
         const renderProgressBars = () => {
             return pages.map((_, idx) => (
@@ -186,7 +189,6 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         return (
             <View style={[styles.container, style]}>
                 <View style={styles.progressContainer}>{renderProgressBars()}</View>
-
                 <View style={styles.content}>
                     {previousIndex !== null && (
                         <Animated.View
@@ -204,7 +206,6 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                         {pages[currentIndex]}
                     </Animated.View>
                 </View>
-
                 {enableNavigation && (
                     <View style={styles.navigationContainer}>
                         <TouchableWithoutFeedback
@@ -214,7 +215,6 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                         >
                             <View style={styles.navigationHalf} />
                         </TouchableWithoutFeedback>
-
                         <TouchableWithoutFeedback
                             onPressIn={handlePressIn}
                             onPressOut={handlePressOut}

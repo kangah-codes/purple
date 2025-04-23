@@ -43,30 +43,70 @@ function CustomBottomSheetFlatList<T>({
     ...rest
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const unmountTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Local state to handle delayed unmounting
+    const [shouldRender, setShouldRender] = useState(false);
 
     // Memoize default snap points
     const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '50%'], [rest.snapPoints]);
+
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();
+
+    // Extract the visibility for this specific sheet
+    const isVisible = useMemo(
+        () => !!bottomSheetFlatListKeys[sheetKey],
+        [bottomSheetFlatListKeys, sheetKey],
+    );
+
+    // Handle delayed mounting/unmounting for smooth animations
+    useEffect(() => {
+        if (isVisible) {
+            // Clear any pending unmount
+            if (unmountTimeoutRef.current) {
+                clearTimeout(unmountTimeoutRef.current);
+                unmountTimeoutRef.current = null;
+            }
+            // Mount immediately
+            setShouldRender(true);
+        } else if (shouldRender) {
+            // Start unmount delay to allow close animation to finish
+            unmountTimeoutRef.current = setTimeout(() => {
+                setShouldRender(false);
+                unmountTimeoutRef.current = null;
+            }, 300); // Adjust timing based on your animation duration
+        }
+
+        return () => {
+            if (unmountTimeoutRef.current) {
+                clearTimeout(unmountTimeoutRef.current);
+            }
+        };
+    }, [isVisible, shouldRender]);
 
     // Memoize handlers
     const handleSheetChanges = useCallback(
         (index: number) => {
-            if (index === -1) setShowBottomSheetFlatList(sheetKey, false);
+            if (index === -1 && bottomSheetFlatListKeys[sheetKey]) {
+                setShowBottomSheetFlatList(sheetKey, false);
+            }
         },
-        [sheetKey, setShowBottomSheetFlatList],
+        [sheetKey, setShowBottomSheetFlatList, bottomSheetFlatListKeys],
     );
 
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
                 {...props}
-                onPress={() => setShowBottomSheetFlatList(sheetKey, false)}
+                onPress={() => {
+                    bottomSheetRef.current?.close();
+                }}
                 appearsOnIndex={0}
                 disappearsOnIndex={-1}
             />
         ),
-        [sheetKey, setShowBottomSheetFlatList],
+        [],
     );
 
     // Memoize empty list component
@@ -79,22 +119,23 @@ function CustomBottomSheetFlatList<T>({
         [],
     );
 
-    // Setup effect
+    // Initialize sheet key once
     useEffect(() => {
         createBottomSheetFlatList(sheetKey);
     }, [sheetKey, createBottomSheetFlatList]);
 
-    // Handle visibility changes
+    // Handle sheet state changes
     useEffect(() => {
-        const isVisible = bottomSheetFlatListKeys[sheetKey];
-        if (isVisible) {
-            bottomSheetRef.current?.snapToIndex(0);
-        } else {
-            bottomSheetRef.current?.close();
+        if (shouldRender) {
+            if (isVisible) {
+                bottomSheetRef.current?.snapToIndex(0);
+            } else {
+                bottomSheetRef.current?.close();
+            }
         }
-    }, [bottomSheetFlatListKeys[sheetKey]]);
+    }, [isVisible, shouldRender]);
 
-    if (!bottomSheetFlatListKeys[sheetKey]) return null;
+    if (!shouldRender) return null;
 
     return (
         <BottomSheet
@@ -103,9 +144,10 @@ function CustomBottomSheetFlatList<T>({
             android_keyboardInputMode='adjustResize'
             keyboardBlurBehavior='restore'
             ref={bottomSheetRef}
-            index={1}
+            index={isVisible ? 0 : -1}
             snapPoints={defaultSnapPoints}
             onChange={handleSheetChanges}
+            enablePanDownToClose={true}
             {...rest}
         >
             {children}
@@ -117,10 +159,10 @@ function CustomBottomSheetFlatList<T>({
                 showsVerticalScrollIndicator
                 ItemSeparatorComponent={itemSeparator}
                 ListEmptyComponent={EmptyListComponent}
-                removeClippedSubviews={Platform.OS === 'android'} // Optimize memory usage
-                maxToRenderPerBatch={10} // Optimize initial render
-                windowSize={10} // Optimize scroll performance
-                updateCellsBatchingPeriod={50} // Optimize update batching
+                removeClippedSubviews={Platform.OS === 'android'}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                updateCellsBatchingPeriod={50}
             />
         </BottomSheet>
     );

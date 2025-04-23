@@ -2,10 +2,11 @@ import { Transaction } from '@/components/Transactions/schema';
 import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import TransactionCard from './TransactionCard';
 import { Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 export default function TransactionsAccordion({ transactions }: { transactions: Transaction[] }) {
     const groupedTransactionData = useMemo(() => {
@@ -35,6 +36,14 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
         }) => <TransactionCard groupName={item.groupName} transactions={item.transactions} />,
         [],
     );
+    const renderEmptylist = useCallback(
+        () => (
+            <View className='my-20'>
+                <EmptyList message="Looks like you haven't created any transactions yet." />
+            </View>
+        ),
+        [],
+    );
 
     return (
         <View style={{ flex: 1 }} className='px-5 flex flex-col space-y-2.5 mt-5'>
@@ -48,7 +57,7 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{ paddingBottom: 300 }}
                 showsVerticalScrollIndicator={false}
-                // refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
+                ListEmptyComponent={renderEmptylist}
             />
         </View>
     );

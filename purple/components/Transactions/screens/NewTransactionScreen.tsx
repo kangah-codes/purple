@@ -109,13 +109,13 @@ export default function NewTransactionScreen() {
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
-                            Debit Account
+                            From Account
                         </Text>
                         <View>
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Debit account can't be empty",
+                                    required: "From account can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
@@ -160,13 +160,13 @@ export default function NewTransactionScreen() {
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-xs text-gray-600'
                         >
-                            Credit Account
+                            To Account
                         </Text>
                         <View>
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Credit account can't be empty",
+                                    required: "To account can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>

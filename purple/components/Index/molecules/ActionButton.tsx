@@ -41,10 +41,7 @@ export function ActionButton({
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>
-            <Text
-                style={[GLOBAL_STYLESHEET.satoshiMedium, styles.actionText]}
-                className='leading-[14px]'
-            >
+            <Text style={[GLOBAL_STYLESHEET.satoshiBold]} className='text-sm text-[#9333ea]'>
                 {label}
             </Text>
         </View>
@@ -77,11 +74,6 @@ export default function ActionButtons({ account }: { account: Account }) {
 }
 
 const styles = StyleSheet.create({
-    actionText: {
-        color: '#1f2937',
-        fontSize: 14,
-        letterSpacing: -0.3,
-    },
     actionButton: {
         shadowColor: '#A855F7',
         shadowOffset: {

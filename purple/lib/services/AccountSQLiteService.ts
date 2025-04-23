@@ -23,7 +23,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
     async create(data: CreateAccountPayload): Promise<GenericAPIResponse<Account>> {
         let account!: Account;
         const uuid = UUID();
-        const now = format(new Date().toISOString(), 'yyyyMMdd');
+        const now = new Date().toISOString();
         await this.db.withTransactionAsync(async () => {
             await this.db.runAsync(
                 `
@@ -72,12 +72,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         if (!account) throw new HTTPError('Account not found', 404);
 
         return this.formatResponse({
-            data: {
-                ...account,
-                // TODO: hack for now
-                created_at: parse(account.created_at, 'yyyyMMdd', new Date()).toISOString(),
-                updated_at: parse(account.updated_at, 'yyyyMMdd', new Date()).toISOString(),
-            },
+            data: account,
             status: 200,
             page: 1,
             page_size: 1,

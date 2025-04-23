@@ -21,13 +21,10 @@ export function BalanceDisplay({
 }) {
     return (
         <View className='flex flex-col'>
-            <Text
-                style={GLOBAL_STYLESHEET.satoshiBlack}
-                className='text-black text-3xl tracking-tighter'
-            >
+            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-black text-3xl'>
                 {formatCurrencyRounded(account.balance, account.currency)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-base mt-1.5'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-base'>
                 {accountName}
             </Text>
         </View>

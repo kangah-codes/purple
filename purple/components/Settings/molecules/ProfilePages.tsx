@@ -46,7 +46,6 @@ export default function ProfilePages() {
 
     return (
         <>
-            <SelectCurrency />
             <FlatList
                 data={profilePages}
                 keyExtractor={keyExtractor}

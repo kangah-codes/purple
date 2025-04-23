@@ -32,19 +32,19 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
         <View className='flex flex-col px-5'>
             <View className='flex flex-row space-x-2.5'>
                 <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-400'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
                         Total Income
                     </Text>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-green-600'>
                         {formatCurrencyRounded(totalCredits, currency)}
                     </Text>
                 </View>
 
                 <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-400'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
                         Total Expenses
                     </Text>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-black'>
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-red-600'>
                         {formatCurrencyRounded(totalDebits, currency)}
                     </Text>
                 </View>
