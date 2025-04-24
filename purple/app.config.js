@@ -1,6 +1,5 @@
 export default ({ config }) => {
-    const isDev =
-        process.env.EAS_BUILD_PROFILE === 'development' || process.env.NODE_ENV == 'development';
+    const isDev = process.env.EAS_BUILD_PROFILE === 'development';
 
     return {
         ...config,
