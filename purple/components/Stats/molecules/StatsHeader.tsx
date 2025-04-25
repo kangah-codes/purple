@@ -27,7 +27,6 @@ export default function StatsHeader() {
         options: {
             onSuccess: (response) => {
                 const { data } = response as GenericAPIResponse<Transaction[]>;
-                console.log(data, 'tx');
                 setTransactions(data);
             },
         },

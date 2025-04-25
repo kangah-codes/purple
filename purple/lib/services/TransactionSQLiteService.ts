@@ -5,7 +5,6 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
 import { BaseSQLiteService } from './SQLiteService';
-import { format, parse } from 'date-fns';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
@@ -30,7 +29,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     uuid,
-                    now,
+                    data.date,
                     now,
                     data.account_id,
                     null,

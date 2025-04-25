@@ -25,6 +25,17 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         const uuid = UUID();
         const now = new Date().toISOString();
         await this.db.withTransactionAsync(async () => {
+            if (data.is_default_account) {
+                const existingDefault = await this.db.getFirstAsync<Account>(
+                    'SELECT * FROM accounts WHERE is_default_account = 1 AND category = ?',
+                    [data.category],
+                );
+
+                if (existingDefault) {
+                    throw new HTTPError('Default account already exists for this category', 409);
+                }
+            }
+
             await this.db.runAsync(
                 `
                 INSERT INTO accounts
@@ -88,7 +99,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
             'SELECT COUNT(*) FROM accounts WHERE deleted_at IS NULL',
         );
-        if (!result) throw new Error('Error fetching transactions');
+        if (!result) throw new Error('Error fetching accounts');
         const accounts = await this.db.getAllAsync<Account>(
             `SELECT * FROM accounts
              WHERE deleted_at IS NULL

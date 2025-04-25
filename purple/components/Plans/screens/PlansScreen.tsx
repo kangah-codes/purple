@@ -15,20 +15,19 @@ import { SceneMap, TabView } from 'react-native-tab-view';
 import tw from 'twrnc';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
+import { useInfinitePlans } from '../hooks';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 const { width: screenWidth } = Dimensions.get('window');
 const linearGradientColours = ['#c084fc', '#9333ea'];
+const routes = [
+    { key: 'expenses', title: 'Budgets' },
+    { key: 'savings', title: 'Savings' },
+];
 
 export default function PlansScreen() {
     const [index, setIndex] = useState(0);
-    const [routes] = useState([
-        { key: 'expenses', title: 'Budgets' },
-        { key: 'savings', title: 'Savings' },
-    ]);
-    const handleNavigation = () => {
-        router.push('/plans/new-plan');
-    };
-
+    const handleNavigation = useCallback(() => router.push('/plans/new-plan'), []);
     const horizontalPadding = 10; // Add this line to define the horizontal padding
     const width = screenWidth - 40 - 2 * horizontalPadding; // Subtract the horizontal padding from both sides
     const translateXAnim = useRef(new Animated.Value(0)).current;
@@ -64,9 +63,7 @@ export default function PlansScreen() {
                     {routes.map((route, i) => {
                         return (
                             <View
-                                style={{
-                                    ...tw`flex-grow flex items-center justify-center rounded-full`,
-                                }}
+                                className='flex-grow flex items-center justify-center rounded-full'
                                 key={route.title}
                             >
                                 <TouchableOpacity

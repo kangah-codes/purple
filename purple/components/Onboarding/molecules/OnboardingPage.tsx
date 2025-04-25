@@ -24,32 +24,38 @@ export default function OnboardingPage({
 }: OnboardingPageProps) {
     const { setOnboarded, setSessionData } = useAuth();
     const { currency } = usePreferences();
-    const { mutate, isLoading } = useCreateAccount();
+    const { mutate } = useCreateAccount();
+
+    async function setSession() {
+        setSessionData({
+            access_token: '',
+            access_token_expires_at: '',
+            user: {
+                ID: 'offline_user',
+                username: 'offline_user',
+                email: 'offline_user',
+            },
+        });
+        await setOnboarded(true);
+    }
 
     async function handleOnboarding() {
         nativeStorage.setItem('isOfflineMode', true);
         mutate(
             {
                 category: '💵 Cash',
-                name: 'Cash Account',
+                name: 'Cash',
                 balance: 0,
                 currency: currency,
+                is_default_account: true,
             },
             {
                 onSuccess: async () => {
-                    // TODO: refactor this
-                    setSessionData({
-                        access_token: '',
-                        access_token_expires_at: '',
-                        user: {
-                            ID: 'test',
-                            username: 'test',
-                            email: 'test',
-                        },
-                    });
-                    await setOnboarded(true);
+                    await setSession();
                 },
-                onError: (error) => {
+                onError: async (error) => {
+                    // a default cash account already exists
+                    if (error.statusCode == 409) await setSession();
                     Toast.show({
                         type: 'error',
                         text1: 'Something went wrong!',
@@ -67,7 +73,7 @@ export default function OnboardingPage({
                 <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-4xl text-black'>
                     {title}
                 </Text>
-                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm text-black'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-500'>
                     {description}
                 </Text>
             </View>

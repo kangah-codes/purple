@@ -1,12 +1,11 @@
 import { ChevronDownIcon } from '@/components/SVG/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useCallback, useEffect, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { LRUCache } from '@/lib/utils/cache';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -34,8 +33,7 @@ export default function SelectField({
     onChange,
     value,
 }: SelectFieldProps) {
-    const { setShowBottomSheetFlatList, bottomSheetFlatListKeys } = useBottomSheetFlatListStore();
-    const selectCache = new LRUCache<SelectOption>(selectKey, 3);
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const [val, setValue] = useState<string | undefined>(value);
     const renderDefaultItem = useCallback(
         (item: any) => (
@@ -72,34 +70,6 @@ export default function SelectField({
                                     </Text>
                                 </View>
                             )}
-                            {selectCache.size() > 0 && (
-                                <View
-                                    className='w-full px-5 flex flex-col bg-white'
-                                    // style={styles.shadow}
-                                >
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBold}
-                                        className='text-base text-black'
-                                    >
-                                        Recently Used
-                                    </Text>
-                                    {selectCache.getAllItems().map(([_, item]) => (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setValue(item.value.toString());
-                                                onChange && onChange(item.value.toString());
-                                                // close the bottom sheet
-                                                setShowBottomSheetFlatList(selectKey, false);
-                                                selectCache.set(item.value.toString(), item);
-                                            }}
-                                        >
-                                            {renderItem
-                                                ? renderItem(item)
-                                                : renderDefaultItem(item)}
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            )}
                         </View>
                     }
                     sheetKey={selectKey}
@@ -116,7 +86,6 @@ export default function SelectField({
                                     onChange && onChange(_item.value.toString());
                                     // close the bottom sheet
                                     setShowBottomSheetFlatList(selectKey, false);
-                                    selectCache.set(_item.value.toString(), _item);
                                 }}
                             >
                                 {renderItem ? renderItem(_item) : renderDefaultItem(_item)}

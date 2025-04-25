@@ -36,12 +36,12 @@ export default function ProfilePages() {
             title: 'Default Currency',
             callback: () => setShowBottomSheetFlatList('preferences-currency', true),
         },
-        {
-            icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Categories',
-            link: '/lkol',
-            callback: () => alert('NME'),
-        },
+        // {
+        //     icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
+        //     title: 'Categories',
+        //     link: '/categories',
+        //     callback: () => alert('NME'),
+        // },
     ];
 
     return (

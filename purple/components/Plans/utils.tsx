@@ -204,25 +204,23 @@ export function generateSpendingTrendData(
         return { projected: [], actual: [], ideal: [] };
     }
 
+    const isExpense = plan.type === 'expense';
+
     const startDate = new Date(plan.start_date);
     const endDate = new Date(plan.end_date);
     const now = new Date();
 
-    // Calculate time intervals
     const totalDuration = endDate.getTime() - startDate.getTime();
     const timeInterval = totalDuration / (dataPoints - 1);
 
-    // Initialize return arrays
     const projected: TrendDataPoint[] = [];
     const actual: TrendDataPoint[] = [];
     const ideal: TrendDataPoint[] = [];
 
-    // Sort transactions by date
     const sortedTransactions = [...(plan.transactions || [])].sort(
         (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
-    // Calculate cumulative transaction amounts up to each date
     function getAmountUpToDate(date: Date): number {
         const amount = sortedTransactions
             .filter((t) => new Date(t.created_at) <= date)
@@ -230,7 +228,6 @@ export function generateSpendingTrendData(
         return isNaN(amount) ? 0 : amount;
     }
 
-    // Pre-calculate the label indices for even spacing
     const labelIndices = new Set<number>();
     if (numberOfLabels > 0) {
         const interval = (dataPoints - 1) / (numberOfLabels - 1);
@@ -242,36 +239,27 @@ export function generateSpendingTrendData(
         }
     }
 
-    // Calculate daily rate based on remaining budget and time
     const daysRemaining = Math.max(0, (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const remainingBudget = isNaN(plan.target - plan.balance) ? 0 : plan.target - plan.balance;
-    const projectedDailyRate = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
+    const remaining = isExpense ? plan.balance : plan.target - plan.balance;
+    const projectedDailyRate = daysRemaining > 0 ? remaining / daysRemaining : 0;
 
-    // Function to normalize values to 0-100 scale
-    const normalizeValue = (value: number): number => {
-        // if (!normalize || plan.target <= 0) return value;
-        // return (value / plan.target) * 100;
+    const normalizeValue = (value: number): number => value;
 
-        return value;
-    };
-
-    // Generate data points
-    // const dataPoints: { date: string; amount: number }[] = [];
     for (let i = 0; i < dataPoints; i++) {
         const pointDate = new Date(startDate.getTime() + timeInterval * i);
         const daysFromStart = (pointDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
         const totalDays = totalDuration / (1000 * 60 * 60 * 24);
-
-        // Format date for output
         const dateStr = pointDate.toISOString().split('T')[0];
         const shouldAddLabel = labelIndices.has(i);
 
-        // Calculate ideal trend (curved using quadratic function)
+        // Ideal trend using curved progress
         const progress = daysFromStart / totalDays;
         const curvature = 1;
         const curvedProgress = curvature * progress * progress + (1 - curvature) * progress;
-        let idealAmount = plan.target * curvedProgress;
-        idealAmount = isNaN(idealAmount) ? 0 : Math.min(idealAmount, plan.target || 0);
+        let idealAmount = isExpense
+            ? plan.target * (1 - curvedProgress)
+            : plan.target * curvedProgress;
+        idealAmount = Math.max(0, Math.min(idealAmount, plan.target || 0));
 
         ideal.push({
             date: dateStr,
@@ -285,30 +273,26 @@ export function generateSpendingTrendData(
             }),
         });
 
-        // Calculate actual spending (only up to current date)
-        // if (pointDate <= now) {
         const actualAmount = getAmountUpToDate(pointDate);
+        const actualValue = isExpense ? plan.target - actualAmount : actualAmount;
         actual.push({
             date: dateStr,
-            value: Number(normalizeValue(isNaN(actualAmount) ? 0 : actualAmount).toFixed(2)),
+            value: Number(normalizeValue(Math.max(0, actualValue)).toFixed(2)),
             ...(shouldAddLabel && {
                 labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
             }),
         });
-        // }
 
-        // Calculate projected spending (from current date to end)
         if (pointDate >= now) {
             const currentAmount = getAmountUpToDate(now);
             const daysFromNow = (pointDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
             let projectedAmount = currentAmount + projectedDailyRate * daysFromNow;
-            projectedAmount = isNaN(projectedAmount)
-                ? 0
-                : Math.min(projectedAmount, plan.target || 0);
+            let projectedValue = isExpense ? plan.target - projectedAmount : projectedAmount;
+            projectedValue = Math.max(0, Math.min(projectedValue, plan.target || 0));
 
             projected.push({
                 date: dateStr,
-                value: Number(normalizeValue(projectedAmount).toFixed(2)),
+                value: Number(normalizeValue(projectedValue).toFixed(2)),
                 ...(shouldAddLabel && {
                     labelComponent: () => <Text>{formatDateLabel(dateStr)}</Text>,
                 }),
@@ -395,6 +379,25 @@ export function calculateRemainingForCurrentPeriod(
     isOverPeriodAmount: boolean;
     overageAmount: number;
 } {
+    const now = new Date();
+
+    // return early if plan hasn't started yet
+    if (now < startDate) {
+        return {
+            remainingAmount: 0,
+            isOverPeriodAmount: false,
+            overageAmount: 0,
+        };
+    }
+
+    if (now > endDate) {
+        return {
+            remainingAmount: 0,
+            isOverPeriodAmount: false,
+            overageAmount: 0,
+        };
+    }
+
     const totalPeriods = getNumberOfPeriods(startDate, endDate, frequency);
     const amountPerPeriod = targetAmount / totalPeriods;
 

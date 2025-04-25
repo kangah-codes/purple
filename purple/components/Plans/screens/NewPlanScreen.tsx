@@ -15,11 +15,10 @@ import {
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { transformObject } from '@/lib/utils/object';
-import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -59,6 +58,7 @@ export default function NewPlanScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
+        getValues,
     } = useForm<CreatePlan>({
         defaultValues: {
             type: '',
@@ -66,7 +66,7 @@ export default function NewPlanScreen() {
             target: 0.0,
             start_date: new Date().toISOString(),
             end_date: new Date(new Date().getTime() + 24 * 30 * 60 * 60 * 1000).toISOString(),
-            deposit_frequency: '',
+            deposit_frequency: 'weekly',
             push_notification: false,
             name: '',
             currency,
@@ -93,7 +93,7 @@ export default function NewPlanScreen() {
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Plan created successfully' },
                 });
-                router.replace('/(tabs)/plans');
+                router.replace(`/plans/${plan.id}`);
             },
         });
     };
@@ -218,9 +218,9 @@ export default function NewPlanScreen() {
                                                                 </Text>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.satoshiMedium
+                                                                        GLOBAL_STYLESHEET.satoshiBold
                                                                     }
-                                                                    className='text-sm text-gray-600'
+                                                                    className='text-xs text-purple-500'
                                                                 >
                                                                     Save money for a specific goal
                                                                 </Text>
@@ -263,9 +263,9 @@ export default function NewPlanScreen() {
                                                                 </Text>
                                                                 <Text
                                                                     style={
-                                                                        GLOBAL_STYLESHEET.satoshiMedium
+                                                                        GLOBAL_STYLESHEET.satoshiBold
                                                                     }
-                                                                    className='text-sm text-gray-600'
+                                                                    className='text-xs text-purple-500'
                                                                 >
                                                                     Put money aside for a projected
                                                                     expense
@@ -301,6 +301,9 @@ export default function NewPlanScreen() {
                         <View>
                             <Controller
                                 control={control}
+                                rules={{
+                                    required: "Plan category can't be empty",
+                                }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
                                         <SelectField
@@ -462,47 +465,50 @@ export default function NewPlanScreen() {
                         )}
                     </View>
 
-                    <View className='h-1 border-b border-gray-100 w-full' />
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
-                            Deposit Frequency
-                        </Text>
+                    {getValues('type') === 'saving' && (
                         <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Deposit Frequency can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newPlanDepositFrequency'
-                                            options={depositFrequency}
-                                            customSnapPoints={['20%', '30%']}
-                                            value={value}
-                                            onChange={(val) => {
-                                                onChange(val);
-                                                setValue('deposit_frequency', val);
-                                            }}
-                                        />
-                                    </>
+                            <View className='h-1 border-b border-gray-100 w-full' />
+                            <View className='flex flex-col space-y-1'>
+                                <Text
+                                    style={GLOBAL_STYLESHEET.satoshiBold}
+                                    className='text-xs text-gray-600'
+                                >
+                                    Deposit Frequency
+                                </Text>
+                                <View>
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: "Deposit Frequency can't be empty",
+                                        }}
+                                        render={({ field: { onChange, value } }) => (
+                                            <>
+                                                <SelectField
+                                                    selectKey='newPlanDepositFrequency'
+                                                    options={depositFrequency}
+                                                    customSnapPoints={['20%', '30%']}
+                                                    value={value}
+                                                    onChange={(val) => {
+                                                        onChange(val);
+                                                        setValue('deposit_frequency', val);
+                                                    }}
+                                                />
+                                            </>
+                                        )}
+                                        name='deposit_frequency'
+                                    />
+                                </View>
+                                {errors.deposit_frequency && (
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.deposit_frequency.message}
+                                    </Text>
                                 )}
-                                name='deposit_frequency'
-                            />
+                            </View>
                         </View>
-                        {errors.deposit_frequency && (
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.deposit_frequency.message}
-                            </Text>
-                        )}
-                    </View>
+                    )}
                 </ScrollView>
 
                 <TouchableOpacity

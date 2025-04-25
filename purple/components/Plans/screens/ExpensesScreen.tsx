@@ -1,47 +1,44 @@
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import { Plan } from '../schema';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
 function ExpensesScreen() {
-    const { sessionData } = useAuth();
     const { setExpensePlans, expensePlans } = usePlanStore();
-    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
-        useInfinitePlans({
-            requestQuery: {
-                type: 'expense',
-                page_size: 10,
+    const { data, fetchNextPage, hasNextPage, isLoading, refetch } = useInfinitePlans({
+        requestQuery: {
+            type: 'expense',
+            page_size: 10,
+        },
+        options: {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your plans",
+                    },
+                });
             },
-            options: {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: "We couldn't fetch your plans",
-                        },
-                    });
-                },
-            },
-        });
+            refetchOnWindowFocus: 'always',
+        },
+    });
 
-    useRefreshOnFocus(refetch);
-    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: Plan }) => <BudgetPlanCard data={item} />,
-        [],
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch]),
     );
+
+    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderEmptylist = useCallback(
         () => (
-            <View className='my-20'>
+            <View className='my-10'>
                 <EmptyList message="Looks like you haven't created any expense plans yet." />
             </View>
         ),

@@ -1,12 +1,11 @@
+import { calculateAmountAddedOnDay } from '@/components/Plans/utils';
 import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import { Text, View } from '@/components/Shared/styled';
+import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { useAccountStore } from '../hooks';
-import { formatDateTime } from '@/lib/utils/date';
-import { calculateAmountAddedOnDay } from '@/components/Plans/utils';
-import { Transaction } from '@/components/Transactions/schema';
 
 export default function AccountInformation({ transactions }: { transactions: Transaction[] }) {
     const { currentAccount } = useAccountStore();
@@ -32,7 +31,7 @@ export default function AccountInformation({ transactions }: { transactions: Tra
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
+                            style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-purple-500 text-sm'
                         >
                             {formatCurrencyAccurate(currentAccount.currency, amountAdded)} recorded

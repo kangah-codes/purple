@@ -3,7 +3,6 @@ import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
 import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { groupBy } from '@/lib/utils/helpers';
@@ -71,11 +70,11 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
     );
 
     return (
-        <View className='flex flex-col space-y-2.5 px-5'>
+        <View className='flex-col space-y-2.5 px-5'>
             <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                 Daily Activity
             </Text>
-            <View className='flex flex-row justify-between py-2'>
+            <View className='flex-row justify-between py-2'>
                 {days.map((day, key) => (
                     <Text
                         key={key}
@@ -94,6 +93,23 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
                 startColumn={getDay(start)}
                 renderCell={renderCell}
             />
+            <View className='flex-row justify-end items-center space-x-2 mt-2'>
+                <Text className='text-black text-xs' style={GLOBAL_STYLESHEET.satoshiBold}>
+                    Less
+                </Text>
+                <View className='flex flex-row space-x-0.5'>
+                    {colors.map((gradient, index) => (
+                        <LinearGradient
+                            key={index}
+                            colors={gradient}
+                            className='h-3 w-3 rounded-[4px]'
+                        />
+                    ))}
+                </View>
+                <Text className='text-black text-xs' style={GLOBAL_STYLESHEET.satoshiBold}>
+                    More
+                </Text>
+            </View>
         </View>
     );
 }

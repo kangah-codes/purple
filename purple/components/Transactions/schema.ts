@@ -36,4 +36,5 @@ export type CreateTransaction = {
     to_account?: string;
     currency: string;
     plan_id?: string;
+    date: string;
 };

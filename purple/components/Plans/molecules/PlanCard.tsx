@@ -39,11 +39,11 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
             <View className='h-[1px] bg-purple-200 w-full' />
 
             <View className='flex flex-row justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-600'>
                     {formatCurrencyRounded(data.balance, data.currency)}
                 </Text>
 
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-600'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-600'>
                     {formatCurrencyRounded(data.target, data.currency)}
                 </Text>
             </View>

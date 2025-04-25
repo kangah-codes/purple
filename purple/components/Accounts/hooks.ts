@@ -14,6 +14,7 @@ import { stringify } from '@/lib/utils/string';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useAuth } from '../Auth/hooks';
+import HTTPError from '@/lib/utils/error';
 
 export function useAccountStore() {
     const [
@@ -134,7 +135,7 @@ export function useAccountGroups({
     );
 }
 
-export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account>, Error> {
+export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account>, HTTPError> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
 

@@ -12,7 +12,7 @@ export default function Screen() {
         <OnboardingPage
             title='Welcome to Purple!'
             description={
-                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+                'Purple helps you stay in control of your money with ease. Track your spending, set goals, and build better financial habits — all in one place.'
             }
             image={
                 <Image
@@ -26,7 +26,7 @@ export default function Screen() {
         <OnboardingPage
             title='Watch your spending'
             description={
-                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+                'See where your money goes. Categorize your expenses and find out what’s costing you the most so you can spend more intentionally.'
             }
             image={
                 <Image
@@ -40,7 +40,7 @@ export default function Screen() {
         <OnboardingPage
             title='Know when you hit your limits'
             description={
-                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+                'Set flexible budgets and get alerts when you’re nearing your spending limits. No surprises — just smarter decisions.'
             }
             image={
                 <Image
@@ -54,7 +54,7 @@ export default function Screen() {
         <OnboardingPage
             title='Take control of your finances'
             description={
-                'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Doloribus aspernatur at voluptate accusantium, enim deserunt iste minima maiores non explicabo molestiae repellendus. Commodi veritatis enim sunt aperiam adipisci id explicabo.'
+                'Build savings, track your goals, and feel confident about your money. Purple makes personal finance simple and fun.'
             }
             image={
                 <Image
@@ -73,7 +73,7 @@ export default function Screen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={1500}
+                timePerPage={3000}
                 enableNavigation={false}
                 // disableAutomaticScroll
             />

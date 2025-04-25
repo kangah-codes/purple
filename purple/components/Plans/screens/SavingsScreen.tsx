@@ -7,7 +7,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import { Plan } from '../schema';
+import { useFocusEffect } from 'expo-router';
 
 function SavingsScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
@@ -29,15 +29,16 @@ function SavingsScreen() {
                 },
             },
         });
-    useRefreshOnFocus(refetch);
-    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: Plan }) => <BudgetPlanCard data={item} />,
-        [],
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch]),
     );
+
+    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderEmptylist = useCallback(
         () => (
-            <View className='my-20'>
+            <View className='my-10'>
                 <EmptyList message="Looks like you haven't created any saving plans yet." />
             </View>
         ),

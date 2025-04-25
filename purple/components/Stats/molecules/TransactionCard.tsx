@@ -53,7 +53,7 @@ export default function TransactionCard({
                 <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
                     {formattedDate}
                 </Text>
-                <Text style={[GLOBAL_STYLESHEET.satoshiBold]} className='text-xs text-purple-500'>
+                <Text style={[GLOBAL_STYLESHEET.satoshiBlack]} className='text-xs text-purple-500'>
                     {formattedTotal}
                 </Text>
             </View>

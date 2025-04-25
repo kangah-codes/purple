@@ -34,7 +34,7 @@ export default function AccountCard({
             <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-sm'>
                 {truncateStringIfLongerThan(item.name, 20)}
             </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-500 text-sm'>
+            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-700 text-sm'>
                 {formatCurrencyAccurate(item.currency, item.balance)}
             </Text>
         </TouchableOpacity>

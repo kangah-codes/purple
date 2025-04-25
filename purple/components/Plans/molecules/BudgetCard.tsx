@@ -94,7 +94,10 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                         style={[
                             GLOBAL_STYLESHEET.satoshiBold,
                             {
-                                color: daysLeft < 0 || isOverPeriodAmount ? '#fb2c36' : '#ad46ff',
+                                color:
+                                    (daysLeft < 0 || isOverPeriodAmount) && type == 'expense'
+                                        ? '#fb2c36'
+                                        : '#ad46ff',
                             },
                         ]}
                         className='text-xs'

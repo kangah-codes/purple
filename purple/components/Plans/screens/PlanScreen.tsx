@@ -1,4 +1,3 @@
-import { useAuth } from '@/components/Auth/hooks';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
