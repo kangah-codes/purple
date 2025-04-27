@@ -11,14 +11,14 @@ import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/Globa
 
 export default function SelectCurrency() {
     const [searchValue, setSearchValue] = useState<string>('');
-    const { setPreferences } = usePreferences();
+    const { setPreference } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
 
     const renderItem = useCallback(({ item }: { item: (typeof currencies)[0] }) => {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    setPreferences({ currency: item.code });
+                    setPreference('currency', item.code);
                     setShowBottomSheetFlatList('preferences-currency', false);
                 }}
                 className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'
