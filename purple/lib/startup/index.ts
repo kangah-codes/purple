@@ -1,13 +1,14 @@
+import { type SQLiteDatabase } from 'expo-sqlite';
 import { StartupServiceFactory } from '../factory/StartupFactory';
 import { loadFonts } from './fonts';
-import { type SQLiteDatabase } from 'expo-sqlite';
-import { SettingsServiceFactory } from '../factory/SettingsFactory';
 import { initializePreferences } from './preferences';
 
 export async function initializeApp(db: SQLiteDatabase) {
     try {
         // init startup service
         const startupService = await StartupServiceFactory.init(db);
+
+        // load startup tasks here
         startupService.registerStartupTask(loadFonts);
         startupService.registerStartupTask(() => initializePreferences(db));
 

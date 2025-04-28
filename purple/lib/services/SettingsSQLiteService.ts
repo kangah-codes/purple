@@ -20,12 +20,6 @@ export class SettingsSQLiteService {
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('theme', ?)`,
                     [preferences.theme || 'light'],
                 ),
-                ...TRANSACTION_CATEGORY.map((type) =>
-                    this.db.runAsync(
-                        `INSERT OR IGNORE INTO transaction_types (emoji, category, is_custom) VALUES (?, ?, 0)`,
-                        [type.emoji, type.category],
-                    ),
-                ),
             ]);
         });
     }

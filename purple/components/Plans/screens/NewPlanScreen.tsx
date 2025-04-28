@@ -50,7 +50,7 @@ const depositFrequency = {
 
 export default function NewPlanScreen() {
     const {
-        preferences: { currency },
+        preferences: { customTransactionTypes, currency },
     } = usePreferences();
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlan();
@@ -310,33 +310,25 @@ export default function NewPlanScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanCategory'
-                                            options={transactionTypes.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            // TODO: optimise this
+                                            options={customTransactionTypes
+                                                .map((t) => `${t.emoji} ${t.category}`)
+                                                .reduce(
+                                                    (acc, curr) => {
+                                                        acc[curr] = {
+                                                            label: curr,
+                                                            value: curr,
+                                                        };
+                                                        return acc;
+                                                    },
+                                                    {} as Record<
+                                                        string,
+                                                        { label: string; value: string }
+                                                    >,
+                                                )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
-                                            // renderItem={(item) => (
-                                            //     <View className='w-[105%] border items-center border-purple-200 bg-purple-50 rounded-xl my-0.5 flex flex-row p-2.5 -mx-2.5'>
-                                            //         <View className='h-5 w-5 bg-purple-500 rounded-full' />
-                                            //         <Text
-                                            //             style={GLOBAL_STYLESHEET.satoshiMedium}
-                                            //             className='text-base text-black'
-                                            //         >
-                                            //             {item.label}
-                                            //         </Text>
-                                            //     </View>
-                                            // )}
                                         />
                                     </>
                                 )}

@@ -20,12 +20,21 @@ export default class StartupService {
             'PRAGMA user_version',
         )) ?? { user_version: 0 };
 
+        let highestAppliedVersion = dbVersion.user_version;
+
         for (const { version, sql } of migrations) {
             if (version > dbVersion.user_version) {
                 console.log(`Running migration v${version}`);
                 await db.execAsync(sql);
-                await db.execAsync(`PRAGMA user_version = ${version}`);
+
+                if (version > highestAppliedVersion) {
+                    highestAppliedVersion = version;
+                }
             }
+        }
+
+        if (highestAppliedVersion > dbVersion.user_version) {
+            await db.execAsync(`PRAGMA user_version = ${highestAppliedVersion}`);
         }
     }
 

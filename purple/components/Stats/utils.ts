@@ -24,6 +24,29 @@ const getDayKey = (date: Date) => {
     return dayKeys[index];
 };
 
+// export const groupTransactionsByWeek = (transactions: Transaction[]) => {
+//     const weeks: Record<number, Record<string, number>> = {
+//         1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+//         2: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+//         3: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+//         4: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+//     };
+
+//     for (const tx of transactions) {
+//         // if (tx.type !== 'debit') continue;
+
+//         const date = new Date(tx.created_at);
+//         const week = getWeekOfMonth(date, { weekStartsOn: 0 });
+//         const key = getDayKey(date);
+
+//         if (weeks[week]) {
+//             weeks[week][key] += tx.amount;
+//         }
+//     }
+
+//     return weeks;
+// };
+//
 export const groupTransactionsByWeek = (transactions: Transaction[]) => {
     const weeks: Record<number, Record<string, number>> = {
         1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
@@ -32,15 +55,29 @@ export const groupTransactionsByWeek = (transactions: Transaction[]) => {
         4: Object.fromEntries(dayKeys.map((k) => [k, 0])),
     };
 
+    // Get current date to calculate relative weeks
+    const now = new Date();
+
     for (const tx of transactions) {
-        if (tx.type !== 'debit') continue;
+        // Include all transactions, or filter conditionally if needed
+        // if (tx.type !== 'debit') continue;
 
         const date = new Date(tx.created_at);
-        const week = getWeekOfMonth(date, { weekStartsOn: 0 });
-        const key = getDayKey(date);
 
-        if (weeks[week]) {
-            weeks[week][key] += tx.amount;
+        // Calculate weeks ago (0 = current week, 1 = last week, etc.)
+        const dayDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        const weekAgo = Math.min(4, Math.max(1, Math.ceil(dayDiff / 7)));
+
+        // Get day of week (0 = Sunday, 1 = Monday, etc.)
+        const dayOfWeek = date.getDay();
+        // Map to your day keys (assuming dayKeys are ['mon', 'tue', ...])
+        const dayKeyIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Adjust if Sunday is end of week
+        const key = dayKeys[dayKeyIndex];
+
+        if (weeks[weekAgo] && key) {
+            // Use positive values for debits for visualization purposes
+            const amount = tx.type === 'debit' ? tx.amount : 0;
+            weeks[weekAgo][key] += amount;
         }
     }
 
