@@ -20,20 +20,17 @@ export default function WeekLegend({ weekRanges }: Props) {
             }}
         >
             {weekRanges.map((range, i) => (
-                <View
-                    key={i}
-                    className='bg-purple-50 flex flex-row justify-center items-center space-x-2 px-4 py-2 rounded-full'
-                >
+                <View key={i} className='flex flex-row justify-center items-center space-x-2.5'>
                     <View
                         style={{
                             width: 12,
                             height: 12,
-                            borderRadius: 6,
+                            borderRadius: 3,
                             backgroundColor: weekColors[i % weekColors.length],
                         }}
                     />
                     <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight text-xs'>
-                        Week {i + 1} ({range})
+                        {range}
                     </Text>
                 </View>
             ))}

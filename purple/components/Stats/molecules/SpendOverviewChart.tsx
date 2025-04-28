@@ -11,7 +11,7 @@ type SpendOverviewChartProps = {
 };
 
 export default function SpendOverviewChart({ transactions }: SpendOverviewChartProps) {
-    console.log(transactions);
+    // const tx = generateMockTransactionsForMonth(new Date());
     const stackData = useMemo(() => getStackedChartData(transactions), [transactions]);
     const weekRanges = getWeekRangesForMonth(new Date());
 

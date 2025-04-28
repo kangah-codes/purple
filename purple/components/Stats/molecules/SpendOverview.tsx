@@ -11,7 +11,9 @@ type SpendOverviewProps = {
 };
 
 export default function SpendOverview({ transactions }: SpendOverviewProps) {
-    const { currency } = usePreferences();
+    const {
+        preferences: { currency },
+    } = usePreferences();
     const { totalDebits, totalCredits } = useMemo(() => {
         const totals = transactions.reduce(
             (acc, tx) => {

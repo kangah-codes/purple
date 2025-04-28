@@ -78,7 +78,7 @@ const migrations: Migration[] = [
           PRAGMA journal_mode = WAL;
           CREATE TABLE IF NOT EXISTS settings (
             key TEXT NOT NULL,
-            value TEXT NOT NULL,
+            value TEXT NOT NULL
           );`,
     },
     {

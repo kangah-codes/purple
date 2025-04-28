@@ -1,4 +1,4 @@
-import { UserPreferences } from '@/components/Settings/schema';
+import { CustomTransactionType, UserPreferences } from '@/components/Settings/schema';
 import * as SQLite from 'expo-sqlite';
 import { TRANSACTION_CATEGORY } from '../constants/transactionTypes';
 
@@ -70,7 +70,7 @@ export class SettingsSQLiteService {
 
     async listTransactionTypes(): Promise<UserPreferences['customTransactionTypes']> {
         const result = await this.db.getAllAsync<UserPreferences['customTransactionTypes'][number]>(
-            `SELECT (emoji, category, is_custom) FROM transaction_types`,
+            `SELECT emoji, category, is_custom FROM transaction_types`,
             [],
         );
 
@@ -79,14 +79,16 @@ export class SettingsSQLiteService {
         >;
     }
 
-    async updateTransactionTypes(
+    async createTransactionType(
         custom: UserPreferences['customTransactionTypes'][number],
-    ): Promise<void> {
+    ): Promise<CustomTransactionType> {
         await this.db.runAsync(
             `INSERT INTO transaction_types (emoji, category, is_custom)
-              VALUES (?, ?, 1)
-            ON CONFLICT(key) DO UPDATE SET value=excluded.value, is_custom=1`,
+            VALUES (?, ?, 1)
+          ON CONFLICT(emoji) DO UPDATE SET category=excluded.category, is_custom=1`,
             [custom.emoji, custom.category],
         );
+
+        return custom;
     }
 }

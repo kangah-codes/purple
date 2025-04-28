@@ -1,11 +1,10 @@
-import { useGetAccountFromStore } from '@/components/Accounts/utils';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
-import { formatDate, formatDateTime } from '@/lib/utils/date';
+import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
 import React, { useMemo } from 'react';

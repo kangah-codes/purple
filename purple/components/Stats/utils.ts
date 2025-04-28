@@ -89,32 +89,38 @@ export const generateMockTransactionsForMonth = (monthDate: Date): Transaction[]
     const end = endOfMonth(monthDate);
 
     const transactions: Transaction[] = [];
-    let current = start;
     let id = 1;
+    let current = start;
 
     while (current <= end) {
-        const dayIndex = current.getDay(); // 0 (Sun) to 6 (Sat)
-        const week = getWeekOfMonth(current, { weekStartsOn: 0 });
+        const numTransactionsToday = Math.floor(Math.random() * 6);
 
-        transactions.push({
-            id: id.toString(),
-            created_at: current.toISOString(),
-            updated_at: current.toISOString(),
-            deleted_at: null,
-            account_id: 'acc1',
-            user_id: 'user1',
-            type: 'debit',
-            amount: 100 * week + dayIndex * 10,
-            account: {} as any,
-            note: `Mock transaction ${id}`,
-            category: 'Test',
-            from_account: '',
-            to_account: '',
-            currency: 'USD',
-            plan_id: '',
-        });
+        for (let i = 0; i < numTransactionsToday; i++) {
+            const minAmount = 10;
+            const maxAmount = 10000;
+            const randomAmount = Math.random() * (maxAmount - minAmount) + minAmount;
 
-        id++;
+            transactions.push({
+                id: id.toString(),
+                created_at: current.toISOString(),
+                updated_at: current.toISOString(),
+                deleted_at: null,
+                account_id: 'acc1',
+                user_id: 'user1',
+                type: Math.random() > 0.5 ? 'debit' : 'credit',
+                amount: parseFloat(randomAmount.toFixed(2)),
+                account: {} as any,
+                note: `Mock transaction ${id}`,
+                category: 'Test',
+                from_account: '',
+                to_account: '',
+                currency: 'USD',
+                plan_id: '',
+            });
+
+            id++;
+        }
+
         current = addDays(current, 1);
     }
 

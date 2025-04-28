@@ -4,7 +4,6 @@ import migrations from '../migrations';
 export type StartupTask = () => Promise<void>;
 
 export default class StartupService {
-    private isInitialised = false;
     protected db: SQLite.SQLiteDatabase;
     private startupTasks: StartupTask[] = [];
 
@@ -14,20 +13,6 @@ export default class StartupService {
 
     public registerStartupTask(task: StartupTask): void {
         this.startupTasks.push(task);
-    }
-
-    public async initialise(db: SQLite.SQLiteDatabase): Promise<void> {
-        if (this.isInitialised) return;
-
-        try {
-            await this.runMigrations(db);
-            await this.executeStartupTasks();
-
-            this.isInitialised = true;
-        } catch (error) {
-            console.error('Startup initialization failed:', error);
-            throw error;
-        }
     }
 
     public async runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
@@ -44,7 +29,7 @@ export default class StartupService {
         }
     }
 
-    private async executeStartupTasks(): Promise<void> {
+    public async executeStartupTasks(): Promise<void> {
         await Promise.all(this.startupTasks.map((task) => task()));
     }
 }

@@ -55,7 +55,7 @@ export default function AccountsScreen() {
                 <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg mt-2.5'>
                     Accounts
                 </Text>
-                <View className='h-1 border-gray-100 border-b w-full mb-2.5' />
+                <View className='h-1 border-purple-100 border-b w-full mb-2.5' />
             </View>
         ),
         [accounts],

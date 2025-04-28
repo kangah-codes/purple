@@ -13,7 +13,9 @@ import { usePreferences } from '../hooks';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const { currency } = usePreferences();
+    const {
+        preferences: { currency },
+    } = usePreferences();
     const renderItem: ListRenderItem<ProfilePageLinkProps> = useCallback(
         ({ item }) => (
             <ProfilePageLink
@@ -36,12 +38,12 @@ export default function ProfilePages() {
             title: 'Default Currency',
             callback: () => setShowBottomSheetFlatList('preferences-currency', true),
         },
-        // {
-        //     icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
-        //     title: 'Categories',
-        //     link: '/categories',
-        //     callback: () => alert('NME'),
-        // },
+        {
+            icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Categories',
+            link: '/settings/transaction-categories',
+            callback: () => alert('NME'),
+        },
     ];
 
     return (

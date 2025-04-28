@@ -23,7 +23,9 @@ export default function OnboardingPage({
     pages,
 }: OnboardingPageProps) {
     const { setOnboarded, setSessionData } = useAuth();
-    const { currency } = usePreferences();
+    const {
+        preferences: { currency },
+    } = usePreferences();
     const { mutate } = useCreateAccount();
 
     async function setSession() {

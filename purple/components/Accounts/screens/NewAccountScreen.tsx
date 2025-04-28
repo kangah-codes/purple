@@ -1,4 +1,4 @@
-import SearchableSelectField from '@/components/Shared/atoms/SearchableSelectField';
+import { usePreferences } from '@/components/Settings/hooks';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
     InputField,
@@ -20,10 +20,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
-import { usePreferences } from '@/components/Settings/hooks';
 
 export default function NewAccountScreen() {
-    const { currency } = usePreferences();
+    const {
+        preferences: { currency },
+    } = usePreferences();
     const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
     const { updateAccounts } = useAccountStore();
     const { mutate, isLoading } = useCreateAccount();
@@ -76,7 +77,7 @@ export default function NewAccountScreen() {
 
     const renderItem = useCallback((item: any) => {
         return (
-            <View className='py-3 border-b border-gray-100'>
+            <View className='py-3 border-b border-purple-100'>
                 <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight'>
                     {item.label}
                 </Text>
@@ -88,7 +89,7 @@ export default function NewAccountScreen() {
         const currency = currencies.find((currency) => currency.code === item.value);
 
         return (
-            <View className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'>
+            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'>
                 <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm'>
                     {currency?.emojiFlag}
                     {'  '}

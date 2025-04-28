@@ -6,7 +6,7 @@ import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
@@ -15,6 +15,7 @@ import TransactionHistoryList from '../molecules/TransactionHistoryList';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
 import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useSQLiteContext } from 'expo-sqlite';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -24,6 +25,7 @@ export default function IndexScreen() {
     const { updateTransactions } = useTransactionStore();
     const { setUser } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
+    const db = useSQLiteContext();
     // TODO: refactor this to a better named hook
     const { refetch, data } = useUser({
         options: {

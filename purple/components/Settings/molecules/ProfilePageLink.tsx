@@ -21,10 +21,7 @@ export default function ProfilePageLink({ icon, title, link, callback }: Profile
             <View className='flex-row items-center justify-between py-5 w-full'>
                 <View className='flex-row items-center space-x-2.5'>
                     <View className='items-center justify-center'>{icon}</View>
-                    <Text
-                        style={GLOBAL_STYLESHEET.satoshiBlack}
-                        className='text-sm text-black tracking-tight'
-                    >
+                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
                         {title}
                     </Text>
                 </View>
