@@ -18,16 +18,19 @@ export default function PlanNavigationArea() {
     if (!currentPlan) return null;
 
     return (
-        <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
+        <View className='w-full flex flex-row py-2.5 justify-between items-center px-5 relative'>
             <TouchableOpacity
                 onPress={router.back}
                 className='bg-purple-300 px-4 py-2 flex items-center justify-center rounded-full'
             >
                 <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                {truncateStringIfLongerThan(currentPlan.name as string, 20)}
-            </Text>
+
+            <View className='absolute left-0 right-0 items-center'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                    {currentPlan.name}
+                </Text>
+            </View>
 
             <View className='flex flex-row space-x-2'>
                 <TouchableOpacity onPress={() => router.push('/plans/transaction')}>

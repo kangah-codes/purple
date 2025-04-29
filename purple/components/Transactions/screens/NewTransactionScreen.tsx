@@ -23,6 +23,7 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -272,16 +273,19 @@ export default function NewTransactionScreen() {
             >
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
-                    <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                            New Transaction
-                        </Text>
-
-                        <TouchableOpacity onPress={router.back}>
-                            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-600'>
-                                Cancel
-                            </Text>
+                    <View className='w-full flex flex-row py-2.5 justify-between items-center relative'>
+                        <TouchableOpacity
+                            onPress={router.back}
+                            className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                        >
+                            <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                         </TouchableOpacity>
+
+                        <View className='absolute left-0 right-0 items-center'>
+                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                                New Transaction
+                            </Text>
+                        </View>
                     </View>
 
                     <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>

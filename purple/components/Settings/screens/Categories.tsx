@@ -1,6 +1,7 @@
 import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/24x24';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
+    InputField,
     LinearGradient,
     SafeAreaView,
     Text,
@@ -10,17 +11,25 @@ import {
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import { CustomTransactionType } from '../schema';
+import { SearchIcon } from '@/components/SVG/noscale';
 
 export default function CategoriesScreen() {
+    const [searchValue, setSearchValue] = useState('');
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
+    const filteredData = useMemo(() => {
+        return customTransactionTypes.filter((category) => {
+            const searchString = `${category.emoji} ${category.category}`;
+            return searchString.toLowerCase().includes(searchValue.toLowerCase());
+        });
+    }, [searchValue]);
     const renderItem = useCallback(({ item }: { item: CustomTransactionType }) => {
         return (
             <View className='py-3'>
@@ -46,10 +55,10 @@ export default function CategoriesScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <View className='w-full flex flex-row py-2.5 justify-between items-center px-5 relative'>
+            <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity
                     onPress={router.back}
-                    className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                    className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'
                 >
                     <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                 </TouchableOpacity>
@@ -59,10 +68,41 @@ export default function CategoriesScreen() {
                         Categories
                     </Text>
                 </View>
+
+                <Link
+                    href={{
+                        pathname: '/settings/new-transaction-category',
+                    }}
+                >
+                    <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
+                        <PlusIcon stroke={'#fff'} />
+                    </View>
+                </Link>
+            </View>
+            <View className='px-5 border-b'>
+                <View className='relative flex justify-center mt-2.5 mb-5'>
+                    <InputField
+                        className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900'
+                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        placeholder='Search'
+                        cursorColor={'#000'}
+                        onChangeText={setSearchValue}
+                        value={searchValue}
+                    />
+                    <SearchIcon
+                        width={16}
+                        height={16}
+                        style={{
+                            position: 'absolute',
+                            left: 15,
+                        }}
+                        stroke='#9333EA'
+                    />
+                </View>
             </View>
             <FlashList
                 estimatedItemSize={100}
-                data={customTransactionTypes}
+                data={filteredData}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={true}
@@ -71,19 +111,6 @@ export default function CategoriesScreen() {
                 ListEmptyComponent={renderEmptylist}
                 onEndReachedThreshold={0.5}
             />
-            <LinearGradient
-                className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={() => {
-                        router.push('/settings/new-transaction-category');
-                    }}
-                >
-                    <PlusIcon stroke={'#fff'} />
-                </TouchableOpacity>
-            </LinearGradient>
         </SafeAreaView>
     );
 }

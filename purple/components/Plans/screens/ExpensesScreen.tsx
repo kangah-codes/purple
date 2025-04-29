@@ -39,7 +39,7 @@ function ExpensesScreen() {
     const renderEmptylist = useCallback(
         () => (
             <View className='my-10'>
-                <EmptyList message="Looks like you haven't created any expense plans yet." />
+                <EmptyList message="Looks like you haven't created any budgets yet." />
             </View>
         ),
         [],

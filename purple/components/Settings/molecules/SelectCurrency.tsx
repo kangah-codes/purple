@@ -19,7 +19,6 @@ export default function SelectCurrency() {
                 <TouchableOpacity
                     onPress={() => {
                         setPreference('currency', item.code);
-                        console.log('Udated preference', preferences.currency);
                         setShowBottomSheetFlatList('preferences-currency', false);
                     }}
                     className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'

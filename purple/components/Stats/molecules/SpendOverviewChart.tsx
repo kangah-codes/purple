@@ -5,14 +5,22 @@ import React, { useMemo } from 'react';
 import { BarChart } from 'react-native-gifted-charts';
 import { getStackedChartData, getWeekRangesForMonth } from '../utils';
 import WeekLegend from './SpendOverviewLegend';
+import { generatePalette } from '@/lib/utils/colour';
 
 type SpendOverviewChartProps = {
     transactions: Transaction[];
 };
 
 export default function SpendOverviewChart({ transactions }: SpendOverviewChartProps) {
-    const stackData = useMemo(() => getStackedChartData(transactions), [transactions]);
-    const weekRanges = getWeekRangesForMonth(new Date());
+    const { stackData, weekRanges, palette } = useMemo(() => {
+        return {
+            stackData: getStackedChartData(transactions),
+            weekRanges: getWeekRangesForMonth(new Date()),
+            palette: generatePalette(new Date().toISOString()),
+        };
+    }, [transactions]);
+
+    console.log(palette);
 
     return (
         <View className='pt-5 flex flex-col space-y-2.5 px-5 mb-5'>
