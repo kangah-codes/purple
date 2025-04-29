@@ -1,7 +1,6 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import * as SQLite from 'expo-sqlite';
 import { DataService } from './DataService';
-import migrations from '../migrations';
 
 export abstract class BaseSQLiteService<T> implements DataService<T> {
     protected db: SQLite.SQLiteDatabase;

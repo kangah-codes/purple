@@ -43,7 +43,7 @@ export default function TransactionHistoryList({
         [],
     );
     const renderItemSeparator = useCallback(
-        () => <View className='border-b border-gray-100' />,
+        () => <View className='border-b border-purple-100' />,
         [],
     );
     const renderEmptylist = useCallback(

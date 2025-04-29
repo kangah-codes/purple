@@ -1,34 +1,36 @@
 import { SearchIcon } from '@/components/SVG/noscale';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { InputField, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { currencies } from '@/lib/constants/currencies';
-import { Portal } from '@gorhom/portal';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 
 export default function SelectCurrency() {
     const [searchValue, setSearchValue] = useState<string>('');
-    const { setPreferences } = usePreferences();
+    const { setPreference, preferences } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
 
-    const renderItem = useCallback(({ item }: { item: (typeof currencies)[0] }) => {
-        return (
-            <TouchableOpacity
-                onPress={() => {
-                    setPreferences({ currency: item.code });
-                    setShowBottomSheetFlatList('preferences-currency', false);
-                }}
-                className='py-3 border-b border-gray-100 flex flex-row space-x-2 items-center'
-            >
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm'>
-                    {item.emojiFlag} {item.name}
-                </Text>
-            </TouchableOpacity>
-        );
-    }, []);
+    const renderItem = useCallback(
+        ({ item }: { item: (typeof currencies)[0] }) => {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        setPreference('currency', item.code);
+                        setShowBottomSheetFlatList('preferences-currency', false);
+                    }}
+                    className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'
+                >
+                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm'>
+                        {item.emojiFlag} {item.name}
+                    </Text>
+                </TouchableOpacity>
+            );
+        },
+        [preferences],
+    );
 
     const filteredData = useMemo(() => {
         return currencies.filter((currency) => {

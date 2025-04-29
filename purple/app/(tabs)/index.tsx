@@ -18,7 +18,8 @@ export default function Screen() {
     const { setPlans } = usePlanStore();
     const { isLoading } = useUser({
         options: {
-            onError: () => {
+            onError: (err) => {
+                console.log('ERROR', err);
                 Toast.show({
                     type: 'error',
                     props: {

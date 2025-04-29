@@ -48,7 +48,7 @@ export default function LoadingScreen() {
                         <SkeletonLine width={40} height={20} />
                     </View>
 
-                    <View style={tw`p-5 space-y-2 border border-gray-100 rounded-xl`}>
+                    <View style={tw`p-5 space-y-2 border border-purple-100 rounded-xl`}>
                         <View style={tw`flex-row justify-between items-center`}>
                             <SkeletonLine width={80} height={20} />
                             <SkeletonLine width={40} height={20} />
@@ -68,7 +68,7 @@ export default function LoadingScreen() {
                         <React.Fragment key={index}>
                             <SkeletonListItem />
                             {index < 5 && (
-                                <View style={tw`w-full h-1 border-gray-100 border-t mb-2.5`} />
+                                <View style={tw`w-full h-1 border-purple-100 border-t mb-2.5`} />
                             )}
                         </React.Fragment>
                     ))}

@@ -971,4 +971,4 @@ export const currencies = [
         symbol: 'Z$',
         emojiFlag: '🇿🇼',
     },
-];
+] as const;

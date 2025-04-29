@@ -1,7 +1,7 @@
-import React from 'react';
-import { weekColors } from '../contants';
+import { ScrollView, Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { ScrollView, View, Text } from '@/components/Shared/styled';
+import React from 'react';
+import { generatedPalette } from '../contants';
 
 type Props = {
     weekRanges: string[];
@@ -13,27 +13,23 @@ export default function WeekLegend({ weekRanges }: Props) {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
-                paddingHorizontal: 16,
                 paddingTop: 8,
                 paddingBottom: 16,
                 gap: 12,
             }}
         >
             {weekRanges.map((range, i) => (
-                <View
-                    key={i}
-                    className='bg-purple-50 flex flex-row justify-center items-center space-x-2 px-4 py-2 rounded-full'
-                >
+                <View key={i} className='flex flex-row justify-center items-center space-x-2.5'>
                     <View
                         style={{
                             width: 12,
                             height: 12,
-                            borderRadius: 6,
-                            backgroundColor: weekColors[i % weekColors.length],
+                            borderRadius: 3,
+                            backgroundColor: generatedPalette[i % generatedPalette.length],
                         }}
                     />
                     <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight text-xs'>
-                        Week {i + 1} ({range})
+                        {range}
                     </Text>
                 </View>
             ))}

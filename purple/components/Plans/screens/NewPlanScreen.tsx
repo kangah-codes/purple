@@ -49,7 +49,9 @@ const depositFrequency = {
 };
 
 export default function NewPlanScreen() {
-    const { currency } = usePreferences();
+    const {
+        preferences: { customTransactionTypes, currency },
+    } = usePreferences();
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlan();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
@@ -308,33 +310,25 @@ export default function NewPlanScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanCategory'
-                                            options={transactionTypes.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            // TODO: optimise this
+                                            options={customTransactionTypes
+                                                .map((t) => `${t.emoji} ${t.category}`)
+                                                .reduce(
+                                                    (acc, curr) => {
+                                                        acc[curr] = {
+                                                            label: curr,
+                                                            value: curr,
+                                                        };
+                                                        return acc;
+                                                    },
+                                                    {} as Record<
+                                                        string,
+                                                        { label: string; value: string }
+                                                    >,
+                                                )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
-                                            // renderItem={(item) => (
-                                            //     <View className='w-[105%] border items-center border-purple-200 bg-purple-50 rounded-xl my-0.5 flex flex-row p-2.5 -mx-2.5'>
-                                            //         <View className='h-5 w-5 bg-purple-500 rounded-full' />
-                                            //         <Text
-                                            //             style={GLOBAL_STYLESHEET.satoshiMedium}
-                                            //             className='text-base text-black'
-                                            //         >
-                                            //             {item.label}
-                                            //         </Text>
-                                            //     </View>
-                                            // )}
                                         />
                                     </>
                                 )}
@@ -396,7 +390,7 @@ export default function NewPlanScreen() {
                         )}
                     </View>
 
-                    <View className='h-1 border-b border-gray-100 w-full' />
+                    <View className='h-1 border-b border-purple-100 w-full' />
 
                     <View className='flex flex-col space-y-1'>
                         <Controller
@@ -466,47 +460,44 @@ export default function NewPlanScreen() {
                     </View>
 
                     {getValues('type') === 'saving' && (
-                        <View>
-                            <View className='h-1 border-b border-gray-100 w-full' />
-                            <View className='flex flex-col space-y-1'>
-                                <Text
-                                    style={GLOBAL_STYLESHEET.satoshiBold}
-                                    className='text-xs text-gray-600'
-                                >
-                                    Deposit Frequency
-                                </Text>
-                                <View>
-                                    <Controller
-                                        control={control}
-                                        rules={{
-                                            required: "Deposit Frequency can't be empty",
-                                        }}
-                                        render={({ field: { onChange, value } }) => (
-                                            <>
-                                                <SelectField
-                                                    selectKey='newPlanDepositFrequency'
-                                                    options={depositFrequency}
-                                                    customSnapPoints={['20%', '30%']}
-                                                    value={value}
-                                                    onChange={(val) => {
-                                                        onChange(val);
-                                                        setValue('deposit_frequency', val);
-                                                    }}
-                                                />
-                                            </>
-                                        )}
-                                        name='deposit_frequency'
-                                    />
-                                </View>
-                                {errors.deposit_frequency && (
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
-                                        className='text-xs text-red-500'
-                                    >
-                                        {errors.deposit_frequency.message}
-                                    </Text>
-                                )}
+                        <View className='flex flex-col space-y-1'>
+                            <Text
+                                style={GLOBAL_STYLESHEET.satoshiBold}
+                                className='text-xs text-gray-600'
+                            >
+                                Deposit Frequency
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Deposit Frequency can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SelectField
+                                                selectKey='newPlanDepositFrequency'
+                                                options={depositFrequency}
+                                                customSnapPoints={['20%', '30%']}
+                                                value={value}
+                                                onChange={(val) => {
+                                                    onChange(val);
+                                                    setValue('deposit_frequency', val);
+                                                }}
+                                            />
+                                        </>
+                                    )}
+                                    name='deposit_frequency'
+                                />
                             </View>
+                            {errors.deposit_frequency && (
+                                <Text
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.deposit_frequency.message}
+                                </Text>
+                            )}
                         </View>
                     )}
                 </ScrollView>

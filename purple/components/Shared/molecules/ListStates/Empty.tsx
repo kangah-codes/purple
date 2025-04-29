@@ -10,12 +10,12 @@ type EmptyListProps = {
 
 export default function EmptyList({ message }: EmptyListProps) {
     return (
-        <View className='flex flex-col space-y-5 items-center justify-center px-5'>
+        <View className='flex flex-col items-center justify-center px-5'>
             <Image
-                source={require('@/assets/images/graphics/cactus.png')}
-                style={tw`h-[200px] w-[200px]`}
+                source={require('@/assets/images/graphics/kabosu.png')}
+                style={tw`h-[170px] w-[200px]`}
             />
-            <View className='flex flex-col space-y-2'>
+            <View className='flex flex-col'>
                 <Text
                     style={GLOBAL_STYLESHEET.satoshiBlack}
                     className='text-2xl text-black text-center'
@@ -24,7 +24,7 @@ export default function EmptyList({ message }: EmptyListProps) {
                 </Text>
                 <Text
                     style={GLOBAL_STYLESHEET.satoshiBold}
-                    className='text-sm text-purple-600 text-center'
+                    className='text-sm text-purple-500 text-center'
                 >
                     {message}
                 </Text>

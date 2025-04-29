@@ -1,5 +1,8 @@
 import { StyleSheet } from 'react-native';
 
+/**
+ * @deprecated Use satoshiFont from fonts.ts
+ */
 export const GLOBAL_STYLESHEET = StyleSheet.create({
     // satoshi
     satoshiBlack: {

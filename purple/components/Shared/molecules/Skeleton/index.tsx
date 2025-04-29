@@ -92,7 +92,7 @@ export const LineChartSkeleton = () => {
                 <View style={tw`ml-12 flex-1`}>
                     {/* Background grid lines */}
                     {[...Array(5)].map((_, i) => (
-                        <View key={`grid-${i}`} style={tw`border-t border-gray-100 flex-1`} />
+                        <View key={`grid-${i}`} style={tw`border-t border-purple-100 flex-1`} />
                     ))}
 
                     {/* Trend line */}

@@ -1,16 +1,39 @@
+import { CustomTransactionType, UserPreferences } from '@/components/Settings/schema';
 import { nativeStorage } from '@/lib/utils/storage';
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { UserPreferenceStore } from './schema';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
-export const createPreferencesStore = create<UserPreferenceStore>()(
+interface PreferencesStore {
+    preferences: UserPreferences;
+    setPreferences: (prefs: Partial<UserPreferences>) => void;
+    addCategory: (category: CustomTransactionType) => void;
+}
+
+export const usePreferencesStore = create<PreferencesStore>()(
     persist(
         (set) => ({
-            currency: 'GHS',
-            setPreferences: ({ currency }) => set({ currency }),
+            preferences: {
+                currency: 'GHS',
+                theme: 'light',
+                customTransactionTypes: [],
+            },
+            setPreferences: (partialPrefs) =>
+                set((state) => ({
+                    preferences: { ...state.preferences, ...partialPrefs },
+                })),
+            addCategory: (category) =>
+                set((state) => ({
+                    preferences: {
+                        ...state.preferences,
+                        customTransactionTypes: [
+                            ...state.preferences.customTransactionTypes,
+                            category,
+                        ],
+                    },
+                })),
         }),
         {
-            name: 'user-preferences',
+            name: 'preferences-store',
             storage: createJSONStorage(() => nativeStorage),
         },
     ),

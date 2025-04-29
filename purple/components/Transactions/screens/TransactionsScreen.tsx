@@ -1,5 +1,3 @@
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
 import { PlusIcon } from '@/components/SVG/24x24';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
@@ -11,25 +9,20 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
+import { FlashList } from '@shopify/flash-list';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useCallback, useEffect } from 'react';
-import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
 import { Transaction } from '../schema';
-import { FlashList } from '@shopify/flash-list';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 
-type TransactionsScreenProps = {
-    showBackButton?: boolean;
-};
-
-function TransactionsScreen(props: TransactionsScreenProps) {
+function TransactionsScreen() {
     const { accountID } = useLocalSearchParams();
-    const { sessionData } = useAuth();
     const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { data, fetchNextPage, hasNextPage, isError, refetch, isFetching } =
@@ -99,7 +92,7 @@ function TransactionsScreen(props: TransactionsScreenProps) {
         [],
     );
     const renderItemSeparator = useCallback(
-        () => <View className='border-b border-gray-100' />,
+        () => <View className='border-b border-purple-100' />,
         [],
     );
 

@@ -110,7 +110,7 @@ export default function NewPlanTransactionScreen() {
                             </Text>
                         </TouchableOpacity>
                     </View>
-                    <View className='h-1 border-b border-gray-100 w-full' />
+                    <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'

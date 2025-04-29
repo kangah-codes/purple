@@ -106,7 +106,7 @@ export default function SettingsScreen() {
                                     });
                                 });
                             }}
-                            // disabled={isLoading}
+                            disabled
                         >
                             <LinearGradient
                                 className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'

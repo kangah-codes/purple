@@ -80,6 +80,38 @@ export function stringify(obj: ParsedQuery): string {
     return parts.join('&');
 }
 
+export function isEmoji(char: string) {
+    // Get the code point of the character
+    const codePoint = char.codePointAt(0);
+
+    if (!codePoint) return false;
+
+    // Check if it's in emoji ranges
+    // Emoji ranges based on Unicode 14.0
+    return (
+        // Basic emoji
+        (codePoint >= 0x1f600 && codePoint <= 0x1f64f) ||
+        // Supplemental Symbols and Pictographs
+        (codePoint >= 0x1f900 && codePoint <= 0x1f9ff) ||
+        // Emoticons
+        (codePoint >= 0x1f600 && codePoint <= 0x1f64f) ||
+        // Transport and Map Symbols
+        (codePoint >= 0x1f680 && codePoint <= 0x1f6ff) ||
+        // Miscellaneous Symbols and Pictographs
+        (codePoint >= 0x1f300 && codePoint <= 0x1f5ff) ||
+        // Flags
+        (codePoint >= 0x1f1e6 && codePoint <= 0x1f1ff) ||
+        // Misc Technical
+        (codePoint >= 0x2300 && codePoint <= 0x23ff) ||
+        // Geometric Shapes
+        (codePoint >= 0x25a0 && codePoint <= 0x25ff) ||
+        // Misc Symbols
+        (codePoint >= 0x2600 && codePoint <= 0x26ff) ||
+        // Dingbats
+        (codePoint >= 0x2700 && codePoint <= 0x27bf)
+    );
+}
+
 export function isNotEmptyString(str?: string) {
     if (!str) return false;
     return str.trim().length > 0;

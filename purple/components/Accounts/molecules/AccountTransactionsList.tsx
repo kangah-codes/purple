@@ -39,7 +39,7 @@ export default function AccountTransactionsList({
     const renderEmptylist = useCallback(
         () => (
             <View className='my-20'>
-                <EmptyList message="Looks like you haven't created any transactions for this plan yet." />
+                <EmptyList message="Looks like you haven't created any transactions for this account yet." />
             </View>
         ),
         [],
@@ -51,12 +51,6 @@ export default function AccountTransactionsList({
 
     return (
         <View className='flex flex-col mt-5'>
-            {/* <View className='flex flex-row w-full justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg text-black'>
-                    Transactions
-                </Text>
-            </View> */}
-
             <FlashList
                 estimatedItemSize={40}
                 data={transactions}

@@ -46,7 +46,8 @@ export default function PlanInformation() {
                             style={GLOBAL_STYLESHEET.satoshiBold}
                             className='text-purple-500 text-sm tracking-tight'
                         >
-                            {formatCurrencyAccurate(currentPlan.currency, amountAdded)} added today
+                            {formatCurrencyAccurate(currentPlan.currency, amountAdded)}{' '}
+                            {currentPlan.type == 'expense' ? 'spent' : 'saved'} today
                         </Text>
                     </View>
                 )}

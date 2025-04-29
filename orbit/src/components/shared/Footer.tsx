@@ -32,15 +32,6 @@ export default function Footer() {
                         </div>
                         <div className='pb-16'>
                             <div className='group/row relative isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
-                                <div
-                                    aria-hidden='true'
-                                    className='absolute inset-y-0 left-1/2 -z-10 w-full -translate-x-1/2'
-                                >
-                                    <div className='absolute inset-x-0 top-0 border-t border-black/5' />
-                                    <div className='absolute inset-x-0 top-2 border-t border-black/5' />
-                                    <div className='absolute inset-x-0 bottom-0 hidden border-b border-black/5 group-last/row:block' />
-                                    <div className='absolute inset-x-0 bottom-2 hidden border-b border-black/5 group-last/row:block' />
-                                </div>
                                 <div className='grid grid-cols-2 gap-y-10 py-5 lg:grid-cols-9 lg:gap-8'>
                                     <div className='col-span-6 flex'>
                                         <div className='pt-6 lg:pb-6 group/item relative'>
@@ -171,18 +162,9 @@ export default function Footer() {
                                 </div>
                             </div>
                             <div className='flex justify-between group/row relative isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
-                                <div
-                                    aria-hidden='true'
-                                    className='absolute inset-y-0 left-1/2 -z-10 w-full -translate-x-1/2'
-                                >
-                                    <div className='absolute inset-x-0 top-0 border-t border-black/5' />
-                                    <div className='absolute inset-x-0 top-2 border-t border-black/5' />
-                                    <div className='absolute inset-x-0 bottom-0 hidden border-b border-black/5 group-last/row:block' />
-                                    <div className='absolute inset-x-0 bottom-2 hidden border-b border-black/5 group-last/row:block' />
-                                </div>
                                 <div>
                                     <div className='py-3 group/item relative'>
-                                        <div className='text-sm/6 text-black'>
+                                        <div className='text-sm/6 text-black font-semibold'>
                                             © {new Date().getFullYear()} Purple
                                         </div>
                                     </div>

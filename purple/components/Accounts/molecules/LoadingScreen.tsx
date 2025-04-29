@@ -63,7 +63,7 @@ export default function LoadingScreen() {
                         <React.Fragment key={index}>
                             <SkeletonListItem />
                             {index < 5 && (
-                                <View style={tw`w-full h-1 border-gray-100 border-t mb-2.5`} />
+                                <View style={tw`w-full h-1 border-purple-100 border-t mb-2.5`} />
                             )}
                         </React.Fragment>
                     ))}

@@ -1,4 +1,5 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
+import { usePreferences } from '@/components/Settings/hooks';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
@@ -11,25 +12,27 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { TRANSACTION_TYPES, transactionTypes } from '@/lib/constants/transactionTypes';
+import { TRANSACTION_TYPES } from '@/lib/constants/transactionTypes';
 import { omit, transformObject } from '@/lib/utils/object';
-import { nativeStorage } from '@/lib/utils/storage';
 import { capitaliseFirstLetter } from '@/lib/utils/string';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
+    const {
+        preferences: { customTransactionTypes },
+    } = usePreferences();
     const queryClient = useQueryClient();
     const { accounts } = useAccountStore();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
-    const [transactionCategories, setTransactionCategories] = useState<string[]>([]);
     const { mutate, isLoading } = useCreateTransaction();
     const {
         control,
@@ -48,13 +51,15 @@ export default function NewTransactionScreen() {
             date: new Date().toISOString(),
         },
     });
+    const transactionTypes = useMemo(
+        () =>
+            customTransactionTypes.map(
+                (transaction) => `${transaction.emoji} ${transaction.category}`,
+            ),
+        [customTransactionTypes],
+    );
     useEffect(() => {
         setValue('type', transactionType);
-        const getCachedConstants = async () => {
-            const cachedTypes = nativeStorage.getItem<string[]>('transaction_types');
-            if (cachedTypes) setTransactionCategories(cachedTypes);
-        };
-        getCachedConstants();
     }, [transactionType, setValue]);
 
     const onSubmit = (data: {
@@ -268,16 +273,19 @@ export default function NewTransactionScreen() {
             >
                 <ExpoStatusBar style='dark' />
                 <View className='flex flex-col space-y-2.5 px-5'>
-                    <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                            New Transaction
-                        </Text>
-
-                        <TouchableOpacity onPress={router.back}>
-                            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-600'>
-                                Cancel
-                            </Text>
+                    <View className='w-full flex flex-row py-2.5 justify-between items-center relative'>
+                        <TouchableOpacity
+                            onPress={router.back}
+                            className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                        >
+                            <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                         </TouchableOpacity>
+
+                        <View className='absolute left-0 right-0 items-center'>
+                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                                New Transaction
+                            </Text>
+                        </View>
                     </View>
 
                     <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>
@@ -308,7 +316,7 @@ export default function NewTransactionScreen() {
                             );
                         })}
                     </View>
-                    <View className='h-1 border-b border-gray-100 w-full' />
+                    <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
@@ -404,7 +412,7 @@ export default function NewTransactionScreen() {
                         </View>
                     </View>
 
-                    <View className='h-1 border-b border-gray-100 w-full' />
+                    <View className='h-1 border-b border-purple-100 w-full' />
 
                     <View className='flex flex-col space-y-1'>
                         <Controller
@@ -438,7 +446,7 @@ export default function NewTransactionScreen() {
                         )}
                     </View>
 
-                    <View className='h-1 border-b border-gray-100 w-full' />
+                    <View className='h-1 border-b border-purple-100 w-full' />
 
                     {renderAccountFields()}
 

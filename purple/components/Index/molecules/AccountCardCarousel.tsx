@@ -54,11 +54,6 @@ export default function AccountCardCarousel() {
                 dotsLength={accounts.length}
                 activeDotIndex={activeSlide}
                 dotStyle={styles.paginationDotStyle}
-                inactiveDotStyle={
-                    {
-                        // Define styles for inactive dots here
-                    }
-                }
                 inactiveDotOpacity={0.4}
                 inactiveDotScale={0.6}
                 containerStyle={styles.containerStyle}
