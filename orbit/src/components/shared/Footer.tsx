@@ -14,7 +14,7 @@ export default function Footer() {
                                     Coming soon to an Android near you
                                 </h1>
                             </hgroup>
-                            <p className='mx-auto mt-6 max-w-lg text-base text-black'>
+                            <p className='mx-auto mt-6 max-w-3xl text-base text-black'>
                                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos nemo
                                 rerum ipsam itaque consectetur corporis incidunt nostrum iure
                                 voluptatum autem doloribus porro, maxime aliquam perferendis
@@ -63,70 +63,19 @@ export default function Footer() {
                                                         className='font-medium text-black data-hover:text-black/75'
                                                         href='#'
                                                     >
-                                                        Features
+                                                        About
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a
+                                                        className='font-medium text-black data-hover:text-black/75'
+                                                        href='#'
+                                                    >
+                                                        Press
                                                     </a>
                                                 </li>
                                             </ul>
                                         </div>
-                                        {/* <div>
-                                            <h3 className='text-sm/6 font-medium text-purple-600'>
-                                                Company
-                                            </h3>
-                                            <ul className='mt-6 space-y-4 text-sm/6'>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-
-                                                        href='#'
-                                                    >
-                                                        Careers
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-
-                                                        href='/blog'
-                                                    >
-                                                        Blog
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-
-                                                        href='/company'
-                                                    >
-                                                        Company
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div> */}
-                                        {/* <div>
-                                            <h3 className='text-sm/6 font-medium text-purple-600'>
-                                                Support
-                                            </h3>
-                                            <ul className='mt-6 space-y-4 text-sm/6'>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-
-                                                        href='#'
-                                                    >
-                                                        Help center
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-
-                                                        href='#'
-                                                    >
-                                                        Community
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div> */}
                                         <div>
                                             <h3 className='text-sm/6 font-medium text-purple-600'>
                                                 Legal

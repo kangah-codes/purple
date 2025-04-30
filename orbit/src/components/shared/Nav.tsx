@@ -80,7 +80,7 @@ export default function Nav() {
                                         <div
                                             className={`
                                                 p-5 bg-gradient-to-br from-purple-50 to-purple-100 divide-y divide-white/5 rounded-[3rem]
-                                                h-full w-full z-10 text-sm/6
+                                                h-full w-full z-10 text-sm/6 max-w-2xl lg:max-w-7xl mx-auto
                                               `}
                                         >
                                             <Link

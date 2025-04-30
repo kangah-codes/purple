@@ -18,11 +18,10 @@ export default function BlockSection() {
                             <div className='px-5 text-black text-center flex'>
                                 <div className='flex flex-col space-y-2.5 mx-auto max-w-sm w-full'>
                                     <h1 className='inline text-4xl tracking-tight font-bold'>
-                                        Beautiful, and functional
+                                        Slick design, serious power
                                     </h1>
                                     <p className='text-base text-black'>
-                                        Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                                        Nisi nesciunt a, provident quaerat similique dolore!
+                                        Manage your finances without compromising on style.
                                     </p>
                                 </div>
                             </div>
@@ -36,7 +35,7 @@ export default function BlockSection() {
                                             decoding='async'
                                             data-nimg={1}
                                             className='mx-auto'
-                                            src='/graphics/stats_screen.png'
+                                            src='/graphics/stats_screen_3.png'
                                         />
                                     </div>
                                 </div>
@@ -47,12 +46,11 @@ export default function BlockSection() {
                                 <div className='px-5 text-black text-center flex'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full space-y-2.5'>
                                         <p className='inline text-4xl tracking-tight font-bold'>
-                                            Make budgeting <br /> fun again
+                                            Budgeting you&apos;ll <br /> actually enjoy
                                         </p>
                                         <p className='text-base text-black'>
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                            Esse, magnam rerum, necessitatibus quia, aspernatur odit
-                                            qui ut quibusdam.
+                                            Track, plan, and enjoy your money without the
+                                            spreadsheets.
                                         </p>
                                     </div>
                                 </div>
@@ -100,8 +98,8 @@ export default function BlockSection() {
 
                                 <div className='text-black text-center flex z-[1]'>
                                     <div className='flex flex-col mx-auto max-w-sm w-full space-y-2.5'>
-                                        <h1 className='inline text-4xl tracking-tight font-bold'>
-                                            Something cool.
+                                        <h1 className='inline text-3xl lg:text-4xl tracking-tight font-bold'>
+                                            Your financial cloud nine
                                         </h1>
                                         <p className='text-base text-black'>
                                             Lorem ipsum dolor sit amet consectetur adipisicing elit.
@@ -110,24 +108,6 @@ export default function BlockSection() {
                                         </p>
                                     </div>
                                 </div>
-                                {/* <div className='grid grid-cols-8 gap-3 max-w-md w-full mx-auto h-full relative'>
-                                    <div className='col-span-4 bg-white bg-opacity-50 backdrop-blur rounded-[2.5rem] items-center justify-center flex overflow-hidden relative'>
-                                        <div className='flex flex-col space-y-1 text-black text-center'>
-                                            <p className='inline text-4xl xl:text-5xl tracking-tight font-bold bg-gradient-to-r from-purple-300 to-purple-600 bg-clip-text text-transparent z-10'>
-                                                10x
-                                            </p>
-                                            <p className='inline text-sm'>Some metric</p>
-                                        </div>
-                                    </div>
-                                    <div className='col-span-4 bg-white bg-opacity-50 backdrop-blur rounded-[2.5rem] items-center justify-center flex overflow-hidden relative'>
-                                        <div className='flex flex-col space-y-1 text-black text-center'>
-                                            <p className='inline text-4xl xl:text-5xl tracking-tight font-bold bg-gradient-to-r from-purple-300 to-purple-600 bg-clip-text text-transparent z-10'>
-                                                3x
-                                            </p>
-                                            <p className='inline text-sm'>Another metric</p>
-                                        </div>
-                                    </div>
-                                </div> */}
                             </div>
                         </div>
                         <div className='grid grid-rows-6 h-[32.5rem] md:h-[35rem] gap-5'>
@@ -139,9 +119,7 @@ export default function BlockSection() {
                                                 100%
                                             </span>
                                         </h1>
-                                        <p className='text-base mt-2.5 text-black'>
-                                            Cruelty-free & Open Source
-                                        </p>
+                                        <p className='text-base mt-2.5 text-black'>Open Source</p>
                                     </div>
                                 </div>
                             </div>
@@ -151,7 +129,7 @@ export default function BlockSection() {
                                         alt='Logo'
                                         objectFit='cover'
                                         fill
-                                        src='/graphics/masonry.png'
+                                        src='/graphics/masonry-1.png'
                                     />
                                 </div>
                             </div>
@@ -159,8 +137,8 @@ export default function BlockSection() {
                         <div className='grid grid-cols-5 overflow-hidden border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-300 rounded-[3rem] col-span-full relative backdrop-blur-xl backdrop-opacity-50'>
                             <div className='col-span-full lg:col-span-2 z-10 text-black p-5 flex items-center justify-center'>
                                 <div className='flex flex-col p-5 lg:px-10 space-y-2.5'>
-                                    <h1 className='text-4xl tracking-tight font-bold'>
-                                        Something cool.
+                                    <h1 className='text-3xl lg:text-4xl tracking-tight font-bold'>
+                                        Everything where it belongs
                                     </h1>
                                     <p className='text-base'>
                                         Lorem ipsum dolor sit amet, consectetur adipisicing elit.
@@ -193,7 +171,7 @@ export default function BlockSection() {
                                         width={276}
                                         height={600}
                                         decoding='async'
-                                        src='/graphics/new_transaction_screen.png'
+                                        src='/graphics/accounts_screen.png'
                                         className='shadow-2xl translate-y-[75px]'
                                     />
                                 </div>

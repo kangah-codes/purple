@@ -1,6 +1,6 @@
 import BlockSection from '@/components/index/BlockSection';
 import Hero from '@/components/index/Hero';
-import Rain from '@/components/index/Rain';
+import Master from '@/components/index/Master';
 import Section from '@/components/index/Section';
 
 export default function Home() {
@@ -8,7 +8,7 @@ export default function Home() {
         <div>
             <Hero />
             <Section />
-            <Rain />
+            <Master />
             <BlockSection />
         </div>
     );
