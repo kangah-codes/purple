@@ -43,19 +43,24 @@ export default function Section() {
                                     <div className='w-[100px] h-[100px] relative mx-auto'>
                                         <Image
                                             src={'/graphics/envelope.png'}
-                                            alt='Watchtower'
+                                            alt='Envelope'
                                             priority
                                             fill
                                             className='w-full h-full top-0 left-0 object-cover'
                                         />
                                     </div>
                                     <div className='flex flex-col justify-start flex-1 mt-4'>
-                                        <dt className='text-2xl pt-2 leading-6 text-gray-800 font-semibold mb-2'>
-                                            Smart integrations
-                                        </dt>
+                                        <div className='flex flex-row space-x-2.5 items-center justify-center'>
+                                            <dt className='text-2xl pt-2 leading-6 text-gray-800 font-semibold mb-2'>
+                                                Smart integrations
+                                            </dt>
+                                            <div className='bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex px-2 py-1 text-white text-xs'>
+                                                <p className='my-auto font-bold'>Coming Soon</p>
+                                            </div>
+                                        </div>
                                         <dd className='text-base'>
                                             Link your bank, mobile money, or POS accounts in one
-                                            place—no more jumping between apps to track expenses.
+                                            place - no more jumping between apps to track expenses.
                                         </dd>
                                     </div>
                                 </div>
@@ -65,7 +70,7 @@ export default function Section() {
                                     <div className='w-[100px] h-[100px] relative mx-auto'>
                                         <Image
                                             src={'/graphics/computer-crash.png'}
-                                            alt='Watchtower'
+                                            alt='Computer Crash'
                                             priority
                                             fill
                                             className='w-full h-full top-0 left-0 object-cover'

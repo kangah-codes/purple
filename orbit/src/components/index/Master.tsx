@@ -9,10 +9,10 @@ export default function Master() {
                         Master your <span className='text-purple-600'>money</span>
                     </h1>
                     <p className='text-lg text-black mt-5'>
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi nesciunt a,
-                        provident quaerat similique dolore! Earum, eaque molestiae autem dolor, quos
-                        eveniet doloribus magni ullam temporibus eligendi, dolores dignissimos
-                        deleniti?
+                        Feel good about every penny you spend. Whether it’s keeping track of bills
+                        or saving up for something big, you&apos;re in control. No stress, just
+                        simple tools to help you stay on top of your money and build the future you
+                        want.
                     </p>
                 </div>
                 <div className='w-full xl:pl-10 grid place-items-center'>
