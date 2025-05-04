@@ -59,8 +59,8 @@ export default function Section() {
                                             </div>
                                         </div>
                                         <dd className='text-base'>
-                                            Link your bank, mobile money, or POS accounts in one
-                                            place - no more jumping between apps to track expenses.
+                                            Let Purple do the heavy lifting. Your transactions
+                                            magically show up, categorised and ready to go.
                                         </dd>
                                     </div>
                                 </div>

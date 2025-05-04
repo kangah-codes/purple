@@ -3,14 +3,14 @@ import Image from 'next/image';
 export default function BlockSection() {
     return (
         <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5'>
-            <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
+            {/* <div className='flex flex-col mx-auto text-center w-full col-span-2 space-y-2 max-w-2xl'>
                 <h1 className='font-bold text-4xl lg:text-5xl'>Insert header</h1>
                 <p className='text-lg text-black'>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi nesciunt a,
                     provident quaerat similique dolore! Earum, eaque molestiae autem dolor, quos
                     eveniet doloribus magni ullam temporibus eligendi, dolores dignissimos deleniti?
                 </p>
-            </div>
+            </div> */}
             <div className='mx-auto'>
                 <div className='mt-10'>
                     <div className='space-y-5 md:space-y-0 grid grid-cols-1 lg:grid-cols-3 md:gap-5'>
@@ -102,9 +102,9 @@ export default function BlockSection() {
                                             Your financial cloud nine
                                         </h1>
                                         <p className='text-base text-black'>
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                            Esse, magnam rerum, necessitatibus quia, aspernatur odit
-                                            qui ut quibusdam.
+                                            Your transactions are tracked, sorted, and served with a
+                                            side of clarity. It’s budgeting, but without the stress,
+                                            spreadsheets, or second-guessing.
                                         </p>
                                     </div>
                                 </div>
@@ -129,7 +129,8 @@ export default function BlockSection() {
                                         alt='Logo'
                                         objectFit='cover'
                                         fill
-                                        src='/graphics/masonry-1.png'
+                                        src='/graphics/masonry.png'
+                                        quality={100}
                                     />
                                 </div>
                             </div>
@@ -141,10 +142,9 @@ export default function BlockSection() {
                                         Everything where it belongs
                                     </h1>
                                     <p className='text-base'>
-                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                                        Perspiciatis magnam dicta iste neque atque. Incidunt
-                                        commodi, itaque eaque eos quia consectetur quisquam
-                                        laboriosam hic ut dolore libero nobis voluptatibus earum.
+                                        Life’s messy. Your money doesn’t have to be. Purple tidies
+                                        up your transactions so you can actually enjoy checking in
+                                        on your money.
                                     </p>
                                 </div>
                             </div>
