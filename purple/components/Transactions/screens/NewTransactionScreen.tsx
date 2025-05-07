@@ -31,7 +31,10 @@ export default function NewTransactionScreen() {
         preferences: { customTransactionTypes },
     } = usePreferences();
     const queryClient = useQueryClient();
-    const { accounts } = useAccountStore();
+    const { accounts, getAccountById } = useAccountStore();
+    const {
+        preferences: { allowOverdraw },
+    } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const { mutate, isLoading } = useCreateTransaction();
     const {
@@ -39,6 +42,7 @@ export default function NewTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
+        setError,
     } = useForm({
         defaultValues: {
             amount: '',
@@ -73,6 +77,31 @@ export default function NewTransactionScreen() {
         date: string;
     }) => {
         Keyboard.dismiss();
+
+        // check if overdraw is allowed
+        const account = getAccountById(
+            transactionType !== 'transfer' ? data.accountId : data.fromAccount,
+        );
+        if (!account) {
+            Toast.show({
+                type: 'error',
+                props: { text1: 'Error!', text2: "Couldn't create transaction" },
+            });
+            return;
+        }
+
+        if (
+            account.balance - Number(data.amount) < 0 &&
+            !allowOverdraw &&
+            ['debit', 'transfer'].includes(transactionType)
+        ) {
+            Toast.show({
+                type: 'warning',
+                props: { text1: 'Oops!', text2: 'Cannot overdraw account!' },
+            });
+            return;
+        }
+
         let transformedData = transformObject(data, [
             ['toAccount', 'to_account'],
             ['fromAccount', 'from_account'],
@@ -91,7 +120,7 @@ export default function NewTransactionScreen() {
             onError: (err) => {
                 Toast.show({
                     type: 'error',
-                    props: { text1: 'Error!', text2: capitaliseFirstLetter(err.message) },
+                    props: { text1: 'Error!', text2: "Couldn't create transaction" },
                 });
             },
             onSuccess: (res) => {

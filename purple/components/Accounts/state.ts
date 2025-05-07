@@ -6,6 +6,7 @@ import { Transaction } from '../Transactions/schema';
 
 type AccountStore = {
     accounts: Account[];
+    getAccountById: (id?: string) => Account | null;
     setAccounts: (accounts: Account[]) => void;
     updateAccounts: (account: Account) => void;
     currentAccount?: Account | null;
@@ -17,8 +18,13 @@ type AccountStore = {
 
 export const createAccountStore = create<AccountStore>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             accounts: [],
+            getAccountById: (id?: string) => {
+                if (!id) return null;
+                const account = get().accounts.find((acc) => acc.id === id);
+                return account ?? null;
+            },
             setAccounts: (accounts) => set({ accounts }),
             updateAccounts: (account) =>
                 set((state) => ({ accounts: [...state.accounts, account] })),

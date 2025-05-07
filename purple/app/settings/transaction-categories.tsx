@@ -1,4 +1,4 @@
-import CategoriesScreen from '@/components/Settings/screens/Categories';
+import CategoriesScreen from '@/components/Settings/screens/CategoriesScreen';
 import React from 'react';
 
 export default function Screen() {

@@ -6,15 +6,13 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import pkg from '@/package.json';
 import { Portal } from '@gorhom/portal';
-import { Image } from 'expo-image';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useState } from 'react';
 import { ActivityIndicator, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import tw from 'twrnc';
 import ProfilePages from '../molecules/ProfilePages';
 import SelectCurrency from '../molecules/SelectCurrency';
 
@@ -39,32 +37,24 @@ export default function SettingsScreen() {
                 colors={linearGradientColours}
             />
             <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                     Settings
                 </Text>
             </View>
-            <View className='flex items-center justify-center space-y-2.5 mt-5'>
-                <View className='flex items-center justify-center bg-purple-50 border border-purple-300 rounded-full w-20 h-20'>
-                    <Image
-                        source={require('@/assets/images/graphics/catto.png')}
-                        style={tw`h-12 w-12`}
-                    />
-                </View>
-            </View>
-            <View className='mt-5'>
+            <View className='mt-10'>
                 <ProfilePages />
             </View>
 
             <View className='flex flex-col space-y-2.5'>
                 <View className='flex flex-row justify-center'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-500'>
+                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-purple-500'>
                         Purple v{pkg.version} {pkg.isBeta && 'beta'}
                     </Text>
                 </View>
                 {process.env.NODE_ENV == 'development' && (
                     <>
                         <TouchableOpacity
-                            className='items-center self-center justify-center px-4'
+                            className='items-center self-center justify-center px-4 mt-10'
                             onPress={() => {
                                 setOnboarded(false).then(() =>
                                     destroySession().then(() => {
@@ -84,7 +74,7 @@ export default function SettingsScreen() {
                                 colors={['#F87171', '#DC2626']}
                             >
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiBlack}
+                                    style={satoshiFont.satoshiBlack}
                                     className='text-white text-center'
                                 >
                                     Reset App Cache
@@ -116,7 +106,7 @@ export default function SettingsScreen() {
                                     <ActivityIndicator size={15} color='#fff' />
                                 ) : (
                                     <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBlack}
+                                        style={satoshiFont.satoshiBlack}
                                         className='text-white text-center'
                                     >
                                         Sign Out

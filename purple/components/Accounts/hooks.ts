@@ -1,26 +1,26 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import HTTPError from '@/lib/utils/error';
+import { useSQLiteContext } from 'expo-sqlite';
 import {
-    useMutation,
     UseMutationResult,
-    useQuery,
     UseQueryOptions,
     UseQueryResult,
+    useMutation,
+    useQuery,
 } from 'react-query';
 import { useStore } from 'zustand';
+import { useAuth } from '../Auth/hooks';
 import { SessionData } from '../Auth/schema';
 import { Account } from './schema';
 import { createAccountStore } from './state';
-import { stringify } from '@/lib/utils/string';
-import { ServiceFactory } from '@/lib/factory/ServiceFactory';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useAuth } from '../Auth/hooks';
-import HTTPError from '@/lib/utils/error';
 
 export function useAccountStore() {
     const [
         accounts,
         setAccounts,
         updateAccounts,
+        getAccountById,
         currentAccount,
         setCurrentAccount,
         currentAccountTransactions,
@@ -29,6 +29,7 @@ export function useAccountStore() {
         state.accounts,
         state.setAccounts,
         state.updateAccounts,
+        state.getAccountById,
         state.currentAccount,
         state.setCurrentAccount,
         state.currentAccountTransactions,
@@ -38,6 +39,7 @@ export function useAccountStore() {
     return {
         accounts,
         setAccounts,
+        getAccountById,
         updateAccounts,
         currentAccount,
         setCurrentAccount,

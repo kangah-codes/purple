@@ -79,7 +79,7 @@ export default function PlanActionMenu() {
                         Delete Plan?
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                        style={GLOBAL_STYLESHEET.satoshiBold}
                         className='text-sm textblack text-center'
                     >
                         Are you sure you want to delete "

@@ -5,13 +5,21 @@ import { SettingsServiceFactory } from '../factory/SettingsFactory';
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
         const settingsService = SettingsServiceFactory.create(db);
-        const transactionTypes = await settingsService.listTransactionTypes();
+        await settingsService.ensureDefaults({
+            currency: 'GHS',
+            theme: 'light',
+            allowOverdraw: false,
+        });
+
+        const [transactionTypes, allowOverdraw] = await Promise.all([
+            settingsService.listTransactionTypes(),
+            settingsService.getWithFallback('allowOverdraw', false),
+        ]);
 
         usePreferencesStore.getState().setPreferences({
             customTransactionTypes: transactionTypes,
+            allowOverdraw: allowOverdraw,
         });
-
-        await settingsService.ensureDefaults(usePreferencesStore.getState().preferences);
     } catch (error) {
         console.error('Failed to initialize preferences:', error);
         throw error;

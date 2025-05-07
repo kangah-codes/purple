@@ -1,29 +1,18 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import React, { useCallback } from 'react';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Href, useRouter } from 'expo-router';
-import { ProfilePageLinkProps } from '../schema';
+import React, { useCallback } from 'react';
+import { SettingsListItem } from '../schema';
+import { satoshiFont } from '@/lib/constants/fonts';
 
-/**
-*
-* @param param0 <Switch
-          trackColor={{false: '#767577', true: '#81b0ff'}}
-          thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-* @returns
-*/
-
-export default function ProfilePageLink({
+export default function SettingsItem({
     icon,
     title,
     link,
     callback,
     description,
-}: ProfilePageLinkProps) {
+    customItem,
+}: SettingsListItem) {
     const router = useRouter();
     const handlePress = useCallback(() => {
         if (link) {
@@ -40,20 +29,17 @@ export default function ProfilePageLink({
                     <View className='items-center justify-center rounded-full border border-purple-300 p-2'>
                         {icon}
                     </View>
-                    <View className='flex flex-col space-y-0.5 max-w-[90%]'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
+                    <View className='flex flex-col space-y-0.5 max-w-[70%]'>
+                        <Text style={satoshiFont.satoshiBold} className='text-sm text-black'>
                             {title}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-xs text-black'
-                        >
+                        <Text style={satoshiFont.satoshiMedium} className='text-xs text-black'>
                             {description}
                         </Text>
                     </View>
                 </View>
 
-                <ChevronRightIcon stroke='#9333ea' />
+                {customItem ? customItem : <ChevronRightIcon stroke='#9333ea' />}
             </View>
         </TouchableOpacity>
     );

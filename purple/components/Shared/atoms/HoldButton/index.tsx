@@ -17,6 +17,7 @@ type HoldButtonProps = {
     buttonClassName?: string;
 };
 
+// TODO: allow user to style button
 export default function HoldButton({
     onComplete,
     isLoading,

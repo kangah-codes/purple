@@ -5,7 +5,17 @@ export type ProfilePageLinkProps = {
     icon: React.ReactNode;
     title: string;
     link?: string;
-    callback: () => void;
+    callback?: () => void;
+    description: string;
+};
+
+export type SettingsListItem = {
+    icon: React.ReactNode;
+    title: string;
+    link?: string;
+    callback?: () => void;
+    description: string;
+    customItem?: React.ReactNode;
 };
 
 export type UserPreferenceStore = {
@@ -29,4 +39,5 @@ export type UserPreferences = {
     currency: (typeof currencies)[number]['code'];
     theme: 'light' | 'dark';
     customTransactionTypes: CustomTransactionType[];
+    allowOverdraw: boolean;
 };

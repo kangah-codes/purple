@@ -16,6 +16,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
                 currency: 'GHS',
                 theme: 'light',
                 customTransactionTypes: [],
+                allowOverdraw: false,
             },
             setPreferences: (partialPrefs) =>
                 set((state) => ({

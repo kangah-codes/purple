@@ -77,9 +77,11 @@ const migrations: Migration[] = [
         sql: `
           PRAGMA journal_mode = WAL;
           CREATE TABLE IF NOT EXISTS settings (
-            key TEXT NOT NULL,
-            value TEXT NOT NULL
-          );`,
+              key TEXT PRIMARY KEY NOT NULL,
+              value TEXT NOT NULL
+          );
+
+          CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);`,
     },
     {
         version: 1,

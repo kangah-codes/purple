@@ -20,11 +20,15 @@ import { transformObject } from '@/lib/utils/object';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import { useQueryClient } from 'react-query';
+import { usePreferences } from '@/components/Settings/hooks';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();
     const { currentPlan } = usePlanStore();
-    const { accounts } = useAccountStore();
+    const {
+        preferences: { allowOverdraw },
+    } = usePreferences();
+    const { accounts, getAccountById } = useAccountStore();
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useCreatePlanTransaction({
         planData: {
@@ -52,6 +56,27 @@ export default function NewPlanTransactionScreen() {
 
     const onSubmit = (data: { amount: string; note: string; debit_account_id: string }) => {
         Keyboard.dismiss();
+        const account = getAccountById(data.debit_account_id);
+
+        if (!account) {
+            Toast.show({
+                type: 'error',
+                props: {
+                    text1: 'Error!',
+                    text2: "Couldn't create transaction",
+                },
+            });
+            return;
+        }
+
+        if (account.balance - Number(data.amount) < 0 && !allowOverdraw) {
+            Toast.show({
+                type: 'warning',
+                props: { text1: 'Oops!', text2: 'Cannot overdraw account!' },
+            });
+            return;
+        }
+
         let transformedData = transformObject(data, [
             ['amount', 'amount', (value) => Math.abs(Number(value))],
             [
@@ -69,7 +94,7 @@ export default function NewPlanTransactionScreen() {
                         type: 'error',
                         props: {
                             text1: 'Error!',
-                            text2: err.message,
+                            text2: "Couldn't create transaction",
                         },
                     });
                 },

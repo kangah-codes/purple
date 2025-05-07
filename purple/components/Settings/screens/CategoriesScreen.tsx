@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/24x24';
+import { SearchIcon } from '@/components/SVG/noscale';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
     InputField,
@@ -9,15 +10,15 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { Link, router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet, Platform } from 'react-native';
 import { usePreferences } from '../hooks';
 import { CustomTransactionType } from '../schema';
-import { SearchIcon } from '@/components/SVG/noscale';
 
 export default function CategoriesScreen() {
     const [searchValue, setSearchValue] = useState('');
@@ -33,7 +34,7 @@ export default function CategoriesScreen() {
     const renderItem = useCallback(({ item }: { item: CustomTransactionType }) => {
         return (
             <View className='py-3'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-base text-gray-800'>
+                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-800'>
                     {`${item.emoji} ${item.category}`}
                 </Text>
             </View>
@@ -42,7 +43,7 @@ export default function CategoriesScreen() {
     const renderEmptylist = useCallback(
         () => (
             <View className='my-20'>
-                <EmptyList message="Looks like you haven't created any transactions plans yet." />
+                <EmptyList message={`Couldn't find any categories which match "${searchValue}"`} />
             </View>
         ),
         [],
@@ -64,7 +65,7 @@ export default function CategoriesScreen() {
                 </TouchableOpacity>
 
                 <View className='absolute left-0 right-0 items-center'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                         Categories
                     </Text>
                 </View>
@@ -79,11 +80,11 @@ export default function CategoriesScreen() {
                     </View>
                 </Link>
             </View>
-            <View className='px-5 border-b'>
+            <View className='px-5'>
                 <View className='relative flex justify-center mt-2.5 mb-5'>
                     <InputField
-                        className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900'
-                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-purple-200'
+                        style={satoshiFont.satoshiBold}
                         placeholder='Search'
                         cursorColor={'#000'}
                         onChangeText={setSearchValue}
@@ -99,6 +100,19 @@ export default function CategoriesScreen() {
                         stroke='#9333EA'
                     />
                 </View>
+                <LinearGradient
+                    colors={['#f3e8ff', 'transparent']}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: -10,
+                        height: 10,
+                        zIndex: -1,
+                        borderBottomLeftRadius: 20,
+                        borderBottomRightRadius: 20,
+                    }}
+                />
             </View>
             <FlashList
                 estimatedItemSize={100}
