@@ -47,7 +47,7 @@ export default function SettingsScreen() {
 
             <View className='flex flex-col space-y-2.5'>
                 <View className='flex flex-row justify-center'>
-                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-purple-500'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
                         Purple v{pkg.version} {pkg.isBeta && 'beta'}
                     </Text>
                 </View>

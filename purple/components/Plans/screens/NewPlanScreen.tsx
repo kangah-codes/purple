@@ -32,6 +32,7 @@ import { useQueryClient } from 'react-query';
 import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
 
 const depositFrequency = {
     weekly: {
@@ -102,24 +103,23 @@ export default function NewPlanScreen() {
 
     return (
         <>
-            <SafeAreaView className='bg-white relative h-full'>
+            <SafeAreaView style={styles.parentView} className='bg-white relative h-full'>
                 <ExpoStatusBar style='dark' />
-                <View
-                    style={styles.parentView}
-                    className='w-full flex flex-row px-5 py-2.5 justify-between items-center'
-                >
-                    <View className='flex flex-col'>
+                <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+                    <TouchableOpacity
+                        onPress={router.back}
+                        className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                    >
+                        <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
+                    </TouchableOpacity>
+
+                    <View className='absolute left-0 right-0 items-center'>
                         <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                            New Plan
+                            New Transaction
                         </Text>
                     </View>
-
-                    <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
-                            Cancel
-                        </Text>
-                    </TouchableOpacity>
                 </View>
+
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.container}

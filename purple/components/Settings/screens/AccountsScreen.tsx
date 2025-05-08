@@ -2,17 +2,17 @@ import { ArrowLeftIcon } from '@/components/SVG/24x24';
 import { ScaleIcon } from '@/components/SVG/noscale';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useState } from 'react';
+import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import { Switch } from 'react-native-switch';
+import Toast from 'react-native-toast-message';
 import { usePreferences } from '../hooks';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
-import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
-import Toast from 'react-native-toast-message';
-import { useSQLiteContext } from 'expo-sqlite';
+import Switch from '@/components/Shared/molecules/Switch';
 
 export default function AccountsScreen() {
     const {
@@ -38,30 +38,12 @@ export default function AccountsScreen() {
         }
     };
 
-    console.log(allowOverdraw, 'VAL');
-
     const settingsItems: SettingsListItem[] = [
         {
             icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Allow Overdraw',
             description: 'Enable overspending by allowing the account balance to drop below zero',
-            customItem: (
-                <Switch
-                    value={allowOverdraw}
-                    onValueChange={handleOverdrawChange}
-                    activeText={''}
-                    inActiveText={''}
-                    backgroundActive='#9810fa'
-                    backgroundInactive='#dab2ff'
-                    circleSize={20}
-                    barHeight={30}
-                    circleBorderWidth={0}
-                    switchWidthMultiplier={2.9}
-                    containerStyle={{
-                        transform: [{ scale: 0.8 }],
-                    }}
-                />
-            ),
+            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
     ];
 

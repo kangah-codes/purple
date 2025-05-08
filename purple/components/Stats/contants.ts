@@ -16,3 +16,11 @@ export const dayLabels: Record<DayKey, string> = {
     Fr: 'F',
     Sa: 'S',
 };
+export const spendOverviewPalette = [
+    '#FECACA',
+    '#FCD34D',
+    '#A7F3D0',
+    '#93C5FD',
+    '#C4B5FD',
+    '#F9A8D4',
+];

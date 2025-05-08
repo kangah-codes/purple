@@ -1,16 +1,18 @@
 import { GenericAPIResponse } from '@/@types/request';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
-import { useInfiniteTransactions } from '@/components/Transactions/hooks';
+import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
+import { useTransactions } from '@/components/Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { getDateRange } from '@/lib/utils/date';
 import { useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccount, useAccountStore } from '../hooks';
+import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
 import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
-import AccountTransactionsList from '../molecules/AccountTransactionsList';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
 
@@ -18,7 +20,19 @@ const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
-    const { setCurrentAccount } = useAccountStore();
+    const { setCurrentAccount, currentAccountRequestParams, setCurrentAccountRequestParams } =
+        useAccountStore();
+
+    useEffect(() => {
+        const defaultDateRange = getDateRange('1W');
+        setCurrentAccountRequestParams({
+            accountID,
+            page_size: Infinity,
+            currentSelection: '1W',
+            startDate: defaultDateRange.startDate.toISOString(),
+            endDate: defaultDateRange.endDate.toISOString(),
+        });
+    }, [accountID]);
     const { refetch: accountRefetch, isLoading: accountsLoading } = useAccount({
         accountID,
         options: {
@@ -37,17 +51,23 @@ function AccountScreen() {
         },
     });
 
+    useEffect(() => {
+        if (currentAccountRequestParams.startDate && currentAccountRequestParams.endDate) {
+            transactionsRefetch();
+        }
+    }, [currentAccountRequestParams.startDate, currentAccountRequestParams.endDate]);
+
     const {
-        data: transactionsData,
-        fetchNextPage,
-        hasNextPage,
-        refetch: transactionsRefetch,
+        data: transactions,
         isFetching: transactionsFetching,
         isLoading: transactionsLoading,
-    } = useInfiniteTransactions({
+        refetch: transactionsRefetch,
+    } = useTransactions({
         requestQuery: {
             accountID,
-            page_size: 10,
+            start_date: currentAccountRequestParams.startDate,
+            end_date: currentAccountRequestParams.endDate,
+            page_size: currentAccountRequestParams.page_size,
         },
         options: {
             onError: (err) => {
@@ -55,26 +75,21 @@ function AccountScreen() {
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: err.message,
+                        text2: "Couldn't fetch account details",
                     },
                 });
             },
         },
     });
-
     useRefreshOnFocus(transactionsRefetch);
     useRefreshOnFocus(accountRefetch);
 
-    const transactions = useMemo(() => {
-        if (!transactionsData) return [];
-        return transactionsData.pages.flatMap((page) => page.data);
-    }, [transactionsData]);
-
-    const handleLoadMore = useCallback(() => {
-        if (hasNextPage) {
-            fetchNextPage();
-        }
-    }, [hasNextPage, fetchNextPage]);
+    useEffect(() => {
+        setCurrentAccountRequestParams({
+            accountID,
+            page_size: Infinity,
+        });
+    }, []);
 
     const isLoading = transactionsLoading || accountsLoading;
     if (isLoading) return <LoadingScreen />;
@@ -89,16 +104,9 @@ function AccountScreen() {
             <ExpoStatusBar style='dark' />
             <ScrollView>
                 <AccountNavigationArea />
-                <AccountInformation transactions={transactions} />
-                {/* <AccountActivityAreaChart transactions={transactions} /> */}
-                <AccountTransactionsList
-                    transactions={transactions}
-                    queryData={{
-                        handleLoadMore,
-                        refetch: transactionsRefetch,
-                        refreshing: transactionsFetching,
-                    }}
-                />
+                <AccountInformation transactions={transactions?.data ?? []} />
+                <AccountActivityAreaChart transactions={transactions?.data ?? []} />
+                <TransactionsAccordion transactions={transactions?.data ?? []} />
             </ScrollView>
         </SafeAreaView>
     );

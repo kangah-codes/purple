@@ -101,16 +101,14 @@ export default function CategoriesScreen() {
                     />
                 </View>
                 <LinearGradient
-                    colors={['#f3e8ff', 'transparent']}
+                    colors={['#e5e7eb', 'transparent']}
                     style={{
                         position: 'absolute',
                         left: 0,
                         right: 0,
-                        bottom: -10,
-                        height: 10,
+                        bottom: -15,
+                        height: 15,
                         zIndex: -1,
-                        borderBottomLeftRadius: 20,
-                        borderBottomRightRadius: 20,
                     }}
                 />
             </View>

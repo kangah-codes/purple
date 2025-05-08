@@ -1,21 +1,9 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import React, { useCallback } from 'react';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { Href, useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
 import { ProfilePageLinkProps } from '../schema';
-
-/**
-*
-* @param param0 <Switch
-          trackColor={{false: '#767577', true: '#81b0ff'}}
-          thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-* @returns
-*/
 
 export default function ProfilePageLink({
     icon,
@@ -40,14 +28,11 @@ export default function ProfilePageLink({
                     <View className='items-center justify-center rounded-full border border-purple-300 p-2'>
                         {icon}
                     </View>
-                    <View className='flex flex-col space-y-0.5 max-w-[90%]'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
+                    <View className='flex flex-col max-w-[90%]'>
+                        <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
                             {title}
                         </Text>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-xs text-black'
-                        >
+                        <Text style={satoshiFont.satoshiMedium} className='text-sm text-black'>
                             {description}
                         </Text>
                     </View>

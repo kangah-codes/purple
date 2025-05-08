@@ -46,11 +46,3 @@ export default function AlternateAccountCard({ item }: { item: Account }) {
         </>
     );
 }
-
-/**
- *  [
- * {"ID": "38a05679-0c4a-4365-bf5f-eadcd7e17c23", "balance": 0, "category": "💵 Cash",
- * "created_at": "2024-09-15T12:37:53.77406Z", "deleted_at": null, "is_default_account": true,
- * "name": "Cash", "updated_at": "2024-09-15T12:37:53.77406Z",
- * "user_id": "e25180d2-5153-4411-a637-0d57d9047e47"}]
- */

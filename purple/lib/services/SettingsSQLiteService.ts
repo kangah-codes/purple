@@ -57,6 +57,29 @@ export class SettingsSQLiteService {
         }
     }
 
+    async get<K extends keyof UserPreferences>(key: K): Promise<UserPreferences[K] | null> {
+        const result = await this.db.getFirstAsync<{ value: string }>(
+            `SELECT value from settings WHERE key = ?`,
+            [key],
+        );
+
+        if (!result) return null;
+        const rawValue = result.value;
+
+        switch (key) {
+            case 'theme':
+            case 'currency':
+                return rawValue as UserPreferences[K];
+            default:
+                try {
+                    return JSON.parse(rawValue) as UserPreferences[K];
+                } catch (e) {
+                    console.error(`Error parsing settings JSON with key ${key}`, e);
+                    return null;
+                }
+        }
+    }
+
     async set<K extends keyof UserPreferences>(key: K, value: UserPreferences[K]): Promise<void> {
         const serialisedValue = typeof value === 'boolean' ? JSON.stringify(value) : String(value);
 

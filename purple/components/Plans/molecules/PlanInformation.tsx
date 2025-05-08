@@ -1,11 +1,11 @@
 import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { usePlanStore } from '../hooks';
 import { calculateAmountAddedOnDay } from '../utils';
-import { formatDateTime } from '@/lib/utils/date';
 
 export default function PlanInformation() {
     const { currentPlan } = usePlanStore();
@@ -22,20 +22,27 @@ export default function PlanInformation() {
         [currentPlan],
     );
 
+    const isOverdrawn = (currentPlan?.target ?? 0) - (currentPlan?.balance ?? 0) < 0;
     if (!currentPlan) return null;
 
     return (
         <View className='px-5 flex flex-col space-y-2.5'>
             <View className='flex flex-col'>
                 <Text
-                    style={GLOBAL_STYLESHEET.satoshiBlack}
+                    style={[
+                        satoshiFont.satoshiBlack,
+                        {
+                            color: isOverdrawn ? 'red' : 'black',
+                        },
+                    ]}
                     className='text-black text-3xl tracking-tighter leading-[1.4] mt-1.5'
                 >
-                    {formatCurrencyAccurate(currentPlan.currency, currentPlan.target)}
+                    {isOverdrawn && '-'}
+                    {formatCurrencyAccurate(currentPlan.currency, currentPlan.balance)}
                 </Text>
                 <Text
-                    style={GLOBAL_STYLESHEET.satoshiBold}
-                    className='text-purple-500 text-sm tracking-tight'
+                    style={satoshiFont.satoshiBold}
+                    className='text-purple-600 text-sm tracking-tight'
                 >
                     {startDate.date} - {endDate.date}
                 </Text>
@@ -43,8 +50,8 @@ export default function PlanInformation() {
                     <View className='flex flex-row items-center space-x-1'>
                         <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-purple-500 text-sm tracking-tight'
+                            style={satoshiFont.satoshiBold}
+                            className='text-purple-600 text-sm tracking-tight'
                         >
                             {formatCurrencyAccurate(currentPlan.currency, amountAdded)}{' '}
                             {currentPlan.type == 'expense' ? 'spent' : 'saved'} today

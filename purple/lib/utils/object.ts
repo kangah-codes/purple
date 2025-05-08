@@ -203,10 +203,10 @@ type TransformObject<T, U extends KeyMapping<T>[]> = {
     [K in U[number] as K[1]]: K extends [infer OldKey, any, (value: any) => infer R]
         ? R
         : K extends [infer OldKey, any]
-        ? OldKey extends keyof T
-            ? T[OldKey]
-            : never
-        : never;
+          ? OldKey extends keyof T
+              ? T[OldKey]
+              : never
+          : never;
 } & Omit<T, U[number][0]>;
 
 export function transformObject<T extends object, U extends KeyMapping<T>[]>(
@@ -265,4 +265,36 @@ export function excludeKeys<T extends Record<string, unknown>>(
         }
         return acc;
     }, {} as Partial<T>);
+}
+
+/**
+ * Returns the maximum value for a specified numeric property in an array of objects
+ * @param arr - Array of objects to search through
+ * @param key - Key of the numeric property to compare
+ * @param fallback - fallback value
+ * @returns The maximum value found or undefined if the array is empty
+ */
+export function getMaxValue<T extends object, K extends keyof T>(
+    arr: T[],
+    key: K,
+    fallback: number,
+): T[K] | number {
+    if (arr.length === 0) {
+        return fallback;
+    }
+
+    return arr.reduce((max, current) => {
+        const currentValue = current[key];
+        const maxValue = max[key];
+
+        if (
+            typeof currentValue === 'number' &&
+            typeof maxValue === 'number' &&
+            currentValue > maxValue
+        ) {
+            return current;
+        }
+
+        return max;
+    }, arr[0])[key];
 }

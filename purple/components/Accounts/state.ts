@@ -1,20 +1,7 @@
-import { create } from 'zustand';
-import { Account } from './schema';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { nativeStorage } from '@/lib/utils/storage';
-import { Transaction } from '../Transactions/schema';
-
-type AccountStore = {
-    accounts: Account[];
-    getAccountById: (id?: string) => Account | null;
-    setAccounts: (accounts: Account[]) => void;
-    updateAccounts: (account: Account) => void;
-    currentAccount?: Account | null;
-    setCurrentAccount: (account: Account | null) => void;
-    currentAccountTransactions: Transaction[];
-    setCurrentAccountTransactions: (transactions: Transaction[]) => void;
-    reset: () => void;
-};
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { AccountStore, CurrentAccountRequestParams } from './schema';
 
 export const createAccountStore = create<AccountStore>()(
     persist(
@@ -29,6 +16,16 @@ export const createAccountStore = create<AccountStore>()(
             updateAccounts: (account) =>
                 set((state) => ({ accounts: [...state.accounts, account] })),
             currentAccount: undefined,
+            currentAccountRequestParams: {},
+            setCurrentAccountRequestParams: (
+                currentAccountRequestParams: Partial<CurrentAccountRequestParams>,
+            ) =>
+                set((state) => ({
+                    currentAccountRequestParams: {
+                        ...state.currentAccountRequestParams,
+                        ...currentAccountRequestParams,
+                    },
+                })),
             setCurrentAccount: (account) => set({ currentAccount: account }),
             currentAccountTransactions: [],
             setCurrentAccountTransactions: (transactions) =>

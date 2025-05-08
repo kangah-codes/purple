@@ -1,31 +1,26 @@
 import { GenericAPIResponse } from '@/@types/request';
 import { useAccountStore } from '@/components/Accounts/hooks';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData, User } from '@/components/Auth/schema';
+import { User } from '@/components/Auth/schema';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
-import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
+import { LinearGradient, SafeAreaView, ScrollView, View } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-import { useTransactionStore } from '@/components/Transactions/hooks';
-import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
-import { useSQLiteContext } from 'expo-sqlite';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
 export default function IndexScreen() {
-    const { sessionData } = useAuth();
     const { setAccounts } = useAccountStore();
     const { updateTransactions } = useTransactionStore();
     const { setUser } = useUserStore();
     const [refreshing, setRefreshing] = useState(false);
-    const db = useSQLiteContext();
     // TODO: refactor this to a better named hook
     const { refetch, data } = useUser({
         options: {

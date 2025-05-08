@@ -165,7 +165,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
             `SELECT t.*, a.id as account_id, a.name as account_name, a.currency as account_currency
               FROM transactions t
               INNER JOIN accounts a ON t.account_id = a.id
-              WHERE t.plan_id = ?`,
+              WHERE t.plan_id = ? ORDER BY t.created_at DESC`,
             [id],
         );
 

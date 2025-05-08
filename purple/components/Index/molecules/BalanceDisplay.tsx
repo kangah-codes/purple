@@ -4,6 +4,8 @@ import { EyeCloseIcon, EyeOpenIcon } from '../../SVG/noscale';
 import React from 'react';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { Account } from '@/components/Accounts/schema';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { Link } from 'expo-router';
 
 // TODO: Add types for props
 export function BalanceDisplay({
@@ -20,14 +22,21 @@ export function BalanceDisplay({
     account: Account;
 }) {
     return (
-        <View className='flex flex-col'>
-            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-black text-3xl'>
-                {formatCurrencyRounded(account.balance, account.currency)}
-            </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-base'>
-                {accountName}
-            </Text>
-        </View>
+        <Link
+            href={{
+                pathname: '/accounts/account-transactions',
+                params: { accountName: account.name, accountID: account.id },
+            }}
+        >
+            <View className='flex flex-col'>
+                <Text style={satoshiFont.satoshiBlack} className='text-black text-3xl'>
+                    {formatCurrencyRounded(account.balance, account.currency)}
+                </Text>
+                <Text style={satoshiFont.satoshiBold} className='text-black text-base'>
+                    {accountName}
+                </Text>
+            </View>
+        </Link>
     );
 }
 

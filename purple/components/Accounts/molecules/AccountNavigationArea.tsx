@@ -5,6 +5,7 @@ import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Link, router } from 'expo-router';
 import React from 'react';
 import { useAccountStore } from '../hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function AccountNavigationArea() {
     const { currentAccount } = useAccountStore();
@@ -12,73 +13,31 @@ export default function AccountNavigationArea() {
     if (!currentAccount) return null;
 
     return (
-        <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
+        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
             <TouchableOpacity
                 onPress={router.back}
-                className='bg-purple-300 px-4 py-2 flex items-center justify-center rounded-full'
+                className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
             >
                 <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                {truncateStringIfLongerThan(currentAccount.name as string, 20)}
-            </Text>
 
-            <View className='flex flex-row space-x-2'>
-                <Link
-                    href={{
-                        pathname: '/transactions/new-transaction',
-                        params: {
-                            accountId: currentAccount.id,
-                        },
-                    }}
-                >
-                    <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                        <PlusIcon stroke={'#fff'} />
-                    </View>
-                </Link>
-                {/* <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                    <DropdownMenu
-                        visible={visible}
-                        handleOpen={() => setVisible(true)}
-                        handleClose={() => setVisible(false)}
-                        trigger={
-                            <DotsHorizontalIcon
-                                stroke='#fff'
-                                width='24'
-                                height='24'
-                                strokeWidth={2.5}
-                            />
-                        }
-                        padX={20}
-                        dropdownWidth={180}
-                    >
-                        <MenuOption
-                            onSelect={() => {
-                                setVisible(false);
-                            }}
-                        >
-                            <View className='flex flex-row items-center space-x-1'>
-                                <EditSquareIcon stroke='#ad46ff' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
-                                    Edit Plan
-                                </Text>
-                            </View>
-                        </MenuOption>
-                        <MenuOption
-                            onSelect={() => {
-                                setShowBottomSheetModal('planScreenModal', true);
-                            }}
-                        >
-                            <View className='flex flex-row items-center space-x-1'>
-                                <TrashIcon stroke='#EF4444' width={18} />
-                                <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-sm'>
-                                    Delete
-                                </Text>
-                            </View>
-                        </MenuOption>
-                    </DropdownMenu>
-                </View> */}
+            <View className='absolute left-0 right-0 items-center'>
+                <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                    {truncateStringIfLongerThan(currentAccount.name as string, 20)}
+                </Text>
             </View>
+            <Link
+                href={{
+                    pathname: '/transactions/new-transaction',
+                    params: {
+                        accountId: currentAccount.id,
+                    },
+                }}
+            >
+                <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
+                    <PlusIcon stroke={'#fff'} />
+                </View>
+            </Link>
         </View>
     );
 }

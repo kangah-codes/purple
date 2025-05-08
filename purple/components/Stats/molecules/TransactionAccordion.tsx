@@ -1,14 +1,19 @@
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import TransactionCard from './TransactionCard';
-import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
-export default function TransactionsAccordion({ transactions }: { transactions: Transaction[] }) {
+type TransactionsAccordionProps = {
+    transactions: Transaction[];
+    title?: string;
+};
+
+export default function TransactionsAccordion({ transactions, title }: TransactionsAccordionProps) {
     const groupedTransactionData = useMemo(() => {
         const transactionsWithFormattedDate = transactions.map((transaction) => ({
             ...transaction,
@@ -47,8 +52,8 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
 
     return (
         <View style={{ flex: 1 }} className='px-5 flex flex-col space-y-2.5 mt-5'>
-            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
-                My transactions
+            <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                {title ?? 'My transactions'}
             </Text>
             <FlashList
                 estimatedItemSize={300}
@@ -58,6 +63,8 @@ export default function TransactionsAccordion({ transactions }: { transactions: 
                 contentContainerStyle={{ paddingBottom: 300 }}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={renderEmptylist}
+                onEndReachedThreshold={0.5}
+                scrollEnabled={false}
             />
         </View>
     );

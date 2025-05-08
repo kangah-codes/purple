@@ -24,6 +24,9 @@ export type Transaction = {
     created_at: string;
     currency: string;
     plan_id: string;
+    created_at_unix: string;
+    updated_at_unix: string;
+    deleted_at_unix: string | null;
 };
 
 export type CreateTransaction = {

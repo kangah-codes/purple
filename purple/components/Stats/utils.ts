@@ -1,6 +1,13 @@
-import { addDays, endOfMonth, format, getWeekOfMonth, startOfMonth } from 'date-fns';
+import {
+    addDays,
+    differenceInDays,
+    endOfMonth,
+    format,
+    getWeekOfMonth,
+    startOfMonth,
+} from 'date-fns';
 import { Transaction } from '../Transactions/schema';
-import { dayKeys, dayLabels, generatedPalette, weekColors } from './contants';
+import { dayKeys, dayLabels, generatedPalette, spendOverviewPalette, weekColors } from './contants';
 
 export function getCurrentMonthYear() {
     const date = new Date();
@@ -43,7 +50,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
     const rawChartData = dayKeys.map((key) => {
         const stacks = Object.entries(grouped).map(([_, data], i) => ({
             value: data[key] || 0,
-            color: generatedPalette[i],
+            color: spendOverviewPalette[i],
             marginBottom: 2,
         }));
 
@@ -74,21 +81,39 @@ export const getStackedChartData = (transactions: Transaction[]) => {
     return paddedChartData;
 };
 
-export const generateMockTransactionsForMonth = (monthDate: Date): Transaction[] => {
+export const generateMockTransactionsForMonth = (
+    monthDate: Date,
+    trend: boolean = false,
+): Transaction[] => {
     const start = startOfMonth(monthDate);
     const end = endOfMonth(monthDate);
-
     const transactions: Transaction[] = [];
     let id = 1;
     let current = start;
+
+    const totalDays = differenceInDays(end, start) + 1;
+    const startAmount = 10;
+    const endAmount = 10000;
+
+    let previousAmount = startAmount;
 
     while (current <= end) {
         const numTransactionsToday = Math.floor(Math.random() * 6);
 
         for (let i = 0; i < numTransactionsToday; i++) {
-            const minAmount = 10;
-            const maxAmount = 10000;
-            const randomAmount = Math.random() * (maxAmount - minAmount) + minAmount;
+            let amount: number;
+
+            if (trend) {
+                const progress = differenceInDays(current, start) / totalDays;
+                const easedProgress = Math.pow(progress, 1.5);
+                const baseAmount = startAmount + (endAmount - startAmount) * easedProgress;
+                const randomFactor = 0.9 + Math.random() * 0.1;
+                amount = baseAmount * randomFactor;
+            } else {
+                amount = previousAmount + Math.random() * 500;
+            }
+
+            amount = Math.max(amount, previousAmount + 1);
 
             transactions.push({
                 id: id.toString(),
@@ -97,17 +122,24 @@ export const generateMockTransactionsForMonth = (monthDate: Date): Transaction[]
                 deleted_at: null,
                 account_id: 'acc1',
                 user_id: 'user1',
-                type: Math.random() > 0.5 ? 'debit' : 'credit',
-                amount: parseFloat(randomAmount.toFixed(2)),
+                type: trend
+                    ? Math.random() > 0.3
+                        ? 'credit'
+                        : 'debit'
+                    : Math.random() > 0.5
+                      ? 'debit'
+                      : 'credit',
+                amount: parseFloat(amount.toFixed(2)),
                 account: {} as any,
                 note: `Mock transaction ${id}`,
                 category: 'Test',
                 from_account: '',
                 to_account: '',
-                currency: 'USD',
+                currency: 'GHS',
                 plan_id: '',
-            });
+            } as Transaction);
 
+            previousAmount = amount;
             id++;
         }
 

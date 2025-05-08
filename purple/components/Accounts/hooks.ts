@@ -24,7 +24,9 @@ export function useAccountStore() {
         currentAccount,
         setCurrentAccount,
         currentAccountTransactions,
+        currentAccountRequestParams,
         setCurrentAccountTransactions,
+        setCurrentAccountRequestParams,
     ] = useStore(createAccountStore, (state) => [
         state.accounts,
         state.setAccounts,
@@ -33,7 +35,9 @@ export function useAccountStore() {
         state.currentAccount,
         state.setCurrentAccount,
         state.currentAccountTransactions,
+        state.currentAccountRequestParams,
         state.setCurrentAccountTransactions,
+        state.setCurrentAccountRequestParams,
     ]);
 
     return {
@@ -44,7 +48,9 @@ export function useAccountStore() {
         currentAccount,
         setCurrentAccount,
         currentAccountTransactions,
+        currentAccountRequestParams,
         setCurrentAccountTransactions,
+        setCurrentAccountRequestParams,
     };
 }
 

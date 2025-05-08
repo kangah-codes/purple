@@ -36,7 +36,7 @@ export default function PlanCard({ data, index }: { data: Plan; index: number })
                 </View>
             </View>
 
-            <View className='h-[1px] bg-purple-200 w-full' />
+            <View className='h-[1px] bg-purple-200 w-full my-2.5' />
 
             <View className='flex flex-row justify-between items-center'>
                 <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-600'>

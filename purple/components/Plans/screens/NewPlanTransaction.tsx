@@ -21,6 +21,8 @@ import { useAccountStore } from '@/components/Accounts/hooks';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import { useQueryClient } from 'react-query';
 import { usePreferences } from '@/components/Settings/hooks';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();
@@ -120,22 +122,19 @@ export default function NewPlanTransactionScreen() {
                 }}
             >
                 <ExpoStatusBar style='dark' />
-                <View className='flex flex-col space-y-2.5 px-5'>
-                    <View className='w-full flex flex-row py-2.5 justify-between items-center'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                <View className='w-full flex flex-row py-2.5 justify-between items-center relative'>
+                    <TouchableOpacity
+                        onPress={router.back}
+                        className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                    >
+                        <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
+                    </TouchableOpacity>
+
+                    <View className='absolute left-0 right-0 items-center'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                             New Transaction
                         </Text>
-
-                        <TouchableOpacity onPress={router.back}>
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
-                                className='text-purple-600'
-                            >
-                                Cancel
-                            </Text>
-                        </TouchableOpacity>
                     </View>
-                    <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'

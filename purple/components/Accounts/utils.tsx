@@ -6,6 +6,7 @@ import { useAccountStore } from './hooks';
 import React from 'react';
 import { getKey, groupBy } from '@/lib/utils/helpers';
 import { Account } from './schema';
+import { format, parseISO } from 'date-fns';
 
 export function createTransactionChartData(
     transactions: Transaction[],
@@ -103,4 +104,32 @@ export function groupAccountsByCategory(accounts: Account[]): Record<string, Acc
     });
 
     return finalGroups;
+}
+
+type ChartPoint = {
+    value: number;
+    date: string;
+};
+
+export function generateChartData(transactions: Transaction[]): ChartPoint[] {
+    const dailyTotals: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+
+        if (!dailyTotals[isoDate]) {
+            dailyTotals[isoDate] = 0;
+        }
+
+        dailyTotals[isoDate] += tx.amount;
+    }
+
+    const chartData = Object.entries(dailyTotals)
+        .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+        .map(([isoDate, value]) => ({
+            date: format(parseISO(isoDate), 'd MMM yyyy'),
+            value,
+        }));
+
+    return chartData;
 }

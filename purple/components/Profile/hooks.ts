@@ -62,7 +62,6 @@ export function useUser({
                     page: 1,
                 }),
             ]).catch((err) => {
-                console.log('Error', err);
                 throw new Error("Couldn't fetch your data");
             });
 

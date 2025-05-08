@@ -17,8 +17,6 @@ export default function PlanBuildUpChart() {
         return generateSpendingTrendData(currentPlan, 30, 5);
     }, [currentPlan?.transactions]);
 
-    console.log(chartData.actual);
-
     if (!currentPlan) return null;
 
     return (

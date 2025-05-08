@@ -141,18 +141,20 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 
+        let paginationClause = '';
         let whereClause = 't.deleted_at IS NULL';
         if (accountID) {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
         }
-        if (start_date) {
-            whereClause += ` AND t.created_at >= ?`;
-            params.push(new Date(start_date).toISOString());
+        if (start_date && end_date) {
+            whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
+            params.push(start_date, end_date);
         }
-        if (end_date) {
-            whereClause += ` AND t.created_at <= ?`;
-            params.push(new Date(end_date).toISOString());
+        if (Number.isFinite(page_size)) {
+            const offset = (page - 1) * page_size;
+            paginationClause = 'LIMIT ? OFFSET ?';
+            params.push(page_size, offset);
         }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
@@ -177,7 +179,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             INNER JOIN accounts a ON t.account_id = a.id
             WHERE ${whereClause}
             ORDER BY t.created_at DESC
-            LIMIT ? OFFSET ?`,
+            ${paginationClause}`,
             params,
         );
 

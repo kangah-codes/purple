@@ -21,8 +21,8 @@ export default function StatsHeader() {
         requestQuery: {
             // TODO: replace this
             page_size: 999_999_999,
-            start_date: startDate,
-            end_date: endDate,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
         },
         options: {
             onSuccess: (response) => {

@@ -14,6 +14,7 @@ import PlanInformation from '../molecules/PlanInformation';
 import PlanNavigationArea from '../molecules/PlanNavigationArea';
 import PlanTransactionsList from '../molecules/PlanTransactionsList';
 import { Plan } from '../schema';
+import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -66,7 +67,10 @@ function PlanScreen() {
                 <PlanInformation />
                 <PlanBuildUpChart />
                 <PlanAccountOverviewPieChart />
-                <PlanTransactionsList />
+                <TransactionsAccordion
+                    transactions={currentPlan.transactions}
+                    title={'Transactions'}
+                />
             </ScrollView>
         </SafeAreaView>
     );

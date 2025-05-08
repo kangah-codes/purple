@@ -8,7 +8,8 @@ import { usePreferences } from '../hooks';
 import { ProfilePageLinkProps } from '../schema';
 import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
-import { SafeIcon } from '@/components/SVG/noscale';
+import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
+import * as WebBrowser from 'expo-web-browser';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -28,7 +29,7 @@ export default function ProfilePages() {
         [],
     );
     const itemSeparator = useCallback(
-        () => <View className='border-b border-purple-100 h-1' />,
+        () => <View className='border-b border-purple-200 h-[1px]' />,
         [],
     );
 
@@ -49,8 +50,13 @@ export default function ProfilePages() {
             icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Categories',
             link: '/settings/transaction-categories',
-            callback: () => alert('NME'),
             description: 'Manage transaction categories',
+        },
+        {
+            icon: <AlertHexagonIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Report a bug',
+            callback: () => WebBrowser.openBrowserAsync('https://purpleapp.featurebase.app/'),
+            description: 'Report a bug in the app or request a feature',
         },
     ];
 

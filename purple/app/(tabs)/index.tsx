@@ -19,7 +19,6 @@ export default function Screen() {
     const { isLoading } = useUser({
         options: {
             onError: (err) => {
-                console.log('ERROR', err);
                 Toast.show({
                     type: 'error',
                     props: {

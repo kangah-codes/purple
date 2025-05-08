@@ -47,7 +47,7 @@ export default function SelectCurrency() {
                     <View className='w-full px-5 pb-2.5'>
                         <View className='relative flex justify-center mt-2.5'>
                             <InputField
-                                className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900'
+                                className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-purple-200'
                                 style={GLOBAL_STYLESHEET.satoshiBold}
                                 placeholder='Search'
                                 cursorColor={'#000'}

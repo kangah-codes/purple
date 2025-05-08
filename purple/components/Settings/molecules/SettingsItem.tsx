@@ -29,11 +29,11 @@ export default function SettingsItem({
                     <View className='items-center justify-center rounded-full border border-purple-300 p-2'>
                         {icon}
                     </View>
-                    <View className='flex flex-col space-y-0.5 max-w-[70%]'>
-                        <Text style={satoshiFont.satoshiBold} className='text-sm text-black'>
+                    <View className='flex flex-col max-w-[75%]'>
+                        <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
                             {title}
                         </Text>
-                        <Text style={satoshiFont.satoshiMedium} className='text-xs text-black'>
+                        <Text style={satoshiFont.satoshiMedium} className='text-sm text-black'>
                             {description}
                         </Text>
                     </View>

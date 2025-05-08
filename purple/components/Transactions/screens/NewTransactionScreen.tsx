@@ -24,6 +24,7 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
 import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -311,7 +312,7 @@ export default function NewTransactionScreen() {
                         </TouchableOpacity>
 
                         <View className='absolute left-0 right-0 items-center'>
-                            <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                            <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                                 New Transaction
                             </Text>
                         </View>
