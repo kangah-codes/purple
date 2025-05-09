@@ -9,8 +9,8 @@ export default function Home() {
         <div>
             <Hero />
             <Section />
-            <Master />
             <OtherFeatures />
+            <Master />
             <BlockSection />
         </div>
     );

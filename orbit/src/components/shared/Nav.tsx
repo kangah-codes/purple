@@ -33,9 +33,9 @@ export default function Nav() {
                             <a
                                 className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                 data-headlessui-state=''
-                                href='/about'
+                                href='/whats-new'
                             >
-                                About
+                                What&apos;s new
                             </a>
                         </div>
                     </nav>

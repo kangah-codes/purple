@@ -9,11 +9,9 @@ export default function Footer() {
                 <div className='px-10 rounded-t-[3rem]'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
                         <div className='relative pt-20 pb-16 text-center sm:py-24'>
-                            <hgroup>
-                                <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
-                                    Coming soon to an Android near you
-                                </h1>
-                            </hgroup>
+                            <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
+                                Get Purple today
+                            </h1>
                             <p className='mx-auto mt-6 max-w-3xl text-base text-black'>
                                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos nemo
                                 rerum ipsam itaque consectetur corporis incidunt nostrum iure
@@ -81,7 +79,7 @@ export default function Footer() {
                                                         className='font-medium text-black data-hover:text-black/75'
                                                         href='#'
                                                     >
-                                                        Press
+                                                        What&apos;s new
                                                     </a>
                                                 </li>
                                             </ul>
