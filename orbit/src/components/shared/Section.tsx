@@ -1,15 +1,15 @@
 import React from 'react';
 
 interface SectionProps {
-    title: string;
-    description: string;
+    title: React.ReactNode;
+    description: React.ReactNode;
     children: React.ReactNode;
     reverse?: boolean;
 }
 
 export default function Section({ title, description, children, reverse = false }: SectionProps) {
     return (
-        <div className='bg-purple-50 w-full overflow-hidden py-20'>
+        <div className='w-full overflow-hidden'>
             <div
                 className={`
                   max-w-3xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl
@@ -17,12 +17,10 @@ export default function Section({ title, description, children, reverse = false 
                 `}
             >
                 <div
-                    className={`relative text-center lg:text-left ${reverse ? 'lg:order-last' : ''}`}
+                    className={`relative text-center lg:text-left xl:pl-10 ${reverse ? 'lg:order-last' : ''}`}
                 >
-                    <h1 className='inline text-4xl lg:text-5xl tracking-tight font-bold'>
-                        {title}
-                    </h1>
-                    <p className='text-lg text-black mt-5'>{description}</p>
+                    <div>{title}</div>
+                    <div>{description}</div>
                 </div>
 
                 <div

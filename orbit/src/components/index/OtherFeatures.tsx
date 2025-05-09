@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import Section from '../shared/Section';
 
-export default function Master() {
+// text-lg text-black mt-5
+
+export default function OtherFeatures() {
     return (
-        <div className='bg-purple-50 py-20'>
+        <div className='pt-20'>
             <Section
                 title={
                     <div className='flex flex-col'>
@@ -13,7 +15,6 @@ export default function Master() {
                         </h1>
                     </div>
                 }
-                reverse
                 description={
                     <div className='flex flex-col'>
                         <div className='flex flex-row space-x-5 items-start mt-5'>
@@ -71,17 +72,7 @@ export default function Master() {
                             data-nimg={1}
                             className='rounded-md z-[2]'
                             style={{ color: 'transparent' }}
-                            src='/graphics/stats_screen.png'
-                        />
-                        <Image
-                            alt='Logo'
-                            width={276}
-                            height={600}
-                            decoding='async'
-                            data-nimg={1}
-                            className='rounded-md z-[2]'
-                            style={{ color: 'transparent' }}
-                            src='/graphics/new_transaction_screen.png'
+                            src='/graphics/account_screen.png'
                         />
                     </div>
                 </div>
