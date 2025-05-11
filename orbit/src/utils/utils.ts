@@ -36,6 +36,23 @@ export function getPostBySlug(slug: string): BlogPost | null {
     } as BlogPost;
 }
 
+export function getDocument(fileName: string) {
+    const filePath = path.join(process.cwd(), 'src/legal', fileName);
+
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Document ${fileName} not found in /legal`);
+    }
+
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const { data, content } = matter(fileContent);
+
+    return {
+        data,
+        content,
+        slug: fileName.replace('.md', ''),
+    };
+}
+
 export function parseDateWithOrdinal(dateString: string) {
     const parts = dateString.split(' ');
     const day = parseInt(parts[0]);

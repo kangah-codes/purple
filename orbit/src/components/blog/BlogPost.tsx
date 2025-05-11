@@ -103,7 +103,7 @@ const AuthorInfo = memo(function AuthorInfo() {
     );
 });
 
-const MarkdownContent = memo(
+export const MarkdownContent = memo(
     function MarkdownContent({ content }: { content: string }) {
         return (
             <ReactMarkdown

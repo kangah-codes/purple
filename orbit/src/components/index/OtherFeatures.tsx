@@ -7,9 +7,7 @@ export default function OtherFeatures() {
             <Section
                 title={
                     <div className='flex flex-col'>
-                        <h5 className='inline text-sm font-medium text-purple-600'>
-                            TRANSACTION MANAGEMENT
-                        </h5>
+                        <h5 className='inline text-sm font-medium text-purple-600'>TRANSACTIONS</h5>
                         <h1 className='inline text-4xl lg:text-5xl tracking-tight font-bold'>
                             Penny in, <span className='text-purple-600'>Penny Out</span>
                         </h1>
@@ -38,7 +36,7 @@ export default function OtherFeatures() {
                             <div>
                                 <p className='text-[#22201d]'>
                                     Stay on top of your finances with a clear view of income,
-                                    expenses, and balances across all accounts.
+                                    expenses, and balances across all accounts
                                 </p>
                             </div>
                         </li>
@@ -62,8 +60,8 @@ export default function OtherFeatures() {
                             </div>
                             <div className='flex flex-row space-x-2.5 items-center justify-center'>
                                 <p className='text-[#22201d]'>
-                                    Automatic categorisation of your transactions gives you insights
-                                    you need, without the heavy lifting.{' '}
+                                    Automatically record & categorise your transactions, with our
+                                    smart integrations{' '}
                                     <span className='inline-block bg-gradient-to-br from-purple-400 to-purple-600 rounded-full px-2 py-1 text-white text-xs'>
                                         <span className='font-bold'>Coming Soon</span>
                                     </span>
@@ -90,7 +88,8 @@ export default function OtherFeatures() {
                             </div>
                             <div>
                                 <p className='text-[#22201d]'>
-                                    Swipe to quickly review or edit transactions as they come in.
+                                    Set up daily, weekly, or monthly recurring payments so you never
+                                    forget your bills or salaries
                                 </p>
                             </div>
                         </li>

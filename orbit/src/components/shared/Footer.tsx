@@ -6,17 +6,16 @@ export default function Footer() {
         <footer>
             <div className='relative'>
                 <div className='absolute inset-5 rounded-[3rem] bg-gradient-to-br from-purple-100 to-purple-300 animate-gradient-xy' />
-                <div className='px-10 rounded-t-[3rem]'>
+                <div className='px-10 md:px-20 2xl:px-10 rounded-t-[3rem]'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
                         <div className='relative pt-20 pb-16 text-center sm:py-24'>
                             <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
                                 Get Purple today
                             </h1>
                             <p className='mx-auto mt-6 max-w-3xl text-base text-black'>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos nemo
-                                rerum ipsam itaque consectetur corporis incidunt nostrum iure
-                                voluptatum autem doloribus porro, maxime aliquam perferendis
-                                eligendi ipsa dolorum dolor beatae?
+                                Take control of your finances with ease. Purple helps you track,
+                                manage, and optimize your spending, all in one place. Start your
+                                journey toward smarter money management today!
                             </p>
                             <div className='mt-6 flex justify-center'>
                                 <Link
@@ -59,28 +58,12 @@ export default function Footer() {
                                             </h3>
                                             <ul className='mt-6 space-y-4 text-sm/6'>
                                                 <li>
-                                                    <a
+                                                    <Link
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='/pricing'
-                                                    >
-                                                        Pricing
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-                                                        href='#'
-                                                    >
-                                                        About
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        className='font-medium text-black data-hover:text-black/75'
-                                                        href='#'
+                                                        href='/blog'
                                                     >
                                                         Blog
-                                                    </a>
+                                                    </Link>
                                                 </li>
                                             </ul>
                                         </div>
@@ -100,7 +83,7 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='#'
+                                                        href='/privacy'
                                                     >
                                                         Privacy policy
                                                     </a>
@@ -108,9 +91,9 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='#'
+                                                        href='/licence'
                                                     >
-                                                        License
+                                                        Licence
                                                     </a>
                                                 </li>
                                             </ul>

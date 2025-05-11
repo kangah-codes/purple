@@ -21,15 +21,6 @@ export default function Nav() {
                     </div>
                     <nav className='relative hidden lg:flex'>
                         <div className='flex group/item relative'>
-                            <a
-                                className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
-                                data-headlessui-state=''
-                                href='/pricing'
-                            >
-                                Pricing
-                            </a>
-                        </div>
-                        <div className='flex group/item relative'>
                             <Link
                                 className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                 data-headlessui-state=''
@@ -39,16 +30,6 @@ export default function Nav() {
                             </Link>
                         </div>
                     </nav>
-                    {/* <button
-                        className='flex size-12 items-center justify-center self-center rounded-lg data-hover:bg-black/5 lg:hidden'
-                        aria-label='Open main menu'
-                        id='headlessui-disclosure-button-:rl:'
-                        type='button'
-                        aria-expanded='false'
-                        data-headlessui-state=''
-                    >
-
-                    </button> */}
                     <div className='flex size-12 items-center justify-center self-center rounded-lg data-hover:bg-black/5 lg:hidden'>
                         <div className='flex gap-8'>
                             <Popover>
@@ -86,25 +67,12 @@ export default function Nav() {
                                             <Link
                                                 onMouseUp={() => close()}
                                                 className='block py-2.5 px-3.5 transition hover:bg-purple-200 rounded-3xl'
-                                                href='/pricing'
+                                                href='/blog'
                                             >
-                                                <p className='font-bold text-lg text-black'>
-                                                    Pricing
-                                                </p>
+                                                <p className='font-bold text-lg text-black'>Blog</p>
                                                 <p className='text-black'>
-                                                    Measure actions your users take
-                                                </p>
-                                            </Link>
-                                            <Link
-                                                onMouseUp={() => close()}
-                                                className='block py-2.5 px-3.5 transition hover:bg-purple-200 rounded-3xl'
-                                                href='/about'
-                                            >
-                                                <p className='font-bold text-lg text-black'>
-                                                    About Purple
-                                                </p>
-                                                <p className='text-black'>
-                                                    Create your own targeted content
+                                                    Stay updated with the lastest information about
+                                                    Purple
                                                 </p>
                                             </Link>
                                         </div>
