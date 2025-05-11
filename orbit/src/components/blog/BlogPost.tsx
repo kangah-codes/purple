@@ -83,7 +83,7 @@ const BlogHeader = memo(function BlogHeader({
 
 const BannerImage = memo(function BannerImage({ imagePath }: { imagePath: string }) {
     return (
-        <div className='w-full h-[15rem] lg:h-[35rem] xl:h-[40rem] relative overflow-hidden rounded-[3rem]'>
+        <div className='w-full h-[15rem] md:h-[20rem] lg:h-[35rem] xl:h-[40rem] relative overflow-hidden rounded-[3rem]'>
             <Image src={`/blog/${imagePath}`} alt='Banner' fill className='object-cover z-[2]' />
             <div className='bg-gradient-to-br from-purple-400 to-purple-800 w-full h-full filter z-[1] blur-2xl absolute inset-0' />
         </div>
