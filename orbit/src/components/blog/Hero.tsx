@@ -21,10 +21,7 @@ export default function Hero() {
                             blog
                         </h1>
                         <div className='space-y-5 flex flex-col items-center justify-center max-w-2xl mx-auto'>
-                            <p className='text-lg text-black'>
-                                Take control of your money without the stress. Purple makes
-                                budgeting simple, fun, and easy to stick with.
-                            </p>
+                            <p className='text-lg text-black'>Lorem ipsum</p>
                         </div>
                     </div>
                 </div>
