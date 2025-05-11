@@ -1,0 +1,54 @@
+---
+title: Building Purple
+description: "It started out with a simple frustration: tracking expenses manually in Notes, losing SMS transaction data, and never knowing how much was really left in the account. It started out with a simple frustration: tracking expenses manually in Notes, losing SMS transaction data, and never knowing how much was really left in the account."
+blogImage: accra.jpg
+slug: building-purple
+date: 10th May, 2025
+---
+
+**From a budgeting frustration to a full-blown app—here’s how Purple was born.**
+
+It started out with a simple frustration: tracking expenses manually in Notes, losing SMS transaction data, and never knowing how much was really left in the account.
+
+# The Origin Story
+
+I started building Purple because I needed a finance app that worked for me—specifically, one that understood local banking, worked offline, and gave me clarity without overwhelming graphs.
+
+Purple began as a weekend prototype. It wasn’t even called "Purple" at the time. The first version had just one screen—a list of transactions stored in a JSON file. Fast-forward a few months, it now supports:
+
+- Recurring transactions
+- SMS parsing from banks and Momo wallets
+- Beautiful UI with FlashList performance optimizations
+- Real-time syncing using a Go backend and PostgreSQL
+
+# Engineering Decisions
+
+From day one, the goal was to make Purple **fast**, **lightweight**, and **offline-first**.
+
+This is an example of using the <kbd>Ctrl</kbd> + <kbd>C</kbd> keyboard shortcut.
+
+
+Here are some of the decisions made:
+
+- **Frontend**: Built with React Native + Expo for quick iteration and easy deployment across Android and iOS.
+- **Backend**: Written in Go to keep things fast, with RESTful APIs and proper caching via Redis.
+- **Database**: PostgreSQL, because it’s stable, powerful, and well-supported on managed hosts.
+- **State Management**: Zustand instead of Redux—minimal boilerplate, fast, and React-friendly.
+- **UI**: Tailwind-like utility-first styles with custom components for lists, cards, and inputs.
+
+# Features We’re Proud Of
+
+- **Offline-first architecture** with SQLite fallback syncing to the cloud
+- **Auto-import of bank and MoMo SMS**—no manual entry needed
+- **Smart recurring transactions**—monthly bills don’t need to be re-entered
+- **Private by default**—all data stays on device unless you choose to sync
+
+![Purple App Screenshot](/blog/account_screen.png)
+
+# What’s Next?
+
+Purple is just getting started.
+
+- We’re working on bank integrations via open banking APIs.
+- A daily expense summary notification is in the works.
+- And of course—Dark Mode is coming. 👀

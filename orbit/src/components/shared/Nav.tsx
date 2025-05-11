@@ -30,13 +30,13 @@ export default function Nav() {
                             </a>
                         </div>
                         <div className='flex group/item relative'>
-                            <a
+                            <Link
                                 className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                 data-headlessui-state=''
-                                href='/whats-new'
+                                href='/blog'
                             >
-                                What&apos;s new
-                            </a>
+                                Blog
+                            </Link>
                         </div>
                     </nav>
                     {/* <button

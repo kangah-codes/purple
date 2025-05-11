@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
 
 export default {
     content: [
@@ -33,6 +34,28 @@ export default {
                 'spin-slower': 'spin 6s linear infinite',
                 'spin-reverse': 'spin-reverse 1s linear infinite',
                 'spin-reverse-slower': 'spin-reverse 6s linear infinite',
+            },
+            typography: {
+                purple: {
+                    css: {
+                        '--tw-prose-body': colors.purple[100],
+                        '--tw-prose-headings': colors.gray[900],
+                        '--tw-prose-lead': colors.purple[200],
+                        '--tw-prose-links': colors.purple[400],
+                        '--tw-prose-bold': colors.purple[700],
+                        '--tw-prose-counters': colors.purple[400],
+                        '--tw-prose-bullets': colors.purple[600],
+                        '--tw-prose-hr': colors.purple[200],
+                        '--tw-prose-quotes': colors.purple[200],
+                        '--tw-prose-quote-borders': colors.purple[300],
+                        '--tw-prose-captions': colors.purple[300],
+                        // '--tw-prose-code': colors.purple[400],
+                        // '--tw-prose-pre-code': colors.purple[100],
+                        // '--tw-prose-pre-bg': colors.purple[900],
+                        '--tw-prose-th-borders': colors.purple[300],
+                        '--tw-prose-td-borders': colors.purple[200],
+                    },
+                },
             },
             keyframes: {
                 'spin-reverse': {

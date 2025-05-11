@@ -5,7 +5,7 @@ export default function Footer() {
     return (
         <footer>
             <div className='relative'>
-                <div className='absolute inset-2 rounded-[3rem] bg-gradient-to-br from-purple-100 to-purple-300 animate-gradient-xy' />
+                <div className='absolute inset-5 rounded-[3rem] bg-gradient-to-br from-purple-100 to-purple-300 animate-gradient-xy' />
                 <div className='px-10 rounded-t-[3rem]'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
                         <div className='relative pt-20 pb-16 text-center sm:py-24'>
@@ -79,7 +79,7 @@ export default function Footer() {
                                                         className='font-medium text-black data-hover:text-black/75'
                                                         href='#'
                                                     >
-                                                        What&apos;s new
+                                                        Blog
                                                     </a>
                                                 </li>
                                             </ul>
