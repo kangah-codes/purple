@@ -14,7 +14,7 @@ export default function BlogPostsList({ posts }: { posts: TBlogPost[] }) {
             {featuredPost && (
                 <div className='grid grid-cols-1 md:grid-cols-12 gap-y-8 md:gap-x-12 mb-20'>
                     <div className='col-span-12 lg:col-span-7'>
-                        <div className='relative w-full h-[250px] lg:h-[420px] aspect-[80/31] rounded-[3rem] overflow-hidden shadow-xl shadow-purple-100'>
+                        <div className='relative w-full h-[250px] md:h-[350px] lg:h-[420px] aspect-[80/31] rounded-[3rem] overflow-hidden shadow-xl shadow-purple-100'>
                             <Link href={`/blog/${featuredPost.slug}`}>
                                 <Image
                                     src={`/blog/${featuredPost.data.blogImage}`}
