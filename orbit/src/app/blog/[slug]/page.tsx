@@ -6,8 +6,6 @@ import { notFound } from 'next/navigation';
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
     const blog = getPostBySlug(params.slug);
 
-    console.log(blog);
-
     if (!blog) return notFound();
 
     return (
