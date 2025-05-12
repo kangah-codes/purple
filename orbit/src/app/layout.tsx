@@ -14,6 +14,24 @@ export const metadata: Metadata = {
     title: 'Purple | Making Budgeting Easy',
     description:
         'Take control of your money without the stress. Purple makes budgeting simple, fun, and easy to stick with',
+    keywords: ['budgeting', 'finance', 'android'],
+    robots: {
+        index: true,
+        follow: true,
+    },
+    openGraph: {
+        type: 'website',
+        locale: 'en_UK',
+        url: 'https://trypurpleapp.com',
+        siteName: 'Purple | Making Budgeting Easy',
+        images: [
+            {
+                url: 'https://trypurpleapp.com/og-image.jpg',
+                width: 1200,
+                height: 630,
+            },
+        ],
+    },
 };
 
 export default function RootLayout({

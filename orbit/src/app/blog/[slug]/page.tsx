@@ -2,6 +2,44 @@ import BlogPost from '@/components/blog/BlogPost';
 import AnimatedClouds from '@/components/shared/AnimatedClouds';
 import { getPostBySlug } from '@/utils/utils';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next/types';
+
+export async function generateMetadata({
+    params,
+}: {
+    params: { slug: string };
+}): Promise<Metadata> {
+    const blog = getPostBySlug(params.slug);
+
+    if (!blog) return {};
+
+    const { title, description, blogImage, slug } = blog.data;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'article',
+            url: `https://trypurpleapp.com/blog/${slug}`,
+            images: [
+                {
+                    url: blogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: [blogImage],
+        },
+    };
+}
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
     const blog = getPostBySlug(params.slug);
