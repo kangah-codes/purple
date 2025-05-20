@@ -1,13 +1,6 @@
-import {
-    addDays,
-    differenceInDays,
-    endOfMonth,
-    format,
-    getWeekOfMonth,
-    startOfMonth,
-} from 'date-fns';
+import { addDays, differenceInDays, endOfMonth, format, startOfMonth } from 'date-fns';
 import { Transaction } from '../Transactions/schema';
-import { dayKeys, dayLabels, generatedPalette, spendOverviewPalette, weekColors } from './contants';
+import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
 
 export function getCurrentMonthYear() {
     const date = new Date();
@@ -21,25 +14,36 @@ const getDayKey = (date: Date) => {
     return dayKeys[index];
 };
 
-export const groupTransactionsByWeek = (transactions: Transaction[]) => {
+export const groupTransactionsByWeek = (transactions: Transaction[], currentDate = new Date()) => {
+    const monthStart = startOfMonth(currentDate);
     const weeks: Record<number, Record<string, number>> = {
         1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
         2: Object.fromEntries(dayKeys.map((k) => [k, 0])),
         3: Object.fromEntries(dayKeys.map((k) => [k, 0])),
         4: Object.fromEntries(dayKeys.map((k) => [k, 0])),
-        5: Object.fromEntries(dayKeys.map((k) => [k, 0])),
     };
 
     for (const tx of transactions) {
         if (tx.type !== 'debit') continue;
 
-        const date = new Date(tx.created_at);
-        const week = getWeekOfMonth(date, { weekStartsOn: 0 });
-        const key = getDayKey(date);
+        const txDate = new Date(tx.created_at);
+        const txMonth = txDate.getMonth();
+        const currentMonth = currentDate.getMonth();
 
-        if (weeks[week]) {
-            weeks[week][key] += tx.amount;
+        if (txDate.getFullYear() !== currentDate.getFullYear() || txMonth !== currentMonth) {
+            continue;
         }
+
+        const daysSinceMonthStart = differenceInDays(txDate, monthStart);
+        // determine week (1 indexed) based on days since month start
+        // each week is 7 days starting from the 1st of the month
+        let week = Math.floor(daysSinceMonthStart / 7) + 1;
+
+        // limit at 4 wks
+        if (week > 4) week = 4;
+
+        const key = getDayKey(txDate);
+        weeks[week][key] += tx.amount;
     }
 
     return weeks;

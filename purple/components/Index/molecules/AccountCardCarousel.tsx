@@ -1,10 +1,11 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { Account } from '@/components/Accounts/schema';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AlternateAccountCard from './AlternateAccountCard';
 import { View } from '@/components/Shared/styled';
+import { usePreferences } from '@/components/Settings/hooks';
 
 const styles = {
     sliderWidth: Dimensions.get('window').width - 40,
@@ -28,10 +29,16 @@ const styles = {
 
 export default function AccountCardCarousel() {
     const { accounts } = useAccountStore();
+    const { preferences } = usePreferences();
     const [activeSlide, setActiveSlide] = useState(0); // active slide is 0 by default
+    const pinnedIndex = useMemo(() => {
+        return accounts.findIndex((account) => account.id === preferences.pinnedAccount);
+    }, [accounts, preferences?.pinnedAccount]);
     const renderItem = useCallback(
-        ({ item }: { item: Account }) => <AlternateAccountCard item={item} />,
-        [accounts],
+        (item: { index: number; item: Account }) => (
+            <AlternateAccountCard item={item.item} pinnedAccount={preferences.pinnedAccount} />
+        ),
+        [accounts, pinnedIndex],
     );
 
     return (
@@ -47,6 +54,7 @@ export default function AccountCardCarousel() {
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
                 loop
+                firstItem={pinnedIndex >= 0 ? pinnedIndex : 0}
             />
 
             {/** @ts-ignore */}

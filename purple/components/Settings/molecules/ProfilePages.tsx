@@ -10,6 +10,8 @@ import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
 import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
 import * as WebBrowser from 'expo-web-browser';
+import { Image } from 'expo-image';
+import { currencies } from '@/lib/constants/currencies';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -24,12 +26,13 @@ export default function ProfilePages() {
                 link={item.link}
                 callback={item.callback}
                 description={item.description}
+                renderIcon={item.renderIcon}
             />
         ),
         [],
     );
     const itemSeparator = useCallback(
-        () => <View className='border-b border-purple-200 h-[1px]' />,
+        () => <View className='border-b border-purple-200 h-[0.5px]' />,
         [],
     );
 
@@ -39,6 +42,24 @@ export default function ProfilePages() {
             title: 'Default Currency',
             callback: () => setShowBottomSheetFlatList('preferences-currency', true),
             description: 'Select a default currency for all transactions',
+            renderIcon: () => {
+                const settingCurrency = currencies.find(
+                    (cur) => cur.code === currency,
+                ) as (typeof currencies)[number];
+                const country = settingCurrency.locale.split('-')[1];
+                return (
+                    <Image
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 40,
+                        }}
+                        source={`https://globalartinc.github.io/round-flags/flags/${country}.svg`}
+                        contentFit='cover'
+                        transition={1000}
+                    />
+                );
+            },
         },
         {
             icon: <SafeIcon width={20} height={20} stroke={'#9333ea'} />,

@@ -10,6 +10,7 @@ export default function ProfilePageLink({
     title,
     link,
     callback,
+    renderIcon,
     description,
 }: ProfilePageLinkProps) {
     const router = useRouter();
@@ -25,9 +26,14 @@ export default function ProfilePageLink({
         <TouchableOpacity onPress={handlePress}>
             <View className='flex-row items-center justify-between py-4 w-full'>
                 <View className='flex-row items-center space-x-2.5'>
-                    <View className='items-center justify-center rounded-full border border-purple-300 p-2'>
-                        {icon}
-                    </View>
+                    {renderIcon ? (
+                        renderIcon()
+                    ) : (
+                        <View className='items-center justify-center rounded-full border border-purple-300 w-[40px] h-[40px]'>
+                            {icon}
+                        </View>
+                    )}
+
                     <View className='flex flex-col max-w-[90%]'>
                         <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
                             {title}

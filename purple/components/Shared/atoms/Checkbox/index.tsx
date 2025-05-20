@@ -1,0 +1,68 @@
+import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from '@/components/Shared/styled';
+import { Pressable, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { CheckMarkIcon } from '@/components/SVG/noscale';
+
+type CheckboxProps = {
+    label?: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    size?: number;
+    checkedColor?: string;
+    uncheckedColor?: string;
+    labelStyle?: TextStyle;
+    boxStyle?: ViewStyle;
+};
+
+export default function Checkbox({
+    label,
+    checked,
+    onChange,
+    size = 24,
+    checkedColor = '#9810fa',
+    uncheckedColor = '#fff',
+    labelStyle = {},
+    boxStyle = {},
+}: CheckboxProps) {
+    return (
+        <Pressable style={styles.container} onPress={() => onChange(!checked)}>
+            <View
+                style={[
+                    styles.checkbox,
+                    {
+                        width: size,
+                        height: size,
+                        borderColor: checked ? checkedColor : '#f3e8ff',
+                        backgroundColor: checked ? checkedColor : uncheckedColor,
+                    },
+                    boxStyle,
+                ]}
+                className='border-[1.5px] rounded-full justify-center items-center mr-[8px]'
+            >
+                {checked && (
+                    <CheckMarkIcon strokeWidth={3} stroke={'#fff'} width={15} height={15} />
+                )}
+            </View>
+            {label && (
+                <Text style={[labelStyle]} className='text-base'>
+                    {label}
+                </Text>
+            )}
+        </Pressable>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    checkbox: {
+        borderWidth: 2,
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
+    },
+});

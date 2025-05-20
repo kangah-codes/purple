@@ -7,6 +7,7 @@ export type ProfilePageLinkProps = {
     link?: string;
     callback?: () => void;
     description: string;
+    renderIcon?: () => React.ReactNode;
 };
 
 export type SettingsListItem = {
@@ -40,4 +41,5 @@ export type UserPreferences = {
     theme: 'light' | 'dark';
     customTransactionTypes: CustomTransactionType[];
     allowOverdraw: boolean;
+    pinnedAccount: string;
 };

@@ -9,10 +9,13 @@ import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { SearchIcon } from '@/components/SVG/noscale';
 import { StyleSheet } from 'react-native';
 import { LRUCache } from '@/lib/utils/cache';
+import { satoshiFont } from '@/lib/constants/fonts';
 
-type SelectOption = {
+// TODO: move to a type declaration file
+export type SelectOption = {
     value: string | number | boolean;
     label: string;
+    searchField?: string;
 };
 
 type SearchableSelectFieldProps = {
@@ -43,7 +46,7 @@ export default function SearchableSelectField({
     const renderDefaultItem = useCallback(
         (item: any) => (
             <View className='py-3 border-b border-purple-200'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-800'>
+                <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
             </View>
@@ -54,7 +57,9 @@ export default function SearchableSelectField({
         return Object.keys(options)
             .map((key) => options[key])
             .filter((item) => {
-                return item.label.toLowerCase().includes(searchValue.toLowerCase());
+                return (item.searchField ? item.searchField : item.label)
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase());
             });
     }, [searchValue, options]);
 
@@ -71,7 +76,7 @@ export default function SearchableSelectField({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        style={satoshiFont.satoshiBold}
                                         className='text-base text-black'
                                     >
                                         {label}
@@ -83,7 +88,7 @@ export default function SearchableSelectField({
                                 <View className='relative flex justify-center mt-5'>
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 pl-10 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         placeholder='Search'
                                         cursorColor={'#000'}
                                         onChangeText={setSearchValue}
@@ -104,7 +109,7 @@ export default function SearchableSelectField({
                                     // style={styles.shadow}
                                 >
                                     <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        style={satoshiFont.satoshiBold}
                                         className='text-base text-black'
                                     >
                                         Recently Used
@@ -164,7 +169,7 @@ export default function SearchableSelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -177,7 +182,7 @@ export default function SearchableSelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
+                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             options[val ?? '']?.label ?? `Select an option...`,
                             45,

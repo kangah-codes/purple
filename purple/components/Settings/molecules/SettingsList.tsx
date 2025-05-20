@@ -24,7 +24,7 @@ export default function SettingsList({ items }: SettingsListProps) {
         [],
     );
     const itemSeparator = useCallback(
-        () => <View className='border-b border-purple-100 h-1' />,
+        () => <View className='border-b border-purple-100 h-[0.5]' />,
         [],
     );
 

@@ -22,6 +22,7 @@ function AccountScreen() {
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
     const { setCurrentAccount, currentAccountRequestParams, setCurrentAccountRequestParams } =
         useAccountStore();
+    const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
 
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
@@ -33,6 +34,7 @@ function AccountScreen() {
             endDate: defaultDateRange.endDate.toISOString(),
         });
     }, [accountID]);
+
     const { refetch: accountRefetch, isLoading: accountsLoading } = useAccount({
         accountID,
         options: {
@@ -91,8 +93,15 @@ function AccountScreen() {
         });
     }, []);
 
-    const isLoading = transactionsLoading || accountsLoading;
-    if (isLoading) return <LoadingScreen />;
+    useEffect(() => {
+        if (!accountsLoading && !transactionsLoading && !initialLoadComplete) {
+            setInitialLoadComplete(true);
+        }
+    }, [accountsLoading, transactionsLoading, initialLoadComplete]);
+
+    if (!initialLoadComplete) {
+        return <LoadingScreen />;
+    }
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>

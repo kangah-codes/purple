@@ -6,40 +6,18 @@ import { nativeStorage } from '@/lib/utils/storage';
 import { Account } from '@/components/Accounts/schema';
 import React from 'react';
 
-export default function AlternateAccountCard({ item }: { item: Account }) {
-    const [showAmount, setShowAmount] = useState(false);
+type AlternateAccountCardProps = {
+    item: Account;
+    pinnedAccount: string;
+};
 
-    const getShowAmount = useCallback(async () => {
-        try {
-            const storedShowAmount = nativeStorage.getItem('showAmount');
-            setShowAmount(!!storedShowAmount);
-        } catch (error) {
-            console.error('Error fetching showAmount:', error);
-            // Optionally set a default value here
-            setShowAmount(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        getShowAmount();
-    }, [getShowAmount]);
-
-    useEffect(() => {
-        nativeStorage.setItem('showAmount', showAmount);
-    }, [showAmount]);
-
-    const toggleShowAmount = useCallback(() => {
-        setShowAmount((prev) => !prev);
-    }, []);
-
+export default function AlternateAccountCard({ item, pinnedAccount }: AlternateAccountCardProps) {
     return (
         <>
             <BalanceDisplay
-                showAmount={true}
-                setShowAmount={toggleShowAmount}
-                balance={item.balance}
                 accountName={item.name}
                 account={item}
+                isPinned={item.id === pinnedAccount}
             />
             <View className='h-[1px] bg-purple-200 w-full my-2.5' />
             <ActionButtons account={item} />

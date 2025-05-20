@@ -1,5 +1,5 @@
 import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { ScaleIcon } from '@/components/SVG/noscale';
+import { PinIcon, ScaleIcon } from '@/components/SVG/noscale';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
@@ -13,12 +13,17 @@ import { usePreferences } from '../hooks';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
 import Switch from '@/components/Shared/molecules/Switch';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
+import PinAccount from '../molecules/PinAccount';
+import { Portal } from '@gorhom/portal';
+import { useAccountStore, useAccounts } from '@/components/Accounts/hooks';
 
 export default function AccountsScreen() {
     const {
         preferences: { allowOverdraw },
         setPreference,
     } = usePreferences();
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
 
@@ -45,11 +50,20 @@ export default function AccountsScreen() {
             description: 'Enable overspending by allowing the account balance to drop below zero',
             customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
+        {
+            icon: <PinIcon width={20} height={20} stroke='#9333ea' />,
+            title: 'Pinned Account',
+            description: 'Choose an account to always show first on the home screen',
+            callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
+        },
     ];
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
+            <Portal>
+                <PinAccount />
+            </Portal>
             <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity
                     onPress={router.back}

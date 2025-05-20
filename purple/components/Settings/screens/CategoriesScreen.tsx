@@ -9,14 +9,13 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { Link, router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet, Platform } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import { CustomTransactionType } from '../schema';
 
@@ -34,7 +33,7 @@ export default function CategoriesScreen() {
     const renderItem = useCallback(({ item }: { item: CustomTransactionType }) => {
         return (
             <View className='py-3'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-800'>
+                <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-800'>
                     {`${item.emoji} ${item.category}`}
                 </Text>
             </View>
@@ -101,7 +100,7 @@ export default function CategoriesScreen() {
                     />
                 </View>
                 <LinearGradient
-                    colors={['#e5e7eb', 'transparent']}
+                    colors={['#f5f5f4', 'transparent']}
                     style={{
                         position: 'absolute',
                         left: 0,
