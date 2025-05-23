@@ -10,6 +10,7 @@ import cloud_4 from '../../../public/graphics/cloud-4.svg';
 const CLOUD_TYPES = [cloud_1, cloud_2, cloud_3, cloud_4] as const;
 const CLOUD_WIDTH = 300;
 const COLLISION_BUFFER = 50;
+const VERTICAL_COLLISION_THRESHOLD = 50;
 
 interface Cloud {
     readonly id: string;
@@ -56,26 +57,37 @@ export default function AnimatedClouds({
         const newCloudEnd = newCloud.position + newCloud.width * newCloud.scale;
         const newCloudVertical = newCloud.top;
 
+        // Early exit if no clouds to check
+        if (existingClouds.length === 0) return false;
+
         return existingClouds.some((cloud) => {
+            // Skip clouds that are far away vertically
+            if (Math.abs(newCloudVertical - cloud.top) >= VERTICAL_COLLISION_THRESHOLD)
+                return false;
+
             const cloudStart = cloud.position;
             const cloudEnd = cloud.position + cloud.width * cloud.scale;
 
             return (
                 newCloudStart <= cloudEnd + COLLISION_BUFFER &&
-                newCloudEnd >= cloudStart - COLLISION_BUFFER &&
-                Math.abs(newCloudVertical - cloud.top) < 50
+                newCloudEnd >= cloudStart - COLLISION_BUFFER
             );
         });
     }, []);
 
     const createCloud = useCallback(
-        (startPosition = -20, existingClouds: Cloud[] = []): Cloud => {
+        (startPosition = -20, existingClouds: Cloud[] = [], attempts = 0): Cloud => {
+            // Limit recursion depth to avoid performance issues
+            if (attempts > 10) {
+                startPosition -= 30; // Move further left to avoid collision area entirely
+            }
+
             const scale = minScale + Math.random() * (maxScale - minScale);
             const effectiveCloudHeight = CLOUD_WIDTH * scale;
             const maxTop = Math.max(minHeight, maxHeight - effectiveCloudHeight);
 
             const newCloud: Cloud = {
-                id: Math.random().toString(36).slice(7),
+                id: Math.random().toString(36).substr(2, 8), // More efficient ID generation
                 type: Math.floor(Math.random() * CLOUD_TYPES.length),
                 top: minHeight + Math.random() * (maxTop - minHeight),
                 speed: baseSpeed * (0.8 + Math.random() * 0.4),
@@ -85,9 +97,9 @@ export default function AnimatedClouds({
                 width: CLOUD_WIDTH,
             };
 
-            // Only check collision if there are existing clouds
-            if (existingClouds.length && wouldCollide(newCloud, existingClouds)) {
-                return createCloud(startPosition - 15, existingClouds);
+            // Only check collision if there are existing clouds and we haven't exceeded max attempts
+            if (existingClouds.length && attempts <= 10 && wouldCollide(newCloud, existingClouds)) {
+                return createCloud(startPosition - 15, existingClouds, attempts + 1);
             }
 
             return newCloud;
@@ -95,48 +107,95 @@ export default function AnimatedClouds({
         [baseSpeed, maxHeight, maxScale, minHeight, minScale, wouldCollide],
     );
 
-    useEffect(() => {
-        // Initialize clouds
-        const initialClouds = Array.from({ length: Math.floor(maxClouds / 2) }, (_, i) =>
-            createCloud(-20 + (140 / Math.floor(maxClouds / 2)) * i),
-        );
-        cloudsRef.current = initialClouds;
+    // Memoized animation function to prevent recreation on each render
+    const updateCloudsCallback = useCallback(() => {
+        let animationFrameId: number;
+        let lastFrameTime = 0;
 
-        const updateClouds = () => {
+        const updateClouds = (timestamp: number) => {
+            // Control frame rate - limit to ~60fps for performance
+            if (timestamp - lastFrameTime < 16) {
+                animationFrameId = requestAnimationFrame(updateClouds);
+                return;
+            }
+
+            lastFrameTime = timestamp;
             const currentTime = Date.now();
             const timeSinceLastSpawn = currentTime - lastSpawnTimeRef.current;
+            let shouldUpdate = false;
 
             // Update existing cloud positions
-            cloudsRef.current = cloudsRef.current.filter((cloud) => {
+            const updatedClouds = cloudsRef.current.filter((cloud) => {
                 cloud.position += cloud.speed / 60;
                 return cloud.position < 120;
             });
+
+            // Check if clouds array changed
+            if (updatedClouds.length !== cloudsRef.current.length) {
+                shouldUpdate = true;
+                cloudsRef.current = updatedClouds;
+            }
 
             // Spawn new clouds if needed
             if (
                 cloudsRef.current.length < maxClouds &&
                 (timeSinceLastSpawn >= spawnInterval || cloudsRef.current.length < maxClouds / 2)
             ) {
+                shouldUpdate = true;
                 lastSpawnTimeRef.current = currentTime;
                 const cloudsNeeded = Math.min(
                     maxClouds - cloudsRef.current.length,
                     Math.max(1, Math.floor((maxClouds - cloudsRef.current.length) / 2)),
                 );
 
+                const newClouds: Cloud[] = [];
                 for (let i = 0; i < cloudsNeeded; i++) {
-                    const newCloud = createCloud(-20 - i * 15, cloudsRef.current);
-                    cloudsRef.current.push(newCloud);
+                    newClouds.push(createCloud(-20 - i * 15, [...cloudsRef.current, ...newClouds]));
                 }
+
+                cloudsRef.current = [...cloudsRef.current, ...newClouds];
             }
 
-            // Force re-render only when cloud positions have been updated
-            forceUpdate();
-            return requestAnimationFrame(updateClouds);
+            // Force re-render only when necessary
+            if (shouldUpdate) {
+                forceUpdate();
+            }
+
+            animationFrameId = requestAnimationFrame(updateClouds);
         };
 
-        const animationFrameId = requestAnimationFrame(updateClouds);
-        return () => cancelAnimationFrame(animationFrameId);
+        return {
+            start: () => {
+                animationFrameId = requestAnimationFrame(updateClouds);
+                return animationFrameId;
+            },
+            stop: () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+            },
+        };
     }, [createCloud, maxClouds, spawnInterval]);
+
+    useEffect(() => {
+        // Initialize clouds - distribute them evenly across the container
+        const initialCount = Math.floor(maxClouds / 2);
+        const initialClouds: Cloud[] = [];
+
+        for (let i = 0; i < initialCount; i++) {
+            const xPos = -20 + (140 / initialCount) * i;
+            initialClouds.push(createCloud(xPos, initialClouds));
+        }
+
+        cloudsRef.current = initialClouds;
+        forceUpdate(); // Initial render with clouds
+
+        // Start animation loop
+        const animation = updateCloudsCallback();
+
+        // Clean up
+        return () => animation.stop();
+    }, [createCloud, maxClouds, updateCloudsCallback]);
 
     // Use forceUpdate instead of state for better performance
     const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
@@ -158,6 +217,7 @@ export default function AnimatedClouds({
                         left: `${cloud.position}%`,
                         transform: `scale(${cloud.scale})`,
                         opacity: cloud.opacity,
+                        willChange: 'transform, left',
                         transition: 'transform 0.5s ease-out',
                     }}
                 >
@@ -167,7 +227,8 @@ export default function AnimatedClouds({
                             width={300}
                             height={100}
                             alt='Cloud'
-                            priority
+                            priority={false}
+                            loading='lazy'
                         />
                     </div>
                 </div>

@@ -53,4 +53,4 @@ This policy may be updated from time to time. If changes are significant, I’ll
 
 ## 8. Contact
 
-For any privacy-related questions, reach out via email: [your-email@example.com]
+For any privacy-related questions, reach out via email: hello@trypurpleapp.com

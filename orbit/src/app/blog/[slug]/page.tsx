@@ -10,46 +10,33 @@ export async function generateMetadata({
     params: { slug: string };
 }): Promise<Metadata> {
     const blog = getPostBySlug(params.slug);
-
     if (!blog) return {};
-
-    const { title, description, blogImage, slug } = blog.data;
-
     return {
-        title,
-        description,
+        title: blog.data.title,
+        description: blog.data.description,
         openGraph: {
-            title,
-            description,
+            title: blog.data.title,
+            description: blog.data.description,
             type: 'article',
-            url: `https://trypurpleapp.com/blog/${slug}`,
-            images: [
-                {
-                    url: blogImage,
-                    width: 1200,
-                    height: 630,
-                    alt: title,
-                },
-            ],
+            url: `https://trypurpleapp.com/blog/${blog.data.slug}`,
+            images: [{ url: blog.data.blogImage, width: 1200, height: 630 }],
         },
         twitter: {
             card: 'summary_large_image',
-            title,
-            description,
-            images: [blogImage],
+            title: blog.data.title,
+            images: [blog.data.blogImage],
         },
     };
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
     const blog = getPostBySlug(params.slug);
-
     if (!blog) return notFound();
 
     return (
         <div className='w-full flex relative bg-gradient-to-b from-purple-400 to-white py-20 overflow-visible'>
             <AnimatedClouds
-                baseSpeed={1}
+                baseSpeed={12}
                 minHeight={10}
                 maxHeight={500}
                 spawnRate={5}

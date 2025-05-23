@@ -109,10 +109,14 @@ export const MarkdownContent = memo(
             <ReactMarkdown
                 remarkPlugins={[gfm]}
                 components={{
+                    // this is to fix the hydration error where <div> cannot be a descendant of <p>
+                    p: ({ children }) => (
+                        <div className='mb-4 text-black opacity-1'>{children}</div>
+                    ),
                     img: ({ src, alt }) => (
-                        <span className='block my-4'>
+                        <div className='my-4'>
                             <ImageExpand src={src!} alt={alt!} />
-                        </span>
+                        </div>
                     ),
                 }}
             >
