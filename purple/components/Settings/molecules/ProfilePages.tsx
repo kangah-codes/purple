@@ -1,17 +1,17 @@
 import { SettingsCogIcon } from '@/components/SVG/24x24';
+import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { View } from '@/components/Shared/styled';
+import { currencies } from '@/lib/constants/currencies';
 import { keyExtractor } from '@/lib/utils/number';
+import { Image } from 'expo-image';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, ListRenderItem } from 'react-native';
+import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import { ProfilePageLinkProps } from '../schema';
 import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
-import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
-import * as WebBrowser from 'expo-web-browser';
-import { Image } from 'expo-image';
-import { currencies } from '@/lib/constants/currencies';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -48,16 +48,20 @@ export default function ProfilePages() {
                 ) as (typeof currencies)[number];
                 const country = settingCurrency.locale.split('-')[1];
                 return (
-                    <Image
-                        style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 40,
-                        }}
-                        source={`https://globalartinc.github.io/round-flags/flags/${country}.svg`}
-                        contentFit='cover'
-                        transition={1000}
-                    />
+                    <View className='w-[40] h-[40] flex items-center justify-center'>
+                        <Image
+                            style={{
+                                width: 37,
+                                height: 37,
+                                borderRadius: 40,
+                            }}
+                            source={{
+                                uri: `https://globalartinc.github.io/round-flags/flags/${country.toLowerCase()}.svg`,
+                            }}
+                            contentFit='cover'
+                            transition={500}
+                        />
+                    </View>
                 );
             },
         },

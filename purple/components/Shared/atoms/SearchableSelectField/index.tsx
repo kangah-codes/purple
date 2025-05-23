@@ -1,15 +1,14 @@
 import { ChevronDownIcon } from '@/components/SVG/16x16';
+import { SearchIcon } from '@/components/SVG/noscale';
 import { InputField, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { LRUCache } from '@/lib/utils/cache';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useCallback, useMemo, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { SearchIcon } from '@/components/SVG/noscale';
-import { StyleSheet } from 'react-native';
-import { LRUCache } from '@/lib/utils/cache';
-import { satoshiFont } from '@/lib/constants/fonts';
 
 // TODO: move to a type declaration file
 export type SelectOption = {
@@ -26,8 +25,10 @@ type SearchableSelectFieldProps = {
     selectKey: string;
     customSnapPoints?: (number | string)[];
     renderItem?: (item: SelectOption) => React.ReactNode;
+    renderSelectedItem?: (item: SelectOption) => React.ReactNode;
     onChange?: (value: string) => void;
     value?: string;
+    useCache?: boolean;
 };
 
 export default function SearchableSelectField({
@@ -36,8 +37,10 @@ export default function SearchableSelectField({
     selectKey,
     customSnapPoints,
     renderItem,
+    renderSelectedItem,
     onChange,
     value,
+    useCache = false,
 }: SearchableSelectFieldProps) {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const selectCache = new LRUCache<SelectOption>(selectKey, 3);
@@ -50,6 +53,14 @@ export default function SearchableSelectField({
                     {item.label}
                 </Text>
             </View>
+        ),
+        [],
+    );
+    const renderDefaultSelectedItem = useCallback(
+        (label: string) => (
+            <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
+                {truncateStringIfLongerThan(label, 45)}
+            </Text>
         ),
         [],
     );
@@ -103,11 +114,8 @@ export default function SearchableSelectField({
                                 </View>
                             </View>
 
-                            {selectCache.size() > 0 && (
-                                <View
-                                    className='w-full px-5 flex flex-col bg-white'
-                                    // style={styles.shadow}
-                                >
+                            {selectCache.size() > 0 && useCache && (
+                                <View className='w-full px-5 flex flex-col bg-white'>
                                     <Text
                                         style={satoshiFont.satoshiBold}
                                         className='text-base text-black'
@@ -119,9 +127,10 @@ export default function SearchableSelectField({
                                             onPress={() => {
                                                 setValue(item.value.toString());
                                                 onChange && onChange(item.value.toString());
+                                                useCache &&
+                                                    selectCache.set(item.value.toString(), item);
                                                 // close the bottom sheet
                                                 setShowBottomSheetFlatList(selectKey, false);
-                                                selectCache.set(item.value.toString(), item);
                                             }}
                                         >
                                             {renderItem
@@ -182,12 +191,13 @@ export default function SearchableSelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
-                        {truncateStringIfLongerThan(
-                            options[val ?? '']?.label ?? `Select an option...`,
-                            45,
-                        )}
-                    </Text>
+                    <View>
+                        {renderSelectedItem
+                            ? renderSelectedItem(options[val ?? ''])
+                            : renderDefaultSelectedItem(
+                                  options[val ?? '']?.label ?? `Select an option...`,
+                              )}
+                    </View>
                 </TouchableOpacity>
             </View>
         </>

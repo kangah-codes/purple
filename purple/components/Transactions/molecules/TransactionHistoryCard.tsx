@@ -9,6 +9,8 @@ import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { router } from 'expo-router';
+import { useTransactionStore } from '../hooks';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -21,9 +23,15 @@ export default function TransactionHistoryCard({
     onPress,
     showTitle = true,
 }: TransactionHistoryCardProps) {
+    const { setCurrentTransaction, currentTransaction } = useTransactionStore();
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
     const showActionMenu = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        setCurrentTransaction(data);
+        router.push({
+            pathname: '/transactions/new-transaction',
+            params: { update: 'true' },
+        });
     }, []);
     const getTransactionColour = (type: Transaction['type']) => {
         switch (type) {

@@ -111,6 +111,137 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
+    async update(id: string, data: CreateTransaction): Promise<GenericAPIResponse<Transaction>> {
+        let updatedTransaction!: Transaction;
+        const now = new Date().toISOString();
+        const errorMessage = "Couldn't update transaction";
+
+        await this.db.withTransactionAsync(async () => {
+            const original = await this.db.getFirstAsync<Transaction>(
+                'SELECT * FROM transactions WHERE id = ?',
+                [id],
+            );
+            if (!original) throw new HTTPError('Transaction not found', 404);
+
+            // Reverse original transaction effects
+            const reverseEffect = async () => {
+                if (original.type === 'transfer') {
+                    const debitAccount = await this.db.getFirstAsync<Account>(
+                        'SELECT * from accounts where id = ?',
+                        [original.from_account!],
+                    );
+                    const creditAccount = await this.db.getFirstAsync<Account>(
+                        'SELECT * from accounts where id = ?',
+                        [original.to_account!],
+                    );
+                    if (!debitAccount || !creditAccount) throw new Error(errorMessage);
+
+                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                        debitAccount.balance + original.amount,
+                        debitAccount.id,
+                    ]);
+                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                        creditAccount.balance - original.amount,
+                        creditAccount.id,
+                    ]);
+                } else {
+                    const account = await this.db.getFirstAsync<Account>(
+                        'SELECT * from accounts where id = ?',
+                        [original.account_id!],
+                    );
+                    if (!account) throw new Error(errorMessage);
+                    const revertAmount =
+                        original.type === 'debit'
+                            ? account.balance + original.amount
+                            : account.balance - original.amount;
+
+                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                        revertAmount,
+                        original.account_id,
+                    ]);
+                }
+            };
+
+            await reverseEffect();
+
+            // Update the transaction
+            await this.db.runAsync(
+                `UPDATE transactions SET
+                    updated_at = ?, account_id = ?, type = ?, amount = ?, note = ?,
+                    category = ?, from_account = ?, to_account = ?, currency = ?, plan_id = ?, created_at = ?
+                WHERE id = ?`,
+                [
+                    now,
+                    data.account_id,
+                    data.type,
+                    data.amount,
+                    data.note ?? null,
+                    data.category,
+                    data.from_account ?? null,
+                    data.to_account ?? null,
+                    data.currency,
+                    data.plan_id ?? null,
+                    data.date,
+                    id,
+                ],
+            );
+
+            // Apply new effects
+            if (data.type === 'transfer') {
+                const debitAccount = await this.db.getFirstAsync<Account>(
+                    'SELECT * from accounts where id = ?',
+                    [data.from_account!],
+                );
+                const creditAccount = await this.db.getFirstAsync<Account>(
+                    'SELECT * from accounts where id = ?',
+                    [data.to_account!],
+                );
+                if (!debitAccount || !creditAccount) throw new Error(errorMessage);
+
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    debitAccount.balance - data.amount,
+                    debitAccount.id,
+                ]);
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    creditAccount.balance + data.amount,
+                    creditAccount.id,
+                ]);
+            } else {
+                const account = await this.db.getFirstAsync<Account>(
+                    'SELECT * from accounts where id = ?',
+                    [data.account_id!],
+                );
+                if (!account) throw new Error(errorMessage);
+                const newBalance =
+                    data.type === 'debit'
+                        ? account.balance - data.amount
+                        : account.balance + data.amount;
+
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    newBalance,
+                    data.account_id,
+                ]);
+            }
+
+            const result = await this.db.getFirstAsync<Transaction>(
+                'SELECT * FROM transactions WHERE id = ?',
+                [id],
+            );
+            if (!result) throw new HTTPError(errorMessage, 500);
+            updatedTransaction = result;
+        });
+
+        return this.formatResponse({
+            data: updatedTransaction,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Updated transaction',
+        });
+    }
+
     async get(id: string): Promise<GenericAPIResponse<Transaction>> {
         const transaction = await this.db.getFirstAsync<Transaction>(
             `SELECT * FROM transactions WHERE deleted_at IS NULL AND id = ?`,

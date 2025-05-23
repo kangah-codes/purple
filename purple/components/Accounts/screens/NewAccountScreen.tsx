@@ -26,6 +26,9 @@ import SearchableSelectField, {
     SelectOption,
 } from '@/components/Shared/atoms/SearchableSelectField';
 import { CheckMarkIcon } from '@/components/SVG/noscale';
+import Checkbox from '@/components/Shared/atoms/Checkbox';
+import { Image } from 'expo-image';
+import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
 
 export default function NewAccountScreen() {
     const {
@@ -92,21 +95,67 @@ export default function NewAccountScreen() {
         );
     }, []);
 
+    const renderSelectedCurrency = useCallback((item: SelectOption) => {
+        const currency = currencies.find((currency) => currency.code === item.value);
+        const country = currency?.locale.split('-')[1];
+
+        return (
+            <View className='flex flex-row space-x-2 items-center -ml-2.5'>
+                <FallbackImage
+                    style={{
+                        width: 35,
+                        height: 35,
+                        borderRadius: 20,
+                    }}
+                    source={{
+                        uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
+                    }}
+                    fallbackSource={require('@/assets/images/graphics/catto.png')}
+                    contentFit='cover'
+                    transition={1000}
+                />
+                <Text style={satoshiFont.satoshiBold} className='text-sm'>
+                    {currency?.name} ({currency?.symbol})
+                </Text>
+            </View>
+        );
+    }, []);
+
     const renderCurrencies = useCallback((item: SelectOption) => {
         const currency = currencies.find((currency) => currency.code === item.value);
+        const country = currency?.locale.split('-')[1];
         const selectedValue = getValues('currency');
 
         return (
-            <View className='py-3 border-b border-purple-100 flex flex-row justify-between space-x-2 items-center'>
-                <Text style={satoshiFont.satoshiBold} className='text-sm'>
-                    {currency?.emojiFlag}
-                    {'  '}
-                    {currency?.name}
-                </Text>
+            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center justify-between'>
+                <View className='flex flex-row space-x-2'>
+                    <View className='w-[40] h-[40] flex items-center justify-center'>
+                        <Image
+                            style={{
+                                width: 37,
+                                height: 37,
+                                borderRadius: 40,
+                            }}
+                            source={{
+                                uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
+                            }}
+                            contentFit='cover'
+                            transition={1000}
+                        />
+                    </View>
+                    <View className='flex flex-col'>
+                        <Text style={satoshiFont.satoshiBold} className='text-base'>
+                            {/* {item.emojiFlag}  */}
+                            {currency?.name} ({currency?.symbol})
+                        </Text>
+                        <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-500'>
+                            {/* {item.emojiFlag}  */}
+                            {currency?.country}
+                        </Text>
+                    </View>
+                </View>
 
-                {selectedValue === currency?.code && (
-                    <CheckMarkIcon strokeWidth={3} stroke={'#9810fa'} width={15} height={15} />
-                )}
+                <Checkbox checked={selectedValue === currency?.code} onChange={() => {}} />
             </View>
         );
     }, []);
@@ -294,6 +343,7 @@ export default function NewAccountScreen() {
                                             )}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
+                                            renderSelectedItem={renderSelectedCurrency}
                                             value={value}
                                             onChange={onChange}
                                         />

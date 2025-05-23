@@ -29,11 +29,11 @@ export default function CategoriesScreen() {
             const searchString = `${category.emoji} ${category.category}`;
             return searchString.toLowerCase().includes(searchValue.toLowerCase());
         });
-    }, [searchValue]);
+    }, [searchValue, customTransactionTypes]);
     const renderItem = useCallback(({ item }: { item: CustomTransactionType }) => {
         return (
             <View className='py-3'>
-                <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-800'>
+                <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
                     {`${item.emoji} ${item.category}`}
                 </Text>
             </View>

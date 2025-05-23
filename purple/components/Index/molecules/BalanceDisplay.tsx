@@ -1,11 +1,10 @@
-import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { EyeCloseIcon, EyeOpenIcon, PinIcon } from '../../SVG/noscale';
-import React from 'react';
-import { formatCurrencyRounded } from '@/lib/utils/number';
 import { Account } from '@/components/Accounts/schema';
+import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 import { Link } from 'expo-router';
+import React from 'react';
+import { PinIcon } from '../../SVG/noscale';
 
 type BalanceDisplayProps = {
     accountName: string;
@@ -30,7 +29,9 @@ export function BalanceDisplay({ accountName, account, isPinned }: BalanceDispla
                         {accountName}
                     </Text>
 
-                    {isPinned && <PinIcon width={15} height={15} stroke={'#9333ea'} />}
+                    {isPinned && (
+                        <PinIcon width={15} height={15} stroke={'#9333ea'} fill={'#9333ea'} />
+                    )}
                 </View>
             </View>
         </Link>
