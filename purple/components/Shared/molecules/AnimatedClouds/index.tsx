@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { View, Image, Dimensions, StyleSheet, Animated } from 'react-native';
 
-// Note: You'll need to import your cloud images appropriately for React Native
 const CLOUD_TYPES = [
     require('@/assets/images/graphics/cloud-1.png'),
     require('@/assets/images/graphics/cloud-2.png'),
     require('@/assets/images/graphics/cloud-3.png'),
     require('@/assets/images/graphics/cloud-4.png'),
 ] as const;
-
 const CLOUD_WIDTH = 300;
-const COLLISION_BUFFER = 150; // Increased buffer for better spacing
+const CLOUD_HEIGHT_RATIO = 0.33;
+const COLLISION_BUFFER = 200;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BASE_DURATION = 50000;
 
@@ -46,118 +45,148 @@ export default function AnimatedClouds({
     maxHeight = 400,
     style = {},
 }: AnimatedCloudsProps) {
+    const [clouds, setClouds] = useState<Cloud[]>([]);
     const cloudsRef = useRef<Cloud[]>([]);
-    const lastSpawnTimeRef = useRef(Date.now());
-
+    const animationRefs = useRef<Animated.CompositeAnimation[]>([]);
     const effectiveHeight = useMemo(() => maxHeight - minHeight, [maxHeight, minHeight]);
     const spawnInterval = useMemo(() => (60 * 1000) / spawnRate, [spawnRate]);
-
-    const getCloudPosition = useCallback((cloud: Cloud) => {
-        // @ts-ignore
-        return cloud.position._value;
+    const getCloudDimensions = useCallback((scale: number) => {
+        return {
+            width: CLOUD_WIDTH * scale,
+            height: CLOUD_WIDTH * CLOUD_HEIGHT_RATIO * scale,
+        };
     }, []);
-
     const wouldCollide = useCallback(
-        (newCloudPos: number, newCloudTop: number, existingClouds: Cloud[]) => {
+        (newCloud: { position: number; top: number; scale: number }, existingClouds: Cloud[]) => {
+            const newDims = getCloudDimensions(newCloud.scale);
+
             return existingClouds.some((cloud) => {
-                const cloudPos = getCloudPosition(cloud);
-                const verticalOverlap = Math.abs(newCloudTop - cloud.top) < CLOUD_WIDTH / 3;
-                const horizontalOverlap = Math.abs(newCloudPos - cloudPos) < COLLISION_BUFFER;
-                return verticalOverlap && horizontalOverlap;
+                // @ts-ignore
+                const cloudPos = cloud.position.__getValue();
+                const cloudDims = getCloudDimensions(cloud.scale);
+
+                const verticalDistance = Math.abs(newCloud.top - cloud.top);
+                const horizontalDistance = Math.abs(newCloud.position - cloudPos);
+
+                const minVerticalDistance = (newDims.height + cloudDims.height) / 2;
+                const minHorizontalDistance =
+                    (newDims.width + cloudDims.width) / 2 + COLLISION_BUFFER;
+
+                return (
+                    verticalDistance < minVerticalDistance &&
+                    horizontalDistance < minHorizontalDistance
+                );
             });
         },
-        [getCloudPosition],
+        [getCloudDimensions],
     );
 
     const findSafePosition = useCallback(
-        (existingClouds: Cloud[], attempts = 0): { position: number; top: number } | null => {
-            if (attempts > 50) return null; // Prevent infinite recursion
-
+        (existingClouds: Cloud[]): { position: number; top: number; scale: number } => {
             const scale = minScale + Math.random() * (maxScale - minScale);
-            const effectiveCloudHeight = CLOUD_WIDTH * scale;
-            const maxTop = Math.max(minHeight, maxHeight - effectiveCloudHeight);
+            const dims = getCloudDimensions(scale);
+            const maxTop = Math.max(minHeight, maxHeight - dims.height);
             const top = minHeight + Math.random() * (maxTop - minHeight);
 
-            // Try to find a position that doesn't collide
-            const position = -CLOUD_WIDTH - attempts * COLLISION_BUFFER;
+            for (let i = 0; i < 10; i++) {
+                const position = -dims.width - Math.random() * SCREEN_WIDTH * 0.5;
+                const newCloud = { position, top, scale };
 
-            if (!wouldCollide(position, top, existingClouds)) {
-                return { position, top };
+                if (!wouldCollide(newCloud, existingClouds)) {
+                    return newCloud;
+                }
             }
 
-            return findSafePosition(existingClouds, attempts + 1);
+            return {
+                position: -CLOUD_WIDTH * maxScale * 2,
+                top,
+                scale,
+            };
         },
-        [maxHeight, maxScale, minHeight, minScale, wouldCollide],
+        [getCloudDimensions, maxHeight, maxScale, minHeight, minScale, wouldCollide],
     );
 
     const createCloud = useCallback(
-        (existingClouds: Cloud[] = []): Cloud | null => {
-            const safeSpot = findSafePosition(existingClouds);
-            if (!safeSpot) return null;
-
-            const scale = minScale + Math.random() * (maxScale - minScale);
+        (existingClouds: Cloud[]): Cloud => {
+            const { position, top, scale } = findSafePosition(existingClouds);
 
             return {
-                id: Math.random().toString(36).slice(7),
+                id: Math.random().toString(36).slice(2, 10),
                 type: Math.floor(Math.random() * CLOUD_TYPES.length),
-                top: safeSpot.top,
+                top,
                 speed: baseSpeed * (0.8 + Math.random() * 0.4),
                 scale,
-                position: new Animated.Value(safeSpot.position),
+                position: new Animated.Value(position),
                 opacity: 0.3 + Math.random() * 0.3,
                 width: CLOUD_WIDTH,
             };
         },
-        [baseSpeed, findSafePosition, maxScale, minScale],
+        [baseSpeed, findSafePosition],
     );
 
     const animateCloud = useCallback(
         (cloud: Cloud) => {
-            Animated.timing(cloud.position, {
-                toValue: SCREEN_WIDTH + CLOUD_WIDTH,
+            const animation = Animated.timing(cloud.position, {
+                toValue: SCREEN_WIDTH + CLOUD_WIDTH * cloud.scale,
                 duration: BASE_DURATION / cloud.speed,
                 useNativeDriver: true,
-            }).start(({ finished }) => {
+            });
+
+            animation.start(({ finished }) => {
                 if (finished) {
-                    const safeSpot = findSafePosition(cloudsRef.current);
-                    if (safeSpot) {
-                        cloud.position.setValue(safeSpot.position);
-                        // cloud.animating = true;
-                        animateCloud(cloud);
-                    }
+                    animationRefs.current = animationRefs.current.filter((a) => a !== animation);
+
+                    setClouds((prevClouds) => {
+                        const newClouds = prevClouds.filter((c) => c.id !== cloud.id);
+                        cloudsRef.current = newClouds;
+
+                        if (newClouds.length < maxClouds) {
+                            const newCloud = createCloud(newClouds);
+                            cloudsRef.current = [...newClouds, newCloud];
+                            animateCloud(newCloud);
+                            return [...newClouds, newCloud];
+                        }
+
+                        return newClouds;
+                    });
                 }
             });
+
+            animationRefs.current.push(animation);
         },
-        [findSafePosition],
+        [createCloud, maxClouds],
     );
 
     useEffect(() => {
-        // Initialize clouds with safe positions
         const initialClouds: Cloud[] = [];
-        for (let i = 0; i < Math.floor(maxClouds / 2); i++) {
+        const initialCount = Math.min(Math.floor(maxClouds / 2), maxClouds);
+
+        for (let i = 0; i < initialCount; i++) {
             const cloud = createCloud(initialClouds);
-            if (cloud) {
-                initialClouds.push(cloud);
-                animateCloud(cloud);
-            }
+            initialClouds.push(cloud);
         }
+
+        setClouds(initialClouds);
         cloudsRef.current = initialClouds;
 
-        const spawnNewClouds = () => {
-            if (cloudsRef.current.length < maxClouds) {
-                const newCloud = createCloud(cloudsRef.current);
-                if (newCloud) {
-                    cloudsRef.current.push(newCloud);
-                    animateCloud(newCloud);
-                }
-            }
+        initialClouds.forEach((cloud) => animateCloud(cloud));
+
+        const spawnIntervalId = setInterval(() => {
+            setClouds((prevClouds) => {
+                if (prevClouds.length >= maxClouds) return prevClouds;
+
+                const newCloud = createCloud(prevClouds);
+                animateCloud(newCloud);
+                return [...prevClouds, newCloud];
+            });
+        }, spawnInterval);
+
+        return () => {
+            clearInterval(spawnIntervalId);
+            animationRefs.current.forEach((animation) => animation.stop());
+            animationRefs.current = [];
         };
-
-        const spawnTimer = setInterval(spawnNewClouds, spawnInterval);
-        return () => clearInterval(spawnTimer);
     }, [animateCloud, createCloud, maxClouds, spawnInterval]);
-
-    const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
 
     return (
         <View
@@ -169,26 +198,30 @@ export default function AnimatedClouds({
                 },
                 style,
             ]}
+            pointerEvents='none'
         >
-            {cloudsRef.current.map((cloud) => (
-                <Animated.View
-                    key={cloud.id}
-                    style={[
-                        styles.cloudContainer,
-                        {
-                            top: cloud.top - minHeight,
-                            transform: [{ translateX: cloud.position }, { scale: cloud.scale }],
-                            opacity: cloud.opacity,
-                        },
-                    ]}
-                >
-                    <Image
-                        source={CLOUD_TYPES[cloud.type]}
-                        style={styles.cloudImage}
-                        resizeMode='contain'
-                    />
-                </Animated.View>
-            ))}
+            {clouds.map((cloud) => {
+                const cloudStyle = {
+                    top: cloud.top - minHeight,
+                    transform: [{ translateX: cloud.position }, { scale: cloud.scale }],
+                    opacity: cloud.opacity,
+                };
+
+                return (
+                    <Animated.View
+                        key={cloud.id}
+                        style={[styles.cloudContainer, cloudStyle]}
+                        shouldRasterizeIOS={true}
+                        renderToHardwareTextureAndroid={true}
+                    >
+                        <Image
+                            source={CLOUD_TYPES[cloud.type]}
+                            style={styles.cloudImage}
+                            resizeMode='contain'
+                        />
+                    </Animated.View>
+                );
+            })}
         </View>
     );
 }
@@ -202,7 +235,7 @@ const styles = StyleSheet.create({
     cloudContainer: {
         position: 'absolute',
         width: CLOUD_WIDTH,
-        height: CLOUD_WIDTH / 3,
+        height: CLOUD_WIDTH * CLOUD_HEIGHT_RATIO,
     },
     cloudImage: {
         width: '100%',
