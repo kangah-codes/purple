@@ -1,15 +1,17 @@
 import { SettingsCogIcon } from '@/components/SVG/24x24';
+import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { View } from '@/components/Shared/styled';
+import { currencies } from '@/lib/constants/currencies';
 import { keyExtractor } from '@/lib/utils/number';
+import { Image } from 'expo-image';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, ListRenderItem } from 'react-native';
+import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import { ProfilePageLinkProps } from '../schema';
 import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
-import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
-import * as WebBrowser from 'expo-web-browser';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -24,12 +26,13 @@ export default function ProfilePages() {
                 link={item.link}
                 callback={item.callback}
                 description={item.description}
+                renderIcon={item.renderIcon}
             />
         ),
         [],
     );
     const itemSeparator = useCallback(
-        () => <View className='border-b border-purple-200 h-[1px]' />,
+        () => <View className='border-b border-purple-200 h-[0.5px]' />,
         [],
     );
 
@@ -39,6 +42,28 @@ export default function ProfilePages() {
             title: 'Default Currency',
             callback: () => setShowBottomSheetFlatList('preferences-currency', true),
             description: 'Select a default currency for all transactions',
+            renderIcon: () => {
+                const settingCurrency = currencies.find(
+                    (cur) => cur.code === currency,
+                ) as (typeof currencies)[number];
+                const country = settingCurrency.locale.split('-')[1];
+                return (
+                    <View className='w-[40] h-[40] flex items-center justify-center'>
+                        <Image
+                            style={{
+                                width: 37,
+                                height: 37,
+                                borderRadius: 40,
+                            }}
+                            source={{
+                                uri: `https://globalartinc.github.io/round-flags/flags/${country.toLowerCase()}.svg`,
+                            }}
+                            contentFit='cover'
+                            transition={500}
+                        />
+                    </View>
+                );
+            },
         },
         {
             icon: <SafeIcon width={20} height={20} stroke={'#9333ea'} />,

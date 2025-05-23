@@ -1,4 +1,5 @@
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
+import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect } from 'react';
@@ -12,9 +13,7 @@ import PlanActionMenu from '../molecules/PlanActionMenu';
 import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
 import PlanInformation from '../molecules/PlanInformation';
 import PlanNavigationArea from '../molecules/PlanNavigationArea';
-import PlanTransactionsList from '../molecules/PlanTransactionsList';
 import { Plan } from '../schema';
-import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 

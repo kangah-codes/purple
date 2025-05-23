@@ -44,38 +44,29 @@ function CustomBottomSheetFlatList<T>({
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const unmountTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    // Local state to handle delayed unmounting
     const [shouldRender, setShouldRender] = useState(false);
 
-    // Memoize default snap points
     const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '50%'], [rest.snapPoints]);
-
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();
-
-    // Extract the visibility for this specific sheet
     const isVisible = useMemo(
         () => !!bottomSheetFlatListKeys[sheetKey],
         [bottomSheetFlatListKeys, sheetKey],
     );
 
-    // Handle delayed mounting/unmounting for smooth animations
     useEffect(() => {
         if (isVisible) {
-            // Clear any pending unmount
             if (unmountTimeoutRef.current) {
                 clearTimeout(unmountTimeoutRef.current);
                 unmountTimeoutRef.current = null;
             }
-            // Mount immediately
+
             setShouldRender(true);
         } else if (shouldRender) {
-            // Start unmount delay to allow close animation to finish
             unmountTimeoutRef.current = setTimeout(() => {
                 setShouldRender(false);
                 unmountTimeoutRef.current = null;
-            }, 300); // Adjust timing based on your animation duration
+            }, 300);
         }
 
         return () => {
@@ -85,7 +76,6 @@ function CustomBottomSheetFlatList<T>({
         };
     }, [isVisible, shouldRender]);
 
-    // Memoize handlers
     const handleSheetChanges = useCallback(
         (index: number) => {
             if (index === -1 && bottomSheetFlatListKeys[sheetKey]) {
@@ -94,7 +84,6 @@ function CustomBottomSheetFlatList<T>({
         },
         [sheetKey, setShowBottomSheetFlatList, bottomSheetFlatListKeys],
     );
-
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
@@ -108,8 +97,6 @@ function CustomBottomSheetFlatList<T>({
         ),
         [],
     );
-
-    // Memoize empty list component
     const EmptyListComponent = useMemo(
         () => (
             <View className='pt-10'>
@@ -119,12 +106,10 @@ function CustomBottomSheetFlatList<T>({
         [],
     );
 
-    // Initialize sheet key once
     useEffect(() => {
         createBottomSheetFlatList(sheetKey);
     }, [sheetKey, createBottomSheetFlatList]);
 
-    // Handle sheet state changes
     useEffect(() => {
         if (shouldRender) {
             if (isVisible) {

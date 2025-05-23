@@ -6,6 +6,7 @@ import { Portal } from '@gorhom/portal';
 import React, { useEffect, useState } from 'react';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 // Props for the parent CustomModalSelectField
 interface CustomModalSelectFieldProps {
@@ -58,7 +59,7 @@ export default function CustomModalSelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={{ fontFamily: 'MonaSansBold' }} className='text-xs text-gray-600'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -70,7 +71,7 @@ export default function CustomModalSelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
+                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             isNotEmptyString(val) ? val! : 'Select an option...',
                             45,

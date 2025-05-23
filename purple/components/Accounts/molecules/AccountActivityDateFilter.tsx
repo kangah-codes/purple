@@ -40,7 +40,7 @@ export default function AccountActivityDateFilter() {
                 >
                     <Text
                         style={[
-                            satoshiFont.satoshiBlack,
+                            satoshiFont.satoshiBold,
                             currentAccountRequestParams.currentSelection === period
                                 ? styles.activeText
                                 : styles.inactiveText,

@@ -122,7 +122,7 @@ export default function NewPlanTransactionScreen() {
                 }}
             >
                 <ExpoStatusBar style='dark' />
-                <View className='w-full flex flex-row py-2.5 justify-between items-center relative'>
+                <View className='w-full flex px-5 flex-row py-2.5 justify-between items-center relative'>
                     <TouchableOpacity
                         onPress={router.back}
                         className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'

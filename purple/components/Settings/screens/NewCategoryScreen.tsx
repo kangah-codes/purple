@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { isEmoji } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -68,7 +68,7 @@ export default function NewCategoryScreen() {
                     </TouchableOpacity>
 
                     <View className='absolute left-0 right-0 items-center'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                             Custom Category
                         </Text>
                     </View>
@@ -78,10 +78,7 @@ export default function NewCategoryScreen() {
                     contentContainerStyle={styles.scrollView}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Category
                         </Text>
 
@@ -94,7 +91,7 @@ export default function NewCategoryScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Category'
                                         onChangeText={onChange}
@@ -107,7 +104,7 @@ export default function NewCategoryScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -116,10 +113,7 @@ export default function NewCategoryScreen() {
                         </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Emoji
                         </Text>
 
@@ -132,7 +126,7 @@ export default function NewCategoryScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Emoji'
                                         onChangeText={(text) => {
@@ -147,7 +141,7 @@ export default function NewCategoryScreen() {
                             />
                             {errors.emoji && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.emoji.message}
@@ -170,7 +164,7 @@ export default function NewCategoryScreen() {
                             <ActivityIndicator size={15} color='#fff' />
                         ) : (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                style={satoshiFont.satoshiBlack}
                                 className='text-white text-center'
                             >
                                 Save

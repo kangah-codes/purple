@@ -26,7 +26,7 @@ export default function SettingsItem({
         <TouchableOpacity onPress={handlePress}>
             <View className='flex-row items-center justify-between py-4 w-full'>
                 <View className='flex-row items-center space-x-2.5'>
-                    <View className='items-center justify-center rounded-full border border-purple-300 p-2'>
+                    <View className='items-center justify-center rounded-full border border-purple-300 w-[40px] h-[40px]'>
                         {icon}
                     </View>
                     <View className='flex flex-col max-w-[75%]'>

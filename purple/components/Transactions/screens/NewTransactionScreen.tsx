@@ -140,10 +140,7 @@ export default function NewTransactionScreen() {
             return (
                 <View className='flex flex-col space-y-5'>
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             From Account
                         </Text>
                         <View>
@@ -182,7 +179,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.fromAccount && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.fromAccount.message}
@@ -191,10 +188,7 @@ export default function NewTransactionScreen() {
                         </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             To Account
                         </Text>
                         <View>
@@ -233,7 +227,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.toAccount && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.toAccount.message}
@@ -246,7 +240,7 @@ export default function NewTransactionScreen() {
         }
         return (
             <View className='flex flex-col space-y-1'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
+                <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                     Account
                 </Text>
                 <View>
@@ -281,10 +275,7 @@ export default function NewTransactionScreen() {
                         name='accountId'
                     />
                     {errors.accountId && (
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiMedium}
-                            className='text-xs text-red-500'
-                        >
+                        <Text style={satoshiFont.satoshiMedium} className='text-xs text-red-500'>
                             {errors.accountId.message}
                         </Text>
                     )}
@@ -335,10 +326,7 @@ export default function NewTransactionScreen() {
                                         onPress={() => setTransactionType(transaction.key)}
                                         className='w-full flex items-center justify-center py-2.5 rounded-full'
                                     >
-                                        <Text
-                                            style={GLOBAL_STYLESHEET.satoshiBlack}
-                                            className='text-sm'
-                                        >
+                                        <Text style={satoshiFont.satoshiBlack} className='text-sm'>
                                             {transaction.label}
                                         </Text>
                                     </TouchableOpacity>
@@ -355,10 +343,7 @@ export default function NewTransactionScreen() {
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Amount
                         </Text>
 
@@ -371,7 +356,7 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='0.00'
                                         onChangeText={onChange}
@@ -384,7 +369,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.amount && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.amount.message}
@@ -394,10 +379,7 @@ export default function NewTransactionScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Category
                         </Text>
                         <View>
@@ -433,7 +415,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -468,7 +450,7 @@ export default function NewTransactionScreen() {
                         />
                         {errors.date && (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.date.message}
@@ -481,10 +463,7 @@ export default function NewTransactionScreen() {
                     {renderAccountFields()}
 
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Note
                         </Text>
 
@@ -494,7 +473,7 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Add a note...'
                                         onChangeText={onChange}
@@ -506,7 +485,7 @@ export default function NewTransactionScreen() {
                             />
                             {errors.note && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.note.message}
@@ -529,7 +508,7 @@ export default function NewTransactionScreen() {
                             <ActivityIndicator size={15} color='#fff' />
                         ) : (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                style={satoshiFont.satoshiBlack}
                                 className='text-white text-center'
                             >
                                 Save

@@ -33,6 +33,7 @@ import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
 import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 const depositFrequency = {
     weekly: {
@@ -114,8 +115,8 @@ export default function NewPlanScreen() {
                     </TouchableOpacity>
 
                     <View className='absolute left-0 right-0 items-center'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                            New Transaction
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                            New Plan
                         </Text>
                     </View>
                 </View>
@@ -125,10 +126,7 @@ export default function NewPlanScreen() {
                     contentContainerStyle={styles.container}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Plan Name
                         </Text>
 
@@ -141,7 +139,7 @@ export default function NewPlanScreen() {
                                 render={({ field: { onChange, value, onBlur } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Plan Name'
                                         onChangeText={onChange}
@@ -154,7 +152,7 @@ export default function NewPlanScreen() {
                         </View>
                         {errors.name && (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.name.message}
@@ -163,10 +161,7 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Plan Type
                         </Text>
                         <View>
@@ -211,17 +206,13 @@ export default function NewPlanScreen() {
                                                             </View>
                                                             <View className='flex flex-col space-y-1 w-full px-5'>
                                                                 <Text
-                                                                    style={
-                                                                        GLOBAL_STYLESHEET.satoshiBlack
-                                                                    }
+                                                                    style={satoshiFont.satoshiBlack}
                                                                     className='text-xl text-black'
                                                                 >
                                                                     Saving
                                                                 </Text>
                                                                 <Text
-                                                                    style={
-                                                                        GLOBAL_STYLESHEET.satoshiBold
-                                                                    }
+                                                                    style={satoshiFont.satoshiBold}
                                                                     className='text-xs text-purple-500'
                                                                 >
                                                                     Save money for a specific goal
@@ -256,17 +247,13 @@ export default function NewPlanScreen() {
                                                             />
                                                             <View className='flex flex-col space-y-1 w-full p-5'>
                                                                 <Text
-                                                                    style={
-                                                                        GLOBAL_STYLESHEET.satoshiBlack
-                                                                    }
+                                                                    style={satoshiFont.satoshiBlack}
                                                                     className='text-xl text-black'
                                                                 >
                                                                     Expense
                                                                 </Text>
                                                                 <Text
-                                                                    style={
-                                                                        GLOBAL_STYLESHEET.satoshiBold
-                                                                    }
+                                                                    style={satoshiFont.satoshiBold}
                                                                     className='text-xs text-purple-500'
                                                                 >
                                                                     Put money aside for a projected
@@ -284,7 +271,7 @@ export default function NewPlanScreen() {
                             />
                             {errors.type && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.type.message}
@@ -294,10 +281,7 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Plan Category
                         </Text>
                         <View>
@@ -336,7 +320,7 @@ export default function NewPlanScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -346,10 +330,7 @@ export default function NewPlanScreen() {
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Target
                         </Text>
 
@@ -367,7 +348,7 @@ export default function NewPlanScreen() {
                                     <>
                                         <InputField
                                             className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                            style={GLOBAL_STYLESHEET.satoshiMedium}
+                                            style={satoshiFont.satoshiMedium}
                                             cursorColor={'#8B5CF6'}
                                             placeholder='0.00'
                                             keyboardType='numeric'
@@ -382,7 +363,7 @@ export default function NewPlanScreen() {
                         </View>
                         {errors.target && (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.target.message}
@@ -417,7 +398,7 @@ export default function NewPlanScreen() {
                         />
                         {errors.start_date && (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.start_date.message}
@@ -451,7 +432,7 @@ export default function NewPlanScreen() {
                         />
                         {errors.end_date && (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiMedium}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-red-500'
                             >
                                 {errors.end_date.message}
@@ -461,10 +442,7 @@ export default function NewPlanScreen() {
 
                     {getValues('type') === 'saving' && (
                         <View className='flex flex-col space-y-1'>
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiBold}
-                                className='text-xs text-gray-600'
-                            >
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                                 Deposit Frequency
                             </Text>
                             <View>
@@ -492,7 +470,7 @@ export default function NewPlanScreen() {
                             </View>
                             {errors.deposit_frequency && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.deposit_frequency.message}
@@ -515,7 +493,7 @@ export default function NewPlanScreen() {
                             <ActivityIndicator size={15} color='#fff' />
                         ) : (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                style={satoshiFont.satoshiBlack}
                                 className='text-white text-center'
                             >
                                 Create Plan

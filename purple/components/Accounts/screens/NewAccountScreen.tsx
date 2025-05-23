@@ -20,6 +20,15 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import SearchableSelectField, {
+    SelectOption,
+} from '@/components/Shared/atoms/SearchableSelectField';
+import { CheckMarkIcon } from '@/components/SVG/noscale';
+import Checkbox from '@/components/Shared/atoms/Checkbox';
+import { Image } from 'expo-image';
+import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
 
 export default function NewAccountScreen() {
     const {
@@ -32,6 +41,7 @@ export default function NewAccountScreen() {
         control,
         handleSubmit,
         formState: { errors },
+        getValues,
     } = useForm({
         defaultValues: {
             category: '',
@@ -78,23 +88,74 @@ export default function NewAccountScreen() {
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-purple-100'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight'>
+                <Text style={satoshiFont.satoshiBold} className='tracking-tight'>
                     {item.label}
                 </Text>
             </View>
         );
     }, []);
 
-    const renderCurrencies = useCallback((item: any) => {
+    const renderSelectedCurrency = useCallback((item: SelectOption) => {
         const currency = currencies.find((currency) => currency.code === item.value);
+        const country = currency?.locale.split('-')[1];
 
         return (
-            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm'>
-                    {currency?.emojiFlag}
-                    {'  '}
-                    {currency?.name}
+            <View className='flex flex-row space-x-2 items-center -ml-2.5'>
+                <FallbackImage
+                    style={{
+                        width: 35,
+                        height: 35,
+                        borderRadius: 20,
+                    }}
+                    source={{
+                        uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
+                    }}
+                    fallbackSource={require('@/assets/images/graphics/catto.png')}
+                    contentFit='cover'
+                    transition={1000}
+                />
+                <Text style={satoshiFont.satoshiBold} className='text-sm'>
+                    {currency?.name} ({currency?.symbol})
                 </Text>
+            </View>
+        );
+    }, []);
+
+    const renderCurrencies = useCallback((item: SelectOption) => {
+        const currency = currencies.find((currency) => currency.code === item.value);
+        const country = currency?.locale.split('-')[1];
+        const selectedValue = getValues('currency');
+
+        return (
+            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center justify-between'>
+                <View className='flex flex-row space-x-2'>
+                    <View className='w-[40] h-[40] flex items-center justify-center'>
+                        <Image
+                            style={{
+                                width: 37,
+                                height: 37,
+                                borderRadius: 40,
+                            }}
+                            source={{
+                                uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
+                            }}
+                            contentFit='cover'
+                            transition={1000}
+                        />
+                    </View>
+                    <View className='flex flex-col'>
+                        <Text style={satoshiFont.satoshiBold} className='text-base'>
+                            {/* {item.emojiFlag}  */}
+                            {currency?.name} ({currency?.symbol})
+                        </Text>
+                        <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-500'>
+                            {/* {item.emojiFlag}  */}
+                            {currency?.country}
+                        </Text>
+                    </View>
+                </View>
+
+                <Checkbox checked={selectedValue === currency?.code} onChange={() => {}} />
             </View>
         );
     }, []);
@@ -114,26 +175,26 @@ export default function NewAccountScreen() {
         <>
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
                 <ExpoStatusBar style='dark' />
-                <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                        New Account
-                    </Text>
-
-                    <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
-                            Cancel
-                        </Text>
+                <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+                    <TouchableOpacity
+                        onPress={router.back}
+                        className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                    >
+                        <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                     </TouchableOpacity>
+
+                    <View className='absolute left-0 right-0 items-center'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                            New Account
+                        </Text>
+                    </View>
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Account Group
                         </Text>
                         <View>
@@ -170,7 +231,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.category && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.category.message}
@@ -179,10 +240,7 @@ export default function NewAccountScreen() {
                         </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Account Name
                         </Text>
 
@@ -195,7 +253,7 @@ export default function NewAccountScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='Account name'
                                         onChangeText={onChange}
@@ -208,7 +266,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.name && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.name.message}
@@ -217,10 +275,7 @@ export default function NewAccountScreen() {
                         </View>
                     </View>
                     <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Balance
                         </Text>
 
@@ -233,7 +288,7 @@ export default function NewAccountScreen() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
                                         className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={GLOBAL_STYLESHEET.satoshiMedium}
+                                        style={satoshiFont.satoshiMedium}
                                         cursorColor={'#8B5CF6'}
                                         placeholder='0.00'
                                         keyboardType='numeric'
@@ -246,7 +301,7 @@ export default function NewAccountScreen() {
                             />
                             {errors.balance && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.balance.message}
@@ -254,11 +309,8 @@ export default function NewAccountScreen() {
                             )}
                         </View>
                     </View>
-                    {/* <View className='flex flex-col space-y-1'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-gray-600'
-                        >
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Currency
                         </Text>
                         <View>
@@ -276,16 +328,22 @@ export default function NewAccountScreen() {
                                                     acc[curr.code] = {
                                                         label: curr.name,
                                                         value: curr.code,
+                                                        searchField: `${curr.code} ${curr.name} ${curr.country}`,
                                                     };
                                                     return acc;
                                                 },
                                                 {} as Record<
                                                     string,
-                                                    { label: string; value: string }
+                                                    {
+                                                        label: string;
+                                                        value: string;
+                                                        searchField: string;
+                                                    }
                                                 >,
                                             )}
                                             customSnapPoints={['80%', '90%']}
                                             renderItem={renderCurrencies}
+                                            renderSelectedItem={renderSelectedCurrency}
                                             value={value}
                                             onChange={onChange}
                                         />
@@ -295,14 +353,14 @@ export default function NewAccountScreen() {
                             />
                             {errors.currency && (
                                 <Text
-                                    style={GLOBAL_STYLESHEET.satoshiMedium}
+                                    style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
                                     {errors.currency.message}
                                 </Text>
                             )}
                         </View>
-                    </View> */}
+                    </View>
                 </ScrollView>
 
                 <TouchableOpacity
@@ -318,7 +376,7 @@ export default function NewAccountScreen() {
                             <ActivityIndicator size={15} color='#fff' />
                         ) : (
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                style={satoshiFont.satoshiBlack}
                                 className='text-white text-center'
                             >
                                 Create Account

@@ -118,3 +118,17 @@ export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Tra
         return service.create(transactionInformation as CreateTransaction);
     });
 }
+
+export function useUpdateTransaction(): UseMutationResult<
+    GenericAPIResponse<Transaction>,
+    Error,
+    { id: string; data: CreateTransaction }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['update-transaction'], async ({ id, data }) => {
+        const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.update(id, data);
+    });
+}

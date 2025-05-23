@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, TextInputProps } from 'react-native';
 import { InputField, View } from '../../styled';
-import { EyeCloseIcon, EyeOpenIcon } from '@/components/SVG/noscale';
-import { useEffect, useState } from 'react';
+import React from 'react';
 
 type AsyncInputProps = TextInputProps & {
     isLoading: boolean;
