@@ -5,6 +5,7 @@ import { ChevronRightIcon } from '@/components/SVG/16x16';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
@@ -26,7 +27,7 @@ export default function PlanHistoryList() {
     const renderEmptylist = useCallback(
         () => (
             <View
-                className='mb-20 mt-10'
+                className='my-5'
                 style={{
                     // had to use this hack because for some reason it
                     // wasn't filling the screen width
@@ -42,7 +43,7 @@ export default function PlanHistoryList() {
     return (
         <View className='flex flex-col space-y-1 mt-5'>
             <View className='flex flex-row w-full justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
+                <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
                     My plans
                 </Text>
 
@@ -51,7 +52,7 @@ export default function PlanHistoryList() {
                     onPress={handleNavigation}
                 >
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        style={satoshiFont.satoshiBold}
                         className='text-sm tracking-tight text-purple-700'
                     >
                         View All
@@ -69,7 +70,6 @@ export default function PlanHistoryList() {
                 ListEmptyComponent={renderEmptylist}
                 contentContainerStyle={{
                     paddingHorizontal: 20,
-                    paddingVertical: 10,
                 }}
             />
         </View>

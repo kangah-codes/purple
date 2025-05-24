@@ -9,20 +9,20 @@ const migrations: Migration[] = [
         sql: `
           PRAGMA journal_mode = WAL;
       		CREATE TABLE IF NOT EXISTS accounts (
-     			id TEXT NOT NULL,
-     			created_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-     			updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-     			deleted_at TEXT,
-          created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          deleted_at_unix INTEGER,
-     			user_id TEXT,
-     			category TEXT NOT NULL,
-     			name TEXT NOT NULL,
-     			balance NUMERIC NOT NULL,
-     			is_default_account BOOLEAN DEFAULT 0,
-     			currency TEXT,
-     			PRIMARY KEY (id)
+       			id TEXT NOT NULL,
+       			created_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+       			updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+       			deleted_at TEXT,
+            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            deleted_at_unix INTEGER,
+       			user_id TEXT,
+       			category TEXT NOT NULL,
+       			name TEXT NOT NULL,
+       			balance NUMERIC NOT NULL,
+       			is_default_account BOOLEAN DEFAULT 0,
+       			currency TEXT,
+       			PRIMARY KEY (id)
       		);
       		CREATE INDEX IF NOT EXISTS idx_accounts_deleted_at ON accounts(deleted_at);`,
     },
@@ -31,27 +31,27 @@ const migrations: Migration[] = [
         sql: `
           PRAGMA journal_mode = WAL;
       		CREATE TABLE IF NOT EXISTS plans (
-     			id TEXT NOT NULL,
-     			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-     			updated_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-     			deleted_at TEXT,
-          created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          deleted_at_unix INTEGER,
-     			user_id TEXT,
-     			type TEXT NOT NULL,
-     			category TEXT NOT NULL,
-     			target NUMERIC NOT NULL,
-     			balance NUMERIC NOT NULL,
-     			account_id TEXT,
-     			start_date TEXT,
-     			end_date TEXT,
-     			deposit_frequency TEXT NOT NULL,
-     			push_notification BOOLEAN,
-     			name TEXT,
-     			currency TEXT NOT NULL,
-     			debit_account_id TEXT,
-     			PRIMARY KEY (id)
+       			id TEXT NOT NULL,
+       			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+       			updated_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+       			deleted_at TEXT,
+            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            deleted_at_unix INTEGER,
+       			user_id TEXT,
+       			type TEXT NOT NULL,
+       			category TEXT NOT NULL,
+       			target NUMERIC NOT NULL,
+       			balance NUMERIC NOT NULL,
+       			account_id TEXT,
+       			start_date TEXT,
+       			end_date TEXT,
+       			deposit_frequency TEXT NOT NULL,
+       			push_notification BOOLEAN,
+       			name TEXT,
+       			currency TEXT NOT NULL,
+       			debit_account_id TEXT,
+       			PRIMARY KEY (id)
       		);
       		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,
     },
@@ -86,8 +86,8 @@ const migrations: Migration[] = [
         sql: `
           PRAGMA journal_mode = WAL;
           CREATE TABLE IF NOT EXISTS settings (
-              key TEXT PRIMARY KEY NOT NULL,
-              value TEXT NOT NULL
+            key TEXT PRIMARY KEY NOT NULL,
+            value TEXT NOT NULL
           );
 
           CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);`,

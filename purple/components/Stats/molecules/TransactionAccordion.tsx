@@ -5,7 +5,8 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import { Animated } from 'react-native';
 import TransactionCard from './TransactionCard';
 
 type TransactionsAccordionProps = {
@@ -14,12 +15,14 @@ type TransactionsAccordionProps = {
 };
 
 export default function TransactionsAccordion({ transactions, title }: TransactionsAccordionProps) {
+    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const hasDataRef = useRef(transactions.length > 0);
+
     const groupedTransactionData = useMemo(() => {
         const transactionsWithFormattedDate = transactions.map((transaction) => ({
             ...transaction,
             created_at_formatted: formatDate(transaction.created_at, 'dd/MM/yy'),
         }));
-
         return Object.entries(groupBy(transactionsWithFormattedDate, 'created_at_formatted'))
             .map(([key, value]) => {
                 const [category, currency] = key.split('_');
@@ -33,6 +36,25 @@ export default function TransactionsAccordion({ transactions, title }: Transacti
             .filter((item) => item.transactions && item.transactions.length > 0);
     }, [transactions]);
 
+    const hasData = groupedTransactionData.length > 0;
+
+    useEffect(() => {
+        if (hasData !== hasDataRef.current) {
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 150,
+                useNativeDriver: true,
+            }).start(() => {
+                hasDataRef.current = hasData;
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 150,
+                    useNativeDriver: true,
+                }).start();
+            });
+        }
+    }, [hasData, fadeAnim]);
+
     const renderItem = React.useCallback(
         ({
             item,
@@ -41,6 +63,7 @@ export default function TransactionsAccordion({ transactions, title }: Transacti
         }) => <TransactionCard groupName={item.groupName} transactions={item.transactions} />,
         [],
     );
+
     const renderEmptylist = useCallback(
         () => (
             <View className='my-20'>
@@ -55,17 +78,19 @@ export default function TransactionsAccordion({ transactions, title }: Transacti
             <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                 {title ?? 'My transactions'}
             </Text>
-            <FlashList
-                estimatedItemSize={300}
-                data={groupedTransactionData}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 300 }}
-                showsVerticalScrollIndicator={false}
-                ListEmptyComponent={renderEmptylist}
-                onEndReachedThreshold={0.5}
-                scrollEnabled={false}
-            />
+            <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+                <FlashList
+                    estimatedItemSize={300}
+                    data={groupedTransactionData}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={{ paddingBottom: 300 }}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={renderEmptylist}
+                    onEndReachedThreshold={0.5}
+                    scrollEnabled={false}
+                />
+            </Animated.View>
         </View>
     );
 }

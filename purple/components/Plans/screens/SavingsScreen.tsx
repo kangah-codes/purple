@@ -1,21 +1,25 @@
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
+import { useFocusEffect } from 'expo-router';
 import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import { useFocusEffect } from 'expo-router';
+import { usePreferences } from '@/components/Settings/hooks';
 
 function SavingsScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
+    const {
+        preferences: { hideCompletedPlans },
+    } = usePreferences();
     const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
         useInfinitePlans({
             requestQuery: {
                 type: 'saving',
                 page_size: 10,
+                is_completed: hideCompletedPlans ? false : undefined,
             },
             options: {
                 onError: () => {

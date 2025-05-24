@@ -12,11 +12,9 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
-import tw from 'twrnc';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
-import { useInfinitePlans } from '../hooks';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 const { width: screenWidth } = Dimensions.get('window');
 const linearGradientColours = ['#c084fc', '#9333ea'];
@@ -70,10 +68,7 @@ export default function PlansScreen() {
                                     onPress={() => setIndex(i)}
                                     className='w-full flex items-center justify-center px-5 py-2.5 rounded-full'
                                 >
-                                    <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBlack}
-                                        className='text-base'
-                                    >
+                                    <Text style={satoshiFont.satoshiBlack} className='text-base'>
                                         {route.title}
                                     </Text>
                                 </TouchableOpacity>
@@ -96,7 +91,7 @@ export default function PlansScreen() {
             <View style={styles.parentView} className='bg-white space-y-5 flex-1 flex flex-col'>
                 <View className='flex px-5 flex-row justify-between items-center pt-2.5'>
                     <View className='flex flex-col'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                             My Plans
                         </Text>
                     </View>

@@ -1,5 +1,5 @@
 import { SettingsCogIcon } from '@/components/SVG/24x24';
-import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
+import { AlertHexagonIcon, PiggyBankIcon, SafeIcon } from '@/components/SVG/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { View } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
@@ -70,6 +70,12 @@ export default function ProfilePages() {
             title: 'Accounts',
             link: '/settings/account-settings',
             description: 'Manage account settings',
+        },
+        {
+            icon: <PiggyBankIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Plans',
+            link: '/settings/plan-settings',
+            description: 'Manage plan settings',
         },
         {
             icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,

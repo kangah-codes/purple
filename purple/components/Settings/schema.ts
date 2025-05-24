@@ -42,4 +42,5 @@ export type UserPreferences = {
     customTransactionTypes: CustomTransactionType[];
     allowOverdraw: boolean;
     pinnedAccount: string;
+    hideCompletedPlans: boolean;
 };

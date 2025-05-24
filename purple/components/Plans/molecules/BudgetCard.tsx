@@ -8,6 +8,8 @@ import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Plan } from '../schema';
 import { calculateRemainingForCurrentPeriod } from '../utils';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { CheckCircleIcon } from '@/components/SVG/noscale';
 
 const now = new Date();
 
@@ -60,13 +62,13 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 className='p-4 rounded-3xl flex flex-col w-full bg-purple-50'
                 style={styles.planCard}
             >
-                <View className='flex flex-col space-y-0.5 w-full'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-black'>
+                <View className='flex flex-col space-y-0.5'>
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-black'>
                         {data.category}
                     </Text>
                     <Text
                         style={[
-                            GLOBAL_STYLESHEET.satoshiBold,
+                            satoshiFont.satoshiBold,
                             {
                                 color: daysLeft < 0 ? '#fb2c36' : '#ad46ff',
                             },
@@ -79,20 +81,22 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 </View>
 
                 <View className='flex flex-col w-full mt-7'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-black'>
-                        {amountSpent.toFixed(0)}% {type === 'expense' ? 'spent' : 'saved'}
+                    <Text style={[satoshiFont.satoshiBold]} className='text-xs'>
+                        {Number(amountSpent.toFixed(0)) >= 100
+                            ? `${isExpense ? 'Budget limit' : 'Target'} reached ${!isExpense && '🎉'}`
+                            : `${amountSpent.toFixed(0)}%} ${isExpense ? 'spent' : 'saved'}`}
                     </Text>
                     <View className='flex flex-row text-black'>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm mt-0.5'>
+                        <Text style={satoshiFont.satoshiBold} className='text-sm mt-0.5'>
                             {currencies.find((cur) => cur.code === data.currency)?.symbol}
                         </Text>
-                        <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-2xl'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-2xl'>
                             {formatNumberRounded(balance)}
                         </Text>
                     </View>
                     <Text
                         style={[
-                            GLOBAL_STYLESHEET.satoshiBold,
+                            satoshiFont.satoshiBold,
                             {
                                 color:
                                     (daysLeft < 0 || isOverPeriodAmount) && type == 'expense'
