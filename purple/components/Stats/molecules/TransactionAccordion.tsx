@@ -12,9 +12,16 @@ import TransactionCard from './TransactionCard';
 type TransactionsAccordionProps = {
     transactions: Transaction[];
     title?: string;
+    onEndReached?: () => void;
+    showTitle?: boolean;
 };
 
-export default function TransactionsAccordion({ transactions, title }: TransactionsAccordionProps) {
+export default function TransactionsAccordion({
+    transactions,
+    title,
+    onEndReached,
+    showTitle = true,
+}: TransactionsAccordionProps) {
     const fadeAnim = useRef(new Animated.Value(1)).current;
     const hasDataRef = useRef(transactions.length > 0);
 
@@ -74,10 +81,16 @@ export default function TransactionsAccordion({ transactions, title }: Transacti
     );
 
     return (
-        <View style={{ flex: 1 }} className='px-5 flex flex-col space-y-2.5 mt-5'>
-            <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
-                {title ?? 'My transactions'}
-            </Text>
+        <View
+            style={{ flex: 1, marginTop: showTitle ? 20 : 0 }}
+            className='px-5 flex flex-col space-y-2.5'
+        >
+            {showTitle && (
+                <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                    {title ?? 'My transactions'}
+                </Text>
+            )}
+
             <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
                 <FlashList
                     estimatedItemSize={300}
@@ -88,6 +101,7 @@ export default function TransactionsAccordion({ transactions, title }: Transacti
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={renderEmptylist}
                     onEndReachedThreshold={0.5}
+                    onEndReached={onEndReached}
                     scrollEnabled={false}
                 />
             </Animated.View>

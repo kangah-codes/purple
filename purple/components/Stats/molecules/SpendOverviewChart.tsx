@@ -27,7 +27,7 @@ export default function SpendOverviewChart({ transactions }: SpendOverviewChartP
     return (
         <View className='pt-5 flex flex-col space-y-2.5 px-5 mb-5'>
             <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
-                Spend Overview
+                Spend By Week
             </Text>
             <View className='mb-5'>
                 <BarChart

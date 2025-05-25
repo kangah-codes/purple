@@ -1,6 +1,4 @@
 import { PlusIcon } from '@/components/SVG/24x24';
-import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
     LinearGradient,
     SafeAreaView,
@@ -8,41 +6,34 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
-import { keyExtractor } from '@/lib/utils/number';
-import { FlashList } from '@shopify/flash-list';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactionStore } from '../hooks';
-import TransactionHistoryCard from '../molecules/TransactionHistoryCard';
-import { Transaction } from '../schema';
 
 function TransactionsScreen() {
-    const { accountID } = useLocalSearchParams();
-    const { transactions, setCurrentTransaction, setTransactions } = useTransactionStore();
-    const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { data, fetchNextPage, hasNextPage, isError, refetch, isFetching } =
-        useInfiniteTransactions({
-            requestQuery: {
-                accountID,
-                page_size: 10,
+    const { transactions, setTransactions } = useTransactionStore();
+    const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteTransactions({
+        requestQuery: {
+            page_size: 10,
+        },
+        options: {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your transactions",
+                    },
+                });
             },
-            options: {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: "We couldn't fetch your transactions",
-                        },
-                    });
-                },
-            },
-        });
+        },
+    });
 
     // reresh page on focus
     useRefreshOnFocus(refetch);
@@ -61,71 +52,18 @@ function TransactionsScreen() {
         }
     };
 
-    if (isError) {
-        Toast.show({
-            type: 'error',
-            props: {
-                text1: 'Error!',
-                text2: "We couldn't fetch your transactions",
-            },
-        });
-    }
-
-    const renderItem = useCallback(
-        ({ item }: { item: Transaction }) => (
-            <TransactionHistoryCard
-                data={item}
-                onPress={() => {
-                    setCurrentTransaction(item);
-                    setShowBottomSheetModal('transactionReceipt', true);
-                }}
-            />
-        ),
-        [],
-    );
-    const renderEmptylist = useCallback(
-        () => (
-            <View className='my-20'>
-                <EmptyList message="Looks like you haven't created any transactions plans yet." />
-            </View>
-        ),
-        [],
-    );
-    const renderItemSeparator = useCallback(
-        () => <View className='border-b border-purple-100' />,
-        [],
-    );
-
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
+                <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                     My Transactions
                 </Text>
-
-                {accountID && (
-                    // no idea why this is even here
-                    <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-purple-600'>
-                            Back
-                        </Text>
-                    </TouchableOpacity>
-                )}
             </View>
-            <FlashList
-                estimatedItemSize={100}
-                data={transactions}
-                keyExtractor={keyExtractor}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={true}
-                renderItem={renderItem}
-                ItemSeparatorComponent={renderItemSeparator}
-                onRefresh={refetch}
-                refreshing={isFetching}
-                ListEmptyComponent={renderEmptylist}
+            <TransactionsAccordion
+                showTitle={false}
+                transactions={transactions}
                 onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
             />
             <LinearGradient
                 className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'

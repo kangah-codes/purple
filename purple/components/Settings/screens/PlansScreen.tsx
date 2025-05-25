@@ -48,12 +48,16 @@ export default function PlansScreen() {
             description: 'Hide plans from the main plans screen once they have been completed',
             customItem: <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
         },
-        {
-            icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
-            title: 'Completed Plans',
-            description: 'View plans which have been completed and hidden',
-            link: '/settings/hidden-plans',
-        },
+        ...(hideCompletedPlans
+            ? [
+                  {
+                      icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
+                      title: 'Completed Plans',
+                      description: 'View plans which have been completed and hidden',
+                      link: '/settings/hidden-plans',
+                  },
+              ]
+            : []),
     ];
 
     return (

@@ -1,14 +1,13 @@
 import { SearchIcon } from '@/components/SVG/noscale';
+import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import { InputField, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { InputField, View } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
+import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
-import { Image } from 'expo-image';
-import { satoshiFont } from '@/lib/constants/fonts';
-import Checkbox from '@/components/Shared/atoms/Checkbox';
 
 export default function SelectCurrency() {
     const [searchValue, setSearchValue] = useState<string>('');
@@ -19,54 +18,17 @@ export default function SelectCurrency() {
             const settingCurrency = currencies.find(
                 (cur) => cur.code === item.code,
             ) as (typeof currencies)[number];
-            const country = settingCurrency.locale.split('-')[1];
-            const isChecked = preferences.currency === item.code;
 
             return (
-                <TouchableOpacity
-                    onPress={() => {
+                <CurrencySelect
+                    currency={settingCurrency}
+                    callback={() => {
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
                         setSearchValue('');
                     }}
-                    className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center justify-between'
-                >
-                    <View className='flex flex-row space-x-2'>
-                        <View className='w-[40] h-[40] flex items-center justify-center'>
-                            <Image
-                                style={{
-                                    width: 37,
-                                    height: 37,
-                                    borderRadius: 40,
-                                }}
-                                source={{
-                                    uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
-                                }}
-                                contentFit='cover'
-                                transition={500}
-                            />
-                        </View>
-                        <View className='flex flex-col'>
-                            <Text style={satoshiFont.satoshiBold} className='text-base'>
-                                {/* {item.emojiFlag}  */}
-                                {item.name} ({item.symbol})
-                            </Text>
-                            <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-500'>
-                                {/* {item.emojiFlag}  */}
-                                {item.country}
-                            </Text>
-                        </View>
-                    </View>
-
-                    <Checkbox
-                        checked={isChecked}
-                        onChange={() => {
-                            setPreference('currency', item.code);
-                            setShowBottomSheetFlatList('preferences-currency', false);
-                            setSearchValue('');
-                        }}
-                    />
-                </TouchableOpacity>
+                    selectedCurrency={preferences.currency}
+                />
             );
         },
         [preferences, currencies],

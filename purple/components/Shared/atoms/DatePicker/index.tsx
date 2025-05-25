@@ -1,15 +1,14 @@
 import { CalendarIcon } from '@/components/SVG/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
 import DateTimePicker, {
     DateTimePickerAndroid,
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import React from 'react';
 
 const snapPoints = ['35%', '35%'];
 
@@ -31,12 +30,47 @@ export default function DatePicker({
     value,
 }: DatePickerProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
+    const [selectedDate, setSelectedDate] = useState<Date>(value);
 
     const onDateChange = (_event: DateTimePickerEvent, selectedDate: Date | undefined) => {
-        const currentDate = selectedDate;
+        if (!selectedDate) return;
 
-        // call the callback function if it exists
-        if (currentDate && typeof onChange === 'function') onChange(currentDate);
+        setSelectedDate(selectedDate);
+        if (Platform.OS === 'android') {
+            DateTimePickerAndroid.open({
+                value: selectedDate,
+                onChange: onTimeChange,
+                mode: 'time',
+            });
+        }
+    };
+
+    const onTimeChange = (_event: DateTimePickerEvent, selectedTime: Date | undefined) => {
+        if (!selectedTime) return;
+
+        const combinedDateTime = new Date(selectedDate);
+        combinedDateTime.setHours(selectedTime.getHours());
+        combinedDateTime.setMinutes(selectedTime.getMinutes());
+        combinedDateTime.setSeconds(selectedTime.getSeconds());
+
+        if (typeof onChange === 'function') {
+            onChange(combinedDateTime);
+        }
+    };
+
+    const onIOSDateTimeChange = (
+        _event: DateTimePickerEvent,
+        selectedDateTime: Date | undefined,
+    ) => {
+        if (!selectedDateTime) return;
+
+        if (typeof onChange === 'function') {
+            onChange(selectedDateTime);
+        }
+    };
+
+    const formatDateTime = (date: Date) => {
+        return `${date.toDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     };
 
     return (
@@ -56,7 +90,7 @@ export default function DatePicker({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        style={satoshiFont.satoshiBold}
                                         className='text-base text-gray-900'
                                     >
                                         {label}
@@ -66,9 +100,8 @@ export default function DatePicker({
                             <DateTimePicker
                                 testID='dateTimePicker'
                                 value={value}
-                                mode={'date'}
-                                is24Hour={true}
-                                onChange={onDateChange}
+                                mode={'datetime'}
+                                onChange={onIOSDateTimeChange}
                                 display='spinner'
                                 minimumDate={minimumDate}
                                 maximumDate={maximumDate}
@@ -79,7 +112,7 @@ export default function DatePicker({
             }
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -88,7 +121,6 @@ export default function DatePicker({
                         if (Platform.OS === 'ios') {
                             setShowBottomSheetModal(pickerKey, true);
                         } else {
-                            // use imperative api for android since it's better
                             DateTimePickerAndroid.open({
                                 value,
                                 onChange: onDateChange,
@@ -105,8 +137,8 @@ export default function DatePicker({
                         <CalendarIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
-                        {value.toDateString()}
+                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
+                        {formatDateTime(value)}
                     </Text>
                 </TouchableOpacity>
             </View>

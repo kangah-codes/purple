@@ -52,10 +52,8 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         const resetAndStartProgressAnimation = React.useCallback(() => {
             if (disableAutomaticScroll) return;
 
-            // Reset progress value immediately
             progressAnimation.setValue(0);
 
-            // Start the animation
             Animated.timing(progressAnimation, {
                 toValue: 1,
                 duration: timePerPage,
@@ -72,19 +70,15 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                 if (isAnimating.current) return;
                 isAnimating.current = true;
 
-                // Stop any ongoing animations
                 progressAnimation.stopAnimation();
-                // Reset progress to 0 immediately to prevent the glitch
                 progressAnimation.setValue(0);
 
                 setPreviousIndex(currentIndex);
                 setCurrentIndex(newIndex);
 
-                // Reset fade animations
                 fadeOutAnimation.setValue(1);
                 fadeInAnimation.setValue(0);
 
-                // Sequence: fade out old page, then fade in new page
                 Animated.sequence([
                     Animated.timing(fadeOutAnimation, {
                         toValue: 0,
@@ -92,7 +86,8 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                         useNativeDriver: true,
                     }),
                     Animated.timing(fadeInAnimation, {
-                        toValue: 1,
+                        toValue: 1, // Only start progress animation after fade transition is complete
+
                         duration: 150,
                         useNativeDriver: true,
                     }),
@@ -101,7 +96,6 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                     isAnimating.current = false;
                     onPageChange(newIndex);
 
-                    // Only start progress animation after fade transition is complete
                     if (autoPlay && !isPaused) {
                         resetAndStartProgressAnimation();
                     }

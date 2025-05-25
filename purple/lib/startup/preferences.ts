@@ -9,6 +9,7 @@ export async function initializePreferences(db: SQLiteDatabase) {
             currency: 'GHS',
             theme: 'light',
             allowOverdraw: false,
+            hideCompletedPlans: true,
         });
 
         const [transactionTypes, allowOverdraw] = await Promise.all([
