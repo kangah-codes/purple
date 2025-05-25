@@ -2,6 +2,7 @@ import { PlusIcon } from '@/components/SVG/24x24';
 import {
     LinearGradient,
     SafeAreaView,
+    ScrollView,
     Text,
     TouchableOpacity,
     View,
@@ -60,11 +61,13 @@ function TransactionsScreen() {
                     My Transactions
                 </Text>
             </View>
-            <TransactionsAccordion
-                showTitle={false}
-                transactions={transactions}
-                onEndReached={handleLoadMore}
-            />
+            <ScrollView>
+                <TransactionsAccordion
+                    showTitle={false}
+                    transactions={transactions}
+                    onEndReached={handleLoadMore}
+                />
+            </ScrollView>
             <LinearGradient
                 className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
                 colors={['#c084fc', '#9333ea']}
