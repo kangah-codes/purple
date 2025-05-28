@@ -17,7 +17,7 @@ import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
 
-export default function AccountsScreen() {
+export default function PrivacyScreen() {
     const {
         preferences: { allowOverdraw },
         setPreference,
@@ -45,15 +45,15 @@ export default function AccountsScreen() {
     const settingsItems: SettingsListItem[] = [
         {
             icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Allow Overdraw',
-            description: 'Enable overspending by allowing the account balance to drop below zero',
+            title: 'Usage Statistics',
+            description: 'Allow Purple to track app metrics, to make the app better',
             customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
         {
-            icon: <PinIcon width={20} height={20} stroke='#9333ea' />,
-            title: 'Pinned Account',
-            description: 'Choose an account to always show first on the home screen',
-            callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
+            icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Send diagnostic data',
+            description: 'Send diagnostic data and crash reports',
+            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
     ];
 
@@ -73,7 +73,7 @@ export default function AccountsScreen() {
 
                 <View className='absolute left-0 right-0 items-center'>
                     <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                        Account Settings
+                        Privacy & Security
                     </Text>
                 </View>
             </View>

@@ -1,5 +1,5 @@
 import { SettingsCogIcon } from '@/components/SVG/24x24';
-import { AlertHexagonIcon, SafeIcon } from '@/components/SVG/noscale';
+import { AlertHexagonIcon, ClosedLockIcon, SafeIcon } from '@/components/SVG/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { View } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
@@ -78,6 +78,12 @@ export default function ProfilePages() {
             description: 'Manage transaction categories',
         },
         {
+            icon: <ClosedLockIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Privacy & Security',
+            link: '/settings/privacy-settings',
+            description: 'Manage privacy & security settings',
+        },
+        {
             icon: <AlertHexagonIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Report a bug',
             callback: () => WebBrowser.openBrowserAsync('https://purpleapp.featurebase.app/'),
@@ -104,5 +110,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingBottom: 100,
     },
 });
