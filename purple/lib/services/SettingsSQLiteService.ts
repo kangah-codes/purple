@@ -10,7 +10,10 @@ export class SettingsSQLiteService {
     }
 
     async ensureDefaults(
-        preferences: Pick<UserPreferences, 'currency' | 'theme' | 'allowOverdraw'>,
+        preferences: Pick<
+            UserPreferences,
+            'currency' | 'theme' | 'allowOverdraw' | 'hideCompletedPlans'
+        >,
     ): Promise<void> {
         await this.db.withTransactionAsync(async () => {
             await Promise.all([
@@ -25,6 +28,10 @@ export class SettingsSQLiteService {
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('allowOverdraw', ?)`,
                     [JSON.stringify(preferences.allowOverdraw ?? false)],
+                ),
+                this.db.runAsync(
+                    `INSERT OR IGNORE INTO settings (key, value) VALUES ('hideCompletedPlans', ?)`,
+                    [JSON.stringify(preferences.allowOverdraw ?? true)],
                 ),
             ]);
         });

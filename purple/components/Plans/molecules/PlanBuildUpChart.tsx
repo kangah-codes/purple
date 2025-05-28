@@ -1,20 +1,27 @@
 import { Text, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 import { usePlanStore } from '../hooks';
 import { generateSpendingTrendData } from '../utils';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 export default function PlanBuildUpChart() {
     const { currentPlan } = usePlanStore();
 
-    const chartData = useMemo(() => {
+    const { chartData, maxValue } = useMemo(() => {
         if (!currentPlan) {
-            return { projected: [], actual: [], ideal: [] };
+            return { chartData: { projected: [], actual: [], ideal: [] }, maxValue: 0 };
         }
 
-        return generateSpendingTrendData(currentPlan, 30, 5);
+        const chartData = generateSpendingTrendData(currentPlan, 30, 5);
+        const allValues = [
+            ...chartData.actual.map((item) => item.value),
+            ...chartData.ideal.map((item) => item.value),
+        ];
+        const maxValue = Math.max(...allValues, 0);
+
+        return { chartData, maxValue };
     }, [currentPlan?.transactions]);
 
     if (!currentPlan) return null;
@@ -22,10 +29,8 @@ export default function PlanBuildUpChart() {
     return (
         <View className='pt-10 w-full pl-2 flex flex-col'>
             <LineChart
-                // width={200}
                 height={220}
                 rotateLabel
-                // spacing={25}
                 areaChart
                 curved
                 curvature={0.25}
@@ -33,8 +38,6 @@ export default function PlanBuildUpChart() {
                 color2='#15803D'
                 data={chartData.ideal}
                 data2={chartData.actual}
-                // hideRules
-                // hideYAxisText
                 yAxisTextStyle={{
                     fontSize: 12,
                     fontFamily: 'SatoshiBlack',
@@ -47,11 +50,8 @@ export default function PlanBuildUpChart() {
                     alignSelf: 'flex-end',
                     marginTop: -44,
                 }}
-                // hide the line on the x axis
-                // hideAxesAndRules
                 spacing={9.8}
                 noOfSections={5}
-                // yAxisLabelPrefix='GHS '
                 yAxisLabelWidth={70}
                 startFillColor1='#A855F7'
                 startFillColor2='#10B981'
@@ -60,32 +60,18 @@ export default function PlanBuildUpChart() {
                 endFillColor1='#FAF5FF'
                 endOpacity={0.3}
                 endSpacing={10}
-                // maxValue={900}
+                maxValue={maxValue * 1.1} // Add 10% padding
                 hideDataPoints
                 yAxisColor='#C026D3'
                 xAxisColor='#C026D3'
-                // hideYAxisText
-                // yAxisThickness={0}
-                // rulesType="solid"
-                // rulesColor="#F3E8FF"
-                // yAxisTextStyle={{ color: "gray" }}
-                // yAxisSide="right"
-                // xAxisColor="lightgray"
                 disableScroll
                 hideRules
-                // hideYAxisText
-                // hide the line on the x axis
-                // hideAxesAndRules
-                // isAnimated
                 animateOnDataChange
                 animationDuration={1200}
                 initialSpacing={0}
                 adjustToWidth
-                // spacing={30}
                 thickness={2.5}
                 labelsExtraHeight={50}
-                // labelWidth={100}
-                // showValuesAsTopLabel
                 xAxisLabelsVerticalShift={20}
                 formatYLabel={(value) => formatCurrencyRounded(Number(value), currentPlan.currency)}
             />
@@ -93,13 +79,13 @@ export default function PlanBuildUpChart() {
             <View className='flex flex-row justify-between items-center -mt-2.5 px-5 mx-auto space-x-2'>
                 <View className='flex flex-row space-x-1 items-center'>
                     <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#10B981' }} />
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-xs'>
+                    <Text style={satoshiFont.satoshiBold} className='text-black text-xs'>
                         Actual {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
                     </Text>
                 </View>
                 <View className='flex flex-row space-x-1 items-center'>
                     <View className='rounded-full w-2 h-2' style={{ backgroundColor: '#A855F7' }} />
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-xs'>
+                    <Text style={satoshiFont.satoshiBold} className='text-black text-xs'>
                         Optimal {currentPlan.type == 'expense' ? 'Spending' : 'Saving'}
                     </Text>
                 </View>

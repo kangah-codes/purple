@@ -1,5 +1,5 @@
 import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { PinIcon, ScaleIcon } from '@/components/SVG/noscale';
+import { CoinsStackedIcon, EyeCloseIcon, PinIcon, ScaleIcon } from '@/components/SVG/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
@@ -17,19 +17,19 @@ import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
 
-export default function AccountsScreen() {
+export default function PlansScreen() {
     const {
-        preferences: { allowOverdraw },
+        preferences: { hideCompletedPlans },
         setPreference,
     } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
 
-    const handleOverdrawChange = async (value: boolean) => {
+    const handleToggle = async (value: boolean) => {
         try {
-            await settingsService.set('allowOverdraw', value);
-            setPreference('allowOverdraw', value);
+            await settingsService.set('hideCompletedPlans', value);
+            setPreference('hideCompletedPlans', value);
         } catch (error) {
             Toast.show({
                 type: 'error',
@@ -43,17 +43,21 @@ export default function AccountsScreen() {
 
     const settingsItems: SettingsListItem[] = [
         {
-            icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Allow Overdraw',
-            description: 'Enable overspending by allowing the account balance to drop below zero',
-            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
+            icon: <EyeCloseIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Hide completed plans',
+            description: 'Hide plans from the main plans screen once they have been completed',
+            customItem: <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
         },
-        {
-            icon: <PinIcon width={20} height={20} stroke='#9333ea' />,
-            title: 'Pinned Account',
-            description: 'Choose an account to always show first on the home screen',
-            callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
-        },
+        ...(hideCompletedPlans
+            ? [
+                  {
+                      icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
+                      title: 'Completed Plans',
+                      description: 'View plans which have been completed and hidden',
+                      link: '/settings/hidden-plans',
+                  },
+              ]
+            : []),
     ];
 
     return (
@@ -72,10 +76,11 @@ export default function AccountsScreen() {
 
                 <View className='absolute left-0 right-0 items-center'>
                     <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                        Account Settings
+                        Plan Settings
                     </Text>
                 </View>
             </View>
+
             <View className='mt-5'>
                 <SettingsList items={settingsItems} />
             </View>

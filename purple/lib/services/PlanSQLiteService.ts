@@ -1,12 +1,11 @@
-import { BaseSQLiteService } from './SQLiteService';
-import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
-import HTTPError from '../utils/error';
-import { type SQLiteDatabase } from 'expo-sqlite';
-import { UUID, groupBy } from '../utils/helpers';
+import { Account } from '@/components/Accounts/schema';
 import { CreatePlan, CreatePlanTransaction, Plan } from '@/components/Plans/schema';
 import { Transaction } from '@/components/Transactions/schema';
-import { format, parse } from 'date-fns';
+import { type SQLiteDatabase } from 'expo-sqlite';
+import HTTPError from '../utils/error';
+import { UUID, groupBy } from '../utils/helpers';
+import { BaseSQLiteService } from './SQLiteService';
 
 export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     constructor(db: SQLiteDatabase) {
@@ -68,6 +67,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         } else {
             planEmoji = '📉';
         }
+
         const account = await this.db.getFirstAsync<Account>(
             `SELECT * from accounts where deleted_at IS NULL AND id = ?`,
             [data.debit_account_id],
@@ -111,13 +111,24 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
                 data.debit_account_id,
             ]);
 
-            await this.db.runAsync('UPDATE plans SET balance = ? where id = ?', [
-                plan.balance + data.amount,
+            const newPlanBalance = plan.balance + data.amount;
+
+            // Update the plan's balance
+            await this.db.runAsync('UPDATE plans SET balance = ? WHERE id = ?', [
+                newPlanBalance,
                 plan.id,
             ]);
 
+            // Check if the plan is now completed
+            if (!plan.is_completed && newPlanBalance >= plan.target) {
+                await this.db.runAsync(
+                    'UPDATE plans SET is_completed = 1, updated_at = ? WHERE id = ?',
+                    [now, plan.id],
+                );
+            }
+
             const result = await this.db.getFirstAsync<Transaction>(
-                'SELECT * FROM transactions where id = ?',
+                'SELECT * FROM transactions WHERE id = ?',
                 [uuid],
             );
 
@@ -191,7 +202,7 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     }
 
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Plan[]>> {
-        const { page = 1, page_size = 10, type } = query;
+        const { page = 1, page_size = 10, type, is_completed } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 
@@ -199,6 +210,11 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         if (type) {
             whereClause += ' AND p.type = ?';
             params.push(type);
+        }
+
+        if (typeof is_completed === 'boolean') {
+            whereClause += ' AND p.is_completed = ?';
+            params.push(Number(is_completed));
         }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(

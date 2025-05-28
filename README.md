@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./purple/assets/images/icon.png" style="border-radius: 10%; width: 100px">
-    
+
   <p style="font-weight: 900; font-size: 40px">Purple</p>
 </div>
 
@@ -10,8 +10,8 @@ Purple is a budget and expense tracker mobile app I'm currently building for per
 
 ## Directory Structure
 
--   [`purple/`](#purple-react-native-app): Contains the Expo-based React Native app.
--   [`nucleus/`](#nucleus-backend): Contains the Go backend using Gin and GORM with PostgreSQL.
+- [`purple/`](#purple-react-native-app): Contains the Expo-based React Native app.
+- [`nucleus/`](#nucleus-backend): Contains the Go backend using Gin and GORM with PostgreSQL.
 - [`orbit/`](#orbit-frontend): Contains the React frontend for the landing page & future web app.
 
 ## Purple (React Native App)
@@ -31,16 +31,10 @@ For now Purple is going to work exclusively offline, probably going to use sqlit
 Here are a few screenshots of the app so far:
 
 <div style="display: flex; flex-direction: row;">
-<img src="assets/screenshots/Screenshot_20250130-165853.png" style="width: 150px" />
-<img src="assets/screenshots/Screenshot_20250130-165858.png" style="width: 150px" />
-<img src="assets/screenshots/Screenshot_20250130-165902.png" style="width: 150px" />
-<img src="assets/screenshots/Screenshot_20250130-165911.png" style="width: 150px" />
-</div>
-
-<div style="display: flex; flex-direction: row;">
-<img src="assets/screenshots/Screenshot_20250130-170005.png" style="width: 150px" />
-<img src="assets/screenshots/Screenshot_20250130-170017.png" style="width: 150px" />
-<img src="assets/screenshots/Screenshot_20250130-170032.png" style="width: 150px" />
+<img src="assets/screenshots/account_screen.png" style="width: 150px" />
+<img src="assets/screenshots/home_screen.png" style="width: 150px" />
+<img src="assets/screenshots/stats_screen_3.png" style="width: 150px" />
+<img src="assets/screenshots/transaction_modal.png" style="width: 150px" />
 </div>
 
 ### Building the app
@@ -57,22 +51,22 @@ Since this application uses the expo-sdk and is built with React Native, buildin
 
 Right now, Purple is still just a pet project, I'm not entirely sure I have the direction I want to take it in. But I do have a few ideas in mind (in no particular order):
 
--   Adding recurring transactions 🔄
--   Session Recording & Tracking 📹 (Trust me bro it's for analytics only I swear bro 🥺👉👈)
--   Dark Mode 🌚
--   Search functionality 🔍
--   Push Notifications 📬
--   Custom Categories 📊
--   Buget Limits 📉
--   Expense Splitting 🤝
--   Automatic Exchange Rate Conversion / Proper multi-currency support 🌍
--   Reporting 📈 (Cashflow analysis)
--   Iris 🪻
--   Offline Syncing 🔄
--   Calendar Integration 📅
--   Web Version? 🌐
--   Integration with bank/mobile money services for automatic expense tracking 🏦
--   Opt-in encryption (Users can choose to have their sensitive data in the db encrypted)
+[ ]   Adding recurring transactions 🔄
+[ ]   Session Recording & Tracking 📹 (Trust me bro it's for analytics only I swear bro 🥺👉👈)
+[ ]   Dark Mode 🌚
+[ ]   Search functionality 🔍
+[ ]   Push Notifications 📬
+[x]   Custom Categories 📊
+[ ]   Buget Limits 📉
+[ ]   Expense Splitting 🤝
+[ ]   Automatic Exchange Rate Conversion / Proper multi-currency support 🌍
+[ ]   Reporting 📈 (Cashflow analysis)
+[ ]   Iris 🪻
+[x]   Offline Syncing 🔄
+[ ]   Calendar Integration 📅
+[ ]   Web Version? 🌐
+[ ]   Integration with bank/mobile money services for automatic expense tracking 🏦
+[ ]   Opt-in encryption (Users can choose to have their sensitive data in the db encrypted)
 
 ## Nucleus (Go Backend)
 

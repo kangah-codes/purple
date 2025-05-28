@@ -20,11 +20,11 @@ To the maximum extent permitted by law, I am not liable for any damages, losses,
 
 ## 5. User Responsibilities
 
-You agree not to use Purple for any unlawful or harmful activity. You are responsible for the security of your device and login credentials. You also agree not to reverse engineer or tamper with the app.
+You agree not to use Purple for any unlawful or harmful activity. You are responsible for the security of your device. You also agree not to reverse engineer or tamper with the app.
 
 ## 6. Data and Privacy
 
-Purple may collect limited data to help improve the app, such as crash reports or anonymous usage analytics. Please review the [Privacy Policy](#) for details on how your data is handled.
+Purple may collect limited data to help improve the app, such as crash reports or anonymous usage analytics. Please review the [Privacy Policy](/privacy) for details on how your data is handled.
 
 ## 7. Third-Party Services
 
@@ -44,4 +44,4 @@ These Terms shall be governed by and interpreted in accordance with the laws of 
 
 ---
 
-If you have any questions or concerns, please contact me at [your-email@example.com].
+If you have any questions or concerns, please contact me at hello@trypurpleapp.com.

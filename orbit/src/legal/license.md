@@ -40,14 +40,15 @@ Purple also uses third-party assets and dependencies. All trademarks, copyrights
 
 ### Fonts
 - [Satoshi Font](https://www.fontshare.com/fonts/satoshi) — © Indian Type Foundry. Licensed under the [Fontshare License](https://www.fontshare.com/licenses).
-- [Roboto](https://fonts.google.com/specimen/Roboto) — © Google. Licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+### Graphics
+- Visual elements, illustrations, and icons used in the app may include assets sourced from:
+  - [Untitled Icons](https://www.untitledui.com/download/untitled-ui) — © Untitled UI. Used under the Free License for commercial use. License details available on the [Untitled UI License Page](https://www.untitledui.com/license)
+  - [Canva](https://canva.com) - Used under Canva’s [Content License Agreement](https://www.canva.com/policies/content-license-agreement/). Assets are incorporated into the app’s design and may not be extracted or reused outside the app.
 
 ### Dependencies
 - Various open-source libraries provided by the JavaScript, TypeScript, and React Native communities under their respective open-source licenses (MIT, Apache, etc.).
 
 Please refer to each package’s documentation or repository for full license details.
 
-
 ---
-
-If you do not agree to these terms, please do not use Purple.

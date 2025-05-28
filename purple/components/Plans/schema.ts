@@ -37,6 +37,7 @@ export type Plan = {
     name: string;
     currency: string;
     transactions: Transaction[];
+    is_completed: boolean;
 };
 
 export type CreatePlan = {

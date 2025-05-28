@@ -1,5 +1,12 @@
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
+import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
+import SearchableSelectField, {
+    SelectOption,
+} from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import {
     InputField,
     LinearGradient,
@@ -9,9 +16,9 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 import { currencies } from '@/lib/constants/currencies';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -20,21 +27,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
-import { satoshiFont } from '@/lib/constants/fonts';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import SearchableSelectField, {
-    SelectOption,
-} from '@/components/Shared/atoms/SearchableSelectField';
-import { CheckMarkIcon } from '@/components/SVG/noscale';
-import Checkbox from '@/components/Shared/atoms/Checkbox';
-import { Image } from 'expo-image';
-import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
 
 export default function NewAccountScreen() {
     const {
         preferences: { currency },
     } = usePreferences();
     const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { updateAccounts } = useAccountStore();
     const { mutate, isLoading } = useCreateAccount();
     const {
@@ -42,6 +41,7 @@ export default function NewAccountScreen() {
         handleSubmit,
         formState: { errors },
         getValues,
+        setValue,
     } = useForm({
         defaultValues: {
             category: '',
@@ -95,8 +95,9 @@ export default function NewAccountScreen() {
         );
     }, []);
 
-    const renderSelectedCurrency = useCallback((item: SelectOption) => {
-        const currency = currencies.find((currency) => currency.code === item.value);
+    const renderSelectedCurrency = () => {
+        const selectedCode = getValues('currency');
+        const currency = currencies.find((c) => c.code === selectedCode);
         const country = currency?.locale.split('-')[1];
 
         return (
@@ -119,44 +120,21 @@ export default function NewAccountScreen() {
                 </Text>
             </View>
         );
-    }, []);
+    };
 
     const renderCurrencies = useCallback((item: SelectOption) => {
-        const currency = currencies.find((currency) => currency.code === item.value);
-        const country = currency?.locale.split('-')[1];
+        const currency = currencies.find((currency) => currency.code === item.value)!;
         const selectedValue = getValues('currency');
 
         return (
-            <View className='py-3 border-b border-purple-100 flex flex-row space-x-2 items-center justify-between'>
-                <View className='flex flex-row space-x-2'>
-                    <View className='w-[40] h-[40] flex items-center justify-center'>
-                        <Image
-                            style={{
-                                width: 37,
-                                height: 37,
-                                borderRadius: 40,
-                            }}
-                            source={{
-                                uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
-                            }}
-                            contentFit='cover'
-                            transition={1000}
-                        />
-                    </View>
-                    <View className='flex flex-col'>
-                        <Text style={satoshiFont.satoshiBold} className='text-base'>
-                            {/* {item.emojiFlag}  */}
-                            {currency?.name} ({currency?.symbol})
-                        </Text>
-                        <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-500'>
-                            {/* {item.emojiFlag}  */}
-                            {currency?.country}
-                        </Text>
-                    </View>
-                </View>
-
-                <Checkbox checked={selectedValue === currency?.code} onChange={() => {}} />
-            </View>
+            <CurrencySelect
+                currency={currency}
+                callback={() => {
+                    setValue('currency', currency.code);
+                    setShowBottomSheetFlatList('newCurrencyType', false);
+                }}
+                selectedCurrency={selectedValue}
+            />
         );
     }, []);
 

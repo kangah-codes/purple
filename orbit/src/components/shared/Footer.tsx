@@ -17,22 +17,39 @@ export default function Footer() {
                                 manage, and optimize your spending, all in one place. Start your
                                 journey toward smarter money management today!
                             </p>
-                            <div className='mt-6 flex justify-center'>
+                            <div className='mt-6 flex justify-center flex-row space-x-2.5'>
                                 <Link
                                     target='_blank'
                                     href='https://google.com'
-                                    className='flex items-center justify-end flex-row space-x-2 cursor-pointer'
+                                    className='flex items-center justify-end flex-row space-x-2 cursor-pointer h-[40px]'
                                 >
                                     <Image
                                         src='/graphics/play-store-badge.png'
                                         alt='Play Store Badge'
                                         width={130}
-                                        height={400}
+                                        height={40}
                                         style={{
-                                            objectFit: 'cover',
-                                            objectPosition: 'top',
+                                            objectFit: 'contain',
+                                            width: 'auto',
                                         }}
-                                        className='mx-auto'
+                                        className='mx-auto h-full'
+                                    />
+                                </Link>
+                                <Link
+                                    target='_blank'
+                                    href='https://github.com/kangah-codes/purple/releases/latest'
+                                    className='flex items-center justify-end flex-row space-x-2 cursor-pointer h-[40px]'
+                                >
+                                    <Image
+                                        src='/graphics/github-badge.svg'
+                                        alt='Github Badge'
+                                        width={130}
+                                        height={40}
+                                        style={{
+                                            objectFit: 'contain',
+                                            width: 'auto',
+                                        }}
+                                        className='mx-auto h-full'
                                     />
                                 </Link>
                             </div>

@@ -2,7 +2,7 @@ import { useCreateAccount } from '@/components/Accounts/hooks';
 import { useAuth } from '@/components/Auth/hooks';
 import { usePreferences } from '@/components/Settings/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { nativeStorage } from '@/lib/utils/storage';
 import React from 'react';
 import Toast from 'react-native-toast-message';
@@ -72,10 +72,10 @@ export default function OnboardingPage({
         <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] bg-purple-50 relative'>
             <>{image}</>
             <View className='flex flex-col space-y-2.5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-4xl text-black'>
+                <Text style={satoshiFont.satoshiBlack} className='text-4xl text-black'>
                     {title}
                 </Text>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-purple-500'>
+                <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-500'>
                     {description}
                 </Text>
             </View>
@@ -87,10 +87,7 @@ export default function OnboardingPage({
                             className='flex items-center justify-center rounded-full px-4 py-2 w-[200] h-[50]'
                             colors={['#c084fc', '#9333ea']}
                         >
-                            <Text
-                                style={GLOBAL_STYLESHEET.satoshiBold}
-                                className='text-base text-white'
-                            >
+                            <Text style={satoshiFont.satoshiBold} className='text-base text-white'>
                                 Let's go!
                             </Text>
                         </LinearGradient>

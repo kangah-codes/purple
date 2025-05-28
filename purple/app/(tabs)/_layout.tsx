@@ -14,7 +14,7 @@ import Colors from '@/lib/constants/Colors';
 import { SettingsCogIcon } from '@/components/SVG/24x24';
 
 export default function TabLayout() {
-    const { isAuthenticated, isOfflineMode } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
         return <Redirect href='/onboarding/landing' />;
