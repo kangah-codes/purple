@@ -4,11 +4,13 @@ import { Switch as RNSwitch } from 'react-native-switch';
 type SwitchProps = {
     value: boolean;
     onValueChange: (value: boolean) => void;
+    disabled?: boolean;
 };
 
-export default function Switch({ value, onValueChange }: SwitchProps) {
+export default function Switch({ value, onValueChange, disabled }: SwitchProps) {
     return (
         <RNSwitch
+            disabled={disabled}
             value={value}
             onValueChange={onValueChange}
             activeText={''}

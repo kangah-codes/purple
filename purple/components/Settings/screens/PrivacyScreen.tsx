@@ -1,10 +1,4 @@
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { PinIcon, ScaleIcon } from '@/components/SVG/noscale';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { satoshiFont } from '@/lib/constants/fonts';
-import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -12,31 +6,35 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/noscale';
+import Switch from '@/components/Shared/molecules/Switch';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
-import { SettingsListItem } from '../schema';
+import { SettingsListItem, UserPreferences } from '../schema';
 
 export default function PrivacyScreen() {
     const {
-        preferences: { allowOverdraw },
+        preferences: { trackUsageStatistics, sendDiagnosticData },
         setPreference,
     } = usePreferences();
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
 
-    const handleOverdrawChange = async (value: boolean) => {
+    const handleToggle = async (key: keyof UserPreferences, value: boolean) => {
         try {
-            await settingsService.set('allowOverdraw', value);
-            setPreference('allowOverdraw', value);
+            await settingsService.set(key, value);
+            setPreference(key, value);
         } catch (error) {
-            console.error('Failed to update allowOverdraw setting:', error);
+            console.error(`Failed to update ${key} setting:`, error);
             Toast.show({
                 type: 'error',
                 props: {
                     text1: 'Error',
-                    text2: 'Failed to update setting',
+                    text2: `Failed to update setting`,
                 },
             });
         }
@@ -44,16 +42,28 @@ export default function PrivacyScreen() {
 
     const settingsItems: SettingsListItem[] = [
         {
-            icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Usage Statistics',
-            description: 'Allow Purple to track app metrics, to make the app better',
-            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
+            icon: <BarLineChartIcon width={20} height={20} stroke='#9333ea' />,
+            title: 'Usage statistics',
+            description:
+                'Allow Purple to track app metrics and usage patterns to improve features and user experience',
+            customItem: (
+                <Switch
+                    value={trackUsageStatistics}
+                    onValueChange={(value) => handleToggle('trackUsageStatistics', value)}
+                />
+            ),
         },
         {
-            icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
+            icon: <PaperPlaneIcon width={20} height={20} stroke='#9333ea' />,
             title: 'Send diagnostic data',
-            description: 'Send diagnostic data and crash reports',
-            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
+            description:
+                'Send diagnostic data and crash reports to help improve performance and reliability',
+            customItem: (
+                <Switch
+                    value={sendDiagnosticData}
+                    onValueChange={(value) => handleToggle('sendDiagnosticData', value)}
+                />
+            ),
         },
     ];
 
@@ -63,6 +73,7 @@ export default function PrivacyScreen() {
             <Portal>
                 <PinAccount />
             </Portal>
+
             <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity
                     onPress={router.back}
@@ -77,6 +88,7 @@ export default function PrivacyScreen() {
                     </Text>
                 </View>
             </View>
+
             <View className='mt-5'>
                 <SettingsList items={settingsItems} />
             </View>

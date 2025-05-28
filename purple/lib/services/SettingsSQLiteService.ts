@@ -9,29 +9,32 @@ export class SettingsSQLiteService {
         this.db = sqlite;
     }
 
-    async ensureDefaults(
-        preferences: Pick<
-            UserPreferences,
-            'currency' | 'theme' | 'allowOverdraw' | 'hideCompletedPlans'
-        >,
-    ): Promise<void> {
+    async ensureDefaults(preferences: UserPreferences): Promise<void> {
         await this.db.withTransactionAsync(async () => {
             await Promise.all([
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('currency', ?)`,
-                    [preferences.currency || 'GHS'],
+                    [preferences.currency],
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('theme', ?)`,
-                    [preferences.theme || 'light'],
+                    [preferences.theme],
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('allowOverdraw', ?)`,
-                    [JSON.stringify(preferences.allowOverdraw ?? false)],
+                    [JSON.stringify(preferences.allowOverdraw)],
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('hideCompletedPlans', ?)`,
-                    [JSON.stringify(preferences.allowOverdraw ?? true)],
+                    [JSON.stringify(preferences.allowOverdraw)],
+                ),
+                this.db.runAsync(
+                    `INSERT OR IGNORE INTO settings (key, value) VALUES ('trackUsageStatistics', ?)`,
+                    [JSON.stringify(preferences.trackUsageStatistics)],
+                ),
+                this.db.runAsync(
+                    `INSERT OR IGNORE INTO settings (key, value) VALUES ('sendDiagnosticData', ?)`,
+                    [JSON.stringify(preferences.trackUsageStatistics)],
                 ),
             ]);
         });

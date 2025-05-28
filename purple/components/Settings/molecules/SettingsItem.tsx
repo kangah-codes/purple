@@ -12,6 +12,7 @@ export default function SettingsItem({
     callback,
     description,
     customItem,
+    disabled,
 }: SettingsListItem) {
     const router = useRouter();
     const handlePress = useCallback(() => {
@@ -23,9 +24,9 @@ export default function SettingsItem({
     }, [link, callback]);
 
     return (
-        <TouchableOpacity onPress={handlePress}>
+        <TouchableOpacity onPress={handlePress} disabled={disabled}>
             <View className='flex-row items-center justify-between py-4 w-full'>
-                <View className='flex-row items-center space-x-2.5'>
+                <View className='flex-row items-start space-x-2.5'>
                     <View className='items-center justify-center rounded-full border border-purple-300 w-[40px] h-[40px]'>
                         {icon}
                     </View>

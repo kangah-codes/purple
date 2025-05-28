@@ -17,6 +17,7 @@ export type SettingsListItem = {
     callback?: () => void;
     description: string;
     customItem?: React.ReactNode;
+    disabled?: boolean;
 };
 
 export type UserPreferenceStore = {
@@ -43,4 +44,6 @@ export type UserPreferences = {
     allowOverdraw: boolean;
     pinnedAccount: string;
     hideCompletedPlans: boolean;
+    trackUsageStatistics: boolean;
+    sendDiagnosticData: boolean;
 };

@@ -19,6 +19,7 @@ export default function SettingsList({ items }: SettingsListProps) {
                 callback={item.callback}
                 description={item.description}
                 customItem={item.customItem}
+                disabled={item.disabled}
             />
         ),
         [],

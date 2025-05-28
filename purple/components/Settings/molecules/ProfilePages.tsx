@@ -17,6 +17,7 @@ import { usePreferences } from '../hooks';
 import { ProfilePageLinkProps } from '../schema';
 import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
+import SettingsFooter from './SettingsFooter';
 
 export default function ProfilePages() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -110,6 +111,7 @@ export default function ProfilePages() {
             renderItem={renderItem}
             ItemSeparatorComponent={itemSeparator}
             contentContainerStyle={styles.flatlistContainer}
+            ListFooterComponent={<SettingsFooter />}
         />
     );
 }
@@ -121,6 +123,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingBottom: 100,
+        paddingBottom: 70,
     },
 });
