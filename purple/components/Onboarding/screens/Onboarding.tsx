@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { Image } from 'react-native';
 import tw from 'twrnc';
 import OnboardingPage from '../molecules/OnboardingPage';
+import CurrencySetup from '../molecules/CurrencySetup';
 
 export default function Screen() {
     const storiesRef = useRef<StoriesRef>(null);
@@ -65,6 +66,7 @@ export default function Screen() {
             currentIndex={3}
             pages={4}
         />,
+        <CurrencySetup />,
     ];
 
     return (
@@ -73,7 +75,7 @@ export default function Screen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={3000}
+                timePerPage={process.env.NODE_ENV == 'development' ? 100 : 3000}
                 enableNavigation={false}
                 // disableAutomaticScroll
             />

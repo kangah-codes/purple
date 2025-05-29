@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet, Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/icons/noscale';
@@ -24,19 +24,78 @@ export default function PrivacyScreen() {
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
 
-    const handleToggle = async (key: keyof UserPreferences, value: boolean) => {
-        try {
-            await settingsService.set(key, value);
-            setPreference(key, value);
-        } catch (error) {
-            console.error(`Failed to update ${key} setting:`, error);
-            Toast.show({
-                type: 'error',
-                props: {
-                    text1: 'Error',
-                    text2: `Failed to update setting`,
+    const handleToggle = async (
+        key: 'trackUsageStatistics' | 'sendDiagnosticData',
+        value: boolean,
+    ) => {
+        const isDisabling = !value;
+        const messages: Record<
+            'trackUsageStatistics' | 'sendDiagnosticData',
+            { enable: string; disable: string }
+        > = {
+            trackUsageStatistics: {
+                enable: 'Allowing usage tracking helps us improve features based on how you use the app.',
+                disable:
+                    'Disabling usage tracking means we won’t be able to improve the experience based on how the app is used.',
+            },
+            sendDiagnosticData: {
+                enable: 'Sending diagnostic data and crash reports helps us fix bugs faster and improve performance.',
+                disable:
+                    'Disabling diagnostic data means we won’t receive crash reports, which may slow down bug fixes.',
+            },
+        };
+
+        const showConfirmation = isDisabling && messages[key];
+
+        if (showConfirmation) {
+            Alert.alert('Are you sure?', messages[key].disable, [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
                 },
-            });
+                {
+                    text: 'Disable',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await settingsService.set(key, value);
+                            setPreference(key, value);
+                        } catch (error) {
+                            console.error(`Failed to update ${key} setting:`, error);
+                            Toast.show({
+                                type: 'error',
+                                props: {
+                                    text1: 'Error',
+                                    text2: `Failed to update setting`,
+                                },
+                            });
+                        }
+                    },
+                },
+            ]);
+        } else {
+            try {
+                await settingsService.set(key, value);
+                setPreference(key, value);
+                if (value) {
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Preference updated',
+                            text2: messages[key]?.enable,
+                        },
+                    });
+                }
+            } catch (error) {
+                console.error(`Failed to update ${key} setting:`, error);
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error',
+                        text2: `Failed to update setting`,
+                    },
+                });
+            }
         }
     };
 

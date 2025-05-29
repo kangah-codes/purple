@@ -6,7 +6,7 @@ import { UserPreferences } from '@/components/Settings/schema';
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
         const defaultSettings: UserPreferences = {
-            currency: 'GHS',
+            currency: 'USD',
             theme: 'light',
             allowOverdraw: false,
             hideCompletedPlans: true,

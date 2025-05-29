@@ -30,28 +30,31 @@ export default function DatePicker({
     value,
 }: DatePickerProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const [selectedDate, setSelectedDate] = useState<Date>(value);
+    // const [selectedDate, setSelectedDate] = useState<Date>(value);
 
-    const onDateChange = (_event: DateTimePickerEvent, selectedDate: Date | undefined) => {
-        if (!selectedDate) return;
+    const onDateChange = (_event: DateTimePickerEvent, pickedDate: Date | undefined) => {
+        if (!pickedDate) return;
 
-        setSelectedDate(selectedDate);
-        if (Platform.OS === 'android') {
-            DateTimePickerAndroid.open({
-                value: selectedDate,
-                onChange: onTimeChange,
-                mode: 'time',
-            });
-        }
+        DateTimePickerAndroid.open({
+            value: pickedDate,
+            onChange: (event, selectedTime) => onTimeChange(pickedDate, event, selectedTime),
+            mode: 'time',
+            is24Hour: true,
+        });
     };
 
-    const onTimeChange = (_event: DateTimePickerEvent, selectedTime: Date | undefined) => {
-        if (!selectedTime) return;
+    const onTimeChange = (
+        pickedDate: Date,
+        _event: DateTimePickerEvent,
+        pickedTime: Date | undefined,
+    ) => {
+        if (!pickedTime) return;
 
-        const combinedDateTime = new Date(selectedDate);
-        combinedDateTime.setHours(selectedTime.getHours());
-        combinedDateTime.setMinutes(selectedTime.getMinutes());
-        combinedDateTime.setSeconds(selectedTime.getSeconds());
+        const combinedDateTime = new Date(pickedDate);
+        combinedDateTime.setHours(pickedTime.getHours());
+        combinedDateTime.setMinutes(pickedTime.getMinutes());
+        combinedDateTime.setSeconds(pickedTime.getSeconds());
+        combinedDateTime.setMilliseconds(0);
 
         if (typeof onChange === 'function') {
             onChange(combinedDateTime);
@@ -70,7 +73,10 @@ export default function DatePicker({
     };
 
     const formatDateTime = (date: Date) => {
-        return `${date.toDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        return `${date.toDateString()} ${date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        })}`;
     };
 
     return (

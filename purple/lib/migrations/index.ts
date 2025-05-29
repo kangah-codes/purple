@@ -51,7 +51,7 @@ const migrations: Migration[] = [
        			name TEXT,
        			currency TEXT NOT NULL,
        			debit_account_id TEXT,
-          		is_completed BOOLEAN DEFAULT 0;
+          		is_completed BOOLEAN DEFAULT 0,
        			PRIMARY KEY (id)
       		);
       		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,

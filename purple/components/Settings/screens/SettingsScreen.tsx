@@ -1,11 +1,9 @@
 import { LinearGradient, SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { Portal } from '@gorhom/portal';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import ProfilePages from '../molecules/ProfilePages';
-import SelectCurrency from '../molecules/SelectCurrency';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -13,9 +11,6 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <Portal>
-                <SelectCurrency />
-            </Portal>
             <LinearGradient
                 className='flex px-5 py-2.5 h-[350] absolute w-full'
                 colors={linearGradientColours}

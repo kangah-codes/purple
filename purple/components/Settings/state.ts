@@ -13,10 +13,15 @@ export const usePreferencesStore = create<PreferencesStore>()(
     persist(
         (set) => ({
             preferences: {
-                currency: 'GHS',
+                currency: 'USD',
                 theme: 'light',
                 customTransactionTypes: [],
                 allowOverdraw: false,
+                pinnedAccount: '',
+                hideCompletedPlans: true,
+                trackUsageStatistics: true,
+                sendDiagnosticData: true,
+                allowCurrencyConversion: false,
             },
             setPreferences: (partialPrefs) =>
                 set((state) => ({

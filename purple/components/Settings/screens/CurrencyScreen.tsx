@@ -6,25 +6,28 @@ import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { CurrencyRates } from '@/lib/services/CurrencyService';
+import CurrencyService, { CurrencyRates } from '@/lib/services/CurrencyService';
 import { nativeStorage } from '@/lib/utils/storage';
-import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import CurrencyOption from '../molecules/CurrencyOption';
-import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import { Portal } from '@gorhom/portal';
+import SelectCurrency from '../molecules/SelectCurrency';
+import { CurrencyCode } from '../molecules/ExchangeRateItem';
 
 export default function CurrencyScreen() {
     const {
         preferences: { currency },
+        setPreference,
     } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const exchangeRates = nativeStorage.getItem<CurrencyRates>('currency-exchange-rates');
+
     const settingsItems: SettingsListItem[] = [
         {
             icon: <CurrencyOption code={currency} />,
@@ -64,7 +67,16 @@ export default function CurrencyScreen() {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <Portal>
-                <PinAccount />
+                <SelectCurrency
+                    callback={(item) => {
+                        setPreference('currency', item.code);
+                        setShowBottomSheetFlatList('preferences-currency', false);
+                        // setSearchValue('');
+                        CurrencyService.getInstance().fetchExchangeRates(
+                            item.code.toLowerCase() as CurrencyCode,
+                        );
+                    }}
+                />
             </Portal>
             <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity

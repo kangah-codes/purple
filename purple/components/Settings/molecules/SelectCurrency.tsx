@@ -11,7 +11,11 @@ import { usePreferences } from '../hooks';
 import CurrencyService from '@/lib/services/CurrencyService';
 import { CurrencyCode } from './ExchangeRateItem';
 
-export default function SelectCurrency() {
+type SelectCurrencyProps = {
+    callback: (item: (typeof currencies)[0]) => void;
+};
+
+export default function SelectCurrency({ callback }: SelectCurrencyProps) {
     const [searchValue, setSearchValue] = useState<string>('');
     const { setPreference, preferences } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
@@ -25,12 +29,8 @@ export default function SelectCurrency() {
                 <CurrencySelect
                     currency={settingCurrency}
                     callback={() => {
-                        setPreference('currency', item.code);
-                        setShowBottomSheetFlatList('preferences-currency', false);
                         setSearchValue('');
-                        CurrencyService.getInstance().fetchExchangeRates(
-                            item.code.toLowerCase() as CurrencyCode,
-                        );
+                        callback(item);
                     }}
                     selectedCurrency={preferences.currency}
                 />
