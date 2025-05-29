@@ -20,6 +20,8 @@ export default function SettingsList({ items }: SettingsListProps) {
                 description={item.description}
                 customItem={item.customItem}
                 disabled={item.disabled}
+                renderIcon={item.renderIcon}
+                isNew={item.isNew}
             />
         ),
         [],

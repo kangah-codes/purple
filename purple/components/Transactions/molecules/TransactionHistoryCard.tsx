@@ -1,16 +1,15 @@
-import { ChevronRightIcon } from '@/components/SVG/16x16';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { Transaction } from '../schema';
-import { satoshiFont } from '@/lib/constants/fonts';
-import { router } from 'expo-router';
 import { useTransactionStore } from '../hooks';
+import { Transaction } from '../schema';
 
 type TransactionHistoryCardProps = {
     data: Transaction;

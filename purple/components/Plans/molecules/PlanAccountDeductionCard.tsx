@@ -1,4 +1,4 @@
-import { ArrowNarrowDownRightIcon } from '@/components/SVG/noscale';
+import { ArrowNarrowDownRightIcon } from '@/components/SVG/icons/noscale';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';

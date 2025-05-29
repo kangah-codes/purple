@@ -1,6 +1,5 @@
 import { GenericAPIResponse } from '@/@types/request';
-import { useAuth } from '@/components/Auth/hooks';
-import { SessionData } from '@/components/Auth/schema';
+import { PlusIcon } from '@/components/SVG/icons/24x24';
 import {
     LinearGradient,
     SafeAreaView,
@@ -8,14 +7,13 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { PlusIcon } from '@/components/SVG/24x24';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
-import { FlatList, RefreshControl, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { FlatList, StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useAccounts, useAccountStore } from '../hooks';
+import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
 import { Account } from '../schema';
 

@@ -46,7 +46,9 @@ export const formatCurrencyRounded = (
     currency: string | undefined | null,
     dp: number = 2,
 ): string => {
-    if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
+    // NOTE: idk why I filter out ALL currency code
+    // if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
+    if (!currency || currency === '') return 'N/A';
 
     if (amount === undefined || amount === null || currency === undefined || currency === '')
         return 'N/A';

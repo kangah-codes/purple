@@ -1,7 +1,7 @@
+import { EyeCloseIcon, EyeOpenIcon } from '@/components/SVG/icons/noscale';
+import { useState } from 'react';
 import { TextInputProps } from 'react-native';
 import { InputField, View } from '../../styled';
-import { EyeCloseIcon, EyeOpenIcon } from '@/components/SVG/noscale';
-import { useState } from 'react';
 
 type ProtectedInputProps = TextInputProps & {
     className?: string;

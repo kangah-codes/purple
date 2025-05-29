@@ -1,11 +1,10 @@
-import { ArrowLeftIcon, EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/24x24';
-import { DotsHorizontalIcon } from '@/components/SVG/noscale';
+import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
 import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { usePlanStore } from '../hooks';

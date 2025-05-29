@@ -1,4 +1,4 @@
-import { CalendarIcon } from '@/components/SVG/16x16';
+import { CalendarIcon } from '@/components/SVG/icons/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import DateTimePicker, {

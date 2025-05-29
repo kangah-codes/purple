@@ -8,12 +8,12 @@ export async function initializeApp(db: SQLiteDatabase) {
     try {
         // init startup service
         const startupService = await StartupServiceFactory.init(db);
-        const currencyService = new CurrencyService();
+        const currencyService = CurrencyService.getInstance();
 
         // load startup tasks here
         startupService.registerStartupTask(loadFonts);
         startupService.registerStartupTask(() => initializePreferences(db));
-        startupService.registerStartupTask(() => currencyService.fetchExchangeRates('GHS'));
+        startupService.registerStartupTask(() => currencyService.fetchExchangeRates('ghs'));
 
         await startupService.runMigrations(db);
         await startupService.executeStartupTasks();

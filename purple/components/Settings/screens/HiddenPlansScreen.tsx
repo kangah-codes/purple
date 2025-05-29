@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function HiddenPlansScreen() {

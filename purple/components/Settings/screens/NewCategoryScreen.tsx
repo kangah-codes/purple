@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { useCreateCategory, usePreferences } from '@/components/Settings/hooks';
 import {
     InputField,
@@ -19,10 +19,7 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } fro
 import Toast from 'react-native-toast-message';
 
 export default function NewCategoryScreen() {
-    const {
-        preferences: { currency },
-        addCategory,
-    } = usePreferences();
+    const { addCategory } = usePreferences();
     const {
         control,
         handleSubmit,

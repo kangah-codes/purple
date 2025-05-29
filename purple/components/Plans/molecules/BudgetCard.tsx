@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { currencies } from '@/lib/constants/currencies';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded, formatNumberRounded } from '@/lib/utils/number';
 import { differenceInDays } from 'date-fns';
 import { router } from 'expo-router';
@@ -8,8 +8,6 @@ import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Plan } from '../schema';
 import { calculateRemainingForCurrentPeriod } from '../utils';
-import { satoshiFont } from '@/lib/constants/fonts';
-import { CheckCircleIcon } from '@/components/SVG/noscale';
 
 const now = new Date();
 

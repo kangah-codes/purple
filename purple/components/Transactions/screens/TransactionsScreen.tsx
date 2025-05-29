@@ -1,4 +1,4 @@
-import { PlusIcon } from '@/components/SVG/24x24';
+import { PlusIcon } from '@/components/SVG/icons/24x24';
 import {
     LinearGradient,
     SafeAreaView,

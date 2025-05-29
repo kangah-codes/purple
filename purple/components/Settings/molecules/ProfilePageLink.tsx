@@ -1,4 +1,4 @@
-import { ChevronRightIcon } from '@/components/SVG/16x16';
+import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { Href, useRouter } from 'expo-router';

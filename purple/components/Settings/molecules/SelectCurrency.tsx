@@ -1,4 +1,4 @@
-import { SearchIcon } from '@/components/SVG/noscale';
+import { SearchIcon } from '@/components/SVG/icons/noscale';
 import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
@@ -8,6 +8,8 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
+import CurrencyService from '@/lib/services/CurrencyService';
+import { CurrencyCode } from './ExchangeRateItem';
 
 export default function SelectCurrency() {
     const [searchValue, setSearchValue] = useState<string>('');
@@ -26,6 +28,9 @@ export default function SelectCurrency() {
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
                         setSearchValue('');
+                        CurrencyService.getInstance().fetchExchangeRates(
+                            item.code.toLowerCase() as CurrencyCode,
+                        );
                     }}
                     selectedCurrency={preferences.currency}
                 />

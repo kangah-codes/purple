@@ -1,11 +1,10 @@
-import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/icons/24x24';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Link, router } from 'expo-router';
 import React from 'react';
 import { useAccountStore } from '../hooks';
-import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function AccountNavigationArea() {
     const { currentAccount } = useAccountStore();

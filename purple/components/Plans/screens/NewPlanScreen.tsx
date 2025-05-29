@@ -32,7 +32,7 @@ import { useQueryClient } from 'react-query';
 import tw from 'twrnc';
 import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 
 const depositFrequency = {

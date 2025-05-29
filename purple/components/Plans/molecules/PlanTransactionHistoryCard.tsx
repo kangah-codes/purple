@@ -1,5 +1,5 @@
 import { useGetAccountFromStore } from '@/components/Accounts/utils';
-import { ArrowNarrowDownRightIcon } from '@/components/SVG/noscale';
+import { ArrowNarrowDownRightIcon } from '@/components/SVG/icons/noscale';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';

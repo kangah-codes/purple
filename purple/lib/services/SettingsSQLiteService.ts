@@ -36,6 +36,10 @@ export class SettingsSQLiteService {
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('sendDiagnosticData', ?)`,
                     [JSON.stringify(preferences.trackUsageStatistics)],
                 ),
+                this.db.runAsync(
+                    `INSERT OR IGNORE INTO settings (key, value) VALUES ('allowCurrencyConversion', ?)`,
+                    [JSON.stringify(preferences.allowCurrencyConversion)],
+                ),
             ]);
         });
     }

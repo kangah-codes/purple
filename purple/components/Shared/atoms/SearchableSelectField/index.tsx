@@ -1,5 +1,5 @@
-import { ChevronDownIcon } from '@/components/SVG/16x16';
-import { SearchIcon } from '@/components/SVG/noscale';
+import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
+import { SearchIcon } from '@/components/SVG/icons/noscale';
 import { InputField, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { LRUCache } from '@/lib/utils/cache';

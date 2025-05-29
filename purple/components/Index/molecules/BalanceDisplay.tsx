@@ -4,7 +4,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { Link } from 'expo-router';
 import React from 'react';
-import { PinIcon } from '../../SVG/noscale';
+import { PinIcon } from '../../SVG/icons/noscale';
 
 type BalanceDisplayProps = {
     accountName: string;

@@ -1,13 +1,11 @@
-import {
-    InputField,
-    SafeAreaView,
-    Text,
-    TouchableOpacity,
-    View,
-    LinearGradient,
-} from '@/components/Shared/styled';
+import { ChevronLeftIcon } from '@/components/SVG/icons/24x24';
+import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { nativeStorage } from '@/lib/utils/storage';
+import {} from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
@@ -18,17 +16,10 @@ import {
     TextInput,
     TouchableWithoutFeedback,
 } from 'react-native';
-import tw from 'twrnc';
-import { OTPInput } from '../molecules/OTPInput';
-import { Controller, useForm } from 'react-hook-form';
-import {} from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { ChevronLeftIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import React from 'react';
-import { nativeStorage } from '@/lib/utils/storage';
-import { useActivateAccount } from '../hooks';
 import Toast from 'react-native-toast-message';
+import tw from 'twrnc';
+import { useActivateAccount } from '../hooks';
+import { OTPInput } from '../molecules/OTPInput';
 
 export default function OTPAccountActivationScreen() {
     const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);

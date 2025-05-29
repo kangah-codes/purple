@@ -1,4 +1,4 @@
-import { PlusIcon } from '@/components/SVG/24x24';
+import { PlusIcon } from '@/components/SVG/icons/24x24';
 import {
     LinearGradient,
     SafeAreaView,
@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,7 +14,6 @@ import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'reac
 import { SceneMap, TabView } from 'react-native-tab-view';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
-import { satoshiFont } from '@/lib/constants/fonts';
 
 const { width: screenWidth } = Dimensions.get('window');
 const linearGradientColours = ['#c084fc', '#9333ea'];

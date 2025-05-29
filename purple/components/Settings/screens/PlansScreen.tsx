@@ -1,5 +1,5 @@
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { CoinsStackedIcon, EyeCloseIcon, PinIcon, ScaleIcon } from '@/components/SVG/noscale';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { CoinsStackedIcon, EyeCloseIcon, PinIcon, ScaleIcon } from '@/components/SVG/icons/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
@@ -22,7 +22,6 @@ export default function PlansScreen() {
         preferences: { hideCompletedPlans },
         setPreference,
     } = usePreferences();
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
 
@@ -46,7 +45,7 @@ export default function PlansScreen() {
             icon: <EyeCloseIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Hide completed plans',
             description: 'Hide plans from the main plans screen once they have been completed',
-            customItem: <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
+            customItem: () => <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
         },
         ...(hideCompletedPlans
             ? [

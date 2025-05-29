@@ -21,7 +21,7 @@ import { useAccountStore } from '@/components/Accounts/hooks';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import { useQueryClient } from 'react-query';
 import { usePreferences } from '@/components/Settings/hooks';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function NewPlanTransactionScreen() {

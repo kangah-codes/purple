@@ -1,7 +1,7 @@
 import { usePlanStore } from '@/components/Plans/hooks';
 import PlanCard from '@/components/Plans/molecules/PlanCard';
 import { Plan } from '@/components/Plans/schema';
-import { ChevronRightIcon } from '@/components/SVG/16x16';
+import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
@@ -42,7 +42,7 @@ export default function PlanHistoryList() {
 
     return (
         <View className='flex flex-col space-y-1 mt-5'>
-            <View className='flex flex-row w-full justify-between items-center px-5'>
+            <View className='flex flex-row w-full justify-between items-center px-5 mb-2.5'>
                 <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
                     My plans
                 </Text>

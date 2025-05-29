@@ -1,4 +1,4 @@
-import { StarsIcon } from '@/components/SVG/24x24';
+import { StarsIcon } from '@/components/SVG/icons/24x24';
 import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
 import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';

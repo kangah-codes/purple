@@ -7,7 +7,7 @@ import {
     ArrowCircleUpIcon,
     CoinSwapIcon,
     PiggyBankIcon,
-} from '../../SVG/noscale';
+} from '../../SVG/icons/noscale';
 import { Link } from 'expo-router';
 import { Account } from '@/components/Accounts/schema';
 import React from 'react';

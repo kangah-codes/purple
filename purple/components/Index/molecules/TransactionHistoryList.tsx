@@ -1,4 +1,4 @@
-import { ChevronRightIcon } from '@/components/SVG/16x16';
+import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';

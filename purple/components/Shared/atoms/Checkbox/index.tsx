@@ -1,8 +1,7 @@
-import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { Text, View } from '@/components/Shared/styled';
-import { Pressable, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { CheckMarkIcon } from '@/components/SVG/noscale';
+import React from 'react';
+import { Pressable, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 
 type CheckboxProps = {
     label?: string;

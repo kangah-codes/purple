@@ -1,13 +1,18 @@
+import { ChevronLeftIcon } from '@/components/SVG/icons/24x24';
 import {
     InputField,
+    LinearGradient,
     SafeAreaView,
     Text,
     TouchableOpacity,
     View,
-    LinearGradient,
 } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import {} from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
     Keyboard,
@@ -19,19 +24,12 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 import { OTPInput } from '../molecules/OTPInput';
-import { Controller, useForm } from 'react-hook-form';
-import {} from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { ChevronLeftIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import React from 'react';
 
 export default function OTPScreen() {
     const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
     const inputRefs = Array.from({ length: codes.length }, () => useRef<TextInput>(null));
     const [loading, setLoading] = useState(false);
     const [hasRequestedCode, setHasRequestedCode] = useState(false);
-    const [canResetPassword, setCanResetPassword] = useState(false);
 
     const handleChangeCode = (text: string, index: number) => {
         const newCodes = [...codes];

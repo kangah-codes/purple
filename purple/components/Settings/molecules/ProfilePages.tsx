@@ -1,29 +1,21 @@
-import { SettingsCogIcon } from '@/components/SVG/24x24';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import {
     AlertHexagonIcon,
+    CashIcon,
     ClosedLockIcon,
     PiggyBankIcon,
     SafeIcon,
-} from '@/components/SVG/noscale';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
+} from '@/components/SVG/icons/noscale';
 import { View } from '@/components/Shared/styled';
-import { currencies } from '@/lib/constants/currencies';
 import { keyExtractor } from '@/lib/utils/number';
-import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
 import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
-import { usePreferences } from '../hooks';
 import { ProfilePageLinkProps } from '../schema';
-import CurrencyOption from './CurrencyOption';
 import ProfilePageLink from './ProfilePageLink';
 import SettingsFooter from './SettingsFooter';
 
 export default function ProfilePages() {
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const {
-        preferences: { currency },
-    } = usePreferences();
     const renderItem: ListRenderItem<ProfilePageLinkProps> = useCallback(
         ({ item }) => (
             <ProfilePageLink
@@ -44,32 +36,10 @@ export default function ProfilePages() {
 
     const profilePages: ProfilePageLinkProps[] = [
         {
-            icon: <CurrencyOption code={currency} />,
-            title: 'Default Currency',
-            callback: () => setShowBottomSheetFlatList('preferences-currency', true),
-            description: 'Select a default currency for all transactions',
-            renderIcon: () => {
-                const settingCurrency = currencies.find(
-                    (cur) => cur.code === currency,
-                ) as (typeof currencies)[number];
-                const country = settingCurrency.locale.split('-')[1];
-                return (
-                    <View className='w-[40] h-[40] flex items-center justify-center'>
-                        <Image
-                            style={{
-                                width: 37,
-                                height: 37,
-                                borderRadius: 40,
-                            }}
-                            source={{
-                                uri: `https://globalartinc.github.io/round-flags/flags/${country.toLowerCase()}.svg`,
-                            }}
-                            contentFit='cover'
-                            transition={500}
-                        />
-                    </View>
-                );
-            },
+            icon: <CashIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Currency',
+            link: '/settings/currencies/currency-settings',
+            description: 'Manage currency settings',
         },
         {
             icon: <SafeIcon width={20} height={20} stroke={'#9333ea'} />,

@@ -1,4 +1,5 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
@@ -11,10 +12,9 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { TRANSACTION_TYPES } from '@/lib/constants/transactionTypes';
 import { omit, transformObject } from '@/lib/utils/object';
-import { capitaliseFirstLetter } from '@/lib/utils/string';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -23,8 +23,6 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { satoshiFont } from '@/lib/constants/fonts';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -43,7 +41,6 @@ export default function NewTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
-        setError,
     } = useForm({
         defaultValues: {
             amount: '',

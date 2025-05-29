@@ -12,6 +12,7 @@ export async function initializePreferences(db: SQLiteDatabase) {
             hideCompletedPlans: true,
             trackUsageStatistics: true,
             sendDiagnosticData: true,
+            allowCurrencyConversion: true,
         } as UserPreferences;
 
         const settingsService = SettingsServiceFactory.create(db);
@@ -23,6 +24,7 @@ export async function initializePreferences(db: SQLiteDatabase) {
             hideCompletedPlans,
             trackUsageStatistics,
             sendDiagnosticData,
+            allowCurrencyConversion,
         ] = await Promise.all([
             settingsService.listTransactionTypes(),
             settingsService.getWithFallback('allowOverdraw', defaultSettings.allowOverdraw),
@@ -38,6 +40,10 @@ export async function initializePreferences(db: SQLiteDatabase) {
                 'sendDiagnosticData',
                 defaultSettings.sendDiagnosticData,
             ),
+            settingsService.getWithFallback(
+                'allowCurrencyConversion',
+                defaultSettings.allowCurrencyConversion,
+            ),
         ]);
 
         usePreferencesStore.getState().setPreferences({
@@ -46,6 +52,7 @@ export async function initializePreferences(db: SQLiteDatabase) {
             hideCompletedPlans,
             trackUsageStatistics,
             sendDiagnosticData,
+            allowCurrencyConversion,
         });
     } catch (error) {
         console.error('Failed to initialize preferences:', error);

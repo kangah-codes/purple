@@ -6,8 +6,8 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/noscale';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/icons/noscale';
 import Switch from '@/components/Shared/molecules/Switch';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
@@ -46,7 +46,7 @@ export default function PrivacyScreen() {
             title: 'Usage statistics',
             description:
                 'Allow Purple to track app metrics and usage patterns to improve features and user experience',
-            customItem: (
+            customItem: () => (
                 <Switch
                     value={trackUsageStatistics}
                     onValueChange={(value) => handleToggle('trackUsageStatistics', value)}
@@ -58,7 +58,7 @@ export default function PrivacyScreen() {
             title: 'Send diagnostic data',
             description:
                 'Send diagnostic data and crash reports to help improve performance and reliability',
-            customItem: (
+            customItem: () => (
                 <Switch
                     value={sendDiagnosticData}
                     onValueChange={(value) => handleToggle('sendDiagnosticData', value)}

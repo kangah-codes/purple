@@ -1,5 +1,5 @@
 import { calculateAmountAddedOnDay } from '@/components/Plans/utils';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/noscale';
+import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
 import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';

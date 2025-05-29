@@ -13,9 +13,9 @@ const migrations: Migration[] = [
        			created_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
        			updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
        			deleted_at TEXT,
-            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-            deleted_at_unix INTEGER,
+            	created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            	updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            	deleted_at_unix INTEGER,
        			user_id TEXT,
        			category TEXT NOT NULL,
        			name TEXT NOT NULL,
@@ -35,9 +35,9 @@ const migrations: Migration[] = [
        			created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
        			updated_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
        			deleted_at TEXT,
-            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-            deleted_at_unix INTEGER,
+            	created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+             	updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+             	deleted_at_unix INTEGER,
        			user_id TEXT,
        			type TEXT NOT NULL,
        			category TEXT NOT NULL,
@@ -51,6 +51,7 @@ const migrations: Migration[] = [
        			name TEXT,
        			currency TEXT NOT NULL,
        			debit_account_id TEXT,
+          		is_completed BOOLEAN DEFAULT 0;
        			PRIMARY KEY (id)
       		);
       		CREATE INDEX IF NOT EXISTS idx_plans_deleted_at ON plans(deleted_at);`,

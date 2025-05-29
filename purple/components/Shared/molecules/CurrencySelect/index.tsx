@@ -4,6 +4,7 @@ import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { Image } from 'expo-image';
 import React from 'react';
+import FlagIcon from '../../atoms/FlagIcon';
 
 type CurrencySelectProps = {
     currency: (typeof currencies)[number];
@@ -25,18 +26,7 @@ export default function CurrencySelect({
         >
             <View className='flex flex-row space-x-2'>
                 <View className='w-[40] h-[40] flex items-center justify-center'>
-                    <Image
-                        style={{
-                            width: 37,
-                            height: 37,
-                            borderRadius: 40,
-                        }}
-                        source={{
-                            uri: `https://globalartinc.github.io/round-flags/flags/${currency.locale.split('-')[1].toLowerCase()}.svg`,
-                        }}
-                        contentFit='cover'
-                        transition={500}
-                    />
+                    <FlagIcon currency={currency} />
                 </View>
                 <View className='flex flex-col'>
                     <Text style={satoshiFont.satoshiBold} className='text-base'>

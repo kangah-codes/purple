@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
 import SearchableSelectField, {
@@ -27,6 +27,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
+import FlagIcon from '@/components/Shared/atoms/FlagIcon';
 
 export default function NewAccountScreen() {
     const {
@@ -98,23 +99,10 @@ export default function NewAccountScreen() {
     const renderSelectedCurrency = () => {
         const selectedCode = getValues('currency');
         const currency = currencies.find((c) => c.code === selectedCode);
-        const country = currency?.locale.split('-')[1];
 
         return (
             <View className='flex flex-row space-x-2 items-center -ml-2.5'>
-                <FallbackImage
-                    style={{
-                        width: 35,
-                        height: 35,
-                        borderRadius: 20,
-                    }}
-                    source={{
-                        uri: `https://globalartinc.github.io/round-flags/flags/${country?.toLowerCase()}.svg`,
-                    }}
-                    fallbackSource={require('@/assets/images/graphics/catto.png')}
-                    contentFit='cover'
-                    transition={1000}
-                />
+                <FlagIcon currency={currency!} />
                 <Text style={satoshiFont.satoshiBold} className='text-sm'>
                     {currency?.name} ({currency?.symbol})
                 </Text>

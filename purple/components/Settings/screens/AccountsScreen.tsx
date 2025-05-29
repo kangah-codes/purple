@@ -1,5 +1,5 @@
-import { ArrowLeftIcon } from '@/components/SVG/24x24';
-import { PinIcon, ScaleIcon } from '@/components/SVG/noscale';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { PinIcon, ScaleIcon } from '@/components/SVG/icons/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
@@ -46,7 +46,7 @@ export default function AccountsScreen() {
             icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Allow Overdraw',
             description: 'Enable overspending by allowing the account balance to drop below zero',
-            customItem: <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
+            customItem: () => <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
         {
             icon: <PinIcon width={20} height={20} stroke='#9333ea' />,

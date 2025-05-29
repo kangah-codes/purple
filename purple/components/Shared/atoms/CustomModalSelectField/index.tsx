@@ -1,12 +1,11 @@
-import { ChevronDownIcon } from '@/components/SVG/16x16';
+import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { isNotEmptyString, truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useEffect, useState } from 'react';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
-import { satoshiFont } from '@/lib/constants/fonts';
 
 // Props for the parent CustomModalSelectField
 interface CustomModalSelectFieldProps {

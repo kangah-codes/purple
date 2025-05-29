@@ -1,6 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
-
 import { useAuth } from '@/components/Auth/hooks';
 import {
     BarLineChartIcon,
@@ -9,9 +8,9 @@ import {
     PiggyBankIcon,
     SafeIcon,
     UserCircleIcon,
-} from '@/components/SVG/noscale';
+} from '@/components/SVG/icons/noscale';
 import Colors from '@/lib/constants/Colors';
-import { SettingsCogIcon } from '@/components/SVG/24x24';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();

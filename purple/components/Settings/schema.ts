@@ -16,8 +16,10 @@ export type SettingsListItem = {
     link?: string;
     callback?: () => void;
     description: string;
-    customItem?: React.ReactNode;
+    customItem?: () => React.ReactNode;
+    renderIcon?: () => React.ReactNode;
     disabled?: boolean;
+    isNew?: boolean;
 };
 
 export type UserPreferenceStore = {
@@ -46,4 +48,5 @@ export type UserPreferences = {
     hideCompletedPlans: boolean;
     trackUsageStatistics: boolean;
     sendDiagnosticData: boolean;
+    allowCurrencyConversion: boolean;
 };

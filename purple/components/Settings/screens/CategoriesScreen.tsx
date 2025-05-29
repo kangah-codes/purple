@@ -1,5 +1,5 @@
-import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/24x24';
-import { SearchIcon } from '@/components/SVG/noscale';
+import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/icons/24x24';
+import { SearchIcon } from '@/components/SVG/icons/noscale';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
     InputField,
