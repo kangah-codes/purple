@@ -4,8 +4,9 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import SelectCurrency from '@/components/Settings/molecules/SelectCurrency';
 import FlagIcon from '@/components/Shared/atoms/FlagIcon';
+import Pill from '@/components/Shared/atoms/Pill';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { Image, LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -79,6 +80,10 @@ export default function CurrencySetup() {
                 />
             </Portal>
             <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] bg-purple-50 relative'>
+                <Image
+                    source={require('@/assets/images/graphics/19.png')}
+                    className={`rounded-3xl w-[200px] h-[100px]`}
+                />
                 <View className='flex flex-col space-y-2.5'>
                     <Text style={satoshiFont.satoshiBlack} className='text-4xl text-black'>
                         One more thing...

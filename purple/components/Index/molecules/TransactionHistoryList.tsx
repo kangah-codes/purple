@@ -6,6 +6,7 @@ import { useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { dedupeByKey } from '@/lib/utils/array';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
@@ -48,7 +49,7 @@ export default function TransactionHistoryList({
     );
     const renderEmptylist = useCallback(
         () => (
-            <View className='my-20'>
+            <View className='my-5'>
                 <EmptyList message="Looks like you haven't created any transactions yet." />
             </View>
         ),
@@ -56,48 +57,40 @@ export default function TransactionHistoryList({
     );
 
     return (
-        <>
-            {/* <Portal hostName='transactionReceipt'>
-                <CurrentTransactionModal modalKey='transactionReceipt' />
-            </Portal> */}
-            <View className='flex flex-col mt-5'>
-                <View className='flex flex-row w-full justify-between items-center px-5'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-base text-black'>
-                        Recent Transactions
+        <View className='flex flex-col mt-5'>
+            <View className='flex flex-row w-full justify-between items-center px-5'>
+                <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
+                    Recent Transactions
+                </Text>
+
+                <TouchableOpacity
+                    onPress={() => router.push('/transactions')}
+                    className='flex flex-row items-center space-x-1'
+                >
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-700'>
+                        View All
                     </Text>
-
-                    <TouchableOpacity
-                        onPress={() => router.push('/transactions')}
-                        className='flex flex-row items-center space-x-1'
-                    >
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-sm text-purple-700'
-                        >
-                            View All
-                        </Text>
-                        <ChevronRightIcon stroke='#9333ea' />
-                    </TouchableOpacity>
-                </View>
-
-                <FlashList
-                    estimatedItemSize={50}
-                    data={
-                        // TODO: refactor this to be neater later
-                        propTransactions
-                            ? getTopFiveTransactions(propTransactions)
-                            : getTopFiveTransactions(transactions)
-                    }
-                    keyExtractor={keyExtractor}
-                    contentContainerStyle={styles.flatlistContainerStyle}
-                    showsVerticalScrollIndicator={true}
-                    renderItem={renderItem}
-                    ItemSeparatorComponent={renderItemSeparator}
-                    scrollEnabled={false}
-                    ListEmptyComponent={renderEmptylist}
-                />
+                    <ChevronRightIcon stroke='#9333ea' />
+                </TouchableOpacity>
             </View>
-        </>
+
+            <FlashList
+                estimatedItemSize={50}
+                data={
+                    // TODO: refactor this to be neater later
+                    propTransactions
+                        ? getTopFiveTransactions(propTransactions)
+                        : getTopFiveTransactions(transactions)
+                }
+                keyExtractor={keyExtractor}
+                contentContainerStyle={styles.flatlistContainerStyle}
+                showsVerticalScrollIndicator={true}
+                renderItem={renderItem}
+                ItemSeparatorComponent={renderItemSeparator}
+                scrollEnabled={false}
+                ListEmptyComponent={renderEmptylist}
+            />
+        </View>
     );
 }
 

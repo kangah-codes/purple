@@ -81,8 +81,10 @@ export default function BudgetPlanCard({ data }: { data: Plan }) {
                 <View className='flex flex-col w-full mt-7'>
                     <Text style={[satoshiFont.satoshiBold]} className='text-xs'>
                         {Number(amountSpent.toFixed(0)) >= 100
-                            ? `${isExpense ? 'Budget limit' : 'Target'} reached ${!isExpense && '🎉'}`
-                            : `${amountSpent.toFixed(0)}%} ${isExpense ? 'spent' : 'saved'}`}
+                            ? `${isExpense ? 'Budget limit' : 'Target'} reached ${
+                                  !isExpense && '🎉'
+                              }`
+                            : `${amountSpent.toFixed(0)}% ${isExpense ? 'spent' : 'saved'}`}
                     </Text>
                     <View className='flex flex-row text-black'>
                         <Text style={satoshiFont.satoshiBold} className='text-sm mt-0.5'>

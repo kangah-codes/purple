@@ -75,7 +75,7 @@ export default function Screen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={process.env.NODE_ENV == 'development' ? 100 : 3000}
+                timePerPage={process.env.NODE_ENV == 'development' ? 1000 : 3000}
                 enableNavigation={false}
                 // disableAutomaticScroll
             />
