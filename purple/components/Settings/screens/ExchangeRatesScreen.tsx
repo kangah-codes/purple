@@ -9,7 +9,7 @@ import {
 } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { CurrencyRates } from '@/lib/services/CurrencyService';
+import CurrencyService, { CurrencyRates } from '@/lib/services/CurrencyService';
 import { keyExtractor } from '@/lib/utils/number';
 import { nativeStorage } from '@/lib/utils/storage';
 import { FlashList } from '@shopify/flash-list';
@@ -19,12 +19,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import ExchangeRateItem, { CurrencyCode } from '../molecules/ExchangeRateItem';
-import { SearchIcon } from '@/components/SVG/icons/noscale';
+import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from '@/components/SVG/icons/noscale';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 export default function ExchangeRatesScreen() {
     const [searchValue, setSearchValue] = useState('');
     const exchangeRates = nativeStorage.getItem<CurrencyRates>('currency-exchange-rates')!;
+    const [sortOrder, setSortOrder] = useState<'low-to-high' | 'high-to-low'>('high-to-low');
     const { preferences } = usePreferences();
     const renderItem = useCallback(
         ({ item }: { item: (typeof currencies)[0] }) => {
@@ -54,14 +55,33 @@ export default function ExchangeRatesScreen() {
         [],
     );
 
+    const calculateCurrency = useCallback(
+        (currencyCode: string) => {
+            const currencyService = CurrencyService.getInstance();
+            return currencyService.convertCurrency({
+                from: { currency: preferences.currency.toLowerCase() as CurrencyCode, amount: 1 },
+                to: { currency: currencyCode.toLowerCase() as CurrencyCode },
+            });
+        },
+        [preferences.currency],
+    );
+
     const filteredData = useMemo(() => {
-        return currencies.filter((currency) => {
-            const searchString = `${currency.code} ${currency.country} ${currency.name}`;
-            const matchesSearch = searchString.toLowerCase().includes(searchValue.toLowerCase());
-            const isNotUserCurrency = currency.code !== preferences.currency;
-            return matchesSearch && isNotUserCurrency;
-        });
-    }, [searchValue, preferences.currency]);
+        return currencies
+            .filter((currency) => {
+                const searchString = `${currency.code} ${currency.country} ${currency.name}`;
+                const matchesSearch = searchString
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase());
+                return matchesSearch && currency.code !== preferences.currency;
+            })
+            .sort((a, b) => {
+                const rateA = calculateCurrency(a.code);
+                const rateB = calculateCurrency(b.code);
+
+                return sortOrder === 'low-to-high' ? rateA - rateB : rateB - rateA;
+            });
+    }, [searchValue, preferences.currency, sortOrder, currencies, calculateCurrency]);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -78,6 +98,28 @@ export default function ExchangeRatesScreen() {
                         Exchange Rates
                     </Text>
                 </View>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        setSortOrder((prev) =>
+                            prev === 'high-to-low' ? 'low-to-high' : 'high-to-low',
+                        )
+                    }
+                    className='flex flex-row items-center justify-center'
+                >
+                    <ArrowDownIcon
+                        width={20}
+                        height={20}
+                        stroke={sortOrder === 'low-to-high' ? '#9333ea' : '#dab2ff'}
+                        strokeWidth={3}
+                    />
+                    <ArrowUpIcon
+                        width={20}
+                        height={20}
+                        stroke={sortOrder === 'high-to-low' ? '#9333ea' : '#dab2ff'}
+                        strokeWidth={3}
+                    />
+                </TouchableOpacity>
             </View>
             <View className='px-5'>
                 <View className='relative flex justify-center mt-2.5 mb-5'>

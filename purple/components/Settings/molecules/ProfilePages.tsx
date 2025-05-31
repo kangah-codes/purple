@@ -3,6 +3,7 @@ import {
     AlertHexagonIcon,
     CashIcon,
     ClosedLockIcon,
+    FolderLockIcon,
     PiggyBankIcon,
     SafeIcon,
 } from '@/components/SVG/icons/noscale';
@@ -58,6 +59,12 @@ export default function ProfilePages() {
             title: 'Categories',
             link: '/settings/transaction-categories',
             description: 'Manage transaction categories',
+        },
+        {
+            icon: <FolderLockIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Storage',
+            link: '/settings/storage-settings',
+            description: 'Manage local data, backups, and storage',
         },
         {
             icon: <ClosedLockIcon width={20} height={20} stroke={'#9333ea'} />,

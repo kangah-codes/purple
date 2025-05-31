@@ -7,6 +7,8 @@ import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { usePlanStore } from '@/components/Plans/hooks';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { useTransactionStore } from '@/components/Transactions/hooks';
+import { useScreenTracking } from '@/lib/providers/Analytics';
+import { nativeStorage } from '@/lib/utils/storage';
 import React from 'react';
 import Toast from 'react-native-toast-message';
 
@@ -39,6 +41,12 @@ export default function Screen() {
                 setPlans(res.data.plans);
             },
         },
+    });
+
+    console.log(nativeStorage.getItem('analytics-data'));
+
+    useScreenTracking('home', {
+        source: 'navigation',
     });
 
     if (isLoading || user == null) {

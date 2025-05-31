@@ -24,7 +24,10 @@ func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 			"/api/v1/auth/sign-up":        true,
 			"/api/v1/auth/check-username": true,
 			"/api/v1/auth/activate":       true,
+			"/api/v1/tracking/":           true,
 		}
+
+		log.InfoLogger.Println(c.FullPath())
 
 		if disabledRoutes[c.FullPath()] {
 			c.Next()

@@ -22,6 +22,7 @@ type Container struct {
 	AccountService     *services.AccountService
 	TransactionService *services.TransactionService
 	StatsService       *services.StatsService
+	AnalyticsService   *services.AnalyticsService
 }
 
 func NewAPIContainer(cfg *config.Config) *Container {
@@ -31,6 +32,7 @@ func NewAPIContainer(cfg *config.Config) *Container {
 	authRepo := repositories.NewPostgresAuthRepository(cfg)
 	planRepo := repositories.NewPostgresPlanRepository(cfg)
 	transactionRepo := repositories.NewPostgresTransactionRepository(cfg)
+	analyticsRepo := repositories.NewCachingAnalyticsRepository(cfg)
 
 	// add caching
 	cacheUserRepo := repositories.NewCachingUserRepository(userRepo, cfg, "app:v1", time.Minute*5)
@@ -46,6 +48,7 @@ func NewAPIContainer(cfg *config.Config) *Container {
 	transactionService := services.NewTransactionService(cacheTransactionRepo, cacheAccountRepo, cfg)
 	authService := services.NewAuthService(cacheAuthRepo, cacheUserRepo, cfg)
 	statsService := services.NewStatsService(planRepo, transactionRepo, cfg)
+	analyticsService := services.NewAnalyticsService(analyticsRepo, cfg)
 
 	return &Container{
 		// repos
@@ -62,5 +65,6 @@ func NewAPIContainer(cfg *config.Config) *Container {
 		TransactionService: transactionService,
 		AuthService:        authService,
 		StatsService:       statsService,
+		AnalyticsService:   analyticsService,
 	}
 }

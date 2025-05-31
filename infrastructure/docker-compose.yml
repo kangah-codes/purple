@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -23,6 +23,51 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
+
+  android-builder:
+    build:
+      context: ../
+      dockerfile: infrastructure/AndroidBuild.Dockerfile
+    container_name: purple-android-builder
+    volumes:
+      - ../purple:/app
+      - ./output:/output
+      - ./workspace:/workspace
+    environment:
+      - EXPO_TOKEN=${EXPO_TOKEN:-}
+      - API_URL=${API_URL:-}
+      - API_KEY=${API_KEY:-}
+    working_dir: /app
+    command: >
+      bash -c "
+        echo 'Container ready for building...' &&
+        echo 'Use: docker-compose exec android-builder build-apk.sh --help for options' &&
+        tail -f /dev/null
+      "
+
+  android-builder-dev:
+    extends: android-builder
+    container_name: purple-android-builder-dev
+    command: >
+      /usr/local/bin/build-apk.sh
+      --profile development
+      --output purple-dev.apk
+      --env dev
+      --api-url ${API_URL:-}
+      --api-key ${API_KEY:-}
+      --expo-token ${EXPO_TOKEN:-}
+
+  android-builder-rc:
+    extends: android-builder
+    container_name: purple-android-builder-rc
+    command: >
+      /usr/local/bin/build-apk.sh
+      --profile rc
+      --output purple-rc.apk
+      --env rc
+      --api-url ${API_URL:-}
+      --api-key ${API_KEY:-}
+      --expo-token ${EXPO_TOKEN:-}
 
 volumes:
   postgres_data:

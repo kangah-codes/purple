@@ -4,6 +4,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -13,7 +14,7 @@ import {
     AnalyticsTracker,
     ErrorLevel,
     EventProperties,
-} from '../services/Analytics';
+} from '../services/AnalyticsService';
 
 type AnalyticsContextType = {
     analytics: AnalyticsTracker | null;
@@ -21,7 +22,7 @@ type AnalyticsContextType = {
     queueSize: number;
     isOnline: boolean;
     sessionId: string | null;
-    userId: string | null;
+    uniqueId: string | null;
     logEvent: <T extends keyof EventProperties>(
         name: T,
         properties: EventProperties[T] | Record<string, unknown>,
@@ -31,7 +32,6 @@ type AnalyticsContextType = {
         extraMetadata?: Record<string, unknown>,
         level?: ErrorLevel,
     ) => Promise<void>;
-    setUserId: (userId: string | null) => void;
     flush: () => Promise<void>;
     clearQueue: () => Promise<void>;
 };
@@ -57,7 +57,7 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     const [queueSize, setQueueSize] = useState(0);
     const [isOnline, setIsOnline] = useState(true);
     const [sessionId, setSessionId] = useState<string | null>(null);
-    const [userId, setUserId] = useState<string | null>(null);
+    const [uniqueId, setUniqueId] = useState<string | null>(null);
 
     useEffect(() => {
         const initializeAnalytics = async () => {
@@ -69,7 +69,7 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
 
                 analyticsRef.current = analytics;
                 setSessionId(analytics.getSessionId());
-                setUserId(analytics.getUserId());
+                setUniqueId(analytics.getUniqueId());
                 setIsOnline(analytics.isOnlineStatus());
                 setQueueSize(analytics.getQueueSize());
                 setIsInitialized(true);
@@ -172,16 +172,6 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
         [onError],
     );
 
-    const handleSetUserId = useCallback((newUserId: string | null) => {
-        if (!analyticsRef.current) {
-            console.warn('[AnalyticsProvider] Analytics not initialized, user ID not set');
-            return;
-        }
-
-        analyticsRef.current.setUserId(newUserId);
-        setUserId(newUserId);
-    }, []);
-
     const flush = useCallback(async (): Promise<void> => {
         if (!analyticsRef.current) {
             console.warn('[AnalyticsProvider] Analytics not initialized, flush ignored');
@@ -219,10 +209,9 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
         queueSize,
         isOnline,
         sessionId,
-        userId,
+        uniqueId,
         logEvent: logEvent as any,
         logError,
-        setUserId: handleSetUserId,
         flush,
         clearQueue,
     };
@@ -279,27 +268,17 @@ export const useAnalyticsError = () => {
 
 export const useScreenTracking = (
     screenName: string,
-    additionalProperties?: Record<string, unknown>,
+    additionalProperties: Record<string, unknown> = {},
 ) => {
     const logEvent = useAnalyticsEvent();
+    const memoizedProps = useMemo(() => additionalProperties, []);
 
     useEffect(() => {
         logEvent('screen_view', {
             screen: screenName,
-            ...additionalProperties,
+            ...memoizedProps,
         }).catch(console.error);
-    }, [screenName, logEvent, additionalProperties]);
-};
-
-export const useAnalyticsUser = () => {
-    const { setUserId, userId, sessionId } = useAnalytics();
-
-    return {
-        setUserId,
-        userId,
-        sessionId,
-        isLoggedIn: userId !== null,
-    };
+    }, [screenName, logEvent, memoizedProps]);
 };
 
 export const useAnalyticsStatus = () => {

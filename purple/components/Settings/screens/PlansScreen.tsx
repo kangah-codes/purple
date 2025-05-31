@@ -1,6 +1,5 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-import { CoinsStackedIcon, EyeCloseIcon, PinIcon, ScaleIcon } from '@/components/SVG/icons/noscale';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
+import { CoinsStackedIcon, EyeCloseIcon } from '@/components/SVG/icons/noscale';
 import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';

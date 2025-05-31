@@ -3,6 +3,7 @@ import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
@@ -64,47 +65,62 @@ export default function RootLayout() {
                                     <PortalProvider>
                                         <SafeAreaProvider>
                                             <ThemeProvider value={DefaultTheme}>
-                                                {/** Portal Rendering  */}
-                                                {/* {transactionPortal} */}
-                                                <CurrentTransactionModal modalKey='transactionReceipt' />
-
-                                                {/** Main Navigation Stack */}
-                                                <Stack
-                                                    screenOptions={{
-                                                        contentStyle: {
-                                                            backgroundColor: '#fff',
-                                                        },
+                                                <AnalyticsProvider
+                                                    config={{
+                                                        endpoint: 'URL',
+                                                        apiKey: 'API_KEY',
+                                                        enableDebugLogs: true,
+                                                        syncEveryMs: 200000000000000,
+                                                        batchSize: 25,
                                                     }}
+                                                    onInitialized={() => {
+                                                        console.log('Analytics initialised!');
+                                                    }}
+                                                    onError={(error) => {
+                                                        console.error('Analytics error:', error);
+                                                    }}
+                                                    autoFlushOnBackground={true}
                                                 >
-                                                    <Stack.Screen
-                                                        name='(tabs)'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='plans'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='accounts'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='transactions'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='onboarding'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='auth'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='settings'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                </Stack>
+                                                    {/** Portal Rendering  */}
+                                                    <CurrentTransactionModal modalKey='transactionReceipt' />
+                                                    {/** Main Navigation Stack */}
+                                                    <Stack
+                                                        screenOptions={{
+                                                            contentStyle: {
+                                                                backgroundColor: '#fff',
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Stack.Screen
+                                                            name='(tabs)'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='plans'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='accounts'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='transactions'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='onboarding'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='auth'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                        <Stack.Screen
+                                                            name='settings'
+                                                            options={{ headerShown: false }}
+                                                        />
+                                                    </Stack>
+                                                </AnalyticsProvider>
                                             </ThemeProvider>
                                         </SafeAreaProvider>
                                     </PortalProvider>

@@ -1,21 +1,15 @@
 import { useInfinitePlans, usePlanStore } from '@/components/Plans/hooks';
 import BudgetPlanCard from '@/components/Plans/molecules/BudgetCard';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { router, useFocusEffect } from 'expo-router';
-import React, { useCallback, useEffect } from 'react';
-import {
-    ActivityIndicator,
-    FlatList,
-    Keyboard,
-    StatusBar as RNStatusBar,
-    StyleSheet,
-} from 'react-native';
-import Toast from 'react-native-toast-message';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-import { satoshiFont } from '@/lib/constants/fonts';
+import React, { useCallback, useEffect } from 'react';
+import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function HiddenPlansScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
