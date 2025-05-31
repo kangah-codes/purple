@@ -67,6 +67,7 @@ if [[ -n "$API_URL" && -n "$API_KEY" ]]; then
   echo "📝 Creating .env file..."
   echo "EXPO_PUBLIC_API_URL=$API_URL" > .env
   echo "EXPO_PUBLIC_API_KEY=$API_KEY" >> .env
+  echo "EAS_NO_VCS=1" >> .env
 
   if [[ "$NODE_ENV" == "dev" ]]; then
     echo "NODE_ENV=dev" >> .env

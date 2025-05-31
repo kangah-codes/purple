@@ -4,7 +4,6 @@ import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { Portal } from '@gorhom/portal';
-import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -40,24 +39,22 @@ export default function StorageScreen() {
     };
 
     async function exportBackup() {
-        const backupUri = `${FileSystem.documentDirectory}backup/mydb_backup.db`;
-
-        // Make sure backup exists
-        try {
-            await FileSystem.copyAsync({
-                from: `${FileSystem.documentDirectory}SQLite/purple_test_1.db`,
-                to: backupUri,
-            });
-
-            // if (await Sharing.isAvailableAsync()) {
-            //     await Sharing.shareAsync(backupUri);
-            // } else {
-            //     alert('Sharing is not available on this device');
-            // }
-            console.log('backup success');
-        } catch (error) {
-            console.error('Export failed:', error);
-        }
+        // const backupUri = `${FileSystem.documentDirectory}backup/mydb_backup.db`;
+        // // Make sure backup exists
+        // try {
+        //     await FileSystem.copyAsync({
+        //         from: `${FileSystem.documentDirectory}SQLite/purple_test_1.db`,
+        //         to: backupUri,
+        //     });
+        //     // if (await Sharing.isAvailableAsync()) {
+        //     //     await Sharing.shareAsync(backupUri);
+        //     // } else {
+        //     //     alert('Sharing is not available on this device');
+        //     // }
+        //     console.log('backup success');
+        // } catch (error) {
+        //     console.error('Export failed:', error);
+        // }
     }
 
     const settingsItems: SettingsListItem[] = [
