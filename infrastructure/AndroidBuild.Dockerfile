@@ -1,38 +1,25 @@
 # infrastructure/Dockerfile.android-build
 FROM ubuntu:22.04
 
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
-ENV PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH=${PATH}:${JAVA_HOME}/bin
-ENV NODE_VERSION=20.x
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${JAVA_HOME}/bin
 
-# Install system dependencies
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    git \
-    unzip \
-    build-essential \
-    python3 \
-    python3-pip \
-    openjdk-17-jdk \
+    curl wget git unzip build-essential python3 python3-pip \
+    openjdk-17-jdk bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Set up Java environment
-RUN update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk-amd64/bin/java 1
-RUN update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac 1
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+RUN update-alternatives --install /usr/bin/java java ${JAVA_HOME}/bin/java 1 && \
+    update-alternatives --install /usr/bin/javac javac ${JAVA_HOME}/bin/javac 1
 
-# Install Node.js 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
-# Install Yarn
-RUN npm install -g yarn
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g yarn
 
 # Install Android SDK
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
@@ -42,34 +29,14 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
     rm commandlinetools-linux-9477386_latest.zip && \
     mv cmdline-tools latest
 
-# Update PATH for Android SDK
-ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin
-
-# Accept Android SDK licenses and install required packages
 RUN yes | sdkmanager --licenses && \
-    sdkmanager "platforms;android-34" \
-    "build-tools;34.0.0" \
-    "platform-tools" \
-    "tools"
+    sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
-# Install Expo CLI and EAS CLI globally
-RUN npm install -g @expo/cli@latest eas-cli@latest
+# Install expo + eas
+RUN npm install -g expo-cli eas-cli
 
-# Set working directory
-WORKDIR /app
-
-# Copy package files for dependency installation
-COPY purple/package.json purple/yarn.lock ./
-
-# Install dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy the entire purple directory
-COPY purple/ ./
-
-# Create entrypoint script
-COPY infrastructure/build-apk.sh /usr/local/bin/build-apk.sh
+# Copy build script
+COPY build-apk.sh /usr/local/bin/build-apk.sh
 RUN chmod +x /usr/local/bin/build-apk.sh
 
-# Set the entrypoint
-ENTRYPOINT ["/usr/local/bin/build-apk.sh"]
+WORKDIR /app

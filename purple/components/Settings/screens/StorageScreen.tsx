@@ -6,7 +6,6 @@ import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { Portal } from '@gorhom/portal';
 import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
-import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
@@ -46,15 +45,16 @@ export default function StorageScreen() {
         // Make sure backup exists
         try {
             await FileSystem.copyAsync({
-                from: `${FileSystem.documentDirectory}SQLite/mydb.db`,
+                from: `${FileSystem.documentDirectory}SQLite/purple_test_1.db`,
                 to: backupUri,
             });
 
-            if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(backupUri);
-            } else {
-                alert('Sharing is not available on this device');
-            }
+            // if (await Sharing.isAvailableAsync()) {
+            //     await Sharing.shareAsync(backupUri);
+            // } else {
+            //     alert('Sharing is not available on this device');
+            // }
+            console.log('backup success');
         } catch (error) {
             console.error('Export failed:', error);
         }

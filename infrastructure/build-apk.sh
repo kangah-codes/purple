@@ -3,6 +3,10 @@
 
 set -e
 
+echo "🔍 Debug: Script started with args: $@"
+echo "🔍 Debug: Current directory: $(pwd)"
+echo "🔍 Debug: Script path: $0"
+
 # Default values
 PROFILE="development"
 OUTPUT_NAME="purple-dev.apk"
@@ -40,11 +44,11 @@ while [[ $# -gt 0 ]]; do
       echo "Options:"
       echo "  --profile PROFILE    Build profile (development|rc) [default: development]"
       echo "  --output OUTPUT      Output APK filename [default: purple-dev.apk]"
-      echo "  --env ENV           Environment (dev|rc) [default: dev]"
-      echo "  --api-url URL       API URL for environment variables"
-      echo "  --api-key KEY       API key for environment variables"
-      echo "  --expo-token TOKEN  Expo token for authentication"
-      echo "  -h, --help          Show this help message"
+      echo "  --env ENV            Environment (dev|rc) [default: dev]"
+      echo "  --api-url URL        API URL for environment variables"
+      echo "  --api-key KEY        API key for environment variables"
+      echo "  --expo-token TOKEN   Expo token for authentication"
+      echo "  -h, --help           Show this help message"
       exit 0
       ;;
     *)

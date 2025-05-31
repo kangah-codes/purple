@@ -8,7 +8,7 @@ This Docker setup replicates your GitHub Actions environment for building Androi
 your-monorepo/
 ├── infrastructure/
 │   ├── Dockerfile.android-build
-│   ├── docker-compose.android.yml
+│   ├── docker compose.android.yml
 │   ├── build-apk.sh
 │   ├── Makefile
 │   ├── .env.example
@@ -80,16 +80,16 @@ make clean
 ### Using Docker Compose Directly
 ```bash
 # Development build
-docker-compose -f docker-compose.android.yml run --rm android-builder-dev
+docker compose -f docker compose.android.yml run --rm android-builder-dev
 
 # Release candidate build
-docker-compose -f docker-compose.android.yml run --rm android-builder-rc
+docker compose -f docker compose.android.yml run --rm android-builder-rc
 ```
 
 ### Using Build Script Directly
 ```bash
 # Start interactive container
-docker-compose -f docker-compose.android.yml run --rm android-builder
+docker compose -f docker compose.android.yml run --rm android-builder
 
 # Inside container, run:
 build-apk.sh --profile development --output my-app.apk
@@ -114,7 +114,7 @@ build-apk.sh --profile rc --output my-app-rc.apk
 ```bash
 make shell
 # Or
-docker-compose -f docker-compose.android.yml run --rm android-builder bash
+docker compose -f docker compose.android.yml run --rm android-builder bash
 ```
 
 ### View Build Logs
@@ -181,7 +181,7 @@ The `build-apk.sh` script supports these options:
 make help
 
 # Show build script options
-docker-compose -f docker-compose.android.yml run --rm android-builder build-apk.sh --help
+docker compose -f docker compose.android.yml run --rm android-builder build-apk.sh --help
 ```
 
 ## 🎯 Advantages Over GitHub Actions

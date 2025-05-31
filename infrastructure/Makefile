@@ -51,20 +51,65 @@ db-restart: db-down db-up
 setup:
 	@echo "🔧 Setting up build environment..."
 	mkdir -p output workspace
-	docker compose build android-builder
+	@echo "⏳ Building Android container (this may take 10-15 minutes on first run)..."
+	@echo "💡 Tip: Subsequent builds will be much faster due to Docker layer caching"
+	DOCKER_BUILDKIT=1 docker compose build android-builder
 	@echo "✅ Setup complete!"
+
+# Faster setup with parallel downloads and build optimizations
+setup-fast:
+	@echo "🚀 Setting up build environment (optimized)..."
+	mkdir -p output workspace
+	@echo "⚡ Building with optimizations enabled..."
+	DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker compose build --parallel android-builder
+	@echo "✅ Fast setup complete!"
+
+# Setup with no cache (clean build)
+setup-clean:
+	@echo "🧹 Clean setup (rebuilding everything from scratch)..."
+	mkdir -p output workspace
+	DOCKER_BUILDKIT=1 docker compose build --no-cache android-builder
+	@echo "✅ Clean setup complete!"
 
 # Build development APK
 build-dev: setup
 	@echo "🚀 Building development APK..."
+	@if [ -z "$(EXPO_TOKEN)" ]; then \
+		echo "⚠️  Warning: EXPO_TOKEN not set. Build may fail."; \
+		echo "   Set it with: EXPO_TOKEN=your_token make build-dev"; \
+	fi
 	docker compose run --rm android-builder-dev
 	@echo "✅ Development build complete! Check ./output/purple-dev.apk"
 
 # Build release candidate APK
 build-rc: setup
 	@echo "🚀 Building release candidate APK..."
+	@if [ -z "$(EXPO_TOKEN)" ]; then \
+		echo "⚠️  Warning: EXPO_TOKEN not set. Build may fail."; \
+		echo "   Set it with: EXPO_TOKEN=your_token make build-rc"; \
+	fi
 	docker compose run --rm android-builder-rc
 	@echo "✅ Release candidate build complete! Check ./output/purple-rc.apk"
+
+test:
+	@echo "🧪 Testing container setup..."
+	docker compose run --rm android-builder bash -c 'echo "Container works!" && node --version && java -version && which eas'
+
+build:
+	docker compose run --rm android-builder bash -c "build-apk.sh"
+
+# Build development APK with direct command (alternative method)
+build-dev-direct: setup
+	@echo "🚀 Building development APK (direct method)..."
+	docker compose run --rm android-builder bash -c "\
+		/usr/local/bin/build-apk.sh \
+		--profile development \
+		--output purple-dev.apk \
+		--env dev \
+		--api-url '$(API_URL)' \
+		--api-key '$(API_KEY)' \
+		--expo-token '$(EXPO_TOKEN)'"
+	@echo "✅ Development build complete! Check ./output/purple-dev.apk"
 
 # Build both versions
 build-both: build-dev build-rc
