@@ -15,6 +15,7 @@ import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
+import { useScreenTracking } from '@/lib/providers/Analytics';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
@@ -24,6 +25,10 @@ function AccountScreen() {
         useAccountStore();
     const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
 
+    useScreenTracking('account', {
+        source: 'navigation',
+        id: accountID,
+    });
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
         setCurrentAccountRequestParams({
@@ -61,7 +66,6 @@ function AccountScreen() {
 
     const {
         data: transactions,
-        isFetching: transactionsFetching,
         isLoading: transactionsLoading,
         refetch: transactionsRefetch,
     } = useTransactions({
@@ -85,14 +89,12 @@ function AccountScreen() {
     });
     useRefreshOnFocus(transactionsRefetch);
     useRefreshOnFocus(accountRefetch);
-
     useEffect(() => {
         setCurrentAccountRequestParams({
             accountID,
             page_size: Infinity,
         });
     }, []);
-
     useEffect(() => {
         if (!accountsLoading && !transactionsLoading && !initialLoadComplete) {
             setInitialLoadComplete(true);

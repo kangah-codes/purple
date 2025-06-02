@@ -16,6 +16,7 @@ import Toast from 'react-native-toast-message';
 import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
 import { Account } from '../schema';
+import { useScreenTracking } from '@/lib/providers/Analytics';
 
 export default function AccountsScreen() {
     const { setAccounts, accounts } = useAccountStore();
@@ -25,22 +26,24 @@ export default function AccountsScreen() {
                 const res = data as GenericAPIResponse<Account[]>;
                 setAccounts(res.data);
             },
-            // @ts-ignore wtf is this
-            onError: (err: Error) => {
+            onError: () => {
                 Toast.show({
                     type: 'error',
                     props: {
                         text1: 'Error!',
-                        text2: err.message,
+                        text2: "Couldn't fetch your accounts",
                     },
                 });
             },
         },
         requestQuery: {
             page: 1,
-            // we would want to fetch all user accounts on the index screen
-            limit: 999,
+            limit: Infinity,
         },
+    });
+
+    useScreenTracking('accounts', {
+        source: 'navigation',
     });
 
     const handleNavigation = useCallback(() => {

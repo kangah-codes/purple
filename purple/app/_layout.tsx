@@ -3,7 +3,7 @@ import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
-import { AnalyticsProvider } from '@/lib/providers/Analytics';
+import { AnalyticsProvider, useAnalytics } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
@@ -22,15 +22,28 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
 };
-const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-});
 
 SplashScreen.preventAutoHideAsync();
 LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);
+    const { logError } = useAnalytics();
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                retry: false,
+                onError: (err: Error) => {
+                    logError(err, {}, 'error');
+                },
+            },
+            mutations: {
+                onError: (err) => {
+                    logError(err, {}, 'error');
+                },
+            },
+        },
+    });
 
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {

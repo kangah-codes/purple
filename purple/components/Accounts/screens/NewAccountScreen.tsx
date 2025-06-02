@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
-import FallbackImage from '@/components/Shared/atoms/ImageWithFallback';
+import FlagIcon from '@/components/Shared/atoms/FlagIcon';
 import SearchableSelectField, {
     SelectOption,
 } from '@/components/Shared/atoms/SearchableSelectField';
@@ -19,6 +19,7 @@ import {
 import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics, useScreenTracking } from '@/lib/providers/Analytics';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -27,7 +28,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
-import FlagIcon from '@/components/Shared/atoms/FlagIcon';
 
 export default function NewAccountScreen() {
     const {
@@ -37,6 +37,7 @@ export default function NewAccountScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { updateAccounts } = useAccountStore();
     const { mutate, isLoading } = useCreateAccount();
+    const { logEvent } = useAnalytics();
     const {
         control,
         handleSubmit,
@@ -52,7 +53,17 @@ export default function NewAccountScreen() {
         },
     });
 
-    const onSubmit = (data: { category: string; name: string; balance: string }) => {
+    useScreenTracking('new_account', {
+        source: 'navigation',
+    });
+
+    const onSubmit = async (data: { category: string; name: string; balance: string }) => {
+        await logEvent('button_tap', {
+            button: 'submit',
+            screen: 'new_account_screen',
+            log: 'attempting to create account',
+            data,
+        });
         Keyboard.dismiss();
         mutate(
             {
@@ -69,7 +80,7 @@ export default function NewAccountScreen() {
                         },
                     });
                 },
-                onSuccess: (res) => {
+                onSuccess: async (res) => {
                     const { data } = res;
 
                     updateAccounts(data);
@@ -79,6 +90,11 @@ export default function NewAccountScreen() {
                             text1: 'Success!',
                             text2: 'Account created successfully',
                         },
+                    });
+
+                    await logEvent('object_created', {
+                        object_type: 'account',
+                        payload: data,
                     });
                     router.replace('/(tabs)/accounts');
                 },
@@ -95,7 +111,6 @@ export default function NewAccountScreen() {
             </View>
         );
     }, []);
-
     const renderSelectedCurrency = () => {
         const selectedCode = getValues('currency');
         const currency = currencies.find((c) => c.code === selectedCode);
@@ -173,19 +188,13 @@ export default function NewAccountScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanType'
-                                            options={accountGroups.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={accountGroups.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '55%', '60%']}
                                             renderItem={renderItem}
                                             value={value}

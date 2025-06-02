@@ -4,7 +4,7 @@ import { NativeStorage } from '../utils/storage';
 import { UUID } from '../utils/helpers';
 import { AppState } from 'react-native';
 
-type EventName = 'screen_view' | 'button_tap' | 'error_occurred' | string;
+type EventName = 'screen_view' | 'button_tap' | 'error_occurred' | 'object_created' | string;
 type EventProperties = {
     screen_view: {
         screen: string;
@@ -20,6 +20,10 @@ type EventProperties = {
         error_type: string;
         context: string;
         severity: 'low' | 'medium' | 'high';
+    };
+    object_created: {
+        object_type: string;
+        payload: Record<string, unknown>;
     };
 };
 type BaseEventData = {
