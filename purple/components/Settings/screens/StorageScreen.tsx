@@ -14,7 +14,6 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
-import { useBackup } from '@/lib/hooks/useBackup';
 
 export default function StorageScreen() {
     const {
@@ -23,7 +22,6 @@ export default function StorageScreen() {
     } = usePreferences();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
-    const { backupDatabase } = useBackup();
 
     const handleToggle = async (value: boolean) => {
         try {
@@ -59,21 +57,12 @@ export default function StorageScreen() {
     // }
     // }
 
-    const backupDB = useCallback(async () => {
-        try {
-            await backupDatabase();
-            Alert.alert('Success', 'Database exported successfully!');
-        } catch {
-            Alert.alert('Error', 'Failed to export database.');
-        }
-    }, []);
-
     const settingsItems: SettingsListItem[] = [
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Data',
             description: 'Create a backup of your current data',
-            callback: backupDB,
+            // callback: backupDB,
         },
     ];
 
