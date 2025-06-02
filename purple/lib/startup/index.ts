@@ -13,7 +13,7 @@ export async function initializeApp(db: SQLiteDatabase) {
         // load startup tasks here
         startupService.registerStartupTask(loadFonts);
         startupService.registerStartupTask(() => initializePreferences(db));
-        startupService.registerStartupTask(() => currencyService.fetchExchangeRates('ghs'));
+        startupService.registerStartupTask(() => currencyService.fetchExchangeRates());
 
         await startupService.runMigrations(db);
         await startupService.executeStartupTasks();

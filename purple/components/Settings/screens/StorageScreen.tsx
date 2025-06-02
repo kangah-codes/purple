@@ -7,13 +7,14 @@ import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
+import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import { useBackup } from '@/lib/hooks/useBackup';
 
 export default function StorageScreen() {
     const {
@@ -22,6 +23,7 @@ export default function StorageScreen() {
     } = usePreferences();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
+    const { backupDatabase } = useBackup();
 
     const handleToggle = async (value: boolean) => {
         try {
@@ -38,31 +40,40 @@ export default function StorageScreen() {
         }
     };
 
-    async function exportBackup() {
-        // const backupUri = `${FileSystem.documentDirectory}backup/mydb_backup.db`;
-        // // Make sure backup exists
-        // try {
-        //     await FileSystem.copyAsync({
-        //         from: `${FileSystem.documentDirectory}SQLite/purple_test_1.db`,
-        //         to: backupUri,
-        //     });
-        //     // if (await Sharing.isAvailableAsync()) {
-        //     //     await Sharing.shareAsync(backupUri);
-        //     // } else {
-        //     //     alert('Sharing is not available on this device');
-        //     // }
-        //     console.log('backup success');
-        // } catch (error) {
-        //     console.error('Export failed:', error);
-        // }
-    }
+    // async function exportBackup() {
+    // const backupUri = `${FileSystem.documentDirectory}backup/mydb_backup.db`;
+    // // Make sure backup exists
+    // try {
+    //     await FileSystem.copyAsync({
+    //         from: `${FileSystem.documentDirectory}SQLite/purple_test_1.db`,
+    //         to: backupUri,
+    //     });
+    //     // if (await Sharing.isAvailableAsync()) {
+    //     //     await Sharing.shareAsync(backupUri);
+    //     // } else {
+    //     //     alert('Sharing is not available on this device');
+    //     // }
+    //     console.log('backup success');
+    // } catch (error) {
+    //     console.error('Export failed:', error);
+    // }
+    // }
+
+    const backupDB = useCallback(async () => {
+        try {
+            await backupDatabase();
+            Alert.alert('Success', 'Database exported successfully!');
+        } catch {
+            Alert.alert('Error', 'Failed to export database.');
+        }
+    }, []);
 
     const settingsItems: SettingsListItem[] = [
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Data',
             description: 'Create a backup of your current data',
-            callback: exportBackup,
+            callback: backupDB,
         },
     ];
 

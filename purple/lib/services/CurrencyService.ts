@@ -1,6 +1,7 @@
 import Toast from 'react-native-toast-message';
 import { currencies } from '../constants/currencies';
 import { NativeStorage } from '../utils/storage';
+import { usePreferencesStore } from '@/components/Settings/state';
 
 type CurrencyCode = Lowercase<(typeof currencies)[number]['code']>;
 export type CurrencyRates = {
@@ -34,10 +35,11 @@ export default class CurrencyService {
         return this.instance;
     }
 
-    public async fetchExchangeRates(code: CurrencyCode): Promise<void> {
+    public async fetchExchangeRates(code?: CurrencyCode): Promise<void> {
         try {
+            const { currency } = usePreferencesStore.getState().preferences;
             const res = await fetch(
-                `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${code.toLowerCase()}.json`,
+                `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${code ? code.toLowerCase() : currency.toLowerCase()}.json`,
             );
             if (!res.ok) {
                 throw new Error(`Failed to fetch currency data: ${res.status}`);
