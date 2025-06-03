@@ -40,8 +40,8 @@ type EnvConfig struct {
 	// Redis
 	RedisHost     string `mapstructure:"REDIS_HOST" validate:"required"`
 	RedisPort     string `mapstructure:"REDIS_PORT" validate:"required,numeric"`
-	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisUsername string `mapstructure:"REDIS_USERNAME"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD" validate:"required"`
+	RedisUsername string `mapstructure:"REDIS_USERNAME" validate:"required"`
 
 	// Server
 	ServerPort string `mapstructure:"SERVER_PORT"`
@@ -170,11 +170,13 @@ func (c *Config) InitialiseDB() error {
 func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
 	var tlsConfig *tls.Config
-	if config.Env.ENV == "dev" {
-		tlsConfig = nil
-	} else {
-		tlsConfig = &tls.Config{InsecureSkipVerify: true}
-	}
+	tlsConfig = nil
+	// if config.Env.ENV == "dev" || config.Env.ENV == "staging" {
+	// } else {
+	// 	tlsConfig = &tls.Config{InsecureSkipVerify: true}
+	// }
+
+	fmt.Printf("%s %s %s %s", c.Env.RedisHost, c.Env.RedisPort, c.Env.RedisUsername, c.Env.RedisPassword)
 
 	c.Redis = redis.NewClient(&redis.Options{
 		Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
