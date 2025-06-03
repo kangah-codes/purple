@@ -7,13 +7,10 @@ import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import { usePreferences } from '@/components/Settings/hooks';
+import { useScreenTracking } from '@/lib/providers/Analytics';
 
 function ExpensesScreen() {
     const { setExpensePlans, expensePlans } = usePlanStore();
-    const {
-        preferences: { hideCompletedPlans },
-    } = usePreferences();
     const { data, fetchNextPage, hasNextPage, isLoading, refetch } = useInfinitePlans({
         requestQuery: {
             type: 'expense',
@@ -39,6 +36,9 @@ function ExpensesScreen() {
             refetch();
         }, [refetch]),
     );
+    useScreenTracking('plans_expenses', {
+        source: 'navigation',
+    });
 
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderEmptylist = useCallback(
@@ -54,7 +54,7 @@ function ExpensesScreen() {
         return (
             <View className='flex flex-col space-y-5 -px-5'>
                 {/* <PlanInfoCard type='expense' /> */}
-                <View style={styles.listHeaderView} />
+                <View />
             </View>
         );
     }, []);
@@ -104,10 +104,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingBottom: 100,
-        // paddingHorizontal: 20,
-    },
-    listHeaderView: {
-        // marginTop: 20,
     },
     itemSeparator: {
         height: 10,

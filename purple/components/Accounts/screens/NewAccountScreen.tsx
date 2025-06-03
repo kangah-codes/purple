@@ -53,10 +53,6 @@ export default function NewAccountScreen() {
         },
     });
 
-    useScreenTracking('new_account', {
-        source: 'navigation',
-    });
-
     const onSubmit = async (data: { category: string; name: string; balance: string }) => {
         await logEvent('button_tap', {
             button: 'submit',
@@ -188,13 +184,19 @@ export default function NewAccountScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newPlanType'
-                                            options={accountGroups.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accountGroups.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '55%', '60%']}
                                             renderItem={renderItem}
                                             value={value}

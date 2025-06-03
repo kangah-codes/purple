@@ -4,7 +4,15 @@ import { NativeStorage } from '../utils/storage';
 import { UUID } from '../utils/helpers';
 import { AppState } from 'react-native';
 
-type EventName = 'screen_view' | 'button_tap' | 'error_occurred' | 'object_created' | string;
+type EventName =
+    | 'screen_view'
+    | 'button_tap'
+    | 'error_occurred'
+    | 'object_created'
+    | 'app_open'
+    | 'app_exit'
+    | 'settings_set'
+    | string;
 type EventProperties = {
     screen_view: {
         screen: string;
@@ -25,6 +33,20 @@ type EventProperties = {
         object_type: string;
         payload: Record<string, unknown>;
     };
+    app_open: {
+        launch_type: 'cold' | 'warm' | 'background';
+        from_notification?: boolean;
+    };
+    app_exit: {
+        screen: string;
+        session_duration: number;
+    };
+    settings_set: {
+        setting: string;
+        old_value: any;
+        new_value: any;
+    };
+    generic_event: Record<string, unknown>;
 };
 type BaseEventData = {
     name: string;

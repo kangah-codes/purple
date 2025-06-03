@@ -1,9 +1,7 @@
-import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import {
     AlertHexagonIcon,
     CashIcon,
     ClosedLockIcon,
-    FolderLockIcon,
     PiggyBankIcon,
     SafeIcon,
 } from '@/components/SVG/icons/noscale';
@@ -12,6 +10,7 @@ import { keyExtractor } from '@/lib/utils/number';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
 import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
 import SettingsFooter from './SettingsFooter';
@@ -59,12 +58,6 @@ export default function ProfilePages() {
             title: 'Categories',
             link: '/settings/transaction-categories',
             description: 'Manage transaction categories',
-        },
-        {
-            icon: <FolderLockIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Storage',
-            link: '/settings/storage-settings',
-            description: 'Manage local data, backups, and storage',
         },
         {
             icon: <ClosedLockIcon width={20} height={20} stroke={'#9333ea'} />,

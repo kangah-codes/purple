@@ -10,6 +10,7 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/providers/Analytics';
 import { isEmoji } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -31,17 +32,27 @@ export default function NewCategoryScreen() {
         },
     });
     const { mutate, isLoading } = useCreateCategory();
+    const { logEvent } = useAnalytics();
 
-    const onSubmit = (data: { emoji: string; category: string }) => {
+    const onSubmit = async (data: { emoji: string; category: string }) => {
+        await logEvent('object_created', {
+            payload: data,
+            object_type: 'transaction_category',
+        });
         Keyboard.dismiss();
         mutate(data, {
-            onError: (err) => {
+            onError: async () => {
+                await logEvent('error_occurred', {
+                    error_type: 'OBJECT_CREATE_ERROR',
+                    context: `Failed to create transaction category`,
+                    severity: 'medium',
+                });
                 Toast.show({
                     type: 'error',
                     props: { text1: 'Error!', text2: 'Error creating category' },
                 });
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 addCategory(data);
                 Toast.show({
                     type: 'success',

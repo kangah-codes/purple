@@ -23,6 +23,7 @@ import { useQueryClient } from 'react-query';
 import { usePreferences } from '@/components/Settings/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();
@@ -32,6 +33,7 @@ export default function NewPlanTransactionScreen() {
     } = usePreferences();
     const { accounts, getAccountById } = useAccountStore();
     const queryClient = useQueryClient();
+    const { logEvent } = useAnalytics();
     const { mutate, isLoading } = useCreatePlanTransaction({
         planData: {
             id: currentPlan!.id,
@@ -56,7 +58,13 @@ export default function NewPlanTransactionScreen() {
         if (!currentPlan) router.push('/plans');
     }, [currentPlan]);
 
-    const onSubmit = (data: { amount: string; note: string; debit_account_id: string }) => {
+    const onSubmit = async (data: { amount: string; note: string; debit_account_id: string }) => {
+        await logEvent('button_tap', {
+            button: 'submit',
+            screen: 'new_plan_transaction',
+            log: 'attempting to create plan transaction',
+            data,
+        });
         Keyboard.dismiss();
         const account = getAccountById(data.debit_account_id);
 

@@ -51,7 +51,7 @@ export default function HiddenPlansScreen() {
         return (
             <View className='flex flex-col space-y-5 -px-5'>
                 {/* <PlanInfoCard type='saving' /> */}
-                <View style={styles.listHeaderView} />
+                <View />
             </View>
         );
     }, [savingPlans]);
@@ -117,9 +117,6 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
         paddingHorizontal: 20,
         paddingTop: 20,
-    },
-    listHeaderView: {
-        // marginTop: 20,
     },
     itemSeparator: {
         height: 20,

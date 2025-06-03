@@ -7,7 +7,8 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { useScreenTracking } from '@/lib/providers/Analytics';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
@@ -16,7 +17,6 @@ import Toast from 'react-native-toast-message';
 import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
 import { Account } from '../schema';
-import { useScreenTracking } from '@/lib/providers/Analytics';
 
 export default function AccountsScreen() {
     const { setAccounts, accounts } = useAccountStore();
@@ -53,7 +53,7 @@ export default function AccountsScreen() {
     const renderHeader = useCallback(
         () => (
             <View className='px-5 flex flex-col space-y-2.5 w-full'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg mt-2.5'>
+                <Text style={satoshiFont.satoshiBlack} className='text-lg mt-2.5'>
                     Accounts
                 </Text>
                 <View className='h-1 border-purple-100 border-b w-full mb-2.5' />

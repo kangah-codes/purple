@@ -1,4 +1,6 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from '@/components/SVG/icons/noscale';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import {
     InputField,
     LinearGradient,
@@ -9,9 +11,8 @@ import {
 } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
-import CurrencyService, { CurrencyRates } from '@/lib/services/CurrencyService';
+import CurrencyService from '@/lib/services/CurrencyService';
 import { keyExtractor } from '@/lib/utils/number';
-import { nativeStorage } from '@/lib/utils/storage';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -19,12 +20,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 import ExchangeRateItem, { CurrencyCode } from '../molecules/ExchangeRateItem';
-import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from '@/components/SVG/icons/noscale';
-import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 export default function ExchangeRatesScreen() {
     const [searchValue, setSearchValue] = useState('');
-    const exchangeRates = nativeStorage.getItem<CurrencyRates>('currency-exchange-rates')!;
     const [sortOrder, setSortOrder] = useState<'low-to-high' | 'high-to-low'>('high-to-low');
     const { preferences } = usePreferences();
     const renderItem = useCallback(

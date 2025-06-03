@@ -27,8 +27,6 @@ func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 			"/api/v1/tracking/":           true,
 		}
 
-		log.InfoLogger.Println(c.FullPath())
-
 		if disabledRoutes[c.FullPath()] {
 			c.Next()
 			return

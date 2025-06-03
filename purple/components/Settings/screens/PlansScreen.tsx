@@ -15,6 +15,7 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 export default function PlansScreen() {
     const {
@@ -23,12 +24,23 @@ export default function PlansScreen() {
     } = usePreferences();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
+    const { logEvent } = useAnalytics();
 
     const handleToggle = async (value: boolean) => {
         try {
+            await logEvent('settings_set', {
+                setting: 'hideCompletedPlans',
+                old_value: hideCompletedPlans,
+                new_value: value,
+            });
             await settingsService.set('hideCompletedPlans', value);
             setPreference('hideCompletedPlans', value);
         } catch (error) {
+            await logEvent('error_occurred', {
+                error_type: 'SETTING_UPDATE_ERROR',
+                context: `Failed to update hideCompletedPlans setting:`,
+                severity: 'medium',
+            });
             Toast.show({
                 type: 'error',
                 props: {

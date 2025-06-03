@@ -2,7 +2,7 @@ name: Upload Analytics to GCloud buckets
 
 on:
   schedule:
-    - cron: "0 1 * * *" # Runs daily at 1 AM UTC
+    - cron: "0 1 * * *"
   workflow_dispatch:
 
 jobs:

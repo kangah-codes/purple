@@ -16,6 +16,7 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 export default function AccountsScreen() {
     const {
@@ -25,12 +26,23 @@ export default function AccountsScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
+    const { logEvent } = useAnalytics();
 
     const handleOverdrawChange = async (value: boolean) => {
         try {
+            await logEvent('settings_set', {
+                setting: 'allowOverdraw',
+                old_value: allowOverdraw,
+                new_value: value,
+            });
             await settingsService.set('allowOverdraw', value);
             setPreference('allowOverdraw', value);
         } catch (error) {
+            await logEvent('error_occurred', {
+                error_type: 'SETTING_UPDATE_ERROR',
+                context: `Failed to update ${allowOverdraw} setting:`,
+                severity: 'medium',
+            });
             Toast.show({
                 type: 'error',
                 props: {

@@ -15,15 +15,14 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem, UserPreferences } from '../schema';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 export default function PrivacyScreen() {
-    const {
-        preferences: { trackUsageStatistics, sendDiagnosticData },
-        setPreference,
-    } = usePreferences();
+    const { preferences, setPreference } = usePreferences();
+    const { trackUsageStatistics, sendDiagnosticData } = preferences;
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
-
+    const { logEvent } = useAnalytics();
     const handleToggle = async (
         key: 'trackUsageStatistics' | 'sendDiagnosticData',
         value: boolean,
@@ -58,10 +57,20 @@ export default function PrivacyScreen() {
                     style: 'destructive',
                     onPress: async () => {
                         try {
+                            await logEvent('settings_set', {
+                                setting: key,
+                                old_value: preferences[key],
+                                new_value: value,
+                            });
                             await settingsService.set(key, value);
                             setPreference(key, value);
                         } catch (error) {
                             console.error(`Failed to update ${key} setting:`, error);
+                            await logEvent('error_occurred', {
+                                error_type: 'SETTING_UPDATE_ERROR',
+                                context: `Failed to update ${key} setting:`,
+                                severity: 'medium',
+                            });
                             Toast.show({
                                 type: 'error',
                                 props: {
@@ -88,6 +97,11 @@ export default function PrivacyScreen() {
                 }
             } catch (error) {
                 console.error(`Failed to update ${key} setting:`, error);
+                await logEvent('error_occurred', {
+                    error_type: 'SETTING_UPDATE_ERROR',
+                    context: `Failed to update ${key} setting:`,
+                    severity: 'medium',
+                });
                 Toast.show({
                     type: 'error',
                     props: {

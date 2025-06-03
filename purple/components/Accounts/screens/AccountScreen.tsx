@@ -15,7 +15,6 @@ import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
-import { useScreenTracking } from '@/lib/providers/Analytics';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
@@ -24,11 +23,6 @@ function AccountScreen() {
     const { setCurrentAccount, currentAccountRequestParams, setCurrentAccountRequestParams } =
         useAccountStore();
     const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
-
-    useScreenTracking('account', {
-        source: 'navigation',
-        id: accountID,
-    });
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
         setCurrentAccountRequestParams({

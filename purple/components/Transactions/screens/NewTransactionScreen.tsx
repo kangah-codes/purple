@@ -23,6 +23,7 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -31,6 +32,7 @@ export default function NewTransactionScreen() {
     } = usePreferences();
     const queryClient = useQueryClient();
     const { accounts, getAccountById } = useAccountStore();
+    const { logEvent } = useAnalytics();
     const {
         preferences: { allowOverdraw },
     } = usePreferences();
@@ -64,7 +66,7 @@ export default function NewTransactionScreen() {
         setValue('type', transactionType);
     }, [transactionType, setValue]);
 
-    const onSubmit = (data: {
+    const onSubmit = async (data: {
         amount: string;
         category: string;
         note: string;
@@ -74,13 +76,23 @@ export default function NewTransactionScreen() {
         accountId?: string;
         date: string;
     }) => {
+        await logEvent('button_tap', {
+            button: 'submit',
+            screen: 'new_transactiont_screen',
+            log: 'attempting to create transaction',
+            data,
+        });
         Keyboard.dismiss();
 
+        const accountId = transactionType !== 'transfer' ? data.accountId : data.fromAccount;
         // check if overdraw is allowed
-        const account = getAccountById(
-            transactionType !== 'transfer' ? data.accountId : data.fromAccount,
-        );
+        const account = getAccountById(accountId);
         if (!account) {
+            await logEvent('error_occurred', {
+                error_type: 'NOT_FOUND_ERROR',
+                context: `Account with id ${accountId} not found`,
+                severity: 'high',
+            });
             Toast.show({
                 type: 'error',
                 props: { text1: 'Error!', text2: "Couldn't create transaction" },
@@ -93,6 +105,9 @@ export default function NewTransactionScreen() {
             !allowOverdraw &&
             ['debit', 'transfer'].includes(transactionType)
         ) {
+            await logEvent('generic_event', {
+                context: 'attempted to overdraw account',
+            });
             Toast.show({
                 type: 'warning',
                 props: { text1: 'Oops!', text2: 'Cannot overdraw account!' },
@@ -115,13 +130,13 @@ export default function NewTransactionScreen() {
         }
 
         mutate(transformedData, {
-            onError: (err) => {
+            onError: () => {
                 Toast.show({
                     type: 'error',
                     props: { text1: 'Error!', text2: "Couldn't create transaction" },
                 });
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
                 Toast.show({
                     type: 'success',

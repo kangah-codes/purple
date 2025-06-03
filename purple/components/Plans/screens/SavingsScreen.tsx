@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import { usePreferences } from '@/components/Settings/hooks';
+import { useScreenTracking } from '@/lib/providers/Analytics';
 
 function SavingsScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
@@ -38,6 +39,9 @@ function SavingsScreen() {
             refetch();
         }, [refetch]),
     );
+    useScreenTracking('plan_budgets', {
+        source: 'navigation',
+    });
 
     const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
     const renderEmptylist = useCallback(

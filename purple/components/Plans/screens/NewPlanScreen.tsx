@@ -34,6 +34,7 @@ import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/providers/Analytics';
 
 const depositFrequency = {
     weekly: {
@@ -76,18 +77,25 @@ export default function NewPlanScreen() {
             currency,
         },
     });
+    const { logEvent } = useAnalytics();
 
-    const onSubmit = (data: CreatePlan) => {
+    const onSubmit = async (data: CreatePlan) => {
+        await logEvent('button_tap', {
+            button: 'submit',
+            screen: 'new_plan_screen',
+            log: 'attempting to create plan',
+            data,
+        });
         Keyboard.dismiss();
         let transformedData = transformObject(data, [
             ['target', 'target', (value) => Number(value)],
         ]);
 
         mutate(transformedData, {
-            onError: (err) => {
+            onError: () => {
                 Toast.show({
                     type: 'error',
-                    props: { text1: 'Error!', text2: err.message },
+                    props: { text1: 'Error!', text2: 'Error creating plan!' },
                 });
             },
             onSuccess: (res) => {
