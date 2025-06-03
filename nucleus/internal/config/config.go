@@ -169,8 +169,8 @@ func (c *Config) InitialiseDB() error {
 // InitialiseRedis initializes the Redis connection
 func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
-	var tlsConfig *tls.Config
-	tlsConfig = nil
+	// var tlsConfig *tls.Config
+	// tlsConfig = nil
 	// if config.Env.ENV == "dev" || config.Env.ENV == "staging" {
 	// } else {
 	// 	tlsConfig = &tls.Config{InsecureSkipVerify: true}
@@ -185,7 +185,7 @@ func (c *Config) InitialiseRedis() error {
 		DB:          0,
 		DialTimeout: 30 * time.Second,
 		MaxRetries:  5,
-		TLSConfig:   tlsConfig,
+		TLSConfig:   &tls.Config{InsecureSkipVerify: true},
 	})
 
 	_, err := c.Redis.Ping(ctx).Result()
