@@ -2,8 +2,9 @@ import { AuthProvider } from '@/components/Auth/hooks';
 import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
+import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientProvider';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
-import { AnalyticsProvider, useAnalytics } from '@/lib/providers/Analytics';
+import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
@@ -17,7 +18,6 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 export const unstable_settings = {
     initialRouteName: '(tabs)/index',
@@ -28,23 +28,6 @@ LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);
-    const { logError } = useAnalytics();
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                onError: (err: Error) => {
-                    logError(err, {}, 'error');
-                },
-            },
-            mutations: {
-                onError: (err) => {
-                    logError(err, {}, 'error');
-                },
-            },
-        },
-    });
-
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
             await initializeApp(db);
@@ -62,38 +45,38 @@ export default function RootLayout() {
 
     return (
         <ErrorBoundary>
-            <QueryClientProvider client={queryClient}>
-                <AuthProvider>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                        <Suspense fallback={<LoadingScreen />}>
-                            <SQLiteProvider
-                                databaseName='purple_test_1.db'
-                                onInit={onInitialise}
-                                useSuspense
-                                options={{
-                                    useNewConnection: true,
-                                }}
-                            >
-                                <BottomSheetModalProvider>
-                                    <PortalProvider>
-                                        <SafeAreaProvider>
-                                            <ThemeProvider value={DefaultTheme}>
-                                                <AnalyticsProvider
-                                                    config={{
-                                                        endpoint: 'URL',
-                                                        apiKey: 'API_KEY',
-                                                        enableDebugLogs: true,
-                                                        syncEveryMs: 200000000000000,
-                                                        batchSize: 25,
-                                                    }}
-                                                    onInitialized={() => {
-                                                        console.log('Analytics initialised!');
-                                                    }}
-                                                    onError={(error) => {
-                                                        console.error('Analytics error:', error);
-                                                    }}
-                                                    autoFlushOnBackground={true}
-                                                >
+            <AnalyticsProvider
+                config={{
+                    endpoint: 'URL',
+                    apiKey: 'API_KEY',
+                    enableDebugLogs: true,
+                    syncEveryMs: 200000000000000,
+                    batchSize: 25,
+                }}
+                onInitialized={() => {
+                    console.log('Analytics initialised!');
+                }}
+                onError={(error) => {
+                    console.error('Analytics error:', error);
+                }}
+                autoFlushOnBackground={true}
+            >
+                <AppQueryClientProvider>
+                    <AuthProvider>
+                        <GestureHandlerRootView style={{ flex: 1 }}>
+                            <Suspense fallback={<LoadingScreen />}>
+                                <SQLiteProvider
+                                    databaseName='purple_test_1.db'
+                                    onInit={onInitialise}
+                                    useSuspense
+                                    options={{
+                                        useNewConnection: true,
+                                    }}
+                                >
+                                    <BottomSheetModalProvider>
+                                        <PortalProvider>
+                                            <SafeAreaProvider>
+                                                <ThemeProvider value={DefaultTheme}>
                                                     {/** Portal Rendering  */}
                                                     <CurrentTransactionModal modalKey='transactionReceipt' />
                                                     {/** Main Navigation Stack */}
@@ -133,17 +116,17 @@ export default function RootLayout() {
                                                             options={{ headerShown: false }}
                                                         />
                                                     </Stack>
-                                                </AnalyticsProvider>
-                                            </ThemeProvider>
-                                        </SafeAreaProvider>
-                                    </PortalProvider>
-                                </BottomSheetModalProvider>
-                            </SQLiteProvider>
-                        </Suspense>
-                    </GestureHandlerRootView>
-                    <Toast config={toastConfig} />
-                </AuthProvider>
-            </QueryClientProvider>
+                                                </ThemeProvider>
+                                            </SafeAreaProvider>
+                                        </PortalProvider>
+                                    </BottomSheetModalProvider>
+                                </SQLiteProvider>
+                            </Suspense>
+                        </GestureHandlerRootView>
+                        <Toast config={toastConfig} />
+                    </AuthProvider>
+                </AppQueryClientProvider>
+            </AnalyticsProvider>
         </ErrorBoundary>
     );
 }
