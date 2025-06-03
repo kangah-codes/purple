@@ -48,10 +48,10 @@ type EnvConfig struct {
 	// ENV        string `mapstructure:"ENV" validate:"required,oneof=dev prod"`
 	ENV string `mapstructure:"ENV"`
 
-	// Email
-	MailgunAPIKey string `mapstructure:"MAILGUN_API_KEY" validate:"required"`
-	EmailDomain   string `mapstructure:"EMAIL_DOMAIN" validate:"required"`
-	ResendAPIKey  string `mapstructure:"RESEND_API_KEY" validate:"required"`
+	// Email - TODO: Re-enable these soon
+	MailgunAPIKey string `mapstructure:"MAILGUN_API_KEY"`
+	EmailDomain   string `mapstructure:"EMAIL_DOMAIN"`
+	ResendAPIKey  string `mapstructure:"RESEND_API_KEY"`
 
 	// Encryption Key
 	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required"`
