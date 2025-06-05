@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"nucleus/internal/cache"
 	"nucleus/internal/dispatch"
@@ -171,26 +170,29 @@ func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
 	// var tlsConfig *tls.Config
 	// tlsConfig = nil
-	// if config.Env.ENV == "dev" || config.Env.ENV == "staging" {
+	// if config.Env.ENV == "dev" {
 	// } else {
 	// 	tlsConfig = &tls.Config{InsecureSkipVerify: true}
 	// }
+	//
 
-	fmt.Printf("%s %s %s %s", c.Env.RedisHost, c.Env.RedisPort, c.Env.RedisUsername, c.Env.RedisPassword)
+	// opt, _ := redis.ParseURL("rediss://default:AUlxAAIjcDE4ZDA3NjYxNDVhNzQ0MzE0Yjk4ZDk4NGExYTBlMDhlM3AxMA@smooth-muskrat-18801.upstash.io:6379")
+	opt, _ := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", c.Env.RedisUsername, c.Env.RedisPassword, c.Env.RedisHost, c.Env.RedisPort))
+  	c.Redis = redis.NewClient(opt)
 
-	c.Redis = redis.NewClient(&redis.Options{
-		Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
-		Username:    c.Env.RedisUsername,
-		Password:    c.Env.RedisPassword,
-		DB:          0,
-		DialTimeout: 30 * time.Second,
-		MaxRetries:  5,
-		TLSConfig:   &tls.Config{InsecureSkipVerify: true},
-	})
+	// c.Redis = redis.NewClient(&redis.Options{
+	// 	Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
+	// 	Username:    c.Env.RedisUsername,
+	// 	Password:    c.Env.RedisPassword,
+	// 	DB:          0,
+	// 	DialTimeout: 30 * time.Second,
+	// 	MaxRetries:  5,
+	// 	TLSConfig:   nil,
+	// })
 
 	_, err := c.Redis.Ping(ctx).Result()
 	if err != nil {
-		log.ErrorLogger.Errorf("Failed to connect to Redis: %v", err)
+		log.ErrorLogger.Errorf("Failed to connect to Redis: %w", err)
 		return err
 	}
 

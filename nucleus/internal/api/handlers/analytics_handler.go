@@ -25,14 +25,18 @@ func (h *AnalyticsHandler) CreateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, types.Response{Status: http.StatusBadRequest, Message: "Invalid request", Data: nil})
 		return
 	}
-	err := h.service.CreateAnalyticsEvent(c.Request.Context(), &models.AnalyticsEvent{
-		ID:         createEvent.ID,
-		TrackingId: createEvent.TrackingId,
-		Type:       createEvent.Type,
-		Payload:    createEvent.Payload,
-		RetryCount: *createEvent.RetryCount,
-		CreatedAt:  createEvent.CreatedAt,
-	})
+	var events []*models.AnalyticsEvent
+	for _, item := range createEvent.Items {
+			events = append(events, &models.AnalyticsEvent{
+				ID:         item.ID,
+				TrackingId: item.TrackingId,
+				Type:       item.Type,
+				Payload:    item.Payload,
+				CreatedAt:  item.CreatedAt,
+			})
+	}
+
+	err := h.service.CreateAnalyticsEvents(c.Request.Context(), events)
 	if err != nil {
 		log.ErrorLogger.Errorln(err)
 		c.JSON(http.StatusInternalServerError, types.Response{Status: http.StatusInternalServerError, Message: "Failed to create event", Data: nil})
