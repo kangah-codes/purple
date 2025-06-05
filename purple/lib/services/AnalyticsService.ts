@@ -196,7 +196,6 @@ export class AnalyticsTracker {
                     timestamp: new Date().toISOString(),
                     sessionId: this.sessionId,
                     uniqueId: this.uniqueId,
-                    metadata: this.deviceMetadata,
                 },
             };
 
@@ -218,7 +217,6 @@ export class AnalyticsTracker {
             const err = typeof error === 'string' ? new Error(error) : error;
             const metadata: Record<string, unknown> = {
                 ...extraMetadata,
-                ...this.deviceMetadata,
             };
 
             const payload: ErrorData = {
