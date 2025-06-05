@@ -176,7 +176,6 @@ func (c *Config) InitialiseRedis() error {
 	// }
 	//
 
-	// opt, _ := redis.ParseURL("rediss://default:AUlxAAIjcDE4ZDA3NjYxNDVhNzQ0MzE0Yjk4ZDk4NGExYTBlMDhlM3AxMA@smooth-muskrat-18801.upstash.io:6379")
 	opt, _ := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", c.Env.RedisUsername, c.Env.RedisPassword, c.Env.RedisHost, c.Env.RedisPort))
   	c.Redis = redis.NewClient(opt)
 
