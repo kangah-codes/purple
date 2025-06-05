@@ -19,12 +19,14 @@ import { SettingsListItem } from '../schema';
 import { Portal } from '@gorhom/portal';
 import SelectCurrency from '../molecules/SelectCurrency';
 import { CurrencyCode } from '../molecules/ExchangeRateItem';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function CurrencyScreen() {
     const {
         preferences: { currency },
         setPreference,
     } = usePreferences();
+    const { logEvent } = useAnalytics();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const exchangeRates = nativeStorage.getItem<CurrencyRates>('currency-exchange-rates');
 
@@ -68,10 +70,14 @@ export default function CurrencyScreen() {
             <ExpoStatusBar style='dark' />
             <Portal>
                 <SelectCurrency
-                    callback={(item) => {
+                    callback={async (item) => {
+                        await logEvent('settings_set', {
+                            old_value: currency,
+                            new_value: item.code,
+                            setting: 'currency',
+                        });
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
-                        // setSearchValue('');
                         CurrencyService.getInstance().fetchExchangeRates(
                             item.code.toLowerCase() as CurrencyCode,
                         );

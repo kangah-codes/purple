@@ -23,7 +23,7 @@ import { useQueryClient } from 'react-query';
 import { usePreferences } from '@/components/Settings/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function NewPlanTransactionScreen() {
     const { sessionData } = useAuth();

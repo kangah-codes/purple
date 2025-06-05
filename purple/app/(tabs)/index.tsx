@@ -6,7 +6,7 @@ import IndexScreen from '@/components/Index/screens/IndexScreen';
 import { usePlanStore } from '@/components/Plans/hooks';
 import { useUser, useUserStore } from '@/components/Profile/hooks';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import React from 'react';
 import Toast from 'react-native-toast-message';
 

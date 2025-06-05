@@ -1,5 +1,5 @@
 import NewPlanTransactionScreen from '@/components/Plans/screens/NewPlanTransaction';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 

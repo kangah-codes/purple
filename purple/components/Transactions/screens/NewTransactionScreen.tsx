@@ -23,7 +23,7 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();

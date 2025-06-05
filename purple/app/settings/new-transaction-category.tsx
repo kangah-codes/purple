@@ -1,5 +1,5 @@
 import NewCategoryScreen from '@/components/Settings/screens/NewCategoryScreen';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import React from 'react';
 
 export default function Screen() {

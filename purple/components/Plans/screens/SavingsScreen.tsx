@@ -8,7 +8,7 @@ import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import { usePreferences } from '@/components/Settings/hooks';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 
 function SavingsScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();

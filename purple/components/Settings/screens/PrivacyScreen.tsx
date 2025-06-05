@@ -1,21 +1,21 @@
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/icons/noscale';
+import Switch from '@/components/Shared/molecules/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
-import { StatusBar as RNStatusBar, StyleSheet, Alert } from 'react-native';
+import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-import { BarLineChartIcon, PaperPlaneIcon } from '@/components/SVG/icons/noscale';
-import Switch from '@/components/Shared/molecules/Switch';
-import { satoshiFont } from '@/lib/constants/fonts';
-import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
-import { SettingsListItem, UserPreferences } from '../schema';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { SettingsListItem } from '../schema';
 
 export default function PrivacyScreen() {
     const { preferences, setPreference } = usePreferences();

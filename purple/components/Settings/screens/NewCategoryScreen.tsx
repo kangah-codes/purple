@@ -10,7 +10,7 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { isEmoji } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';

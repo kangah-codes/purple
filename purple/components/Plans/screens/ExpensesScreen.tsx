@@ -7,7 +7,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 
 function ExpensesScreen() {
     const { setExpensePlans, expensePlans } = usePlanStore();

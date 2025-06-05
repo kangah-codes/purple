@@ -13,13 +13,13 @@ import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useEffect } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 
 function TransactionsScreen() {
     const { transactions, setTransactions } = useTransactionStore();
-    const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteTransactions({
+    const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
         requestQuery: {
             page_size: 10,
         },
@@ -61,7 +61,9 @@ function TransactionsScreen() {
                     My Transactions
                 </Text>
             </View>
-            <ScrollView>
+            <ScrollView
+                refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+            >
                 <TransactionsAccordion
                     showTitle={false}
                     transactions={transactions}

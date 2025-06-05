@@ -34,7 +34,7 @@ import { useCreatePlan } from '../hooks';
 import { CreatePlan } from '../schema';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 const depositFrequency = {
     weekly: {

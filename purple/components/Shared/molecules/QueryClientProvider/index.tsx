@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useState } from 'react';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { QueryClient, QueryClientProvider as ReactQueryClientProvider } from 'react-query';
 
 export default function AppQueryClientProvider({ children }: PropsWithChildren<{}>) {

@@ -1,5 +1,5 @@
 import PlanScreen from '@/components/Plans/screens/PlanScreen';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 

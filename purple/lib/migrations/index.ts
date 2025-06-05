@@ -103,6 +103,38 @@ const migrations: Migration[] = [
             is_custom BOOLEAN DEFAULT 0
           );`,
     },
+    {
+        version: 1,
+        sql: `
+          PRAGMA journal_mode = WAL;
+          CREATE TABLE IF NOT EXISTS device_metadata (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            unique_id TEXT NOT NULL UNIQUE,
+            system_name TEXT NOT NULL,
+            system_version TEXT NOT NULL,
+            brand TEXT NOT NULL,
+            model TEXT NOT NULL,
+            device_id TEXT NOT NULL,
+            app_version TEXT NOT NULL,
+            build_number TEXT NOT NULL,
+            is_emulator BOOLEAN NOT NULL DEFAULT 0,
+            bundle_id TEXT NOT NULL,
+            carrier TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+          CREATE INDEX IF NOT EXISTS idx_device_metadata_unique_id ON device_metadata(unique_id);
+          CREATE INDEX IF NOT EXISTS idx_device_metadata_device_id ON device_metadata(device_id);
+          CREATE INDEX IF NOT EXISTS idx_device_metadata_created_at ON device_metadata(created_at);
+          CREATE TRIGGER IF NOT EXISTS device_metadata_updated_at
+            AFTER UPDATE ON device_metadata
+            FOR EACH ROW
+          BEGIN
+            UPDATE device_metadata
+            SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = NEW.id;
+          END;`,
+    },
 ];
 
 export default migrations;

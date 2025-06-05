@@ -16,7 +16,7 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
-import { useAnalytics } from '@/lib/providers/Analytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function AccountsScreen() {
     const {

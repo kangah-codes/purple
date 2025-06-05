@@ -1,5 +1,5 @@
 import NewPlanScreen from '@/components/Plans/screens/NewPlanScreen';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import React from 'react';
 
 export default function Screen() {

@@ -19,7 +19,7 @@ import {
 import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useAnalytics, useScreenTracking } from '@/lib/providers/Analytics';
+import { useAnalytics, useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { nativeStorage } from '@/lib/utils/storage';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';

@@ -1,13 +1,15 @@
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 
@@ -25,6 +27,21 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
         () => formatDateTime(currentTransaction?.created_at ?? ''),
         [currentTransaction?.created_at],
     );
+    const { bottomSheetModalKeys } = useBottomSheetModalStore();
+    const { logEvent } = useAnalytics();
+
+    useEffect(() => {
+        const trackScreenView = async () => {
+            if (bottomSheetModalKeys[modalKey]) {
+                await logEvent('screen_view', {
+                    screen: 'transaction_modal',
+                    transaction: currentTransaction,
+                });
+            }
+        };
+
+        trackScreenView();
+    }, [bottomSheetModalKeys, modalKey]);
 
     if (!currentTransaction) return null;
 
@@ -56,7 +73,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             </Text>
                         </View>
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiBlack}
+                            style={satoshiFont.satoshiBlack}
                             className='text-lg text-white mt-2.5'
                         >
                             {currentTransaction.category.includes(' ')
@@ -67,7 +84,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
                         <Text
                             style={[
-                                GLOBAL_STYLESHEET.satoshiBlack,
+                                satoshiFont.satoshiBlack,
                                 {
                                     color:
                                         currentTransaction.type === 'debit'

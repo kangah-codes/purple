@@ -190,10 +190,13 @@ export class AnalyticsTracker {
                 createdAt: new Date().toISOString(),
                 payload: {
                     name,
-                    properties: this.sanitizeProperties(properties),
+                    properties: {
+                        ...this.sanitizeProperties(properties),
+                    },
                     timestamp: new Date().toISOString(),
                     sessionId: this.sessionId,
                     uniqueId: this.uniqueId,
+                    metadata: this.deviceMetadata,
                 },
             };
 

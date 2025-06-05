@@ -8,7 +8,8 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useScreenTracking } from '@/lib/providers/Analytics';
+import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
@@ -41,6 +42,7 @@ export default function AccountsScreen() {
             limit: Infinity,
         },
     });
+    useRefreshOnFocus(refetch);
 
     useScreenTracking('accounts', {
         source: 'navigation',
