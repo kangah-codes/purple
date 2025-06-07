@@ -1,6 +1,11 @@
 import React, { PropsWithChildren, useState } from 'react';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import { QueryClient, QueryClientProvider as ReactQueryClientProvider } from 'react-query';
+import {
+    MutationCache,
+    QueryCache,
+    QueryClient,
+    QueryClientProvider as ReactQueryClientProvider,
+} from 'react-query';
 
 export default function AppQueryClientProvider({ children }: PropsWithChildren<{}>) {
     const { logError } = useAnalytics();
@@ -8,21 +13,16 @@ export default function AppQueryClientProvider({ children }: PropsWithChildren<{
     const [queryClient] = useState(
         () =>
             new QueryClient({
-                defaultOptions: {
-                    queries: {
-                        retry: false,
-                        onError: (err: unknown) => {
-                            // @ts-expect-error
-                            logError(err, {}, 'error');
-                        },
+                queryCache: new QueryCache({
+                    onError: (error, query) => {
+                        logError(error as Error, { ...query }, 'error');
                     },
-                    mutations: {
-                        onError: (err: unknown) => {
-                            // @ts-expect-error
-                            logError(err, {}, 'error');
-                        },
+                }),
+                mutationCache: new MutationCache({
+                    onError: (error, mutation) => {
+                        logError(error as Error, { mutation }, 'error');
                     },
-                },
+                }),
             }),
     );
 

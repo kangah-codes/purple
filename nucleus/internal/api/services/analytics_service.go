@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"nucleus/internal/api/repositories"
+	"nucleus/internal/api/types"
 	"nucleus/internal/config"
 	"nucleus/internal/models"
 )
@@ -19,6 +20,6 @@ func NewAnalyticsService(analyticsRepo repositories.AnalyticsRepository, cfg *co
 func (s *AnalyticsService) CreateAnalyticsEvent(ctx context.Context, event *models.AnalyticsEvent) error {
 	return s.analyticsRepo.Create(ctx, event)
 }
-func (s *AnalyticsService) CreateAnalyticsEvents(ctx context.Context, events []*models.AnalyticsEvent) error {
-	return s.analyticsRepo.CreateBatch(ctx, events)
+func (s *AnalyticsService) CreateAnalyticsEvents(ctx context.Context, events []*models.AnalyticsEvent, meta types.DeviceMetadata) error {
+	return s.analyticsRepo.CreateBatch(ctx, events, meta)
 }

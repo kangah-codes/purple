@@ -85,7 +85,6 @@ func NewDispatchClient(redisClient *redis.Client) (*DispatchClient, error) {
 	}, nil
 }
 
-// Initialize and subscribe all listeners
 func InitListeners(c *DispatchClient, listeners []BaseListener) error {
 	for _, listener := range listeners {
 		if err := listener.Register(c); err != nil {
@@ -95,7 +94,6 @@ func InitListeners(c *DispatchClient, listeners []BaseListener) error {
 	return nil
 }
 
-// Subscribe adds a callback for a specific channel
 func Subscribe[T any](c *DispatchClient, channel string, callback func(T) error) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -105,19 +103,16 @@ func Subscribe[T any](c *DispatchClient, channel string, callback func(T) error)
 		return err
 	}
 
-	// if first time subscribing to this channel, set up Redis PubSub
 	if _, exists := c.subs[channel]; !exists {
 		if c.pubsub == nil {
 			c.pubsub = c.redis.Subscribe(context.Background(), channel)
 		} else {
-			// add subscription to the existing PubSub
 			if err := c.pubsub.Subscribe(context.Background(), channel); err != nil {
 				return fmt.Errorf("failed to subscribe to channel %s: %w", channel, err)
 			}
 		}
 	}
 
-	// register typed callback
 	c.subs[channel] = append(c.subs[channel], subscription{
 		payloadType: reflect.TypeOf((*T)(nil)).Elem(),
 		callback:    wrappedCallback,
@@ -126,7 +121,6 @@ func Subscribe[T any](c *DispatchClient, channel string, callback func(T) error)
 	return nil
 }
 
-// Publish an event with a typed payload
 func Publish[T any](c *DispatchClient, channel string, payload T) error {
 	ctx := context.Background()
 	msg := Message{
@@ -148,7 +142,6 @@ func Publish[T any](c *DispatchClient, channel string, payload T) error {
 	pubsub := c.redis.Subscribe(ctx, ackChannel)
 	defer pubsub.Close()
 
-	// wait for messsage ack
 	select {
 	case message := <-pubsub.Channel():
 		var ack Acknowledgement
@@ -164,7 +157,6 @@ func Publish[T any](c *DispatchClient, channel string, payload T) error {
 	}
 }
 
-// StartListening begins listening for incoming messages on all subscribed channels
 func StartListening(c *DispatchClient, ctx context.Context) error {
 	if c.pubsub == nil {
 		return fmt.Errorf("no subscriptions found; please subscribe to at least one channel before listening")
@@ -209,7 +201,6 @@ func sendAcknowledgment(c *DispatchClient, msg Message, success bool, errMsg str
 	return c.redis.Publish(context.Background(), ackChannel, data).Err()
 }
 
-// handleMessage processes the incoming message
 func (c *DispatchClient) handleMessage(m any) {
 	var msg Message
 	redisMsg, ok := m.(*redis.Message)
@@ -237,7 +228,6 @@ func (c *DispatchClient) handleMessage(m any) {
 	for _, sub := range subs {
 		payloadPtr := reflect.New(sub.payloadType).Interface()
 
-		// Marshal and unmarshal the Data field instead of Payload
 		payloadData, err := json.Marshal(msg.Data)
 		if err != nil {
 			processingError = fmt.Errorf("error marshaling message data: %v", err)
@@ -263,7 +253,6 @@ func (c *DispatchClient) handleMessage(m any) {
 		}
 	}
 
-	// Send acknowledgment based on processing result
 	errMsg := ""
 	if processingError != nil {
 		errMsg = processingError.Error()
@@ -273,7 +262,6 @@ func (c *DispatchClient) handleMessage(m any) {
 	}
 }
 
-// Close gracefully shuts down the client
 func (c *DispatchClient) Close() error {
 	if c.pubsub != nil {
 		if err := c.pubsub.Close(); err != nil {

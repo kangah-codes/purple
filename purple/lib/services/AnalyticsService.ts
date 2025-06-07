@@ -53,7 +53,6 @@ type BaseEventData = {
     properties?: Record<string, unknown>;
     timestamp: string;
     sessionId: string;
-    uniqueId: string | null;
 };
 type ErrorLevel = 'error' | 'warning' | 'info';
 type ErrorData = {
@@ -62,7 +61,6 @@ type ErrorData = {
     metadata?: Record<string, unknown>;
     timestamp: string;
     sessionId: string;
-    uniqueId: string | null;
     level: ErrorLevel;
 };
 type TrackedItem = {
@@ -78,7 +76,6 @@ type AnalyticsConfig = {
     readonly maxRetries?: number;
     readonly enableDebugLogs?: boolean;
     readonly endpoint?: string;
-    readonly apiKey?: string;
     readonly batchSize?: number;
     readonly flushOnBackground?: boolean;
     readonly timeoutMs?: number;
@@ -93,15 +90,11 @@ type DeviceMetadata = {
     readonly appVersion: string;
     readonly buildNumber: string;
     readonly isEmulator: boolean;
-    readonly bundleId: string;
     readonly carrier: string;
-    readonly totalMemory: number;
-    readonly usedMemory: number;
     readonly uniqueId: string;
 };
 type BatchPayload = {
-    readonly items: ReadonlyArray<BaseEventData | ErrorData>;
-    readonly sessionId: string;
+    readonly items: TrackedItem[];
     readonly timestamp: string;
     readonly deviceMetadata: Partial<DeviceMetadata>;
 };
@@ -139,8 +132,7 @@ export class AnalyticsTracker {
             maxQueueSize: 1000,
             maxRetries: 3,
             enableDebugLogs: false,
-            endpoint: process.env.TRACKING_URL as string,
-            apiKey: process.env.TOKEN as string,
+            endpoint: process.env.EXPO_PUBLIC_TRACKING_URL as string,
             batchSize: 50,
             flushOnBackground: true,
             timeoutMs: 15000,
@@ -174,11 +166,6 @@ export class AnalyticsTracker {
     }
 
     public async logEvent<T extends keyof EventProperties>(
-        name: T,
-        properties: EventProperties[T],
-    ): Promise<void>;
-    public async logEvent(name: string, properties?: Record<string, unknown>): Promise<void>;
-    public async logEvent<T extends keyof EventProperties>(
         name: T | string,
         properties?: EventProperties[T] | Record<string, unknown>,
     ): Promise<void> {
@@ -195,7 +182,6 @@ export class AnalyticsTracker {
                     },
                     timestamp: new Date().toISOString(),
                     sessionId: this.sessionId,
-                    uniqueId: this.uniqueId,
                 },
             };
 
@@ -225,7 +211,6 @@ export class AnalyticsTracker {
                 metadata: this.sanitizeProperties(metadata),
                 timestamp: new Date().toISOString(),
                 sessionId: this.sessionId,
-                uniqueId: this.uniqueId,
                 level,
             };
 
@@ -352,8 +337,7 @@ export class AnalyticsTracker {
     private async sendBatch(batch: readonly TrackedItem[]): Promise<boolean> {
         try {
             const payload: BatchPayload = {
-                items: batch.map((item) => item.payload),
-                sessionId: this.sessionId,
+                items: batch as TrackedItem[],
                 timestamp: new Date().toISOString(),
                 deviceMetadata: this.deviceMetadata,
             };
@@ -362,11 +346,12 @@ export class AnalyticsTracker {
             const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
             try {
+                this.log(JSON.stringify(payload));
+
                 const response = await fetch(this.config.endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${this.config.apiKey}`,
                         'User-Agent': this.getUserAgent(),
                     },
                     body: JSON.stringify(payload),
@@ -471,10 +456,7 @@ export class AnalyticsTracker {
                 appVersion: DeviceInfo.getVersion(),
                 buildNumber: DeviceInfo.getBuildNumber(),
                 isEmulator: await DeviceInfo.isEmulator(),
-                bundleId: DeviceInfo.getBundleId(),
                 carrier: await DeviceInfo.getCarrier(),
-                totalMemory: await DeviceInfo.getTotalMemory(),
-                usedMemory: await DeviceInfo.getUsedMemory(),
                 uniqueId: await DeviceInfo.getUniqueId(),
             };
             this.uniqueId = this.deviceMetadata.uniqueId || null;

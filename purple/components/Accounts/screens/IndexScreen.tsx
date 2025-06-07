@@ -8,7 +8,7 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';

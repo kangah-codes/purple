@@ -36,17 +36,13 @@ export function useUser({
     return useQuery(
         ['user'],
         async () => {
-            const planService = await ServiceFactory.create<Plan>('plans', db, sessionData);
-            const transactionService = await ServiceFactory.create<Transaction>(
+            const planService = ServiceFactory.create<Plan>('plans', db, sessionData);
+            const transactionService = ServiceFactory.create<Transaction>(
                 'transactions',
                 db,
                 sessionData,
             );
-            const accountService = await ServiceFactory.create<Account>(
-                'accounts',
-                db,
-                sessionData,
-            );
+            const accountService = ServiceFactory.create<Account>('accounts', db, sessionData);
 
             const [accounts, transactions, plans] = await Promise.all([
                 accountService.list({
@@ -61,9 +57,11 @@ export function useUser({
                     page_size: 5,
                     page: 1,
                 }),
-            ]).catch((err) => {
+            ]).catch(() => {
                 throw new Error("Couldn't fetch your data");
             });
+
+            throw new Error('LADIDA');
 
             return {
                 data: {

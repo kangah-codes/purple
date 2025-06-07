@@ -116,7 +116,7 @@ export function useDeletePlan({
     const { sessionData } = useAuth();
 
     return useMutation(['delete-plan'], async () => {
-        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+        const service = ServiceFactory.create<Plan>('plans', db, sessionData);
         return service.delete(planID);
     });
 }
@@ -134,7 +134,7 @@ export function usePlan({
     return useQuery(
         [`plan-${planID}`],
         async () => {
-            const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+            const service = ServiceFactory.create<Plan>('plans', db, sessionData);
             return service.get(planID);
         },
         {
@@ -212,7 +212,7 @@ export function useInfinitePlans({
                 page_size: requestQuery.page_size || 10,
             };
 
-            const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+            const service = ServiceFactory.create<Plan>('plans', db, sessionData);
             return service.list(queryParams);
         },
         {
@@ -233,7 +233,7 @@ export function useCreatePlan(): UseMutationResult<GenericAPIResponse<Plan>, Err
     const { sessionData } = useAuth();
 
     return useMutation(['create-plan'], async (data) => {
-        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+        const service = ServiceFactory.create<Plan>('plans', db, sessionData);
         return service.create(data as CreatePlan);
     });
 }
@@ -248,7 +248,7 @@ export function useCreatePlanTransaction({
     const { sessionData } = useAuth();
 
     return useMutation(['create-plan'], async (data) => {
-        const service = await ServiceFactory.create<Plan>('plans', db, sessionData);
+        const service = ServiceFactory.create<Plan>('plans', db, sessionData);
         const planService = service as typeof service & {
             createTransaction(
                 data: CreatePlanTransaction,

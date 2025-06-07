@@ -13,6 +13,7 @@ jobs:
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
       GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
 
     steps:
@@ -25,7 +26,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install redis google-cloud-storage python-dateutil
+        run: pip install -r scripts/tracking/requirements.txt
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2

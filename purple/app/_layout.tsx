@@ -6,7 +6,6 @@ import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientPro
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
-import { nativeStorage } from '@/lib/utils/storage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -44,23 +43,13 @@ export default function RootLayout() {
         return null;
     }
 
-    console.log(JSON.stringify(nativeStorage.getItem('analytics-data')), 's');
-
     return (
         <ErrorBoundary>
             <AnalyticsProvider
                 config={{
-                    endpoint: 'URL',
-                    apiKey: 'API_KEY',
                     enableDebugLogs: true,
                     syncEveryMs: 180000,
                     batchSize: 25,
-                }}
-                onInitialized={() => {
-                    console.log('Analytics initialised!');
-                }}
-                onError={(error) => {
-                    console.error('Analytics error:', error);
                 }}
                 autoFlushOnBackground={true}
             >

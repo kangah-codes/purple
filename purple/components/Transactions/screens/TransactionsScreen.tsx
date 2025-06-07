@@ -9,7 +9,7 @@ import {
 } from '@/components/Shared/styled';
 import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useEffect } from 'react';

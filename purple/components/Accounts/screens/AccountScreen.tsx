@@ -2,7 +2,7 @@ import { GenericAPIResponse } from '@/@types/request';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 import { useTransactions } from '@/components/Transactions/hooks';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { getDateRange } from '@/lib/utils/date';
 import { useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -15,13 +15,18 @@ import AccountInformation from '../molecules/AccountInformation';
 import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
-    const { setCurrentAccount, currentAccountRequestParams, setCurrentAccountRequestParams } =
-        useAccountStore();
+    const {
+        setCurrentAccount,
+        currentAccount,
+        currentAccountRequestParams,
+        setCurrentAccountRequestParams,
+    } = useAccountStore();
     const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
@@ -33,6 +38,10 @@ function AccountScreen() {
             endDate: defaultDateRange.endDate.toISOString(),
         });
     }, [accountID]);
+    useScreenTracking('account', {
+        source: 'navigation',
+        account: currentAccount,
+    });
 
     const { refetch: accountRefetch, isLoading: accountsLoading } = useAccount({
         accountID,

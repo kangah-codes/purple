@@ -12,12 +12,12 @@ export class ServiceFactory {
     private static transactionService: TransactionSQLiteService | null = null;
     private static planService: PlanSQLiteService | null = null;
 
-    static async create<T>(
+    static create<T>(
         endpoint: 'accounts' | 'transactions' | 'plans',
         db: SQLite.SQLiteDatabase,
         sessionData: SessionData | null,
-    ): Promise<DataService<T>> {
-        const isOffline = await nativeStorage.getItem('isOfflineMode');
+    ): DataService<T> {
+        const isOffline = nativeStorage.getItem('isOfflineMode');
 
         if (isOffline) {
             switch (endpoint) {

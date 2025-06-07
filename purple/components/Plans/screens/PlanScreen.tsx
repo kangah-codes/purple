@@ -14,6 +14,7 @@ import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
 import PlanInformation from '../molecules/PlanInformation';
 import PlanNavigationArea from '../molecules/PlanNavigationArea';
 import { Plan } from '../schema';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -34,6 +35,10 @@ function PlanScreen() {
                 router.back();
             },
         },
+    });
+    useScreenTracking('plan', {
+        source: 'navigation',
+        plan: currentPlan,
     });
 
     useEffect(() => {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"nucleus/internal/api/types"
 	"nucleus/internal/config"
 	"nucleus/internal/models"
 )
@@ -26,20 +27,25 @@ func (r *CachingAnalyticsRepository) Create(ctx context.Context, event *models.A
 		return err
 	}
 
-	key := fmt.Sprintf("%s:%s", r.keyPrefix, event.TrackingId)
+	key := fmt.Sprintf("%s:%s", r.keyPrefix, event.SessionID)
 	return r.config.RedisCache.Client.RPush(ctx, key, eventBytes).Err()
 
 }
 
-func (r *CachingAnalyticsRepository) CreateBatch(ctx context.Context, events []*models.AnalyticsEvent) error {
+func (r *CachingAnalyticsRepository) CreateBatch(ctx context.Context, events []*models.AnalyticsEvent, meta types.DeviceMetadata) error {
 	grouped := make(map[string][]string)
 
 	for _, event := range events {
-		eventBytes, err := json.Marshal(event)
+		payload := map[string]any{
+			"event": event,
+			"meta":  meta,
+		}
+		eventBytes, err := json.Marshal(payload)
 		if err != nil {
 			return err
 		}
-		key := fmt.Sprintf("%s:%s", r.keyPrefix, event.TrackingId)
+
+		key := fmt.Sprintf("%s:%s:%s", r.keyPrefix, event.SessionID, meta.UniqueID)
 		grouped[key] = append(grouped[key], string(eventBytes))
 	}
 
