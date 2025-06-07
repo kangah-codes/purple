@@ -1,8 +1,7 @@
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { Image } from 'expo-image';
-import React from 'react';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 import { BaseToastProps } from 'react-native-toast-message';
 import tw from 'twrnc';
@@ -87,7 +86,7 @@ export default function Toast({ type, ...props }: ToastProps) {
 
     return (
         <View
-            className='w-[90%] rounded-full flex flex-row p-2 items-center mt-2.5 border'
+            className='w-[90%] rounded-full flex flex-row p-2 items-center mt-5 border'
             style={[toastStyles[type]]}
         >
             <View
@@ -102,7 +101,7 @@ export default function Toast({ type, ...props }: ToastProps) {
             <View className='flex-1 flex-col'>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.satoshiBold,
+                        satoshiFont.satoshiBold,
                         {
                             color: styles.titleFontColour,
                         },
@@ -113,7 +112,7 @@ export default function Toast({ type, ...props }: ToastProps) {
                 </Text>
                 <Text
                     style={[
-                        GLOBAL_STYLESHEET.satoshiMedium,
+                        satoshiFont.satoshiMedium,
                         {
                             color: styles.labelFontColour,
                         },

@@ -21,7 +21,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
                 hideCompletedPlans: true,
                 trackUsageStatistics: true,
                 sendDiagnosticData: true,
-                allowCurrencyConversion: false,
+                allowCurrencyConversion: true,
             },
             setPreferences: (partialPrefs) =>
                 set((state) => ({

@@ -304,7 +304,7 @@ export function generateSpendingTrendData(
 }
 
 export function calculateAmountAddedOnDay(
-    transactions: Transaction[] | PlanTransaction[] | undefined,
+    transactions: Transaction[] | undefined,
     date?: Date,
 ): number {
     if (!transactions) return 0;
@@ -320,7 +320,10 @@ export function calculateAmountAddedOnDay(
     if (!transactionsOnDate || transactionsOnDate.length === 0) return 0;
 
     // sum up all transactions made on this day
-    return transactionsOnDate.reduce((acc, curr) => acc + curr.amount, 0);
+    return transactionsOnDate.reduce(
+        (acc, curr) => (curr.type == 'credit' ? acc + curr.amount : acc - curr.amount),
+        0,
+    );
 }
 
 export function getAccountTransactionStats(

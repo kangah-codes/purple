@@ -16,7 +16,7 @@ const currencyService = CurrencyService.getInstance();
 export default function ExchangeRateItem({ currency, selectedCurrency }: CurrencySelectProps) {
     const calculateCurrency = useCallback(
         (currencyCode: string) => {
-            return currencyService.convertCurrency({
+            return currencyService.convertCurrencySync({
                 from: { currency: selectedCurrency.toLowerCase() as CurrencyCode, amount: 1 },
                 to: { currency: currencyCode.toLowerCase() as CurrencyCode },
             });

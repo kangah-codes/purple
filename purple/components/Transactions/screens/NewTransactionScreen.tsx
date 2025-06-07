@@ -53,6 +53,7 @@ export default function NewTransactionScreen() {
             type: '',
             accountId: (accountId as string) ?? '',
             date: new Date().toISOString(),
+            charges: '',
         },
     });
     const transactionTypes = useMemo(
@@ -75,6 +76,7 @@ export default function NewTransactionScreen() {
         type: string;
         accountId?: string;
         date: string;
+        charges: string;
     }) => {
         await logEvent('button_tap', {
             button: 'submit',
@@ -100,6 +102,14 @@ export default function NewTransactionScreen() {
             return;
         }
 
+        if (transactionType == 'transfer' && data.fromAccount === data.toAccount) {
+            Toast.show({
+                type: 'warning',
+                props: { text1: 'Oops!', text2: 'Cannot transfer to same account' },
+            });
+            return;
+        }
+
         if (
             account.balance - Number(data.amount) < 0 &&
             !allowOverdraw &&
@@ -120,6 +130,7 @@ export default function NewTransactionScreen() {
             ['fromAccount', 'from_account'],
             ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
             ['amount', 'amount', (value) => Number(value)],
+            ['charges', 'charges', (value) => Number(value)],
         ]);
 
         if (transactionType !== 'transfer') {
@@ -243,6 +254,37 @@ export default function NewTransactionScreen() {
                                     className='text-xs text-red-500'
                                 >
                                     {errors.toAccount.message}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Charges
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                        style={satoshiFont.satoshiMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='0.00'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                        keyboardType='numeric'
+                                    />
+                                )}
+                                name='charges'
+                            />
+                            {errors.charges && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.charges.message}
                                 </Text>
                             )}
                         </View>

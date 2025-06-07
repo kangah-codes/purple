@@ -61,8 +61,6 @@ export function useUser({
                 throw new Error("Couldn't fetch your data");
             });
 
-            throw new Error('LADIDA');
-
             return {
                 data: {
                     accounts: accounts.data,

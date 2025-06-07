@@ -5,6 +5,9 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
 import { BaseSQLiteService } from './SQLiteService';
+import CurrencyService from './CurrencyService';
+import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
+import { isNotEmptyString } from '../utils/string';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
@@ -12,40 +15,14 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     }
 
     async create(data: CreateTransaction): Promise<GenericAPIResponse<Transaction>> {
-        const uuid = UUID();
         let transaction!: Transaction;
         let debitAccount: Account | null;
         let creditAccount: Account | null;
         const now = new Date().toISOString();
         const errorMessage = "Couldn't create transaction";
-        await this.db.withTransactionAsync(async () => {
-            await this.db.runAsync(
-                `INSERT INTO transactions
-                  (
-                    id, created_at, updated_at, account_id, user_id, type,
-                    amount, note, category, from_account, to_account, currency, plan_id
-                  )
-                VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    uuid,
-                    data.date,
-                    now,
-                    data.account_id,
-                    null,
-                    data.type,
-                    data.amount,
-                    data.note ?? null,
-                    data.category,
-                    data.from_account ?? null,
-                    data.to_account ?? null,
-                    data.currency,
-                    data.plan_id ?? null,
-                ],
-            );
 
-            // if the type is transfer, we need the debit & credit accounts to do math correctly
-            if (data.type! == 'transfer') {
+        await this.db.withTransactionAsync(async () => {
+            if (data.type === 'transfer') {
                 debitAccount = await this.db.getFirstAsync<Account>(
                     'SELECT * from accounts where id = ?',
                     [data.from_account!],
@@ -56,48 +33,137 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 );
 
                 if (!creditAccount || !debitAccount) throw new Error(errorMessage);
-            }
 
-            // update the account balance
-            const accountBalance = await this.db.getFirstAsync<{ balance: number }>(
-                'SELECT balance from accounts where id = ?',
-                [data.account_id!],
-            );
+                const defaultNote = `Transfer from ${debitAccount.name}`;
+                let creditAmount = data.amount;
 
-            if (accountBalance?.balance === undefined || accountBalance?.balance === null)
-                throw Error(errorMessage);
+                if (debitAccount.currency !== creditAccount.currency) {
+                    const currencyService = CurrencyService.getInstance();
+                    creditAmount = await currencyService.convertCurrencyAsync({
+                        from: {
+                            currency: debitAccount.currency.toLowerCase() as CurrencyCode,
+                            amount: data.amount,
+                        },
+                        to: {
+                            currency: creditAccount.currency.toLowerCase() as CurrencyCode,
+                        },
+                    });
+                }
 
-            switch (data.type!) {
-                case 'debit':
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        accountBalance.balance - data.amount,
+                // Create debit entry
+                const debitUUID = UUID();
+                await this.db.runAsync(
+                    `INSERT INTO transactions
+                      (id, created_at, updated_at, account_id, user_id, type,
+                       amount, note, category, from_account, to_account, currency, plan_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        debitUUID,
+                        data.date,
+                        now,
+                        data.from_account ?? null,
+                        null,
+                        'debit',
+                        data.amount,
+                        isNotEmptyString(data.note) ? data.note! : defaultNote,
+                        data.category,
+                        data.from_account ?? null,
+                        data.to_account ?? null,
+                        debitAccount.currency,
+                        data.plan_id ?? null,
+                    ],
+                );
+
+                // Create credit entry
+                const creditUUID = UUID();
+                await this.db.runAsync(
+                    `INSERT INTO transactions
+                      (id, created_at, updated_at, account_id, user_id, type,
+                       amount, note, category, from_account, to_account, currency, plan_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        creditUUID,
+                        data.date,
+                        now,
+                        data.to_account ?? null,
+                        null,
+                        'credit',
+                        creditAmount,
+                        isNotEmptyString(data.note) ? data.note! : defaultNote,
+                        data.category,
+                        data.from_account ?? null,
+                        data.to_account ?? null,
+                        creditAccount.currency,
+                        data.plan_id ?? null,
+                    ],
+                );
+
+                // Update account balances
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    debitAccount.balance - data.amount - data.charges,
+                    debitAccount.id,
+                ]);
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    creditAccount.balance + creditAmount,
+                    creditAccount.id,
+                ]);
+
+                const result = await this.db.getFirstAsync<Transaction>(
+                    'SELECT * FROM transactions where id = ?',
+                    [debitUUID],
+                );
+                if (!result) throw new HTTPError(errorMessage, 500);
+                transaction = result;
+            } else {
+                const uuid = UUID();
+                await this.db.runAsync(
+                    `INSERT INTO transactions
+                      (id, created_at, updated_at, account_id, user_id, type,
+                       amount, note, category, from_account, to_account, currency, plan_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        uuid,
+                        data.date,
+                        now,
                         data.account_id,
-                    ]);
-                    break;
-                case 'credit':
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        accountBalance.balance + data.amount,
-                        data.account_id,
-                    ]);
-                    break;
-                case 'transfer':
-                    if (!debitAccount || !creditAccount) throw new Error(errorMessage);
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        debitAccount.balance - data.amount,
-                        debitAccount.id,
-                    ]);
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        creditAccount.balance + data.amount,
-                        creditAccount.id,
-                    ]);
-            }
+                        null,
+                        data.type,
+                        data.amount,
+                        data.note ?? null,
+                        data.category,
+                        data.from_account ?? null,
+                        data.to_account ?? null,
+                        data.currency,
+                        data.plan_id ?? null,
+                    ],
+                );
 
-            const result = await this.db.getFirstAsync<Transaction>(
-                'SELECT * FROM transactions where id = ?',
-                [uuid],
-            );
-            if (!result) throw new HTTPError(errorMessage, 500);
-            transaction = result;
+                // Update account balance
+                const accountBalance = await this.db.getFirstAsync<{ balance: number }>(
+                    'SELECT balance from accounts where id = ?',
+                    [data.account_id!],
+                );
+
+                if (accountBalance?.balance === undefined || accountBalance?.balance === null)
+                    throw Error(errorMessage);
+
+                const newBalance =
+                    data.type === 'debit'
+                        ? accountBalance.balance - data.amount
+                        : accountBalance.balance + data.amount;
+
+                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
+                    newBalance,
+                    data.account_id,
+                ]);
+
+                const result = await this.db.getFirstAsync<Transaction>(
+                    'SELECT * FROM transactions where id = ?',
+                    [uuid],
+                );
+                if (!result) throw new HTTPError(errorMessage, 500);
+                transaction = result;
+            }
         });
 
         return this.formatResponse({
@@ -107,7 +173,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             page_size: 1,
             total: 1,
             total_items: 1,
-            message: 'Created account',
+            message: 'Created transaction',
         });
     }
 

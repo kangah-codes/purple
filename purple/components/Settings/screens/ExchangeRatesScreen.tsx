@@ -56,7 +56,7 @@ export default function ExchangeRatesScreen() {
     const calculateCurrency = useCallback(
         (currencyCode: string) => {
             const currencyService = CurrencyService.getInstance();
-            return currencyService.convertCurrency({
+            return currencyService.convertCurrencySync({
                 from: { currency: preferences.currency.toLowerCase() as CurrencyCode, amount: 1 },
                 to: { currency: currencyCode.toLowerCase() as CurrencyCode },
             });

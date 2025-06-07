@@ -79,7 +79,7 @@ function AccountScreen() {
             page_size: currentAccountRequestParams.page_size,
         },
         options: {
-            onError: (err) => {
+            onError: () => {
                 Toast.show({
                     type: 'error',
                     props: {
