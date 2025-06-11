@@ -8,7 +8,9 @@ on:
 jobs:
   upload-to-gcloud:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: scripts/tracking
     env:
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
@@ -33,4 +35,4 @@ jobs:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Run upload script
-        run: python scripts/upload_tracking.py
+        run: python upload_tracking.py
