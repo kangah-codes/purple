@@ -39,6 +39,7 @@ KEY_PREFIX = 'analytics:'
 GCS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
 GCS_FOLDER_FORMAT = '%d-%m-%y'
 OUTPUT_FORMAT = os.getenv('OUTPUT_FORMAT', 'json').lower()
+SERVICE_
 
 logging.debug(f"Redis URL: {REDIS_URL}")
 logging.debug(f"GCS Bucket: {GCS_BUCKET_NAME}")
@@ -168,9 +169,9 @@ except ValueError as e:
 
 # init gcs client
 try:
-    credentials = service_account.Credentials.from_service_account_file(
-        '/home/gyimihendrix/Downloads/purple-json-auth.json')
-    storage_client = storage.Client(credentials=credentials)
+    # credentials = service_account.Credentials.from_service_account_file(
+    #     '/home/gyimihendrix/Downloads/purple-json-auth.json')
+    storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
     logging.info("✅ Initialized GCS client")
 except Exception as e:
