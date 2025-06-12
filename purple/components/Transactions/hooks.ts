@@ -53,11 +53,7 @@ export function useTransactions({
     return useQuery(
         ['transactions', requestQuery],
         async () => {
-            const service = await ServiceFactory.create<Transaction>(
-                'transactions',
-                db,
-                sessionData,
-            );
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
             return service.list(requestQuery);
         },
         {
@@ -90,11 +86,7 @@ export function useInfiniteTransactions({
                 page: pageParam,
                 page_size: requestQuery.page_size || 10,
             };
-            const service = await ServiceFactory.create<Transaction>(
-                'transactions',
-                db,
-                sessionData,
-            );
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
             return service.list(queryParams);
         },
         {
@@ -114,7 +106,7 @@ export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Tra
     const { sessionData } = useAuth();
 
     return useMutation(['create-transaction'], async (transactionInformation) => {
-        const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.create(transactionInformation as CreateTransaction);
     });
 }
@@ -128,7 +120,7 @@ export function useUpdateTransaction(): UseMutationResult<
     const { sessionData } = useAuth();
 
     return useMutation(['update-transaction'], async ({ id, data }) => {
-        const service = await ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.update(id, data);
     });
 }

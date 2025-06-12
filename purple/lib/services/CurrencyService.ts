@@ -39,7 +39,9 @@ export default class CurrencyService {
         try {
             const { currency } = usePreferencesStore.getState().preferences;
             const res = await fetch(
-                `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${code ? code.toLowerCase() : currency.toLowerCase()}.json`,
+                `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${
+                    code ? code.toLowerCase() : currency.toLowerCase()
+                }.json`,
             );
             if (!res.ok) {
                 throw new Error(`Failed to fetch currency data: ${res.status}`);
@@ -59,7 +61,34 @@ export default class CurrencyService {
         }
     }
 
-    public convertCurrency({ from, to }: CurrencyConversionArgs): number {
+    public async convertCurrencyAsync({ from, to }: CurrencyConversionArgs): Promise<number> {
+        try {
+            let rates = this.nativeStorage.getItem<CurrencyRates>('currency-exchange-rates');
+
+            if (!rates || !rates[from.currency] || !rates[from.currency]![to.currency]) {
+                try {
+                    const res = await fetch(
+                        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${from.currency.toLowerCase()}.json`,
+                    );
+                    if (!res.ok) {
+                        throw new Error(`Failed to fetch currency data: ${res.status}`);
+                    }
+                    rates = await res.json();
+                } catch (err) {
+                    console.error('Failed to fetch exchange rates:', err);
+                    return from.amount;
+                }
+            }
+
+            const rate = rates![from.currency]![to.currency];
+            return from.amount * (rate || 1);
+        } catch (err) {
+            console.error(err);
+            return from.amount;
+        }
+    }
+
+    public convertCurrencySync({ from, to }: CurrencyConversionArgs): number {
         try {
             const rates = this.nativeStorage.getItem<CurrencyRates>('currency-exchange-rates');
             if (!rates || !rates[from.currency] || !rates[from.currency]![to.currency]) {
@@ -72,7 +101,7 @@ export default class CurrencyService {
             return converted;
         } catch (err) {
             console.error(err);
-            return 0;
+            return from.amount;
         }
     }
 }

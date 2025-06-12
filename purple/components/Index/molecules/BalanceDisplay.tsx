@@ -25,7 +25,7 @@ export function BalanceDisplay({ accountName, account, isPinned }: BalanceDispla
                     {formatCurrencyRounded(account.balance, account.currency)}
                 </Text>
                 <View className='flex flex-row space-x-2 items-center'>
-                    <Text style={satoshiFont.satoshiBold} className='text-black text-base'>
+                    <Text style={satoshiFont.satoshiBold} className='text-[#9333ea] text-base'>
                         {accountName}
                     </Text>
 

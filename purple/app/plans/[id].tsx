@@ -1,16 +1,8 @@
 import PlanScreen from '@/components/Plans/screens/PlanScreen';
-import { useScreenTracking } from '@/lib/hooks/useAnalytics';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import React from 'react';
 
 export default function Screen() {
-    const { id } = useLocalSearchParams();
-
-    useScreenTracking('plan', {
-        source: 'navigation',
-        id,
-    });
-
     return (
         <>
             <Stack.Screen options={{ headerShown: false }} />

@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
 import { useAnalytics } from './useAnalytics';
+
+let globalListener: NativeEventSubscription | null = null;
+let listenerCount = 0;
 
 export function useAppLifecycleEvents() {
     const appState = useRef<AppStateStatus>(AppState.currentState);
@@ -9,35 +12,44 @@ export function useAppLifecycleEvents() {
     const { logEvent } = useAnalytics();
 
     useEffect(() => {
-        if (AppState.currentState === 'active') {
-            sessionStartTime.current = Date.now();
+        listenerCount++;
+
+        if (!globalListener) {
+            if (AppState.currentState === 'active') {
+                sessionStartTime.current = Date.now();
+            }
+
+            globalListener = AppState.addEventListener('change', async (nextAppState) => {
+                const now = Date.now();
+                if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                    sessionStartTime.current = now;
+                    await logEvent('app_open', {
+                        launch_type: appState.current === 'background' ? 'background' : 'warm',
+                    });
+                }
+
+                if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+                    const sessionDuration = sessionStartTime.current
+                        ? Math.floor((now - sessionStartTime.current) / 1000)
+                        : 0;
+                    await logEvent('app_exit', {
+                        screen: currentScreen.current,
+                        session_duration: sessionDuration,
+                    });
+                    sessionStartTime.current = null;
+                }
+
+                appState.current = nextAppState;
+            });
         }
 
-        const subscription = AppState.addEventListener('change', async (nextAppState) => {
-            const now = Date.now();
-            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                sessionStartTime.current = now;
-
-                await logEvent('app_open', {
-                    launch_type: appState.current === 'background' ? 'background' : 'warm',
-                });
+        return () => {
+            listenerCount--;
+            if (listenerCount === 0 && globalListener) {
+                globalListener.remove();
+                globalListener = null;
             }
-
-            if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
-                const sessionDuration = sessionStartTime.current
-                    ? Math.floor((now - sessionStartTime.current) / 1000)
-                    : 0;
-                await logEvent('app_exit', {
-                    screen: currentScreen.current,
-                    session_duration: sessionDuration,
-                });
-                sessionStartTime.current = null;
-            }
-
-            appState.current = nextAppState;
-        });
-
-        return () => subscription.remove();
+        };
     }, [logEvent]);
 
     const updateCurrentScreen = (screenName: string) => {

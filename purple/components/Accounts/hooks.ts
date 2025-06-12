@@ -67,7 +67,7 @@ export function useAccounts({
     return useQuery(
         ['accounts', requestQuery],
         async () => {
-            const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+            const service = ServiceFactory.create<Account>('accounts', db, sessionData);
             return service.list(requestQuery);
         },
         {
@@ -92,7 +92,7 @@ export function useAccount({
     return useQuery(
         [`account-${accountID}`],
         async () => {
-            const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+            const service = ServiceFactory.create<Account>('accounts', db, sessionData);
             return service.get(accountID);
         },
         {
@@ -148,7 +148,7 @@ export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account
     const { sessionData } = useAuth();
 
     return useMutation(['create-account'], async (accountInformation) => {
-        const service = await ServiceFactory.create<Account>('accounts', db, sessionData);
+        const service = ServiceFactory.create<Account>('accounts', db, sessionData);
         return service.create(accountInformation as Partial<Account>);
     });
 }

@@ -1,10 +1,10 @@
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { Image } from 'expo-image';
+import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { View, Text, LinearGradient, TouchableOpacity } from '@/components/Shared/styled';
-import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
-import { Image } from 'expo-image';
 import tw from 'twrnc';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -39,13 +39,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                     />
                     <View className='flex flex-col space-y-2.5'>
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiBlack}
+                            style={satoshiFont.satoshiBlack}
                             className='text-2xl text-black text-center'
                         >
                             Oops! Something went wrong!
                         </Text>
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
+                            style={satoshiFont.satoshiBold}
                             className='text-sm text-black text-center'
                         >
                             We've been alerted and are looking into this. Hang tight!
@@ -65,7 +65,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text
-                                style={GLOBAL_STYLESHEET.satoshiBold}
+                                style={satoshiFont.satoshiBold}
                                 className='text-base text-white tracking-tight'
                             >
                                 Try again

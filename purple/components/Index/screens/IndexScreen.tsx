@@ -5,7 +5,7 @@ import { useUser, useUserStore } from '@/components/Profile/hooks';
 import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
 import { LinearGradient, SafeAreaView, ScrollView, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';

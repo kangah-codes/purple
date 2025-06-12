@@ -1,10 +1,8 @@
+import { Account } from '@/components/Accounts/schema';
 import { View } from '@/components/Shared/styled';
-import { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import ActionButtons from './ActionButton';
 import { BalanceDisplay } from './BalanceDisplay';
-import { nativeStorage } from '@/lib/utils/storage';
-import { Account } from '@/components/Accounts/schema';
-import React from 'react';
 
 type AlternateAccountCardProps = {
     item: Account;

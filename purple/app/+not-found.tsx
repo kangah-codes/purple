@@ -1,5 +1,5 @@
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '../lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
@@ -14,13 +14,13 @@ export default function NotFoundScreen() {
                 <Image source={require('@/assets/images/graphics/15.png')} style={tw`h-52 w-52`} />
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiBlack}
+                        style={satoshiFont.satoshiBlack}
                         className='text-2xl text-black text-center'
                     >
                         Looks like you're lost!
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiBold}
+                        style={satoshiFont.satoshiBold}
                         className='text-base textblack text-center'
                     >
                         The page you're looking for doesn't exist or has been moved.
@@ -37,7 +37,7 @@ export default function NotFoundScreen() {
                         colors={['#c084fc', '#9333ea']}
                     >
                         <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
+                            style={satoshiFont.satoshiBold}
                             className='text-base text-white tracking-tight'
                         >
                             Take me home

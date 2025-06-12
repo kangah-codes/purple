@@ -1,16 +1,11 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { Account } from '@/components/Accounts/schema';
+import { Text, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { Link } from 'expo-router';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { SvgProps } from 'react-native-svg';
-import {
-    ArrowCircleDownIcon,
-    ArrowCircleUpIcon,
-    CoinSwapIcon,
-    PiggyBankIcon,
-} from '../../SVG/icons/noscale';
-import { Link } from 'expo-router';
-import { Account } from '@/components/Accounts/schema';
-import React from 'react';
+import { ArrowCircleDownIcon, ArrowCircleUpIcon, CoinSwapIcon } from '../../SVG/icons/noscale';
 
 export function ActionButton({
     IconComponent,
@@ -41,7 +36,7 @@ export function ActionButton({
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>
-            <Text style={[GLOBAL_STYLESHEET.satoshiBold]} className='text-sm text-[#9333ea]'>
+            <Text style={[satoshiFont.satoshiBold]} className='text-sm text-[#9333ea]'>
                 {label}
             </Text>
         </View>

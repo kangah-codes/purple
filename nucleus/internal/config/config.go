@@ -177,12 +177,10 @@ func (c *Config) InitialiseRedis() error {
 	//
 
 	opt, _ := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", c.Env.RedisUsername, c.Env.RedisPassword, c.Env.RedisHost, c.Env.RedisPort))
-  	c.Redis = redis.NewClient(opt)
+	c.Redis = redis.NewClient(opt)
 
 	// c.Redis = redis.NewClient(&redis.Options{
 	// 	Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
-	// 	Username:    c.Env.RedisUsername,
-	// 	Password:    c.Env.RedisPassword,
 	// 	DB:          0,
 	// 	DialTimeout: 30 * time.Second,
 	// 	MaxRetries:  5,

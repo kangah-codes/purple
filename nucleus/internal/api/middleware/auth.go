@@ -7,6 +7,7 @@ import (
 	"nucleus/internal/api/types"
 	"nucleus/internal/log"
 	"nucleus/internal/utils"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,18 +17,27 @@ type AuthMiddlewareConfig struct {
 	AuthService *services.AuthService
 }
 
+var disabledRoutes = []*regexp.Regexp{
+	regexp.MustCompile(`^/api/v1/auth/.*`),
+	regexp.MustCompile(`^/api/v1/tracking/.*`),
+}
+
+func SkipAuthorization(path string, routes []*regexp.Regexp) bool {
+	// disable header checks for some routes
+	for _, r := range routes {
+		if r.MatchString(path) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// routes to disable auth header checks
-		disabledRoutes := map[string]bool{
-			"/api/v1/auth/sign-in":        true,
-			"/api/v1/auth/sign-up":        true,
-			"/api/v1/auth/check-username": true,
-			"/api/v1/auth/activate":       true,
-			"/api/v1/tracking/":           true,
-		}
+		path := c.FullPath()
 
-		if disabledRoutes[c.FullPath()] {
+		if SkipAuthorization(path, disabledRoutes) {
 			c.Next()
 			return
 		}
@@ -68,6 +78,12 @@ func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 
 func APIKeyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		path := c.FullPath()
+		if SkipAuthorization(path, disabledRoutes) {
+			c.Next()
+			return
+		}
+
 		apiKey := utils.EnvValue("API_KEY", "")
 		if apiKey != c.GetHeader("X-API-KEY") {
 			c.JSON(401, types.Response{Status: 401, Message: "Invalid API key", Data: nil})

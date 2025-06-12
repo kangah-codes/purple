@@ -23,7 +23,7 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function CurrencyScreen() {
     const {
-        preferences: { currency },
+        preferences: { currency, allowCurrencyConversion },
         setPreference,
     } = usePreferences();
     const { logEvent } = useAnalytics();
@@ -51,9 +51,17 @@ export default function CurrencyScreen() {
             ? [
                   {
                       icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
-                      title: 'Enable Currency Conversion',
-                      description: 'Auto-convert amounts between different currencies',
-                      customItem: () => <Switch value={false} onValueChange={() => {}} disabled />,
+                      title: 'Currency Conversion',
+                      description:
+                          'Auto-convert amounts between different currencies when moving money',
+                      customItem: () => (
+                          <Switch
+                              value={allowCurrencyConversion}
+                              onValueChange={(value) =>
+                                  setPreference('allowCurrencyConversion', value)
+                              }
+                          />
+                      ),
                   },
                   {
                       icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,

@@ -9,7 +9,7 @@ import TransactionsAccordion from './TransactionAccordion';
 import StatsHeatmap from './Heatmap';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { GenericAPIResponse } from '@/@types/request';
-import { useRefreshOnFocus } from '@/lib/hooks/refetchOnFocus';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
 const now = new Date();
 const startDate = startOfMonth(now);
