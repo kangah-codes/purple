@@ -179,13 +179,8 @@ except Exception as e:
 
 # connect to Redis
 try:
-    r = redis.Redis(
-        host=os.getenv("REDIS_HOST"),
-        port=int(os.getenv("REDIS_PORT", 6379)),
-        username=os.getenv("REDIS_USERNAME"),
-        password=os.getenv("REDIS_PASSWORD"),
-        decode_responses=True
-    )
+    r = redis.Redis.from_url(
+        f"rediss://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}")
     r.ping()
     logging.info("✅ Connected to Redis successfully")
 except redis.exceptions.ConnectionError as e:
