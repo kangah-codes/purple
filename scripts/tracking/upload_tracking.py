@@ -180,7 +180,7 @@ except Exception as e:
 # connect to Redis
 try:
     r = redis.Redis.from_url(
-        f"rediss://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}")
+        f"rediss://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOST}:6379")
     r.ping()
     logging.info("✅ Connected to Redis successfully")
 except redis.exceptions.ConnectionError as e:
