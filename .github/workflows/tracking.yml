@@ -31,7 +31,7 @@ jobs:
                   python-version: "3.11"
 
             - name: Install dependencies
-              run: pip install redis google-cloud-storage python-dateutil
+              run: pip install -r requirements.txt
 
             - name: Authenticate to Google Cloud
               uses: google-github-actions/auth@v2
