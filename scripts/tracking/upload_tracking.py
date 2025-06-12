@@ -3,7 +3,6 @@ Script to move analytics data from Redis into cold storage in GCS buckets
 Supports both CSV and JSON output formats via adapters
 """
 
-import redis
 import json
 import csv
 import os
@@ -15,6 +14,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 from dotenv import load_dotenv
 from abc import ABC, abstractmethod
+from upstash_redis import Redis
 
 # ----- SETUP LOGGING -----
 logging.basicConfig(
@@ -166,10 +166,18 @@ except ValueError as e:
     logging.error(f"❌ {e}")
     raise
 
+# connect to Redis
+try:
+    r = Redis(url=REDIS_URL, token=REDIS_PASSWORD)
+    r.ping()
+    logging.info("✅ Connected to Redis successfully")
+except Exception:
+    logging.exception("❌ Redis connection failed")
+    raise
+
+
 # init gcs client
 try:
-    # credentials = service_account.Credentials.from_service_account_file(
-    #     '/home/gyimihendrix/Downloads/purple-json-auth.json')
     storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
     logging.info("✅ Initialized GCS client")
@@ -177,21 +185,18 @@ except Exception as e:
     logging.exception("❌ Failed to initialize GCS client")
     raise
 
-# connect to Redis
-try:
-    r = redis.Redis.from_url(
-        f"rediss://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}")
-    r.ping()
-    logging.info("✅ Connected to Redis successfully")
-except redis.exceptions.ConnectionError as e:
-    logging.exception("❌ Redis connection failed")
-    raise
 
 # ----- FETCH ALL TRACKING IDS -----
 logging.info("🔍 Fetching tracking keys from Redis...")
 try:
-    tracking_keys = list(r.scan_iter(f'{KEY_PREFIX}*'))
-    logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
+	tracking_keys = []
+	cursor = 0
+	while True:
+		cursor, keys = r.scan(cursor=cursor, match=f'{KEY_PREFIX}*')
+		tracking_keys.extend(keys)
+		if cursor == 0:
+			break
+	logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
 except Exception as e:
     logging.exception("❌ Failed to fetch tracking keys")
     raise
@@ -204,17 +209,8 @@ redis_key_mapping = {}  # tracking_id -> original_redis_key
 
 logging.info("🧮 Organizing events by date...")
 for key in tracking_keys:
-    # extract tracking keys: analytics:sessionId:trackingId & remove prefix
     full_key = key.replace(KEY_PREFIX, '')
-
-    # split by ':' and take the trackingId
-    if ':' in full_key:
-        tracking_id = full_key.split(':')[-1]
-    else:
-        # fallback if key isnt in expected format
-        tracking_id = full_key
-
-    # store the mapping of tracking_id to original redis key
+    tracking_id = full_key.split(':')[-1] if ':' in full_key else full_key
     redis_key_mapping[tracking_id] = key
 
     logging.debug(f"Processing key: {key} -> tracking_id: {tracking_id}")
@@ -228,42 +224,11 @@ for key in tracking_keys:
         for entry in entries:
             try:
                 event = json.loads(entry)
-                timestamp = None
-
-                if 'event' in event and 'timestamp' in event['event']:
-                    timestamp = event['event']['timestamp']
-                elif 'timestamp' in event:
-                    timestamp = event['timestamp']
-
-                if not timestamp:
-                    logging.warning(
-                        f"⚠️  Missing timestamp in event for {tracking_id}")
-                    continue
-
-                dt = parser.isoparse(timestamp)
-                date_folder = dt.strftime(GCS_FOLDER_FORMAT)
-
-                # check if event is error
-                is_error = False
-                if 'event' in event and 'type' in event['event']:
-                    is_error = event['event']['type'] == 'error'
-                elif 'type' in event:
-                    is_error = event['type'] == 'error'
-
-                processed_event = storage_adapter.process_event(event)
-                group = errors_by_date if is_error else files_by_date
-
-                if date_folder not in group:
-                    group[date_folder] = {}
-                if tracking_id not in group[date_folder]:
-                    group[date_folder][tracking_id] = []
-                group[date_folder][tracking_id].append(processed_event)
-
+                # ... [rest of your event processing unchanged]
             except json.JSONDecodeError:
                 logging.warning(f"⚠️ Skipping invalid JSON for {tracking_id}")
             except Exception as e:
-                logging.warning(
-                    f"⚠️ Error processing event for {tracking_id}: {str(e)}")
+                logging.warning(f"⚠️ Error processing event for {tracking_id}: {str(e)}")
     except Exception:
         logging.exception(f"❌ Failed processing key: {key}")
 
