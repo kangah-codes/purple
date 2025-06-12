@@ -168,7 +168,7 @@ except ValueError as e:
 
 # connect to Redis
 try:
-    r = Redis(url=REDIS_URL, token=REDIS_PASSWORD)
+    r = Redis(url=REDIS_HOST, token=REDIS_PASSWORD)
     r.ping()
     logging.info("✅ Connected to Redis successfully")
 except Exception:
