@@ -31,7 +31,7 @@ logging.info("Loaded environment variables from .env")
 
 # ----- CONFIG -----
 REDIS_HOST = os.getenv('REDIS_HOST', "")
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_PORT = int(os.getenv('REDIS_PORT') or 6379)
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 REDIS_USERNAME = os.getenv('REDIS_USERNAME')
 REDIS_URL = os.getenv("REDIS_URL", "")
@@ -45,6 +45,8 @@ logging.debug(f"GCS Bucket: {GCS_BUCKET_NAME}")
 logging.debug(f"Output Format: {OUTPUT_FORMAT}")
 
 # ----- STORAGE ADAPTERS -----
+
+
 class StorageAdapter(ABC):
     """Abstract base class for storage adapters"""
 
@@ -67,6 +69,7 @@ class StorageAdapter(ABC):
     def process_event(self, event):
         """Process individual event for this format"""
         pass
+
 
 class CSVAdapter(StorageAdapter):
     """Adapter for CSV format storage"""
@@ -108,7 +111,8 @@ class CSVAdapter(StorageAdapter):
         fieldnames = sorted(list(all_fieldnames))
 
         output = StringIO()
-        writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+        writer = csv.DictWriter(
+            output, fieldnames=fieldnames, extrasaction='ignore')
         writer.writeheader()
 
         # ensure events have all fields
@@ -117,6 +121,7 @@ class CSVAdapter(StorageAdapter):
             writer.writerow(row)
 
         return output.getvalue()
+
 
 class JSONAdapter(StorageAdapter):
     """Adapter for JSON format storage"""
@@ -136,6 +141,8 @@ class JSONAdapter(StorageAdapter):
         return json.dumps(events, indent=2, default=str)
 
 # ----- ADAPTER FACTORY -----
+
+
 def get_storage_adapter(format_type):
     """Factory function to get the appropriate storage adapter"""
     adapters = {
@@ -144,9 +151,11 @@ def get_storage_adapter(format_type):
     }
 
     if format_type not in adapters:
-        raise ValueError(f"Unsupported format: {format_type}. Available formats: {list(adapters.keys())}")
+        raise ValueError(
+            f"Unsupported format: {format_type}. Available formats: {list(adapters.keys())}")
 
     return adapters[format_type]
+
 
 # ----- INITIALIZE COMPONENTS -----
 # init storage adapter
@@ -159,7 +168,8 @@ except ValueError as e:
 
 # init gcs client
 try:
-    credentials = service_account.Credentials.from_service_account_file('/home/gyimihendrix/Downloads/purple-json-auth.json')
+    credentials = service_account.Credentials.from_service_account_file(
+        '/home/gyimihendrix/Downloads/purple-json-auth.json')
     storage_client = storage.Client(credentials=credentials)
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
     logging.info("✅ Initialized GCS client")
@@ -231,7 +241,8 @@ for key in tracking_keys:
                     timestamp = event['timestamp']
 
                 if not timestamp:
-                    logging.warning(f"⚠️  Missing timestamp in event for {tracking_id}")
+                    logging.warning(
+                        f"⚠️  Missing timestamp in event for {tracking_id}")
                     continue
 
                 dt = parser.isoparse(timestamp)
@@ -256,19 +267,24 @@ for key in tracking_keys:
             except json.JSONDecodeError:
                 logging.warning(f"⚠️ Skipping invalid JSON for {tracking_id}")
             except Exception as e:
-                logging.warning(f"⚠️ Error processing event for {tracking_id}: {str(e)}")
+                logging.warning(
+                    f"⚠️ Error processing event for {tracking_id}: {str(e)}")
     except Exception:
         logging.exception(f"❌ Failed processing key: {key}")
 
 # ----- FUNCTION TO WRITE EVENTS TO GCS -----
+
+
 def upload_event_group(name, tracking_data, is_error=False):
-    logging.info(f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
+    logging.info(
+        f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
 
     for date_folder, trackings in tracking_data.items():
         for tracking_id, events in trackings.items():
             try:
                 if not events:
-                    logging.warning(f"⚠️ No events to upload for {tracking_id}")
+                    logging.warning(
+                        f"⚠️ No events to upload for {tracking_id}")
                     continue
 
                 serialized_data = storage_adapter.serialize_events(events)
@@ -286,17 +302,21 @@ def upload_event_group(name, tracking_data, is_error=False):
                     content_type=storage_adapter.get_content_type()
                 )
 
-                logging.info(f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
+                logging.info(
+                    f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
 
                 original_redis_key = redis_key_mapping.get(tracking_id)
                 if original_redis_key:
                     r.delete(original_redis_key)
                     logging.info(f"🗑️ Deleted Redis key: {original_redis_key}")
                 else:
-                    logging.warning(f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
+                    logging.warning(
+                        f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
 
             except Exception:
-                logging.exception(f"❌ Failed to upload or clean up for tracking ID: {tracking_id}")
+                logging.exception(
+                    f"❌ Failed to upload or clean up for tracking ID: {tracking_id}")
+
 
 # ----- UPLOAD EVENTS TO GCS -----
 upload_event_group("normal", files_by_date, is_error=False)
