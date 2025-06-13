@@ -1,42 +1,38 @@
 name: Upload Analytics to GCloud buckets
 
 on:
-    # schedule:
-    #   - cron: "0 1 * * *"
-    # workflow_dispatch:
-    push:
-        branches:
-            - dev
-            - rc
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
 
 jobs:
-    upload-to-gcloud:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: scripts/tracking
-        env:
-            REDIS_HOST: ${{ secrets.REDIS_HOST }}
-            REDIS_PORT: ${{ secrets.REDIS_PORT }}
-            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
+  upload-to-gcloud:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scripts/tracking
+    env:
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
 
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-            - name: Install dependencies
-              run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-            - name: Authenticate to Google Cloud
-              uses: google-github-actions/auth@v2
-              with:
-                  credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-            - name: Run upload script
-              run: python upload_tracking.py
+      - name: Run upload script
+        run: python upload_tracking.py
