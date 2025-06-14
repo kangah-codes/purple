@@ -8,12 +8,13 @@ on:
 jobs:
   upload-to-gcloud:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: scripts/tracking
     env:
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
       GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
 
     steps:
@@ -26,7 +27,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r scripts/tracking/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -34,4 +35,4 @@ jobs:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Run upload script
-        run: python scripts/upload_tracking.py
+        run: python upload_tracking.py

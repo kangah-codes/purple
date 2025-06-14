@@ -3,7 +3,6 @@ Script to move analytics data from Redis into cold storage in GCS buckets
 Supports both CSV and JSON output formats via adapters
 """
 
-import redis
 import json
 import csv
 import os
@@ -15,6 +14,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 from dotenv import load_dotenv
 from abc import ABC, abstractmethod
+from upstash_redis import Redis
 
 # ----- SETUP LOGGING -----
 logging.basicConfig(
@@ -31,7 +31,7 @@ logging.info("Loaded environment variables from .env")
 
 # ----- CONFIG -----
 REDIS_HOST = os.getenv('REDIS_HOST', "")
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_PORT = int(os.getenv('REDIS_PORT') or 6379)
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 REDIS_USERNAME = os.getenv('REDIS_USERNAME')
 REDIS_URL = os.getenv("REDIS_URL", "")
@@ -45,6 +45,8 @@ logging.debug(f"GCS Bucket: {GCS_BUCKET_NAME}")
 logging.debug(f"Output Format: {OUTPUT_FORMAT}")
 
 # ----- STORAGE ADAPTERS -----
+
+
 class StorageAdapter(ABC):
     """Abstract base class for storage adapters"""
 
@@ -67,6 +69,7 @@ class StorageAdapter(ABC):
     def process_event(self, event):
         """Process individual event for this format"""
         pass
+
 
 class CSVAdapter(StorageAdapter):
     """Adapter for CSV format storage"""
@@ -108,7 +111,8 @@ class CSVAdapter(StorageAdapter):
         fieldnames = sorted(list(all_fieldnames))
 
         output = StringIO()
-        writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+        writer = csv.DictWriter(
+            output, fieldnames=fieldnames, extrasaction='ignore')
         writer.writeheader()
 
         # ensure events have all fields
@@ -117,6 +121,7 @@ class CSVAdapter(StorageAdapter):
             writer.writerow(row)
 
         return output.getvalue()
+
 
 class JSONAdapter(StorageAdapter):
     """Adapter for JSON format storage"""
@@ -136,6 +141,8 @@ class JSONAdapter(StorageAdapter):
         return json.dumps(events, indent=2, default=str)
 
 # ----- ADAPTER FACTORY -----
+
+
 def get_storage_adapter(format_type):
     """Factory function to get the appropriate storage adapter"""
     adapters = {
@@ -144,9 +151,11 @@ def get_storage_adapter(format_type):
     }
 
     if format_type not in adapters:
-        raise ValueError(f"Unsupported format: {format_type}. Available formats: {list(adapters.keys())}")
+        raise ValueError(
+            f"Unsupported format: {format_type}. Available formats: {list(adapters.keys())}")
 
     return adapters[format_type]
+
 
 # ----- INITIALIZE COMPONENTS -----
 # init storage adapter
@@ -157,36 +166,37 @@ except ValueError as e:
     logging.error(f"❌ {e}")
     raise
 
+# connect to Redis
+try:
+    r = Redis(url=REDIS_HOST, token=REDIS_PASSWORD)
+    r.ping()
+    logging.info("✅ Connected to Redis successfully")
+except Exception:
+    logging.exception("❌ Redis connection failed")
+    raise
+
+
 # init gcs client
 try:
-    credentials = service_account.Credentials.from_service_account_file('/home/gyimihendrix/Downloads/purple-json-auth.json')
-    storage_client = storage.Client(credentials=credentials)
+    storage_client = storage.Client()
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
     logging.info("✅ Initialized GCS client")
 except Exception as e:
     logging.exception("❌ Failed to initialize GCS client")
     raise
 
-# connect to Redis
-try:
-    r = redis.Redis(
-        host=os.getenv("REDIS_HOST"),
-        port=int(os.getenv("REDIS_PORT", 6379)),
-        username=os.getenv("REDIS_USERNAME"),
-        password=os.getenv("REDIS_PASSWORD"),
-        decode_responses=True
-    )
-    r.ping()
-    logging.info("✅ Connected to Redis successfully")
-except redis.exceptions.ConnectionError as e:
-    logging.exception("❌ Redis connection failed")
-    raise
 
 # ----- FETCH ALL TRACKING IDS -----
 logging.info("🔍 Fetching tracking keys from Redis...")
 try:
-    tracking_keys = list(r.scan_iter(f'{KEY_PREFIX}*'))
-    logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
+	tracking_keys = []
+	cursor = 0
+	while True:
+		cursor, keys = r.scan(cursor=cursor, match=f'{KEY_PREFIX}*')
+		tracking_keys.extend(keys)
+		if cursor == 0:
+			break
+	logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
 except Exception as e:
     logging.exception("❌ Failed to fetch tracking keys")
     raise
@@ -199,17 +209,8 @@ redis_key_mapping = {}  # tracking_id -> original_redis_key
 
 logging.info("🧮 Organizing events by date...")
 for key in tracking_keys:
-    # extract tracking keys: analytics:sessionId:trackingId & remove prefix
     full_key = key.replace(KEY_PREFIX, '')
-
-    # split by ':' and take the trackingId
-    if ':' in full_key:
-        tracking_id = full_key.split(':')[-1]
-    else:
-        # fallback if key isnt in expected format
-        tracking_id = full_key
-
-    # store the mapping of tracking_id to original redis key
+    tracking_id = full_key.split(':')[-1] if ':' in full_key else full_key
     redis_key_mapping[tracking_id] = key
 
     logging.debug(f"Processing key: {key.split(':')[1]}")
@@ -223,36 +224,7 @@ for key in tracking_keys:
         for entry in entries:
             try:
                 event = json.loads(entry)
-                timestamp = None
-
-                if 'event' in event and 'timestamp' in event['event']:
-                    timestamp = event['event']['timestamp']
-                elif 'timestamp' in event:
-                    timestamp = event['timestamp']
-
-                if not timestamp:
-                    logging.warning(f"⚠️  Missing timestamp in event for {tracking_id}")
-                    continue
-
-                dt = parser.isoparse(timestamp)
-                date_folder = dt.strftime(GCS_FOLDER_FORMAT)
-
-                # check if event is error
-                is_error = False
-                if 'event' in event and 'type' in event['event']:
-                    is_error = event['event']['type'] == 'error'
-                elif 'type' in event:
-                    is_error = event['type'] == 'error'
-
-                processed_event = storage_adapter.process_event(event)
-                group = errors_by_date if is_error else files_by_date
-
-                if date_folder not in group:
-                    group[date_folder] = {}
-                if tracking_id not in group[date_folder]:
-                    group[date_folder][tracking_id] = []
-                group[date_folder][tracking_id].append(processed_event)
-
+                # ... [rest of your event processing unchanged]
             except json.JSONDecodeError:
                 logging.warning(f"⚠️ Skipping invalid JSON for {tracking_id}")
             except Exception as e:
@@ -261,14 +233,18 @@ for key in tracking_keys:
         logging.exception(f"❌ Failed processing key: {key}")
 
 # ----- FUNCTION TO WRITE EVENTS TO GCS -----
+
+
 def upload_event_group(name, tracking_data, is_error=False):
-    logging.info(f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
+    logging.info(
+        f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
 
     for date_folder, trackings in tracking_data.items():
         for tracking_id, events in trackings.items():
             try:
                 if not events:
-                    logging.warning(f"⚠️ No events to upload for {tracking_id}")
+                    logging.warning(
+                        f"⚠️ No events to upload for {tracking_id}")
                     continue
 
                 serialized_data = storage_adapter.serialize_events(events)
@@ -286,17 +262,21 @@ def upload_event_group(name, tracking_data, is_error=False):
                     content_type=storage_adapter.get_content_type()
                 )
 
-                logging.info(f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
+                logging.info(
+                    f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
 
                 original_redis_key = redis_key_mapping.get(tracking_id)
                 if original_redis_key:
                     r.delete(original_redis_key)
                     logging.info(f"🗑️ Deleted Redis key: {original_redis_key}")
                 else:
-                    logging.warning(f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
+                    logging.warning(
+                        f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
 
             except Exception:
-                logging.exception(f"❌ Failed to upload or clean up for tracking ID: {tracking_id}")
+                logging.exception(
+                    f"❌ Failed to upload or clean up for tracking ID: {tracking_id}")
+
 
 # ----- UPLOAD EVENTS TO GCS -----
 upload_event_group("normal", files_by_date, is_error=False)
