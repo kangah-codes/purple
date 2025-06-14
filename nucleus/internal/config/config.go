@@ -168,28 +168,22 @@ func (c *Config) InitialiseDB() error {
 // InitialiseRedis initializes the Redis connection
 func (c *Config) InitialiseRedis() error {
 	ctx := context.Background()
-	// var tlsConfig *tls.Config
-	// tlsConfig = nil
-	// if config.Env.ENV == "dev" {
-	// } else {
-	// 	tlsConfig = &tls.Config{InsecureSkipVerify: true}
-	// }
-	//
-
-	opt, _ := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", c.Env.RedisUsername, c.Env.RedisPassword, c.Env.RedisHost, c.Env.RedisPort))
-	c.Redis = redis.NewClient(opt)
-
-	// c.Redis = redis.NewClient(&redis.Options{
-	// 	Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
-	// 	DB:          0,
-	// 	DialTimeout: 30 * time.Second,
-	// 	MaxRetries:  5,
-	// 	TLSConfig:   nil,
-	// })
+	if config.Env.ENV == "dev" {
+		c.Redis = redis.NewClient(&redis.Options{
+			Addr:        fmt.Sprintf("%s:%s", c.Env.RedisHost, c.Env.RedisPort),
+			DB:          0,
+			DialTimeout: 30 * time.Second,
+			MaxRetries:  5,
+			TLSConfig:   nil,
+		})
+	} else {
+		opt, _ := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", c.Env.RedisUsername, c.Env.RedisPassword, c.Env.RedisHost, c.Env.RedisPort))
+		c.Redis = redis.NewClient(opt)
+	}
 
 	_, err := c.Redis.Ping(ctx).Result()
 	if err != nil {
-		log.ErrorLogger.Errorf("Failed to connect to Redis: %w", err)
+		log.ErrorLogger.Errorf("Failed to connect to Redis: %v", err)
 		return err
 	}
 
