@@ -213,7 +213,7 @@ for key in tracking_keys:
     tracking_id = full_key.split(':')[-1] if ':' in full_key else full_key
     redis_key_mapping[tracking_id] = key
 
-    logging.debug(f"Processing key: {key} -> tracking_id: {tracking_id}")
+    logging.debug(f"Processing key: {key.split(':')[1]}")
 
     try:
         entries = r.lrange(key, 0, -1)
