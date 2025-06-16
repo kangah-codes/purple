@@ -189,14 +189,14 @@ except Exception as e:
 # ----- FETCH ALL TRACKING IDS -----
 logging.info("🔍 Fetching tracking keys from Redis...")
 try:
-	tracking_keys = []
-	cursor = 0
-	while True:
-		cursor, keys = r.scan(cursor=cursor, match=f'{KEY_PREFIX}*')
-		tracking_keys.extend(keys)
-		if cursor == 0:
-			break
-	logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
+    tracking_keys = []
+    cursor = 0
+    while True:
+        cursor, keys = r.scan(cursor=cursor, match=f'{KEY_PREFIX}*')
+        tracking_keys.extend(keys)
+        if cursor == 0:
+            break
+    logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
 except Exception as e:
     logging.exception("❌ Failed to fetch tracking keys")
     raise
@@ -204,8 +204,8 @@ except Exception as e:
 # ----- ORGANIZE BY DATE AND TRACKING ID -----
 files_by_date = {}
 errors_by_date = {}
-# keep track of original Redis keys for deletion
-redis_key_mapping = {}  # tracking_id -> original_redis_key
+# tracking_id maps to original_redis_key
+redis_key_mapping = {}
 
 logging.info("🧮 Organizing events by date...")
 for key in tracking_keys:
@@ -224,7 +224,50 @@ for key in tracking_keys:
         for entry in entries:
             try:
                 event = json.loads(entry)
-                # ... [rest of your event processing unchanged]
+
+                # Process event based on format
+                processed_event = storage_adapter.process_event(event)
+
+                # Extract timestamp for organizing by date
+                timestamp = None
+                if 'timestamp' in event:
+                    timestamp = event['timestamp']
+                elif 'created_at' in event:
+                    timestamp = event['created_at']
+                elif 'time' in event:
+                    timestamp = event['time']
+
+                # Parse timestamp and create date folder
+                date_folder = "unknown"
+                if timestamp:
+                    try:
+                        if isinstance(timestamp, str):
+                            dt = parser.parse(timestamp)
+                        else:
+                            dt = datetime.fromtimestamp(timestamp)
+                        date_folder = dt.strftime(GCS_FOLDER_FORMAT)
+                    except (ValueError, TypeError):
+                        logging.warning(f"⚠️ Could not parse timestamp: {timestamp}")
+                        date_folder = "unknown"
+
+                # Determine if this is an error event
+                is_error = (
+                    event.get('level') == 'error' or
+                    event.get('type') == 'error' or
+                    'error' in event.get('event_type', '').lower()
+                )
+
+                # Organize into appropriate dictionary
+                target_dict = errors_by_date if is_error else files_by_date
+
+                if date_folder not in target_dict:
+                    target_dict[date_folder] = {}
+
+                if tracking_id not in target_dict[date_folder]:
+                    target_dict[date_folder][tracking_id] = []
+
+                target_dict[date_folder][tracking_id].append(processed_event)
+
             except json.JSONDecodeError:
                 logging.warning(f"⚠️ Skipping invalid JSON for {tracking_id}")
             except Exception as e:
@@ -233,11 +276,11 @@ for key in tracking_keys:
         logging.exception(f"❌ Failed processing key: {key}")
 
 # ----- FUNCTION TO WRITE EVENTS TO GCS -----
-
-
 def upload_event_group(name, tracking_data, is_error=False):
     logging.info(
         f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
+
+    successfully_uploaded_keys = set()
 
     for date_folder, trackings in tracking_data.items():
         for tracking_id, events in trackings.items():
@@ -265,21 +308,35 @@ def upload_event_group(name, tracking_data, is_error=False):
                 logging.info(
                     f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
 
-                original_redis_key = redis_key_mapping.get(tracking_id)
-                if original_redis_key:
-                    r.delete(original_redis_key)
-                    logging.info(f"🗑️ Deleted Redis key: {original_redis_key}")
-                else:
-                    logging.warning(
-                        f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
+                # Mark for deletion only after successful upload
+                successfully_uploaded_keys.add(tracking_id)
 
             except Exception:
                 logging.exception(
-                    f"❌ Failed to upload or clean up for tracking ID: {tracking_id}")
+                    f"❌ Failed to upload for tracking ID: {tracking_id}")
+
+    # Delete Redis keys only for successfully uploaded data
+    for tracking_id in successfully_uploaded_keys:
+        original_redis_key = redis_key_mapping.get(tracking_id)
+        if original_redis_key:
+            try:
+                result = r.delete(original_redis_key)
+                if result:
+                    logging.info(f"🗑️ Deleted Redis key: {original_redis_key}")
+                else:
+                    logging.warning(f"⚠️ Redis key not found or already deleted: {original_redis_key}")
+            except Exception:
+                logging.exception(f"❌ Failed to delete Redis key: {original_redis_key}")
+        else:
+            logging.warning(
+                f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
+
+    return len(successfully_uploaded_keys)
 
 
 # ----- UPLOAD EVENTS TO GCS -----
-upload_event_group("normal", files_by_date, is_error=False)
-upload_event_group("error", errors_by_date, is_error=True)
+normal_uploaded = upload_event_group("normal", files_by_date, is_error=False)
+error_uploaded = upload_event_group("error", errors_by_date, is_error=True)
 
-logging.info(f"🎉 All uploads complete in {OUTPUT_FORMAT.upper()} format")
+logging.info(f"🎉 Upload complete! {normal_uploaded} normal and {error_uploaded} error tracking IDs processed")
+logging.info(f"Data uploaded in {OUTPUT_FORMAT.upper()} format and Redis keys cleaned up")
