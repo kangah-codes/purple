@@ -1,56 +1,78 @@
 _Last updated: 11th May, 2025_
 
-Your privacy matters. This Privacy Policy explains how Purple collects, uses, and protects any information you provide while using the app.
-
-By using Purple, you agree to the practices outlined here. If you do not agree, please stop using the app.
-
 ## 1. Information Collected
 
-Purple is designed to collect **minimal data**. Depending on how you use the app, we may collect:
+Depending on how you use the app, we may collect:
 
-- **Local data** stored on your device (e.g., your transactions and budget details).
-- **App usage data** (e.g., crash reports, feature usage) — only if analytics are enabled.
-- **Optional sync data**, if you choose to use a sync or backup feature tied to third-party services (e.g., Firebase, Google Drive).
+-   **Local data** stored on your device (e.g., transactions, budgets, accounts).
+-   **App usage and interaction data** — such as:
+    -   Screens visited and navigation flows
+    -   Button taps and UI interactions
+    -   App opens and exits
+    -   Session duration
+    -   Changes to app settings and or configurations
+    -   Crash or error events (including error type, severity, and context)
+-   **Device metadata** used for analytics and debugging:
+    -   Operating system name and version
+    -   App version and build number
+    -   Device brand and model
+    -   Device ID and unique identifier (used to associate events)
+    -   Carrier information
+    -   Whether you're using an emulator
+
+**No names, email addresses, passwords, or payment information are collected.**
 
 ## 2. How Your Data Is Used
 
-Any data collected is used to:
+**Any collected data is used to**:
 
-- Provide core app functionality.
-- Improve the app (e.g., by identifying crashes or bugs).
-- Communicate updates, if you've opted in.
+-   Provide and improve core app functionality
+-   Debug crashes or technical issues
+-   Understand usage patterns to improve user experience
+-   Introduce new features and enhancements
 
-We do **not** sell your data. We do **not** track you across other apps or websites.
+**We do not**:
+
+-   Sell your data to third parties
+-   Share your data with advertisers
+-   Track you across other apps or websites
 
 ## 3. Third-Party Services
 
 Purple may integrate with third-party services such as:
 
-- **Analytics & Crash Reporting**: To help identify and fix issues (e.g., Firebase, Sentry).
-- **Cloud Sync or Backups**: To store your data securely if you choose to enable it.
+-   **Analytics & Crash Reporting**: To help identify and fix issues (e.g., Firebase, Sentry).
 
 These services may collect anonymized or aggregated data subject to their own privacy policies.
 
-## 4. Data Security
+## 4. Data Retention
 
-I take your data seriously and use reasonable measures to protect it. However, no system is 100% secure, and use of the app is at your own risk.
+We retain analytics and diagnostic data for as long as necessary to improve the app experience.
 
-## 5. Your Choices
+If you request deletion, we will make reasonable efforts to anonymize or remove any data associated with your device ID. However, aggregate or non-identifiable data may be retained for ongoing improvement of the app.
+
+## 5. Data Security
+
+We take your data seriously and use reasonable security measures to protect it. Analytics and diagnostic data are encrypted in transit and at rest using industry-standard encryption. However, no system is completely secure, and use of the app is at your own risk.
+
+## 6. Your Choices
 
 You can:
 
-- Use Purple entirely offline.
-- Clear your data from within the app.
-- Opt out of crash reports or analytics (if available in settings).
+-   Use Purple entirely offline.
+-   Disable analytics and crash reporting (if available in settings).
+-   Request deletion of analytics data linked to your device by emailing privacy@trypurpleapp.com
 
-## 6. Children's Privacy
+**Note**: While we honour deletion requests for identifiable data, we reserve the right to retain anonymized analytics and diagnostic data for ongoing analysis and to improve app performance.
 
-Purple is not intended for use by anyone under the age of 13. I do not knowingly collect data from children.
+## 7. Children's Privacy
 
-## 7. Changes to This Policy
+Purple is not intended for use by anyone under the age of 13. We do not knowingly collect data from children.
 
-This policy may be updated from time to time. If changes are significant, I’ll make a reasonable effort to notify users. Continued use of the app means you accept the changes.
+## 8. Changes to This Policy
 
-## 8. Contact
+This Privacy Policy may be updated periodically to reflect changes in the app, legal requirements, or data practices. If any significant changes are made, we will make reasonable efforts to notify you within the app or through other appropriate means. Continued use of the app after such updates indicates your acceptance of the revised policy.
 
-For any privacy-related questions, reach out via email: hello@trypurpleapp.com
+## 9. Contact
+
+For any privacy related questions, reach out via email: privacy@trypurpleapp.com

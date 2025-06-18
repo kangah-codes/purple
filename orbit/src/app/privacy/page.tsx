@@ -15,7 +15,7 @@ export default function Terms() {
                   If you do not agree, please do NOT use the app.
                 `}
             />
-            <article className='prose prose-purple col-span-full md:col-span-4 w-full px-0 sm:px-4 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg mb-20'>
+            <article className='prose prose-purple col-span-full md:col-span-4 w-full px-5 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg mb-20'>
                 <MarkdownContent content={terms.content} />
             </article>
         </div>

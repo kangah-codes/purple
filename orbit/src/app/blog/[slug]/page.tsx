@@ -36,7 +36,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     return (
         <div className='w-full flex relative bg-gradient-to-b from-purple-400 to-white py-20 overflow-visible'>
             <AnimatedClouds
-                baseSpeed={12}
+                baseSpeed={0.7}
                 minHeight={10}
                 maxHeight={500}
                 spawnRate={5}

@@ -5,11 +5,9 @@ import { useAppLifecycleEvents } from './useTrackLifecycle';
 
 export const useAnalytics = (): AnalyticsContextType => {
     const context = useContext(AnalyticsContext);
-
     if (context === undefined) {
         throw new Error('useAnalytics must be used within an AnalyticsProvider');
     }
-
     return context;
 };
 
@@ -56,7 +54,7 @@ export const useScreenTracking = (
 ) => {
     const logEvent = useAnalyticsEvent();
     const { updateCurrentScreen } = useAppLifecycleEvents();
-    const memoizedProps = useMemo(() => additionalProperties, []);
+    const memoizedProps = useMemo(() => additionalProperties, [additionalProperties]);
 
     useEffect(() => {
         updateCurrentScreen(screenName);
@@ -64,16 +62,19 @@ export const useScreenTracking = (
             screen: screenName,
             ...memoizedProps,
         }).catch(console.error);
-    }, [screenName, logEvent, memoizedProps, updateCurrentScreen(screenName)]);
+    }, [screenName, logEvent, memoizedProps, updateCurrentScreen]);
 };
 
 export const useAnalyticsStatus = () => {
     const { isInitialized, queueSize, isOnline } = useAnalytics();
 
-    return {
-        isInitialized,
-        queueSize,
-        isOnline,
-        hasQueuedItems: queueSize > 0,
-    };
+    return useMemo(
+        () => ({
+            isInitialized,
+            queueSize,
+            isOnline,
+            hasQueuedItems: queueSize > 0,
+        }),
+        [isInitialized, queueSize, isOnline],
+    );
 };

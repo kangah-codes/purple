@@ -1,6 +1,6 @@
 import { usePreferences } from '@/components/Settings/hooks';
 import React, { ReactNode, createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { AppState } from 'react-native';
+import { AppState, AppStateStatus } from 'react-native';
 import {
     AnalyticsConfig,
     AnalyticsTracker,
@@ -29,6 +29,7 @@ type AnalyticsContextType = {
 };
 
 export const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
+
 type AnalyticsProviderProps = {
     children: ReactNode;
     config?: AnalyticsConfig;
@@ -37,13 +38,13 @@ type AnalyticsProviderProps = {
     autoFlushOnBackground?: boolean;
 };
 
-export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
+export function AnalyticsProvider({
     children,
     config = {},
     onInitialized,
     onError,
     autoFlushOnBackground = true,
-}) => {
+}: AnalyticsProviderProps) {
     const analyticsRef = useRef<AnalyticsTracker | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const [queueSize, setQueueSize] = useState(0);
@@ -51,12 +52,24 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [uniqueId, setUniqueId] = useState<string | null>(null);
     const { preferences } = usePreferences();
-
-    const shouldTrackEvents = preferences?.trackUsageStatistics ?? false;
-    const shouldSendDiagnostics = preferences?.sendDiagnosticData ?? false;
+    const shouldTrackEvents = preferences?.trackUsageStatistics ?? true;
+    const shouldSendDiagnostics = preferences?.sendDiagnosticData ?? true;
 
     useEffect(() => {
-        if (!shouldTrackEvents && !shouldSendDiagnostics) return;
+        if (!shouldTrackEvents && !shouldSendDiagnostics) {
+            // clean up if tracking is disabled
+            if (analyticsRef.current) {
+                analyticsRef.current.destroy();
+                analyticsRef.current = null;
+                setIsInitialized(false);
+                setSessionId(null);
+                setUniqueId(null);
+                setQueueSize(0);
+            }
+            return;
+        }
+
+        if (analyticsRef.current) return;
 
         const initializeAnalytics = async () => {
             try {
@@ -66,6 +79,10 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
                 });
 
                 analyticsRef.current = analytics;
+
+                // wait for init to complete before setting state
+                await new Promise((resolve) => setTimeout(resolve, 100));
+
                 setSessionId(analytics.getSessionId());
                 setUniqueId(analytics.getUniqueId());
                 setIsOnline(analytics.isOnlineStatus());
@@ -87,48 +104,48 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
             if (analyticsRef.current) {
                 analyticsRef.current.destroy();
                 analyticsRef.current = null;
+                setIsInitialized(false);
             }
         };
-    }, [shouldTrackEvents, shouldSendDiagnostics]);
+    }, [shouldTrackEvents, shouldSendDiagnostics, config, onInitialized, onError]);
 
     useEffect(() => {
-        if (!analyticsRef.current) return;
+        if (!isInitialized || !analyticsRef.current) return;
 
-        const updateQueueSize = () => {
+        const updateStatus = () => {
             if (analyticsRef.current) {
                 setQueueSize(analyticsRef.current.getQueueSize());
                 setIsOnline(analyticsRef.current.isOnlineStatus());
             }
         };
 
-        const interval = setInterval(updateQueueSize, 5000);
+        updateStatus();
 
+        const interval = setInterval(updateStatus, 5000);
         return () => clearInterval(interval);
     }, [isInitialized]);
 
     useEffect(() => {
-        if (!autoFlushOnBackground || !analyticsRef.current || !shouldTrackEvents) return;
+        if (!autoFlushOnBackground || !isInitialized || !analyticsRef.current) return;
 
-        const subscription = AppState.addEventListener('change', (nextAppState) => {
-            if (nextAppState === 'background') {
-                analyticsRef.current!.flush().catch((error) => {
+        const handleAppStateChange = (nextAppState: AppStateStatus) => {
+            if (nextAppState === 'background' && analyticsRef.current) {
+                analyticsRef.current.flush().catch((error) => {
                     onError?.(error instanceof Error ? error : new Error('Auto-flush failed'));
                 });
             }
-        });
+        };
 
-        return () => subscription.remove();
-    }, [isInitialized, autoFlushOnBackground, shouldTrackEvents]);
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+        return () => subscription?.remove();
+    }, [isInitialized, autoFlushOnBackground, onError]);
 
     const logEvent = useCallback(
         async <T extends keyof EventProperties>(
             name: T | string,
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
-            if (!shouldTrackEvents || !analyticsRef.current) return;
-
-            if (!analyticsRef.current) {
-                console.warn('[AnalyticsProvider] Analytics not initialized, event ignored:', name);
+            if (!shouldTrackEvents || !analyticsRef.current) {
                 return;
             }
 
@@ -141,7 +158,7 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
                 onError?.(analyticsError);
             }
         },
-        [onError, shouldTrackEvents],
+        [shouldTrackEvents, onError],
     );
 
     const logError = useCallback(
@@ -150,13 +167,7 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
             extraMetadata?: Record<string, unknown>,
             level: ErrorLevel = 'error',
         ): Promise<void> => {
-            if (!shouldSendDiagnostics || !analyticsRef.current) return;
-
-            if (!analyticsRef.current) {
-                console.warn(
-                    '[AnalyticsProvider] Analytics not initialized, error ignored:',
-                    error,
-                );
+            if (!shouldSendDiagnostics || !analyticsRef.current) {
                 return;
             }
 
@@ -169,14 +180,11 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
                 onError?.(analyticsError);
             }
         },
-        [onError, shouldSendDiagnostics],
+        [shouldSendDiagnostics, onError],
     );
 
     const flush = useCallback(async (): Promise<void> => {
-        if (!shouldTrackEvents || !analyticsRef.current) return;
-
         if (!analyticsRef.current) {
-            console.warn('[AnalyticsProvider] Analytics not initialized, flush ignored');
             return;
         }
 
@@ -187,13 +195,10 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
             const analyticsError = error instanceof Error ? error : new Error('Failed to flush');
             onError?.(analyticsError);
         }
-    }, [onError, shouldTrackEvents]);
+    }, [onError]);
 
     const clearQueue = useCallback(async (): Promise<void> => {
-        if (!shouldTrackEvents || !analyticsRef.current) return;
-
         if (!analyticsRef.current) {
-            console.warn('[AnalyticsProvider] Analytics not initialized, clear ignored');
             return;
         }
 
@@ -205,7 +210,7 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
                 error instanceof Error ? error : new Error('Failed to clear queue');
             onError?.(analyticsError);
         }
-    }, [onError, shouldTrackEvents]);
+    }, [onError]);
 
     const contextValue: AnalyticsContextType = {
         analytics: analyticsRef.current,
@@ -221,6 +226,6 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     };
 
     return <AnalyticsContext.Provider value={contextValue}>{children}</AnalyticsContext.Provider>;
-};
+}
 
 export type { AnalyticsContextType, AnalyticsProviderProps };

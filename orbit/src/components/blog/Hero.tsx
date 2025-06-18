@@ -4,7 +4,7 @@ export default function Hero() {
     return (
         <div className='w-full flex px-5 relative bg-gradient-to-b from-purple-400 to-white py-20 overflow-visible'>
             <AnimatedClouds
-                baseSpeed={1}
+                baseSpeed={0.7}
                 minHeight={10}
                 maxHeight={500}
                 spawnRate={5}

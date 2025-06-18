@@ -4,7 +4,7 @@ export default function Hero({ title, description }: { title: string; descriptio
     return (
         <div className='w-full flex overflow-auto px-5 relative bg-gradient-to-b from-purple-400 to-white pt-[59px]'>
             <AnimatedClouds
-                baseSpeed={1}
+                baseSpeed={0.7}
                 minHeight={10}
                 maxHeight={300}
                 spawnRate={5}
@@ -19,7 +19,7 @@ export default function Hero({ title, description }: { title: string; descriptio
                             {title}
                         </h1>
                         <div className='space-y-5 flex flex-col items-center justify-center max-w-2xl mx-auto'>
-                            <p className='text-lg text-black'>{description}</p>
+                            <p className='text-base text-black'>{description}</p>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,7 @@ export default function Hero() {
     return (
         <div className='w-full flex overflow-hidden px-5 relative bg-gradient-to-b from-purple-400 to-white min-h-screen pt-[59px]'>
             <AnimatedClouds
-                baseSpeed={1}
+                baseSpeed={0.7}
                 minHeight={10}
                 maxHeight={650}
                 spawnRate={5}
