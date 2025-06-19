@@ -35,7 +35,7 @@ export default function PrivacyScreen() {
             trackUsageStatistics: {
                 enable: 'Allowing usage tracking helps us improve features based on how you use the app.',
                 disable:
-                    'Disabling usage tracking means we won’t be able to improve the experience based on how the app is used.',
+                    'Disabling usage tracking means we won’t be able to improve your experience based on how the app is used.',
             },
             sendDiagnosticData: {
                 enable: 'Sending diagnostic data and crash reports helps us fix bugs faster and improve performance.',

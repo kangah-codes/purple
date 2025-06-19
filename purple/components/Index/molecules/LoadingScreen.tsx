@@ -6,7 +6,7 @@ import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
 
 const SkeletonLine = ({ width, height = 5 }: { width: number | string; height?: number }) => (
-    <AnimatedSkeleton style={[tw`rounded-md mb-2.5`, { width, height }]} />
+    <AnimatedSkeleton style={[tw`rounded-3xl mb-2.5`, { width, height }]} />
 );
 
 const SkeletonCircle = ({ size = 40 }) => (
@@ -48,7 +48,7 @@ export default function LoadingScreen() {
                         <SkeletonLine width={40} height={20} />
                     </View>
 
-                    <View style={tw`p-5 space-y-2 border border-purple-100 rounded-xl`}>
+                    <View style={tw`p-5 space-y-2 border border-purple-100 rounded-3xl`}>
                         <View style={tw`flex-row justify-between items-center`}>
                             <SkeletonLine width={80} height={20} />
                             <SkeletonLine width={40} height={20} />

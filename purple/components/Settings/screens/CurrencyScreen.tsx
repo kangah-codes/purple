@@ -57,9 +57,14 @@ export default function CurrencyScreen() {
                       customItem: () => (
                           <Switch
                               value={allowCurrencyConversion}
-                              onValueChange={(value) =>
-                                  setPreference('allowCurrencyConversion', value)
-                              }
+                              onValueChange={async (value) => {
+                                  await logEvent('settings_set', {
+                                      old_value: allowCurrencyConversion,
+                                      new_value: value,
+                                      setting: 'allowCurrencyConversion',
+                                  });
+                                  setPreference('allowCurrencyConversion', value);
+                              }}
                           />
                       ),
                   },

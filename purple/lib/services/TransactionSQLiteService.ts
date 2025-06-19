@@ -8,6 +8,7 @@ import { BaseSQLiteService } from './SQLiteService';
 import CurrencyService from './CurrencyService';
 import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import { isNotEmptyString } from '../utils/string';
+import { SettingsServiceFactory } from '../factory/SettingsFactory';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
@@ -22,6 +23,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         const errorMessage = "Couldn't create transaction";
 
         await this.db.withTransactionAsync(async () => {
+            const settingsService = SettingsServiceFactory.create(this.db);
             if (data.type === 'transfer') {
                 debitAccount = await this.db.getFirstAsync<Account>(
                     'SELECT * from accounts where id = ?',
@@ -36,8 +38,12 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 const defaultNote = `Transfer from ${debitAccount.name}`;
                 let creditAmount = data.amount;
+                const shouldUseConversion = await settingsService.get('allowCurrencyConversion');
 
-                if (debitAccount.currency !== creditAccount.currency) {
+                if (
+                    debitAccount.currency !== creditAccount.currency &&
+                    shouldUseConversion === true
+                ) {
                     const currencyService = CurrencyService.getInstance();
                     creditAmount = await currencyService.convertCurrencyAsync({
                         from: {

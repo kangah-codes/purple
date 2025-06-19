@@ -2,6 +2,7 @@ import { useContext, useCallback, useMemo, useEffect } from 'react';
 import { AnalyticsContext, AnalyticsContextType } from '../providers/Analytics';
 import { EventProperties, ErrorLevel } from '../services/AnalyticsService';
 import { useAppLifecycleEvents } from './useTrackLifecycle';
+import { useDeepCompareMemo } from './useDeepCompareMemo';
 
 export const useAnalytics = (): AnalyticsContextType => {
     const context = useContext(AnalyticsContext);
@@ -54,7 +55,7 @@ export const useScreenTracking = (
 ) => {
     const logEvent = useAnalyticsEvent();
     const { updateCurrentScreen } = useAppLifecycleEvents();
-    const memoizedProps = useMemo(() => additionalProperties, [additionalProperties]);
+    const memoizedProps = useDeepCompareMemo(() => additionalProperties, [additionalProperties]);
 
     useEffect(() => {
         updateCurrentScreen(screenName);
@@ -62,7 +63,7 @@ export const useScreenTracking = (
             screen: screenName,
             ...memoizedProps,
         }).catch(console.error);
-    }, [screenName, logEvent, memoizedProps, updateCurrentScreen]);
+    }, [screenName, logEvent, memoizedProps]);
 };
 
 export const useAnalyticsStatus = () => {

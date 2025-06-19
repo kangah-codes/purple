@@ -53,8 +53,8 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             handleIndicatorStyle={styles.handleIndicator}
         >
             <View className='px-5'>
-                <View className='w-full items-center mt-5' style={styles.receiptView}>
-                    <Svg
+                <View className='w-full items-center' style={styles.receiptView}>
+                    {/* <Svg
                         height={12}
                         width='100%'
                         style={styles.zigZag}
@@ -62,9 +62,9 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         stroke='#c084fc'
                     >
                         {ZIGZAG_VIEW}
-                    </Svg>
+                    </Svg> */}
                     <LinearGradient
-                        className='w-full py-5 items-center justify-center'
+                        className='w-full py-5 items-center justify-center rounded-t-3xl'
                         colors={linearGradient}
                     >
                         <View className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'>

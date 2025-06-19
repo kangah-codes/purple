@@ -3,17 +3,23 @@ import { Account } from '@/components/Accounts/schema';
 import Checkbox from '@/components/Shared/atoms/Checkbox';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { Text, TouchableOpacity } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import React, { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
 import { usePreferences } from '../hooks';
 
 export default function PinAccount() {
     const { setPreference, preferences } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const { logEvent } = useAnalytics();
     const { accounts } = useAccountStore();
-    const handlePress = useCallback((item: Account) => {
+    const handlePress = useCallback(async (item: Account) => {
+        await logEvent('settings_set', {
+            setting: 'pinnedAccount',
+            old_value: preferences.pinnedAccount,
+            new_value: item.id,
+        });
         setPreference('pinnedAccount', item.id);
         setShowBottomSheetFlatList('preferences-pinned-account', false);
     }, []);
@@ -60,10 +66,3 @@ export default function PinAccount() {
         />
     );
 }
-
-const styles = StyleSheet.create({
-    searchIcon: {
-        position: 'absolute',
-        left: 15,
-    },
-});

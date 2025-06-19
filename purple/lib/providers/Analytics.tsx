@@ -26,6 +26,7 @@ type AnalyticsContextType = {
     ) => Promise<void>;
     flush: () => Promise<void>;
     clearQueue: () => Promise<void>;
+    flushQueue: () => Promise<void>;
 };
 
 export const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
@@ -212,6 +213,21 @@ export function AnalyticsProvider({
         }
     }, [onError]);
 
+    const flushQueue = useCallback(async (): Promise<void> => {
+        if (!analyticsRef.current) {
+            return;
+        }
+
+        try {
+            await analyticsRef.current.flushQueue();
+            setQueueSize(0);
+        } catch (error) {
+            const analyticsError =
+                error instanceof Error ? error : new Error('Failed to clear queue');
+            onError?.(analyticsError);
+        }
+    }, [onError]);
+
     const contextValue: AnalyticsContextType = {
         analytics: analyticsRef.current,
         isInitialized,
@@ -223,6 +239,7 @@ export function AnalyticsProvider({
         logError,
         flush,
         clearQueue,
+        flushQueue,
     };
 
     return <AnalyticsContext.Provider value={contextValue}>{children}</AnalyticsContext.Provider>;

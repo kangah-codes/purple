@@ -248,6 +248,12 @@ export class AnalyticsTracker {
         this.log('Queue cleared');
     }
 
+    public async flushQueue(): Promise<void> {
+        this.queue.length = 0;
+        this.dropQueue();
+        this.log('Queue dropped');
+    }
+
     public getQueueSize(): number {
         return this.queue.length;
     }
@@ -396,6 +402,14 @@ export class AnalyticsTracker {
             this.storage.setItem(this.storageKey, this.queue);
         } catch (error) {
             this.handleError(new AnalyticsError('Failed to save queue', 'STORAGE_ERROR', error));
+        }
+    }
+
+    private dropQueue(): void {
+        try {
+            this.storage.removeItem(this.storageKey);
+        } catch (error) {
+            this.handleError(new AnalyticsError('Failed to drop queue', 'STORAGE_ERROR', error));
         }
     }
 

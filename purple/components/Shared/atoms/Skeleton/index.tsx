@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, StyleProp, ViewStyle } from 'react-native';
+import { Animated, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 
 type AnimatedSkeletonProps = {
     style: StyleProp<ViewStyle>;
@@ -31,7 +31,7 @@ function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
 
     const backgroundColor = animatedValue.interpolate({
         inputRange: [0, 1],
-        outputRange: ['#E0E0E0', '#F5F5F5'],
+        outputRange: ['#faf5ff', '#f3e8ff'],
     });
 
     return <Animated.View style={[styles.skeleton, style, { backgroundColor }]} />;

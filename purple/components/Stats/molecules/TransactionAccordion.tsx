@@ -5,8 +5,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
 import TransactionCard from './TransactionCard';
 
 type TransactionsAccordionProps = {
@@ -22,9 +21,6 @@ export default function TransactionsAccordion({
     onEndReached,
     showTitle = true,
 }: TransactionsAccordionProps) {
-    const fadeAnim = useRef(new Animated.Value(1)).current;
-    const hasDataRef = useRef(transactions.length > 0);
-
     const groupedTransactionData = useMemo(() => {
         const transactionsWithFormattedDate = transactions.map((transaction) => ({
             ...transaction,
@@ -43,26 +39,7 @@ export default function TransactionsAccordion({
             .filter((item) => item.transactions && item.transactions.length > 0);
     }, [transactions]);
 
-    const hasData = groupedTransactionData.length > 0;
-
-    useEffect(() => {
-        if (hasData !== hasDataRef.current) {
-            Animated.timing(fadeAnim, {
-                toValue: 0,
-                duration: 150,
-                useNativeDriver: true,
-            }).start(() => {
-                hasDataRef.current = hasData;
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 150,
-                    useNativeDriver: true,
-                }).start();
-            });
-        }
-    }, [hasData, fadeAnim]);
-
-    const renderItem = React.useCallback(
+    const renderItem = useCallback(
         ({
             item,
         }: {
@@ -91,20 +68,18 @@ export default function TransactionsAccordion({
                 </Text>
             )}
 
-            <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
-                <FlashList
-                    estimatedItemSize={300}
-                    data={groupedTransactionData}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ paddingBottom: 300 }}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={renderEmptylist}
-                    onEndReachedThreshold={0.5}
-                    onEndReached={onEndReached}
-                    scrollEnabled={false}
-                />
-            </Animated.View>
+            <FlashList
+                estimatedItemSize={300}
+                data={groupedTransactionData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 300 }}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={renderEmptylist}
+                onEndReachedThreshold={0.5}
+                onEndReached={onEndReached}
+                scrollEnabled={false}
+            />
         </View>
     );
 }

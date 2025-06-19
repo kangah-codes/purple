@@ -1,5 +1,5 @@
 import { ScrollView, Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import React from 'react';
 import { spendOverviewPalette } from '../contants';
 
@@ -28,7 +28,7 @@ export default function WeekLegend({ weekRanges }: Props) {
                             backgroundColor: spendOverviewPalette[i % spendOverviewPalette.length],
                         }}
                     />
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='tracking-tight text-xs'>
+                    <Text style={satoshiFont.satoshiBold} className='tracking-tight text-xs'>
                         {range}
                     </Text>
                 </View>

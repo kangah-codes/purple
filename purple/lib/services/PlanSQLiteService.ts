@@ -6,6 +6,9 @@ import { type SQLiteDatabase } from 'expo-sqlite';
 import HTTPError from '../utils/error';
 import { UUID, groupBy } from '../utils/helpers';
 import { BaseSQLiteService } from './SQLiteService';
+import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
+import CurrencyService from './CurrencyService';
+import { SettingsServiceFactory } from '../factory/SettingsFactory';
 
 export class PlanSQLiteService extends BaseSQLiteService<Plan> {
     constructor(db: SQLiteDatabase) {
@@ -85,12 +88,29 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
         const now = new Date().toISOString();
 
         await this.db.withTransactionAsync(async () => {
+            const settingsService = SettingsServiceFactory.create(this.db);
+            const currencyService = CurrencyService.getInstance();
+            const shouldUseConversion = await settingsService.get('allowCurrencyConversion');
+            let creditAmount = data.amount;
+
+            if (account.currency !== plan.currency && shouldUseConversion === true) {
+                creditAmount = await currencyService.convertCurrencyAsync({
+                    from: {
+                        currency: account.currency.toLowerCase() as CurrencyCode,
+                        amount: data.amount,
+                    },
+                    to: {
+                        currency: plan.currency.toLowerCase() as CurrencyCode,
+                    },
+                });
+            }
+
             await this.db.runAsync(
                 `INSERT INTO transactions
-                (
-                  id, created_at, updated_at, account_id, user_id, type,
-                  amount, note, category, currency, plan_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                 (
+                   id, created_at, updated_at, account_id, user_id, type,
+                   amount, note, category, currency, plan_id
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     uuid,
                     now,
@@ -106,20 +126,20 @@ export class PlanSQLiteService extends BaseSQLiteService<Plan> {
                 ],
             );
 
+            // debit from the source account (original currency)
             await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
                 account.balance - data.amount,
                 data.debit_account_id,
             ]);
 
-            const newPlanBalance = plan.balance + data.amount;
+            const newPlanBalance = plan.balance + creditAmount;
 
-            // Update the plan's balance
+            // credit to the plan (converted currency)
             await this.db.runAsync('UPDATE plans SET balance = ? WHERE id = ?', [
                 newPlanBalance,
                 plan.id,
             ]);
 
-            // Check if the plan is now completed
             if (!plan.is_completed && newPlanBalance >= plan.target) {
                 await this.db.runAsync(
                     'UPDATE plans SET is_completed = 1, updated_at = ? WHERE id = ?',

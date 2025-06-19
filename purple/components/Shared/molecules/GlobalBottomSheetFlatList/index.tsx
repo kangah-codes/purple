@@ -134,6 +134,7 @@ function CustomBottomSheetFlatList<T>({
             onChange={handleSheetChanges}
             enablePanDownToClose={true}
             {...rest}
+            backgroundStyle={{ borderRadius: 28 }}
         >
             {children}
             <BottomSheetFlatList

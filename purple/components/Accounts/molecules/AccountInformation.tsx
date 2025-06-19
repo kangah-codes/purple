@@ -22,30 +22,31 @@ export default function AccountInformation({ transactions }: { transactions: Tra
                 <Text
                     style={[
                         satoshiFont.satoshiBlack,
-                        {
-                            color: currentAccount.balance < 0 ? '#DC2626' : '#000000',
-                        },
+                        { color: currentAccount.balance < 0 ? '#DC2626' : '#000000' },
                     ]}
                     className='text-2xl tracking-tighter leading-[1.4] mt-1.5'
                 >
                     {formatCurrencyAccurate(currentAccount.currency, currentAccount.balance)}
                 </Text>
-                <View className='flex flex-row items-center space-x-1'>
-                    {amountAdded > 0 ? (
-                        <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
-                    ) : (
-                        <ArrowNarrowDownRightIcon width={16} height={16} stroke='#fb2c36' />
-                    )}
-                    <Text
-                        style={[
-                            satoshiFont.satoshiBold,
-                            { color: amountAdded > 0 ? '#A855F7' : '#fb2c36' },
-                        ]}
-                        className='text-purple-600 text-sm'
-                    >
-                        {formatCurrencyAccurate(currentAccount.currency, amountAdded)} today
-                    </Text>
-                </View>
+
+                {!!amountAdded && (
+                    <View className='flex flex-row items-center space-x-1'>
+                        {amountAdded > 0 ? (
+                            <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
+                        ) : (
+                            <ArrowNarrowDownRightIcon width={16} height={16} stroke='#fb2c36' />
+                        )}
+                        <Text
+                            style={[
+                                satoshiFont.satoshiBold,
+                                { color: amountAdded > 0 ? '#A855F7' : '#fb2c36' },
+                            ]}
+                            className='text-sm'
+                        >
+                            {formatCurrencyAccurate(currentAccount.currency, amountAdded)} today
+                        </Text>
+                    </View>
+                )}
             </View>
         </View>
     );

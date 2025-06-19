@@ -69,6 +69,7 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
             snapPoints={defaultSnapPoints}
             onChange={handleSheetChanges}
             {...rest}
+            style={{ borderRadius: 28, overflow: 'hidden' }}
         >
             <BottomSheetView style={styles.bottomSheetView}>{children}</BottomSheetView>
         </BottomSheetModal>
