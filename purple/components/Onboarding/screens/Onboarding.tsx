@@ -1,10 +1,11 @@
 import Stories, { StoriesRef } from '@/components/Shared/molecules/Stories';
+import { View } from '@/components/Shared/styled';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useRef } from 'react';
 import { Image } from 'react-native';
 import tw from 'twrnc';
-import OnboardingPage from '../molecules/OnboardingPage';
 import CurrencySetup from '../molecules/CurrencySetup';
+import OnboardingPage from '../molecules/OnboardingPage';
 
 export default function Screen() {
     const storiesRef = useRef<StoriesRef>(null);
@@ -17,12 +18,13 @@ export default function Screen() {
             }
             image={
                 <Image
-                    source={require('@/assets/images/graphics/8.png')}
+                    source={require('@/assets/images/graphics/iris.png')}
                     style={tw`rounded-3xl w-[200px] h-[200px]`}
                 />
             }
             currentIndex={0}
             pages={4}
+            storiesRef={storiesRef}
         />,
         <OnboardingPage
             title='Watch your spending'
@@ -37,6 +39,7 @@ export default function Screen() {
             }
             currentIndex={1}
             pages={4}
+            storiesRef={storiesRef}
         />,
         <OnboardingPage
             title='Know when you hit your limits'
@@ -51,6 +54,7 @@ export default function Screen() {
             }
             currentIndex={2}
             pages={4}
+            storiesRef={storiesRef}
         />,
         <OnboardingPage
             title='Take control of your finances'
@@ -65,20 +69,25 @@ export default function Screen() {
             }
             currentIndex={3}
             pages={4}
+            storiesRef={storiesRef}
         />,
         <CurrencySetup />,
     ];
 
     return (
-        <>
+        <View className='w-full h-[100%]'>
+            <Image
+                source={require('@/assets/images/graphics/gradient-2.png')}
+                style={tw`rounded-3xl w-full h-full absolute`}
+            />
             <ExpoStatusBar style='dark' />
             <Stories
                 pages={pages}
                 ref={storiesRef}
                 timePerPage={process.env.NODE_ENV == 'development' ? 1000 : 3000}
                 enableNavigation={false}
-                // disableAutomaticScroll
+                disableAutomaticScroll
             />
-        </>
+        </View>
     );
 }

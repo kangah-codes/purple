@@ -21,6 +21,8 @@ export interface StoriesProps {
 export interface StoriesRef {
     goToPage: (index: number) => void;
     currentIndex: number;
+    goForward: () => void;
+    goBack: () => void;
 }
 
 const Stories = forwardRef<StoriesRef, StoriesProps>(
@@ -116,6 +118,16 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
             goToPage: (pageIndex: number) => {
                 if (pageIndex >= 0 && pageIndex < pages.length) {
                     animatePageTransition(pageIndex);
+                }
+            },
+            goForward: () => {
+                if (currentIndex < pages.length - 1) {
+                    animatePageTransition(currentIndex + 1);
+                }
+            },
+            goBack: () => {
+                if (currentIndex > 0) {
+                    animatePageTransition(currentIndex - 1);
                 }
             },
             currentIndex,

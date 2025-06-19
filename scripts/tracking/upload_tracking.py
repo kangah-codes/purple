@@ -36,12 +36,12 @@ REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 REDIS_USERNAME = os.getenv('REDIS_USERNAME')
 REDIS_URL = os.getenv("REDIS_URL", "")
 KEY_PREFIX = 'analytics:'
-GCS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
+GCS_BUCKET = os.getenv('GCS_BUCKET')
 GCS_FOLDER_FORMAT = '%d-%m-%y'
 OUTPUT_FORMAT = os.getenv('OUTPUT_FORMAT', 'json').lower()
 
 logging.debug(f"Redis URL: {REDIS_URL}")
-logging.debug(f"GCS Bucket: {GCS_BUCKET_NAME}")
+logging.debug(f"GCS Bucket: {GCS_BUCKET}")
 logging.debug(f"Output Format: {OUTPUT_FORMAT}")
 
 # ----- STORAGE ADAPTERS -----
@@ -171,18 +171,18 @@ try:
     r = Redis(url=REDIS_HOST, token=REDIS_PASSWORD)
     r.ping()
     logging.info("✅ Connected to Redis successfully")
-except Exception:
-    logging.exception("❌ Redis connection failed")
+except Exception as e:
+    logging.exception(f"❌ Redis connection failed - {e}")
     raise
 
 
 # init gcs client
 try:
     storage_client = storage.Client()
-    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+    bucket = storage_client.bucket(GCS_BUCKET)
     logging.info("✅ Initialized GCS client")
 except Exception as e:
-    logging.exception("❌ Failed to initialize GCS client")
+    logging.exception(f"❌ Failed to initialize GCS client - {e}")
     raise
 
 
@@ -311,9 +311,10 @@ def upload_event_group(name, tracking_data, is_error=False):
                 # Mark for deletion only after successful upload
                 successfully_uploaded_keys.add(tracking_id)
 
-            except Exception:
+            except Exception as e:
                 logging.exception(
-                    f"❌ Failed to upload for tracking ID: {tracking_id}")
+                    f"❌ Failed to upload for tracking ID: {tracking_id} - {e}")
+
 
     # Delete Redis keys only for successfully uploaded data
     for tracking_id in successfully_uploaded_keys:
@@ -322,7 +323,7 @@ def upload_event_group(name, tracking_data, is_error=False):
             try:
                 result = r.delete(original_redis_key)
                 if result:
-                    logging.info(f"🗑️ Deleted Redis key: {original_redis_key}")
+                    logging.info(f"🗑️  Deleted Redis key: {original_redis_key}")
                 else:
                     logging.warning(f"⚠️ Redis key not found or already deleted: {original_redis_key}")
             except Exception:
