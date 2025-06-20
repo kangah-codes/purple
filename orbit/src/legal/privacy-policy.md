@@ -4,21 +4,21 @@ _Last updated: 11th May, 2025_
 
 Depending on how you use the app, we may collect:
 
--   **Local data** stored on your device (e.g., transactions, budgets, accounts).
--   **App usage and interaction data** — such as:
-    -   Screens visited and navigation flows
-    -   Button taps and UI interactions
-    -   App opens and exits
-    -   Session duration
-    -   Changes to app settings and or configurations
-    -   Crash or error events (including error type, severity, and context)
--   **Device metadata** used for analytics and debugging:
-    -   Operating system name and version
-    -   App version and build number
-    -   Device brand and model
-    -   Device ID and unique identifier (used to associate events)
-    -   Carrier information
-    -   Whether you're using an emulator
+- **Local data** stored on your device (e.g., transactions, budgets, accounts).
+- **App usage and interaction data** — such as:
+    - Screens visited and navigation flows
+    - Button taps and UI interactions
+    - App opens and exits
+    - Session duration
+    - Changes to app settings and or configurations
+    - Crash or error events (including error type, severity, and context)
+- **Device metadata** used for analytics and debugging:
+    - Operating system name and version
+    - App version and build number
+    - Device brand and model
+    - Device ID and unique identifier (used to associate events)
+    - Carrier information
+    - Whether you're running the app in an emulator
 
 **No names, email addresses, passwords, or payment information are collected.**
 
@@ -26,22 +26,22 @@ Depending on how you use the app, we may collect:
 
 **Any collected data is used to**:
 
--   Provide and improve core app functionality
--   Debug crashes or technical issues
--   Understand usage patterns to improve user experience
--   Introduce new features and enhancements
+- Provide and improve core app functionality
+- Debug crashes or technical issues
+- Understand usage patterns to improve user experience
+- Introduce new features and enhancements
 
 **We do not**:
 
--   Sell your data to third parties
--   Share your data with advertisers
--   Track you across other apps or websites
+- Sell your data to third parties
+- Share your data with advertisers
+- Track you across other apps or websites
 
 ## 3. Third-Party Services
 
 Purple may integrate with third-party services such as:
 
--   **Analytics & Crash Reporting**: To help identify and fix issues (e.g., Firebase, Sentry).
+- **Analytics & Crash Reporting**: To help identify and fix issues (e.g., Firebase, Sentry).
 
 These services may collect anonymized or aggregated data subject to their own privacy policies.
 
@@ -59,9 +59,9 @@ We take your data seriously and use reasonable security measures to protect it. 
 
 You can:
 
--   Use Purple entirely offline.
--   Disable analytics and crash reporting (if available in settings).
--   Request deletion of analytics data linked to your device by emailing privacy@trypurpleapp.com
+- Use Purple entirely offline.
+- Disable analytics and crash reporting (if available in settings).
+- Request deletion of analytics data linked to your device by emailing privacy@trypurpleapp.com
 
 **Note**: While we honour deletion requests for identifiable data, we reserve the right to retain anonymized analytics and diagnostic data for ongoing analysis and to improve app performance.
 

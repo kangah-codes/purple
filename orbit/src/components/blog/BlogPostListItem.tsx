@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function BlogPostListItem({ post }: { post: TBlogPost }) {
-    console.log(post.data.tags);
     return (
         <article className='flex max-w-xl flex-col space-y-5 items-start justify-between'>
             <div className='relative w-full aspect-[4/3] rounded-[3rem] overflow-hidden bg-purple-400 shadow-xl shadow-purple-50'>
@@ -15,6 +14,7 @@ export default function BlogPostListItem({ post }: { post: TBlogPost }) {
                         className='object-cover group-hover:scale-105 transition-transform duration-300'
                         sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                         priority={false}
+                        quality={100}
                     />
                 </Link>
             </div>

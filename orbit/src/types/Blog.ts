@@ -6,7 +6,7 @@ export type BlogPost = {
         description: string;
         slug: string;
         title: string;
-        tags: string;
+        tags: string[];
         featured: boolean;
     };
     slug: string;

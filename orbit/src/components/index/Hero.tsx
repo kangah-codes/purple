@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import AnimatedClouds from '../shared/AnimatedClouds';
 import Image from 'next/image';
 
@@ -27,6 +28,23 @@ export default function Hero() {
                                 budgeting simple, fun, and easy to stick with.
                             </p>
                         </div>
+                        <Link
+                            target='_blank'
+                            href='https://github.com/kangah-codes/purple/releases/latest'
+                            className='flex items-center justify-end flex-row space-x-2 cursor-pointer h-[40px]'
+                        >
+                            <Image
+                                src='/graphics/github-badge.svg'
+                                alt='Github Badge'
+                                width={130}
+                                height={40}
+                                style={{
+                                    objectFit: 'contain',
+                                    width: 'auto',
+                                }}
+                                className='mx-auto h-full'
+                            />
+                        </Link>
                     </div>
                 </div>
 

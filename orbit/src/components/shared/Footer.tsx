@@ -108,9 +108,9 @@ export default function Footer() {
                                                 <li>
                                                     <a
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='/licence'
+                                                        href='/license'
                                                     >
-                                                        Licence
+                                                        License
                                                     </a>
                                                 </li>
                                             </ul>
