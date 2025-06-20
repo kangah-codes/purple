@@ -48,14 +48,23 @@ jobs:
 
       - name: Create .env file for build (dev or rc)
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
-            echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
-            echo "EXPO_PUBLIC_API_KEY=${{ secrets.API_KEY }}" >> .env\
-            echo "NODE_ENV=dev" >> .env
-          elif [[ "${{ github.ref }}" == "refs/heads/rc" ]]; then
-            echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
-            echo "EXPO_PUBLIC_API_KEY=${{ secrets.API_KEY }}" >> .env
-          fi
+          case "${{ github.ref }}" in
+            "refs/heads/dev")
+              echo "NODE_ENV=development" >> .env
+              ;;
+            "refs/heads/rc")
+              ;;
+            *)
+              echo "Branch not handled. Skipping .env creation."
+              exit 0
+              ;;
+          esac
+
+          for VAR in API_URL API_KEY SENTRY_DSN; do
+            echo "EXPO_PUBLIC_${VAR}=${{ secrets[$VAR] }}" >> .env
+          done
+
+          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: 🚀 Development Build
         if: ${{ github.ref == 'refs/heads/dev' }}

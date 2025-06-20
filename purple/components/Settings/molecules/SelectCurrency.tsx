@@ -1,7 +1,7 @@
 import { SearchIcon } from '@/components/SVG/icons/noscale';
 import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
 import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
-import { InputField, View } from '@/components/Shared/styled';
+import { InputField, LinearGradient, View } from '@/components/Shared/styled';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -46,9 +46,9 @@ export default function SelectCurrency({ callback }: SelectCurrencyProps) {
         <CustomBottomSheetFlatList
             snapPoints={['50%', '70%', '85%']}
             children={
-                <View className='flex flex-col space-y-2.5'>
+                <View className='flex flex-col space-y-2.5 relative z-[5]'>
                     <View className='w-full px-5 pb-2.5'>
-                        <View className='relative flex justify-center mt-2.5'>
+                        <View className='relative flex justify-center'>
                             <InputField
                                 className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-purple-200'
                                 style={satoshiFont.satoshiBold}
@@ -65,6 +65,17 @@ export default function SelectCurrency({ callback }: SelectCurrencyProps) {
                             />
                         </View>
                     </View>
+                    <LinearGradient
+                        colors={['#f3f4f6', 'transparent']}
+                        className=''
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            bottom: -14,
+                            height: 15,
+                        }}
+                    />
                 </View>
             }
             sheetKey={'preferences-currency'}

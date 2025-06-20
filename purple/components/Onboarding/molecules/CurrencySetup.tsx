@@ -4,7 +4,6 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import SelectCurrency from '@/components/Settings/molecules/SelectCurrency';
 import FlagIcon from '@/components/Shared/atoms/FlagIcon';
-import Pill from '@/components/Shared/atoms/Pill';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { Image, LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
@@ -15,6 +14,7 @@ import { nativeStorage } from '@/lib/utils/storage';
 import { Portal } from '@gorhom/portal';
 import React from 'react';
 import Toast from 'react-native-toast-message';
+import tw from 'twrnc';
 
 export default function CurrencySetup() {
     const { setOnboarded, setSessionData } = useAuth();
@@ -67,7 +67,11 @@ export default function CurrencySetup() {
     }
 
     return (
-        <>
+        <View className='relative'>
+            <Image
+                source={require('@/assets/images/graphics/gradient-2.png')}
+                style={tw`rounded-3xl w-full h-full absolute`}
+            />
             <Portal>
                 <SelectCurrency
                     callback={(item) => {
@@ -79,7 +83,7 @@ export default function CurrencySetup() {
                     }}
                 />
             </Portal>
-            <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] bg-purple-50 relative'>
+            <View className='flex flex-col space-y-5 justify-center px-5 h-[100%] relative'>
                 <Image
                     source={require('@/assets/images/graphics/19.png')}
                     className={`rounded-3xl w-[200px] h-[100px]`}
@@ -134,6 +138,6 @@ export default function CurrencySetup() {
                     </TouchableOpacity>
                 </View>
             </View>
-        </>
+        </View>
     );
 }
