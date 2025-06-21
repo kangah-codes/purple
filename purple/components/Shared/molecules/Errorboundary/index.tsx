@@ -5,6 +5,7 @@ import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router'
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import tw from 'twrnc';
+import * as Sentry from '@sentry/react-native';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -26,6 +27,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        Sentry.captureException(error, {
+            extra: {
+                componentStack: errorInfo.componentStack,
+            },
+        });
         console.log('ErrorBoundary caught an error:', error, errorInfo);
     }
 
