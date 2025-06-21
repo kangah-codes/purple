@@ -33,7 +33,8 @@ Sentry.init({
     integrations: [Sentry.mobileReplayIntegration()],
 
     // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-    // spotlight: __DEV__,
+    spotlight: __DEV__,
+    enabled: !__DEV__,
 });
 
 export const unstable_settings = {
@@ -84,49 +85,49 @@ export default Sentry.wrap(function RootLayout() {
                                 >
                                     <BottomSheetModalProvider>
                                         <PortalProvider>
-                                            <SafeAreaProvider>
-                                                <ThemeProvider value={DefaultTheme}>
-                                                    {/** Portal Rendering  */}
-                                                    <CurrentTransactionModal modalKey='transactionReceipt' />
-                                                    {/** Main Navigation Stack */}
-                                                    <Stack
-                                                        screenOptions={{
-                                                            contentStyle: {
-                                                                backgroundColor: '#fff',
-                                                            },
-                                                        }}
-                                                    >
-                                                        <Stack.Screen
-                                                            name='(tabs)'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='plans'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='accounts'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='transactions'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='onboarding'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='auth'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                        <Stack.Screen
-                                                            name='settings'
-                                                            options={{ headerShown: false }}
-                                                        />
-                                                    </Stack>
-                                                </ThemeProvider>
-                                            </SafeAreaProvider>
+                                            {/* <SafeAreaProvider> */}
+                                            <ThemeProvider value={DefaultTheme}>
+                                                {/** Portal Rendering  */}
+                                                <CurrentTransactionModal modalKey='transactionReceipt' />
+                                                {/** Main Navigation Stack */}
+                                                <Stack
+                                                    screenOptions={{
+                                                        contentStyle: {
+                                                            backgroundColor: '#fff',
+                                                        },
+                                                    }}
+                                                >
+                                                    <Stack.Screen
+                                                        name='(tabs)'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='plans'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='accounts'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='transactions'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='onboarding'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='auth'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                    <Stack.Screen
+                                                        name='settings'
+                                                        options={{ headerShown: false }}
+                                                    />
+                                                </Stack>
+                                            </ThemeProvider>
+                                            {/* </SafeAreaProvider> */}
                                         </PortalProvider>
                                     </BottomSheetModalProvider>
                                 </SQLiteProvider>

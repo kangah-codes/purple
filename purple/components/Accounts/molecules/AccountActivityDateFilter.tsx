@@ -63,9 +63,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(243, 232, 255, 0.7)',
     },
     activeText: {
-        color: '#9333EA',
+        color: '#8200db',
+        fontFamily: satoshiFont.satoshiBlack.fontFamily,
     },
     inactiveText: {
-        color: '#99a1af',
+        color: '#c27aff',
     },
 });
