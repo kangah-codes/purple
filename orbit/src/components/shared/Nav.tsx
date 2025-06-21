@@ -75,6 +75,18 @@ export default function Nav() {
                                                     Purple
                                                 </p>
                                             </Link>
+                                            <Link
+                                                onMouseUp={() => close()}
+                                                className='block py-2.5 px-3.5 transition hover:bg-purple-200 rounded-3xl'
+                                                href='/changelog'
+                                            >
+                                                <p className='font-bold text-lg text-black'>
+                                                    Changelog
+                                                </p>
+                                                <p className='text-black'>
+                                                    Stay updated with the lastest releases of Purple
+                                                </p>
+                                            </Link>
                                         </div>
                                     )}
                                 </PopoverPanel>

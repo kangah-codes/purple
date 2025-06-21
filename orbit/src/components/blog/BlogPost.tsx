@@ -156,7 +156,7 @@ export default function BlogPost({ post }: { post: TBlogPost }) {
                 </div>
 
                 {/* markdown content */}
-                <article className='prose prose-purple col-span-full md:col-span-4 w-full px-0 sm:px-4 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg'>
+                <article className='prose prose-purple col-span-full md:col-span-4 w-full px-5 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg'>
                     <MarkdownContent content={post.content} />
                 </article>
             </div>

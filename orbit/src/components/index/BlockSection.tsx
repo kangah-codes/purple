@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function BlockSection() {
     return (
-        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5'>
+        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl pt-20 pb-[60px] mx-auto px-5'>
             <div className='mx-auto'>
                 <div className='space-y-5 md:space-y-0 grid grid-cols-1 lg:grid-cols-3 md:gap-5'>
                     <div className='flex flex-col overflow-hidden bg-gradient-to-br from-purple-100 to-purple-400 rounded-[3rem] h-[32.5rem] md:h-[35rem] py-[3.75rem] items-center'>

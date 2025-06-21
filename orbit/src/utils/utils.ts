@@ -36,11 +36,11 @@ export function getPostBySlug(slug: string): BlogPost | null {
     } as BlogPost;
 }
 
-export function getDocument(fileName: string) {
-    const filePath = path.join(process.cwd(), 'src/legal', fileName);
+export function getDocument(fileName: string, dir = 'legal') {
+    const filePath = path.join(process.cwd(), `src/${dir}`, fileName);
 
     if (!fs.existsSync(filePath)) {
-        throw new Error(`Document ${fileName} not found in /legal`);
+        throw new Error(`Document ${fileName} not found in /${dir}`);
     }
 
     const fileContent = fs.readFileSync(filePath, 'utf-8');
