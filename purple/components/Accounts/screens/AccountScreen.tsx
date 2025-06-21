@@ -71,8 +71,6 @@ function AccountScreen() {
         data: transactions,
         isLoading: transactionsLoading,
         refetch: transactionsRefetch,
-        isFetching,
-        isFetched,
     } = useTransactions({
         requestQuery: {
             accountID,

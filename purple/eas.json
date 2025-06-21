@@ -8,8 +8,7 @@
             },
             "env": {
                 "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
-                "EXPO_PUBLIC_SENTRY_DSN": "EXPO_PUBLIC_SENTRY_DSN"
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
             },
             "channel": "production",
             "environment": "production"
@@ -22,8 +21,7 @@
             },
             "env": {
                 "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
-                "EXPO_PUBLIC_SENTRY_DSN": "EXPO_PUBLIC_SENTRY_DSN"
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
             },
             "channel": "development",
             "environment": "development"
@@ -36,8 +34,7 @@
             },
             "env": {
                 "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
-                "EXPO_PUBLIC_SENTRY_DSN": "EXPO_PUBLIC_SENTRY_DSN"
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
             },
             "channel": "rc",
             "environment": "production"

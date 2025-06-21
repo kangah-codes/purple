@@ -1,5 +1,5 @@
-import * as Sentry from '@sentry/react-native';
 import React, { PropsWithChildren, useState } from 'react';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import {
     MutationCache,
     QueryCache,
@@ -8,17 +8,19 @@ import {
 } from 'react-query';
 
 export default function AppQueryClientProvider({ children }: PropsWithChildren<{}>) {
+    const { logError } = useAnalytics();
+
     const [queryClient] = useState(
         () =>
             new QueryClient({
                 queryCache: new QueryCache({
-                    onError: (error) => {
-                        Sentry.captureException(error);
+                    onError: (error, query) => {
+                        logError(error as Error, { ...query }, 'error');
                     },
                 }),
                 mutationCache: new MutationCache({
-                    onError: (error) => {
-                        Sentry.captureException(error);
+                    onError: (error, mutation) => {
+                        logError(error as Error, { mutation }, 'error');
                     },
                 }),
             }),
