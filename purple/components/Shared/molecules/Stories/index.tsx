@@ -23,6 +23,7 @@ export interface StoriesRef {
     currentIndex: number;
     goForward: () => void;
     goBack: () => void;
+    totalPages: number;
 }
 
 const Stories = forwardRef<StoriesRef, StoriesProps>(
@@ -45,10 +46,14 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         const progressAnimation = React.useRef(new Animated.Value(0)).current;
         const fadeOutAnimation = React.useRef(new Animated.Value(1)).current;
         const fadeInAnimation = React.useRef(new Animated.Value(1)).current;
+        const [manualProgressIndex, setManualProgressIndex] = React.useState<number | null>(null);
         const isAnimating = React.useRef(false);
 
         React.useEffect(() => {
             setIsFirstRender(false);
+            if (disableAutomaticScroll && previousIndex === null) {
+                setManualProgressIndex(currentIndex);
+            }
         }, []);
 
         const resetAndStartProgressAnimation = React.useCallback(() => {
@@ -71,6 +76,10 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
             (newIndex: number) => {
                 if (isAnimating.current) return;
                 isAnimating.current = true;
+
+                if (disableAutomaticScroll) {
+                    setManualProgressIndex(newIndex);
+                }
 
                 progressAnimation.stopAnimation();
                 progressAnimation.setValue(0);
@@ -131,6 +140,7 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
                 }
             },
             currentIndex,
+            totalPages: pages.length,
         }));
 
         React.useEffect(() => {
@@ -174,7 +184,25 @@ const Stories = forwardRef<StoriesRef, StoriesProps>(
         const renderProgressBars = () => {
             return pages.map((_, idx) => (
                 <View key={idx} style={styles.progressBackground} className='rounded-full'>
-                    {idx < currentIndex && <View style={[styles.progressBar, { width: '100%' }]} />}
+                    {idx === currentIndex ||
+                        (idx < currentIndex &&
+                            (disableAutomaticScroll ? (
+                                manualProgressIndex === currentIndex && (
+                                    <View style={[styles.progressBar, { width: '100%' }]} />
+                                )
+                            ) : (
+                                <Animated.View
+                                    style={[
+                                        styles.progressBar,
+                                        {
+                                            width: progressAnimation.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: ['0%', '100%'],
+                                            }),
+                                        },
+                                    ]}
+                                />
+                            )))}
                     {idx === currentIndex && !disableAutomaticScroll && (
                         <Animated.View
                             style={[

@@ -6,7 +6,7 @@ export default function Footer() {
         <footer>
             <div className='relative'>
                 <div className='absolute inset-5 rounded-[3rem] bg-gradient-to-br from-purple-300 via-purple-200 to-purple-300' />
-                <div className='px-10 md:px-20 2xl:px-10 rounded-t-[3rem]'>
+                <div className='px-10 md:px-20 2xl:px-10'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
                         <div className='relative text-center py-24'>
                             <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
@@ -93,7 +93,7 @@ export default function Footer() {
                                                 <li>
                                                     <Link
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='/blog'
+                                                        href='/roadmap'
                                                     >
                                                         Roadmap
                                                     </Link>

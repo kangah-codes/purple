@@ -1,3 +1,4 @@
+import HTTPError from '@/lib/utils/error';
 import * as Sentry from '@sentry/react-native';
 import React, { PropsWithChildren, useState } from 'react';
 import {
@@ -13,12 +14,16 @@ export default function AppQueryClientProvider({ children }: PropsWithChildren<{
             new QueryClient({
                 queryCache: new QueryCache({
                     onError: (error) => {
-                        Sentry.captureException(error);
+                        if (!(error instanceof HTTPError)) {
+                            Sentry.captureException(error);
+                        }
                     },
                 }),
                 mutationCache: new MutationCache({
                     onError: (error) => {
-                        Sentry.captureException(error);
+                        if (!(error instanceof HTTPError)) {
+                            Sentry.captureException(error);
+                        }
                     },
                 }),
             }),

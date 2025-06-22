@@ -23,6 +23,16 @@ export default function OnboardingPage({
 }: OnboardingPageProps) {
     return (
         <View className='flex flex-col space-y-5 justify-center h-[100%] relative'>
+            <TouchableOpacity
+                className='absolute z-10 top-24 right-5'
+                onPress={() => {
+                    storiesRef.current?.goToPage(storiesRef.current.totalPages - 1);
+                }}
+            >
+                <Text style={satoshiFont.satoshiBlack} className='text-sm text-purple-500'>
+                    Skip
+                </Text>
+            </TouchableOpacity>
             <View className='px-5'>{image}</View>
             <View className='flex flex-col space-y-2.5 px-5'>
                 <Text style={satoshiFont.satoshiBlack} className='text-4xl text-black'>
@@ -33,26 +43,25 @@ export default function OnboardingPage({
                 </Text>
             </View>
 
-            <View className='w-full flex flex-row py-2.5 justify-center items-center absolute bottom-5 space-x-2.5'>
-                <View className='bg-purple-200 border border-purple-300 flex flex-row space-x-2.5 p-2.5 rounded-full'>
-                    <TouchableOpacity
-                        onPress={() =>
-                            storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1)
-                        }
-                        className='bg-[#ad46ff] px-4 py-2 flex items-center justify-center rounded-full'
-                    >
-                        <ArrowLeftIcon stroke='#fff' strokeWidth={2.5} />
-                    </TouchableOpacity>
+            <View className='absolute bottom-5 left-5 right-5 flex-row justify-between items-center'>
+                <TouchableOpacity
+                    onPress={() =>
+                        storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1)
+                    }
+                >
+                    <Text style={satoshiFont.satoshiBlack} className='text-sm text-purple-500'>
+                        Back
+                    </Text>
+                </TouchableOpacity>
 
-                    <TouchableOpacity
-                        onPress={() =>
-                            storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
-                        }
-                        className='bg-[#ad46ff] px-4 py-2 flex items-center justify-center rounded-full'
-                    >
-                        <ArrowRightIcon stroke='#fff' strokeWidth={2.5} />
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                    onPress={() =>
+                        storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
+                    }
+                    className='bg-purple-300 px-4 py-2.5 w-[75px] flex items-center justify-center rounded-full'
+                >
+                    <ArrowRightIcon stroke='#9810fa' strokeWidth={2.5} />
+                </TouchableOpacity>
             </View>
         </View>
     );

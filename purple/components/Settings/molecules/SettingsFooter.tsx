@@ -21,18 +21,9 @@ export default function SettingsFooter() {
                 <>
                     <TouchableOpacity
                         className='items-center self-center justify-center px-4 mt-10'
-                        onPress={() => {
-                            setOnboarded(false).then(() =>
-                                destroySession().then(() => {
-                                    Toast.show({
-                                        type: 'info',
-                                        props: {
-                                            text1: 'Cache reset',
-                                            text2: 'The entire app cache has been cleared!',
-                                        },
-                                    });
-                                }),
-                            );
+                        onPress={async () => {
+                            await setOnboarded(false);
+                            await destroySession();
                         }}
                     >
                         <LinearGradient

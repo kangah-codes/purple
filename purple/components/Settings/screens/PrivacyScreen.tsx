@@ -16,6 +16,7 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import pkg from '@/package.json';
 
 export default function PrivacyScreen() {
     const { preferences, setPreference } = usePreferences();
@@ -33,9 +34,9 @@ export default function PrivacyScreen() {
             { enable: string; disable: string }
         > = {
             trackUsageStatistics: {
-                enable: 'Allowing usage tracking helps us improve features based on how you use the app.',
+                enable: 'Enable usage tracking to help us improve the app based on how you use it.',
                 disable:
-                    'Disabling usage tracking means we won’t be able to improve your experience based on how the app is used.',
+                    'If you turn off usage tracking, certain features that rely on usage data may be unavailable. You can re-enable it anytime in settings.',
             },
             sendDiagnosticData: {
                 enable: 'Sending diagnostic data and crash reports helps us fix bugs faster and improve performance.',
@@ -47,7 +48,7 @@ export default function PrivacyScreen() {
         const showConfirmation = isDisabling && messages[key];
 
         if (showConfirmation) {
-            Alert.alert('Are you sure?', messages[key].disable, [
+            Alert.alert('Are you sure? 🥺', messages[key].disable, [
                 {
                     text: 'Cancel',
                     style: 'cancel',
@@ -56,6 +57,7 @@ export default function PrivacyScreen() {
                     text: 'Disable',
                     style: 'destructive',
                     onPress: async () => {
+                        if (key == 'sendDiagnosticData') return;
                         try {
                             await logEvent('settings_set', {
                                 setting: key,
@@ -126,18 +128,24 @@ export default function PrivacyScreen() {
                 />
             ),
         },
-        {
-            icon: <PaperPlaneIcon width={20} height={20} stroke='#9333ea' />,
-            title: 'Send diagnostic data',
-            description:
-                'Send diagnostic data and crash reports to help improve performance and reliability',
-            customItem: () => (
-                <Switch
-                    value={sendDiagnosticData}
-                    onValueChange={(value) => handleToggle('sendDiagnosticData', value)}
-                />
-            ),
-        },
+        // diagnostic data is required for unstable beta versions
+        ...(!pkg.isBeta
+            ? [
+                  {
+                      icon: <PaperPlaneIcon width={20} height={20} stroke='#9333ea' />,
+                      title: 'Send diagnostic data',
+                      description:
+                          'Send diagnostic data and crash reports to help improve performance and reliability',
+                      customItem: () => (
+                          <Switch
+                              disabled
+                              value={sendDiagnosticData}
+                              onValueChange={(value) => handleToggle('sendDiagnosticData', value)}
+                          />
+                      ),
+                  },
+              ]
+            : []),
     ];
 
     return (

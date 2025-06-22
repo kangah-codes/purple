@@ -22,7 +22,7 @@ export default function Nav() {
                     <nav className='relative hidden lg:flex'>
                         <div className='flex group/item relative'>
                             <Link
-                                className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
+                                className='flex items-center px-5 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                 data-headlessui-state=''
                                 href='/blog'
                             >
