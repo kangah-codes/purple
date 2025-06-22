@@ -16,7 +16,7 @@ export default function Hero({ title, description }: { title: string; descriptio
                 </div>
             </div>
 
-            <div className='bg-gradient-to-b from-purple-400 to-white absolute top-0 w-full h-[500]' />
+            <div className='bg-gradient-to-b from-purple-400 to-white absolute top-0 w-full h-[500px]' />
         </>
     );
 }
