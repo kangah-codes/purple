@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 import { useEffect, useState, memo } from 'react';
+import rehypeRaw from 'rehype-raw';
 
 const AVATAR_ONE = 'https://avatars.githubusercontent.com/u/47978604?v=4';
 const AVATAR_TWO = '/graphics/doakes.png';
@@ -115,6 +116,8 @@ export const MarkdownContent = memo(
         return (
             <ReactMarkdown
                 remarkPlugins={[gfm]}
+                rehypePlugins={[rehypeRaw]}
+                skipHtml={false}
                 components={{
                     // this is to fix the hydration error where <div> cannot be a descendant of <p>
                     p: ({ children }) => (
