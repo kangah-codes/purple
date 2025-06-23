@@ -8,11 +8,11 @@ You are free to:
 
 - Use the app for personal or internal business purposes.
 - Share the app with others.
+- Modify the app for **non commercial** purposes.
 
 You may not:
 
 - Sell, rent, or sublicense the app.
-- Reverse engineer, decompile, or modify the app without permission.
 - Misrepresent the app as your own.
 
 ## 2. Modifications
@@ -30,7 +30,7 @@ USE IT AT YOUR OWN RISK.
 
 ## 4. Limitation of Liability
 
-In no event shall the developer be liable for any damages arising from the use or inability to use the app, including but not limited to data loss, financial loss, nuclear war, or business interruption.
+In no event shall the developer be liable for any damages arising from the use or inability to use the app, including but not limited to data loss, financial loss, business interruption, or nuclear war.
 
 ## 5. Licenses
 

@@ -24,15 +24,15 @@ export type HeatmapProps = {
 };
 
 export default function Heatmap({
-    rows,
-    cols,
-    cellSize,
-    cellStyle,
+    rows = 4,
+    cols = 7,
+    cellSize = 10,
+    cellStyle = { margin: 2, borderRadius: 8 },
     data,
     colors = defaultColors,
     onPressCallback,
     renderCell,
-    startColumn,
+    startColumn = 0,
 }: HeatmapProps) {
     const maxValue = useMemo(() => Math.max(...data.map((d) => d.value)), [data]);
     const fullData = useMemo(() => {
@@ -96,15 +96,3 @@ export default function Heatmap({
         />
     );
 }
-
-Heatmap.defaultProps = {
-    rows: 4,
-    cols: 7,
-    cellSize: 10,
-    cellStyle: {
-        margin: 2,
-        borderRadius: 8,
-    },
-    colors: defaultColors,
-    startColumn: 0,
-};

@@ -8,7 +8,7 @@ import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
-import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
+import { Button, StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';
@@ -59,7 +59,7 @@ export default function IndexScreen() {
                     className='flex px-5 py-2.5 h-[350] absolute w-full'
                     colors={linearGradientColours}
                 />
-                <AnimatedClouds baseSpeed={0.1} minHeight={10} maxHeight={450} spawnRate={5} />
+                <AnimatedClouds baseSpeed={0.1} minHeight={10} maxHeight={450} spawnRate={1} />
                 <View className='flex flex-col'>
                     {/* <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg px-5'>
                         Hi, {sessionData?.user.username} 👋

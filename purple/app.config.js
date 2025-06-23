@@ -25,8 +25,8 @@ export default ({ config }) => {
         android: {
             package: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
             adaptiveIcon: {
-                foregroundImage: './assets/images/adaptive-icon.png',
-                backgroundColor: '#9333EA',
+                foregroundImage: './assets/images/icon.png',
+                backgroundColor: '#00000000',
             },
         },
         plugins: [
@@ -82,6 +82,14 @@ export default ({ config }) => {
                             '-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1',
                         ],
                     },
+                },
+            ],
+            [
+                '@sentry/react-native/expo',
+                {
+                    url: 'https://sentry.io/',
+                    project: 'react-native',
+                    organization: 'purple-hg',
                 },
             ],
             'expo-localization',

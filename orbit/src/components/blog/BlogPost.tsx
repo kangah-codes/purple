@@ -60,7 +60,7 @@ const BlogHeader = memo(function BlogHeader({
         <div className='w-full overflow-hidden flex flex-col space-y-2 justify-center'>
             <Link
                 href='/blog'
-                className='bg-purple-300/70 px-4 py-2 flex items-center justify-center rounded-full w-16'
+                className='bg-purple-300/70 px-5 py-2 flex items-center justify-center rounded-full w-16'
             >
                 <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
                     <path
@@ -159,7 +159,7 @@ export default function BlogPost({ post }: { post: TBlogPost }) {
                 </div>
 
                 {/* markdown content */}
-                <article className='prose prose-purple col-span-full md:col-span-4 w-full px-0 sm:px-4 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg'>
+                <article className='prose prose-purple col-span-full md:col-span-4 w-full text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg'>
                     <MarkdownContent content={post.content} />
                 </article>
             </div>

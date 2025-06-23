@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function BlockSection() {
     return (
-        <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl py-20 mx-auto px-5'>
+        <div className='w-full max-w-3xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl pt-20 pb-[60px] mx-auto px-5'>
             <div className='mx-auto'>
                 <div className='space-y-5 md:space-y-0 grid grid-cols-1 lg:grid-cols-3 md:gap-5'>
                     <div className='flex flex-col overflow-hidden bg-gradient-to-br from-purple-100 to-purple-400 rounded-[3rem] h-[32.5rem] md:h-[35rem] py-[3.75rem] items-center'>
@@ -164,6 +164,36 @@ export default function BlockSection() {
                                     src='/graphics/accounts_screen.png'
                                     className='shadow-2xl translate-y-[75px]'
                                 />
+                            </div>
+                        </div>
+
+                        <div className='lg:hidden h-[250] md:h-[400] relative col-span-full'>
+                            <div className='col-span-full flex flex-row transform items-center justify-center p-5 space-x-2.5 -bottom-1/2'>
+                                <div className='col-span-1'>
+                                    <Image
+                                        alt='Logo'
+                                        loading='lazy'
+                                        width={276}
+                                        height={600}
+                                        decoding='async'
+                                        data-nimg={1}
+                                        style={{ color: 'transparent' }}
+                                        src='/graphics/transaction_modal.png'
+                                        className='shadow-2xl'
+                                    />
+                                </div>
+
+                                <div className='col-span-1'>
+                                    <Image
+                                        alt='Logo'
+                                        loading='lazy'
+                                        width={276}
+                                        height={600}
+                                        decoding='async'
+                                        src='/graphics/accounts_screen.png'
+                                        className='shadow-2xl'
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

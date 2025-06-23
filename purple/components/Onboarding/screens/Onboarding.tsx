@@ -6,6 +6,7 @@ import { Image } from 'react-native';
 import tw from 'twrnc';
 import CurrencySetup from '../molecules/CurrencySetup';
 import OnboardingPage from '../molecules/OnboardingPage';
+import pkg from '@/package.json';
 
 export default function Screen() {
     const storiesRef = useRef<StoriesRef>(null);
@@ -18,12 +19,12 @@ export default function Screen() {
             }
             image={
                 <Image
-                    source={require('@/assets/images/graphics/iris.png')}
-                    style={tw`rounded-3xl w-[200px] h-[200px]`}
+                    source={require('@/assets/images/icon-gradient.png')}
+                    style={tw`rounded-3xl w-[75px] h-[75px]`}
                 />
             }
             currentIndex={0}
-            pages={4}
+            pages={6}
             storiesRef={storiesRef}
         />,
         <OnboardingPage
@@ -38,7 +39,7 @@ export default function Screen() {
                 />
             }
             currentIndex={1}
-            pages={4}
+            pages={6}
             storiesRef={storiesRef}
         />,
         <OnboardingPage
@@ -53,7 +54,7 @@ export default function Screen() {
                 />
             }
             currentIndex={2}
-            pages={4}
+            pages={6}
             storiesRef={storiesRef}
         />,
         <OnboardingPage
@@ -68,9 +69,24 @@ export default function Screen() {
                 />
             }
             currentIndex={3}
-            pages={4}
+            pages={6}
             storiesRef={storiesRef}
         />,
+        pkg.isBeta && (
+            <OnboardingPage
+                title='Welcome to the Betaverse 🧪'
+                description={'Heads up! This is a beta, some things might act a little funny.'}
+                image={
+                    <Image
+                        source={require('@/assets/images/graphics/13.png')}
+                        style={tw`rounded-3xl w-[200px] h-[200px]`}
+                    />
+                }
+                currentIndex={4}
+                pages={6}
+                storiesRef={storiesRef}
+            />
+        ),
         <CurrencySetup />,
     ];
 

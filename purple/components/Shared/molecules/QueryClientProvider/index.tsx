@@ -1,5 +1,6 @@
+import HTTPError from '@/lib/utils/error';
+import * as Sentry from '@sentry/react-native';
 import React, { PropsWithChildren, useState } from 'react';
-import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import {
     MutationCache,
     QueryCache,
@@ -8,19 +9,21 @@ import {
 } from 'react-query';
 
 export default function AppQueryClientProvider({ children }: PropsWithChildren<{}>) {
-    const { logError } = useAnalytics();
-
     const [queryClient] = useState(
         () =>
             new QueryClient({
                 queryCache: new QueryCache({
-                    onError: (error, query) => {
-                        logError(error as Error, { ...query }, 'error');
+                    onError: (error) => {
+                        if (!(error instanceof HTTPError)) {
+                            Sentry.captureException(error);
+                        }
                     },
                 }),
                 mutationCache: new MutationCache({
-                    onError: (error, mutation) => {
-                        logError(error as Error, { mutation }, 'error');
+                    onError: (error) => {
+                        if (!(error instanceof HTTPError)) {
+                            Sentry.captureException(error);
+                        }
                     },
                 }),
             }),

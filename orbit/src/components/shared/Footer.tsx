@@ -5,10 +5,10 @@ export default function Footer() {
     return (
         <footer>
             <div className='relative'>
-                <div className='absolute inset-5 rounded-[3rem] bg-gradient-to-br from-purple-100 to-purple-300 animate-gradient-xy' />
-                <div className='px-10 md:px-20 2xl:px-10 rounded-t-[3rem]'>
+                <div className='absolute inset-5 rounded-[3rem] bg-gradient-to-br from-purple-300 via-purple-200 to-purple-300' />
+                <div className='px-10 md:px-20 2xl:px-10'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
-                        <div className='relative pt-20 pb-16 text-center sm:py-24'>
+                        <div className='relative text-center py-24'>
                             <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
                                 Get Purple today
                             </h1>
@@ -82,6 +82,22 @@ export default function Footer() {
                                                         Blog
                                                     </Link>
                                                 </li>
+                                                <li>
+                                                    <Link
+                                                        className='font-medium text-black data-hover:text-black/75'
+                                                        href='/changelog'
+                                                    >
+                                                        Changelog
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link
+                                                        className='font-medium text-black data-hover:text-black/75'
+                                                        href='/roadmap'
+                                                    >
+                                                        Roadmap
+                                                    </Link>
+                                                </li>
                                             </ul>
                                         </div>
                                         <div>
@@ -116,8 +132,35 @@ export default function Footer() {
                                             </ul>
                                         </div>
                                     </div>
+                                    <div className='col-span-full'>
+                                        <div className='text-sm flex flex-col mt-8 space-y-1 z-10 font-semibold'>
+                                            <p className='text-black'>
+                                                All visuals and illustrations shown are for
+                                                demonstration purposes only and may not reflect
+                                                actual financial data or user experiences.
+                                            </p>
+                                            <p className='text-black'>
+                                                Use of Purple and its services is subject to our{' '}
+                                                <a
+                                                    className='text-purple-500 hover:text-purple-500 pb-1 transition duration-300'
+                                                    href='/terms'
+                                                >
+                                                    Terms of Service
+                                                </a>{' '}
+                                                and{' '}
+                                                <a
+                                                    className='text-purple-500 hover:text-purple-500 pb-1 transition duration-300'
+                                                    href='/privacy'
+                                                >
+                                                    Privacy Policy
+                                                </a>
+                                                .
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
                             <div className='flex justify-between group/row relative isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
                                 <div className='py-3 group/item relative'>
                                     <div className='text-sm/6 text-black font-semibold'>

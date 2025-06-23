@@ -1,8 +1,8 @@
-import { useContext, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsContext, AnalyticsContextType } from '../providers/Analytics';
-import { EventProperties, ErrorLevel } from '../services/AnalyticsService';
-import { useAppLifecycleEvents } from './useTrackLifecycle';
+import { EventProperties } from '../services/AnalyticsService';
 import { useDeepCompareMemo } from './useDeepCompareMemo';
+import { useAppLifecycleEvents } from './useTrackLifecycle';
 
 export const useAnalytics = (): AnalyticsContextType => {
     const context = useContext(AnalyticsContext);
@@ -24,28 +24,6 @@ export const useAnalyticsEvent = () => {
             return logEvent(name, properties);
         },
         [logEvent, isInitialized],
-    );
-};
-
-export const useAnalyticsError = () => {
-    const { logError, isInitialized } = useAnalytics();
-
-    return useCallback(
-        (
-            error: Error | string,
-            extraMetadata?: Record<string, unknown>,
-            level: ErrorLevel = 'error',
-        ) => {
-            if (!isInitialized) {
-                console.warn(
-                    '[useAnalyticsError] Analytics not initialized, error ignored:',
-                    error,
-                );
-                return Promise.resolve();
-            }
-            return logError(error, extraMetadata, level);
-        },
-        [logError, isInitialized],
     );
 };
 

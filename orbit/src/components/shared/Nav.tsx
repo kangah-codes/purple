@@ -22,7 +22,7 @@ export default function Nav() {
                     <nav className='relative hidden lg:flex'>
                         <div className='flex group/item relative'>
                             <Link
-                                className='flex items-center px-4 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
+                                className='flex items-center px-5 py-3 text-base font-medium text-gray-950 bg-blend-multiply data-hover:bg-black/[2.5%]'
                                 data-headlessui-state=''
                                 href='/blog'
                             >
@@ -73,6 +73,18 @@ export default function Nav() {
                                                 <p className='text-black'>
                                                     Stay updated with the lastest information about
                                                     Purple
+                                                </p>
+                                            </Link>
+                                            <Link
+                                                onMouseUp={() => close()}
+                                                className='block py-2.5 px-3.5 transition hover:bg-purple-200 rounded-3xl'
+                                                href='/changelog'
+                                            >
+                                                <p className='font-bold text-lg text-black'>
+                                                    Changelog
+                                                </p>
+                                                <p className='text-black'>
+                                                    Stay updated with the lastest releases of Purple
                                                 </p>
                                             </Link>
                                         </div>

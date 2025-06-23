@@ -1,12 +1,7 @@
 import { usePreferences } from '@/components/Settings/hooks';
 import React, { ReactNode, createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import {
-    AnalyticsConfig,
-    AnalyticsTracker,
-    ErrorLevel,
-    EventProperties,
-} from '../services/AnalyticsService';
+import { AnalyticsConfig, AnalyticsTracker, EventProperties } from '../services/AnalyticsService';
 
 type AnalyticsContextType = {
     analytics: AnalyticsTracker | null;
@@ -18,11 +13,6 @@ type AnalyticsContextType = {
     logEvent: <T extends keyof EventProperties>(
         name: T,
         properties: EventProperties[T] | Record<string, unknown>,
-    ) => Promise<void>;
-    logError: (
-        error: Error | string,
-        extraMetadata?: Record<string, unknown>,
-        level?: ErrorLevel,
     ) => Promise<void>;
     flush: () => Promise<void>;
     clearQueue: () => Promise<void>;
@@ -162,28 +152,6 @@ export function AnalyticsProvider({
         [shouldTrackEvents, onError],
     );
 
-    const logError = useCallback(
-        async (
-            error: Error | string,
-            extraMetadata?: Record<string, unknown>,
-            level: ErrorLevel = 'error',
-        ): Promise<void> => {
-            if (!shouldSendDiagnostics || !analyticsRef.current) {
-                return;
-            }
-
-            try {
-                await analyticsRef.current.logError(error, extraMetadata, level);
-                setQueueSize(analyticsRef.current.getQueueSize());
-            } catch (err) {
-                const analyticsError =
-                    err instanceof Error ? err : new Error('Failed to log error');
-                onError?.(analyticsError);
-            }
-        },
-        [shouldSendDiagnostics, onError],
-    );
-
     const flush = useCallback(async (): Promise<void> => {
         if (!analyticsRef.current) {
             return;
@@ -236,7 +204,6 @@ export function AnalyticsProvider({
         sessionId,
         uniqueId,
         logEvent: logEvent as any,
-        logError,
         flush,
         clearQueue,
         flushQueue,

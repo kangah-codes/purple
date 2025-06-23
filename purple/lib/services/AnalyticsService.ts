@@ -54,19 +54,10 @@ type BaseEventData = {
     timestamp: string;
     sessionId: string;
 };
-type ErrorLevel = 'error' | 'warning' | 'info';
-type ErrorData = {
-    message: string;
-    stack?: string;
-    metadata?: Record<string, unknown>;
-    timestamp: string;
-    sessionId: string;
-    level: ErrorLevel;
-};
 type TrackedItem = {
     id: string;
-    type: 'event' | 'error';
-    payload: BaseEventData | ErrorData;
+    type: 'event';
+    payload: BaseEventData;
     retryCount: number;
     createdAt: string;
 };
@@ -191,41 +182,6 @@ export class AnalyticsTracker {
             this.handleError(
                 new AnalyticsError(`Failed to log event: ${name}`, 'VALIDATION_ERROR', error),
             );
-        }
-    }
-
-    public async logError(
-        error: Error | string,
-        extraMetadata: Record<string, unknown> = {},
-        level: ErrorLevel = 'error',
-    ): Promise<void> {
-        try {
-            const err = typeof error === 'string' ? new Error(error) : error;
-            const metadata: Record<string, unknown> = {
-                ...extraMetadata,
-            };
-
-            const payload: ErrorData = {
-                message: err.message,
-                stack: err.stack,
-                metadata: this.sanitizeProperties(metadata),
-                timestamp: new Date().toISOString(),
-                sessionId: this.sessionId,
-                level,
-            };
-
-            const trackedItem: TrackedItem = {
-                id: this.generateId(),
-                type: 'error',
-                retryCount: 0,
-                createdAt: new Date().toISOString(),
-                payload,
-            };
-
-            await this.enqueue(trackedItem);
-            this.log(`Error logged: ${err.message} (${level})`);
-        } catch (err) {
-            this.handleError(new AnalyticsError('Failed to log error', 'VALIDATION_ERROR', err));
         }
     }
 
@@ -565,11 +521,4 @@ export class AnalyticsTracker {
     }
 }
 
-export type {
-    EventName,
-    EventProperties,
-    ErrorLevel,
-    AnalyticsConfig,
-    DeviceMetadata,
-    AnalyticsError,
-};
+export type { EventName, EventProperties, AnalyticsConfig, DeviceMetadata, AnalyticsError };
