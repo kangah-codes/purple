@@ -20,6 +20,7 @@ export async function generateMetadata({
             type: 'article',
             url: `https://trypurpleapp.com/blog/${blog.data.slug}`,
             images: [{ url: blog.data.blogImage, width: 1200, height: 630 }],
+            tags: blog.data.tags || [],
         },
         twitter: {
             card: 'summary_large_image',

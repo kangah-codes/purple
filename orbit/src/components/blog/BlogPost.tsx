@@ -60,7 +60,7 @@ const BlogHeader = memo(function BlogHeader({
         <div className='w-full overflow-hidden flex flex-col space-y-2 justify-center'>
             <Link
                 href='/blog'
-                className='bg-purple-300/70 px-5 py-2 flex items-center justify-center rounded-full w-16'
+                className='bg-purple-300/30 px-5 py-2 flex items-center justify-center rounded-full w-16 backdrop-blur-md'
             >
                 <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
                     <path

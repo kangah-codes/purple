@@ -20,9 +20,6 @@ export default function Hero() {
                             </span>{' '}
                             blog
                         </h1>
-                        <div className='space-y-5 flex flex-col items-center justify-center max-w-2xl mx-auto'>
-                            <p className='text-lg text-black'>Lorem ipsum</p>
-                        </div>
                     </div>
                 </div>
             </div>

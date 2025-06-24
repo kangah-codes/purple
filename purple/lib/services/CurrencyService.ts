@@ -36,29 +36,18 @@ export default class CurrencyService {
     }
 
     public async fetchExchangeRates(code?: CurrencyCode): Promise<void> {
-        try {
-            const { currency } = usePreferencesStore.getState().preferences;
-            const res = await fetch(
-                `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${
-                    code ? code.toLowerCase() : currency.toLowerCase()
-                }.json`,
-            );
-            if (!res.ok) {
-                throw new Error(`Failed to fetch currency data: ${res.status}`);
-            }
-
-            const data: CurrencyRates = await res.json();
-            this.nativeStorage.setItem('currency-exchange-rates', data);
-        } catch (err) {
-            Toast.show({
-                type: 'error',
-                props: {
-                    text1: 'Error!',
-                    text2: "Couldn't load exchange rates. Try again later",
-                },
-            });
-            console.error(err);
+        const { currency } = usePreferencesStore.getState().preferences;
+        const { ok, json, status } = await fetch(
+            `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${
+                code ? code.toLowerCase() : currency.toLowerCase()
+            }.json`,
+        );
+        if (!ok) {
+            console.error(`Failed to fetch exchange rates: ${status}`);
         }
+
+        const data: CurrencyRates = await json();
+        this.nativeStorage.setItem('currency-exchange-rates', data);
     }
 
     public async convertCurrencyAsync({ from, to }: CurrencyConversionArgs): Promise<number> {

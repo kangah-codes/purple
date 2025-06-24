@@ -12,11 +12,12 @@ export default function NotFound() {
             />
             <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold'>Uh-oh!</h1>
             <p className='text-lg mb-6'>Sorry, we couldn’t find the page you’re looking for.</p>
+
             <Link
                 href='/'
-                className='bg-purple-500 p-[2px] text-white transition duration-500 overflow-hidden rounded-full flex px-5 py-2 2xl:text-sm'
+                className='bg-gradient-to-b font-semibold from-purple-400 to-purple-600 py-2 px-4 text-sm text-white rounded-full transition duration-500 hover:bg-purple-500'
             >
-                <p className='my-auto tracking-tight font-semibold'>Take me home</p>
+                Take me home
             </Link>
         </div>
     );

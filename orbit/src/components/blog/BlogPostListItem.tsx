@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function BlogPostListItem({ post }: { post: TBlogPost }) {
     return (
-        <article className='flex max-w-xl flex-col space-y-5 items-start justify-between'>
+        <article className='flex max-w-xl flex-col space-y-5 items-start justify-between z-[10]'>
             <div className='relative w-full aspect-[4/3] rounded-[3rem] overflow-hidden bg-purple-400 shadow-xl shadow-purple-50'>
                 <Link href={`/blog/${post.slug}`}>
                     <Image
