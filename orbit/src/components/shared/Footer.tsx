@@ -162,10 +162,37 @@ export default function Footer() {
                             </div>
 
                             <div className='flex justify-between group/row relative isolate pt-[calc(--spacing(2)+1px)] last:pb-[calc(--spacing(2)+1px)]'>
-                                <div className='py-3 group/item relative'>
+                                <div className='group/item relative'>
                                     <div className='text-sm/6 text-black font-semibold'>
                                         © {new Date().getFullYear()} Purple
                                     </div>
+                                </div>
+
+                                <div className='group/item relative flex flex-row space-x-2.5'>
+                                    <Link
+                                        target='_blank'
+                                        href={'https://github.com/kangah-codes/purple'}
+                                    >
+                                        <Image
+                                            src='/graphics/github-logo.svg'
+                                            alt='GitHub Logo'
+                                            width={20}
+                                            height={20}
+                                            className='inline-block'
+                                        />
+                                    </Link>
+                                    <Link
+                                        target='_blank'
+                                        href={'https://linkedin.com/in/akangah89/'}
+                                    >
+                                        <Image
+                                            src='/graphics/linkedin-logo.png'
+                                            alt='GitHub Logo'
+                                            width={20}
+                                            height={20}
+                                            className='inline-block'
+                                        />
+                                    </Link>
                                 </div>
                             </div>
                         </div>

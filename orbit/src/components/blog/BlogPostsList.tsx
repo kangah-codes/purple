@@ -49,7 +49,7 @@ export default function BlogPostsList({ posts }: { posts: TBlogPost[] }) {
                                 {featuredPost.data.title}
                             </Link>
                         </h3>
-                        <p className='text-lg text-black'>{featuredPost.data.description}</p>
+                        <p className='text-base text-black'>{featuredPost.data.description}</p>
                     </div>
                 </div>
             )}
