@@ -12,7 +12,7 @@ export default function Hero() {
             />
             <div className='w-full max-w-xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto z-[3] relative'>
                 <div className='mx-auto flex flex-col items-center overflow-hidden'>
-                    <div className='pt-20 lg:pt-32 pb-12 space-y-5 flex flex-col text-center'>
+                    <div className='pt-20 pb-12 space-y-5 flex flex-col text-center'>
                         <h1 className='text-5xl text-black lg:text-7xl tracking-tight font-semibold'>
                             From the{' '}
                             <span className='text-gradient bg-gradient-to-br from-purple-500 to-purple-700 animate-gradient-x-2000'>

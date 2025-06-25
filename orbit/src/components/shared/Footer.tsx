@@ -9,16 +9,24 @@ export default function Footer() {
                 <div className='px-10 md:px-20 2xl:px-10'>
                     <div className='mx-auto max-w-2xl lg:max-w-7xl'>
                         <div className='relative text-center py-24'>
-                            <h1 className='mt-5 text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
-                                Get Purple today
-                            </h1>
+                            <div className='flex flex-row space-x-2 items-center justify-center mt-5'>
+                                <h1 className='text-4xl lg:text-5xl font-semibold tracking-tight text-black sm:text-5xl'>
+                                    Try Purple today{' '}
+                                </h1>
+                                <span className='relative inline-flex overflow-hidden rounded-full p-[1px] focus:outline-none'>
+                                    <span className='absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#5d0ec0_50%,#E2CBFF_100%)]' />
+                                    <span className='inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gradient-to-b from-purple-500 to-purple-600 px-3 py-1 text-xs font-medium text-white backdrop-blur-3xl'>
+                                        Beta
+                                    </span>
+                                </span>
+                            </div>
                             <p className='mx-auto mt-6 max-w-3xl text-base text-black'>
                                 Take control of your finances with ease. Purple helps you track,
                                 manage, and optimize your spending, all in one place. Start your
                                 journey toward smarter money management today!
                             </p>
                             <div className='mt-6 flex justify-center flex-row space-x-2.5'>
-                                <Link
+                                {/* <Link
                                     target='_blank'
                                     href='https://google.com'
                                     className='flex items-center justify-end flex-row space-x-2 cursor-pointer h-[40px]'
@@ -34,7 +42,7 @@ export default function Footer() {
                                         }}
                                         className='mx-auto h-full'
                                     />
-                                </Link>
+                                </Link> */}
                                 <Link
                                     target='_blank'
                                     href='https://github.com/kangah-codes/purple/releases/latest'
