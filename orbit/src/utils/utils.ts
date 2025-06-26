@@ -1,49 +1,20 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
 import { BlogPost } from '@/types/Blog';
 
 const mdFiles = path.join(process.cwd(), 'src/blog');
-export function getPostSlugs(): BlogPost[] {
-    const allPosts = fs.readdirSync(mdFiles);
-    return allPosts.map((fileName) => {
-        const slug = fileName.replace('.md', '');
-        const fileContent = fs.readFileSync(path.join(mdFiles, fileName), 'utf-8');
-        const { data, content } = matter(fileContent);
 
-        return {
-            data,
-            content,
-            slug,
-        } as unknown as BlogPost;
-    });
-}
-
-export function getPostBySlug(slug: string): BlogPost | null {
-    const filePath = path.join(mdFiles, `${slug}.md`);
-
-    if (!fs.existsSync(filePath)) {
-        return null;
-    }
-
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const { data, content } = matter(fileContent);
-
-    return {
-        data,
-        content,
-        slug,
-    } as BlogPost;
-}
-
-export function getDocument(fileName: string, dir = 'legal') {
+export async function getDocument(fileName: string, dir = 'legal') {
     const filePath = path.join(process.cwd(), `src/${dir}`, fileName);
 
-    if (!fs.existsSync(filePath)) {
+    try {
+        await fs.access(filePath);
+    } catch {
         throw new Error(`Document ${fileName} not found in /${dir}`);
     }
 
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const fileContent = await fs.readFile(filePath, 'utf-8');
     const { data, content } = matter(fileContent);
 
     return {
@@ -51,6 +22,43 @@ export function getDocument(fileName: string, dir = 'legal') {
         content,
         slug: fileName.replace('.md', ''),
     };
+}
+
+export async function getPostSlugs(): Promise<BlogPost[]> {
+    const allPosts = await fs.readdir(mdFiles);
+
+    const posts = await Promise.all(
+        allPosts.map(async (fileName) => {
+            const slug = fileName.replace('.md', '');
+            const fileContent = await fs.readFile(path.join(mdFiles, fileName), 'utf-8');
+            const { data, content } = matter(fileContent);
+
+            return {
+                data,
+                content,
+                slug,
+            } as BlogPost;
+        }),
+    );
+
+    return posts;
+}
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+    const filePath = path.join(mdFiles, `${slug}.md`);
+
+    try {
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const { data, content } = matter(fileContent);
+
+        return {
+            data,
+            content,
+            slug,
+        } as BlogPost;
+    } catch {
+        return null;
+    }
 }
 
 export function parseDateWithOrdinal(dateString: string) {

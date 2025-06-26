@@ -15,7 +15,7 @@ tags:
 
 # The Origin Story
 
-In my search for the ideal budgeting app, I tried dozens. Some looked promising at first but always fell short in small but meaningful ways. The ones with solid features were often locked behind paywalls. Others were cluttered with ads or felt dated, with interfaces that looked like they hadn’t been updated since 2017. It quickly became frustrating. I wasn’t just looking for something that worked. I wanted an app I’d actually enjoy using consistently, especially since I wanted to build better financial habits.
+For quite sometime I've been searching for the perfect <sup>[1]</sup> budgeting app. I've installed and used over 10 regularly. Some seemed promising, but always fell short in subtle yet important ways. The ones with the best features were often behind paywalls, while others were bogged down with ads or had extremely outdated UI. It didn’t take long for the frustration to set in. I wasn’t just looking for a tool that worked, I needed something I’d actually enjoy using regularly, especially if I was serious about building better financial habits.
 
 After switching to Android, the search only got more frustrating. I couldn’t find a single app that felt modern, intuitive, and actually aligned with how I wanted to manage money. At some point, I thought: “If none of these work for me, maybe I can just build my own.”
 
@@ -61,7 +61,7 @@ As a Google Pixel fanboy, I also plan to draw a lot of inspiration from Google�
 
 <br/>
 
-# The Beta-verse 🧪
+# Into the Beta-verse 🧪
 
 Purple is currently available as a closed beta (not really closed, if you're interested you can grab the APK from github, or build it yourself). If you're curious to try it out, you can grab the APK from GitHub or even build it yourself from source.
 
