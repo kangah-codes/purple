@@ -8,7 +8,7 @@ type RoadmapListProps = {
 
 export default function RoadmapList({ items }: RoadmapListProps) {
     return (
-        <div className='flex flex-col min-h-screen z-10'>
+        <div className='flex flex-col min-h-screen z-[2]'>
             <main className='flex-1'>
                 <div className='flex flex-col space-y-8 px-5'>
                     <div className='grid gap-6 md:gap-8'>
