@@ -5,6 +5,8 @@ on:
     branches:
       - dev
       - rc
+      # temp
+      - liquid-glass
     paths:
       # Trigger this action only for changes in purple directory
       - "purple/**"
