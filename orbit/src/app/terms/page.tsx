@@ -2,10 +2,8 @@ import { MarkdownContent } from '@/components/blog/BlogPost';
 import Hero from '@/components/shared/Hero';
 import { getDocument } from '@/utils/utils';
 
-export default function Terms() {
-    const terms = getDocument('tos.md');
-
-    console.log(terms);
+export default async function Terms() {
+    const terms = await getDocument('tos.md');
 
     return (
         <div className='flex items-center flex-col'>

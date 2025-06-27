@@ -2,8 +2,8 @@ import { MarkdownContent } from '@/components/blog/BlogPost';
 import Hero from '@/components/shared/Hero';
 import { getDocument } from '@/utils/utils';
 
-export default function Terms() {
-    const terms = getDocument('privacy-policy.md');
+export default async function Terms() {
+    const terms = await getDocument('privacy-policy.md');
 
     return (
         <div className='flex items-center flex-col'>
