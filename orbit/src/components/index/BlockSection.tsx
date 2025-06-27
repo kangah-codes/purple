@@ -125,7 +125,7 @@ export default function BlockSection() {
                             </div>
                         </div>
                     </div>
-                    <div className='grid grid-cols-5 overflow-hidden border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-300 rounded-[3rem] col-span-full relative backdrop-blur-xl backdrop-opacity-50'>
+                    <div className='hidden md:grid grid-cols-5 overflow-hidden border border-purple-100 bg-gradient-to-br from-purple-50 to-purple-300 rounded-[3rem] col-span-full relative backdrop-blur-xl backdrop-opacity-50'>
                         <div className='col-span-full lg:col-span-2 z-10 text-black p-5 flex items-center justify-center'>
                             <div className='flex flex-col p-5 lg:px-10 space-y-2.5'>
                                 <h1 className='text-3xl lg:text-4xl tracking-tight font-bold'>
