@@ -15,9 +15,9 @@ tags:
 
 # The Origin Story
 
-For quite sometime I've been searching for the perfect <sup>[1]</sup> budgeting app. I've installed and used over 10 regularly. Some seemed promising, but always fell short in subtle yet important ways. The ones with the best features were often behind paywalls, while others were bogged down with ads or had extremely outdated UI. It didn’t take long for the frustration to set in. I wasn’t just looking for a tool that worked, I needed something I’d actually enjoy using regularly, especially if I was serious about building better financial habits.
+For quite sometime I've been searching for the perfect budgeting app. I've installed and used over 10 regularly. Some seemed promising, but always fell short in subtle yet important ways. The ones with the best features were often behind paywalls, while others were bogged down with ads or had extremely outdated UI. It didn’t take long for the frustration to set in. I wasn’t just looking for a tool that worked, I needed something I’d actually enjoy using regularly, especially if I was serious about building better financial habits.
 
-After switching to Android, the search only got more frustrating. I couldn’t find a single app that felt modern, intuitive, and actually aligned with how I wanted to manage money. At some point, I thought: “If none of these work for me, maybe I can just build my own.”
+After switching to Android, the search only got more frustrating. I couldn’t find a single app that felt modern, intuitive, and actually aligned with how I wanted to manage my money. At some point, I thought: “If none of these work for me, maybe I can just build my own.”
 
 That’s how Purple started. What began as a weekend prototype (originally called Spendwise) was purely a personal project. I wasn’t trying to launch a complete app or product. I just wanted something that was tailored to my specific use case, and I’d enjoy using every day. I focused on simple UX decisions guided entirely by my own habits, needs, and expectations.
 
@@ -31,19 +31,19 @@ Purple is built on a simple idea: budgeting tools should be modern, practical, a
 
 Before working on Purple, my experience with mobile development was pretty limited. I’d played around with React Native and Flutter in the past, but never actually shipped anything. Since I already had a solid React background, React Native was the obvious choice. It felt familiar and comfortable, and a natural evolution of React ergonomics. That made it easy to move fast and iterate quickly.
 
-The original plan was to build Purple as a fully offline app without a backend, no sync, just a local sqlite store and simplicity. But after a few iterations, I made the (in hindsight, premature) decision to switch to an online only model. I figured it would help me learn more about backend development, so I spun up a RESTful API using Go (which I was learning at the time), with PostgreSQL as the main database and some Redis sprinkled in for caching here and there.
+The original plan was to build Purple as a fully offline app without a backend, with no online syncing, just local storage. But after a few iterations, I made the (in hindsight, premature) decision to switch to an online only model. I figured it would help me learn more about backend development, so I spun up a RESTful API using Go (which I was learning at the time), with PostgreSQL as the main database and some Redis sprinkled in for caching here and there.
 
 I ended up spending nearly ten months building and refining that backend, only to scrap it in the end. Why? Because I realized I was over engineering a solution for a product that hadn't even been released into peoples hands, and it had 1 active user (me!). I was too focused on scale and infrastructure when I should’ve been focused on the app experience. And honestly, when the server bills started adding up, it was a wake up call.
 
 ![Gru Meme](/blog/building-purple/meme-1.jpg)
 
-So, I pivoted back to the original offline first approach. This time, for the forseeable future. Thankfully, I had designed the data layer in a way that made it easy to swap out the backend API calls for a local storage implementation. I went with SQLite, it’s lightweight, reliable, and more than capable of handling what Purple needs. This shift let me zero in on what really mattered to get this app out there as fast as I could.
+So, I pivoted back to the original offline first approach. This time, for good. Thankfully, I had designed the data layer in a way that made it easy to swap out the backend API calls for a local storage implementation. I went with SQLite, it’s lightweight, reliable, and more than capable of handling what Purple needs. This shift let me zero in on what really mattered to get this app out there as fast as I could (Spoiler alert, I missed my 6 month release target).
 
 <br/>
 
 # The Design Evolution
 
-My design process started pretty informally. I began by imagining how I wanted the app to look and feel, then turned to Dribbble and Behance to gather inspiration and refine those mental sketches I had. One of my main goals was to build something that wasn’t just functional, but also visually appealing.
+My design process started pretty informally. I mostly approach UI design by just imagining how I want the app to look and feel, then search online to gather inspiration and refine the mental sketches I come up with. One of my main goals was to build something that wasn’t just functional, but also visually appealing to some extent.
 
 I don’t have a formal background in UI or visual design, but I’ve always enjoyed the challenge of translating ideas in my head into something real. It’s a bit like problem solving through visuals, and that’s something I’ve grown to love.
 
@@ -63,14 +63,14 @@ As a Google Pixel fanboy, I also plan to draw a lot of inspiration from Google�
 
 # Into the Beta-verse 🧪
 
-Purple is currently available as a closed beta (not really closed, if you're interested you can grab the APK from github, or build it yourself). If you're curious to try it out, you can grab the APK from GitHub or even build it yourself from source.
+Purple is currently available as a beta. If you're curious to try it out, you can grab the APK from GitHub or even build it yourself from source.
 
 Feature wise, Purple is still very much a work in progress. That said, it already includes the core functionality needed to use it as a complete budgeting app (I've been using it myself for the past few weeks). There are still some rough edges and a few bugs I want to release into the wild and learn from.
 
-The goal with this beta is to gather meaningful feedback from early users, understand what’s working (and what’s not), and use that insight to shape the next phase of development. If everything goes to plan, I’ll move toward a public beta and eventually a stable release later this year.
+The goal with this beta is to gather meaningful feedback from early users, understand what’s working (and what’s not), and use that insight to shape the next phase of development.
 
 <br/>
 
 # What’s Next?
 
-We're is just getting started, in the coming months I'll be bringing Purple to the Play Store. Checkout the [roadmap](/roadmap) for the direction we're heading to.
+I'm just getting started, in the coming months I'll be working to bring Purple to the Play Store. If everything goes to plan, I’ll move toward a stable release later this year. Checkout the [roadmap](https://purpleapp.featurebase.app/roadmap) for the direction we're heading to.

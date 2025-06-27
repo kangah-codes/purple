@@ -10,6 +10,12 @@ const navItems = [
         name: 'Changelog',
         href: '/changelog',
         isMobileOnly: true,
+        description: `Check out the latest releases`,
+    },
+    {
+        name: 'Roadmap',
+        href: 'https://purpleapp.featurebase.app/roadmap',
+        isMobileOnly: true,
         description: `See what's on the roadmap for Purple`,
     },
 ];

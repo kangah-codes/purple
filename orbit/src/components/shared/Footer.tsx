@@ -100,8 +100,9 @@ export default function Footer() {
                                                 </li>
                                                 <li>
                                                     <Link
+                                                        target='_blank'
                                                         className='font-medium text-black data-hover:text-black/75'
-                                                        href='/roadmap'
+                                                        href='https://purpleapp.featurebase.app/roadmap'
                                                     >
                                                         Roadmap
                                                     </Link>
