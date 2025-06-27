@@ -10,9 +10,9 @@ const formatBadgeText = (type: string) => {
 const getBadgeColor = (type: string) => {
     switch (type) {
         case 'new-feature':
-            return 'bg-blue-100 text-blue-800 border-blue-100';
-        case 'quality-of-life':
             return 'bg-green-100 text-green-800 border-green-100';
+        case 'quality-of-life':
+            return 'bg-blue-100 text-blue-800 border-blue-100';
         case 'performance':
             return 'bg-orange-100 text-orange-800 border-orange-100';
         case 'security':

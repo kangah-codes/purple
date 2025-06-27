@@ -16,11 +16,10 @@ const roadmapItems: RoadmapItem[] = [
         id: 1,
         title: 'Dark Mode',
         description:
-            'A sleek dark interface for late-night budgeting or reduced eye strain — switch themes effortlessly.',
+            'A sleek dark interface for late-night budgeting or reduced eye strain - switch themes effortlessly.',
         timeline: 'TBD',
         type: 'quality-of-life',
         status: 'planned',
-        isPriority: true,
     },
     {
         id: 2,
@@ -36,9 +35,10 @@ const roadmapItems: RoadmapItem[] = [
         title: 'Recurring Transactions',
         description:
             'Automatically schedule repeating income and expense items like rent, subscriptions, or salary.',
-        timeline: 'TBD',
+        timeline: 'Q3 2025',
         type: 'new-feature',
         status: 'planned',
+        isPriority: true,
     },
     {
         id: 4,
@@ -53,7 +53,7 @@ const roadmapItems: RoadmapItem[] = [
         id: 5,
         title: 'AI Integration',
         description:
-            'Leverage Iris, our bset in class assistant to give you smart insights, predictive suggestions, and natural-language queries to plan and reflect on your finances.',
+            'Leverage Iris, our bset in class assistant to give you smart insights, predictive suggestions, and natural language to plan and reflect on your finances.',
         timeline: 'TBD',
         type: 'new-feature',
         status: 'planned',
