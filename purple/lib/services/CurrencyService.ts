@@ -38,6 +38,7 @@ export default class CurrencyService {
     public async fetchExchangeRates(code?: CurrencyCode): Promise<void> {
         const { currency } = usePreferencesStore.getState().preferences;
         const { ok, json, status } = await fetch(
+            // TODO: remove hardcoded api endpoints, too lazy to bootstrap app config rn
             `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${
                 code ? code.toLowerCase() : currency.toLowerCase()
             }.json`,

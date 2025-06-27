@@ -37,13 +37,13 @@ I ended up spending nearly ten months building and refining that backend, only t
 
 ![Gru Meme](/blog/building-purple/meme-1.jpg)
 
-So, I pivoted back to the original offline first approach. This time, for good. Thankfully, I had designed the data layer in a way that made it easy to swap out the backend API calls for a local storage implementation. I went with SQLite, it’s lightweight, reliable, and more than capable of handling what Purple needs. This shift let me zero in on what really mattered to get this app out there as fast as I could (Spoiler alert, I missed my 6 month release target).
+So, I pivoted back to the original offline first approach. This time, for good. Thankfully, I had designed the data layer in a way that made it easy to swap out the backend API calls for a local storage implementation without a massive refactor. I went with SQLite, it’s lightweight, reliable, and more than capable of handling what Purple needs. This shift let me zero in on what really mattered to get this app out there as fast as I could (Spoiler alert, I missed my 6 month release target).
 
 <br/>
 
 # The Design Evolution
 
-My design process started pretty informally. I mostly approach UI design by just imagining how I want the app to look and feel, then search online to gather inspiration and refine the mental sketches I come up with. One of my main goals was to build something that wasn’t just functional, but also visually appealing to some extent.
+My design process started pretty informally. I mostly approach UI design by just imagining how I want the finished app to look and feel, then search online to gather inspiration and refine the mental sketches I come up with. One of my main goals was to build something that wasn’t just functional, but also visually appealing to some extent.
 
 I don’t have a formal background in UI or visual design, but I’ve always enjoyed the challenge of translating ideas in my head into something real. It’s a bit like problem solving through visuals, and that’s something I’ve grown to love.
 
