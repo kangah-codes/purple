@@ -16,7 +16,7 @@ const navItems = [
 
 export default function Navbar() {
     return (
-        <div className='fixed top-0 left-0 z-[10] w-full md:relative md:bg-purple-400'>
+        <div className='fixed top-0 left-0 z-[30] w-full md:relative md:bg-purple-400'>
             <header className='mx-auto max-w-7xl px-5 py-5'>
                 <div className='relative flex items-center justify-between rounded-full bg-purple-500/50 md:bg-transparent px-2.5 py-2 backdrop-blur-lg'>
                     <Link href='/' className='flex items-center'>

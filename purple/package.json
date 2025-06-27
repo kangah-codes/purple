@@ -25,7 +25,6 @@
         "@react-navigation/native": "^6.0.2",
         "@sentry/react-native": "^6.15.1",
         "@shopify/flash-list": "^1.7.2",
-        "@shopify/react-native-skia": "^2.0.7",
         "add": "^2.0.6",
         "date-fns": "^3.6.0",
         "expo": "^51.0.39",
