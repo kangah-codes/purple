@@ -61,7 +61,7 @@ As a Google Pixel fanboy, I also plan to draw a lot of inspiration from Google�
 
 <br/>
 
-# Into the Beta-verse 🧪
+# Into the Betaverse 🧪
 
 Purple is currently available as a beta. If you're curious to try it out, you can grab the APK from GitHub or even build it yourself from source.
 
