@@ -1,3 +1,12 @@
+## [v0.1.1-beta](https://github.com/kangah-codes/purple/releases/tag/v0.1.1) - 2025-06-27
+
+### Changed
+
+-   Added new onboarding screens
+-   Minor visual changes
+
+---
+
 ## [v0.1.0-beta](https://github.com/kangah-codes/purple/releases/tag/v0.1.0) - 2025-06-21
 
 ### Added
