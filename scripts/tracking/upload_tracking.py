@@ -186,32 +186,32 @@ except Exception as e:
     raise
 
 
-# ----- FETCH ALL TRACKING IDS -----
+# ─── FETCH ALL TRACKING KEYS ──────────────────────────────────────────────
 logging.info("🔍 Fetching tracking keys from Redis...")
 try:
-    tracking_keys = []
+    tracking_keys: list[str] = []
     cursor = 0
     while True:
-        cursor, keys = r.scan(cursor=cursor, match=f'{KEY_PREFIX}*')
-        tracking_keys.extend(keys)
+        cursor, keys = r.scan(cursor=cursor, match=f"{KEY_PREFIX}*")
+        # Ensure we always have str, even when using redis‑py locally.
+        tracking_keys.extend(k.decode() if isinstance(k, bytes) else k for k in keys)
         if cursor == 0:
             break
     logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
-except Exception as e:
+except Exception:
     logging.exception("❌ Failed to fetch tracking keys")
     raise
 
-# ----- ORGANIZE BY DATE AND TRACKING ID -----
-files_by_date = {}
-errors_by_date = {}
-# tracking_id maps to original_redis_key
-redis_key_mapping = {}
+# ─── ORGANIZE BY DATE AND TRACKING ID ─────────────────────────────────────
+files_by_date: dict[str, dict[str, list]] = {}
+errors_by_date: dict[str, dict[str, list]] = {}
+redis_key_mapping: dict[str, list[str]] = {}
 
 logging.info("🧮 Organizing events by date...")
 for key in tracking_keys:
     full_key = key.replace(KEY_PREFIX, '')
-    tracking_id = full_key.split(':')[-1] if ':' in full_key else full_key
-    redis_key_mapping[tracking_id] = key
+    tracking_id = full_key.split(":")[-1]
+    redis_key_mapping.setdefault(tracking_id, []).append(key)
 
     logging.debug(f"Processing key: {key.split(':')[1]}")
 
@@ -223,7 +223,7 @@ for key in tracking_keys:
 
         for entry in entries:
             try:
-                event = json.loads(entry)
+                event = json.loads(entry)['event']
 
                 # Process event based on format
                 processed_event = storage_adapter.process_event(event)
@@ -316,21 +316,22 @@ def upload_event_group(name, tracking_data, is_error=False):
                     f"❌ Failed to upload for tracking ID: {tracking_id} - {e}")
 
 
-    # Delete Redis keys only for successfully uploaded data
-    for tracking_id in successfully_uploaded_keys:
-        original_redis_key = redis_key_mapping.get(tracking_id)
-        if original_redis_key:
-            try:
-                result = r.delete(original_redis_key)
-                if result:
-                    logging.info(f"🗑️  Deleted Redis key: {original_redis_key}")
-                else:
-                    logging.warning(f"⚠️ Redis key not found or already deleted: {original_redis_key}")
-            except Exception:
-                logging.exception(f"❌ Failed to delete Redis key: {original_redis_key}")
-        else:
-            logging.warning(
-                f"⚠️ Could not find original Redis key for tracking_id: {tracking_id}")
+        # ─── DELETE ONLY THOSE KEYS WE REALLY UPLOADED ───────────────────────────
+        for tracking_id in successfully_uploaded_keys:
+            for original_key in redis_key_mapping.get(tracking_id, []):
+                try:
+                    resp = r.delete(original_key)
+                    deleted = (
+                        resp.get("result")
+                        if isinstance(resp, dict)
+                        else resp
+                    )
+                    if deleted == 1:
+                        logging.info(f"🗑️  Deleted Redis key: {original_key}")
+                    else:
+                        logging.warning(f"⚠️ Key not found or already deleted: {original_key}")
+                except Exception:
+                    logging.exception(f"❌ Failed to delete Redis key: {original_key}")
 
     return len(successfully_uploaded_keys)
 
