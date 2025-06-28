@@ -13,32 +13,24 @@ export async function generateMetadata({
     const blog = await getPostBySlug(slug);
     if (!blog) return {};
 
-    console.log('BLOG', blog);
-    // http://localhost:3000/_next/image?url=%2Fblog%2Fbuilding-purple%2Fcreating-purple.png&w=1920&q=100
+    const baseUrl = 'https://trypurpleapp.com';
+    const ogImage = `${baseUrl}/blog/${blog.data.blogImage}`;
 
     return {
         title: blog.data.title,
-        description: blog.data.description,
+        description: blog.data.description || blog.content.slice(0, 160),
         openGraph: {
             title: blog.data.title,
-            description: blog.data.description,
+            description: blog.data.description || blog.content.slice(0, 160),
+            images: [ogImage],
             type: 'article',
-            url: `https://trypurpleapp.com/blog/${blog.data.slug}`,
-            images: [
-                {
-                    url: `https://trypurpleapp.com/_next/image?url=${encodeURIComponent(blog.data.blogImage)}&w=1920&q=100`,
-                    width: 1200,
-                    height: 630,
-                },
-            ],
-            tags: blog.data.tags || [],
+            url: `${baseUrl}/blog/${params.slug}`,
         },
         twitter: {
             card: 'summary_large_image',
             title: blog.data.title,
-            images: [
-                `https://trypurpleapp.com/_next/image?url=${encodeURIComponent(blog.data.blogImage)}&w=1920&q=100`,
-            ],
+            description: blog.data.description || blog.content.slice(0, 160),
+            images: [ogImage],
         },
     };
 }
