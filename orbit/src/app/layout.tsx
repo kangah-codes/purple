@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         siteName: 'Purple | Making Budgeting Easy',
         images: [
             {
-                url: 'https://trypurpleapp.com/og-image.jpg',
+                url: 'https://trypurpleapp.com/blog/building-purple/creating-purple.png',
                 width: 1200,
                 height: 630,
             },
