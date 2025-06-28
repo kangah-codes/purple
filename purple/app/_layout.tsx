@@ -76,7 +76,7 @@ export default Sentry.wrap(function RootLayout() {
                         <GestureHandlerRootView style={{ flex: 1 }}>
                             <Suspense fallback={<LoadingScreen />}>
                                 <SQLiteProvider
-                                    databaseName='purple_test_1.db'
+                                    databaseName='purple.db'
                                     onInit={onInitialise}
                                     useSuspense
                                     options={{

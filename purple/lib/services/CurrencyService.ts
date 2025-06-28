@@ -37,17 +37,17 @@ export default class CurrencyService {
 
     public async fetchExchangeRates(code?: CurrencyCode): Promise<void> {
         const { currency } = usePreferencesStore.getState().preferences;
-        const { ok, json, status } = await fetch(
+        const res = await fetch(
             // TODO: remove hardcoded api endpoints, too lazy to bootstrap app config rn
             `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${
                 code ? code.toLowerCase() : currency.toLowerCase()
             }.json`,
         );
-        if (!ok) {
-            console.error(`Failed to fetch exchange rates: ${status}`);
+        if (!res.ok) {
+            console.error(`Failed to fetch exchange rates: ${res.status}`);
         }
 
-        const data: CurrencyRates = await json();
+        const data: CurrencyRates = await res.json();
         this.nativeStorage.setItem('currency-exchange-rates', data);
     }
 

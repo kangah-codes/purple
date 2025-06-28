@@ -1,3 +1,11 @@
+## [v0.1.2-beta](https://github.com/kangah-codes/purple/releases/tag/v0.1.1) - 2025-06-27
+
+### Fixed
+
+-   Errors with fetching exchange rates
+
+---
+
 ## [v0.1.1-beta](https://github.com/kangah-codes/purple/releases/tag/v0.1.1) - 2025-06-27
 
 ### Changed
