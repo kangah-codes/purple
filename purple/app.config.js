@@ -106,5 +106,11 @@ export default ({ config }) => {
             },
         },
         owner: 'akangah89',
+        updates: {
+            url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
+        },
+        runtimeVersion: {
+            policy: 'appVersion',
+        },
     };
 };
