@@ -11,7 +11,7 @@ import { dedupeByKey } from '@/lib/utils/array';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
 type TransactionHistoryList = {
@@ -23,13 +23,9 @@ export default function TransactionHistoryList({
 }: TransactionHistoryList) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { transactions, setCurrentTransaction } = useTransactionStore();
-    const getTopFiveTransactions = useCallback(
-        (transactions: Transaction[]) => {
-            // TODO: research why duplicate transactions were being sent in the first place instead of this shit
-            return dedupeByKey(transactions.slice(0, 5), 'id');
-        },
-        [transactions],
-    );
+    const topFiveTransactions = useMemo(() => {
+        return transactions.slice(0, 5);
+    }, [propTransactions]);
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
@@ -76,12 +72,7 @@ export default function TransactionHistoryList({
 
             <FlashList
                 estimatedItemSize={50}
-                data={
-                    // TODO: refactor this to be neater later
-                    propTransactions
-                        ? getTopFiveTransactions(propTransactions)
-                        : getTopFiveTransactions(transactions)
-                }
+                data={topFiveTransactions}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.flatlistContainerStyle}
                 showsVerticalScrollIndicator={true}

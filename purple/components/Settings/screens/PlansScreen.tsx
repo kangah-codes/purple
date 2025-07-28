@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { CoinsStackedIcon, EyeCloseIcon } from '@/components/SVG/icons/noscale';
-import Switch from '@/components/Shared/molecules/Switch';
+import Switch from '@/components/Shared/atoms/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';

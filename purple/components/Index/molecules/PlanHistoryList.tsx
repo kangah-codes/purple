@@ -4,14 +4,12 @@ import { Plan } from '@/components/Plans/schema';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import React from 'react';
-import { useCallback } from 'react';
-import { Dimensions, FlatList } from 'react-native';
+import React, { useCallback } from 'react';
+import { Dimensions } from 'react-native';
 
 const width = Dimensions.get('screen').width;
 

@@ -8,7 +8,7 @@ import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
-import { Button, StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import PlanHistoryList from '../molecules/PlanHistoryList';

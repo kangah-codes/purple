@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { PinIcon, ScaleIcon } from '@/components/SVG/icons/noscale';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
-import Switch from '@/components/Shared/molecules/Switch';
+import Switch from '@/components/Shared/atoms/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';

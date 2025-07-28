@@ -33,7 +33,7 @@ export default function CategoriesScreen() {
     const renderItem = useCallback(({ item }: { item: CustomTransactionType }) => {
         return (
             <View className='py-3'>
-                <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
+                <Text style={satoshiFont.satoshiBold} className='text-sm text-black'>
                     {`${item.emoji} ${item.category}`}
                 </Text>
             </View>
@@ -45,7 +45,7 @@ export default function CategoriesScreen() {
                 <EmptyList message={`Couldn't find any categories which match "${searchValue}"`} />
             </View>
         ),
-        [],
+        [searchValue],
     );
     const renderItemSeparator = useCallback(
         () => <View className='border-b border-purple-100 h-[1px]' />,
