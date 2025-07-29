@@ -64,7 +64,6 @@
         "react-native-screens": "3.31.1",
         "react-native-snap-carousel": "^3.9.1",
         "react-native-svg": "15.2.0",
-        "react-native-switch": "^1.5.1",
         "react-native-tab-view": "^3.5.2",
         "react-native-toast-message": "^2.2.0",
         "react-native-uuid": "^2.0.3",

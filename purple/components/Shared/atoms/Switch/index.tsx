@@ -5,7 +5,7 @@ import Animated, {
     interpolateColor,
     useAnimatedStyle,
     useSharedValue,
-    withTiming,
+    withSpring,
 } from 'react-native-reanimated';
 
 type SwitchProps = {
@@ -13,11 +13,17 @@ type SwitchProps = {
     onValueChange: (value: boolean) => void;
     disabled?: boolean;
     style?: ViewStyle;
-    duration?: number;
+    scale?: number;
+    widthRatio?: number;
+    springConfig?: {
+        damping?: number;
+        stiffness?: number;
+        mass?: number;
+    };
     trackColors?: { on: string; off: string };
 };
 
-const THUMB_WIDTH = 35;
+const THUMB_WIDTH = 30;
 const TRACK_PADDING = 3;
 
 export default function Switch({
@@ -25,16 +31,36 @@ export default function Switch({
     onValueChange,
     disabled = false,
     style,
-    duration = 200,
+    scale = 1,
+    widthRatio = 1.9,
+    springConfig = {
+        damping: 15,
+        stiffness: 150,
+        mass: 1,
+    },
     trackColors = { on: '#9810fa', off: '#dab2ff' },
 }: SwitchProps) {
     const height = useSharedValue(0);
     const width = useSharedValue(0);
 
+    const styles = StyleSheet.create({
+        track: {
+            alignItems: 'flex-start',
+            width: THUMB_WIDTH * widthRatio * scale,
+            height: 25 * scale,
+            padding: TRACK_PADDING * scale,
+        },
+        thumb: {
+            height: '100%',
+            width: THUMB_WIDTH * scale,
+            backgroundColor: 'white',
+        },
+    });
+
     const trackAnimatedStyle = useAnimatedStyle(() => {
         const color = interpolateColor(value ? 1 : 0, [0, 1], [trackColors.off, trackColors.on]);
         return {
-            backgroundColor: withTiming(color, { duration }),
+            backgroundColor: withSpring(color, springConfig),
             borderRadius: height.value,
         };
     });
@@ -43,11 +69,10 @@ export default function Switch({
         const moveValue = interpolate(
             value ? 1 : 0,
             [0, 1],
-            [0, width.value - THUMB_WIDTH - TRACK_PADDING * 2],
+            [0, width.value - THUMB_WIDTH * scale - TRACK_PADDING * 2 * scale],
         );
-
         return {
-            transform: [{ translateX: withTiming(moveValue, { duration }) }],
+            transform: [{ translateX: withSpring(moveValue, springConfig) }],
             borderRadius: height.value,
         };
     });
@@ -72,17 +97,3 @@ export default function Switch({
         </Pressable>
     );
 }
-
-const styles = StyleSheet.create({
-    track: {
-        alignItems: 'flex-start',
-        width: THUMB_WIDTH * 1.9,
-        height: 30,
-        padding: TRACK_PADDING,
-    },
-    thumb: {
-        height: '100%',
-        width: THUMB_WIDTH,
-        backgroundColor: 'white',
-    },
-});
