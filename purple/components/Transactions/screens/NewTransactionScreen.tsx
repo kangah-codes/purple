@@ -1,7 +1,7 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, ArrowRightIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
-import DatePicker from '@/components/Shared/atoms/DatePicker';
+import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import {
     InputField,
@@ -24,6 +24,8 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useCreateTransaction } from '../hooks';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { CoinSwapIcon } from '@/components/SVG/icons/noscale';
+import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -48,7 +50,7 @@ export default function NewTransactionScreen() {
             amount: '',
             category: '',
             note: '',
-            fromAccount: type == 'transfer' ? ((accountId as string) ?? '') : '',
+            fromAccount: type == 'transfer' ? (accountId as string) ?? '' : '',
             toAccount: '',
             type: '',
             accountId: (accountId as string) ?? '',
@@ -176,19 +178,13 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionDebitAccount'
-                                            options={accounts.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.id] = {
-                                                        label: curr.name,
-                                                        value: curr.id,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={accounts.reduce((acc, curr) => {
+                                                acc[curr.id] = {
+                                                    label: curr.name,
+                                                    value: curr.id,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -224,19 +220,13 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCreditAccount'
-                                            options={accounts.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.id] = {
-                                                        label: curr.name,
-                                                        value: curr.id,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={accounts.reduce((acc, curr) => {
+                                                acc[curr.id] = {
+                                                    label: curr.name,
+                                                    value: curr.id,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -307,16 +297,13 @@ export default function NewTransactionScreen() {
                             <>
                                 <SelectField
                                     selectKey='newTransactionAccount'
-                                    options={accounts.reduce(
-                                        (acc, curr) => {
-                                            acc[curr.id] = {
-                                                label: curr.name,
-                                                value: curr.id,
-                                            };
-                                            return acc;
-                                        },
-                                        {} as Record<string, { label: string; value: string }>,
-                                    )}
+                                    options={accounts.reduce((acc, curr) => {
+                                        acc[curr.id] = {
+                                            label: curr.name,
+                                            value: curr.id,
+                                        };
+                                        return acc;
+                                    }, {} as Record<string, { label: string; value: string }>)}
                                     customSnapPoints={['50%', '70%']}
                                     value={value}
                                     onChange={(val) => {
@@ -406,6 +393,14 @@ export default function NewTransactionScreen() {
                                 control={control}
                                 rules={{
                                     required: "Amount can't be empty",
+                                    pattern: {
+                                        value: /^\d+(\.\d{1,2})?$/,
+                                        message: 'Amount must be a valid number',
+                                    },
+                                    min: {
+                                        value: 0.01,
+                                        message: 'Amount must be at least 0.01',
+                                    },
                                 }}
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
@@ -446,19 +441,13 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={transactionTypes.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
@@ -487,7 +476,7 @@ export default function NewTransactionScreen() {
                                 required: "Date can't be empty",
                             }}
                             render={({ field: { onChange, value } }) => (
-                                <DatePicker
+                                <DateAndTimePicker
                                     label='Date'
                                     pickerKey='newTransactionStartDate'
                                     onChange={(date) => {

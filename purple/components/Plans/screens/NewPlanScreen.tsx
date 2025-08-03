@@ -1,6 +1,6 @@
 import { usePreferences } from '@/components/Settings/hooks';
 import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
-import DatePicker from '@/components/Shared/atoms/DatePicker';
+import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
@@ -388,7 +388,7 @@ export default function NewPlanScreen() {
                                 required: "Start date can't be empty",
                             }}
                             render={({ field: { onChange, value } }) => (
-                                <DatePicker
+                                <DateAndTimePicker
                                     label='Start Date'
                                     pickerKey='newPlanStartDate'
                                     onChange={(date) => {
@@ -421,7 +421,7 @@ export default function NewPlanScreen() {
                                 required: "End date can't be empty",
                             }}
                             render={({ field: { onChange, value } }) => (
-                                <DatePicker
+                                <DateAndTimePicker
                                     label='End Date'
                                     pickerKey='newPlanEndDate'
                                     onChange={(date) => {

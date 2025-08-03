@@ -10,6 +10,7 @@ import StatsHeatmap from './Heatmap';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { GenericAPIResponse } from '@/@types/request';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import SpendOverviewPieChart from './SpendOverviewPieChart';
 
 const now = new Date();
 const startDate = startOfMonth(now);
@@ -39,6 +40,7 @@ export default function StatsHeader() {
 
             <SpendOverview transactions={transactions} />
             <SpendOverviewChart transactions={transactions} />
+            <SpendOverviewPieChart transactions={transactions} />
             <StatsHeatmap transactions={transactions} />
             <TransactionsAccordion transactions={transactions} />
 

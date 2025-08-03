@@ -29,6 +29,29 @@ export type Transaction = {
     deleted_at_unix: string | null;
 };
 
+export type RecurringTransaction = {
+    id: string;
+    amount: number;
+    category: string;
+    account_id: string;
+    recurrence_rule: string;
+    is_active: boolean;
+    start_date: string;
+    end_date: string;
+    create_next_at: string;
+    last_created_at: string;
+    metadata: Record<string, any>;
+    status: 'active' | 'paused' | 'cancelled';
+    created_at: string;
+    updated_at: string;
+    deleted_at: string;
+    created_at_unix: string;
+    updated_at_unix: string;
+    deleted_at_unix: string | null;
+    create_next_at_unix: string;
+    last_created_at_unix: string;
+};
+
 export type CreateTransaction = {
     account_id: string;
     type: Transaction['type'];
@@ -41,4 +64,16 @@ export type CreateTransaction = {
     plan_id?: string;
     date: string;
     charges: number;
+};
+
+export type CreateRecurringTransaction = {
+    account_id: string;
+    type: Transaction['type'];
+    amount: number;
+    category: string;
+    recurrence_rule: string;
+    start_date: string;
+    end_date?: string;
+    metadata?: Record<string, any>;
+    currency: string;
 };

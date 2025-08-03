@@ -136,7 +136,11 @@ export function AnalyticsProvider({
             name: T | string,
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
-            if (!shouldTrackEvents || !analyticsRef.current) {
+            if (
+                !shouldTrackEvents ||
+                !analyticsRef.current ||
+                process.env.NODE_ENV !== 'development'
+            ) {
                 return;
             }
 

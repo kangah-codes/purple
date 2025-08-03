@@ -1,6 +1,11 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Account } from '@/components/Accounts/schema';
-import { CreateTransaction, Transaction } from '@/components/Transactions/schema';
+import {
+    CreateRecurringTransaction,
+    CreateTransaction,
+    RecurringTransaction,
+    Transaction,
+} from '@/components/Transactions/schema';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
@@ -330,6 +335,51 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             total: 1,
             total_items: 1,
             message: 'Success',
+        });
+    }
+
+    async createRecurringTransaction(
+        data: CreateRecurringTransaction,
+    ): Promise<GenericAPIResponse<RecurringTransaction>> {
+        const now = new Date().toISOString();
+        const uuid = UUID();
+
+        console.log('Creating recurring transaction:', data);
+
+        await this.db.runAsync(
+            `INSERT INTO recurring_transactions
+                (id, created_at, updated_at, account_id, type, amount, category,
+                 recurrence_rule, start_date, end_date, status, metadata)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                uuid,
+                now,
+                now,
+                data.account_id,
+                data.type,
+                data.amount,
+                data.category,
+                data.recurrence_rule,
+                data.start_date,
+                data.end_date ?? null,
+                'active',
+                JSON.stringify(data.metadata ?? {}),
+            ],
+        );
+
+        const result = await this.db.getFirstAsync<RecurringTransaction>(
+            'SELECT * FROM recurring_transactions WHERE id = ?',
+            [uuid],
+        );
+        if (!result) throw new HTTPError("Couldn't create recurring transaction", 500);
+        return this.formatResponse({
+            data: result,
+            status: 201,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Created recurring transaction',
         });
     }
 

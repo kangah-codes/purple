@@ -16,6 +16,7 @@ import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { exportDatabase } from '../utils';
 
 export default function PlansScreen() {
     const {

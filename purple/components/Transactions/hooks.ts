@@ -13,8 +13,14 @@ import {
 } from 'react-query';
 import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
-import { CreateTransaction, Transaction } from './schema';
+import {
+    CreateRecurringTransaction,
+    CreateTransaction,
+    RecurringTransaction,
+    Transaction,
+} from './schema';
 import { createTransactionStore } from './state';
+import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
 
 export function useTransactionStore() {
     const [
@@ -108,6 +114,25 @@ export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Tra
     return useMutation(['create-transaction'], async (transactionInformation) => {
         const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.create(transactionInformation as CreateTransaction);
+    });
+}
+
+export function useCreateRecurringTransaction(): UseMutationResult<
+    GenericAPIResponse<RecurringTransaction>,
+    Error
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['create-recurring-transaction'], async (recurringTransaction) => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.createRecurringTransaction(
+            recurringTransaction as CreateRecurringTransaction,
+        );
     });
 }
 

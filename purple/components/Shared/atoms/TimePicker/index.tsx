@@ -12,35 +12,31 @@ import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal
 
 const snapPoints = ['35%', '35%'];
 
-type DatePickerProps = {
+type TimePickerProps = {
     label?: string;
     onChange?: (date: Date) => void;
     pickerKey: string;
-    minimumDate?: Date;
-    maximumDate?: Date;
     value: Date;
 };
 
-export default function DatePicker({
-    label,
-    onChange,
-    pickerKey,
-    minimumDate,
-    maximumDate,
-    value,
-}: DatePickerProps) {
+export default function TimePicker({ label, onChange, pickerKey, value }: TimePickerProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
-    const handleDateChange = (_event: DateTimePickerEvent, pickedDate?: Date) => {
+    const handleTimeChange = (_event: DateTimePickerEvent, pickedDate?: Date) => {
         if (!pickedDate) return;
         if (typeof onChange === 'function') {
             onChange(pickedDate);
         }
     };
 
-    const formatDate = (date: Date) => {
-        if ((date as unknown as string) == 'Invalid Date') return 'Select a date';
-        return date.toDateString();
+    // format time like "2:30 PM"
+    const formatTime = (date: Date) => {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const normalizedHours = hours % 12 || 12;
+        const paddedMinutes = minutes.toString().padStart(2, '0');
+        return `${normalizedHours}:${paddedMinutes} ${ampm}`;
     };
 
     return (
@@ -65,13 +61,11 @@ export default function DatePicker({
                             </View>
                         )}
                         <DateTimePicker
-                            testID='datePicker'
+                            testID='timePicker'
                             value={value}
-                            mode='date'
-                            onChange={handleDateChange}
+                            mode='time'
+                            onChange={handleTimeChange}
                             display='spinner'
-                            minimumDate={minimumDate}
-                            maximumDate={maximumDate}
                         />
                     </View>
                 </CustomBottomSheetModal>
@@ -91,11 +85,9 @@ export default function DatePicker({
                         } else {
                             DateTimePickerAndroid.open({
                                 value,
-                                onChange: handleDateChange,
-                                mode: 'date',
-                                is24Hour: true,
-                                minimumDate,
-                                maximumDate,
+                                onChange: handleTimeChange,
+                                mode: 'time',
+                                is24Hour: false,
                             });
                         }
                     }}
@@ -106,7 +98,7 @@ export default function DatePicker({
                     </View>
 
                     <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
-                        {formatDate(value)}
+                        {formatTime(value)}
                     </Text>
                 </TouchableOpacity>
             </View>

@@ -135,6 +135,34 @@ const migrations: Migration[] = [
             WHERE id = NEW.id;
           END;`,
     },
+    {
+        version: 2,
+        sql: `
+          PRAGMA journal_mode = WAL;
+          CREATE TABLE IF NOT EXISTS recurring_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            amount NUMERIC NOT NULL,
+            category TEXT NOT NULL,
+            type TEXT NOT NULL,
+            account_id TEXT NOT NULL,
+            recurrence_rule TEXT NOT NULL,
+            start_date TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            end_date TEXT,
+            start_date_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            end_date_unix INTEGER,
+            metadata JSONB,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW'))
+          );
+          CREATE INDEX IF NOT EXISTS idx_scheduled_transaction_events_account_id ON scheduled_transaction_events(account_id);
+          CREATE INDEX IF NOT EXISTS idx_scheduled_transaction_events_start_date ON scheduled_transaction_events(start_date);
+          CREATE INDEX IF NOT EXISTS idx_scheduled_transaction_events_end_date ON scheduled_transaction_events(end_date);
+          CREATE INDEX IF NOT EXISTS idx_scheduled_transaction_events_status ON scheduled_transaction_events(status);
+        `,
+    },
 ];
 
 export default migrations;

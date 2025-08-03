@@ -2,8 +2,10 @@ import {
     AlertHexagonIcon,
     CashIcon,
     ClosedLockIcon,
+    FlaskIcon,
     PiggyBankIcon,
     SafeIcon,
+    UploadIcon,
 } from '@/components/SVG/icons/noscale';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
@@ -64,6 +66,12 @@ export default function ProfilePages() {
             title: 'Privacy & Security',
             link: '/settings/privacy-settings',
             description: 'Manage privacy & security settings',
+        },
+        {
+            icon: <FlaskIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Experimental Features',
+            link: '/settings/experimental',
+            description: 'Enable experimental features. Use with caution.',
         },
         {
             icon: <AlertHexagonIcon width={20} height={20} stroke={'#9333ea'} />,

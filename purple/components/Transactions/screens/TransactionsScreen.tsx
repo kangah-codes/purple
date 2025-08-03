@@ -16,6 +16,8 @@ import React, { memo, useEffect } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useInfiniteTransactions, useTransactionStore } from '../hooks';
+import { WalletIcon } from '@/components/SVG/icons/noscale';
+import AnimatedFAB from '@/components/Shared/molecules/AnimatedFAB';
 
 function TransactionsScreen() {
     const { transactions, setTransactions } = useTransactionStore();
@@ -35,6 +37,29 @@ function TransactionsScreen() {
             },
         },
     });
+
+    const fabOptions = [
+        {
+            renderContent: () => (
+                <View className='bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200'>
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-600'>
+                        Recurring Transaction
+                    </Text>
+                </View>
+            ),
+            onPress: () => router.push('/transactions/new-recurring-transaction'),
+        },
+        {
+            renderContent: () => (
+                <View className='bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200'>
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-600'>
+                        Regular Transaction
+                    </Text>
+                </View>
+            ),
+            onPress: () => router.push('/transactions/new-transaction'),
+        },
+    ];
 
     // reresh page on focus
     useRefreshOnFocus(refetch);
@@ -70,7 +95,7 @@ function TransactionsScreen() {
                     onEndReached={handleLoadMore}
                 />
             </ScrollView>
-            <LinearGradient
+            {/* <LinearGradient
                 className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
                 colors={['#c084fc', '#9333ea']}
             >
@@ -80,9 +105,31 @@ function TransactionsScreen() {
                         router.push('/transactions/new-transaction');
                     }}
                 >
-                    <PlusIcon stroke={'#fff'} />
+                    <PlusIcon stroke={'black'} />
                 </TouchableOpacity>
-            </LinearGradient>
+            </LinearGradient> */}
+            <AnimatedFAB
+                renderMainContent={() => (
+                    <LinearGradient
+                        className='rounded-full  justify-center items-center space-y-4'
+                        colors={['#c084fc', '#9333ea']}
+                    >
+                        <View
+                            className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
+                            // onPress={() => {
+                            //     router.push('/transactions/new-transaction');
+                            // }}
+                        >
+                            <PlusIcon stroke={'#fff'} />
+                        </View>
+                    </LinearGradient>
+                )}
+                // mainButtonColor='red' // purple-700
+                options={fabOptions}
+                position={{ right: 20, bottom: 20 }}
+                spacing={10} // Space between action buttons
+                animationDuration={100}
+            />
         </SafeAreaView>
     );
 }

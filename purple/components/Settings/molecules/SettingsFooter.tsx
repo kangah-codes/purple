@@ -17,63 +17,64 @@ export default function SettingsFooter() {
                     Purple v{pkg.version} {pkg.isBeta && 'beta'}
                 </Text>
             </View>
-            {process.env.NODE_ENV == 'development' && (
-                <>
-                    <TouchableOpacity
-                        className='items-center self-center justify-center px-4 mt-10'
-                        onPress={async () => {
-                            await setOnboarded(false);
-                            await destroySession();
-                        }}
-                    >
-                        <LinearGradient
-                            className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                            colors={['#F87171', '#DC2626']}
+            {process.env.NODE_ENV == 'development' ||
+                (true && (
+                    <>
+                        <TouchableOpacity
+                            className='items-center self-center justify-center px-4 mt-10'
+                            onPress={async () => {
+                                await setOnboarded(false);
+                                await destroySession();
+                            }}
                         >
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                            <LinearGradient
+                                className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                                colors={['#F87171', '#DC2626']}
                             >
-                                Reset App Cache
-                            </Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-white text-center'
+                                >
+                                    Reset App Cache
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        className='items-center self-center justify-center px-4 mt-2.5'
-                        onPress={flush}
-                    >
-                        <LinearGradient
-                            className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                            colors={['#497d00', '#3c6300']}
+                        <TouchableOpacity
+                            className='items-center self-center justify-center px-4 mt-2.5'
+                            onPress={flush}
                         >
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                            <LinearGradient
+                                className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                                colors={['#497d00', '#3c6300']}
                             >
-                                Flush Analytics
-                            </Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-white text-center'
+                                >
+                                    Flush Analytics
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        className='items-center self-center justify-center px-4 mt-2.5'
-                        onPress={flushQueue}
-                    >
-                        <LinearGradient
-                            className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                            colors={['#00a6f4', '#0069a8']}
+                        <TouchableOpacity
+                            className='items-center self-center justify-center px-4 mt-2.5'
+                            onPress={flushQueue}
                         >
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                            <LinearGradient
+                                className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                                colors={['#00a6f4', '#0069a8']}
                             >
-                                Clear Analytics
-                            </Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </>
-            )}
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-white text-center'
+                                >
+                                    Clear Analytics
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </>
+                ))}
         </View>
     );
 }
