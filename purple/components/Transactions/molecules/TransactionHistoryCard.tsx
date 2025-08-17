@@ -10,6 +10,7 @@ import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { useTransactionStore } from '../hooks';
 import { Transaction } from '../schema';
+import { getTransactionColour } from '../utils';
 
 type TransactionHistoryCardProps = {
     data: Transaction;
@@ -32,16 +33,6 @@ export default function TransactionHistoryCard({
             params: { update: 'true' },
         });
     }, []);
-    const getTransactionColour = (type: Transaction['type']) => {
-        switch (type) {
-            case 'debit':
-                return '#e7000b';
-            case 'credit':
-                return '#00a63e';
-            case 'transfer':
-                return '#9810fa';
-        }
-    };
 
     return (
         <TouchableOpacity

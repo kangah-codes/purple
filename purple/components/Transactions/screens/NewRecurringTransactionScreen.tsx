@@ -83,18 +83,6 @@ export default function NewRecurringTransactionScreen() {
             start_date: new Date().toISOString(),
             end_date: undefined,
         },
-        // id,
-        // created_at,
-        // updated_at,
-        // account_id,
-        // type,
-        // amount,
-        // category,
-        // recurrence_rule,
-        // start_date,
-        // end_date,
-        // status,
-        // metadata,
     });
 
     const transactionTypes = useMemo(
@@ -190,7 +178,7 @@ export default function NewRecurringTransactionScreen() {
                 });
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
+                queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Transaction created successfully' },
@@ -275,6 +263,13 @@ export default function NewRecurringTransactionScreen() {
                                 control={control}
                                 rules={{
                                     required: "Amount can't be empty",
+                                    validate: (value) => {
+                                        const numValue = Number(value);
+                                        if (isNaN(numValue) || numValue <= 0) {
+                                            return 'Amount must be a positive number';
+                                        }
+                                        return true;
+                                    },
                                 }}
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <InputField
@@ -552,7 +547,8 @@ export default function NewRecurringTransactionScreen() {
                                     }}
                                     // selectedDate={value}
                                     // make maximim date today
-                                    maximumDate={new Date()}
+                                    minimumDate={new Date()}
+                                    // @ts-expect-error
                                     value={new Date(value)}
                                 />
                             )}
@@ -568,19 +564,24 @@ export default function NewRecurringTransactionScreen() {
                         )}
                     </View>
 
-                    <View className='flex flex-col space-y-1'>
+                    {/* <View className='flex flex-col space-y-1'>
                         <Controller
                             control={control}
+                            rules={{
+                                required: "Date can't be empty",
+                            }}
                             render={({ field: { onChange, value } }) => (
                                 <DatePicker
                                     label='End Date'
-                                    pickerKey='newTransactionStartDate'
+                                    pickerKey='newTransactionEndDate'
                                     onChange={(date) => {
                                         // format "2006-01-02T15:04:05.000Z"
                                         onChange(date.toISOString());
                                     }}
                                     // selectedDate={value}
                                     // make maximim date today
+                                    minimumDate={new Date()}
+                                    // @ts-expect-error
                                     value={new Date(value)}
                                 />
                             )}
@@ -594,7 +595,37 @@ export default function NewRecurringTransactionScreen() {
                                 {errors.end_date.message}
                             </Text>
                         )}
-                    </View>
+                    </View> */}
+
+                    {/* <View className='flex flex-col space-y-1'>
+                        <Controller
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <DatePicker
+                                    label='End Date'
+                                    pickerKey='newTransactionEndDate'
+                                    onChange={(date) => {
+                                        // format "2006-01-02T15:04:05.000Z"
+                                        onChange(date.toISOString());
+                                    }}
+                                    // selectedDate={value}
+                                    // make maximim date today
+                                    // @ts-expect-error
+                                    value={new Date(value)}
+                                    maximumDate={new Date()}
+                                />
+                            )}
+                            name='end_date'
+                        />
+                        {errors.end_date && (
+                            <Text
+                                style={satoshiFont.satoshiMedium}
+                                className='text-xs text-red-500'
+                            >
+                                {errors.end_date.message}
+                            </Text>
+                        )}
+                    </View> */}
 
                     <View className='h-1 border-b border-purple-100 w-full' />
 

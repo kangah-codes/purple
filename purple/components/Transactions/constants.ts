@@ -30,6 +30,16 @@ export const DAYS_OF_WEEK = [
     { label: 'Saturday', value: '6' },
 ];
 
+export const WEEKDAY_MAP: Record<string, string> = {
+    Sunday: 'SU',
+    Monday: 'MO',
+    Tuesday: 'TU',
+    Wednesday: 'WE',
+    Thursday: 'TH',
+    Friday: 'FR',
+    Saturday: 'SA',
+};
+
 export const DAYS_OF_MONTH = Array.from({ length: 31 }, (_, i) => {
     const day = i + 1;
     return {

@@ -33,23 +33,26 @@ export type RecurringTransaction = {
     id: string;
     amount: number;
     category: string;
+    type: 'debit' | 'credit';
     account_id: string;
     recurrence_rule: string;
     is_active: boolean;
     start_date: string;
     end_date: string;
     create_next_at: string;
+    create_next_at_unix: number;
     last_created_at: string;
+    last_created_at_unix: number | null;
+    start_date_unix: number;
+    end_date_unix: number | null;
     metadata: Record<string, any>;
     status: 'active' | 'paused' | 'cancelled';
     created_at: string;
     updated_at: string;
     deleted_at: string;
-    created_at_unix: string;
-    updated_at_unix: string;
-    deleted_at_unix: string | null;
-    create_next_at_unix: string;
-    last_created_at_unix: string;
+    created_at_unix: number;
+    updated_at_unix: number;
+    deleted_at_unix: number | null;
 };
 
 export type CreateTransaction = {

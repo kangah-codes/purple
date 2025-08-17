@@ -80,7 +80,52 @@ const migrations: Migration[] = [
             plan_id TEXT,
             PRIMARY KEY (id)
           );
-          CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);`,
+          CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);
+          CREATE TRIGGER IF NOT EXISTS trg_after_insert_debit
+          AFTER INSERT ON transactions
+          WHEN NEW.type = 'debit'
+          BEGIN
+              UPDATE accounts
+              SET balance = balance - NEW.amount
+              WHERE id = NEW.account_id;
+          END;
+          CREATE TRIGGER IF NOT EXISTS trg_after_insert_credit
+          AFTER INSERT ON transactions
+          WHEN NEW.type = 'credit'
+          BEGIN
+              UPDATE accounts
+              SET balance = balance + NEW.amount
+              WHERE id = NEW.account_id;
+          END;
+          CREATE TRIGGER IF NOT EXISTS trg_after_update_transaction
+          AFTER UPDATE ON transactions
+          BEGIN
+              -- Reverse old balance
+              UPDATE accounts
+              SET balance = CASE OLD.type
+                  WHEN 'debit' THEN balance + OLD.amount
+                  WHEN 'credit' THEN balance - OLD.amount
+              END
+              WHERE id = OLD.account_id;
+
+              -- Apply new balance
+              UPDATE accounts
+              SET balance = CASE NEW.type
+                  WHEN 'debit' THEN balance - NEW.amount
+                  WHEN 'credit' THEN balance + NEW.amount
+              END
+              WHERE id = NEW.account_id;
+          END;
+          CREATE TRIGGER IF NOT EXISTS trg_after_delete_transaction
+          AFTER DELETE ON transactions
+          BEGIN
+              UPDATE accounts
+              SET balance = CASE OLD.type
+                  WHEN 'debit' THEN balance + OLD.amount
+                  WHEN 'credit' THEN balance - OLD.amount
+              END
+              WHERE id = OLD.account_id;
+          END;`,
     },
     {
         version: 1,
@@ -120,6 +165,10 @@ const migrations: Migration[] = [
             end_date_unix INTEGER,
             metadata JSONB,
             status TEXT NOT NULL DEFAULT 'active',
+            create_next_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            last_created_at TEXT,
+            create_next_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            last_created_at_unix INTEGER,
             created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
             updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
             created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),

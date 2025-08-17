@@ -9,6 +9,7 @@ import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import 'expo-dev-client';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,9 +17,7 @@ import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useCallback, useState } from 'react';
 import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -43,6 +42,12 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 LogBox.ignoreAllLogs(true);
+
+// disable error logging in development
+if (__DEV__) {
+    console.error = () => {};
+    console.warn = () => {};
+}
 
 export default Sentry.wrap(function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);
@@ -69,6 +74,7 @@ export default Sentry.wrap(function RootLayout() {
                     syncEveryMs: 180000,
                     batchSize: 25,
                 }}
+                disabled
                 autoFlushOnBackground={true}
             >
                 <AppQueryClientProvider>

@@ -1,12 +1,6 @@
 import { PlusIcon } from '@/components/SVG/icons/24x24';
-import {
-    LinearGradient,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from '@/components/Shared/styled';
+import AnimatedFAB from '@/components/Shared/molecules/AnimatedFAB';
+import { LinearGradient, SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
 import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
@@ -15,12 +9,9 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useEffect } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useInfiniteTransactions, useTransactionStore } from '../hooks';
-import { DotsHorizontalIcon, WalletIcon } from '@/components/SVG/icons/noscale';
-import AnimatedFAB from '@/components/Shared/molecules/AnimatedFAB';
-import { DotsVerticalIcon } from '@/components/SVG/icons/16x16';
-import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
+import { useInfiniteTransactions, useRecurringTransactions, useTransactionStore } from '../hooks';
 import RecurringTransactionsWidget from '../molecules/RecurringTransactionsWidget';
+import { lastDayOfMonth, startOfMonth } from 'date-fns';
 
 function TransactionsScreen() {
     const { transactions, setTransactions } = useTransactionStore();
@@ -88,10 +79,6 @@ function TransactionsScreen() {
                 <Text style={satoshiFont.satoshiBlack} className='text-lg'>
                     My Transactions
                 </Text>
-
-                <TouchableOpacity onPress={() => router.push('/transactions/recurring')}>
-                    <DotsHorizontalIcon width={24} height={24} stroke={'#ad46ff'} />
-                </TouchableOpacity>
             </View>
             <ScrollView
                 refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
@@ -105,36 +92,17 @@ function TransactionsScreen() {
                     onEndReached={handleLoadMore}
                 />
             </ScrollView>
-            {/* <LinearGradient
-                className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={() => {
-                        router.push('/transactions/new-transaction');
-                    }}
-                >
-                    <PlusIcon stroke={'black'} />
-                </TouchableOpacity>
-            </LinearGradient> */}
             <AnimatedFAB
                 renderMainContent={() => (
                     <LinearGradient
                         className='rounded-full  justify-center items-center space-y-4'
                         colors={['#c084fc', '#9333ea']}
                     >
-                        <View
-                            className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                            // onPress={() => {
-                            //     router.push('/transactions/new-transaction');
-                            // }}
-                        >
+                        <View className='items-center w-[55px] h-[55px] justify-center rounded-full p-3'>
                             <PlusIcon stroke={'#fff'} />
                         </View>
                     </LinearGradient>
                 )}
-                // mainButtonColor='red' // purple-700
                 options={fabOptions}
                 style={{ right: 20, bottom: 20 }}
                 spacing={10} // Space between action buttons

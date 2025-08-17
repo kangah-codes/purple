@@ -1,5 +1,6 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
 import { useSQLiteContext } from 'expo-sqlite';
 import {
     UseInfiniteQueryOptions,
@@ -20,21 +21,30 @@ import {
     Transaction,
 } from './schema';
 import { createTransactionStore } from './state';
-import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
 
 export function useTransactionStore() {
     const [
         transactions,
+        recurringTransactions,
         setTransactions,
+        setRecurringTransactions,
         currentTransaction,
+        currentRecurringTransaction,
         setCurrentTransaction,
+        setCurrentRecurringTransaction,
         updateTransactions,
+        updateRecurringTransactions,
     ] = useStore(createTransactionStore, (state) => [
         state.transactions,
+        state.recurringTransactions,
         state.setTransactions,
+        state.setRecurringTransactions,
         state.currentTransaction,
+        state.currentRecurringTransaction,
         state.setCurrentTransaction,
+        state.setCurrentRecurringTransaction,
         state.updateTransactions,
+        state.updateRecurringTransactions,
     ]);
 
     return {
@@ -43,6 +53,12 @@ export function useTransactionStore() {
         currentTransaction,
         setCurrentTransaction,
         updateTransactions,
+
+        recurringTransactions,
+        setRecurringTransactions,
+        currentRecurringTransaction,
+        setCurrentRecurringTransaction,
+        updateRecurringTransactions,
     };
 }
 
@@ -61,6 +77,40 @@ export function useTransactions({
         async () => {
             const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
             return service.list(requestQuery);
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+        },
+    );
+}
+
+export function useRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: {
+        startDate: Date;
+        endDate: Date;
+        n: number;
+    };
+    options?: UseQueryOptions;
+}): UseQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useQuery(
+        ['recurring-transactions', requestQuery],
+        async () => {
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+            // @ts-expect-error: listUpcomingRecurringTransactions exists on TransactionSQLiteService
+            return service.listUpcomingRecurringTransactions(
+                requestQuery.startDate,
+                requestQuery.endDate,
+                requestQuery.n,
+            );
         },
         {
             ...(options as Omit<

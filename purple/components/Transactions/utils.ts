@@ -92,3 +92,14 @@ export function generateICalRRule(
 
     return `RRULE:${parts.join(';')}`;
 }
+
+export function getTransactionColour(type: Transaction['type']) {
+    switch (type) {
+        case 'debit':
+            return '#e7000b';
+        case 'credit':
+            return '#00a63e';
+        case 'transfer':
+            return '#9810fa';
+    }
+}

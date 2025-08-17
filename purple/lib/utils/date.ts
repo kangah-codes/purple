@@ -156,3 +156,7 @@ export function getDateRange(period: TimePeriod): DateRange {
         endDate,
     };
 }
+
+export function dateToUNIX(date: Date): number {
+    return Math.floor(date.getTime() / 1000);
+}

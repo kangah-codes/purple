@@ -70,6 +70,7 @@
         "react-native-uuid": "^2.0.3",
         "react-native-web": "~0.19.6",
         "react-query": "^3.39.3",
+        "rrule": "^2.8.1",
         "twrnc": "^4.2.0",
         "zustand": "^4.5.1"
     },

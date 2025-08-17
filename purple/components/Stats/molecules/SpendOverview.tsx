@@ -70,12 +70,11 @@ function SegmentedBar({
     );
 }
 
-export default function SpendOverview() {
+export default function SpendOverview({ transactions }: SpendOverviewProps) {
     const {
         preferences: { currency },
     } = usePreferences();
 
-    const transactions = mockTransactions;
     const { totalDebits, totalCredits, creditSlices, debitSlices } = useMemo(() => {
         const debitMap: Record<string, number> = {};
         const creditMap: Record<string, number> = {};
@@ -99,7 +98,7 @@ export default function SpendOverview() {
                 category,
                 amount,
                 percent: total === 0 ? 0 : (amount / total) * 100,
-                color: generatePalette(`${category} ${category}`).color500,
+                color: generatePalette(`${category}`).color500,
             }));
         };
 
@@ -122,7 +121,6 @@ export default function SpendOverview() {
     ) => {
         const maxItems = 6;
         const showToggle = slices.length > maxItems;
-
         const displaySlices = expanded ? slices : slices.slice(0, maxItems);
 
         return (
@@ -133,22 +131,16 @@ export default function SpendOverview() {
                         return (
                             <View
                                 key={slice.category}
-                                className='flex-row items-center mb-2 space-x-0.5'
+                                className='flex-row items-center mb-2 space-x-1'
                                 style={{ maxWidth: '48%', marginRight: 10 }}
                             >
                                 <View
                                     className='w-2 h-2 rounded-full'
                                     style={{ backgroundColor: slice.color }}
                                 />
-                                <Text
-                                    style={satoshiFont.satoshiBold}
-                                    className='text-xs text-black ml-1.5'
-                                >
+                                <Text style={[satoshiFont.satoshiBold]} className='text-xs ml-1.5'>
                                     {slice.category.slice(3)}{' '}
-                                    <Text
-                                        style={satoshiFont.satoshiBlack}
-                                        className='text-xs text-purple-600'
-                                    >
+                                    <Text style={[satoshiFont.satoshiBlack]} className='text-xs'>
                                         {percent}%
                                     </Text>
                                 </Text>
@@ -183,7 +175,7 @@ export default function SpendOverview() {
                     </Text>
                 </View>
                 <View>
-                    <Text style={satoshiFont.satoshiBlack} className='text-xl text-black'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black'>
                         {formatCurrencyRounded(totalCredits, currency)}
                     </Text>
                 </View>
@@ -209,7 +201,7 @@ export default function SpendOverview() {
                     </Text>
                 </View>
                 <View>
-                    <Text style={satoshiFont.satoshiBlack} className='text-xl text-black'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black'>
                         {formatCurrencyRounded(totalDebits, currency)}
                     </Text>
                 </View>

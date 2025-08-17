@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
-import { useAnalytics } from './useAnalytics';
+import { useAnalyticsCore } from './useAnalyticsCore';
 
 let globalListener: NativeEventSubscription | null = null;
 let listenerCount = 0;
@@ -9,7 +9,7 @@ export function useAppLifecycleEvents() {
     const appState = useRef<AppStateStatus>(AppState.currentState);
     const sessionStartTime = useRef<number | null>(null);
     const currentScreen = useRef<string>('');
-    const { logEvent } = useAnalytics();
+    const { logEvent } = useAnalyticsCore();
 
     useEffect(() => {
         listenerCount++;
