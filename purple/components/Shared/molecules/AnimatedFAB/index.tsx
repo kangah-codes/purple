@@ -6,17 +6,9 @@ interface FABOption {
     onPress?: () => void;
 }
 
-interface Position {
-    right?: number;
-    left?: number;
-    top?: number;
-    bottom?: number;
-}
-
 interface AnimatedFABProps {
     renderMainContent: () => React.ReactNode;
     options?: FABOption[];
-    position: Position;
     spacing?: number;
     animationDuration?: number;
     style?: ViewStyle;
@@ -24,7 +16,6 @@ interface AnimatedFABProps {
 
 const AnimatedFAB: React.FC<AnimatedFABProps> = ({
     renderMainContent,
-    position,
     options = [],
     spacing = 12,
     animationDuration = 200,
@@ -122,7 +113,7 @@ const AnimatedFAB: React.FC<AnimatedFABProps> = ({
                 />
             )}
 
-            <View style={[styles.container, position, style]} pointerEvents='box-none'>
+            <View style={[styles.container, style]} pointerEvents='box-none'>
                 {/* Action Buttons */}
                 {isMenuOpen && (
                     <View style={[styles.optionsContainer, { marginBottom: spacing }]}>

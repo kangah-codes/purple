@@ -338,19 +338,26 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
+    /**
+     *
+     *
+     * {"account_id": "bb4b0d0d-37ef-4b4c-ba99-f3f9bd25e6e1", "amount": 423, "category": "🚗 Transport",
+     * "dayOfMonth": undefined, "dayOfWeek": undefined, "end_date": undefined, "frequency": "daily",
+     * "note": "", "recurrence_rule": "RRULE:FREQ=DAILY;BYHOUR=21;BYMINUTE=32",
+     * "start_date": "2025-08-16T21:32:07.113Z", "time": "2025-08-16T21:32:07.113Z", "type": "debit"}
+     */
+
     async createRecurringTransaction(
         data: CreateRecurringTransaction,
     ): Promise<GenericAPIResponse<RecurringTransaction>> {
         const now = new Date().toISOString();
         const uuid = UUID();
 
-        console.log('Creating recurring transaction:', data);
-
         await this.db.runAsync(
             `INSERT INTO recurring_transactions
-                (id, created_at, updated_at, account_id, type, amount, category,
-                 recurrence_rule, start_date, end_date, status, metadata)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (id, created_at, updated_at, account_id, type, amount, category, recurrence_rule, start_date, end_date, status, metadata) 
+            VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 uuid,
                 now,

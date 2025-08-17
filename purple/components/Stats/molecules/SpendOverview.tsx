@@ -1,55 +1,229 @@
 import { usePreferences } from '@/components/Settings/hooks';
-import { Text, View } from '@/components/Shared/styled';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { generatePalette } from '@/lib/utils/colour';
+import { mockTransactions } from '../contants';
+import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
 
 type SpendOverviewProps = {
     transactions: Transaction[];
 };
 
-export default function SpendOverview({ transactions }: SpendOverviewProps) {
+type CategorySlice = {
+    category: string;
+    amount: number;
+    percent: number;
+    color: string;
+};
+
+function SegmentedBar({
+    slices,
+    emptyColor = '#E9D8FD',
+    height = 8,
+    radius = 8,
+}: {
+    slices: CategorySlice[];
+    emptyColor?: string;
+    height?: number;
+    radius?: number;
+}) {
+    const hasData = slices.reduce((sum, s) => sum + s.amount, 0) > 0;
+
+    if (!hasData) {
+        return (
+            <View
+                className='w-full'
+                style={{
+                    height,
+                    borderRadius: radius,
+                    backgroundColor: emptyColor,
+                }}
+            />
+        );
+    }
+
+    return (
+        <View
+            className='w-full flex-row overflow-hidden space-x-0.5'
+            style={{ height, borderRadius: radius }}
+        >
+            {slices.map((slice) => {
+                return (
+                    <View
+                        key={slice.category}
+                        style={[
+                            {
+                                width: `${slice.percent}%`,
+                                backgroundColor: slice.color,
+                                height,
+                            },
+                        ]}
+                        className='rounded-full'
+                    />
+                );
+            })}
+        </View>
+    );
+}
+
+export default function SpendOverview() {
     const {
         preferences: { currency },
     } = usePreferences();
-    const { totalDebits, totalCredits } = useMemo(() => {
-        const totals = transactions.reduce(
-            (acc, tx) => {
-                if (tx.type === 'debit') {
-                    acc.totalDebits += tx.amount;
-                } else if (tx.type === 'credit') {
-                    acc.totalCredits += tx.amount;
-                }
-                return acc;
-            },
-            { totalDebits: 0, totalCredits: 0 },
-        );
 
-        return totals;
+    const transactions = mockTransactions;
+    const { totalDebits, totalCredits, creditSlices, debitSlices } = useMemo(() => {
+        const debitMap: Record<string, number> = {};
+        const creditMap: Record<string, number> = {};
+        let totalDebits = 0;
+        let totalCredits = 0;
+
+        for (const tx of transactions) {
+            if (!tx?.amount || !tx?.type || !tx?.category) continue;
+            if (tx.type === 'debit') {
+                totalDebits += tx.amount;
+                debitMap[tx.category] = (debitMap[tx.category] || 0) + tx.amount;
+            } else if (tx.type === 'credit') {
+                totalCredits += tx.amount;
+                creditMap[tx.category] = (creditMap[tx.category] || 0) + tx.amount;
+            }
+        }
+
+        const toSlices = (map: Record<string, number>, total: number): CategorySlice[] => {
+            const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+            return entries.map(([category, amount]) => ({
+                category,
+                amount,
+                percent: total === 0 ? 0 : (amount / total) * 100,
+                color: generatePalette(`${category} ${category}`).color500,
+            }));
+        };
+
+        return {
+            totalDebits,
+            totalCredits,
+            creditSlices: toSlices(creditMap, totalCredits),
+            debitSlices: toSlices(debitMap, totalDebits),
+        };
     }, [transactions]);
 
+    const [expandedCreditLegend, setExpandedCreditLegend] = useState(false);
+    const [expandedDebitLegend, setExpandedDebitLegend] = useState(false);
+
+    const renderLegend = (
+        slices: CategorySlice[],
+        total: number,
+        expanded: boolean,
+        setExpanded: (v: boolean) => void,
+    ) => {
+        const maxItems = 6;
+        const showToggle = slices.length > maxItems;
+
+        const displaySlices = expanded ? slices : slices.slice(0, maxItems);
+
+        return (
+            <View className='flex flex-col'>
+                <View className='flex flex-row flex-wrap'>
+                    {displaySlices.map((slice) => {
+                        const percent = total === 0 ? 0 : Math.round((slice.amount / total) * 100);
+                        return (
+                            <View
+                                key={slice.category}
+                                className='flex-row items-center mb-2 space-x-0.5'
+                                style={{ maxWidth: '48%', marginRight: 10 }}
+                            >
+                                <View
+                                    className='w-2 h-2 rounded-full'
+                                    style={{ backgroundColor: slice.color }}
+                                />
+                                <Text
+                                    style={satoshiFont.satoshiBold}
+                                    className='text-xs text-black ml-1.5'
+                                >
+                                    {slice.category.slice(3)}{' '}
+                                    <Text
+                                        style={satoshiFont.satoshiBlack}
+                                        className='text-xs text-purple-600'
+                                    >
+                                        {percent}%
+                                    </Text>
+                                </Text>
+                            </View>
+                        );
+                    })}
+                </View>
+
+                {showToggle && (
+                    <TouchableOpacity
+                        onPress={() => setExpanded(!expanded)}
+                        className='flex flex-row'
+                    >
+                        <Text
+                            style={satoshiFont.satoshiBold}
+                            className='text-xs text-purple-600 mr-1'
+                        >
+                            {expanded ? 'Show less' : 'Show more'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    };
+
     return (
-        <View className='flex flex-col px-5'>
-            <View className='flex flex-row space-x-2.5'>
-                <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
-                        Total Income
+        <View className='flex flex-col p-5 space-y-5'>
+            <View className='flex flex-col space-y-2.5'>
+                <View>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
+                        Income
                     </Text>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-green-600'>
+                </View>
+                <View>
+                    <Text style={satoshiFont.satoshiBlack} className='text-xl text-black'>
                         {formatCurrencyRounded(totalCredits, currency)}
                     </Text>
                 </View>
 
-                <View className='flex-1 flex-col p-5 bg-purple-50 rounded-3xl'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-purple-500'>
-                        Total Expenses
+                <View>
+                    <SegmentedBar slices={creditSlices} />
+                </View>
+
+                {renderLegend(
+                    creditSlices,
+                    totalCredits,
+                    expandedCreditLegend,
+                    setExpandedCreditLegend,
+                )}
+            </View>
+
+            <View className='h-[1px] border-b border-purple-100' />
+
+            <View className='flex flex-col space-y-2.5'>
+                <View>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
+                        Expenses
                     </Text>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-xl text-red-600'>
+                </View>
+                <View>
+                    <Text style={satoshiFont.satoshiBlack} className='text-xl text-black'>
                         {formatCurrencyRounded(totalDebits, currency)}
                     </Text>
                 </View>
+
+                <View>
+                    <SegmentedBar slices={debitSlices} />
+                </View>
+
+                {renderLegend(
+                    debitSlices,
+                    totalDebits,
+                    expandedDebitLegend,
+                    setExpandedDebitLegend,
+                )}
             </View>
         </View>
     );

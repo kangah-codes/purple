@@ -176,8 +176,6 @@ export default function NewRecurringTransactionScreen() {
         );
 
         let transformedData = transformObject(data, [
-            // ['toAccount', 'to_account'],
-            // ['fromAccount', 'from_account'],
             ['accountId', 'account_id'],
             ['amount', 'amount', (value) => Number(value)],
             ['recurrence_rule', 'recurrence_rule', () => rrule],

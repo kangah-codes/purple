@@ -36,8 +36,8 @@ export default function SpendOverviewPieChart({ transactions }: SpendOverviewPie
     const byCurrency = groupByCurrency(transactions);
 
     return (
-        <View className='px-5'>
-            <View className='p-5 rounded-3xl flex flex-col space-y-2.5 bg-purple-50 border border-purple-200'>
+        <View className='px-5 mb-5'>
+            <View className='flex flex-col space-y-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Spend Breakdown
                 </Text>

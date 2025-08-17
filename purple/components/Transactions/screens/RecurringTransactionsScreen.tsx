@@ -1,4 +1,4 @@
-import { PlusIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/icons/24x24';
 import {
     LinearGradient,
     SafeAreaView,
@@ -20,9 +20,8 @@ import { DotsHorizontalIcon, WalletIcon } from '@/components/SVG/icons/noscale';
 import AnimatedFAB from '@/components/Shared/molecules/AnimatedFAB';
 import { DotsVerticalIcon } from '@/components/SVG/icons/16x16';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
-import RecurringTransactionsWidget from '../molecules/RecurringTransactionsWidget';
 
-function TransactionsScreen() {
+function RecurringTransactionsScreen() {
     const { transactions, setTransactions } = useTransactionStore();
     const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
         requestQuery: {
@@ -52,16 +51,6 @@ function TransactionsScreen() {
             ),
             onPress: () => router.push('/transactions/new-recurring-transaction'),
         },
-        {
-            renderContent: () => (
-                <View className='bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200'>
-                    <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-600'>
-                        Regular Transaction
-                    </Text>
-                </View>
-            ),
-            onPress: () => router.push('/transactions/new-transaction'),
-        },
     ];
 
     // reresh page on focus
@@ -84,40 +73,29 @@ function TransactionsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <View className='w-full flex flex-row py-2.5 justify-between items-center px-5'>
-                <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                    My Transactions
-                </Text>
-
-                <TouchableOpacity onPress={() => router.push('/transactions/recurring')}>
-                    <DotsHorizontalIcon width={24} height={24} stroke={'#ad46ff'} />
+            <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+                <TouchableOpacity
+                    onPress={router.back}
+                    className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'
+                >
+                    <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                 </TouchableOpacity>
+
+                <View className='absolute left-0 right-0 items-center'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                        Recurring Transactions
+                    </Text>
+                </View>
             </View>
             <ScrollView
                 refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
             >
-                <View className='px-5 mb-5'>
-                    <RecurringTransactionsWidget />
-                </View>
                 <TransactionsAccordion
                     showTitle={false}
                     transactions={transactions}
                     onEndReached={handleLoadMore}
                 />
             </ScrollView>
-            {/* <LinearGradient
-                className='rounded-full  justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={() => {
-                        router.push('/transactions/new-transaction');
-                    }}
-                >
-                    <PlusIcon stroke={'black'} />
-                </TouchableOpacity>
-            </LinearGradient> */}
             <AnimatedFAB
                 renderMainContent={() => (
                     <LinearGradient
@@ -154,4 +132,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default memo(TransactionsScreen);
+export default memo(RecurringTransactionsScreen);
