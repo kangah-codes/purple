@@ -6,7 +6,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { Transaction } from '@/components/Transactions/schema';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import TransactionCard from '@/components/Transactions/molecules/TransactionCard';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
@@ -26,7 +26,7 @@ export default function AccountTransactionsList({
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
-            <TransactionHistoryCard
+            <TransactionCard
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);

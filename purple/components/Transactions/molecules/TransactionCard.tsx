@@ -12,17 +12,13 @@ import { useTransactionStore } from '../hooks';
 import { Transaction } from '../schema';
 import { getTransactionColour } from '../utils';
 
-type TransactionHistoryCardProps = {
+type TransactionCardProps = {
     data: Transaction;
     onPress: () => void;
     showTitle?: boolean;
 };
 
-export default function TransactionHistoryCard({
-    data,
-    onPress,
-    showTitle = true,
-}: TransactionHistoryCardProps) {
+export default function TransactionCard({ data, onPress, showTitle = true }: TransactionCardProps) {
     const { setCurrentTransaction, currentTransaction } = useTransactionStore();
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
     const showActionMenu = useCallback(() => {

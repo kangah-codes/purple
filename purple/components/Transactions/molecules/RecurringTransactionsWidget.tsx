@@ -19,6 +19,8 @@ import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useRecurringTransactions } from '../hooks';
 import { getTransactionColour } from '../utils';
+import RecurringTransactionCard from './UpcomingTransactionCard';
+import UpcomingTransactionCard from './UpcomingTransactionCard';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -51,8 +53,6 @@ export default function RecurringTransactionsWidget() {
         },
     });
 
-    console.log(data);
-
     const transactions = useMemo(() => {
         const txs = (data?.data ?? []).map((transaction) => ({
             ...transaction,
@@ -61,9 +61,10 @@ export default function RecurringTransactionsWidget() {
         const sorted = txs.sort(
             (a, b) => new Date(a.create_next_at).getTime() - new Date(b.create_next_at).getTime(),
         );
+        const upcoming = sorted.filter((tx) => new Date(tx.create_next_at) >= new Date());
         return {
             transactions: sorted,
-            slicedTransactions: sorted.slice(0, 5),
+            slicedTransactions: upcoming.slice(0, 3), // show only the next 3 upcoming transactions
         };
     }, [data]);
 
@@ -91,7 +92,7 @@ export default function RecurringTransactionsWidget() {
                     className='flex items-center justify-center'
                 >
                     {hasTransactions && new Date(data.key) < now && (
-                        <CheckMarkIcon stroke='#fff' width={16} height={16} />
+                        <CheckMarkIcon stroke='#fff' width={16} height={16} strokeWidth={3} />
                     )}
                 </LinearGradient>
             );
@@ -105,8 +106,8 @@ export default function RecurringTransactionsWidget() {
         <View className='w-full space-y-5 flex flex-col'>
             <View className='flex flex-row w-full justify-between'>
                 <View className='w-[38%] flex flex-col justify-between items-start'>
-                    <View className='px-2 py-0.5 flex items-center justify-center border border-purple-100 rounded-full'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-600'>
+                    <View className='bg-purple-50 px-2 py-1 rounded-full'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
                             This month
                         </Text>
                     </View>
@@ -141,60 +142,7 @@ export default function RecurringTransactionsWidget() {
 
                 <View className='flex flex-col space-y-2'>
                     {transactions.slicedTransactions.map((transaction, index) => {
-                        const nextDate = new Date(transaction.create_next_at);
-                        return (
-                            <TouchableOpacity
-                                key={transaction.id}
-                                className='flex flex-row items-center justify-between space-x-2'
-                            >
-                                <View className='flex flex-row items-center space-x-2'>
-                                    <View className='flex flex-col p-2.5 bg-purple-50 rounded-xl items-center'>
-                                        <Text
-                                            style={satoshiFont.satoshiBold}
-                                            className='text-xs text-purple-500'
-                                        >
-                                            {format(nextDate, 'MMM')}
-                                        </Text>
-                                        <Text
-                                            style={satoshiFont.satoshiBlack}
-                                            className='text-sm text-purple-600'
-                                        >
-                                            {format(nextDate, 'dd')}
-                                        </Text>
-                                    </View>
-                                    <View className='flex flex-col'>
-                                        <Text style={satoshiFont.satoshiBlack} className='text-sm'>
-                                            {transaction.category}
-                                        </Text>
-                                        <Text
-                                            style={satoshiFont.satoshiBold}
-                                            className='text-xs text-purple-500'
-                                        >
-                                            {format(nextDate, 'hh:mm a')}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                <View className='flex flex-row space-x-2 items-center'>
-                                    <Text
-                                        style={[
-                                            satoshiFont.satoshiBlack,
-                                            { color: getTransactionColour(transaction.type) },
-                                        ]}
-                                        className='text-sm'
-                                    >
-                                        {transaction.type === 'debit'
-                                            ? '-'
-                                            : transaction.type === 'credit'
-                                            ? '+'
-                                            : ''}
-                                        {formatCurrencyRounded(transaction.amount, 'GHS')}
-                                    </Text>
-
-                                    <ChevronRightIcon stroke='#9333ea' />
-                                </View>
-                            </TouchableOpacity>
-                        );
+                        return <UpcomingTransactionCard transaction={transaction} key={index} />;
                     })}
                 </View>
             </View>

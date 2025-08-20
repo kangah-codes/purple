@@ -2,17 +2,17 @@ import {
     AlertHexagonIcon,
     CashIcon,
     ClosedLockIcon,
+    CoinSwapIcon,
     FlaskIcon,
     PiggyBankIcon,
     SafeIcon,
-    UploadIcon,
 } from '@/components/SVG/icons/noscale';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
 import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
-import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
 import SettingsFooter from './SettingsFooter';
@@ -54,6 +54,12 @@ export default function ProfilePages() {
             title: 'Plans',
             link: '/settings/plan-settings',
             description: 'Manage plan settings',
+        },
+        {
+            icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Transactions',
+            link: '/settings/transactions',
+            description: 'Manage transaction settings',
         },
         {
             icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,

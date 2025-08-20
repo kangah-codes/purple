@@ -7,13 +7,13 @@ import { FlashList } from '@shopify/flash-list';
 import React, { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 import { usePlanStore } from '../hooks';
-import PlanTransactionHistoryCard from '../molecules/PlanTransactionHistoryCard';
+import PlanTransactionCard from '../molecules/PlanTransactionCard';
 
 export default function PlanTransactionsList() {
     const { currentPlan } = usePlanStore();
 
     const renderItem = useCallback(
-        ({ item }: { item: Transaction }) => <PlanTransactionHistoryCard data={item} />,
+        ({ item }: { item: Transaction }) => <PlanTransactionCard data={item} />,
         [],
     );
     const renderEmptylist = useCallback(

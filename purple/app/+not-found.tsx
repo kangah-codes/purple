@@ -3,7 +3,6 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import tw from 'twrnc';
 
 export default function NotFoundScreen() {
@@ -26,12 +25,7 @@ export default function NotFoundScreen() {
                         The page you're looking for doesn't exist or has been moved.
                     </Text>
                 </View>
-                <TouchableOpacity
-                    className='w-full'
-                    onPress={() => {
-                        router.push('/');
-                    }}
-                >
+                <TouchableOpacity className='w-full' onPress={router.back}>
                     <LinearGradient
                         className='flex items-center justify-center rounded-full px-5 py-2.5 h-12'
                         colors={['#c084fc', '#9333ea']}
@@ -40,7 +34,7 @@ export default function NotFoundScreen() {
                             style={satoshiFont.satoshiBold}
                             className='text-base text-white tracking-tight'
                         >
-                            Take me home
+                            Take me back
                         </Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -48,24 +42,3 @@ export default function NotFoundScreen() {
         </>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    link: {
-        marginTop: 15,
-        paddingVertical: 15,
-    },
-    linkText: {
-        fontSize: 14,
-        color: '#2e78b7',
-    },
-});

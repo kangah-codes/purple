@@ -16,8 +16,9 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
+import { CalendarIcon } from '@/components/SVG/icons/16x16';
 
-export default function PlansScreen() {
+export default function TransactionsScreen() {
     const {
         preferences: { hideCompletedPlans },
         setPreference,
@@ -58,16 +59,13 @@ export default function PlansScreen() {
             description: 'Hide plans from the main plans screen once they have been completed',
             customItem: () => <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
         },
-        ...(hideCompletedPlans
-            ? [
-                  {
-                      icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
-                      title: 'Completed Plans',
-                      description: 'View plans which have been completed and hidden',
-                      link: '/settings/hidden-plans',
-                  },
-              ]
-            : []),
+        {
+            icon: <CalendarIcon width={20} height={20} stroke='#9333ea' strokeWidth={1.3} />,
+            title: 'Recurring Transactions',
+            description: 'Choose an account to always show first on the home screen',
+            // callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
+            link: '/settings/transactions/recurring-transactions',
+        },
     ];
 
     return (
@@ -86,7 +84,7 @@ export default function PlansScreen() {
 
                 <View className='absolute left-0 right-0 items-center'>
                     <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                        Plan Settings
+                        Transaction Settings
                     </Text>
                 </View>
             </View>

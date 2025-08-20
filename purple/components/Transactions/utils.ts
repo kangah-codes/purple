@@ -1,4 +1,16 @@
+import { RRule, rrulestr } from 'rrule';
 import { Transaction } from './schema';
+import { format, parse } from 'date-fns';
+
+const DAYS_OF_WEEK = [
+    { label: 'SU', value: '0' },
+    { label: 'MO', value: '1' },
+    { label: 'TU', value: '2' },
+    { label: 'WE', value: '3' },
+    { label: 'TH', value: '4' },
+    { label: 'FR', value: '5' },
+    { label: 'SA', value: '6' },
+];
 
 export function getDefaultValues(
     transaction: Transaction | null,
@@ -45,6 +57,55 @@ export function getOrdinalSuffix(n: number) {
     }
 }
 
+export function getRRuleFrequency(rruleString: string) {
+    // if string contains invalid characters (eg monday instead of MO), replace them with valid ones
+    const validRRuleString = rruleString
+        .replace(/monday/gi, 'MO')
+        .replace(/tuesday/gi, 'TU')
+        .replace(/wednesday/gi, 'WE')
+        .replace(/thursday/gi, 'TH')
+        .replace(/friday/gi, 'FR')
+        .replace(/saturday/gi, 'SA')
+        .replace(/sunday/gi, 'SU');
+
+    const rule = rrulestr(validRRuleString);
+
+    let frequency: string;
+    switch (rule.options.freq) {
+        case RRule.DAILY:
+            frequency = 'Daily';
+            break;
+        case RRule.WEEKLY:
+            frequency = 'Weekly';
+            break;
+        case RRule.MONTHLY:
+            frequency = 'Monthly';
+            break;
+        case RRule.YEARLY:
+            frequency = 'Yearly';
+            break;
+        default:
+            frequency = 'custom';
+    }
+
+    let time: string | undefined;
+    if (
+        Array.isArray(rule.options.byhour) &&
+        rule.options.byhour.length > 0 &&
+        Array.isArray(rule.options.byminute) &&
+        rule.options.byminute.length > 0
+    ) {
+        const hour = rule.options.byhour[0].toString().padStart(2, '0');
+        const minute = rule.options.byminute[0].toString().padStart(2, '0');
+        time = `${hour}:${minute}`;
+    }
+
+    return {
+        frequency,
+        time,
+    };
+}
+
 export function generateICalRRule(
     frequency: 'daily' | 'weekly' | 'monthly',
     dayOfWeek?: string,
@@ -52,16 +113,6 @@ export function generateICalRRule(
     time?: string,
 ) {
     const parts: string[] = [];
-    // only did this to prevent import cycle from constants
-    const DAYS_OF_WEEK = [
-        { label: 'Sunday', value: '0' },
-        { label: 'Monday', value: '1' },
-        { label: 'Tuesday', value: '2' },
-        { label: 'Wednesday', value: '3' },
-        { label: 'Thursday', value: '4' },
-        { label: 'Friday', value: '5' },
-        { label: 'Saturday', value: '6' },
-    ];
 
     switch (frequency) {
         case 'daily':
@@ -102,4 +153,11 @@ export function getTransactionColour(type: Transaction['type']) {
         case 'transfer':
             return '#9810fa';
     }
+}
+
+export function formatLocalTime(timeString: string) {
+    // parse "HH:mm" into a Date
+    const date = parse(timeString, 'HH:mm', new Date());
+
+    return format(date, 'p');
 }

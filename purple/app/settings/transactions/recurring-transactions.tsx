@@ -3,8 +3,9 @@ import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import React from 'react';
 
 export default function Screen() {
-    useScreenTracking('recurring_transactions', {
+    useScreenTracking('transaction_settings', {
         source: 'navigation',
     });
+
     return <RecurringTransactionsScreen />;
 }

@@ -171,7 +171,6 @@ export default function NewRecurringTransactionScreen() {
 
         mutate(transformedData, {
             onError: (error) => {
-                console.log('Error creating transaction:', error);
                 Toast.show({
                     type: 'error',
                     props: { text1: 'Error!', text2: "Couldn't create transaction" },

@@ -157,6 +157,46 @@ export function useInfiniteTransactions({
     );
 }
 
+export function useInfiniteRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: RequestParamQuery;
+    options?: Omit<
+        UseInfiniteQueryOptions<GenericAPIResponse<RecurringTransaction[]>, Error>,
+        'queryKey' | 'queryFn'
+    >;
+}): UseInfiniteQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useInfiniteQuery<GenericAPIResponse<RecurringTransaction[]>, Error>(
+        ['recurring-transactions', requestQuery],
+        async ({ pageParam = 1 }) => {
+            const queryParams = {
+                ...requestQuery,
+                page: pageParam,
+                page_size: requestQuery.page_size || 10,
+                start_date: requestQuery.startDate || false,
+                end_date: requestQuery.endDate || false,
+                accountID: requestQuery.accountID || false,
+            };
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+            // @ts-expect-error: listRecurringTransactions exists on TransactionSQLiteService
+            return service.listRecurringTransactions(queryParams);
+        },
+        {
+            ...options,
+            getNextPageParam: (lastPage) => {
+                const nextPage = lastPage.page + 1;
+                return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
+                    ? nextPage
+                    : undefined;
+            },
+        },
+    );
+}
+
 export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();

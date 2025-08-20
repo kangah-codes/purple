@@ -518,15 +518,25 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     async listRecurringTransactions(
         query: RequestParamQuery,
     ): Promise<GenericAPIResponse<RecurringTransaction[]>> {
-        const { page = 1, page_size = 10, accountID = false } = query;
+        const {
+            page = 1,
+            page_size = 10,
+            accountID = false,
+            start_date = false,
+            end_date = false,
+        } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 
         let paginationClause = '';
-        let whereClause = 'rt.deleted_at IS NULL';
+        let whereClause = '1=1';
         if (accountID) {
             whereClause += ' AND rt.account_id = ?';
             params.push(accountID);
+        }
+        if (start_date && end_date) {
+            whereClause += ` AND strftime('%s', rt.start_date) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
+            params.push(start_date, end_date);
         }
         if (Number.isFinite(page_size)) {
             paginationClause = 'LIMIT ? OFFSET ?';
@@ -541,7 +551,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
         params.push(page_size, offset);
         const transactions = await this.db.getAllAsync<RecurringTransaction>(
-            `SELECT * FROM recurring_transactions rt WHERE ${whereClause} ORDER BY rt.created_at DESC ${paginationClause}`,
+            `SELECT rt.* FROM recurring_transactions rt
+             WHERE ${whereClause}
+             ORDER BY rt.start_date DESC
+             ${paginationClause}`,
             params,
         );
 

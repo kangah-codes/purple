@@ -10,11 +10,11 @@ import { usePlanStore } from '../hooks';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
-type TransactionHistoryCardProps = {
+type TransactionCardProps = {
     data: Transaction;
 };
 
-export default function PlanTransactionHistoryCard({ data }: TransactionHistoryCardProps) {
+export default function PlanTransactionCard({ data }: TransactionCardProps) {
     const { currentPlan } = usePlanStore();
     const { setCurrentTransaction } = useTransactionStore();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();

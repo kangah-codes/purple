@@ -3,7 +3,7 @@ import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBo
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import TransactionCard from '@/components/Transactions/molecules/TransactionCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -29,7 +29,7 @@ export default function TransactionHistoryList({
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
-            <TransactionHistoryCard
+            <TransactionCard
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);
