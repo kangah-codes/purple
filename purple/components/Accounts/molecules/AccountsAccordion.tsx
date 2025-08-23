@@ -5,6 +5,8 @@ import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
 import { groupAccountsByCategory } from '../utils';
 import AccountCard from './AccountCard';
+import AccountGroupCard from './AccountGroupCard';
+import { View } from '@/components/Shared/styled';
 
 export default function AccountsAccordion() {
     const { accounts } = useAccountStore();
@@ -28,11 +30,12 @@ export default function AccountsAccordion() {
         .filter((item) => item.accounts && item.accounts.length > 0);
 
     return (
-        <FlashList
-            estimatedItemSize={50}
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-        />
+        <View className='px-5 flex flex-col space-y-5'>
+            {Object.keys(groupedAccounts).map((key) => (
+                <View key={key}>
+                    <AccountGroupCard group={key} accounts={groupedAccounts[key]} />
+                </View>
+            ))}
+        </View>
     );
 }

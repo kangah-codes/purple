@@ -64,39 +64,20 @@ export function usePlanStore() {
 }
 
 export function usePlans({
-    sessionData,
     requestQuery,
     options,
 }: {
-    sessionData: SessionData;
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
 }): UseQueryResult<GenericAPIResponse<Plan[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     return useQuery(
         ['plans', requestQuery],
         async () => {
-            const res = await fetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/plan?${stringify(requestQuery)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': process.env.EXPO_PUBLIC_API_KEY as string,
-                        Authorization: sessionData.access_token,
-                    },
-                },
-            );
-
-            const statusCode = res.status;
-            const json = await res.json();
-
-            if (!res.ok) {
-                const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
-                err.statusCode = statusCode;
-                throw err;
-            }
-
-            return json;
+            const service = ServiceFactory.create<Plan>('plans', db, sessionData);
+            return service.list(requestQuery);
         },
         {
             ...(options as Omit<

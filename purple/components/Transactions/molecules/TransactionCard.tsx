@@ -19,23 +19,13 @@ type TransactionCardProps = {
 };
 
 export default function TransactionCard({ data, onPress, showTitle = true }: TransactionCardProps) {
-    const { setCurrentTransaction, currentTransaction } = useTransactionStore();
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
-    const showActionMenu = useCallback(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        setCurrentTransaction(data);
-        router.push({
-            pathname: '/transactions/new-transaction',
-            params: { update: 'true' },
-        });
-    }, []);
 
     return (
         <TouchableOpacity
             onPress={onPress}
             className='w-full py-3.5 flex flex-row items-center space-x-3.5'
             activeOpacity={0.7}
-            onLongPress={showActionMenu}
             delayLongPress={350}
         >
             <View

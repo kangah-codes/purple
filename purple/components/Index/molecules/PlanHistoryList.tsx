@@ -1,10 +1,11 @@
-import { usePlanStore } from '@/components/Plans/hooks';
+import { usePlans, usePlanStore } from '@/components/Plans/hooks';
 import PlanCard from '@/components/Plans/molecules/PlanCard';
 import { Plan } from '@/components/Plans/schema';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
@@ -13,8 +14,18 @@ import { Dimensions } from 'react-native';
 
 const width = Dimensions.get('screen').width;
 
-export default function PlanHistoryList() {
-    const { plans } = usePlanStore();
+export default function PlanHistoryList({ onLoaded }: { onLoaded: () => void }) {
+    const { data: plans, refetch } = usePlans({
+        requestQuery: {
+            page_size: 5,
+        },
+        options: {
+            onSettled: () => {
+                onLoaded();
+            },
+        },
+    });
+
     const renderItem = useCallback(
         ({ item, index }: { item: Plan; index: number }) => <PlanCard data={item} index={index} />,
         [],
@@ -38,6 +49,8 @@ export default function PlanHistoryList() {
         [],
     );
 
+    useRefreshOnFocus(refetch);
+
     return (
         <View className='flex flex-col space-y-1 mt-5'>
             <View className='flex flex-row w-full justify-between items-center px-5 mb-2.5'>
@@ -59,10 +72,12 @@ export default function PlanHistoryList() {
                 </TouchableOpacity>
             </View>
             <FlashList
-                estimatedItemSize={150}
+                estimatedItemSize={80}
+                // force rerender when the length changes to update item size
+                key={plans?.data?.length}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                data={plans}
+                data={plans?.data ?? []}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
                 ListEmptyComponent={renderEmptylist}

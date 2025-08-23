@@ -2,30 +2,30 @@ import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
+import { useTransactions, useTransactionStore } from '@/components/Transactions/hooks';
 import TransactionCard from '@/components/Transactions/molecules/TransactionCard';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { dedupeByKey } from '@/lib/utils/array';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
-type TransactionHistoryList = {
-    transactions?: Transaction[];
-};
-
-export default function TransactionHistoryList({
-    transactions: propTransactions,
-}: TransactionHistoryList) {
+export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => void }) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { transactions, setCurrentTransaction } = useTransactionStore();
-    const topFiveTransactions = useMemo(() => {
-        return transactions.slice(0, 5);
-    }, [propTransactions]);
+    const { setCurrentTransaction } = useTransactionStore();
+    const { data: transactions, refetch } = useTransactions({
+        requestQuery: {
+            page_size: 5,
+        },
+        options: {
+            onSettled: () => {
+                onLoaded();
+            },
+        },
+    });
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
@@ -52,6 +52,8 @@ export default function TransactionHistoryList({
         [],
     );
 
+    useRefreshOnFocus(refetch);
+
     return (
         <View className='flex flex-col mt-5'>
             <View className='flex flex-row w-full justify-between items-center px-5'>
@@ -72,7 +74,7 @@ export default function TransactionHistoryList({
 
             <FlashList
                 estimatedItemSize={50}
-                data={topFiveTransactions}
+                data={transactions?.data ?? []}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.flatlistContainerStyle}
                 showsVerticalScrollIndicator={true}

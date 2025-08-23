@@ -1,3 +1,4 @@
+import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { Transaction } from '../Transactions/schema';
 
 export type IAccountCard = {
@@ -19,7 +20,7 @@ export type Account = {
     name: string;
     balance: number;
     is_default_account: boolean;
-    currency: string;
+    currency: CurrencyCode;
     created_at_unix: string;
     updated_at_unix: string;
     deleted_at_unix: string | null;

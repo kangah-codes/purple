@@ -14,8 +14,6 @@ export default function UpcomingTransactionCard({
 }) {
     const nextDate = new Date(transaction.create_next_at);
 
-    console.log('RecurringTransactionCard', transaction);
-
     return (
         <TouchableOpacity
             key={transaction.id}

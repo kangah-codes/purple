@@ -49,4 +49,8 @@ export type UserPreferences = {
     trackUsageStatistics: boolean;
     sendDiagnosticData: boolean;
     allowCurrencyConversion: boolean;
+
+    // notification preferences
+    pushNotificationsEnabled: boolean;
+    dailyNotificationsEnabled: boolean;
 };

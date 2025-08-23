@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/icons/24x24';
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Link, router } from 'expo-router';
@@ -25,18 +25,24 @@ export default function AccountNavigationArea() {
                     {truncateStringIfLongerThan(currentAccount.name as string, 20)}
                 </Text>
             </View>
-            <Link
-                href={{
-                    pathname: '/transactions/new-transaction',
-                    params: {
-                        accountId: currentAccount.id,
-                    },
-                }}
+            <LinearGradient
+                className='rounded-full justify-center items-center'
+                colors={['#c084fc', '#9333ea']}
             >
-                <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                    <PlusIcon stroke={'#fff'} />
-                </View>
-            </Link>
+                <TouchableOpacity
+                    className='px-4 py-2 flex items-center justify-center rounded-full'
+                    onPress={() => {
+                        router.push({
+                            pathname: '/transactions/new-transaction',
+                            params: {
+                                accountId: currentAccount.id,
+                            },
+                        });
+                    }}
+                >
+                    <PlusIcon stroke={'#fff'} width={24} height={24} />
+                </TouchableOpacity>
+            </LinearGradient>
         </View>
     );
 }

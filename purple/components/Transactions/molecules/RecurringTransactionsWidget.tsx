@@ -61,7 +61,7 @@ export default function RecurringTransactionsWidget() {
         const sorted = txs.sort(
             (a, b) => new Date(a.create_next_at).getTime() - new Date(b.create_next_at).getTime(),
         );
-        const upcoming = sorted.filter((tx) => new Date(tx.create_next_at) >= new Date());
+        const upcoming = sorted.filter((tx) => new Date(tx.create_next_at) >= now);
         return {
             transactions: sorted,
             slicedTransactions: upcoming.slice(0, 3), // show only the next 3 upcoming transactions
@@ -135,17 +135,21 @@ export default function RecurringTransactionsWidget() {
 
             <View className='h-[1px] border-b border-purple-100' />
 
-            <View className='flex flex-col space-y-2.5'>
-                <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
-                    Upcoming
-                </Text>
+            {transactions.slicedTransactions.length > 0 && (
+                <View className='flex flex-col space-y-2.5'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
+                        Upcoming
+                    </Text>
 
-                <View className='flex flex-col space-y-2'>
-                    {transactions.slicedTransactions.map((transaction, index) => {
-                        return <UpcomingTransactionCard transaction={transaction} key={index} />;
-                    })}
+                    <View className='flex flex-col space-y-2'>
+                        {transactions.slicedTransactions.map((transaction, index) => {
+                            return (
+                                <UpcomingTransactionCard transaction={transaction} key={index} />
+                            );
+                        })}
+                    </View>
                 </View>
-            </View>
+            )}
         </View>
     );
 }

@@ -50,7 +50,7 @@ export default function ExchangeRatesScreen() {
                 <EmptyList message={`Couldn't find any currencies which match "${searchValue}"`} />
             </View>
         ),
-        [],
+        [searchValue],
     );
 
     const calculateCurrency = useCallback(

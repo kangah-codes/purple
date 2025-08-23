@@ -1,81 +1,59 @@
-import { GenericAPIResponse } from '@/@types/request';
-import { useAccountStore } from '@/components/Accounts/hooks';
-import { User } from '@/components/Auth/schema';
-import { useUser, useUserStore } from '@/components/Profile/hooks';
 import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
 import { LinearGradient, SafeAreaView, ScrollView, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
-import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback, useState } from 'react';
-import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
-import Toast from 'react-native-toast-message';
+import React, { useState } from 'react';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
+import LoadingScreen from '../molecules/LoadingScreen';
 import PlanHistoryList from '../molecules/PlanHistoryList';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
 export default function IndexScreen() {
-    const { setAccounts } = useAccountStore();
-    const { updateTransactions } = useTransactionStore();
-    const { setUser } = useUserStore();
-    const [refreshing, setRefreshing] = useState(false);
-    // TODO: refactor this to a better named hook
-    const { refetch, data } = useUser({
-        options: {
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: 'Something went wrong',
-                    },
-                });
-            },
-            onSettled: () => {
-                setRefreshing(false);
-            },
-            onSuccess: (data) => {
-                const res = data as GenericAPIResponse<User>;
-                setUser(res.data);
-                setAccounts(res.data.accounts);
-                updateTransactions(res.data.transactions);
-            },
-        },
+    const [sectionsLoaded, setSectionsLoaded] = useState({
+        accounts: false,
+        plans: false,
+        transactions: false,
     });
-    useRefreshOnFocus(refetch);
-
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        refetch();
-    }, []);
+    const allLoaded = Object.values(sectionsLoaded).every(Boolean);
+    const handleSectionLoaded = (section: string) =>
+        setSectionsLoaded((prev) => ({ ...prev, [section]: true }));
 
     return (
-        <SafeAreaView className='bg-white'>
+        <SafeAreaView className='bg-white relative'>
             <ExpoStatusBar style='dark' />
             <View className='w-full relative flex' style={styles.parentView}>
+                {!allLoaded && (
+                    <View
+                        pointerEvents='auto'
+                        style={[
+                            {
+                                zIndex: 9999,
+                                elevation: 20,
+                            },
+                        ]}
+                        className='w-screen h-full absolute'
+                    >
+                        <LoadingScreen />
+                    </View>
+                )}
                 <LinearGradient
                     className='flex px-5 py-2.5 h-[350] absolute w-full'
                     colors={linearGradientColours}
                 />
                 <AnimatedClouds baseSpeed={0.1} minHeight={10} maxHeight={450} spawnRate={1} />
                 <View className='flex flex-col'>
-                    {/* <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg px-5'>
-                        Hi, {sessionData?.user.username} 👋
-                    </Text> */}
-
                     <ScrollView
                         className='mt-5 h-full'
                         contentContainerStyle={styles.scrollView}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                        }
                     >
-                        <AccountCardCarousel />
-                        <PlanHistoryList />
-                        <TransactionHistoryList transactions={data?.data.transactions} />
+                        <AccountCardCarousel onLoaded={() => handleSectionLoaded('accounts')} />
+                        <PlanHistoryList onLoaded={() => handleSectionLoaded('plans')} />
+                        <TransactionHistoryList
+                            onLoaded={() => handleSectionLoaded('transactions')}
+                        />
                     </ScrollView>
                 </View>
             </View>

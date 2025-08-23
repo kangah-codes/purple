@@ -3,7 +3,9 @@ import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientProvider';
+import CurrentRecurringTransactionModal from '@/components/Transactions/molecules/CurrentRecurringTransactionModal';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -50,6 +52,7 @@ if (__DEV__) {
 }
 
 export default Sentry.wrap(function RootLayout() {
+    useNotifications();
     const [appIsReady, setAppIsReady] = useState(true);
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
@@ -85,9 +88,9 @@ export default Sentry.wrap(function RootLayout() {
                                     databaseName='purple.db'
                                     onInit={onInitialise}
                                     useSuspense
-                                    options={{
-                                        useNewConnection: true,
-                                    }}
+                                    // options={{
+                                    //     useNewConnection: true,
+                                    // }}
                                 >
                                     <BottomSheetModalProvider>
                                         <PortalProvider>
@@ -95,6 +98,7 @@ export default Sentry.wrap(function RootLayout() {
                                             <ThemeProvider value={DefaultTheme}>
                                                 {/** Portal Rendering  */}
                                                 <CurrentTransactionModal modalKey='transactionReceipt' />
+                                                <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
                                                 {/** Main Navigation Stack */}
                                                 <Stack
                                                     screenOptions={{

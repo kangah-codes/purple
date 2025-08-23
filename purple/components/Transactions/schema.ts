@@ -69,6 +69,16 @@ export type CreateTransaction = {
     charges: number;
 };
 
+export type EditTransaction = {
+    account_id: string;
+    type: 'debit' | 'credit';
+    amount: number;
+    note: string;
+    category: string;
+    date: string;
+    currency: string;
+};
+
 export type CreateRecurringTransaction = {
     account_id: string;
     type: Transaction['type'];

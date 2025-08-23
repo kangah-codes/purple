@@ -32,6 +32,14 @@ export default ({ config }) => {
         plugins: [
             'expo-router',
             [
+                'expo-notifications',
+                {
+                    icon: './assets/images/icon.png',
+                    color: '#ffffff',
+                    defaultChannel: 'default',
+                },
+            ],
+            [
                 'expo-font',
                 {
                     fonts: [

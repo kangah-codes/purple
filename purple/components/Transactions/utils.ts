@@ -57,7 +57,53 @@ export function getOrdinalSuffix(n: number) {
     }
 }
 
+// TEMP since old rules had full days
+export function cleanRRuleString(str: string) {
+    return str
+        .replace(/monday/gi, 'MO')
+        .replace(/tuesday/gi, 'TU')
+        .replace(/wednesday/gi, 'WE')
+        .replace(/thursday/gi, 'TH')
+        .replace(/friday/gi, 'FR')
+        .replace(/saturday/gi, 'SA')
+        .replace(/sunday/gi, 'SU');
+}
+
+export function ruleToText(str: string) {
+    const rrule = RRule.fromString(cleanRRuleString(str));
+
+    let text = rrule.toText();
+    const opts = rrule.options;
+    const hour = opts.byhour?.[0] ?? 0;
+    const minute = opts.byminute?.[0] ?? 0;
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    const formattedTime = date.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+
+    // replace the time in the text with localized one
+    if (text.includes('at')) {
+        text = text.replace(/at\s+\d+(?::\d+)?/, `at ${formattedTime}`);
+    }
+
+    return text;
+}
+
+export function capitaliseFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export function getRRuleFrequency(rruleString: string) {
+    if (rruleString.trim() === '') {
+        return {
+            frequency: '',
+            time: undefined,
+        };
+    }
+
     // if string contains invalid characters (eg monday instead of MO), replace them with valid ones
     const validRRuleString = rruleString
         .replace(/monday/gi, 'MO')
@@ -155,9 +201,51 @@ export function getTransactionColour(type: Transaction['type']) {
     }
 }
 
-export function formatLocalTime(timeString: string) {
+export function formatLocalTime(timeString: string | undefined) {
     // parse "HH:mm" into a Date
-    const date = parse(timeString, 'HH:mm', new Date());
+    const date = parse(timeString ?? '', 'HH:mm', new Date());
 
     return format(date, 'p');
+}
+
+export function calculateTransactionSchedule(
+    frequency: 'daily' | 'weekly' | 'monthly' | 'custom' | '',
+    time: string,
+    dayOfWeek?: string,
+    dayOfMonth?: number,
+    customDate?: Date,
+) {
+    let summary = '';
+
+    const isValid =
+        frequency === 'daily' ||
+        (frequency === 'weekly' && dayOfWeek) ||
+        (frequency === 'monthly' && dayOfMonth) ||
+        (frequency === 'custom' && customDate);
+
+    if (!isValid) {
+        return null;
+    }
+
+    switch (frequency) {
+        case 'daily':
+            summary = `Transaction will be created daily at ${time}`;
+            break;
+        case 'weekly':
+            summary = `Transaction will be created weekly on ${dayOfWeek} at ${time}`;
+            break;
+        case 'monthly':
+            const suffix = getOrdinalSuffix(dayOfMonth!);
+            summary = `Transaction will be created on the ${dayOfMonth}${suffix} of each month at ${time}`;
+            break;
+        case 'custom':
+            const day = customDate!.getDate();
+            const suffixCustom = getOrdinalSuffix(day);
+            const month = customDate!.toLocaleString('default', { month: 'long' });
+            const year = customDate!.getFullYear();
+            summary = `Transaction will be created on ${day}${suffixCustom} ${month} ${year} at ${time}`;
+            break;
+    }
+
+    return summary;
 }

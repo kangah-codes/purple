@@ -20,6 +20,7 @@ function RecurringTransactionsScreen() {
         useInfiniteRecurringTransactions({
             requestQuery: {
                 page_size: 10,
+                status: 'active',
             },
             options: {
                 onError: () => {

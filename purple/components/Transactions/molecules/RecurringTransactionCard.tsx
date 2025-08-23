@@ -1,46 +1,35 @@
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import React from 'react';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { useTransactionStore } from '../hooks';
-import { RecurringTransaction, Transaction } from '../schema';
+import { RecurringTransaction } from '../schema';
 import { formatLocalTime, getRRuleFrequency, getTransactionColour } from '../utils';
-import { rrulestr } from 'rrule';
 
 type RecurringTransactionCardProps = {
     transaction: RecurringTransaction;
 };
 
 export default function RecurringTransactionCard({ transaction }: RecurringTransactionCardProps) {
-    const { setCurrentRecurringTransaction, currentTransaction } = useTransactionStore();
-    const date = useMemo(() => formatDateTime(transaction.created_at), [transaction.created_at]);
+    const { setCurrentRecurringTransaction } = useTransactionStore();
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { frequency, time } = getRRuleFrequency(transaction.recurrence_rule);
-    const showActionMenu = useCallback(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        setCurrentRecurringTransaction(transaction);
-        router.push({
-            pathname: '/transactions/new-transaction',
-            params: { update: 'true' },
-        });
-    }, []);
 
     return (
         <TouchableOpacity
             className='w-full py-3.5 flex flex-row items-center space-x-3.5'
             activeOpacity={0.7}
-            onLongPress={showActionMenu}
-            delayLongPress={350}
+            onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setCurrentRecurringTransaction(transaction);
+                setShowBottomSheetModal('recurringTransactionReceipt', true);
+            }}
         >
-            <View
-                style={styles.categoryIcon}
-                className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'
-            >
+            <View className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'>
                 <Text className='absolute text-lg'>
                     {extractEmojiOrDefault(transaction.category, '❔')}
                 </Text>
@@ -83,16 +72,3 @@ export default function RecurringTransactionCard({ transaction }: RecurringTrans
         </TouchableOpacity>
     );
 }
-
-const styles = StyleSheet.create({
-    categoryIcon: {
-        // shadowColor: '#A855F7',
-        // shadowOffset: {
-        //     width: 0,
-        //     height: 1,
-        // },
-        // shadowOpacity: 0.125,
-        // shadowRadius: 80,
-        // elevation: 3,
-    },
-});

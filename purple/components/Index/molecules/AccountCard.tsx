@@ -4,12 +4,12 @@ import React from 'react';
 import ActionButtons from './ActionButton';
 import { BalanceDisplay } from './BalanceDisplay';
 
-type AlternateAccountCardProps = {
+type AccountCardProps = {
     item: Account;
     pinnedAccount: string;
 };
 
-export default function AlternateAccountCard({ item, pinnedAccount }: AlternateAccountCardProps) {
+export default function AccountCard({ item, pinnedAccount }: AccountCardProps) {
     return (
         <>
             <BalanceDisplay
@@ -17,7 +17,7 @@ export default function AlternateAccountCard({ item, pinnedAccount }: AlternateA
                 account={item}
                 isPinned={item.id === pinnedAccount}
             />
-            <View className='h-[1px] bg-purple-200 w-full my-2.5' />
+            <View className='h-[1px] bg-purple-300 w-full my-2.5' />
             <ActionButtons account={item} />
         </>
     );

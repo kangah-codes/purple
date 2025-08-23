@@ -9,12 +9,11 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { memo, useEffect } from 'react';
 import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useInfiniteTransactions, useRecurringTransactions, useTransactionStore } from '../hooks';
+import { useInfiniteTransactions, useTransactionStore } from '../hooks';
 import RecurringTransactionsWidget from '../molecules/RecurringTransactionsWidget';
-import { lastDayOfMonth, startOfMonth } from 'date-fns';
 
 function TransactionsScreen() {
-    const { transactions, setTransactions } = useTransactionStore();
+    const { transactions: tx } = useTransactionStore();
     const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
         requestQuery: {
             page_size: 10,
@@ -31,6 +30,22 @@ function TransactionsScreen() {
             },
         },
     });
+
+    // Refresh page on focus
+    useRefreshOnFocus(refetch);
+
+    // TODO: refactor this to use store hook with built-in sync, or probably some event driven shit
+    // works for now so im leaving to future Joshua to figure out
+    useEffect(() => {
+        refetch();
+    }, [tx]);
+
+    const transactions = data ? data.pages.flatMap((page) => page.data) : [];
+    const handleLoadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
 
     const fabOptions = [
         {
@@ -54,23 +69,6 @@ function TransactionsScreen() {
             onPress: () => router.push('/transactions/new-transaction'),
         },
     ];
-
-    // reresh page on focus
-    useRefreshOnFocus(refetch);
-
-    // flatten the data
-    useEffect(() => {
-        if (data) {
-            const tx = data.pages.flatMap((page) => page.data);
-            setTransactions(tx);
-        }
-    }, [data]);
-
-    const handleLoadMore = () => {
-        if (hasNextPage) {
-            fetchNextPage();
-        }
-    };
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -105,7 +103,7 @@ function TransactionsScreen() {
                 )}
                 options={fabOptions}
                 style={{ right: 20, bottom: 20 }}
-                spacing={10} // Space between action buttons
+                spacing={10}
                 animationDuration={100}
             />
         </SafeAreaView>

@@ -1,8 +1,6 @@
-import { useAuth } from '@/components/Auth/hooks';
 import HoldButton from '@/components/Shared/atoms/HoldButton';
 import { Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import Toast from 'react-native-toast-message';
@@ -12,9 +10,7 @@ import { useDeletePlan, usePlanStore } from '../hooks';
 export default function ConfirmAddPlanTransaction() {
     const { currentPlan } = usePlanStore();
     const { id } = useLocalSearchParams();
-    const { sessionData } = useAuth();
     const { mutate, isLoading: deletePlanLoading } = useDeletePlan({
-        sessionData: sessionData!,
         planID: id as string,
     });
 

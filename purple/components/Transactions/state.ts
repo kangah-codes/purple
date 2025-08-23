@@ -19,6 +19,7 @@ type TransactionStore = {
     ) => void;
     resetRecurringTransactions: () => void;
     reset: () => void;
+    deleteTransaction: (id: string) => void;
 };
 
 export const createTransactionStore = create<TransactionStore>()(
@@ -55,6 +56,10 @@ export const createTransactionStore = create<TransactionStore>()(
                 })),
             resetRecurringTransactions: () => set({ recurringTransactions: [] }),
             reset: () => set({ transactions: [], currentTransaction: null }),
+            deleteTransaction: (id: string) =>
+                set((state) => ({
+                    transactions: state.transactions.filter((t) => t.id !== id),
+                })),
         }),
         {
             name: 'transaction-store',

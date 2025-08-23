@@ -1,5 +1,6 @@
 import {
     AlertHexagonIcon,
+    BellIcon,
     CashIcon,
     ClosedLockIcon,
     CoinSwapIcon,
@@ -74,8 +75,14 @@ export default function ProfilePages() {
             description: 'Manage privacy & security settings',
         },
         {
+            icon: <BellIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Notifications',
+            link: '/settings/notifications',
+            description: 'Manage notification preferences',
+        },
+        {
             icon: <FlaskIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Experimental Features',
+            title: 'Experimental',
             link: '/settings/experimental',
             description: 'Enable experimental features. Use with caution.',
         },

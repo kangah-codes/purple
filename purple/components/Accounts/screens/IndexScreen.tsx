@@ -1,8 +1,9 @@
 import { GenericAPIResponse } from '@/@types/request';
-import { PlusIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import {
     LinearGradient,
     SafeAreaView,
+    ScrollView,
     Text,
     TouchableOpacity,
     View,
@@ -12,14 +13,23 @@ import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
 import { Account } from '../schema';
+import AccountGroupCard from '../molecules/AccountGroupCard';
+import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
+import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
+import { useTransactionStore } from '@/components/Transactions/hooks';
+import AccountsAreaChart from '../molecules/AccountsAreaChart';
+import DropdownMenuDeprecated from '@/components/Shared/molecules/DropdownMenuDeprecated';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenuDeprecated/MenuOption';
 
 export default function AccountsScreen() {
+    const [visible, setVisible] = useState(false);
+    const { transactions } = useTransactionStore();
     const { setAccounts, accounts } = useAccountStore();
     const { refetch, isFetching } = useAccounts({
         options: {
@@ -58,7 +68,7 @@ export default function AccountsScreen() {
                 <Text style={satoshiFont.satoshiBlack} className='text-lg mt-2.5'>
                     Accounts
                 </Text>
-                <View className='h-1 border-purple-100 border-b w-full mb-2.5' />
+                <View className='h-1 border-purple-100 border-b w-full mb-5' />
             </View>
         ),
         [accounts],
@@ -72,26 +82,69 @@ export default function AccountsScreen() {
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
 
-            <FlatList
-                data={[{ key: 'accordion' }]} // Single item to render AccountsAccordion
-                renderItem={renderAccountAccordion}
-                ListHeaderComponent={renderHeader}
-                contentContainerStyle={{ paddingBottom: 300 }}
-                showsVerticalScrollIndicator={false}
-                refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
-            />
+            <ScrollView className='flex flex-col' contentContainerStyle={{ paddingBottom: 100 }}>
+                <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+                    <DropdownMenuDeprecated
+                        visible={visible}
+                        handleOpen={() => setVisible(true)}
+                        handleClose={() => setVisible(false)}
+                        trigger={
+                            <View
+                                // onPress={router.back}
+                                className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'
+                            >
+                                <DotsHorizontalIcon
+                                    stroke='#9333EA'
+                                    strokeWidth={2.5}
+                                    width={24}
+                                    height={24}
+                                />
+                            </View>
+                        }
+                        padX={20}
+                        dropdownWidth={180}
+                    >
+                        <MenuOption onSelect={alert}>
+                            <View className='flex flex-row items-center space-x-1'>
+                                <TrashIcon stroke='#EF4444' width={18} />
+                                <Text style={satoshiFont.satoshiMedium} className='text-sm'>
+                                    Delete
+                                </Text>
+                            </View>
+                        </MenuOption>
+                        <MenuOption onSelect={alert}>
+                            <View className='flex flex-row items-center space-x-1'>
+                                <TrashIcon stroke='#EF4444' width={18} />
+                                <Text style={satoshiFont.satoshiMedium} className='text-sm'>
+                                    Delete
+                                </Text>
+                            </View>
+                        </MenuOption>
+                    </DropdownMenuDeprecated>
 
-            <LinearGradient
-                className='rounded-full justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3'
-                    onPress={handleNavigation}
-                >
-                    <PlusIcon stroke={'#fff'} />
-                </TouchableOpacity>
-            </LinearGradient>
+                    <View className='absolute left-0 right-0 items-center'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                            Accounts
+                        </Text>
+                    </View>
+
+                    <LinearGradient
+                        className='rounded-full justify-center items-center'
+                        colors={['#c084fc', '#9333ea']}
+                    >
+                        <TouchableOpacity
+                            className='px-4 py-2 flex items-center justify-center rounded-full'
+                            onPress={handleNavigation}
+                        >
+                            <PlusIcon stroke={'#fff'} width={24} height={24} />
+                        </TouchableOpacity>
+                    </LinearGradient>
+                </View>
+                <View className='mb-7'>
+                    <AccountsAreaChart transactions={transactions} />
+                </View>
+                <AccountsAccordion />
+            </ScrollView>
         </SafeAreaView>
     );
 }

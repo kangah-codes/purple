@@ -1,11 +1,12 @@
-import { useAccountStore } from '@/components/Accounts/hooks';
+import { useAccounts } from '@/components/Accounts/hooks';
 import { Account } from '@/components/Accounts/schema';
+import { usePreferences } from '@/components/Settings/hooks';
+import { View } from '@/components/Shared/styled';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
-import AlternateAccountCard from './AlternateAccountCard';
-import { View } from '@/components/Shared/styled';
-import { usePreferences } from '@/components/Settings/hooks';
+import AccountCard from './AccountCard';
 
 const styles = {
     sliderWidth: Dimensions.get('window').width - 40,
@@ -27,25 +28,34 @@ const styles = {
     },
 };
 
-export default function AccountCardCarousel() {
-    const { accounts } = useAccountStore();
+export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void }) {
+    const { data: accounts, refetch } = useAccounts({
+        requestQuery: {},
+        options: {
+            onSettled: () => {
+                onLoaded();
+            },
+        },
+    });
     const { preferences } = usePreferences();
-    const [activeSlide, setActiveSlide] = useState(0); // active slide is 0 by default
+    const [activeSlide, setActiveSlide] = useState(0);
     const pinnedIndex = useMemo(() => {
-        return accounts.findIndex((account) => account.id === preferences.pinnedAccount);
+        return accounts?.data.findIndex((account) => account.id === preferences.pinnedAccount);
     }, [accounts, preferences?.pinnedAccount]);
     const renderItem = useCallback(
         (item: { index: number; item: Account }) => (
-            <AlternateAccountCard item={item.item} pinnedAccount={preferences.pinnedAccount} />
+            <AccountCard item={item.item} pinnedAccount={preferences.pinnedAccount} />
         ),
         [accounts, pinnedIndex],
     );
+
+    useRefreshOnFocus(refetch);
 
     return (
         <View className='px-5'>
             {/** @ts-ignore */}
             <Carousel
-                data={accounts}
+                data={accounts?.data ?? []}
                 renderItem={renderItem}
                 sliderWidth={styles.sliderWidth}
                 itemWidth={styles.itemWidth}
@@ -54,12 +64,12 @@ export default function AccountCardCarousel() {
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
                 loop
-                firstItem={pinnedIndex >= 0 ? pinnedIndex : 0}
+                firstItem={typeof pinnedIndex === 'number' && pinnedIndex >= 0 ? pinnedIndex : 0}
             />
 
             {/** @ts-ignore */}
             <Pagination
-                dotsLength={accounts.length}
+                dotsLength={accounts?.total_items ?? 1}
                 activeDotIndex={activeSlide}
                 dotStyle={styles.paginationDotStyle}
                 inactiveDotOpacity={0.4}

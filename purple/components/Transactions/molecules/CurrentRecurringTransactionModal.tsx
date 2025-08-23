@@ -1,7 +1,8 @@
-import { EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { useAccountStore } from '@/components/Accounts/hooks';
+import { EditSquareIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import { LinearGradient, Text, View, TouchableOpacity } from '@/components/Shared/styled';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { useDeleteTransaction, useTransactionStore } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
@@ -9,42 +10,48 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
+import { capitaliseFirstLetter, extractEmojiOrDefault } from '@/lib/utils/string';
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
-import * as Haptics from 'expo-haptics';
+import { cleanRRuleString, getRRuleFrequency, ruleToText } from '../utils';
+import { RRule } from 'rrule';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];
 const drawerBackground = Platform.OS === 'android' ? '#faf5ff' : '#fff';
 
-type CurrentTransactionModalProps = {
+type CurrentRecurringTransactionModalProps = {
     modalKey: string;
 };
 
-export default function CurrentTransactionModal({ modalKey }: CurrentTransactionModalProps) {
-    const { currentTransaction, deleteTransaction } = useTransactionStore();
+export default function CurrentRecurringTransactionModal({
+    modalKey,
+}: CurrentRecurringTransactionModalProps) {
+    const { currentRecurringTransaction, deleteTransaction } = useTransactionStore();
     const transactionDate = useMemo(
-        () => formatDateTime(currentTransaction?.created_at ?? ''),
-        [currentTransaction?.created_at],
+        () => formatDateTime(currentRecurringTransaction?.created_at ?? ''),
+        [currentRecurringTransaction?.created_at],
     );
     const queryClient = useQueryClient();
     const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
     const { mutate } = useDeleteTransaction({
-        transactionID: currentTransaction?.id ?? '',
+        transactionID: currentRecurringTransaction?.id ?? '',
     });
     const { logEvent } = useAnalytics();
+    const { accounts } = useAccountStore();
+    const account = accounts.find((acc) => acc.id === currentRecurringTransaction?.account_id);
 
     useEffect(() => {
         const trackScreenView = async () => {
             if (bottomSheetModalKeys[modalKey]) {
                 await logEvent('screen_view', {
                     screen: 'transaction_modal',
-                    transaction: currentTransaction,
+                    transaction: currentRecurringTransaction,
                 });
             }
         };
@@ -68,7 +75,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             },
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts', 'user'] });
-                deleteTransaction(currentTransaction?.id ?? '');
+                deleteTransaction(currentRecurringTransaction?.id ?? '');
                 Toast.show({
                     type: 'success',
                     props: {
@@ -80,7 +87,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
         });
     }, []);
 
-    if (!currentTransaction) return null;
+    if (!currentRecurringTransaction || !account) return null;
 
     return (
         <CustomBottomSheetModal
@@ -106,16 +113,16 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                     >
                         <View className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'>
                             <Text className='absolute text-lg'>
-                                {extractEmojiOrDefault(currentTransaction.category, '❔')}
+                                {extractEmojiOrDefault(currentRecurringTransaction.category, '❔')}
                             </Text>
                         </View>
                         <Text
                             style={satoshiFont.satoshiBlack}
                             className='text-lg text-white mt-2.5'
                         >
-                            {currentTransaction.category.includes(' ')
-                                ? currentTransaction.category.split(' ').slice(1).join(' ')
-                                : currentTransaction.category}
+                            {currentRecurringTransaction.category.includes(' ')
+                                ? currentRecurringTransaction.category.split(' ').slice(1).join(' ')
+                                : currentRecurringTransaction.category}
                         </Text>
                     </LinearGradient>
                     <View className='w-full p-5 items-center' style={styles.bottomDrawer}>
@@ -124,23 +131,23 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                                 satoshiFont.satoshiBlack,
                                 {
                                     color:
-                                        currentTransaction.type === 'debit'
+                                        currentRecurringTransaction.type === 'debit'
                                             ? '#DC2626'
-                                            : currentTransaction.type === 'credit'
+                                            : currentRecurringTransaction.type === 'credit'
                                             ? 'rgb(22 163 74)'
                                             : '#9333EA',
                                 },
                             ]}
                             className='text-3xl mb-5 text-center'
                         >
-                            {currentTransaction.type == 'debit'
+                            {currentRecurringTransaction.type == 'debit'
                                 ? '-'
-                                : currentTransaction.type == 'credit'
+                                : currentRecurringTransaction.type == 'credit'
                                 ? '+'
                                 : ''}
                             {formatCurrencyAccurate(
-                                currentTransaction.currency,
-                                currentTransaction.amount,
+                                account.currency,
+                                currentRecurringTransaction.amount,
                             )}
                         </Text>
                         <View className='w-full relative flex items-center justify-center'>
@@ -150,13 +157,12 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             <View className='border-b border-purple-100 w-full mb-5' />
                         </View>
                         <ReceiptDetail
-                            label='Date'
-                            value={`${transactionDate.date} at ${transactionDate.time}`}
+                            label='Schedule'
+                            value={capitaliseFirstLetter(
+                                ruleToText(currentRecurringTransaction.recurrence_rule),
+                            )}
                         />
-                        <ReceiptDetail label='Account' value={currentTransaction.account?.name} />
-                        {isNotEmptyString(currentTransaction.note) && (
-                            <ReceiptDetail label='Note' value={currentTransaction.note} />
-                        )}
+                        <ReceiptDetail label='Account' value={account.name} />
                         <View className='border-b border-purple-100 w-full mb-5' />
                         <View
                             // colors={['#c084fc', '#9333ea']}

@@ -1,72 +1,70 @@
-import { SQLiteDatabase } from 'expo-sqlite';
 import { RRule } from 'rrule';
-import { UUID } from '../utils/helpers';
 import { dateToUNIX } from '../utils/date';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { RecurringTransaction } from '@/components/Transactions/schema';
 import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
 
-export async function processMissedRecurringTransactions(db: SQLiteDatabase) {
+export async function processRecurringTransactions(db: SQLiteDatabase) {
     const now = new Date();
     const nowUnix = dateToUNIX(now);
 
-    // 1. Fetch all active recurring transactions due (with account currency joined)
-    const recurringTxs = await db.getAllAsync<any>(
-        `SELECT rt.*, a.currency AS account_currency
-         FROM recurring_transactions rt
-         JOIN accounts a ON a.id = rt.account_id
-         WHERE rt.status = 'active'
-           AND rt.create_next_at_unix IS NOT NULL
-           AND rt.create_next_at_unix <= ?`,
-        [nowUnix],
-    );
+    // fetch all active recurring transactions due
+    const recurringTxs: Array<RecurringTransaction & { account_currency: string }> =
+        await db.getAllAsync<any>(
+            `SELECT rt.*, a.currency AS account_currency FROM recurring_transactions rt
+            JOIN accounts a ON a.id = rt.account_id
+            WHERE rt.status = 'active'
+            AND rt.create_next_at_unix IS NOT NULL
+            AND CAST(rt.create_next_at_unix AS INTEGER) <= ?`,
+            [nowUnix],
+        );
 
     for (const recurring of recurringTxs) {
-        let nextAt = recurring.create_next_at_unix;
         const rruleString = recurring.recurrence_rule;
-
-        // Parse recurrence rule starting from last "next_at"
         const rule = RRule.fromString(rruleString);
-        const after = new Date(nextAt * 1000);
-        const occurrences = rule.between(after, now, true);
+        const nextExpected = new Date(recurring.create_next_at_unix * 1000);
 
-        if (occurrences.length === 0) continue;
-
-        const transactionService = new TransactionSQLiteService(db);
-
-        for (const occurrence of occurrences) {
+        // check if the next expected occurrence is now or in the past
+        if (nextExpected <= now) {
+            const transactionService = new TransactionSQLiteService(db);
             await transactionService.create({
                 account_id: recurring.account_id,
                 type: recurring.type,
                 amount: recurring.amount,
                 category: recurring.category,
-                note: recurring.note ?? '',
-                currency: recurring.account_currency, // always from account
-                plan_id: recurring.plan_id ?? null,
-                date: occurrence.toISOString(),
-                from_account: recurring.from_account ?? null,
-                to_account: recurring.to_account ?? null,
+                note: `Recurring transaction for ${recurring.category}`,
+                currency: recurring.account_currency,
+                date: nextExpected.toISOString(),
                 charges: 0,
             });
-        }
 
-        const lastOccurrence = occurrences[occurrences.length - 1];
-        const lastCreatedAtUnix = dateToUNIX(lastOccurrence);
-        const nextOccurrence = rule.after(now, true);
+            // calc the next occurrence after this one
+            const nextOccurrence = rule.after(nextExpected, false);
+            // update the recurring transaction
+            await db.runAsync(
+                `UPDATE recurring_transactions
+                SET create_next_at_unix = ?,
+                    create_next_at = datetime(?, 'unixepoch'),
+                    last_created_at = datetime(?, 'unixepoch'),
+                    last_created_at_unix = ?
+                WHERE id = ?`,
+                [
+                    nextOccurrence ? dateToUNIX(nextOccurrence) : null,
+                    nextOccurrence ? dateToUNIX(nextOccurrence) : null,
+                    dateToUNIX(nextExpected),
+                    dateToUNIX(nextExpected),
+                    recurring.id,
+                ],
+            );
 
-        // 4. Update the recurring transaction's scheduling fields
-        await db.runAsync(
-            `UPDATE recurring_transactions
-             SET create_next_at_unix = ?,
-                 create_next_at = datetime(?, 'unixepoch'),
-                 last_created_at = datetime(?, 'unixepoch'),
-                 last_created_at_unix = ?
-             WHERE id = ?`,
-            [
-                nextOccurrence ? dateToUNIX(nextOccurrence) : null,
-                nextOccurrence ? dateToUNIX(nextOccurrence) : null,
-                lastCreatedAtUnix,
-                lastCreatedAtUnix,
+            console.log('Updated recurring transaction scheduling for:', recurring.id);
+        } else {
+            console.log(
+                'Recurring transaction not due yet:',
                 recurring.id,
-            ],
-        );
+                'Next at:',
+                nextExpected,
+            );
+        }
     }
 }

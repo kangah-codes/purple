@@ -17,6 +17,7 @@ import { useAuth } from '../Auth/hooks';
 import {
     CreateRecurringTransaction,
     CreateTransaction,
+    EditTransaction,
     RecurringTransaction,
     Transaction,
 } from './schema';
@@ -34,6 +35,7 @@ export function useTransactionStore() {
         setCurrentRecurringTransaction,
         updateTransactions,
         updateRecurringTransactions,
+        deleteTransaction,
     ] = useStore(createTransactionStore, (state) => [
         state.transactions,
         state.recurringTransactions,
@@ -45,6 +47,7 @@ export function useTransactionStore() {
         state.setCurrentRecurringTransaction,
         state.updateTransactions,
         state.updateRecurringTransactions,
+        state.deleteTransaction,
     ]);
 
     return {
@@ -59,6 +62,7 @@ export function useTransactionStore() {
         currentRecurringTransaction,
         setCurrentRecurringTransaction,
         updateRecurringTransactions,
+        deleteTransaction,
     };
 }
 
@@ -207,6 +211,20 @@ export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Tra
     });
 }
 
+export function useEditTransaction(): UseMutationResult<
+    GenericAPIResponse<Transaction>,
+    Error,
+    { id: string; data: EditTransaction }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-transaction'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.update(id, data);
+    });
+}
+
 export function useCreateRecurringTransaction(): UseMutationResult<
     GenericAPIResponse<RecurringTransaction>,
     Error
@@ -237,5 +255,19 @@ export function useUpdateTransaction(): UseMutationResult<
     return useMutation(['update-transaction'], async ({ id, data }) => {
         const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.update(id, data);
+    });
+}
+
+export function useDeleteTransaction({
+    transactionID,
+}: {
+    transactionID: string;
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['delete-plan'], async () => {
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.delete(transactionID);
     });
 }

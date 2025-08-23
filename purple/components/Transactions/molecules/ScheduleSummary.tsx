@@ -1,7 +1,7 @@
 import { View, Text } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import React from 'react';
-import { getOrdinalSuffix } from '../utils';
+import { calculateTransactionSchedule, getOrdinalSuffix } from '../utils';
 
 type ScheduleSummaryProps = {
     frequency: 'daily' | 'weekly' | 'monthly' | 'custom' | '';
@@ -18,37 +18,13 @@ export default function ScheduleSummary({
     customDate,
     time,
 }: ScheduleSummaryProps) {
-    let summary = '';
-
-    const isValid =
-        frequency === 'daily' ||
-        (frequency === 'weekly' && dayOfWeek) ||
-        (frequency === 'monthly' && dayOfMonth) ||
-        (frequency === 'custom' && customDate);
-
-    if (!isValid) {
-        return null;
-    }
-
-    switch (frequency) {
-        case 'daily':
-            summary = `Transaction will be created daily at ${time}`;
-            break;
-        case 'weekly':
-            summary = `Transaction will be created weekly on ${dayOfWeek} at ${time}`;
-            break;
-        case 'monthly':
-            const suffix = getOrdinalSuffix(dayOfMonth!);
-            summary = `Transaction will be created on the ${dayOfMonth}${suffix} of each month at ${time}`;
-            break;
-        case 'custom':
-            const day = customDate!.getDate();
-            const suffixCustom = getOrdinalSuffix(day);
-            const month = customDate!.toLocaleString('default', { month: 'long' });
-            const year = customDate!.getFullYear();
-            summary = `Transaction will be created on ${day}${suffixCustom} ${month} ${year} at ${time}`;
-            break;
-    }
+    const summary = calculateTransactionSchedule(
+        frequency,
+        time,
+        dayOfWeek,
+        dayOfMonth,
+        customDate,
+    );
 
     return (
         <View className='bg-purple-100 w-full rounded-3xl mt-2.5 flex flex-col p-1.5'>

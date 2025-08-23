@@ -60,7 +60,7 @@ export function useAccounts({
 }: {
     requestQuery: RequestParamQuery;
     options?: UseQueryOptions;
-}): UseQueryResult<GenericAPIResponse<Account>, Error> {
+}): UseQueryResult<GenericAPIResponse<Account[]>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
 
