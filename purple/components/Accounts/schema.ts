@@ -1,6 +1,8 @@
 import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { Transaction } from '../Transactions/schema';
 
+export type TimePeriod = '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+
 export type IAccountCard = {
     accountName: string;
     accountTotal: number;
@@ -29,7 +31,7 @@ export type Account = {
 export type CurrentAccountRequestParams = {
     accountID?: string;
     page_size?: number;
-    currentSelection?: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+    currentSelection?: TimePeriod;
     startDate?: string;
     endDate?: string;
 };

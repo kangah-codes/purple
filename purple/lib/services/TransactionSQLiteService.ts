@@ -311,6 +311,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             accountID = false,
             start_date = false,
             end_date = false,
+            accountGroup = false,
         } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
@@ -320,6 +321,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         if (accountID) {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
+        }
+        if (accountGroup) {
+            whereClause += ' AND t.account_id IN (SELECT id FROM accounts WHERE category = ?)';
+            params.push(accountGroup);
         }
         if (start_date && end_date) {
             whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;

@@ -1,33 +1,19 @@
-import { keyExtractor } from '@/lib/utils/number';
-import { FlashList } from '@shopify/flash-list';
-import React, { useCallback, useEffect } from 'react';
-import { useAccountStore } from '../hooks';
-import { Account } from '../schema';
-import { groupAccountsByCategory } from '../utils';
-import AccountCard from './AccountCard';
-import AccountGroupCard from './AccountGroupCard';
 import { View } from '@/components/Shared/styled';
+import React from 'react';
+import { useAccounts, useAccountStore } from '../hooks';
+import { groupAccountsByCategory } from '../utils';
+import AccountGroupCard from './AccountGroupCard';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
 export default function AccountsAccordion() {
-    const { accounts } = useAccountStore();
-    const renderItem = useCallback(
-        ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
-            <AccountCard groupName={item.groupName} accounts={item.accounts} />
-        ),
-        [],
-    );
+    const { data: accounts, refetch } = useAccounts({
+        requestQuery: {},
+    });
+    useRefreshOnFocus(refetch);
 
-    const groupedAccounts = groupAccountsByCategory(accounts);
-    const data = Object.entries(groupedAccounts)
-        .map(([key, value]) => {
-            const [category, currency] = key.split('_');
-            return {
-                groupName: category,
-                currency: currency,
-                accounts: value,
-            };
-        })
-        .filter((item) => item.accounts && item.accounts.length > 0);
+    const groupedAccounts = groupAccountsByCategory(accounts?.data ?? []);
+
+    console.log(accounts, 'ACCOUNTS');
 
     return (
         <View className='px-5 flex flex-col space-y-5'>

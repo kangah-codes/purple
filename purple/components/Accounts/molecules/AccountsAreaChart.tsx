@@ -1,25 +1,18 @@
+import { usePreferences } from '@/components/Settings/hooks';
 import { ScrollView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { Transaction } from '@/components/Transactions/schema';
+import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { getMaxValue } from '@/lib/utils/object';
 import React, { useMemo, useState } from 'react';
-import { LineChart } from 'react-native-gifted-charts';
-import { generateChartData, groupAccountsByCategory } from '../utils';
-import AccountActivityDateFilter from './AccountActivityDateFilter';
-import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { StyleSheet } from 'react-native';
-import { generateMockTransactionsForMonth } from '@/components/Stats/utils';
+import { LineChart } from 'react-native-gifted-charts';
 import { transactions } from '../constants';
-import { ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
-import { useAccountStore } from '../hooks';
-import { usePreferences } from '@/components/Settings/hooks';
+import { useAccountStore, useCalculateAccountData } from '../hooks';
+import { TimePeriod } from '../schema';
+import { generateChartData, groupAccountsByCategory } from '../utils';
 
-type AccountsAreaChartProps = {
-    transactions: Transaction[];
-};
-
-const accountCategories = ['NET WORTH', 'CASH', 'BANK ACCOUNTS', 'INVESTMENTS', 'LIABILITIES'];
-const datePeriods = ['1M', '3M', '6M', '1Y', 'ALL'];
+const datePeriods: TimePeriod[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
     const { accounts } = useAccountStore();
@@ -27,23 +20,29 @@ export default function AccountsAreaChart() {
         preferences: { currency },
     } = usePreferences();
     const groupedAccounts = groupAccountsByCategory(accounts);
+    const [selectedCategory, setSelectedCategory] = useState('📈 NET WORTH');
+    const [selectedPeriod, setSelectedPeriod] = useState(datePeriods[0]);
+    const accountGroupData = useCalculateAccountData({
+        accountGroup: selectedCategory,
+        timePeriod: selectedPeriod,
+    });
     const { data, maxValue } = useMemo(() => {
-        const transformedData = generateChartData(transactions);
+        const transformedData = generateChartData(accountGroupData.transactions);
         return {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 102),
         };
-    }, []);
-    const [selectedCategory, setSelectedCategory] = useState('📈 NET WORTH');
-    const [selectedPeriod, setSelectedPeriod] = useState(datePeriods[1]);
+    }, [accountGroupData.transactions, selectedCategory]);
 
     const handleCategoryChange = (period: string) => {
         setSelectedCategory(period);
     };
 
-    const handlePeriodChange = (period: string) => {
+    const handlePeriodChange = (period: TimePeriod) => {
         setSelectedPeriod(period);
     };
+
+    console.log(data, 'CHARTDATA', JSON.stringify(accountGroupData));
 
     return (
         <View className='relative -ml-[5px] flex flex-col scale-[1.03]'>
@@ -81,18 +80,36 @@ export default function AccountsAreaChart() {
             </ScrollView>
             <View className='flex flex-col px-8'>
                 <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black'>
-                    {formatCurrencyAccurate(currency, 45602.83)}
+                    {formatCurrencyAccurate(currency, accountGroupData.currentBalance)}
                 </Text>
-                <View className='flex flex-row items-center space-x-1'>
-                    <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
+                {accountGroupData.percentageChange != 0 && (
+                    <View className='flex flex-row items-center space-x-1'>
+                        {accountGroupData.trend === 'increase' ? (
+                            <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
+                        ) : (
+                            <ArrowNarrowDownRightIcon width={16} height={16} stroke='#fb2c36' />
+                        )}
 
-                    <Text
-                        style={[satoshiFont.satoshiBold, { color: '#A855F7' }]}
-                        className='text-xs'
-                    >
-                        {formatCurrencyAccurate('USD', 32)} (3.5%) 1 month
-                    </Text>
-                </View>
+                        <Text
+                            style={[
+                                satoshiFont.satoshiBold,
+                                {
+                                    color:
+                                        accountGroupData.trend === 'increase'
+                                            ? '#A855F7'
+                                            : '#fb2c36',
+                                },
+                            ]}
+                            className='text-xs'
+                        >
+                            {formatCurrencyAccurate(
+                                accountGroupData.currency,
+                                accountGroupData.currentBalance,
+                            )}{' '}
+                            ({accountGroupData.percentageChange}%)
+                        </Text>
+                    </View>
+                )}
             </View>
             <View className='relative mt-10'>
                 {data.length < 2 && (
@@ -108,14 +125,15 @@ export default function AccountsAreaChart() {
                     maxValue={maxValue}
                     hideDataPoints
                     hideRules
+                    isAnimated
                     hideYAxisText
-                    curved
+                    // curved
                     curvature={0.125}
                     // hideAxesAndRules
                     adjustToWidth
-                    color='#7E22CE'
+                    color='#9810fa'
                     // thickness={2.125}
-                    startFillColor='#7E22CE'
+                    startFillColor='#9810fa'
                     endFillColor='#7E22CE'
                     startOpacity={0.5}
                     endOpacity={0}

@@ -12,8 +12,17 @@ import {
 import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
 import { SessionData } from '../Auth/schema';
-import { Account } from './schema';
+import { Account, TimePeriod } from './schema';
 import { createAccountStore } from './state';
+import { Transaction } from '../Transactions/schema';
+import { usePreferences } from '../Settings/hooks';
+import CurrencyService from '@/lib/services/CurrencyService';
+import { useMemo } from 'react';
+import { getDateRange } from '@/lib/utils/date';
+import { useTransactions } from '../Transactions/hooks';
+import { groupAccountsByCategory } from './utils';
+import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
 export function useAccountStore() {
     const [
@@ -151,4 +160,168 @@ export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account
         const service = ServiceFactory.create<Account>('accounts', db, sessionData);
         return service.create(accountInformation as Partial<Account>);
     });
+}
+export interface AccountDataCalculation {
+    currentBalance: number;
+    previousBalance: number;
+    absoluteChange: number;
+    percentageChange: number;
+    trend: 'increase' | 'decrease' | 'neutral';
+    currency: CurrencyCode;
+    isLoading: boolean;
+    error?: string;
+    transactions: Transaction[];
+}
+
+export function useCalculateAccountData({
+    accountGroup,
+    timePeriod,
+}: {
+    accountGroup?: string;
+    timePeriod: TimePeriod;
+}): AccountDataCalculation {
+    const {
+        preferences: { currency: preferredCurrency },
+    } = usePreferences();
+
+    const currencyService = CurrencyService.getInstance();
+
+    const {
+        data: accountsData,
+        isLoading: accountsLoading,
+        refetch: refetchAccounts,
+    } = useAccounts({
+        requestQuery: {},
+    });
+
+    const {
+        data: transactionsData,
+        isLoading: transactionsLoading,
+        refetch: refetchTransactions,
+    } = useTransactions({
+        requestQuery: {
+            page_size: Infinity,
+            ...getDateRange(timePeriod),
+            ...(accountGroup !== '📈 NET WORTH' && { accountGroup }),
+        },
+    });
+
+    useRefreshOnFocus(refetchAccounts);
+    useRefreshOnFocus(refetchTransactions);
+
+    const isLoading = accountsLoading || transactionsLoading;
+    const accounts = accountsData?.data || [];
+    const transactions = transactionsData?.data || [];
+
+    return useMemo(() => {
+        if (isLoading) {
+            return {
+                currentBalance: 0,
+                previousBalance: 0,
+                absoluteChange: 0,
+                percentageChange: 0,
+                trend: 'neutral' as const,
+                currency: preferredCurrency,
+                isLoading: true,
+                transactions,
+            };
+        }
+
+        try {
+            const { startDate, endDate } = getDateRange(timePeriod);
+
+            let relevantAccounts = accounts;
+            if (accountGroup && accountGroup !== '📈 NET WORTH') {
+                // TODO: fix import cycle
+                const groupedAccounts = groupAccountsByCategory(accounts);
+                relevantAccounts = groupedAccounts[accountGroup] || [];
+            }
+
+            if (relevantAccounts.length === 0) {
+                return {
+                    currentBalance: 0,
+                    previousBalance: 0,
+                    absoluteChange: 0,
+                    percentageChange: 0,
+                    trend: 'neutral' as const,
+                    currency: preferredCurrency,
+                    isLoading: false,
+                    transactions,
+                };
+            }
+
+            // calc current balance (convert all to preferred currency)
+            const currentBalance = relevantAccounts.reduce((sum, account) => {
+                const converted = currencyService.convertCurrencySync({
+                    from: { currency: account.currency, amount: account.balance },
+                    to: { currency: preferredCurrency },
+                });
+                return sum + converted;
+            }, 0);
+
+            // calc balance at the start of the period
+            const previousBalance = relevantAccounts.reduce((sum, account) => {
+                // get transactions for this account within the time period
+                const accountTransactions = transactions.filter(
+                    (tx) =>
+                        tx.account_id === account.id &&
+                        new Date(tx.created_at) >= startDate &&
+                        new Date(tx.created_at) <= endDate,
+                );
+
+                // calc the account balance at the start of the period
+                const transactionSum = accountTransactions.reduce((txSum, tx) => {
+                    return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
+                }, 0);
+
+                const balanceAtStart = account.balance - transactionSum;
+
+                // convert to preferred currency
+                const converted = currencyService.convertCurrencySync({
+                    from: { currency: account.currency, amount: balanceAtStart },
+                    to: { currency: preferredCurrency.toLowerCase() },
+                });
+
+                return sum + converted;
+            }, 0);
+
+            const absoluteChange = currentBalance - previousBalance;
+            const percentageChange = (
+                previousBalance !== 0 ? (absoluteChange / Math.abs(previousBalance)) * 100 : 0
+            ).toFixed(1);
+
+            let trend: 'increase' | 'decrease' | 'neutral';
+            if (Math.abs(Number(percentageChange)) < 0.01) {
+                trend = 'neutral';
+            } else if (absoluteChange > 0) {
+                trend = 'increase';
+            } else {
+                trend = 'decrease';
+            }
+
+            return {
+                currentBalance,
+                previousBalance,
+                absoluteChange,
+                percentageChange,
+                trend,
+                currency: preferredCurrency,
+                isLoading: false,
+                transactions,
+            };
+        } catch (error) {
+            console.error('Error calculating account data:', error);
+            return {
+                currentBalance: 0,
+                previousBalance: 0,
+                absoluteChange: 0,
+                percentageChange: 0,
+                trend: 'neutral' as const,
+                currency: preferredCurrency,
+                isLoading: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+                transactions,
+            };
+        }
+    }, [accountGroup, timePeriod, accounts, transactions, preferredCurrency, isLoading]);
 }

@@ -1,5 +1,8 @@
 import { GenericAPIResponse } from '@/@types/request';
-import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
+import DropdownMenuDeprecated from '@/components/Shared/molecules/DropdownMenuDeprecated';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenuDeprecated/MenuOption';
 import {
     LinearGradient,
     SafeAreaView,
@@ -8,24 +11,20 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { router } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
-import { FlatList, StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
-import { Account } from '../schema';
-import AccountGroupCard from '../molecules/AccountGroupCard';
-import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
-import AccountActivityAreaChart from '../molecules/AccountActivityAreaChart';
-import { useTransactionStore } from '@/components/Transactions/hooks';
 import AccountsAreaChart from '../molecules/AccountsAreaChart';
-import DropdownMenuDeprecated from '@/components/Shared/molecules/DropdownMenuDeprecated';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenuDeprecated/MenuOption';
+import { Account } from '../schema';
+import tw from 'twrnc';
 
 export default function AccountsScreen() {
     const [visible, setVisible] = useState(false);
@@ -103,17 +102,20 @@ export default function AccountsScreen() {
                         }
                         padX={20}
                         dropdownWidth={180}
+                        offsetY={10}
+                        style={[tw`rounded-3xl bg-purple-50 p-2 px-4`, styles.shadow]}
                     >
                         <MenuOption onSelect={alert}>
-                            <View className='flex flex-row items-center space-x-1'>
+                            <View className='flex flex-row items-center space-x-1 py-1.5'>
                                 <TrashIcon stroke='#EF4444' width={18} />
                                 <Text style={satoshiFont.satoshiMedium} className='text-sm'>
                                     Delete
                                 </Text>
                             </View>
                         </MenuOption>
+                        <View className='h-[1px] border-b border-purple-200 my-0.5' />
                         <MenuOption onSelect={alert}>
-                            <View className='flex flex-row items-center space-x-1'>
+                            <View className='flex flex-row items-center space-x-1 py-1.5'>
                                 <TrashIcon stroke='#EF4444' width={18} />
                                 <Text style={satoshiFont.satoshiMedium} className='text-sm'>
                                     Delete
@@ -141,7 +143,7 @@ export default function AccountsScreen() {
                     </LinearGradient>
                 </View>
                 <View className='mb-7'>
-                    <AccountsAreaChart transactions={transactions} />
+                    <AccountsAreaChart />
                 </View>
                 <AccountsAccordion />
             </ScrollView>
@@ -152,5 +154,15 @@ export default function AccountsScreen() {
 const styles = StyleSheet.create({
     parentView: {
         paddingTop: RNStatusBar.currentHeight,
+    },
+    shadow: {
+        shadowColor: '#3c0366',
+        shadowOffset: {
+            width: 0,
+            height: 0,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 8, // increased for a more even spread
+        elevation: 8, // higher elevation for Android to match iOS shadow
     },
 });
