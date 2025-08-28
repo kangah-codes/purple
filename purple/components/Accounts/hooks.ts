@@ -13,7 +13,7 @@ import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
 import { SessionData } from '../Auth/schema';
 import { Account, TimePeriod } from './schema';
-import { createAccountStore } from './state';
+import { createAccountsReportStore, createAccountStore } from './state';
 import { Transaction } from '../Transactions/schema';
 import { usePreferences } from '../Settings/hooks';
 import CurrencyService from '@/lib/services/CurrencyService';
@@ -60,6 +60,29 @@ export function useAccountStore() {
         currentAccountRequestParams,
         setCurrentAccountTransactions,
         setCurrentAccountRequestParams,
+    };
+}
+
+export function useAccountReportStore() {
+    const [category, setCategory, period, setPeriod, showChart, setShowChart] = useStore(
+        createAccountsReportStore,
+        ({ category, setCategory, period, setTimePeriod, showChart, setShowChart }) => [
+            category,
+            setCategory,
+            period,
+            setTimePeriod,
+            showChart,
+            setShowChart,
+        ],
+    );
+
+    return {
+        category,
+        setCategory,
+        period,
+        setPeriod,
+        showChart,
+        setShowChart,
     };
 }
 
@@ -180,6 +203,9 @@ export function useCalculateAccountData({
     accountGroup?: string;
     timePeriod: TimePeriod;
 }): AccountDataCalculation {
+    console.log('🔍 useCalculateAccountData called with:', { accountGroup, timePeriod });
+    const stack = new Error().stack;
+    console.log('📍 Called from:', stack);
     const {
         preferences: { currency: preferredCurrency },
     } = usePreferences();
@@ -212,6 +238,12 @@ export function useCalculateAccountData({
     const isLoading = accountsLoading || transactionsLoading;
     const accounts = accountsData?.data || [];
     const transactions = transactionsData?.data || [];
+
+    console.log({
+        page_size: Infinity,
+        ...getDateRange(timePeriod),
+        ...(accountGroup !== '📈 NET WORTH' && { accountGroup }),
+    });
 
     return useMemo(() => {
         if (isLoading) {
@@ -303,7 +335,10 @@ export function useCalculateAccountData({
                 currentBalance,
                 previousBalance,
                 absoluteChange,
-                percentageChange,
+                percentageChange:
+                    Number(percentageChange) % 1 === 0
+                        ? Number(percentageChange)
+                        : percentageChange,
                 trend,
                 currency: preferredCurrency,
                 isLoading: false,

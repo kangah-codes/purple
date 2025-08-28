@@ -8,7 +8,6 @@ import {
     PiggyBankIcon,
     SafeIcon,
 } from '@/components/SVG/icons/noscale';
-import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
 import * as WebBrowser from 'expo-web-browser';
@@ -61,12 +60,6 @@ export default function ProfilePages() {
             title: 'Transactions',
             link: '/settings/transactions',
             description: 'Manage transaction settings',
-        },
-        {
-            icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Categories',
-            link: '/settings/transaction-categories',
-            description: 'Manage transaction categories',
         },
         {
             icon: <ClosedLockIcon width={20} height={20} stroke={'#9333ea'} />,

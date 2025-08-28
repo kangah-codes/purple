@@ -1,203 +1,211 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
+    Dimensions,
+    Modal,
+    StyleProp,
     StyleSheet,
-    TouchableOpacity,
+    TouchableWithoutFeedback,
     View,
     ViewStyle,
-    Dimensions,
-    ScrollView,
 } from 'react-native';
-
-interface DropdownOption {
-    renderLabel: () => React.ReactNode;
-    onPress?: () => void;
-}
-
 interface DropdownMenuProps {
-    renderTrigger: () => React.ReactNode;
-    options: DropdownOption[];
-    spacing?: number;
-    animationDuration?: number;
-    style?: ViewStyle;
-    dropdownStyle?: ViewStyle;
-    optionStyle?: ViewStyle;
-    screenPadding?: number;
+    visible: boolean;
+    handleClose: () => void;
+    handleOpen: () => void;
+    trigger: React.ReactNode;
+    children: React.ReactNode;
     dropdownWidth?: number;
+    padX?: number;
+    padY?: number;
+    offsetY?: number;
+    animationDuration?: number;
+    style?: StyleProp<ViewStyle>;
 }
 
-const DropdownMenu: React.FC<DropdownMenuProps> = ({
-    renderTrigger,
-    options,
-    spacing = 8,
+interface Position {
+    x: number;
+    y: number;
+    width: number;
+}
+
+export default function DropdownMenu({
+    visible,
+    handleOpen,
+    handleClose,
+    trigger,
+    children,
+    dropdownWidth = 150,
+    padX = 5,
+    padY = 5,
+    offsetY = 0,
     animationDuration = 200,
     style,
-    dropdownStyle,
-    optionStyle,
-    screenPadding = 16,
-    dropdownWidth = 180,
-}) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [layout, setLayout] = useState<{
-        top: number;
-        left: number;
-        maxHeight: number;
-    } | null>(null);
+}: DropdownMenuProps) {
+    const triggerRef = useRef<View>(null);
+    const [position, setPosition] = useState<Position>({ x: 0, y: 0, width: 0 });
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const containerRef = useRef<View>(null);
-    const screen = Dimensions.get('window');
+    // Animation values
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+    const translateYAnim = useRef(new Animated.Value(-10)).current;
 
-    const opacity = useRef(new Animated.Value(0)).current;
-    const scale = useRef(new Animated.Value(0.95)).current;
+    const measureTrigger = () => {
+        if (triggerRef.current) {
+            const screenWidth = Dimensions.get('window').width;
 
-    function measureAndOpen() {
-        if (!containerRef.current) return;
+            triggerRef.current.measure((fx, fy, width, height, px, py) => {
+                // Calculate initial position (centered under trigger)
+                let xPosition = px + width / 2 - dropdownWidth / 2;
 
-        containerRef.current.measureInWindow((x, y, width, height) => {
-            const dropdownHeight = options.length * 44 + 16;
+                // Ensure dropdown stays within screen bounds with padding
+                const rightEdgePosition = xPosition + dropdownWidth;
+                if (rightEdgePosition > screenWidth - padX) {
+                    xPosition = screenWidth - dropdownWidth - padX;
+                }
 
-            const spaceBelow = screen.height - (y + height + spacing) - screenPadding;
-            const spaceAbove = y - spacing - screenPadding;
+                if (xPosition < padX) {
+                    xPosition = padX;
+                }
 
-            let top = y + height + spacing;
-            let maxHeight = dropdownHeight;
+                setPosition({
+                    x: xPosition,
+                    y: height + offsetY,
+                    width: width,
+                });
+            });
+        }
+    };
 
-            if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-                // open above
-                top = Math.max(screenPadding, y - spacing - Math.min(spaceAbove, dropdownHeight));
-                maxHeight = Math.min(spaceAbove, dropdownHeight);
-            } else {
-                // open below
-                top = Math.min(
-                    y + height + spacing,
-                    screen.height - screenPadding - Math.min(spaceBelow, dropdownHeight),
-                );
-                maxHeight = Math.min(spaceBelow, dropdownHeight);
-            }
+    const showDropdown = () => {
+        measureTrigger();
+        setModalVisible(true);
 
-            // Clamp horizontal
-            let left = x;
-            if (x + dropdownWidth > screen.width - screenPadding) {
-                left = screen.width - screenPadding - dropdownWidth;
-            }
-            if (left < screenPadding) left = screenPadding;
+        // Reset animation values
+        scaleAnim.setValue(0.8);
+        opacityAnim.setValue(0);
+        translateYAnim.setValue(-10);
 
-            setLayout({ top, left, maxHeight });
-
-            setIsOpen(true);
-            Animated.parallel([
-                Animated.timing(opacity, {
-                    toValue: 1,
-                    duration: animationDuration,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(scale, {
-                    toValue: 1,
-                    duration: animationDuration,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        });
-    }
-
-    function close() {
+        // Start entrance animation
         Animated.parallel([
-            Animated.timing(opacity, {
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                useNativeDriver: true,
+                tension: 100,
+                friction: 8,
+            }),
+            Animated.timing(opacityAnim, {
+                toValue: 1,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateYAnim, {
                 toValue: 0,
                 duration: animationDuration,
                 useNativeDriver: true,
             }),
-            Animated.timing(scale, {
-                toValue: 0.95,
-                duration: animationDuration,
+        ]).start();
+    };
+
+    const hideDropdown = () => {
+        // Start exit animation
+        Animated.parallel([
+            Animated.timing(scaleAnim, {
+                toValue: 0.8,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+                toValue: 0,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateYAnim, {
+                toValue: -10,
+                duration: animationDuration * 0.8,
                 useNativeDriver: true,
             }),
         ]).start(() => {
-            setIsOpen(false);
-            setLayout(null);
+            setModalVisible(false);
+            handleClose();
         });
-    }
+    };
 
-    function toggle() {
-        if (isOpen) close();
-        else measureAndOpen();
-    }
-
-    function handleOptionPress(option: DropdownOption) {
-        option.onPress?.();
-        close();
-    }
+    useEffect(() => {
+        if (visible) {
+            showDropdown();
+        } else if (modalVisible) {
+            hideDropdown();
+        }
+    }, [visible]);
 
     return (
-        <>
-            {isOpen && (
-                <TouchableOpacity
-                    style={StyleSheet.absoluteFillObject}
-                    activeOpacity={1}
-                    onPress={close}
-                />
-            )}
+        <View>
+            <TouchableWithoutFeedback onPress={handleOpen}>
+                <View ref={triggerRef}>{trigger}</View>
+            </TouchableWithoutFeedback>
 
-            <View ref={containerRef} style={[style]}>
-                <TouchableOpacity activeOpacity={0.8} onPress={toggle}>
-                    {renderTrigger()}
-                </TouchableOpacity>
-            </View>
-
-            {isOpen && layout && (
-                <Animated.View
-                    style={[
-                        styles.dropdown,
-                        {
-                            top: layout.top,
-                            left: layout.left,
-                            width: dropdownWidth,
-                            maxHeight: layout.maxHeight,
-                            opacity,
-                            transform: [{ scale }],
-                        },
-                        dropdownStyle,
-                    ]}
+            {modalVisible && (
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType='none'
+                    hardwareAccelerated
+                    onRequestClose={() => {
+                        if (visible) {
+                            hideDropdown();
+                        }
+                    }}
                 >
-                    <ScrollView style={{ maxHeight: layout.maxHeight }}>
-                        {options.map((option, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[styles.option, optionStyle]}
-                                onPress={() => handleOptionPress(option)}
-                                activeOpacity={0.7}
-                            >
-                                {option.renderLabel()}
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </Animated.View>
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            if (visible) {
+                                hideDropdown();
+                            }
+                        }}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <TouchableWithoutFeedback onPress={() => {}}>
+                                <Animated.View
+                                    style={[
+                                        styles.menu,
+                                        {
+                                            top: position.y + offsetY,
+                                            left: position.x,
+                                            width: dropdownWidth,
+                                            transform: [
+                                                { scale: scaleAnim },
+                                                { translateY: translateYAnim },
+                                            ],
+                                            opacity: opacityAnim,
+                                        },
+                                        style,
+                                    ]}
+                                >
+                                    {children}
+                                </Animated.View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
             )}
-        </>
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
-    dropdown: {
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        backgroundColor: 'transparent',
+    },
+    menu: {
         position: 'absolute',
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        elevation: 6,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.1)',
-        overflow: 'hidden',
-        zIndex: 100,
-    },
-    option: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        minHeight: 44,
-        justifyContent: 'center',
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
 });
-
-export default DropdownMenu;

@@ -3,8 +3,7 @@ import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '@/components/S
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { useCalculateAccountData } from '../hooks';
+import { useAccountReportStore, useCalculateAccountData } from '../hooks';
 import { Account } from '../schema';
 import AccountCard from './AccountCard';
 
@@ -14,16 +13,14 @@ type AccountGroupCardProps = {
 };
 
 export default function AccountGroupCard({ group, accounts }: AccountGroupCardProps) {
+    const { period } = useAccountReportStore();
     const accountGroupData = useCalculateAccountData({
         accountGroup: group,
-        timePeriod: '1Y',
+        timePeriod: period,
     });
 
     return (
-        <View
-            className='w-full flex flex-col p-4 border-[0.5px] border-purple-100 rounded-3xl space-y-2.5 bg-purple-50'
-            style={styles.shadow}
-        >
+        <View className='w-full flex flex-col p-4 border-[0.5px] border-purple-100 rounded-3xl space-y-2.5 bg-purple-50'>
             <View className='flex flex-col'>
                 <View className='flex flex-row justify-between'>
                     <Text style={satoshiFont.satoshiBold} className='text-base'>
@@ -61,7 +58,7 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
                                     accountGroupData.currency,
                                     accountGroupData.absoluteChange,
                                 )}{' '}
-                                ({accountGroupData.percentageChange}%) 1 month
+                                ({accountGroupData.percentageChange}%)
                             </Text>
                         </View>
                     </View>
@@ -70,23 +67,11 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
             <View className='h-1 border-purple-100 border-b w-full mb-2.5' />
             <View className='flex flex-col space-y-4'>
                 {accounts.map((account) => (
-                    <AccountCard account={account} key={account.id} />
+                    <View>
+                        <AccountCard account={account} key={account.id} />
+                    </View>
                 ))}
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    // create a shadow equally around all sides for ios and android
-    shadow: {
-        // shadowColor: '#c27aff',
-        // shadowOffset: {
-        //     width: 0,
-        //     height: 0,
-        // },
-        // shadowOpacity: 0.25,
-        // shadowRadius: 8, // increased for a more even spread
-        // elevation: 8, // higher elevation for Android to match iOS shadow
-    },
-});

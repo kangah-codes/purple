@@ -52,3 +52,12 @@ export type AccountStore = {
     setCurrentAccountTransactions: (transactions: Transaction[]) => void;
     reset: () => void;
 };
+
+export type AccountsReportStore = {
+    category: string;
+    setCategory: (category: string) => void;
+    period: TimePeriod;
+    setTimePeriod: (period: TimePeriod) => void;
+    showChart: boolean;
+    setShowChart: (show: boolean) => void;
+};

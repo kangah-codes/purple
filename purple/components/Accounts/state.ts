@@ -1,7 +1,7 @@
 import { nativeStorage } from '@/lib/utils/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { AccountStore, CurrentAccountRequestParams } from './schema';
+import { AccountsReportStore, AccountStore, CurrentAccountRequestParams } from './schema';
 
 export const createAccountStore = create<AccountStore>()(
     persist(
@@ -35,6 +35,23 @@ export const createAccountStore = create<AccountStore>()(
         }),
         {
             name: 'account-store',
+            storage: createJSONStorage(() => nativeStorage),
+        },
+    ),
+);
+
+export const createAccountsReportStore = create<AccountsReportStore>()(
+    persist(
+        (set) => ({
+            category: '📈 NET WORTH',
+            setCategory: (category) => set({ category }),
+            period: '1M',
+            setTimePeriod: (period) => set({ period }),
+            showChart: true,
+            setShowChart: (showChart) => set({ showChart }),
+        }),
+        {
+            name: 'accounts-report-store',
             storage: createJSONStorage(() => nativeStorage),
         },
     ),

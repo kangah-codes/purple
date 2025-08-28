@@ -69,15 +69,17 @@ export default function CategoriesScreen() {
                     </Text>
                 </View>
 
-                <Link
-                    href={{
-                        pathname: '/settings/new-transaction-category',
-                    }}
+                <LinearGradient
+                    className='rounded-full justify-center items-center'
+                    colors={['#c084fc', '#9333ea']}
                 >
-                    <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                        <PlusIcon stroke={'#fff'} />
-                    </View>
-                </Link>
+                    <TouchableOpacity
+                        className='px-4 py-2 flex items-center justify-center rounded-full'
+                        onPress={() => router.push('/settings/new-transaction-category')}
+                    >
+                        <PlusIcon stroke={'#fff'} width={24} height={24} />
+                    </TouchableOpacity>
+                </LinearGradient>
             </View>
             <View className='px-5'>
                 <View className='relative flex justify-center mt-2.5 mb-5'>

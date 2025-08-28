@@ -7,24 +7,23 @@ import { getMaxValue } from '@/lib/utils/object';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { transactions } from '../constants';
-import { useAccountStore, useCalculateAccountData } from '../hooks';
+import { useAccountReportStore, useAccountStore, useCalculateAccountData } from '../hooks';
 import { TimePeriod } from '../schema';
 import { generateChartData, groupAccountsByCategory } from '../utils';
+import { groupBy } from '@/lib/utils/helpers';
 
 const datePeriods: TimePeriod[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
+    const { category, setCategory, period, setPeriod, showChart } = useAccountReportStore();
     const { accounts } = useAccountStore();
     const {
         preferences: { currency },
     } = usePreferences();
-    const groupedAccounts = groupAccountsByCategory(accounts);
-    const [selectedCategory, setSelectedCategory] = useState('📈 NET WORTH');
-    const [selectedPeriod, setSelectedPeriod] = useState(datePeriods[0]);
+    const groupedAccounts = groupBy(accounts, 'category');
     const accountGroupData = useCalculateAccountData({
-        accountGroup: selectedCategory,
-        timePeriod: selectedPeriod,
+        accountGroup: category,
+        timePeriod: period,
     });
     const { data, maxValue } = useMemo(() => {
         const transformedData = generateChartData(accountGroupData.transactions);
@@ -32,20 +31,20 @@ export default function AccountsAreaChart() {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 102),
         };
-    }, [accountGroupData.transactions, selectedCategory]);
+    }, [accountGroupData.transactions, category]);
 
-    const handleCategoryChange = (period: string) => {
-        setSelectedCategory(period);
+    const handleCategoryChange = (category: string) => {
+        setCategory(category);
     };
 
     const handlePeriodChange = (period: TimePeriod) => {
-        setSelectedPeriod(period);
+        setPeriod(period);
     };
 
-    console.log(data, 'CHARTDATA', JSON.stringify(accountGroupData));
+    if (!showChart) return null;
 
     return (
-        <View className='relative -ml-[5px] flex flex-col scale-[1.03]'>
+        <View className='relative -ml-[5px] flex flex-col scale-[1.03] mb-2'>
             <ScrollView
                 horizontal
                 contentContainerStyle={{
@@ -57,23 +56,21 @@ export default function AccountsAreaChart() {
                 showsHorizontalScrollIndicator={false}
                 className='py-5 px-8'
             >
-                {['📈 NET WORTH', ...Object.keys(groupedAccounts)].map((category) => (
+                {['📈 NET WORTH', ...Object.keys(groupedAccounts)].map((cat) => (
                     <TouchableOpacity
-                        key={category}
-                        style={[styles.pill, selectedCategory === category && styles.activePill]}
+                        key={cat}
+                        style={[styles.pill, category === cat && styles.activePill]}
                         className='rounded-full px-3.5 py-2'
-                        onPress={() => handleCategoryChange(category)}
+                        onPress={() => handleCategoryChange(cat)}
                     >
                         <Text
                             style={[
                                 satoshiFont.satoshiBold,
-                                selectedCategory === category
-                                    ? styles.activeText
-                                    : styles.inactiveText,
+                                cat === category ? styles.activeText : styles.inactiveText,
                             ]}
                             className='text-xs'
                         >
-                            {category.toUpperCase()}
+                            {cat.toUpperCase()}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -125,14 +122,10 @@ export default function AccountsAreaChart() {
                     maxValue={maxValue}
                     hideDataPoints
                     hideRules
-                    isAnimated
                     hideYAxisText
-                    // curved
                     curvature={0.125}
-                    // hideAxesAndRules
                     adjustToWidth
                     color='#9810fa'
-                    // thickness={2.125}
                     startFillColor='#9810fa'
                     endFillColor='#7E22CE'
                     startOpacity={0.5}
@@ -151,21 +144,21 @@ export default function AccountsAreaChart() {
                 />
             </View>
             <View className='flex flex-row justify-between items-center px-8'>
-                {datePeriods.map((period) => (
+                {datePeriods.map((p) => (
                     <TouchableOpacity
-                        key={period}
-                        style={[styles.pill, selectedPeriod === period && styles.activePill]}
+                        key={p}
+                        style={[styles.pill, p === period && styles.activePill]}
                         className='rounded-full px-3 py-1'
-                        onPress={() => handlePeriodChange(period)}
+                        onPress={() => handlePeriodChange(p)}
                     >
                         <Text
                             style={[
                                 satoshiFont.satoshiBold,
-                                selectedPeriod === period ? styles.activeText : styles.inactiveText,
+                                p === period ? styles.activeText : styles.inactiveText,
                             ]}
                             className='text-xs'
                         >
-                            {period}
+                            {p}
                         </Text>
                     </TouchableOpacity>
                 ))}

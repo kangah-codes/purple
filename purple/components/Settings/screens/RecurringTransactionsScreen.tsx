@@ -1,6 +1,12 @@
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, PlusIcon } from '@/components/SVG/icons/24x24';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
-import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import {
+    LinearGradient,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from '@/components/Shared/styled';
 import UpcomingTransactionCard from '@/components/Transactions/molecules/UpcomingTransactionCard';
 import { RecurringTransaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -84,6 +90,18 @@ function RecurringTransactionsScreen() {
                         Recurring Transactions
                     </Text>
                 </View>
+
+                <LinearGradient
+                    className='rounded-full justify-center items-center'
+                    colors={['#c084fc', '#9333ea']}
+                >
+                    <TouchableOpacity
+                        className='px-4 py-2 flex items-center justify-center rounded-full'
+                        onPress={() => router.push('/transactions/new-recurring-transaction')}
+                    >
+                        <PlusIcon stroke={'#fff'} width={24} height={24} />
+                    </TouchableOpacity>
+                </LinearGradient>
             </View>
             <FlashList
                 estimatedItemSize={300}

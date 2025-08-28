@@ -5,12 +5,13 @@ import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import SpendOverview from './SpendOverview';
 import SpendOverviewChart from './SpendOverviewChart';
-import TransactionsAccordion from './TransactionAccordion';
+import TransactionsAccordion from '../../Transactions/molecules/TransactionAccordion';
 import StatsHeatmap from './Heatmap';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { GenericAPIResponse } from '@/@types/request';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import SpendOverviewPieChart from './SpendOverviewPieChart';
+import SpendOverviewAreaChart from './SpendOverviewAreaChart';
 
 const now = new Date();
 const startDate = startOfMonth(now);
@@ -35,16 +36,16 @@ export default function StatsHeader() {
     useRefreshOnFocus(refetch);
 
     return (
-        <View className='flex flex-col space-y-5'>
+        <View className='flex flex-col space-y-5 p-5'>
             {/* Daily Activity Section */}
 
             <SpendOverview transactions={transactions} />
             <SpendOverviewChart transactions={transactions} />
             <SpendOverviewPieChart transactions={transactions} />
+            <SpendOverviewAreaChart />
             <StatsHeatmap transactions={transactions} />
-            <TransactionsAccordion transactions={transactions} />
 
-            <View style={{ marginTop: 20 }} />
+            <View style={{ marginBottom: 200 }} />
         </View>
     );
 }

@@ -13,10 +13,8 @@ export default function AccountsAccordion() {
 
     const groupedAccounts = groupAccountsByCategory(accounts?.data ?? []);
 
-    console.log(accounts, 'ACCOUNTS');
-
     return (
-        <View className='px-5 flex flex-col space-y-5'>
+        <View className='px-5 flex flex-col space-y-5 mt-5'>
             {Object.keys(groupedAccounts).map((key) => (
                 <View key={key}>
                     <AccountGroupCard group={key} accounts={groupedAccounts[key]} />

@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
-import DropdownMenuDeprecated from '@/components/Shared/molecules/DropdownMenuDeprecated';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenuDeprecated/MenuOption';
+import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
@@ -38,7 +38,7 @@ export default function PlanNavigationArea() {
                     </View>
                 </TouchableOpacity>
                 <View className='bg-purple-600 px-2 py-2 flex items-center justify-center rounded-full'>
-                    <DropdownMenuDeprecated
+                    <DropdownMenu
                         visible={visible}
                         handleOpen={() => setVisible(true)}
                         handleClose={() => setVisible(false)}
@@ -65,7 +65,7 @@ export default function PlanNavigationArea() {
                                 </Text>
                             </View>
                         </MenuOption>
-                    </DropdownMenuDeprecated>
+                    </DropdownMenu>
                 </View>
             </View>
         </View>

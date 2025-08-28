@@ -6,7 +6,7 @@ import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
-import TransactionCard from './TransactionCard';
+import TransactionCard from '../../Stats/molecules/TransactionCard';
 
 type TransactionsAccordionProps = {
     transactions: Transaction[];

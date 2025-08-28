@@ -102,7 +102,7 @@ export const generateMockTransactionsForMonth = (
     let previousAmount = startAmount;
 
     while (current <= end) {
-        const numTransactionsToday = Math.floor(Math.random() * 6);
+        const numTransactionsToday = Math.floor(Math.random() * 2);
 
         for (let i = 0; i < numTransactionsToday; i++) {
             let amount: number;
@@ -131,8 +131,8 @@ export const generateMockTransactionsForMonth = (
                         ? 'credit'
                         : 'debit'
                     : Math.random() > 0.5
-                      ? 'debit'
-                      : 'credit',
+                    ? 'debit'
+                    : 'credit',
                 amount: parseFloat(amount.toFixed(2)),
                 account: {} as any,
                 note: `Mock transaction ${id}`,

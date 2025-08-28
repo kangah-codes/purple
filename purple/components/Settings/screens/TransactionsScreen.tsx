@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { CoinsStackedIcon, EyeCloseIcon } from '@/components/SVG/icons/noscale';
 import Switch from '@/components/Shared/atoms/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
@@ -54,17 +54,16 @@ export default function TransactionsScreen() {
 
     const settingsItems: SettingsListItem[] = [
         {
-            icon: <EyeCloseIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Hide completed plans',
-            description: 'Hide plans from the main plans screen once they have been completed',
-            customItem: () => <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
-        },
-        {
             icon: <CalendarIcon width={20} height={20} stroke='#9333ea' strokeWidth={1.3} />,
             title: 'Recurring Transactions',
             description: 'Choose an account to always show first on the home screen',
-            // callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
             link: '/settings/transactions/recurring-transactions',
+        },
+        {
+            icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Categories',
+            link: '/settings/transaction-categories',
+            description: 'Manage transaction categories',
         },
     ];
 

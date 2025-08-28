@@ -26,6 +26,8 @@ export default function ScheduleSummary({
         customDate,
     );
 
+    if (!summary) return null;
+
     return (
         <View className='bg-purple-100 w-full rounded-3xl mt-2.5 flex flex-col p-1.5'>
             <View className='flex flex-col bg-white rounded-[20px] p-3'>

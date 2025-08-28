@@ -16,7 +16,7 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
+import { ACCOUNT_SUBGROUP_TYPES, ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics, useScreenTracking } from '@/lib/hooks/useAnalytics';
@@ -33,7 +33,6 @@ export default function NewAccountScreen() {
     const {
         preferences: { currency },
     } = usePreferences();
-    const [accountGroups, setAccountsGroups] = useState<string[]>(ACCOUNT_TYPES);
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { updateAccounts } = useAccountStore();
     const { mutate, isLoading } = useCreateAccount();
@@ -101,9 +100,7 @@ export default function NewAccountScreen() {
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-purple-100'>
-                <Text style={satoshiFont.satoshiBold} className='tracking-tight'>
-                    {item.label}
-                </Text>
+                <Text style={satoshiFont.satoshiBold}>{item.label}</Text>
             </View>
         );
     }, []);
@@ -137,17 +134,6 @@ export default function NewAccountScreen() {
         );
     }, []);
 
-    useEffect(() => {
-        const getAccountGroups = async () => {
-            const groups = nativeStorage.getItem<string[]>('account_groups');
-            if (groups) setAccountsGroups(groups);
-        };
-
-        getAccountGroups();
-    }, []);
-
-    if (!accountGroups.length) return null;
-
     return (
         <>
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -170,52 +156,6 @@ export default function NewAccountScreen() {
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Account Group
-                        </Text>
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Category can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newPlanType'
-                                            options={accountGroups.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
-                                            customSnapPoints={['50%', '55%', '60%']}
-                                            renderItem={renderItem}
-                                            value={value}
-                                            onChange={onChange}
-                                        />
-                                    </>
-                                )}
-                                name='category'
-                            />
-                            {errors.category && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.category.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
                     <View className='flex flex-col space-y-1'>
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Account Name
@@ -251,6 +191,89 @@ export default function NewAccountScreen() {
                             )}
                         </View>
                     </View>
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Account Group
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Category can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanType'
+                                            options={ACCOUNT_TYPES.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '55%', '60%']}
+                                            renderItem={renderItem}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='category'
+                            />
+                            {errors.category && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.category.message}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Subgroup
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Category can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newAccountSubcategory'
+                                            options={(
+                                                ACCOUNT_SUBGROUP_TYPES[getValues('category')] ?? []
+                                            ).reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '55%', '60%']}
+                                            renderItem={renderItem}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='subcategory'
+                            />
+                            {errors.category && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.category.message}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+
                     <View className='flex flex-col space-y-1'>
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Balance

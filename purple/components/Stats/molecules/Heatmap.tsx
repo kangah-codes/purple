@@ -21,7 +21,7 @@ const monthDays = eachDayOfInterval({ start, end });
 const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
 const offsetData = Array(offset).fill({ value: 0, key: '', index: 0 });
 const finalMonthDays = [...offsetData, ...monthDays];
-const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
+const blockSize = (deviceWidth - padding * 6) / numBlocksPerRow;
 
 type StatsHeatmapProps = {
     transactions: Transaction[];
@@ -70,7 +70,7 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
     );
 
     return (
-        <View className='flex-col space-y-2.5 px-5'>
+        <View className='flex-col space-y-2.5 p-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
             <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
                 Daily Activity
             </Text>
