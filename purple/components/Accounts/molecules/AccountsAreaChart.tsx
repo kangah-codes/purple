@@ -1,16 +1,18 @@
 import { usePreferences } from '@/components/Settings/hooks';
-import { ScrollView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
+import { ScrollView, Text, View } from '@/components/Shared/styled';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { groupBy } from '@/lib/utils/helpers';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { getMaxValue } from '@/lib/utils/object';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useAccountReportStore, useAccountStore, useCalculateAccountData } from '../hooks';
 import { TimePeriod } from '../schema';
-import { generateChartData, groupAccountsByCategory } from '../utils';
-import { groupBy } from '@/lib/utils/helpers';
+import { generateChartData } from '../utils';
 
 const datePeriods: TimePeriod[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
@@ -20,11 +22,14 @@ export default function AccountsAreaChart() {
     const {
         preferences: { currency },
     } = usePreferences();
+
     const groupedAccounts = groupBy(accounts, 'category');
+
     const accountGroupData = useCalculateAccountData({
         accountGroup: category,
         timePeriod: period,
     });
+
     const { data, maxValue } = useMemo(() => {
         const transformedData = generateChartData(accountGroupData.transactions);
         return {
@@ -33,60 +38,72 @@ export default function AccountsAreaChart() {
         };
     }, [accountGroupData.transactions, category]);
 
-    const handleCategoryChange = (category: string) => {
-        setCategory(category);
-    };
+    // For smooth transition
+    const [displayData, setDisplayData] = useState(data);
 
-    const handlePeriodChange = (period: TimePeriod) => {
-        setPeriod(period);
-    };
+    useEffect(() => {
+        if (data.length >= 2) {
+            setDisplayData(data);
+        }
+    }, [data]);
+
+    const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
+    const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
 
     if (!showChart) return null;
 
     return (
-        <View className='relative -ml-[5px] flex flex-col scale-[1.03] mb-2'>
+        <View className='relative flex flex-col mb-2.5'>
+            {/* Category selection */}
             <ScrollView
                 horizontal
                 contentContainerStyle={{
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    paddingRight: 60,
+                    paddingRight: 20,
                 }}
                 showsHorizontalScrollIndicator={false}
-                className='py-5 px-8'
+                className='py-5'
             >
-                {['📈 NET WORTH', ...Object.keys(groupedAccounts)].map((cat) => (
-                    <TouchableOpacity
-                        key={cat}
-                        style={[styles.pill, category === cat && styles.activePill]}
-                        className='rounded-full px-3.5 py-2'
-                        onPress={() => handleCategoryChange(cat)}
-                    >
-                        <Text
-                            style={[
-                                satoshiFont.satoshiBold,
-                                cat === category ? styles.activeText : styles.inactiveText,
-                            ]}
-                            className='text-xs'
-                        >
-                            {cat.toUpperCase()}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+                <View className='pl-5'>
+                    <AnimatedPillSelect
+                        options={['📈 NET WORTH', ...Object.keys(groupedAccounts)].map((p) => ({
+                            label: p.toUpperCase(),
+                            value: p,
+                        }))}
+                        selected={category}
+                        onChange={handleCategoryChange}
+                        styling={{
+                            pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
+                            background: {},
+                        }}
+                        renderItem={(opt, isSelected) => (
+                            <Text
+                                style={[
+                                    satoshiFont.satoshiBold,
+                                    isSelected ? styles.activeText : styles.inactiveText,
+                                ]}
+                                className='text-xs'
+                            >
+                                {opt.label}
+                            </Text>
+                        )}
+                    />
+                </View>
             </ScrollView>
-            <View className='flex flex-col px-8'>
+
+            {/* Current balance & trend */}
+            <View className='flex flex-col px-5'>
                 <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black'>
                     {formatCurrencyAccurate(currency, accountGroupData.currentBalance)}
                 </Text>
-                {accountGroupData.percentageChange != 0 && (
+                {accountGroupData.percentageChange !== 0 && (
                     <View className='flex flex-row items-center space-x-1'>
                         {accountGroupData.trend === 'increase' ? (
                             <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                         ) : (
                             <ArrowNarrowDownRightIcon width={16} height={16} stroke='#fb2c36' />
                         )}
-
                         <Text
                             style={[
                                 satoshiFont.satoshiBold,
@@ -108,60 +125,85 @@ export default function AccountsAreaChart() {
                     </View>
                 )}
             </View>
+
+            {/* Chart */}
             <View className='relative mt-10'>
-                {data.length < 2 && (
-                    <View className='absolute left-0 right-0 top-[40%] items-center'>
+                {displayData.length < 2 && (
+                    <Animated.View
+                        entering={FadeIn}
+                        exiting={FadeOut}
+                        // className='absolute left-0 right-0 top-[40%] items-center'
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            top: '40%',
+                            alignItems: 'center',
+                        }}
+                    >
                         <Text style={satoshiFont.satoshiBlack}>Not enough data</Text>
-                    </View>
+                    </Animated.View>
                 )}
 
-                <LineChart
-                    areaChart
-                    data={data}
-                    rotateLabel
-                    maxValue={maxValue}
-                    hideDataPoints
-                    hideRules
-                    hideYAxisText
-                    curvature={0.125}
-                    adjustToWidth
-                    color='#9810fa'
-                    startFillColor='#9810fa'
-                    endFillColor='#7E22CE'
-                    startOpacity={0.5}
-                    endOpacity={0}
-                    initialSpacing={0}
-                    yAxisColor='white'
-                    yAxisThickness={0}
-                    rulesType='solid'
-                    rulesColor='#F3E8FF'
-                    disableScroll
-                    xAxisType='dotted'
-                    xAxisColor='lightgray'
-                    xAxisThickness={2}
-                    dashWidth={4}
-                    dashGap={4}
-                />
+                <Animated.View
+                    key={displayData.map((d) => d.value).join('-')}
+                    entering={FadeIn}
+                    exiting={FadeOut}
+                >
+                    <View className='-ml-[10px] scale-[1.05]'>
+                        <LineChart
+                            areaChart
+                            data={displayData}
+                            rotateLabel
+                            maxValue={maxValue}
+                            hideDataPoints
+                            hideRules
+                            hideYAxisText
+                            curvature={0.125}
+                            adjustToWidth
+                            color='#9810fa'
+                            startFillColor='#9810fa'
+                            endFillColor='#7E22CE'
+                            startOpacity={0.5}
+                            endOpacity={0}
+                            initialSpacing={0}
+                            yAxisColor='white'
+                            yAxisThickness={0}
+                            rulesType='solid'
+                            rulesColor='#F3E8FF'
+                            disableScroll
+                            xAxisType='dotted'
+                            xAxisColor='lightgray'
+                            xAxisThickness={2}
+                            dashWidth={4}
+                            dashGap={4}
+                        />
+                    </View>
+                </Animated.View>
             </View>
-            <View className='flex flex-row justify-between items-center px-8'>
-                {datePeriods.map((p) => (
-                    <TouchableOpacity
-                        key={p}
-                        style={[styles.pill, p === period && styles.activePill]}
-                        className='rounded-full px-3 py-1'
-                        onPress={() => handlePeriodChange(p)}
-                    >
+
+            {/* Date period selection */}
+            <View className='flex flex-row w-full items-center px-5 mt-5'>
+                <AnimatedPillSelect
+                    options={datePeriods.map((p) => ({ label: p, value: p }))}
+                    selected={period}
+                    onChange={handlePeriodChange}
+                    styling={{
+                        pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
+                        background: {},
+                    }}
+                    renderItem={(opt, isSelected) => (
                         <Text
                             style={[
                                 satoshiFont.satoshiBold,
-                                p === period ? styles.activeText : styles.inactiveText,
+                                isSelected ? styles.activeText : styles.inactiveText,
                             ]}
                             className='text-xs'
                         >
-                            {p}
+                            {opt.label}
                         </Text>
-                    </TouchableOpacity>
-                ))}
+                    )}
+                />
             </View>
         </View>
     );

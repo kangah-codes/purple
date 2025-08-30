@@ -203,13 +203,10 @@ export function useCalculateAccountData({
     accountGroup?: string;
     timePeriod: TimePeriod;
 }): AccountDataCalculation {
-    console.log('🔍 useCalculateAccountData called with:', { accountGroup, timePeriod });
-    const stack = new Error().stack;
-    console.log('📍 Called from:', stack);
     const {
         preferences: { currency: preferredCurrency },
     } = usePreferences();
-
+    const { startDate: start_date, endDate: end_date } = getDateRange(timePeriod);
     const currencyService = CurrencyService.getInstance();
 
     const {
@@ -227,7 +224,8 @@ export function useCalculateAccountData({
     } = useTransactions({
         requestQuery: {
             page_size: Infinity,
-            ...getDateRange(timePeriod),
+            start_date: start_date.toISOString(),
+            end_date: end_date.toISOString(),
             ...(accountGroup !== '📈 NET WORTH' && { accountGroup }),
         },
     });
@@ -238,12 +236,6 @@ export function useCalculateAccountData({
     const isLoading = accountsLoading || transactionsLoading;
     const accounts = accountsData?.data || [];
     const transactions = transactionsData?.data || [];
-
-    console.log({
-        page_size: Infinity,
-        ...getDateRange(timePeriod),
-        ...(accountGroup !== '📈 NET WORTH' && { accountGroup }),
-    });
 
     return useMemo(() => {
         if (isLoading) {
@@ -260,8 +252,6 @@ export function useCalculateAccountData({
         }
 
         try {
-            const { startDate, endDate } = getDateRange(timePeriod);
-
             let relevantAccounts = accounts;
             if (accountGroup && accountGroup !== '📈 NET WORTH') {
                 // TODO: fix import cycle
@@ -297,8 +287,8 @@ export function useCalculateAccountData({
                 const accountTransactions = transactions.filter(
                     (tx) =>
                         tx.account_id === account.id &&
-                        new Date(tx.created_at) >= startDate &&
-                        new Date(tx.created_at) <= endDate,
+                        new Date(tx.created_at) >= start_date &&
+                        new Date(tx.created_at) <= end_date,
                 );
 
                 // calc the account balance at the start of the period

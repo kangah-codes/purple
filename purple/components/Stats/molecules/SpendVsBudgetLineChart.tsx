@@ -36,13 +36,13 @@ function groupByCategory(transactions: Transaction[]) {
     }, {});
 }
 
-export default function SpendOverviewAreaChart() {
+export default function SpendVsBudgetLineChart() {
     const { data, data2, maxValue, maxValue2 } = useMemo(() => {
         const transformedData = generateChartData(
-            generateMockTransactionsForMonth(new Date(), false),
+            generateMockTransactionsForMonth(new Date(), true, true),
         );
         const transformedData2 = generateChartData(
-            generateMockTransactionsForMonth(new Date(), false),
+            generateMockTransactionsForMonth(new Date(), true, true),
         );
         return {
             data: transformedData,
@@ -102,25 +102,24 @@ export default function SpendOverviewAreaChart() {
         >
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
-                    Monthly Spend
+                    Monthly Spend Vs Budget
                 </Text>
                 <View className='flex flex-row space-x-2'>
                     <View className='flex flex-row items-center space-x-1'>
                         <View className='w-1.5 h-1.5 rounded-full bg-purple-500' />
                         <Text className='text-purple-500 text-xs' style={satoshiFont.satoshiBold}>
-                            This month
+                            Spent
                         </Text>
                     </View>
                     <View className='flex flex-row items-center space-x-1'>
                         <View className='w-1.5 h-1.5 rounded-full bg-[#737373]' />
                         <Text className='text-[#737373] text-xs' style={satoshiFont.satoshiBold}>
-                            Last month
+                            Budget
                         </Text>
                     </View>
                 </View>
             </View>
             <LineChart
-                areaChart
                 data={styledData}
                 data2={data2}
                 rotateLabel
@@ -128,8 +127,8 @@ export default function SpendOverviewAreaChart() {
                 hideDataPoints
                 // hideRules
                 // hideYAxisText
-                curvature={0.125}
-                curved
+                // curvature={0.125}
+                // curved
                 width={300}
                 adjustToWidth
                 color='#9810fa'
@@ -137,8 +136,6 @@ export default function SpendOverviewAreaChart() {
                 startFillColor='#9810fa'
                 startFillColor2=''
                 endFillColor='#7E22CE'
-                startOpacity={0.3}
-                endOpacity={0}
                 initialSpacing={0}
                 yAxisColor='white'
                 yAxisThickness={0}

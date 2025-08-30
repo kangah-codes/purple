@@ -121,15 +121,20 @@ export function generateChartData(transactions: Transaction[]): ChartPoint[] {
             dailyTotals[isoDate] = 0;
         }
 
-        dailyTotals[isoDate] += tx.amount;
+        dailyTotals[isoDate] += tx.type == 'credit' ? tx.amount : -tx.amount;
     }
 
+    // calculate cumulative balance instead of net
+    let runningBalance = 0;
     const chartData = Object.entries(dailyTotals)
         .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-        .map(([isoDate, value]) => ({
-            date: format(parseISO(isoDate), 'd MMM yyyy'),
-            value,
-        }));
+        .map(([isoDate, value]) => {
+            runningBalance += value;
+            return {
+                date: format(parseISO(isoDate), 'd MMM yyyy'),
+                value: Math.abs(runningBalance),
+            };
+        });
 
     return chartData;
 }

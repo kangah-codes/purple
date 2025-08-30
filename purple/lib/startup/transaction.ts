@@ -56,8 +56,6 @@ export async function processRecurringTransactions(db: SQLiteDatabase) {
                     recurring.id,
                 ],
             );
-
-            console.log('Updated recurring transaction scheduling for:', recurring.id);
         } else {
             console.log(
                 'Recurring transaction not due yet:',

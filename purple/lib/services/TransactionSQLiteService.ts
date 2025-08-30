@@ -313,6 +313,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             end_date = false,
             accountGroup = false,
         } = query;
+        console.log('LISTING TRANSACTIONS WITH ', query);
         const offset = (page - 1) * page_size;
         const params: any[] = [];
 

@@ -5,6 +5,7 @@ import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import StatsHeader from '../molecules/StatsHeader';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { getCurrentMonthYear } from '../utils';
+import StatsNavigationArea from '../molecules/StatsNavigationArea';
 
 const currentMonthYear = getCurrentMonthYear();
 
@@ -13,7 +14,7 @@ export default function StatsScreen() {
         <SafeAreaView className='relative h-full bg-white'>
             <ExpoStatusBar style='dark' />
             <ScrollView className='' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5 px-5'>
+                {/* <View className='flex flex-row items-center justify-between py-2.5 px-5'>
                     <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
                         My Stats
                     </Text>
@@ -25,7 +26,8 @@ export default function StatsScreen() {
                             {currentMonthYear}
                         </Text>
                     </View>
-                </View>
+                </View> */}
+                <StatsNavigationArea />
 
                 <StatsHeader />
 

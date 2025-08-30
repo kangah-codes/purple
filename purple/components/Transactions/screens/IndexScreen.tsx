@@ -123,7 +123,7 @@ export default function IndexScreen() {
                 >
                     <TouchableOpacity
                         className='px-4 py-2 flex items-center justify-center rounded-full'
-                        // onPress={handleNavigation}
+                        onPress={() => router.push('/transactions/new-transaction')}
                     >
                         <PlusIcon stroke={'#fff'} width={24} height={24} />
                     </TouchableOpacity>

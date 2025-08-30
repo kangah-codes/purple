@@ -12,6 +12,8 @@ import { GenericAPIResponse } from '@/@types/request';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import SpendOverviewPieChart from './SpendOverviewPieChart';
 import SpendOverviewAreaChart from './SpendOverviewAreaChart';
+import SpendVsBudgetLineChart from './SpendVsBudgetLineChart';
+import CashflowBarChart from './CashflowBarChart';
 
 const now = new Date();
 const startDate = startOfMonth(now);
@@ -21,8 +23,7 @@ export default function StatsHeader() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const { refetch } = useTransactions({
         requestQuery: {
-            // TODO: replace this
-            page_size: 999_999_999,
+            page_size: Infinity,
             start_date: startDate.toISOString(),
             end_date: endDate.toISOString(),
         },
@@ -41,7 +42,7 @@ export default function StatsHeader() {
 
             <SpendOverview transactions={transactions} />
             <SpendOverviewChart transactions={transactions} />
-            <SpendOverviewPieChart transactions={transactions} />
+            <SpendVsBudgetLineChart />
             <SpendOverviewAreaChart />
             <StatsHeatmap transactions={transactions} />
 

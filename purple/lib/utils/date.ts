@@ -146,8 +146,6 @@ export function getDateRange(period: TimePeriod): DateRange {
 
     startDate = startOfDay(startDate);
 
-    console.log({ startDate, endDate }, 'DATE PERIOD');
-
     return {
         startDate,
         endDate,

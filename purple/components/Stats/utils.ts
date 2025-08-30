@@ -88,6 +88,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
 export const generateMockTransactionsForMonth = (
     monthDate: Date,
     trend: boolean = false,
+    cumulative: boolean = false,
 ): Transaction[] => {
     const start = startOfMonth(monthDate);
     const end = endOfMonth(monthDate);
@@ -100,6 +101,7 @@ export const generateMockTransactionsForMonth = (
     const endAmount = 10000;
 
     let previousAmount = startAmount;
+    let cumulativeBalance = cumulative ? 1000 : 0; // Starting balance for cumulative mode
 
     while (current <= end) {
         const numTransactionsToday = Math.floor(Math.random() * 2);
@@ -119,6 +121,39 @@ export const generateMockTransactionsForMonth = (
 
             amount = Math.max(amount, previousAmount + 1);
 
+            // Determine transaction type
+            let transactionType: 'credit' | 'debit';
+
+            if (cumulative) {
+                // In cumulative mode, bias towards credits to maintain growth
+                // but allow some debits for realism
+                transactionType = Math.random() > 0.25 ? 'credit' : 'debit';
+
+                // Prevent balance from going too negative
+                if (cumulativeBalance < 100 && Math.random() > 0.1) {
+                    transactionType = 'credit';
+                }
+            } else {
+                transactionType = trend
+                    ? Math.random() > 0.3
+                        ? 'credit'
+                        : 'debit'
+                    : Math.random() > 0.5
+                    ? 'debit'
+                    : 'credit';
+            }
+
+            // For cumulative mode, adjust amount based on current balance
+            if (cumulative) {
+                if (transactionType === 'debit') {
+                    // Limit debits to not exceed current balance (with some buffer)
+                    amount = Math.min(amount, Math.max(cumulativeBalance * 0.8, 50));
+                }
+
+                // Update cumulative balance
+                cumulativeBalance += transactionType === 'credit' ? amount : -amount;
+            }
+
             transactions.push({
                 id: id.toString(),
                 created_at: current.toISOString(),
@@ -126,16 +161,12 @@ export const generateMockTransactionsForMonth = (
                 deleted_at: null,
                 account_id: 'acc1',
                 user_id: 'user1',
-                type: trend
-                    ? Math.random() > 0.3
-                        ? 'credit'
-                        : 'debit'
-                    : Math.random() > 0.5
-                    ? 'debit'
-                    : 'credit',
+                type: transactionType,
                 amount: parseFloat(amount.toFixed(2)),
                 account: {} as any,
-                note: `Mock transaction ${id}`,
+                note: `Mock transaction ${id}${
+                    cumulative ? ` (Balance: ${cumulativeBalance.toFixed(2)})` : ''
+                }`,
                 category: 'Test',
                 from_account: '',
                 to_account: '',

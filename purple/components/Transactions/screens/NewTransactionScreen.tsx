@@ -1,8 +1,12 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
-import { ArrowLeftIcon, ArrowRightIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
+import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import Switch from '@/components/Shared/atoms/Switch';
+import TimePicker from '@/components/Shared/atoms/TimePicker';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
     InputField,
     LinearGradient,
@@ -14,18 +18,38 @@ import {
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { TRANSACTION_TYPES } from '@/lib/constants/transactionTypes';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { omit, transformObject } from '@/lib/utils/object';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
-import { useCreateTransaction } from '../hooks';
-import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import { CoinSwapIcon } from '@/components/SVG/icons/noscale';
-import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
+import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../constants';
+import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
+import ScheduleSummary from '../molecules/ScheduleSummary';
+import { generateICalRRule } from '../utils';
+
+type FormData = {
+    amount: string;
+    category: string;
+    note: string;
+    fromAccount?: string;
+    toAccount?: string;
+    type: string;
+    accountId?: string;
+    date: string;
+    charges: string;
+    time: string;
+    frequency?: string;
+    dayOfWeek?: string;
+    dayOfMonth?: number;
+    recurrence_rule: string;
+    start_date?: string;
+    end_date?: string;
+};
 
 export default function NewTransactionScreen() {
     const { type, accountId } = useLocalSearchParams();
@@ -39,13 +63,20 @@ export default function NewTransactionScreen() {
         preferences: { allowOverdraw },
     } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
-    const { mutate, isLoading } = useCreateTransaction();
+    const [isRecurring, setIsRecurring] = useState(false);
+    const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
+    const { mutate: createRecurringTransaction, isLoading: isCreatingRecurring } =
+        useCreateRecurringTransaction();
+
+    const isLoading = isCreatingTransaction || isCreatingRecurring;
+
     const {
         control,
         handleSubmit,
         formState: { errors },
         setValue,
-    } = useForm({
+        watch,
+    } = useForm<FormData>({
         defaultValues: {
             amount: '',
             category: '',
@@ -56,8 +87,16 @@ export default function NewTransactionScreen() {
             accountId: (accountId as string) ?? '',
             date: new Date().toISOString(),
             charges: '',
+            time: new Date().toISOString(),
+            frequency: undefined,
+            dayOfWeek: undefined,
+            dayOfMonth: undefined,
+            recurrence_rule: '',
+            start_date: new Date().toISOString(),
+            end_date: undefined,
         },
     });
+
     const transactionTypes = useMemo(
         () =>
             customTransactionTypes.map(
@@ -65,21 +104,42 @@ export default function NewTransactionScreen() {
             ),
         [customTransactionTypes],
     );
+
     useEffect(() => {
         setValue('type', transactionType);
     }, [transactionType, setValue]);
 
-    const onSubmit = async (data: {
-        amount: string;
-        category: string;
-        note: string;
-        fromAccount?: string;
-        toAccount?: string;
-        type: string;
-        accountId?: string;
-        date: string;
-        charges: string;
-    }) => {
+    const frequency = useWatch({
+        control,
+        name: 'frequency',
+        defaultValue: '',
+    });
+
+    const dateISO = useWatch({
+        control,
+        name: 'time',
+        defaultValue: new Date().toISOString(),
+    });
+
+    const selectedDayOfWeek = useWatch({
+        control,
+        name: 'dayOfWeek',
+    });
+
+    const selectedDayOfMonth = useWatch({
+        control,
+        name: 'dayOfMonth',
+    });
+
+    const date = dateISO ? new Date(dateISO) : new Date();
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dayOfMonth = frequency === 'monthly' ? selectedDayOfMonth : undefined;
+    const dayOfWeek =
+        frequency === 'weekly'
+            ? DAYS_OF_WEEK.find((d) => d.value === selectedDayOfWeek)?.label
+            : undefined;
+
+    const onSubmit = async (data: FormData) => {
         await logEvent('button_tap', {
             button: 'submit',
             screen: 'new_transactiont_screen',
@@ -127,37 +187,90 @@ export default function NewTransactionScreen() {
             return;
         }
 
-        let transformedData = transformObject(data, [
-            ['toAccount', 'to_account'],
-            ['fromAccount', 'from_account'],
-            ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
-            ['amount', 'amount', (value) => Number(value)],
-            ['charges', 'charges', (value) => Number(value)],
-        ]);
+        if (isRecurring) {
+            // Handle recurring transaction creation
+            const timeString = new Date(data.time).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            });
 
-        if (transactionType !== 'transfer') {
-            transformedData = omit(transformedData, [
-                'from_account',
-                'to_account',
-            ]) as typeof transformedData; // looks hacky af
+            const rrule = generateICalRRule(
+                data.frequency as 'daily' | 'weekly' | 'monthly',
+                data.dayOfWeek,
+                data.dayOfMonth ? Number(data.dayOfMonth) : undefined,
+                timeString,
+            );
+
+            let transformedData = transformObject(data, [
+                ['toAccount', 'to_account'],
+                ['fromAccount', 'from_account'],
+                ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
+                ['amount', 'amount', (value) => Number(value)],
+                ['charges', 'charges', (value) => Number(value)],
+                ['recurrence_rule', 'recurrence_rule', () => rrule],
+            ]);
+
+            if (transactionType !== 'transfer') {
+                transformedData = omit(transformedData, [
+                    'from_account',
+                    'to_account',
+                ]) as typeof transformedData;
+            }
+
+            createRecurringTransaction(transformedData, {
+                onError: (error) => {
+                    Toast.show({
+                        type: 'error',
+                        props: { text1: 'Error!', text2: "Couldn't create recurring transaction" },
+                    });
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Success!',
+                            text2: 'Recurring transaction created successfully',
+                        },
+                    });
+                    router.back();
+                },
+            });
+        } else {
+            // Handle regular transaction creation
+            let transformedData = transformObject(data, [
+                ['toAccount', 'to_account'],
+                ['fromAccount', 'from_account'],
+                ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
+                ['amount', 'amount', (value) => Number(value)],
+                ['charges', 'charges', (value) => Number(value)],
+            ]);
+
+            if (transactionType !== 'transfer') {
+                transformedData = omit(transformedData, [
+                    'from_account',
+                    'to_account',
+                ]) as typeof transformedData;
+            }
+
+            createTransaction(transformedData, {
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        props: { text1: 'Error!', text2: "Couldn't create transaction" },
+                    });
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
+                    Toast.show({
+                        type: 'success',
+                        props: { text1: 'Success!', text2: 'Transaction created successfully' },
+                    });
+                    router.back();
+                },
+            });
         }
-
-        mutate(transformedData, {
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: { text1: 'Error!', text2: "Couldn't create transaction" },
-                });
-            },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
-                Toast.show({
-                    type: 'success',
-                    props: { text1: 'Success!', text2: 'Transaction created successfully' },
-                });
-                router.back();
-            },
-        });
     };
 
     const renderAccountFields = () => {
@@ -226,7 +339,7 @@ export default function NewTransactionScreen() {
                                                     value: curr.id,
                                                 };
                                                 return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            }, {} as Record<string, string>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -325,6 +438,179 @@ export default function NewTransactionScreen() {
         );
     };
 
+    const renderRecurringFields = () => {
+        if (!isRecurring) return null;
+
+        return (
+            <View className='space-y-5'>
+                <View className='h-1 border-b border-purple-100 w-full' />
+
+                {/* Frequency */}
+                <View className='flex flex-col space-y-1'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                        Frequency
+                    </Text>
+                    <View>
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: "Frequency can't be empty",
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <SelectField
+                                    selectKey='transactionRecurrenceRule'
+                                    options={TRANSACTION_RECURRENCE_RULES.reduce((acc, curr) => {
+                                        acc[curr.value] = {
+                                            label: curr.label,
+                                            value: curr.value,
+                                        };
+                                        return acc;
+                                    }, {} as Record<string, { label: string; value: string }>)}
+                                    customSnapPoints={['50%', '70%']}
+                                    value={value !== undefined ? String(value) : undefined}
+                                    onChange={onChange}
+                                />
+                            )}
+                            name='frequency'
+                        />
+                        {errors.frequency && (
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                                {errors.frequency.message}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+
+                {/* Time picker - always shown for recurring */}
+                <View className='flex flex-col space-y-1'>
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: "Time can't be empty",
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <TimePicker
+                                label='Time'
+                                pickerKey='newRecurringTransactionTime'
+                                onChange={(date) => {
+                                    onChange(date.toISOString());
+                                }}
+                                value={new Date(value)}
+                            />
+                        )}
+                        name='time'
+                    />
+                    {errors.time && (
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                            {errors.time.message}
+                        </Text>
+                    )}
+                </View>
+
+                {/* Conditional fields based on frequency */}
+                {frequency === 'weekly' && (
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Day of Week
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: 'Please select a day of the week',
+                                }}
+                                name='dayOfWeek'
+                                render={({ field: { onChange, value } }) => (
+                                    <SelectField
+                                        selectKey='dayOfWeekSelect'
+                                        options={DAYS_OF_WEEK.reduce((acc, curr) => {
+                                            acc[curr.value] = {
+                                                label: curr.label,
+                                                value: curr.value,
+                                            };
+                                            return acc;
+                                        }, {} as Record<string, { label: string; value: string }>)}
+                                        customSnapPoints={['50%', '70%']}
+                                        value={value !== undefined ? String(value) : undefined}
+                                        onChange={onChange}
+                                    />
+                                )}
+                            />
+                        </View>
+                        {errors.dayOfWeek && (
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                                {errors.dayOfWeek.message}
+                            </Text>
+                        )}
+                    </View>
+                )}
+
+                {frequency === 'monthly' && (
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Day of Month
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: 'Please select a day of the month',
+                                }}
+                                name='dayOfMonth'
+                                render={({ field: { onChange, value } }) => (
+                                    <SelectField
+                                        selectKey='dayOfMonthSelect'
+                                        options={DAYS_OF_MONTH.reduce((acc, curr) => {
+                                            acc[curr.value] = {
+                                                label: curr.label,
+                                                value: curr.value,
+                                            };
+                                            return acc;
+                                        }, {} as Record<string, { label: string; value: string }>)}
+                                        customSnapPoints={['50%', '70%']}
+                                        value={value !== undefined ? String(value) : undefined}
+                                        onChange={onChange}
+                                    />
+                                )}
+                            />
+                        </View>
+                        {errors.dayOfMonth && (
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                                {errors.dayOfMonth.message}
+                            </Text>
+                        )}
+                    </View>
+                )}
+
+                <View className='flex flex-col space-y-1'>
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: "Date can't be empty",
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <DatePicker
+                                label='Start Date'
+                                pickerKey='newTransactionStartDate'
+                                onChange={(date) => {
+                                    onChange(date.toISOString());
+                                }}
+                                minimumDate={new Date()}
+                                value={new Date(value)}
+                            />
+                        )}
+                        name='start_date'
+                    />
+                    {errors.start_date && (
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                            {errors.start_date.message}
+                        </Text>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
     return (
         <>
             <SafeAreaView
@@ -349,32 +635,46 @@ export default function NewTransactionScreen() {
                             </Text>
                         </View>
                     </View>
-
-                    <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>
-                        {TRANSACTION_TYPES.map((transaction, i) => {
-                            return (
-                                <View
-                                    className='flex-grow flex items-center justify-center rounded-full'
-                                    style={{
-                                        backgroundColor:
-                                            transaction.key == transactionType
-                                                ? '#fff'
-                                                : 'rgb(243 232 255)',
-                                    }}
-                                    key={transaction.key}
+                    <View className='w-full'>
+                        <AnimatedPillSelect<string>
+                            options={TRANSACTION_TYPES.map((t) => ({
+                                label: t.label,
+                                value: t.key,
+                            }))}
+                            selected={transactionType}
+                            onChange={setTransactionType}
+                            styling={{
+                                pill: { backgroundColor: '#fff' },
+                                background: {
+                                    backgroundColor: 'rgb(243, 232, 255)',
+                                    padding: 4,
+                                    borderRadius: 999,
+                                },
+                            }}
+                            renderItem={(opt, isSelected) => (
+                                <Text
+                                    style={[
+                                        satoshiFont.satoshiBlack,
+                                        { fontSize: 14 },
+                                        isSelected ? { color: '#8200db' } : { color: '#c27aff' },
+                                    ]}
                                 >
-                                    <TouchableOpacity
-                                        onPress={() => setTransactionType(transaction.key)}
-                                        className='w-full flex items-center justify-center py-2.5 rounded-full'
-                                    >
-                                        <Text style={satoshiFont.satoshiBlack} className='text-sm'>
-                                            {transaction.label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            );
-                        })}
+                                    {opt.label}
+                                </Text>
+                            )}
+                        />
                     </View>
+
+                    {/* Schedule Summary for recurring transactions */}
+                    {isRecurring && (
+                        <ScheduleSummary
+                            frequency={frequency as any}
+                            dayOfMonth={dayOfMonth}
+                            dayOfWeek={dayOfWeek}
+                            time={time}
+                        />
+                    )}
+
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
                 <ScrollView
@@ -467,45 +767,64 @@ export default function NewTransactionScreen() {
                         </View>
                     </View>
 
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    <View className='flex flex-col space-y-1'>
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Date can't be empty",
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <DateAndTimePicker
-                                    label='Date'
-                                    pickerKey='newTransactionStartDate'
-                                    onChange={(date) => {
-                                        // format "2006-01-02T15:04:05.000Z"
-                                        onChange(date.toISOString());
+                    {/* Date picker - only for non-recurring transactions */}
+                    {!isRecurring && (
+                        <View className='space-y-5'>
+                            <View className='h-1 border-b border-purple-100 w-full' />
+                            <View className='flex flex-col space-y-1'>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Date can't be empty",
                                     }}
-                                    // selectedDate={value}
-                                    // make maximim date today
-                                    maximumDate={new Date()}
-                                    value={new Date(value)}
+                                    render={({ field: { onChange, value } }) => (
+                                        <DateAndTimePicker
+                                            label='Date'
+                                            pickerKey='newTransactionStartDate'
+                                            onChange={(date) => {
+                                                onChange(date.toISOString());
+                                            }}
+                                            maximumDate={new Date()}
+                                            value={new Date(value)}
+                                        />
+                                    )}
+                                    name='date'
                                 />
-                            )}
-                            name='date'
-                        />
-                        {errors.date && (
-                            <Text
-                                style={satoshiFont.satoshiMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.date.message}
-                            </Text>
-                        )}
-                    </View>
+                                {errors.date && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.date.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+                    )}
 
                     <View className='h-1 border-b border-purple-100 w-full' />
 
                     {renderAccountFields()}
 
-                    <View className='flex flex-col space-y-1'>
+                    <View className='h-1 border-b border-purple-100 w-full' />
+
+                    {/* Recurring Transaction Toggle */}
+                    <View className='flex flex-row w-full justify-between items-center'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Repeat Transaction
+                        </Text>
+
+                        <View>
+                            <Switch value={isRecurring} onValueChange={setIsRecurring} />
+                        </View>
+                    </View>
+
+                    {/* Recurring transaction fields */}
+                    {renderRecurringFields()}
+
+                    <View className='h-1 border-b border-purple-100 w-full' />
+
+                    <View className='flex flex-col space-y-1 mb-20'>
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Note
                         </Text>
