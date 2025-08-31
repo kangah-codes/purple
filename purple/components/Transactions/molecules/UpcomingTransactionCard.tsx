@@ -6,18 +6,28 @@ import { formatCurrencyRounded } from '@/lib/utils/number';
 import { format } from 'date-fns';
 import React from 'react';
 import { getTransactionColour } from '../utils';
+import { useTransactionStore } from '../hooks';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
 export default function UpcomingTransactionCard({
     transaction,
 }: {
     transaction: RecurringTransaction;
 }) {
+    const { setCurrentRecurringTransaction } = useTransactionStore();
+    const { setShowBottomSheetModal, bottomSheetModalKeys } = useBottomSheetModalStore();
     const nextDate = new Date(transaction.create_next_at);
+
+    console.log(bottomSheetModalKeys);
 
     return (
         <TouchableOpacity
             key={transaction.id}
             className='flex flex-row items-center justify-between space-x-2 py-2.5'
+            onPress={() => {
+                setCurrentRecurringTransaction(transaction);
+                setShowBottomSheetModal('recurringTransactionReceipt', true);
+            }}
         >
             <View className='flex flex-row items-center space-x-2'>
                 <View className='flex flex-col p-2.5 bg-purple-50 rounded-xl items-center'>

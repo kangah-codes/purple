@@ -132,9 +132,7 @@ export default function IndexScreen() {
             <ScrollView
                 refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
             >
-                <View className='px-5 my-5'>
-                    <RecurringTransactionsWidget />
-                </View>
+                <RecurringTransactionsWidget />
                 <TransactionsAccordion
                     showTitle={false}
                     transactions={transactions}

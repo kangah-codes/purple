@@ -211,7 +211,15 @@ export default function NewTransactionScreen() {
                 ['recurrence_rule', 'recurrence_rule', () => rrule],
             ]);
 
-            if (transactionType !== 'transfer') {
+            // For transfers, ensure both from_account and to_account are included
+            if (transactionType === 'transfer') {
+                transformedData = {
+                    ...transformedData,
+                    from_account: data.fromAccount,
+                    to_account: data.toAccount,
+                };
+            } else {
+                // Remove transfer-specific fields for non-transfer transactions
                 transformedData = omit(transformedData, [
                     'from_account',
                     'to_account',
@@ -219,22 +227,12 @@ export default function NewTransactionScreen() {
             }
 
             createRecurringTransaction(transformedData, {
-                onError: (error) => {
-                    Toast.show({
-                        type: 'error',
-                        props: { text1: 'Error!', text2: "Couldn't create recurring transaction" },
-                    });
-                },
                 onSuccess: () => {
-                    queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] });
-                    Toast.show({
-                        type: 'success',
-                        props: {
-                            text1: 'Success!',
-                            text2: 'Recurring transaction created successfully',
-                        },
-                    });
+                    queryClient.invalidateQueries(['recurring-transactions']);
                     router.back();
+                },
+                onError: (error) => {
+                    console.error('Error creating recurring transaction:', error);
                 },
             });
         } else {

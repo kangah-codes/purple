@@ -37,12 +37,15 @@ function groupByCategory(transactions: Transaction[]) {
 }
 
 export default function SpendVsBudgetLineChart() {
-    const { data, data2, maxValue, maxValue2 } = useMemo(() => {
+    const { data, data2, data3, maxValue, maxValue2, maxValue3 } = useMemo(() => {
         const transformedData = generateChartData(
             generateMockTransactionsForMonth(new Date(), true, true),
         );
         const transformedData2 = generateChartData(
             generateMockTransactionsForMonth(new Date(), true, true),
+        );
+        const transformedData3 = generateChartData(
+            generateMockTransactionsForMonth(new Date(), true, false),
         );
         return {
             data: transformedData,
@@ -50,6 +53,9 @@ export default function SpendVsBudgetLineChart() {
 
             data2: transformedData2,
             maxValue2: getMaxValue(transformedData2, 'value', 100),
+
+            data3: transformedData3,
+            maxValue3: getMaxValue(transformedData3, 'value', 300),
         };
     }, []);
 
@@ -102,28 +108,36 @@ export default function SpendVsBudgetLineChart() {
         >
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
-                    Monthly Spend Vs Budget
+                    Monthly Spend
                 </Text>
                 <View className='flex flex-row space-x-2'>
                     <View className='flex flex-row items-center space-x-1'>
                         <View className='w-1.5 h-1.5 rounded-full bg-purple-500' />
                         <Text className='text-purple-500 text-xs' style={satoshiFont.satoshiBold}>
-                            Spent
+                            This month
                         </Text>
                     </View>
                     <View className='flex flex-row items-center space-x-1'>
                         <View className='w-1.5 h-1.5 rounded-full bg-[#737373]' />
                         <Text className='text-[#737373] text-xs' style={satoshiFont.satoshiBold}>
+                            Last month
+                        </Text>
+                    </View>
+                    <View className='flex flex-row items-center space-x-1'>
+                        <View className='w-1.5 h-1.5 rounded-full bg-[#009966]' />
+                        <Text className='text-[#009966] text-xs' style={satoshiFont.satoshiBold}>
                             Budget
                         </Text>
                     </View>
                 </View>
             </View>
             <LineChart
+                // areaChart
                 data={styledData}
-                data2={data2}
+                // data2={data2}
+                data3={data3}
                 rotateLabel
-                maxValue={Math.max(maxValue, maxValue2)}
+                maxValue={Math.max(maxValue, maxValue2, maxValue3)}
                 hideDataPoints
                 // hideRules
                 // hideYAxisText
@@ -133,9 +147,11 @@ export default function SpendVsBudgetLineChart() {
                 adjustToWidth
                 color='#9810fa'
                 color2='#737373'
+                color3='#009966'
                 startFillColor='#9810fa'
-                startFillColor2=''
                 endFillColor='#7E22CE'
+                startOpacity={0.5}
+                endOpacity={0.1}
                 initialSpacing={0}
                 yAxisColor='white'
                 yAxisThickness={0}

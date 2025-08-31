@@ -20,7 +20,7 @@ import CurrencyService from '@/lib/services/CurrencyService';
 import { useMemo } from 'react';
 import { getDateRange } from '@/lib/utils/date';
 import { useTransactions } from '../Transactions/hooks';
-import { groupAccountsByCategory } from './utils';
+import { getEffectiveBalance, groupAccountsByCategory } from './utils';
 import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
@@ -184,6 +184,21 @@ export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account
         return service.create(accountInformation as Partial<Account>);
     });
 }
+
+export function useDeleteAccount({
+    id,
+}: {
+    id: string;
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['delete-account'], async () => {
+        const service = ServiceFactory.create<Transaction>('accounts', db, sessionData);
+        return service.delete(id);
+    });
+}
+
 export interface AccountDataCalculation {
     currentBalance: number;
     previousBalance: number;
@@ -274,8 +289,9 @@ export function useCalculateAccountData({
 
             // calc current balance (convert all to preferred currency)
             const currentBalance = relevantAccounts.reduce((sum, account) => {
+                const effectiveBalance = getEffectiveBalance(account);
                 const converted = currencyService.convertCurrencySync({
-                    from: { currency: account.currency, amount: account.balance },
+                    from: { currency: account.currency, amount: effectiveBalance },
                     to: { currency: preferredCurrency },
                 });
                 return sum + converted;
@@ -296,7 +312,7 @@ export function useCalculateAccountData({
                     return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
                 }, 0);
 
-                const balanceAtStart = account.balance - transactionSum;
+                const balanceAtStart = getEffectiveBalance(account) - transactionSum;
 
                 // convert to preferred currency
                 const converted = currencyService.convertCurrencySync({

@@ -255,15 +255,19 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         const createNextAt = nextOccurrence.toISOString();
         const createNextAtUnix = dateToUNIX(nextOccurrence);
 
+        // Handle transfer-specific fields
+        const fromAccount = data.type === 'transfer' ? data.from_account : null;
+        const toAccount = data.type === 'transfer' ? data.to_account : null;
+
         await this.db.runAsync(
             `INSERT INTO recurring_transactions (
                 id, created_at, updated_at, account_id, type, amount, category, 
                 recurrence_rule, start_date, end_date, status, metadata,
                 created_at_unix, updated_at_unix, start_date_unix, end_date_unix,
-                create_next_at, create_next_at_unix
+                create_next_at, create_next_at_unix, from_account, to_account
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?
             )`,
             [
                 uuid,
@@ -284,8 +288,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 data.end_date ? dateToUNIX(new Date(data.end_date)) : null,
                 createNextAt,
                 createNextAtUnix,
+                fromAccount,
+                toAccount,
             ],
         );
+
         const result = await this.db.getFirstAsync<RecurringTransaction>(
             'SELECT * FROM recurring_transactions WHERE id = ?',
             [uuid],
@@ -349,12 +356,14 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 account_id: string;
                 account_currency: string;
                 account_name: string;
+                account_category: string;
             }
         >(
             `SELECT t.*,
                 a.id AS account_id,
                 a.name AS account_name,
-                a.currency AS account_currency
+                a.currency AS account_currency,
+                a.category as account_category
             FROM transactions t
             INNER JOIN accounts a ON t.account_id = a.id
             WHERE ${whereClause}

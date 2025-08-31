@@ -27,16 +27,34 @@ export async function processRecurringTransactions(db: SQLiteDatabase) {
         // check if the next expected occurrence is now or in the past
         if (nextExpected <= now) {
             const transactionService = new TransactionSQLiteService(db);
-            await transactionService.create({
-                account_id: recurring.account_id,
-                type: recurring.type,
-                amount: recurring.amount,
-                category: recurring.category,
-                note: `Recurring transaction for ${recurring.category}`,
-                currency: recurring.account_currency,
-                date: nextExpected.toISOString(),
-                charges: 0,
-            });
+
+            if (recurring.type === 'transfer') {
+                // Handle recurring transfer transactions
+                await transactionService.create({
+                    account_id: recurring.account_id,
+                    type: 'transfer',
+                    amount: recurring.amount,
+                    category: recurring.category,
+                    note: `Recurring transfer for ${recurring.category}`,
+                    currency: recurring.account_currency,
+                    date: nextExpected.toISOString(),
+                    charges: 0,
+                    from_account: recurring.from_account,
+                    to_account: recurring.to_account,
+                });
+            } else {
+                // Handle regular debit/credit recurring transactions
+                await transactionService.create({
+                    account_id: recurring.account_id,
+                    type: recurring.type,
+                    amount: recurring.amount,
+                    category: recurring.category,
+                    note: `Recurring transaction for ${recurring.category}`,
+                    currency: recurring.account_currency,
+                    date: nextExpected.toISOString(),
+                    charges: 0,
+                });
+            }
 
             // calc the next occurrence after this one
             const nextOccurrence = rule.after(nextExpected, false);

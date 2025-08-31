@@ -158,33 +158,37 @@ const migrations: Migration[] = [
         sql: `
           PRAGMA journal_mode = WAL;
           CREATE TABLE IF NOT EXISTS recurring_transactions (
-          id TEXT NOT NULL,
-          amount NUMERIC NOT NULL,
-          category TEXT NOT NULL,
-          type TEXT NOT NULL,
-          account_id TEXT NOT NULL,
-          recurrence_rule TEXT NOT NULL,
-          start_date TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          end_date TEXT,
-          start_date_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          end_date_unix INTEGER,
-          metadata JSONB,
-          status TEXT NOT NULL DEFAULT 'active',
-          create_next_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          last_created_at TEXT,
-          create_next_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          last_created_at_unix INTEGER,
-          created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW'))
+            id TEXT NOT NULL,
+            amount NUMERIC NOT NULL,
+            category TEXT NOT NULL,
+            type TEXT NOT NULL,
+            account_id TEXT NOT NULL,
+            from_account TEXT NOT NULL,
+            to_account TEXT_NOT_NULL,
+            recurrence_rule TEXT NOT NULL,
+            start_date TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            end_date TEXT,
+            start_date_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            end_date_unix INTEGER,
+            metadata JSONB,
+            status TEXT NOT NULL DEFAULT 'active',
+            create_next_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            last_created_at TEXT,
+            create_next_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            last_created_at_unix INTEGER,
+            created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW'))
           );
           CREATE INDEX IF NOT EXISTS idx_recurring_transactions_account_id ON recurring_transactions(account_id);
           CREATE INDEX IF NOT EXISTS idx_recurring_transactions_start_date ON recurring_transactions(start_date);
           CREATE INDEX IF NOT EXISTS idx_recurring_transactions_end_date ON recurring_transactions(end_date);
           CREATE INDEX IF NOT EXISTS idx_recurring_transactions_status ON recurring_transactions(status);
           CREATE INDEX IF NOT EXISTS idx_recurring_transactions_created_at_unix ON recurring_transactions(created_at_unix);
-          CREATE INDEX IF NOT EXISTS idx_recurring_transactions_updated_at_unix ON recurring_transactions(updated_at_unix);`,
+          CREATE INDEX IF NOT EXISTS idx_recurring_transactions_updated_at_unix ON recurring_transactions(updated_at_unix);
+          CREATE INDEX IF NOT EXISTS idx_recurring_transactions_from_account ON recurring_transactions(from_account);
+          CREATE INDEX IF NOT EXISTS idx_recurring_transactions_to_account ON recurring_transactions(to_account);`,
     },
 ];
 

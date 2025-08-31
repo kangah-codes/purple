@@ -41,7 +41,7 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
     const [activeSlide, setActiveSlide] = useState(0);
     const pinnedIndex = useMemo(() => {
         return accounts?.data.findIndex((account) => account.id === preferences.pinnedAccount);
-    }, [accounts, preferences?.pinnedAccount]);
+    }, [accounts?.data, preferences?.pinnedAccount]);
     const renderItem = useCallback(
         (item: { index: number; item: Account }) => (
             <AccountCard item={item.item} pinnedAccount={preferences.pinnedAccount} />
@@ -64,7 +64,7 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
                 loop
-                firstItem={typeof pinnedIndex === 'number' && pinnedIndex >= 0 ? pinnedIndex : 0}
+                firstItem={pinnedIndex === -1 ? undefined : pinnedIndex}
             />
 
             {/** @ts-ignore */}

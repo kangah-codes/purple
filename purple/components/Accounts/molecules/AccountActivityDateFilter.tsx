@@ -34,7 +34,7 @@ export default function AccountActivityDateFilter() {
                     onChange={handlePeriodChange}
                     styling={{
                         pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
-                        background: { backgroundColor: '#fff' },
+                        background: { backgroundColor: 'rgba(255, 255, 255, 0)' },
                     }}
                     renderItem={(opt, isSelected) => (
                         <Text

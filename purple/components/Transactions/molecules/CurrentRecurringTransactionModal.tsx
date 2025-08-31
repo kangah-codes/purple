@@ -18,8 +18,7 @@ import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
-import { cleanRRuleString, getRRuleFrequency, ruleToText } from '../utils';
-import { RRule } from 'rrule';
+import { ruleToText } from '../utils';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];

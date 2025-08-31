@@ -33,8 +33,11 @@ export type RecurringTransaction = {
     id: string;
     amount: number;
     category: string;
-    type: 'debit' | 'credit';
+    type: 'debit' | 'credit' | 'transfer'; // Add 'transfer' support
     account_id: string;
+    // Add fields needed for transfer transactions
+    from_account?: string;
+    to_account?: string;
     recurrence_rule: string;
     is_active: boolean;
     start_date: string;
@@ -50,9 +53,9 @@ export type RecurringTransaction = {
     created_at: string;
     updated_at: string;
     deleted_at: string;
-    created_at_unix: number;
-    updated_at_unix: number;
-    deleted_at_unix: number | null;
+    created_at_unix: string;
+    updated_at_unix: string;
+    deleted_at_unix: string | null;
 };
 
 export type CreateTransaction = {
@@ -81,7 +84,7 @@ export type EditTransaction = {
 
 export type CreateRecurringTransaction = {
     account_id: string;
-    type: Transaction['type'];
+    type: Transaction['type']; // This already supports 'transfer'
     amount: number;
     category: string;
     recurrence_rule: string;
@@ -89,4 +92,7 @@ export type CreateRecurringTransaction = {
     end_date?: string;
     metadata?: Record<string, any>;
     currency: string;
+    // Add fields needed for transfer transactions
+    from_account?: string;
+    to_account?: string;
 };

@@ -42,10 +42,10 @@ export default function AccountsNavigationArea() {
                 padX={20}
                 dropdownWidth={180}
                 offsetY={10}
-                style={[tw`rounded-3xl bg-white p-2 px-4`, styles.shadow]}
+                style={[tw`rounded-full bg-white p-2 px-4`, styles.shadow]}
             >
-                <MenuOption
-                    onSelect={() => {
+                <TouchableOpacity
+                    onPress={() => {
                         setVisible(false);
                         setShowChart(!showChart);
                     }}
@@ -53,19 +53,10 @@ export default function AccountsNavigationArea() {
                     <View className='flex flex-row items-center space-x-2 py-1.5'>
                         <BarLineChartIcon stroke='#9333EA' width={18} height={18} strokeWidth={2} />
                         <Text style={satoshiFont.satoshiMedium} className='text-sm'>
-                            {showChart ? 'Hide' : 'Show'} report
+                            {showChart ? 'Hide' : 'Show'} Chart
                         </Text>
                     </View>
-                </MenuOption>
-                <View className='h-[1px] border-b border-purple-200 my-0.5' />
-                <MenuOption onSelect={alert}>
-                    <View className='flex flex-row items-center space-x-1 py-1.5'>
-                        <TrashIcon stroke='#EF4444' width={18} />
-                        <Text style={satoshiFont.satoshiMedium} className='text-sm'>
-                            Delete
-                        </Text>
-                    </View>
-                </MenuOption>
+                </TouchableOpacity>
             </DropdownMenu>
 
             <View className='absolute left-0 right-0 items-center'>

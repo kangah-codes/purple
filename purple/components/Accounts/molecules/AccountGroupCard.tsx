@@ -14,7 +14,7 @@ type AccountGroupCardProps = {
 
 export default function AccountGroupCard({ group, accounts }: AccountGroupCardProps) {
     const { period } = useAccountReportStore();
-    const accountGroupData = useCalculateAccountData({
+    const { currentBalance, currency, percentageChange, absoluteChange } = useCalculateAccountData({
         accountGroup: group,
         timePeriod: period,
     });
@@ -26,17 +26,20 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
                     <Text style={satoshiFont.satoshiBold} className='text-base'>
                         {group}
                     </Text>
-                    <Text style={satoshiFont.satoshiBlack} className='text-base'>
-                        {formatCurrencyAccurate(
-                            accountGroupData.currency,
-                            accountGroupData.currentBalance,
-                        )}
+                    <Text
+                        style={[
+                            satoshiFont.satoshiBlack,
+                            { color: currentBalance < 0 ? '#EF4444' : '#A855F7' },
+                        ]}
+                        className='text-base'
+                    >
+                        {formatCurrencyAccurate(currency, currentBalance)}
                     </Text>
                 </View>
-                {accountGroupData.percentageChange != 0 && (
+                {percentageChange != 0 && (
                     <View className='flex flex-row justify-between mt-1'>
                         <View className='flex flex-row items-center space-x-1'>
-                            {accountGroupData.percentageChange > 0 ? (
+                            {percentageChange > 0 ? (
                                 <ArrowNarrowUpRightIcon width={16} height={16} stroke='#A855F7' />
                             ) : (
                                 <ArrowNarrowDownRightIcon width={16} height={16} stroke='#EF4444' />
@@ -46,19 +49,13 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
                                 style={[
                                     satoshiFont.satoshiBold,
                                     {
-                                        color:
-                                            accountGroupData.percentageChange > 0
-                                                ? '#A855F7'
-                                                : '#EF4444',
+                                        color: percentageChange > 0 ? '#A855F7' : '#EF4444',
                                     },
                                 ]}
                                 className='text-xs'
                             >
-                                {formatCurrencyAccurate(
-                                    accountGroupData.currency,
-                                    accountGroupData.absoluteChange,
-                                )}{' '}
-                                ({accountGroupData.percentageChange}%)
+                                {formatCurrencyAccurate(currency, absoluteChange)} (
+                                {percentageChange}%)
                             </Text>
                         </View>
                     </View>

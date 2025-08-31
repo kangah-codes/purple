@@ -46,7 +46,7 @@ export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => v
     const renderEmptylist = useCallback(
         () => (
             <View className='my-5'>
-                <EmptyList message="Looks like you haven't created any transactions yet." />
+                <EmptyList message='Start by creating transactions' />
             </View>
         ),
         [],

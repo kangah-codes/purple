@@ -111,7 +111,9 @@ type ChartPoint = {
     date: string;
 };
 
-export function generateChartData(transactions: Transaction[]): ChartPoint[] {
+export function generateChartData(
+    transactions: Array<Transaction & { account_category: string }>,
+): ChartPoint[] {
     const dailyTotals: Record<string, number> = {};
 
     for (const tx of transactions) {
@@ -121,10 +123,20 @@ export function generateChartData(transactions: Transaction[]): ChartPoint[] {
             dailyTotals[isoDate] = 0;
         }
 
-        dailyTotals[isoDate] += tx.type == 'credit' ? tx.amount : -tx.amount;
+        // For liability accounts, we want the chart to go down (negative impact)
+        // For asset accounts, we want the chart to go up (positive impact)
+        if (isLiabilityAccount(tx.account_category)) {
+            // For liability accounts, credits reduce the liability (good), debits increase it (bad)
+            // So we want credits to be positive and debits to be negative
+            dailyTotals[isoDate] += tx.type === 'credit' ? tx.amount : -tx.amount;
+        } else {
+            // For asset accounts, credits increase the asset (good), debits decrease it (bad)
+            // So we want credits to be positive and debits to be negative
+            dailyTotals[isoDate] += tx.type === 'credit' ? tx.amount : -tx.amount;
+        }
     }
 
-    // calculate cumulative balance instead of net
+    // Calculate cumulative balance
     let runningBalance = 0;
     const chartData = Object.entries(dailyTotals)
         .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
@@ -132,9 +144,19 @@ export function generateChartData(transactions: Transaction[]): ChartPoint[] {
             runningBalance += value;
             return {
                 date: format(parseISO(isoDate), 'd MMM yyyy'),
-                value: Math.abs(runningBalance),
+                value: runningBalance < 0 ? 0 : runningBalance,
             };
         });
 
     return chartData;
+}
+
+export function isLiabilityAccount(accountCategory?: string): boolean {
+    if (!accountCategory) return false;
+    return accountCategory === '📉 Liability' || accountCategory.startsWith('📉 Liability');
+}
+
+export function getEffectiveBalance(account: Account): number {
+    const isLiability = isLiabilityAccount(account.category);
+    return isLiability ? -Math.abs(account.balance) : account.balance;
 }

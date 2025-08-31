@@ -46,6 +46,8 @@ type FormData = {
     start_date?: string;
     end_date?: string;
     time: string;
+    fromAccount?: string;
+    toAccount?: string;
 };
 
 export default function NewRecurringTransactionScreen() {
@@ -82,6 +84,8 @@ export default function NewRecurringTransactionScreen() {
             recurrence_rule: '',
             start_date: new Date().toISOString(),
             end_date: undefined,
+            fromAccount: undefined,
+            toAccount: undefined,
         },
     });
 
@@ -150,6 +154,21 @@ export default function NewRecurringTransactionScreen() {
             return;
         }
 
+        if (data.type === 'transfer') {
+            // Validate that both from and to accounts are selected
+            if (!data.fromAccount || !data.toAccount) {
+                // Show error message
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'Please select both From and To Accounts for transfers.',
+                    },
+                });
+                return;
+            }
+        }
+
         const timeString = new Date(data.time).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
@@ -168,6 +187,21 @@ export default function NewRecurringTransactionScreen() {
             ['amount', 'amount', (value) => Number(value)],
             ['recurrence_rule', 'recurrence_rule', () => rrule],
         ]);
+
+        // For transfers, ensure both from_account and to_account are included
+        if (transactionType === 'transfer') {
+            transformedData = {
+                ...transformedData,
+                from_account: data.fromAccount,
+                to_account: data.toAccount,
+            };
+        } else {
+            // Remove transfer-specific fields for non-transfer transactions
+            transformedData = transformObject(transformedData, [
+                ['from_account', 'from_account'],
+                ['to_account', 'to_account'],
+            ]);
+        }
 
         mutate(transformedData, {
             onError: (error) => {

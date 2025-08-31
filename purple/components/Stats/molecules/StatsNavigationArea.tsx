@@ -12,17 +12,14 @@ export default function StatsNavigationArea() {
         setShow(true);
     };
 
-    const handleChange: MonthPickerProps['onChange'] = (event, newDate) => {
-        console.log(event, 'EVENT');
-        if (event === 'dateSetAction' && newDate) {
-            // ✅ User picked a month/year
+    const handleChange: MonthPickerProps['onChange'] = (_, newDate) => {
+        setShow(() => {
             setValue(newDate);
-        }
-        // ✅ Always close after an action (set or dismissed)
-        setShow(false);
+            return false;
+        });
     };
 
-    console.log(show);
+    console.log(value);
 
     return (
         <View className='w-full flex flex-row py-2.5 justify-end items-center relative px-5'>
@@ -41,15 +38,10 @@ export default function StatsNavigationArea() {
 
             {show && (
                 <MonthPicker
-                    onChange={(_, newDate) => {
-                        setShow(() => {
-                            setValue(newDate);
-                            return false;
-                        });
-                    }}
+                    onChange={handleChange}
                     value={value}
                     minimumDate={new Date(2000, 0)}
-                    maximumDate={new Date(2030, 11)}
+                    maximumDate={new Date(2026, 0)}
                 />
             )}
         </View>

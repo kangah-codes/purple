@@ -1,11 +1,9 @@
 import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
 import { colors } from '@/components/Shared/molecules/Heatmap/constants';
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
+import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
-import { formatCurrencyRounded } from '@/lib/utils/number';
 import {
     eachDayOfInterval,
     endOfMonth,
@@ -18,8 +16,6 @@ import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useRecurringTransactions } from '../hooks';
-import { getTransactionColour } from '../utils';
-import RecurringTransactionCard from './UpcomingTransactionCard';
 import UpcomingTransactionCard from './UpcomingTransactionCard';
 
 const now = new Date();
@@ -28,11 +24,8 @@ const end = endOfMonth(now);
 const deviceWidth = Dimensions.get('window').width / 1.7;
 const padding = 20;
 const numBlocksPerRow = 7;
-const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const monthDays = eachDayOfInterval({ start, end });
 const offset = monthDays[0].getDay();
-const offsetData = Array(offset).fill({ value: 0, key: '', index: 0 });
-const finalMonthDays = [...offsetData, ...monthDays];
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 
 export default function RecurringTransactionsWidget() {
@@ -103,7 +96,7 @@ export default function RecurringTransactionsWidget() {
     if (transactions.transactions.length === 0) return null;
 
     return (
-        <View className='w-full space-y-5 flex flex-col'>
+        <View className='w-full space-y-5 flex flex-col px-5 my-5'>
             <View className='flex flex-row w-full justify-between'>
                 <View className='w-[38%] flex flex-col justify-between items-start'>
                     <View className='bg-purple-50 px-2 py-1 rounded-full'>

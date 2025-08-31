@@ -13,8 +13,6 @@ export async function loadFonts() {
             SatoshiMedium: require('../../assets/fonts/satoshi/Satoshi-Medium.otf'),
             SatoshiMediumItalic: require('../../assets/fonts/satoshi/Satoshi-MediumItalic.otf'),
             SatoshiRegular: require('../../assets/fonts/satoshi/Satoshi-Regular.otf'),
-
-            RobotoFlexMedium: require('../../assets/fonts/roboto-flex/RobotoFlex-Medium.otf'),
         });
     } catch (e) {
         console.warn(e);

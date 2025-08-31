@@ -43,7 +43,7 @@ export default function PlanHistoryList({ onLoaded }: { onLoaded: () => void }) 
                     width: width - 40,
                 }}
             >
-                <EmptyList message="Looks like you haven't created any plans yet." />
+                <EmptyList title='No plans created' message='Start by creating a plan' />
             </View>
         ),
         [],

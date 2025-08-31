@@ -37,12 +37,15 @@ function groupByCategory(transactions: Transaction[]) {
 }
 
 export default function SpendOverviewAreaChart() {
-    const { data, data2, maxValue, maxValue2 } = useMemo(() => {
+    const { data, data2, data3, maxValue, maxValue2, maxValue3 } = useMemo(() => {
         const transformedData = generateChartData(
-            generateMockTransactionsForMonth(new Date(), false),
+            generateMockTransactionsForMonth(new Date(), true, true),
         );
         const transformedData2 = generateChartData(
-            generateMockTransactionsForMonth(new Date(), false),
+            generateMockTransactionsForMonth(new Date(), true, true),
+        );
+        const transformedData3 = generateChartData(
+            generateMockTransactionsForMonth(new Date(), true, false),
         );
         return {
             data: transformedData,
@@ -50,6 +53,9 @@ export default function SpendOverviewAreaChart() {
 
             data2: transformedData2,
             maxValue2: getMaxValue(transformedData2, 'value', 100),
+
+            data3: transformedData3,
+            maxValue3: getMaxValue(transformedData3, 'value', 300),
         };
     }, []);
 
@@ -128,8 +134,8 @@ export default function SpendOverviewAreaChart() {
                 hideDataPoints
                 // hideRules
                 // hideYAxisText
-                curvature={0.125}
-                curved
+                // curvature={0.125}
+                // curved
                 width={300}
                 adjustToWidth
                 color='#9810fa'

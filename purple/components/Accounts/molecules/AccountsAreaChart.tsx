@@ -38,14 +38,7 @@ export default function AccountsAreaChart() {
         };
     }, [accountGroupData.transactions, category]);
 
-    // For smooth transition
-    const [displayData, setDisplayData] = useState(data);
-
-    useEffect(() => {
-        if (data.length >= 2) {
-            setDisplayData(data);
-        }
-    }, [data]);
+    console.log(data, 'CHARTD DATA');
 
     const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
     const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
@@ -53,8 +46,7 @@ export default function AccountsAreaChart() {
     if (!showChart) return null;
 
     return (
-        <View className='relative flex flex-col mb-2.5'>
-            {/* Category selection */}
+        <View className='relative flex flex-col'>
             <ScrollView
                 horizontal
                 contentContainerStyle={{
@@ -91,8 +83,6 @@ export default function AccountsAreaChart() {
                     />
                 </View>
             </ScrollView>
-
-            {/* Current balance & trend */}
             <View className='flex flex-col px-5'>
                 <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black'>
                     {formatCurrencyAccurate(currency, accountGroupData.currentBalance)}
@@ -125,65 +115,43 @@ export default function AccountsAreaChart() {
                     </View>
                 )}
             </View>
-
-            {/* Chart */}
             <View className='relative mt-10'>
-                {displayData.length < 2 && (
-                    <Animated.View
-                        entering={FadeIn}
-                        exiting={FadeOut}
-                        // className='absolute left-0 right-0 top-[40%] items-center'
-                        style={{
-                            position: 'absolute',
-                            left: 0,
-                            right: 0,
-                            top: '40%',
-                            alignItems: 'center',
-                        }}
-                    >
+                {data.length < 2 && (
+                    <View className='absolute left-0 right-0 top-[40%] items-center'>
                         <Text style={satoshiFont.satoshiBlack}>Not enough data</Text>
-                    </Animated.View>
-                )}
-
-                <Animated.View
-                    key={displayData.map((d) => d.value).join('-')}
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                >
-                    <View className='-ml-[10px] scale-[1.05]'>
-                        <LineChart
-                            areaChart
-                            data={displayData}
-                            rotateLabel
-                            maxValue={maxValue}
-                            hideDataPoints
-                            hideRules
-                            hideYAxisText
-                            curvature={0.125}
-                            adjustToWidth
-                            color='#9810fa'
-                            startFillColor='#9810fa'
-                            endFillColor='#7E22CE'
-                            startOpacity={0.5}
-                            endOpacity={0}
-                            initialSpacing={0}
-                            yAxisColor='white'
-                            yAxisThickness={0}
-                            rulesType='solid'
-                            rulesColor='#F3E8FF'
-                            disableScroll
-                            xAxisType='dotted'
-                            xAxisColor='lightgray'
-                            xAxisThickness={2}
-                            dashWidth={4}
-                            dashGap={4}
-                        />
                     </View>
-                </Animated.View>
+                )}
+                <View className='-ml-[10px] scale-[1.05] h-[210]'>
+                    <LineChart
+                        areaChart
+                        data={data}
+                        rotateLabel
+                        maxValue={maxValue}
+                        hideDataPoints
+                        hideRules
+                        hideYAxisText
+                        curvature={0.125}
+                        adjustToWidth
+                        color='#9810fa'
+                        startFillColor='#9810fa'
+                        endFillColor='#7E22CE'
+                        startOpacity={0.5}
+                        endOpacity={0}
+                        initialSpacing={0}
+                        yAxisColor='white'
+                        yAxisThickness={0}
+                        rulesType='solid'
+                        rulesColor='#F3E8FF'
+                        disableScroll
+                        xAxisType='dotted'
+                        xAxisColor='lightgray'
+                        xAxisThickness={2}
+                        dashWidth={4}
+                        dashGap={4}
+                    />
+                </View>
             </View>
-
-            {/* Date period selection */}
-            <View className='flex flex-row w-full items-center px-5 mt-5'>
+            <View className='flex flex-row w-full items-center px-5 mt-7'>
                 <AnimatedPillSelect
                     options={datePeriods.map((p) => ({ label: p, value: p }))}
                     selected={period}

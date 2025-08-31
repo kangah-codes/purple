@@ -118,4 +118,32 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
             message: 'Success',
         });
     }
+
+    async delete(id: string): Promise<GenericAPIResponse<null>> {
+        const account = await this.db.getFirstAsync<{ is_default_account: number }>(
+            `SELECT is_default_account FROM accounts WHERE id = ? AND deleted_at IS NULL`,
+            [id],
+        );
+        if (!account) {
+            throw new HTTPError('Account not found', 404);
+        }
+        if (account.is_default_account) {
+            throw new HTTPError('Cannot delete your default account', 400);
+        }
+        await this.db.withTransactionAsync(async () => {
+            await this.db.runAsync(`DELETE from accounts where id = ?`, [id]);
+            await this.db.runAsync('DELETE FROM transactions where account_id = ?', [id]);
+            await this.db.runAsync('DELETE FROM recurring_transactions where account_id = ?', [id]);
+        });
+
+        return this.formatResponse({
+            data: null,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Deleted account',
+        });
+    }
 }
