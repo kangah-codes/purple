@@ -5,8 +5,10 @@ import { UserPreferences } from '@/components/Settings/schema';
 
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
+        const settingsService = SettingsServiceFactory.create(db);
+        const existingCurrency = await settingsService.get('currency');
         const defaultSettings: UserPreferences = {
-            currency: 'USD',
+            currency: existingCurrency || 'USD',
             theme: 'light',
             allowOverdraw: false,
             hideCompletedPlans: true,
@@ -16,8 +18,6 @@ export async function initializePreferences(db: SQLiteDatabase) {
             pushNotificationsEnabled: false,
             dailyNotificationsEnabled: false,
         } as UserPreferences;
-
-        const settingsService = SettingsServiceFactory.create(db);
         await settingsService.ensureDefaults(defaultSettings);
 
         const transactionTypes = await settingsService.listTransactionTypes();

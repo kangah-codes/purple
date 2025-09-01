@@ -163,16 +163,13 @@ export default function CurrentRecurringTransactionModal({
                         />
                         <ReceiptDetail label='Account' value={account.name} />
                         <View className='border-b border-purple-100 w-full mb-5' />
-                        <View
-                            // colors={['#c084fc', '#9333ea']}
-                            className='rounded-full p-2 flex flex-row space-x-2 w-[60%] justify-between bg-purple-200 border border-purple-300'
-                        >
+                        <View className='flex flex-row space-x-2 w-[60%] justify-between'>
                             <LinearGradient
                                 colors={['#c084fc', '#9333ea']}
                                 className='flex-grow flex items-center justify-center rounded-full'
                             >
                                 <TouchableOpacity
-                                    className='w-full py-2 flex items-center'
+                                    className='w-full py-3 flex items-center'
                                     onPress={() => {
                                         setShowBottomSheetModal(modalKey, false);
                                         router.push({
@@ -189,7 +186,7 @@ export default function CurrentRecurringTransactionModal({
                                 className='flex-grow flex items-center justify-center rounded-full'
                             >
                                 <TouchableOpacity
-                                    className='w-full py-2 flex items-center'
+                                    className='w-full py-3 flex items-center'
                                     onLongPress={deleteTransactionCb}
                                     delayLongPress={500}
                                     onPress={() => {

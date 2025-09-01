@@ -29,7 +29,6 @@ export async function processRecurringTransactions(db: SQLiteDatabase) {
             const transactionService = new TransactionSQLiteService(db);
 
             if (recurring.type === 'transfer') {
-                // Handle recurring transfer transactions
                 await transactionService.create({
                     account_id: recurring.account_id,
                     type: 'transfer',
@@ -43,7 +42,6 @@ export async function processRecurringTransactions(db: SQLiteDatabase) {
                     to_account: recurring.to_account,
                 });
             } else {
-                // Handle regular debit/credit recurring transactions
                 await transactionService.create({
                     account_id: recurring.account_id,
                     type: recurring.type,

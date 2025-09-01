@@ -3,6 +3,7 @@ import {
     endOfMonth,
     startOfDay,
     startOfMonth,
+    startOfYear,
     subDays,
     subMonths,
     subWeeks,
@@ -102,7 +103,7 @@ export function convertToJSDate(dateStr: string): Date | null {
 /**
  * Time period strings representing different date ranges
  */
-export type TimePeriod = '1W' | '1D' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+export type TimePeriod = '1W' | '1D' | '1M' | 'YTD' | '3M' | '6M' | '1Y' | 'ALL';
 
 /**
  * Interface representing a date range with start and end dates
@@ -132,6 +133,9 @@ export function getDateRange(period: TimePeriod): DateRange {
             break;
         case '6M':
             startDate = subMonths(now, 6);
+            break;
+        case 'YTD':
+            startDate = startOfYear(now);
             break;
         case '1Y':
             startDate = subYears(now, 1);

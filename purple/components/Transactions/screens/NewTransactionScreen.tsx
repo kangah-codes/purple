@@ -175,7 +175,8 @@ export default function NewTransactionScreen() {
         if (
             account.balance - Number(data.amount) < 0 &&
             !allowOverdraw &&
-            ['debit', 'transfer'].includes(transactionType)
+            ['debit', 'transfer'].includes(transactionType) &&
+            !isRecurring
         ) {
             await logEvent('generic_event', {
                 context: 'attempted to overdraw account',
@@ -647,6 +648,9 @@ export default function NewTransactionScreen() {
                                     backgroundColor: 'rgb(243, 232, 255)',
                                     padding: 4,
                                     borderRadius: 999,
+                                },
+                                option: {
+                                    padding: 12,
                                 },
                             }}
                             renderItem={(opt, isSelected) => (

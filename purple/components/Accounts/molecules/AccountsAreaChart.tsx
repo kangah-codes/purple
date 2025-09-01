@@ -13,8 +13,8 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useAccountReportStore, useAccountStore, useCalculateAccountData } from '../hooks';
 import { TimePeriod } from '../schema';
 import { generateChartData } from '../utils';
-
-const datePeriods: TimePeriod[] = ['1M', '3M', '6M', '1Y', 'ALL'];
+import tw from 'twrnc';
+const datePeriods: TimePeriod[] = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
     const { category, setCategory, period, setPeriod, showChart } = useAccountReportStore();
@@ -66,8 +66,11 @@ export default function AccountsAreaChart() {
                         selected={category}
                         onChange={handleCategoryChange}
                         styling={{
-                            pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
+                            pill: {
+                                backgroundColor: 'rgba(243, 232, 255, 0.5)',
+                            },
                             background: {},
+                            option: { ...tw`p-3` },
                         }}
                         renderItem={(opt, isSelected) => (
                             <Text
@@ -159,6 +162,7 @@ export default function AccountsAreaChart() {
                     styling={{
                         pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
                         background: {},
+                        option: { ...tw`p-3` },
                     }}
                     renderItem={(opt, isSelected) => (
                         <Text

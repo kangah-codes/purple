@@ -105,8 +105,6 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         position: 'relative',
-        // padding: 4,
-        // backgroundColor: 'red',
     },
     indicator: {
         position: 'absolute',
@@ -117,8 +115,6 @@ const styles = StyleSheet.create({
     },
     option: {
         flex: 1,
-        paddingVertical: 13,
-        paddingHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 999,

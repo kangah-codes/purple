@@ -1,7 +1,7 @@
 import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { Transaction } from '../Transactions/schema';
 
-export type TimePeriod = '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+export type TimePeriod = '1D' | '1W' | '1M' | 'YTD' | '3M' | '6M' | '1Y' | 'ALL';
 
 export type IAccountCard = {
     accountName: string;

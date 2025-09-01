@@ -254,10 +254,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
         const createNextAt = nextOccurrence.toISOString();
         const createNextAtUnix = dateToUNIX(nextOccurrence);
-
-        // Handle transfer-specific fields
-        const fromAccount = data.type === 'transfer' ? data.from_account : null;
-        const toAccount = data.type === 'transfer' ? data.to_account : null;
+        const fromAccount = data.type === 'transfer' ? data.from_account ?? null : null;
+        const toAccount = data.type === 'transfer' ? data.to_account ?? null : null;
 
         await this.db.runAsync(
             `INSERT INTO recurring_transactions (
