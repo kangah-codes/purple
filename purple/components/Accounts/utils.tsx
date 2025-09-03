@@ -7,6 +7,7 @@ import { Text } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';
 import { useAccountStore } from './hooks';
 import { Account, TimePeriod } from './schema';
+import { satoshiFont } from '@/lib/constants/fonts';
 
 export function createTransactionChartData(
     transactions: Transaction[],
@@ -112,8 +113,9 @@ type ChartPoint = {
 };
 
 export function generateChartData(
-    transactions: Array<Transaction & { account_category: string }>,
-): ChartPoint[] {
+    transactions: Array<Transaction & { account_category?: string }>,
+    labelSpacing: number = 1,
+): (ChartPoint & { label?: string })[] {
     const dailyTotals: Record<string, number> = {};
 
     for (const tx of transactions) {
@@ -123,30 +125,31 @@ export function generateChartData(
             dailyTotals[isoDate] = 0;
         }
 
-        // For liability accounts, we want the chart to go down (negative impact)
-        // For asset accounts, we want the chart to go up (positive impact)
-        if (isLiabilityAccount(tx.account_category)) {
-            // For liability accounts, credits reduce the liability (good), debits increase it (bad)
-            // So we want credits to be positive and debits to be negative
+        // for liability accounts we want the chart to go down
+        // for asset accounts, we want the chart to go up
+        if (isLiabilityAccount(tx.account?.subcategory || tx.account_category)) {
+            // for liability accounts credits reduce the liability debits increase it
+            // so we want credits to be positive and debits to be negative
             dailyTotals[isoDate] += tx.type === 'credit' ? tx.amount : -tx.amount;
         } else {
-            // For asset accounts, credits increase the asset (good), debits decrease it (bad)
-            // So we want credits to be positive and debits to be negative
+            // asset accounts are opposite
             dailyTotals[isoDate] += tx.type === 'credit' ? tx.amount : -tx.amount;
         }
     }
 
-    // Calculate cumulative balance
     let runningBalance = 0;
-    const chartData = Object.entries(dailyTotals)
-        .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-        .map(([isoDate, value]) => {
-            runningBalance += value;
-            return {
-                date: format(parseISO(isoDate), 'd MMM yyyy'),
-                value: runningBalance < 0 ? 0 : runningBalance,
-            };
-        });
+    const sortedEntries = Object.entries(dailyTotals).sort(
+        ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+
+    const chartData = sortedEntries.map(([isoDate, value], idx) => {
+        runningBalance += value;
+        const showLabel = labelSpacing > 0 && idx % labelSpacing === 0;
+        return {
+            date: format(parseISO(isoDate), 'd MMM yyyy'),
+            value: runningBalance < 0 ? 0 : runningBalance,
+        };
+    });
 
     return chartData;
 }
@@ -159,4 +162,49 @@ export function isLiabilityAccount(accountCategory?: string): boolean {
 export function getEffectiveBalance(account: Account): number {
     const isLiability = isLiabilityAccount(account.category);
     return isLiability ? -Math.abs(account.balance) : account.balance;
+}
+
+export function generateSpendChartData(
+    transactions: Array<Transaction & { account_category?: string }>,
+    labelSpacing: number = 1,
+): (ChartPoint & { label?: string })[] {
+    const dailySpends: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        // only process debit transactions
+        if (tx.type !== 'debit') {
+            continue;
+        }
+
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+
+        if (!dailySpends[isoDate]) {
+            dailySpends[isoDate] = 0;
+        }
+
+        dailySpends[isoDate] += tx.amount;
+    }
+
+    let runningSpend = 0;
+    const sortedEntries = Object.entries(dailySpends).sort(
+        ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+
+    const chartData = sortedEntries.map(([isoDate, value], idx) => {
+        runningSpend += value;
+        const showLabel = labelSpacing > 0 && idx % labelSpacing === 0;
+        return {
+            date: format(parseISO(isoDate), 'd MMM yyyy'),
+            value: runningSpend,
+            ...(showLabel && {
+                labelComponent: () => (
+                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
+                        {format(parseISO(isoDate), 'd MMM')}
+                    </Text>
+                ),
+            }),
+        };
+    });
+
+    return chartData;
 }

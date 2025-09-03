@@ -4,29 +4,9 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { View } from '@/components/Shared/styled';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Dimensions, StyleProp, ViewStyle } from 'react-native';
+import { Dimensions, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AccountCard from './AccountCard';
-
-const styles = {
-    sliderWidth: Dimensions.get('window').width - 40,
-    itemWidth: Dimensions.get('window').width - 40,
-    carouselStyle: {
-        width: '100%',
-    },
-    paginationDotStyle: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#9333EA',
-        marginHorizontal: -5,
-    },
-    containerStyle: {
-        paddingTop: 20,
-        paddingBottom: 0,
-        paddingHorizontal: 0,
-    },
-};
 
 export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void }) {
     const { data: accounts, refetch } = useAccounts({
@@ -52,13 +32,16 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
     useRefreshOnFocus(refetch);
 
     return (
-        <View className='px-5'>
+        <View
+            className='bg-purple-50 p-5 border border-purple-100 rounded-3xl'
+            // style={styles.shadow}
+        >
             {/** @ts-ignore */}
             <Carousel
                 data={accounts?.data ?? []}
                 renderItem={renderItem}
-                sliderWidth={styles.sliderWidth}
-                itemWidth={styles.itemWidth}
+                sliderWidth={styles.slider.width}
+                itemWidth={styles.item.width}
                 layout={'default'}
                 autoplay={false}
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
@@ -79,3 +62,33 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    slider: { width: Dimensions.get('window').width - 80 },
+    item: { width: Dimensions.get('window').width - 80 },
+    carouselStyle: {
+        width: '100%',
+    },
+    paginationDotStyle: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#9333EA',
+        marginHorizontal: -5,
+    },
+    containerStyle: {
+        paddingTop: 20,
+        paddingBottom: 0,
+        paddingHorizontal: 0,
+    },
+    shadow: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+});

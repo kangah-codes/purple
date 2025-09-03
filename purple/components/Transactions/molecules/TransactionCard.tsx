@@ -30,7 +30,7 @@ export default function TransactionCard({ data, onPress, showTitle = true }: Tra
         >
             <View
                 style={styles.categoryIcon}
-                className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'
+                className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-100'
             >
                 <Text className='absolute text-lg'>
                     {extractEmojiOrDefault(data.category, '❔')}

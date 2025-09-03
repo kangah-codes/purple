@@ -19,6 +19,7 @@ export type Account = {
     deleted_at: null;
     user_id: string;
     category: string;
+    subcategory: string | null;
     name: string;
     balance: number;
     is_default_account: boolean;

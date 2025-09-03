@@ -52,39 +52,43 @@ export default function PlanHistoryList({ onLoaded }: { onLoaded: () => void }) 
     useRefreshOnFocus(refetch);
 
     return (
-        <View className='flex flex-col space-y-1 mt-5'>
-            <View className='flex flex-row w-full justify-between items-center px-5 mb-2.5'>
-                <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
-                    My plans
-                </Text>
-
-                <TouchableOpacity
-                    className='flex flex-row items-center space-x-1'
-                    onPress={handleNavigation}
-                >
-                    <Text
-                        style={satoshiFont.satoshiBold}
-                        className='text-sm tracking-tight text-purple-700'
-                    >
-                        View All
+        <View className='px-5 mt-5'>
+            <View className='flex flex-col space-y-1 rounded-[32px] border border-purple-100 bg-purple-50 p-5'>
+                <View className='flex flex-row w-full justify-between items-center mb-2.5'>
+                    <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
+                        My plans
                     </Text>
-                    <ChevronRightIcon stroke='#9333ea' />
-                </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className='flex flex-row items-center space-x-1'
+                        onPress={handleNavigation}
+                    >
+                        <Text
+                            style={satoshiFont.satoshiBold}
+                            className='text-sm tracking-tight text-purple-700'
+                        >
+                            View All
+                        </Text>
+                        <ChevronRightIcon stroke='#9333ea' />
+                    </TouchableOpacity>
+                </View>
+                <FlashList
+                    estimatedItemSize={80}
+                    // force rerender when the length changes to update item size
+                    key={plans?.data?.length}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={plans?.data ?? []}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                    ListEmptyComponent={renderEmptylist}
+                    contentContainerStyle={
+                        {
+                            // paddingHorizontal: 20,
+                        }
+                    }
+                />
             </View>
-            <FlashList
-                estimatedItemSize={80}
-                // force rerender when the length changes to update item size
-                key={plans?.data?.length}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={plans?.data ?? []}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                ListEmptyComponent={renderEmptylist}
-                contentContainerStyle={{
-                    paddingHorizontal: 20,
-                }}
-            />
         </View>
     );
 }

@@ -55,8 +55,11 @@ export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => v
     useRefreshOnFocus(refetch);
 
     return (
-        <View className='flex flex-col mt-5'>
-            <View className='flex flex-row w-full justify-between items-center px-5'>
+        <View
+            className='flex flex-col mt-5 bg-purple-50 p-5 rounded-3xl border border-purple-100'
+            // style={styles.shadow}
+        >
+            <View className='flex flex-row w-full justify-between items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
                     Recent Transactions
                 </Text>
@@ -117,13 +120,22 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     flatlistContainerStyle: {
-        paddingBottom: 200,
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
     },
     bottomDrawer: {
         backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
     },
     arrowRight: {
         position: 'absolute',
+    },
+    shadow: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });

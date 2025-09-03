@@ -3,7 +3,11 @@ import { EditSquareIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { useDeleteTransaction, useTransactionStore } from '@/components/Transactions/hooks';
+import {
+    useDeleteRecurringTransaction,
+    useDeleteTransaction,
+    useTransactionStore,
+} from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -32,13 +36,10 @@ export default function CurrentRecurringTransactionModal({
     modalKey,
 }: CurrentRecurringTransactionModalProps) {
     const { currentRecurringTransaction, deleteTransaction } = useTransactionStore();
-    const transactionDate = useMemo(
-        () => formatDateTime(currentRecurringTransaction?.created_at ?? ''),
-        [currentRecurringTransaction?.created_at],
-    );
+    const { date, time } = formatDateTime(currentRecurringTransaction?.created_at ?? '');
     const queryClient = useQueryClient();
     const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { mutate } = useDeleteTransaction({
+    const { mutate } = useDeleteRecurringTransaction({
         transactionID: currentRecurringTransaction?.id ?? '',
     });
     const { logEvent } = useAnalytics();
@@ -73,7 +74,9 @@ export default function CurrentRecurringTransactionModal({
                 setShowBottomSheetModal(modalKey, false);
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts', 'user'] });
+                queryClient.invalidateQueries({
+                    queryKey: ['recurring-transactions'],
+                });
                 deleteTransaction(currentRecurringTransaction?.id ?? '');
                 Toast.show({
                     type: 'success',
@@ -162,6 +165,7 @@ export default function CurrentRecurringTransactionModal({
                             )}
                         />
                         <ReceiptDetail label='Account' value={account.name} />
+                        <ReceiptDetail label='Date' value={`${date} at ${time}`} />
                         <View className='border-b border-purple-100 w-full mb-5' />
                         <View className='flex flex-row space-x-2 w-[60%] justify-between'>
                             <LinearGradient

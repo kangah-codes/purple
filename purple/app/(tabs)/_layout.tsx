@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/components/Auth/hooks';
 import {
     BarLineChartIcon,
@@ -11,6 +11,9 @@ import {
 } from '@/components/SVG/icons/noscale';
 import Colors from '@/lib/constants/Colors';
 import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
+import { Text, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import * as NavigationBar from 'expo-navigation-bar';
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuth();
@@ -19,21 +22,22 @@ export default function TabLayout() {
         return <Redirect href='/onboarding/landing' />;
     }
 
+    useEffect(() => {
+        // make nav bar transparent like ios
+        NavigationBar.setPositionAsync('absolute');
+        NavigationBar.setBackgroundColorAsync('transparent');
+    }, []);
+
     return (
         <Tabs
             initialRouteName='index'
             screenOptions={{
                 tabBarActiveTintColor: Colors['light'].tint,
-                tabBarLabelStyle: {
-                    marginTop: -5, // do this so that on certain android phones it looks better
-                    marginBottom: 5,
-                    fontFamily: 'SatoshiBold',
-                    lineHeight: 16,
-                    fontSize: 11,
-                },
+                tabBarShowLabel: false, // Hide default labels since we're using custom ones
                 tabBarStyle: [
                     {
                         backgroundColor: '#F9F9F9',
+                        height: 80,
                     },
                 ],
             }}
@@ -43,7 +47,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Home',
                     tabBarIcon: ({ color }) => (
-                        <HomeSmileIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <HomeSmileIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
+                                Home
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
                 }}
@@ -53,7 +62,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Plans',
                     tabBarIcon: ({ color }) => (
-                        <PiggyBankIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <PiggyBankIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
+                                Plans
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
                 }}
@@ -63,7 +77,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Transactions',
                     tabBarIcon: ({ color }) => (
-                        <CoinSwapIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <CoinSwapIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
+                                Transactions
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
                 }}
@@ -73,7 +92,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Stats',
                     tabBarIcon: ({ color }) => (
-                        <BarLineChartIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <BarLineChartIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
+                                Reports
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
                 }}
@@ -82,7 +106,14 @@ export default function TabLayout() {
                 name='accounts'
                 options={{
                     title: 'Accounts',
-                    tabBarIcon: ({ color }) => <SafeIcon width={24} height={24} stroke={color} />,
+                    tabBarIcon: ({ color }) => (
+                        <View className='flex flex-col items-center justify-center'>
+                            <SafeIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
+                                Accounts
+                            </Text>
+                        </View>
+                    ),
                     headerShown: false,
                 }}
             />
@@ -91,10 +122,15 @@ export default function TabLayout() {
                 options={{
                     title: 'Settings',
                     tabBarIcon: ({ color }) => (
-                        <SettingsCogIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <SettingsCogIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={satoshiFont.satoshiBold}>
+                                Settings
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
-                    // href: isOfflineMode && !process.env.EXPO_PUBLIC_DEV_MODE ? null : undefined,
+                    href: null,
                 }}
             />
             <Tabs.Screen
@@ -102,7 +138,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Profile',
                     tabBarIcon: ({ color }) => (
-                        <UserCircleIcon width={24} height={24} stroke={color} />
+                        <View className='flex flex-col items-center justify-center'>
+                            <UserCircleIcon width={24} height={24} stroke={color} />
+                            <Text className='text-xs' style={satoshiFont.satoshiBold}>
+                                Profile
+                            </Text>
+                        </View>
                     ),
                     headerShown: false,
                     href: null,

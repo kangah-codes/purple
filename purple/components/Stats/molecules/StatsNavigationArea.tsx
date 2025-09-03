@@ -19,8 +19,6 @@ export default function StatsNavigationArea() {
         });
     };
 
-    console.log(value);
-
     return (
         <View className='w-full flex flex-row py-2.5 justify-end items-center relative px-5'>
             <View className='absolute left-0 right-0 items-center'>

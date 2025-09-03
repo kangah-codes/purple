@@ -25,7 +25,6 @@ export default function AccountNavigationArea() {
         setVisible(false);
         mutate(undefined, {
             onError: (err) => {
-                console.log(err);
                 if (err instanceof HTTPError) {
                     Toast.show({
                         type: 'error',

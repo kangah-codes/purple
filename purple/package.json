@@ -39,6 +39,7 @@
         "expo-linear-gradient": "~13.0.2",
         "expo-linking": "~6.3.1",
         "expo-localization": "~15.0.3",
+        "expo-navigation-bar": "~3.0.7",
         "expo-notifications": "~0.28.19",
         "expo-router": "~3.5.23",
         "expo-secure-store": "~13.0.2",
@@ -74,6 +75,7 @@
         "react-native-web": "~0.19.6",
         "react-query": "~3.39.3",
         "rrule": "~2.8.1",
+        "rrule-temporal": "^1.1.9",
         "twrnc": "~4.2.0",
         "zustand": "~4.5.1"
     },

@@ -44,6 +44,7 @@ export default function CurrencySetup() {
         mutate(
             {
                 category: '💵 Cash',
+                subcategory: '👛 Wallet',
                 name: 'Cash',
                 balance: 0,
                 currency: currency,

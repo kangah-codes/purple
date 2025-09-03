@@ -35,6 +35,7 @@ export default function AccountActivityDateFilter() {
                     styling={{
                         pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
                         background: { backgroundColor: 'rgba(255, 255, 255, 0)' },
+                        option: { padding: 12 },
                     }}
                     renderItem={(opt, isSelected) => (
                         <Text

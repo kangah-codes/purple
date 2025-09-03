@@ -15,8 +15,9 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useRecurringTransactions } from '../hooks';
+import { useRecurringTransactions, useTransactions } from '../hooks';
 import UpcomingTransactionCard from './UpcomingTransactionCard';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -31,8 +32,12 @@ const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 export default function RecurringTransactionsWidget() {
     const startDate = startOfMonth(new Date());
     const endDate = endOfMonth(new Date());
-    const { data } = useRecurringTransactions({
-        requestQuery: { startDate, endDate, n: getDaysInMonth(new Date()) },
+    const { data, refetch } = useRecurringTransactions({
+        // its ok to use infinity here since we WANT to fetch all
+        // recurring tx within the month
+        // TODO: I should probably refactor the hook or add a new one to return
+        // limited data since thats only what we need
+        requestQuery: { startDate, endDate, n: Infinity },
         options: {
             onError: () => {
                 Toast.show({
@@ -61,6 +66,17 @@ export default function RecurringTransactionsWidget() {
         };
     }, [data]);
 
+    // Build a set of dates that have at least one transaction actually created
+    const createdDatesSet = useMemo(() => {
+        const txs = transactions.transactions;
+        const set = new Set<string>();
+        txs.forEach((t) => {
+            const d = format(new Date(t.last_created_at), 'yyyy-MM-dd');
+            set.add(d);
+        });
+        return set;
+    }, [transactions]);
+
     const heatmapData = useMemo(() => {
         const groupedTransactions = groupBy(transactions.transactions, 'create_next_at_formatted');
         return monthDays.map((day, index) => {
@@ -75,8 +91,9 @@ export default function RecurringTransactionsWidget() {
 
     const renderCell = useCallback(
         (data: CellData) => {
-            const hasTransactions = data.value > 0;
-            const cellColors = hasTransactions ? colors[4] : colors[0];
+            const hasScheduled = data.value > 0;
+            const cellColors = hasScheduled ? colors[4] : colors[0];
+            const hasCreated = createdDatesSet.has(data.key);
 
             return (
                 <LinearGradient
@@ -84,14 +101,16 @@ export default function RecurringTransactionsWidget() {
                     colors={cellColors}
                     className='flex items-center justify-center'
                 >
-                    {hasTransactions && new Date(data.key) < now && (
+                    {hasScheduled && hasCreated && (
                         <CheckMarkIcon stroke='#fff' width={16} height={16} strokeWidth={3} />
                     )}
                 </LinearGradient>
             );
         },
-        [heatmapData],
+        [heatmapData, createdDatesSet],
     );
+
+    useRefreshOnFocus(refetch);
 
     if (transactions.transactions.length === 0) return null;
 

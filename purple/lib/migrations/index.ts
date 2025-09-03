@@ -18,6 +18,7 @@ const migrations: Migration[] = [
             deleted_at_unix INTEGER,
             user_id TEXT,
             category TEXT NOT NULL,
+            subcategory TEXT,
             name TEXT NOT NULL,
             balance NUMERIC NOT NULL,
             is_default_account BOOLEAN DEFAULT 0,

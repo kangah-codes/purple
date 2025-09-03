@@ -108,8 +108,11 @@ export function useRecurringTransactions({
     return useQuery(
         ['recurring-transactions', requestQuery],
         async () => {
-            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
-            // @ts-expect-error: listUpcomingRecurringTransactions exists on TransactionSQLiteService
+            const service = ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
+            ) as TransactionSQLiteService;
             return service.listUpcomingRecurringTransactions(
                 requestQuery.startDate,
                 requestQuery.endDate,
@@ -266,8 +269,26 @@ export function useDeleteTransaction({
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
 
-    return useMutation(['delete-plan'], async () => {
+    return useMutation(['delete-transaction'], async () => {
         const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.delete(transactionID);
+    });
+}
+
+export function useDeleteRecurringTransaction({
+    transactionID,
+}: {
+    transactionID: string;
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['delete-recurring-transaction'], async () => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.deleteRecurring(transactionID);
     });
 }

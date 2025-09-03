@@ -14,7 +14,7 @@ export default function NotFoundScreen() {
                 <View className='flex flex-col space-y-2.5'>
                     <Text
                         style={satoshiFont.satoshiBlack}
-                        className='text-2xl text-black text-center'
+                        className='text-2xl text-purple-600 text-center'
                     >
                         Looks like you're lost!
                     </Text>

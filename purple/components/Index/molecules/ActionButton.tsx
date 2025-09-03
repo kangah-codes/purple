@@ -45,7 +45,7 @@ export function ActionButton({
 
 export default function ActionButtons({ account }: { account: Account }) {
     return (
-        <View className='flex-row justify-between items-stretch w-auto px-20 py-2.5'>
+        <View className='flex-row justify-between items-stretch w-auto px-16 py-2.5'>
             <ActionButton
                 IconComponent={ArrowCircleDownIcon}
                 label='Income'

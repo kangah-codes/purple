@@ -46,6 +46,7 @@ export default function NewAccountScreen() {
     } = useForm({
         defaultValues: {
             category: '',
+            subcategory: '',
             name: '',
             balance: '0',
             currency,
@@ -96,6 +97,8 @@ export default function NewAccountScreen() {
             },
         );
     };
+
+    console.log(errors);
 
     const renderItem = useCallback((item: any) => {
         return (
@@ -239,7 +242,7 @@ export default function NewAccountScreen() {
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Category can't be empty",
+                                    required: "Subcategory can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
@@ -263,12 +266,12 @@ export default function NewAccountScreen() {
                                 )}
                                 name='subcategory'
                             />
-                            {errors.category && (
+                            {errors.subcategory && (
                                 <Text
                                     style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
-                                    {errors.category.message}
+                                    {errors.subcategory.message}
                                 </Text>
                             )}
                         </View>
@@ -363,27 +366,49 @@ export default function NewAccountScreen() {
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity
-                    className='items-center self-center justify-center px-4 absolute bottom-5'
-                    onPress={handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                >
-                    <LinearGradient
-                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                        colors={['#c084fc', '#9333ea']}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size={15} color='#fff' />
-                        ) : (
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={router.back}
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
                             >
-                                Create Account
-                            </Text>
-                        )}
-                    </LinearGradient>
-                </TouchableOpacity>
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? (
+                                        <ActivityIndicator size={15} color='#fff' />
+                                    ) : (
+                                        <Text
+                                            style={satoshiFont.satoshiBlack}
+                                            className='text-white text-center'
+                                        >
+                                            Save
+                                        </Text>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </SafeAreaView>
         </>
     );

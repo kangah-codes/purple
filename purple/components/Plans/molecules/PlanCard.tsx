@@ -10,7 +10,7 @@ import { Plan } from '../schema';
 export default function PlanCard({ data, index }: { data: Plan; index: number }) {
     return (
         <TouchableOpacity
-            className='p-4 bg-purple-50 rounded-3xl flex flex-col w-72 space-y-2.5'
+            className='p-4 bg-white rounded-3xl flex flex-col w-72 space-y-2.5'
             style={[
                 {
                     marginLeft: index !== 0 ? 20 : 0,

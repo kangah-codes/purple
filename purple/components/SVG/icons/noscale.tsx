@@ -5,7 +5,7 @@ import { Path, Svg, SvgProps } from 'react-native-svg';
 
 export function BellIcon(props: SvgProps) {
     return (
-        <Svg fill='none' {...props}>
+        <Svg fill='none' viewBox='0 0 24 24' {...props}>
             <Path
                 stroke={props.stroke}
                 strokeLinecap='round'

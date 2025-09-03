@@ -9,6 +9,7 @@ import { format, parse } from 'date-fns';
 type CreateAccountPayload = {
     user_id?: string;
     category: string;
+    subcategory?: string;
     name: string;
     balance: number;
     is_default_account: boolean;
@@ -39,9 +40,9 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
             await this.db.runAsync(
                 `
                 INSERT INTO accounts
-                  (id, created_at, updated_at, user_id, category, name, balance, is_default_account, currency)
+                  (id, created_at, updated_at, user_id, category, subcategory, name, balance, is_default_account, currency)
                 VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 [
                     uuid,
@@ -49,6 +50,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
                     now,
                     null,
                     data.category,
+                    data.subcategory ?? null,
                     data.name,
                     data.balance,
                     data.is_default_account,

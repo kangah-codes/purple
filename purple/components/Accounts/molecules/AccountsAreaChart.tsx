@@ -38,8 +38,6 @@ export default function AccountsAreaChart() {
         };
     }, [accountGroupData.transactions, category]);
 
-    console.log(data, 'CHARTD DATA');
-
     const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
     const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
 

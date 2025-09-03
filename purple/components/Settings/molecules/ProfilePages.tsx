@@ -1,6 +1,5 @@
 import {
     AlertHexagonIcon,
-    BellIcon,
     CashIcon,
     ClosedLockIcon,
     CoinSwapIcon,
@@ -16,6 +15,7 @@ import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
 import SettingsFooter from './SettingsFooter';
+import { BellIcon } from '@/components/SVG/icons/24x24';
 
 export default function ProfilePages() {
     const renderItem: ListRenderItem<ProfilePageLinkProps> = useCallback(

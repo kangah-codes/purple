@@ -18,8 +18,6 @@ export default function UpcomingTransactionCard({
     const { setShowBottomSheetModal, bottomSheetModalKeys } = useBottomSheetModalStore();
     const nextDate = new Date(transaction.create_next_at);
 
-    console.log(bottomSheetModalKeys);
-
     return (
         <TouchableOpacity
             key={transaction.id}

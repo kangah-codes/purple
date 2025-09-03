@@ -12,12 +12,14 @@ type CheckboxProps = {
     uncheckedColor?: string;
     labelStyle?: TextStyle;
     boxStyle?: ViewStyle;
+    disabled?: boolean;
 };
 
 export default function Checkbox({
     label,
     checked,
     onChange,
+    disabled,
     size = 24,
     checkedColor = '#9810fa',
     uncheckedColor = '#fff',
@@ -25,7 +27,7 @@ export default function Checkbox({
     boxStyle = {},
 }: CheckboxProps) {
     return (
-        <Pressable style={styles.container} onPress={() => onChange(!checked)}>
+        <Pressable disabled={disabled} style={styles.container} onPress={() => onChange(!checked)}>
             <View
                 style={[
                     styles.checkbox,
