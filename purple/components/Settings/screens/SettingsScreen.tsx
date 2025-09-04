@@ -37,7 +37,7 @@ export default function SettingsScreen() {
                     </Text>
                 </View>
             </View>
-            <View className='mt-5'>
+            <View className='mt-2.5'>
                 <ProfilePages />
             </View>
         </SafeAreaView>

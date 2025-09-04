@@ -25,6 +25,8 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useEditTransaction, useTransactionStore } from '../hooks';
 import { EditTransaction } from '../schema';
+import HTTPError from '@/lib/utils/error';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 
 export default function EditTransactionScreen() {
     const { currentTransaction } = useTransactionStore();
@@ -77,7 +79,6 @@ export default function EditTransactionScreen() {
         });
         Keyboard.dismiss();
 
-        // check if overdraw is allowed
         const account = getAccountById(data.account_id);
         if (!account) {
             await logEvent('error_occurred', {
@@ -92,21 +93,7 @@ export default function EditTransactionScreen() {
             return;
         }
 
-        if (
-            account.balance - Number(data.amount) < 0 &&
-            !allowOverdraw &&
-            ['debit', 'transfer'].includes(transactionType)
-        ) {
-            await logEvent('generic_event', {
-                context: 'attempted to overdraw account',
-            });
-            Toast.show({
-                type: 'warning',
-                props: { text1: 'Oops!', text2: 'Cannot overdraw account!' },
-            });
-            return;
-        }
-
+        // @ts-ignore
         let transformedData = transformObject(data, [
             ['amount', 'amount', (value) => Number(value)],
             ['currency', 'currency', () => account.currency],
@@ -118,7 +105,14 @@ export default function EditTransactionScreen() {
                 data: transformedData,
             },
             {
-                onError: () => {
+                onError: (error) => {
+                    if (error instanceof HTTPError) {
+                        Toast.show({
+                            type: 'error',
+                            props: { text1: 'Error!', text2: error.message },
+                        });
+                        return;
+                    }
                     Toast.show({
                         type: 'error',
                         props: { text1: 'Error!', text2: "Couldn't edit transaction" },
@@ -170,30 +164,37 @@ export default function EditTransactionScreen() {
                         </View>
                     </View>
 
-                    <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>
-                        {EDITABLE_TRANSACTION_TYPES.map((transaction, i) => {
-                            return (
-                                <View
-                                    className='flex-grow flex items-center justify-center rounded-full'
-                                    style={{
-                                        backgroundColor:
-                                            transaction.key == transactionType
-                                                ? '#fff'
-                                                : 'rgb(243 232 255)',
-                                    }}
-                                    key={transaction.key}
+                    <View className='w-full'>
+                        <AnimatedPillSelect<string>
+                            options={EDITABLE_TRANSACTION_TYPES.map((t) => ({
+                                label: t.label,
+                                value: t.key,
+                            }))}
+                            selected={transactionType}
+                            onChange={setTransactionType}
+                            styling={{
+                                pill: { backgroundColor: '#fff' },
+                                background: {
+                                    backgroundColor: 'rgb(243, 232, 255)',
+                                    padding: 4,
+                                    borderRadius: 999,
+                                },
+                                option: {
+                                    padding: 12,
+                                },
+                            }}
+                            renderItem={(opt, isSelected) => (
+                                <Text
+                                    style={[
+                                        satoshiFont.satoshiBlack,
+                                        { fontSize: 14 },
+                                        isSelected ? { color: '#8200db' } : { color: '#c27aff' },
+                                    ]}
                                 >
-                                    <TouchableOpacity
-                                        onPress={() => setTransactionType(transaction.key)}
-                                        className='w-full flex items-center justify-center py-2.5 rounded-full'
-                                    >
-                                        <Text style={satoshiFont.satoshiBlack} className='text-sm'>
-                                            {transaction.label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            );
-                        })}
+                                    {opt.label}
+                                </Text>
+                            )}
+                        />
                     </View>
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>

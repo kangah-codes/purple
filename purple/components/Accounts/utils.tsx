@@ -3,7 +3,7 @@ import { groupBy } from '@/lib/utils/helpers';
 import { format, parseISO } from 'date-fns';
 import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
-import { Text } from '../Shared/styled';
+import { Text, View } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';
 import { useAccountStore } from './hooks';
 import { Account, TimePeriod } from './schema';
@@ -166,7 +166,6 @@ export function getEffectiveBalance(account: Account): number {
 
 export function generateSpendChartData(
     transactions: Array<Transaction & { account_category?: string }>,
-    labelSpacing: number = 1,
 ): (ChartPoint & { label?: string })[] {
     const dailySpends: Record<string, number> = {};
 
@@ -192,17 +191,10 @@ export function generateSpendChartData(
 
     const chartData = sortedEntries.map(([isoDate, value], idx) => {
         runningSpend += value;
-        const showLabel = labelSpacing > 0 && idx % labelSpacing === 0;
+
         return {
             date: format(parseISO(isoDate), 'd MMM yyyy'),
             value: runningSpend,
-            ...(showLabel && {
-                labelComponent: () => (
-                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
-                        {format(parseISO(isoDate), 'd MMM')}
-                    </Text>
-                ),
-            }),
         };
     });
 

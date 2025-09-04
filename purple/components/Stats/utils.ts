@@ -184,6 +184,55 @@ export const generateMockTransactionsForMonth = (
     return transactions;
 };
 
+export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transaction[] => {
+    const start = startOfMonth(monthDate);
+    const end = endOfMonth(monthDate);
+    const transactions: Transaction[] = [];
+    let id = 1;
+    let current = start;
+
+    const totalDays = differenceInDays(end, start) + 1;
+    const startAmount = 10;
+    const endAmount = 10000;
+
+    let previousAmount = startAmount;
+
+    while (current <= end) {
+        const numTransactionsToday = Math.floor(Math.random() * 2);
+
+        for (let i = 0; i < numTransactionsToday; i++) {
+            let amount: number;
+
+            amount = Math.random() * 5000;
+
+            transactions.push({
+                id: id.toString(),
+                created_at: current.toISOString(),
+                updated_at: current.toISOString(),
+                deleted_at: null,
+                account_id: 'acc1',
+                user_id: 'user1',
+                type: 'debit',
+                amount: parseFloat(amount.toFixed(2)),
+                account: {} as any,
+                note: `Mock transaction ${id}`,
+                category: 'Test',
+                from_account: '',
+                to_account: '',
+                currency: 'GHS',
+                plan_id: '',
+            } as Transaction);
+
+            previousAmount = amount;
+            id++;
+        }
+
+        current = addDays(current, 1);
+    }
+
+    return transactions;
+};
+
 export function getWeekRangesForMonth(date: Date): string[] {
     const monthStart = startOfMonth(date);
     const monthEnd = endOfMonth(date);

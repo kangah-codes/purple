@@ -31,6 +31,7 @@ import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../co
 import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule } from '../utils';
+import HTTPError from '@/lib/utils/error';
 
 type FormData = {
     amount: string;
@@ -172,22 +173,6 @@ export default function NewTransactionScreen() {
             return;
         }
 
-        if (
-            account.balance - Number(data.amount) < 0 &&
-            !allowOverdraw &&
-            ['debit', 'transfer'].includes(transactionType) &&
-            !isRecurring
-        ) {
-            await logEvent('generic_event', {
-                context: 'attempted to overdraw account',
-            });
-            Toast.show({
-                type: 'warning',
-                props: { text1: 'Oops!', text2: 'Cannot overdraw account!' },
-            });
-            return;
-        }
-
         if (isRecurring) {
             // Handle recurring transaction creation
             const timeString = new Date(data.time).toLocaleTimeString([], {
@@ -233,6 +218,17 @@ export default function NewTransactionScreen() {
                     router.back();
                 },
                 onError: (error) => {
+                    if (error instanceof HTTPError) {
+                        Toast.show({
+                            type: 'error',
+                            props: { text1: 'Error!', text2: error.message },
+                        });
+                        return;
+                    }
+                    Toast.show({
+                        type: 'error',
+                        props: { text1: 'Error!', text2: "Couldn't create transaction" },
+                    });
                     console.error('Error creating recurring transaction:', error);
                 },
             });

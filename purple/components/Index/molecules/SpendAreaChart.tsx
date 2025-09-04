@@ -1,40 +1,12 @@
-import { generateChartData, generateSpendChartData } from '@/components/Accounts/utils';
+import { generateSpendChartData } from '@/components/Accounts/utils';
 import { Text, View } from '@/components/Shared/styled';
-import { mockTransactions } from '@/components/Stats/contants';
-import { generateMockTransactionsForMonth } from '@/components/Stats/utils';
 import { useTransactions } from '@/components/Transactions/hooks';
-import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { getMaxValue } from '@/lib/utils/object';
-import { endOfMonth, startOfMonth } from 'date-fns';
-import React, { useCallback, useMemo, useState } from 'react';
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import React, { useCallback, useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
-
-type SpendOverviewAreaChartProps = {
-    transactions: Transaction[];
-};
-
-function groupByCurrency(transactions: Transaction[]) {
-    return transactions.reduce<Record<string, Transaction[]>>((acc, tx) => {
-        if (!acc[tx.currency]) acc[tx.currency] = [];
-        acc[tx.currency].push(tx);
-        return acc;
-    }, {});
-}
-
-function groupByCategory(transactions: Transaction[]) {
-    return transactions.reduce<Record<string, { value: number; color: string }>>((acc, tx) => {
-        if (tx.type !== 'debit') return acc;
-        if (!acc[tx.category]) {
-            // Assign a color based on category hash (simple deterministic color)
-            const hash = Array.from(tx.category).reduce((a, c) => a + c.charCodeAt(0), 0);
-            const color = `hsl(${hash % 360}, 70%, 60%)`;
-            acc[tx.category] = { value: 0, color };
-        }
-        acc[tx.category].value += Math.abs(tx.amount);
-        return acc;
-    }, {});
-}
 
 const now = new Date();
 
@@ -47,12 +19,18 @@ export default function SpendAreaChart() {
             type: 'debit',
         },
     });
+    const { data: previousMonthTransactions, refetch: refetchPrevious } = useTransactions({
+        requestQuery: {
+            start_date: startOfMonth(subMonths(now, 1)).toISOString(),
+            end_date: endOfMonth(subMonths(now, 1)).toISOString(),
+            page_size: Infinity,
+            type: 'debit',
+        },
+    });
 
     const { data, data2, maxValue, maxValue2 } = useMemo(() => {
         const transformedData = generateSpendChartData(currentMonthTransactions?.data ?? []);
-        const transformedData2 = generateSpendChartData(
-            generateMockTransactionsForMonth(new Date()),
-        );
+        const transformedData2 = generateSpendChartData(previousMonthTransactions?.data ?? []);
         return {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 100),
@@ -60,7 +38,7 @@ export default function SpendAreaChart() {
             data2: transformedData2,
             maxValue2: getMaxValue(transformedData2, 'value', 100),
         };
-    }, [currentMonthTransactions]);
+    }, [currentMonthTransactions, previousMonthTransactions]);
 
     const renderYAxisLabel = useCallback((label: string) => {
         const labelVal = Number(label);
@@ -69,18 +47,13 @@ export default function SpendAreaChart() {
         return label;
     }, []);
 
-    const [width, setWidth] = useState(0);
+    useRefreshOnFocus(refetch);
+    useRefreshOnFocus(refetchPrevious);
 
-    console.log(Math.max(maxValue, maxValue2), data);
+    console.log(data2, Math.max(maxValue, maxValue2));
 
     return (
-        <View
-            className='px-5 pt-5 pb-2.5 mt-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'
-            onLayout={(event) => {
-                const { width } = event.nativeEvent.layout;
-                setWidth(width);
-            }}
-        >
+        <View className='px-5 pt-5 pb-2.5 mt-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Spending
@@ -101,7 +74,7 @@ export default function SpendAreaChart() {
                 </View>
             </View>
             <LineChart
-                areaChart
+                // areaChart
                 data={data}
                 data2={data2}
                 // rotateLabel
@@ -109,25 +82,25 @@ export default function SpendAreaChart() {
                 hideDataPoints
                 // hideRules
                 // hideYAxisText
-                curvature={0.125}
-                curved
+                // curvature={0.125}
+                // curved
                 width={300}
                 adjustToWidth
                 color='#9810fa'
                 color2='#737373'
                 startFillColor='#9810fa'
                 startFillColor2=''
-                endFillColor='#7E22CE'
+                endFillColor2='#7E22CE'
                 startOpacity={0.3}
                 endOpacity={0}
                 initialSpacing={0}
                 yAxisColor='white'
                 yAxisThickness={0}
-                rulesType='solid'
-                rulesColor='#F3E8FF'
+                rulesType='dotted'
+                rulesColor='#e9d4ff'
                 disableScroll
                 xAxisType='dotted'
-                xAxisColor='lightgray'
+                xAxisColor='#e9d4ff'
                 xAxisThickness={2}
                 dashWidth={4}
                 dashGap={4}

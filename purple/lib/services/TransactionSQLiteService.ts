@@ -52,6 +52,20 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 if (!creditAccount || !debitAccount) throw new Error(errorMessage);
 
+                // Check for overdraw on transfer (debit side)
+                if (allowOverdraw === false) {
+                    const debitAmount = data.amount + data.charges;
+                    if (
+                        typeof debitAccount.balance === 'number' &&
+                        debitAccount.balance < debitAmount
+                    ) {
+                        throw new HTTPError(
+                            'Insufficient funds in source account for transfer',
+                            400,
+                        );
+                    }
+                }
+
                 const defaultNote = `Transfer from ${debitAccount.name}`;
                 let creditAmount = data.amount;
                 const shouldUseConversion = await settingsService.get('allowCurrencyConversion');
@@ -127,6 +141,22 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
             } else {
+                // For debit, check for overdraw
+                if (data.type === 'debit' && allowOverdraw === false) {
+                    const account = await this.db.getFirstAsync<Account>(
+                        'SELECT * FROM accounts WHERE id = ?',
+                        [data.account_id],
+                    );
+                    if (!account) throw new HTTPError('Account not found', 404);
+                    const debitAmount = data.amount + (data.charges ?? 0);
+                    if (typeof account.balance === 'number' && account.balance < debitAmount) {
+                        throw new HTTPError(
+                            'Insufficient funds in account for debit transaction',
+                            400,
+                        );
+                    }
+                }
+
                 const uuid = UUID();
                 await this.db.runAsync(
                     `INSERT INTO transactions
@@ -182,6 +212,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         let updatedTransaction!: Transaction;
         const now = new Date().toISOString();
         const errorMessage = "Couldn't update transaction";
+        const settingsService = SettingsServiceFactory.create(this.db);
+        const allowOverdraw = await settingsService.get('allowOverdraw');
 
         await this.db.withTransactionAsync(async () => {
             const original = await this.db.getFirstAsync<Transaction>(
@@ -189,6 +221,18 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 [id],
             );
             if (!original) throw new HTTPError('Transaction not found', 404);
+
+            // check for overdraft if updating to a debit
+            if (data.type === 'debit') {
+                const account = await this.db.getFirstAsync<{ balance: number }>(
+                    'SELECT * FROM accounts WHERE id = ?',
+                    [data.account_id],
+                );
+                if (!account) throw new HTTPError('Account not found', 404);
+                if (allowOverdraw === false && Number(data.amount) > Number(account.balance)) {
+                    throw new HTTPError('Insufficient balance in account.', 400);
+                }
+            }
 
             // Update the transaction
             await this.db.runAsync(
