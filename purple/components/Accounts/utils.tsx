@@ -1,6 +1,6 @@
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { groupBy } from '@/lib/utils/helpers';
-import { format, parseISO } from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, isSameMonth, min, parseISO } from 'date-fns';
 import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
 import { Text, View } from '../Shared/styled';
@@ -195,6 +195,45 @@ export function generateSpendChartData(
         return {
             date: format(parseISO(isoDate), 'd MMM yyyy'),
             value: runningSpend,
+        };
+    });
+
+    return chartData;
+}
+
+export function generateNormalizedSpendChartData(
+    transactions: Array<Transaction & { account_category?: string }>,
+    monthStart: Date,
+    labelSpacing: number = 5,
+): (ChartPoint & { label?: string })[] {
+    const today = new Date();
+    const monthEnd = endOfMonth(monthStart);
+
+    const intervalEnd = isSameMonth(monthStart, today) ? min([today, monthEnd]) : monthEnd;
+    const allDays = eachDayOfInterval({ start: monthStart, end: intervalEnd });
+    const dailySpends: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        if (tx.type !== 'debit') continue;
+
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+        if (!dailySpends[isoDate]) {
+            dailySpends[isoDate] = 0;
+        }
+        dailySpends[isoDate] += tx.amount;
+    }
+
+    let runningSpend = 0;
+    const chartData = allDays.map((day, idx) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        runningSpend += dailySpends[isoDate] || 0;
+
+        // const showLabel = idx === 0 || (labelSpacing > 0 && idx % labelSpacing === 0);
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: runningSpend,
+            // label: showLabel ? format(day, 'd MMM') : undefined,
         };
     });
 

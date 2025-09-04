@@ -1,54 +1,68 @@
-import { SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { useTransactions } from '@/components/Transactions/hooks';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import StatsHeader from '../molecules/StatsHeader';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { getCurrentMonthYear } from '../utils';
+import CashflowBarChart from '../molecules/CashflowBarChart';
+import StatsHeatmap from '../molecules/Heatmap';
+import SpendAreaChart from '../molecules/SpendAreaChart';
+import SpendOverview from '../molecules/SpendOverview';
+import SpendOverviewChart from '../molecules/SpendOverviewChart';
+import SpendVsBudgetLineChart from '../molecules/SpendVsBudgetLineChart';
 import StatsNavigationArea from '../molecules/StatsNavigationArea';
+import { ArrowLeftIcon, ArrowRightIcon } from '@/components/SVG/icons/24x24';
+import { satoshiFont } from '@/lib/constants/fonts';
 
-const currentMonthYear = getCurrentMonthYear();
+const now = new Date();
+const startDate = startOfMonth(now);
+const endDate = endOfMonth(now);
 
 export default function StatsScreen() {
+    const { refetch, data } = useTransactions({
+        requestQuery: {
+            page_size: Infinity,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+        },
+    });
+
+    useRefreshOnFocus(refetch);
+
     return (
-        <SafeAreaView className='relative h-full bg-white'>
+        <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <ScrollView className='' style={styles.parentView}>
-                {/* <View className='flex flex-row items-center justify-between py-2.5 px-5'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                        My Stats
+            <StatsNavigationArea />
+            <View className='w-full flex flex-row mb-2.5 justify-between items-center relative px-5'>
+                <TouchableOpacity className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'>
+                    <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
+                </TouchableOpacity>
+
+                <View className='absolute left-0 right-0 items-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-sm'>
+                        Sep 2025
                     </Text>
-                    <View className='bg-purple-50 px-2 py-1 rounded-full'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-purple-500'
-                        >
-                            {currentMonthYear}
-                        </Text>
-                    </View>
-                </View> */}
-                <StatsNavigationArea />
+                </View>
 
-                <StatsHeader />
-
-                {/* <FlatList
-                    contentContainerStyle={styles.flatlist}
-                    showsVerticalScrollIndicator={false}
-                    data={[]}
-                    renderItem={() => <></>}
-                    ItemSeparatorComponent={itemSeparator}
-                    keyExtractor={keyExtractor}
-                    ListHeaderComponent={<StatsHeader />}
-                    onRefresh={refetch}
-                    refreshing={isFetching}
-                /> */}
+                <TouchableOpacity className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'>
+                    <ArrowRightIcon stroke='#9333EA' strokeWidth={2.5} />
+                </TouchableOpacity>
+            </View>
+            <ScrollView className='px-5 pt-2.5' contentContainerStyle={styles.scrollView}>
+                <SpendOverview transactions={data?.data ?? []} />
+                <SpendOverviewChart transactions={data?.data ?? []} />
+                <SpendVsBudgetLineChart />
+                <SpendAreaChart />
+                <CashflowBarChart />
+                <StatsHeatmap transactions={data?.data ?? []} />
             </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    flatlist: {
+    scrollView: {
         paddingBottom: 100,
     },
     flatlistContentContainer: {

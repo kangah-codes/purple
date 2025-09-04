@@ -15,7 +15,7 @@ import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import GettingStartedWidget from '../molecules/GettingStartedWidget';
 import IndexNavigationArea from '../molecules/IndexNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
-import SpendAreaChart from '../molecules/SpendAreaChart';
+import SpendAreaChart from '../../Stats/molecules/SpendAreaChart';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
 const linearGradientColours = ['#e9d4ff', '#fff'];
 
@@ -58,7 +58,7 @@ export default function IndexScreen() {
                     className='flex px-5 py-2.5 h-[450] absolute w-full'
                     colors={linearGradientColours}
                 />
-                <AnimatedClouds baseSpeed={0.1} minHeight={10} maxHeight={450} spawnRate={1} />
+                <AnimatedClouds baseSpeed={0.1} minHeight={50} maxHeight={450} spawnRate={1} />
                 <IndexNavigationArea />
                 <View className='flex flex-col mt-2.5 relative'>
                     <Animated.View
@@ -87,7 +87,9 @@ export default function IndexScreen() {
                     >
                         <AccountCardCarousel onLoaded={() => handleSectionLoaded('accounts')} />
                         <GettingStartedWidget />
-                        <SpendAreaChart />
+                        <View className='mt-5'>
+                            <SpendAreaChart />
+                        </View>
                         <TransactionHistoryList
                             onLoaded={() => handleSectionLoaded('transactions')}
                         />

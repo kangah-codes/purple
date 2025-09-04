@@ -1,14 +1,15 @@
-import { generateSpendChartData } from '@/components/Accounts/utils';
+import { generateNormalizedSpendChartData } from '@/components/Accounts/utils';
 import { Text, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import { getMaxValue } from '@/lib/utils/object';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 
 const now = new Date();
+const currentMonthStart = startOfMonth(now);
+const previousMonthStart = startOfMonth(subMonths(now, 1));
 
 export default function SpendAreaChart() {
     const { data: currentMonthTransactions, refetch } = useTransactions({
@@ -28,15 +29,44 @@ export default function SpendAreaChart() {
         },
     });
 
-    const { data, data2, maxValue, maxValue2 } = useMemo(() => {
-        const transformedData = generateSpendChartData(currentMonthTransactions?.data ?? []);
-        const transformedData2 = generateSpendChartData(previousMonthTransactions?.data ?? []);
-        return {
-            data: transformedData,
-            maxValue: getMaxValue(transformedData, 'value', 100),
+    const { currentData, previousData, globalMaxValue } = useMemo(() => {
+        const currentMonthData = generateNormalizedSpendChartData(
+            currentMonthTransactions?.data ?? [],
+            currentMonthStart,
+            5,
+        );
 
-            data2: transformedData2,
-            maxValue2: getMaxValue(transformedData2, 'value', 100),
+        const previousMonthData = generateNormalizedSpendChartData(
+            previousMonthTransactions?.data ?? [],
+            previousMonthStart,
+            5,
+        );
+
+        const previousMonthLength = Math.max(
+            previousMonthData.length,
+            new Date(
+                previousMonthStart.getFullYear(),
+                previousMonthStart.getMonth() + 1,
+                0,
+            ).getDate(),
+        );
+
+        while (previousMonthData.length < previousMonthLength) {
+            const lastValue = previousMonthData[previousMonthData.length - 1]?.value ?? 0;
+            previousMonthData.push({
+                date: `Day ${previousMonthData.length + 1}`,
+                value: lastValue,
+            });
+        }
+
+        const currentMax = Math.max(...currentMonthData.map((d) => d.value));
+        const previousMax = Math.max(...previousMonthData.map((d) => d.value));
+        const globalMax = Math.max(currentMax, previousMax, 100);
+
+        return {
+            currentData: currentMonthData,
+            previousData: previousMonthData,
+            globalMaxValue: globalMax,
         };
     }, [currentMonthTransactions, previousMonthTransactions]);
 
@@ -50,10 +80,8 @@ export default function SpendAreaChart() {
     useRefreshOnFocus(refetch);
     useRefreshOnFocus(refetchPrevious);
 
-    console.log(data2, Math.max(maxValue, maxValue2));
-
     return (
-        <View className='px-5 pt-5 pb-2.5 mt-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
+        <View className='px-5 pt-5 pb-2.5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Spending
@@ -74,25 +102,14 @@ export default function SpendAreaChart() {
                 </View>
             </View>
             <LineChart
-                // areaChart
-                data={data}
-                data2={data2}
-                // rotateLabel
-                maxValue={Math.max(maxValue, maxValue2)}
+                data={previousData}
+                data2={currentData}
+                maxValue={globalMaxValue}
                 hideDataPoints
-                // hideRules
-                // hideYAxisText
-                // curvature={0.125}
-                // curved
                 width={300}
                 adjustToWidth
-                color='#9810fa'
-                color2='#737373'
-                startFillColor='#9810fa'
-                startFillColor2=''
-                endFillColor2='#7E22CE'
-                startOpacity={0.3}
-                endOpacity={0}
+                color='#737373'
+                color2='#9810fa'
                 initialSpacing={0}
                 yAxisColor='white'
                 yAxisThickness={0}
@@ -108,13 +125,7 @@ export default function SpendAreaChart() {
                     fontSize: 12,
                     fontFamily: 'SatoshiBlack',
                 }}
-                xAxisLabelTextStyle={{
-                    fontSize: 12,
-                    fontFamily: 'SatoshiBlack',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                }}
-                noOfSections={5}
+                noOfSections={4}
                 formatYLabel={renderYAxisLabel}
             />
         </View>

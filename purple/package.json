@@ -60,7 +60,7 @@
         "react-native": "0.74.5",
         "react-native-device-info": "~10.12.0",
         "react-native-gesture-handler": "~2.16.1",
-        "react-native-gifted-charts": "~1.4.9",
+        "react-native-gifted-charts": "^1.4.64",
         "react-native-mmkv": "2.12.2",
         "react-native-month-year-picker": "^1.9.0",
         "react-native-pager-view": "6.3.0",

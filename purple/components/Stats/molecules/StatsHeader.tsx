@@ -14,6 +14,7 @@ import SpendOverviewPieChart from './SpendOverviewPieChart';
 import SpendOverviewAreaChart from './SpendOverviewAreaChart';
 import SpendVsBudgetLineChart from './SpendVsBudgetLineChart';
 import CashflowBarChart from './CashflowBarChart';
+import SpendAreaChart from './SpendAreaChart';
 
 const now = new Date();
 const startDate = startOfMonth(now);
@@ -35,7 +36,7 @@ export default function StatsHeader() {
             <SpendOverview transactions={data?.data ?? []} />
             <SpendOverviewChart transactions={data?.data ?? []} />
             <SpendVsBudgetLineChart />
-            <SpendOverviewAreaChart />
+            <SpendAreaChart />
             <CashflowBarChart />
             <StatsHeatmap transactions={data?.data ?? []} />
 

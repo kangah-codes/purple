@@ -1,4 +1,13 @@
-import { addDays, differenceInDays, endOfMonth, format, startOfMonth } from 'date-fns';
+import {
+    addDays,
+    differenceInDays,
+    eachDayOfInterval,
+    endOfMonth,
+    format,
+    isSameMonth,
+    min,
+    startOfMonth,
+} from 'date-fns';
 import { Transaction } from '../Transactions/schema';
 import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
 
@@ -271,4 +280,42 @@ export function getWeekRangesForMonth(date: Date): string[] {
     }
 
     return weeks;
+}
+
+type ChartPoint = {
+    value: number;
+    date: string;
+};
+export function generateNormalizedSpendChartData(
+    transactions: Array<Transaction & { account_category?: string }>,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const today = new Date();
+    const monthEnd = endOfMonth(monthStart);
+    const intervalEnd = isSameMonth(monthStart, today) ? min([today, monthEnd]) : monthEnd;
+    const allDays = eachDayOfInterval({ start: monthStart, end: intervalEnd });
+    const dailySpends: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+        if (!dailySpends[isoDate]) {
+            dailySpends[isoDate] = 0;
+        }
+        dailySpends[isoDate] += tx.amount;
+    }
+
+    console.log(allDays, 'ALLDAYS', intervalEnd);
+
+    let runningSpend = 0;
+    const chartData = allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        runningSpend += dailySpends[isoDate] || 0;
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: runningSpend,
+        };
+    });
+
+    return chartData;
 }
