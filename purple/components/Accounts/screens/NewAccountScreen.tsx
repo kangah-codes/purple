@@ -98,8 +98,6 @@ export default function NewAccountScreen() {
         );
     };
 
-    console.log(errors);
-
     const renderItem = useCallback((item: any) => {
         return (
             <View className='py-3 border-b border-purple-100'>

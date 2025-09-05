@@ -36,8 +36,6 @@ export default function SpendVsBudgetLineChart() {
         return label;
     }, []);
 
-    console.log(data, data2);
-
     return (
         <View className='px-5 pt-5 pb-2.5 mb-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
             <View className='flex flex-col mb-2.5'>

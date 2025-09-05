@@ -304,8 +304,6 @@ export function generateNormalizedSpendChartData(
         dailySpends[isoDate] += tx.amount;
     }
 
-    console.log(allDays, 'ALLDAYS', intervalEnd);
-
     let runningSpend = 0;
     const chartData = allDays.map((day) => {
         const isoDate = format(day, 'yyyy-MM-dd');

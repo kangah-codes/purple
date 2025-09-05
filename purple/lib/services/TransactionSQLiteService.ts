@@ -448,9 +448,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             end_date = false,
             accountGroup = false,
             type = false,
+            sortOrder = 'desc',
         } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
+        const orderDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
         let paginationClause = '';
         let whereClause = 't.deleted_at IS NULL';
@@ -501,7 +503,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             FROM transactions t
             INNER JOIN accounts a ON t.account_id = a.id
             WHERE ${whereClause}
-            ORDER BY t.created_at DESC
+            ORDER BY t.created_at ${orderDirection}
             ${paginationClause}`,
             params,
         );

@@ -3,17 +3,17 @@ import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSe
 import { ScrollView, Text, View } from '@/components/Shared/styled';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { getDateRange } from '@/lib/utils/date';
 import { groupBy } from '@/lib/utils/helpers';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { getMaxValue } from '@/lib/utils/object';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import tw from 'twrnc';
 import { useAccountReportStore, useAccountStore, useCalculateAccountData } from '../hooks';
 import { TimePeriod } from '../schema';
-import { generateChartData } from '../utils';
-import tw from 'twrnc';
+import { generateNormalizedSpendChartDataWithMissingDays } from '../utils';
 const datePeriods: TimePeriod[] = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
@@ -22,21 +22,24 @@ export default function AccountsAreaChart() {
     const {
         preferences: { currency },
     } = usePreferences();
-
+    const { startDate, endDate } = getDateRange(period);
     const groupedAccounts = groupBy(accounts, 'category');
-
     const accountGroupData = useCalculateAccountData({
         accountGroup: category,
         timePeriod: period,
     });
 
     const { data, maxValue } = useMemo(() => {
-        const transformedData = generateChartData(accountGroupData.transactions);
+        const transformedData = generateNormalizedSpendChartDataWithMissingDays(
+            accountGroupData.transactions,
+            startDate,
+            endDate,
+        );
         return {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 102),
         };
-    }, [accountGroupData.transactions, category]);
+    }, [accountGroupData.transactions, startDate, endDate]);
 
     const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
     const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);

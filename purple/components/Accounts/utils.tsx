@@ -3,11 +3,10 @@ import { groupBy } from '@/lib/utils/helpers';
 import { eachDayOfInterval, endOfMonth, format, isSameMonth, min, parseISO } from 'date-fns';
 import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
-import { Text, View } from '../Shared/styled';
+import { Text } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';
 import { useAccountStore } from './hooks';
-import { Account, TimePeriod } from './schema';
-import { satoshiFont } from '@/lib/constants/fonts';
+import { Account } from './schema';
 
 export function createTransactionChartData(
     transactions: Transaction[],
@@ -39,20 +38,11 @@ export function createTransactionChartData(
 
     // Create an array of all dates between the min and max date
     const allDates: string[] = [];
-    let currentDate = new Date(minDate);
+    const currentDate = new Date(minDate);
     while (currentDate <= maxDate) {
         allDates.push(currentDate.toLocaleDateString());
         currentDate.setDate(currentDate.getDate() + 1);
     }
-
-    // Aggregate the transaction data
-    const data = allDates.reduce<{ [key: string]: number }>((acc, date) => {
-        const transaction = transactions.find(
-            (t) => new Date(t.created_at).toLocaleDateString() === date,
-        );
-        acc[date] = transaction ? transaction.amount : 0;
-        return acc;
-    }, {});
 
     // Convert the data object to an array of { date, value } objects
     const chartData: { date: string; value: number }[] = [];
@@ -114,7 +104,6 @@ type ChartPoint = {
 
 export function generateChartData(
     transactions: Array<Transaction & { account_category?: string }>,
-    labelSpacing: number = 1,
 ): (ChartPoint & { label?: string })[] {
     const dailyTotals: Record<string, number> = {};
 
@@ -142,9 +131,8 @@ export function generateChartData(
         ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
     );
 
-    const chartData = sortedEntries.map(([isoDate, value], idx) => {
+    const chartData = sortedEntries.map(([isoDate, value]) => {
         runningBalance += value;
-        const showLabel = labelSpacing > 0 && idx % labelSpacing === 0;
         return {
             date: format(parseISO(isoDate), 'd MMM yyyy'),
             value: runningBalance < 0 ? 0 : runningBalance,
@@ -189,7 +177,7 @@ export function generateSpendChartData(
         ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
     );
 
-    const chartData = sortedEntries.map(([isoDate, value], idx) => {
+    const chartData = sortedEntries.map(([isoDate, value]) => {
         runningSpend += value;
 
         return {
@@ -204,7 +192,6 @@ export function generateSpendChartData(
 export function generateNormalizedSpendChartData(
     transactions: Array<Transaction & { account_category?: string }>,
     monthStart: Date,
-    labelSpacing: number = 5,
 ): (ChartPoint & { label?: string })[] {
     const today = new Date();
     const monthEnd = endOfMonth(monthStart);
@@ -224,16 +211,104 @@ export function generateNormalizedSpendChartData(
     }
 
     let runningSpend = 0;
-    const chartData = allDays.map((day, idx) => {
+    const chartData = allDays.map((day) => {
         const isoDate = format(day, 'yyyy-MM-dd');
         runningSpend += dailySpends[isoDate] || 0;
-
-        // const showLabel = idx === 0 || (labelSpacing > 0 && idx % labelSpacing === 0);
 
         return {
             date: format(day, 'd MMM yyyy'),
             value: runningSpend,
-            // label: showLabel ? format(day, 'd MMM') : undefined,
+        };
+    });
+
+    return chartData;
+}
+
+export function generateNormalizedSpendChartDataWithMissingDays(
+    transactions: Array<Transaction & { account_category?: string }>,
+    startDate: Date,
+    endDate?: Date,
+): (ChartPoint & { label?: string })[] {
+    const today = new Date();
+    const finalEndDate =
+        endDate ||
+        (isSameMonth(startDate, today)
+            ? min([today, endOfMonth(startDate)])
+            : endOfMonth(startDate));
+    const totalDays = Math.ceil(
+        (finalEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const transactionsInRange = transactions.filter((tx) => {
+        const txDate = new Date(tx.created_at);
+        return txDate >= startDate && txDate <= finalEndDate;
+    });
+
+    let samplingInterval = 1;
+    const maxDataPoints = 20;
+    const minDataPoints = 5;
+
+    const needsSampling = transactionsInRange.length > maxDataPoints || totalDays > maxDataPoints;
+
+    if (needsSampling) {
+        if (totalDays > 365) {
+            samplingInterval = Math.max(
+                Math.ceil(totalDays / maxDataPoints),
+                Math.ceil(totalDays / minDataPoints),
+            );
+        } else {
+            samplingInterval = Math.ceil(
+                Math.max(totalDays, transactionsInRange.length) / maxDataPoints,
+            );
+        }
+    }
+
+    const allDays: Date[] = [];
+    const currentDate = new Date(startDate);
+    let dayCount = 0;
+
+    while (currentDate <= finalEndDate) {
+        if (dayCount % samplingInterval === 0) {
+            allDays.push(new Date(currentDate));
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+        dayCount++;
+    }
+
+    if (allDays.length === 0 || allDays[allDays.length - 1].getTime() !== finalEndDate.getTime()) {
+        allDays.push(new Date(finalEndDate));
+    }
+
+    const dailyBalanceChanges: Record<string, number> = {};
+    for (const day of allDays) {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        dailyBalanceChanges[isoDate] = 0;
+    }
+
+    for (const tx of transactionsInRange) {
+        const txDate = new Date(tx.created_at);
+        const samplingDate =
+            allDays.find((day) => {
+                const nextSamplingDate = new Date(day);
+                nextSamplingDate.setDate(nextSamplingDate.getDate() + samplingInterval);
+                return txDate >= day && txDate < nextSamplingDate;
+            }) || allDays[allDays.length - 1];
+
+        const isoDate = format(samplingDate, 'yyyy-MM-dd');
+        if (tx.type === 'credit') {
+            dailyBalanceChanges[isoDate] += tx.amount;
+        } else {
+            dailyBalanceChanges[isoDate] -= tx.amount;
+        }
+    }
+
+    let runningBalance = 0;
+    const chartData = allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        runningBalance += dailyBalanceChanges[isoDate];
+
+        return {
+            date: format(day, samplingInterval > 30 ? 'MMM yyyy' : 'd MMM yyyy'),
+            value: runningBalance < 0 ? 0 : runningBalance,
         };
     });
 
