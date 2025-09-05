@@ -1,22 +1,18 @@
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { generatePalette } from '@/lib/utils/colour';
 import React from 'react';
+import { Account } from '../Accounts/schema';
 import { Text } from '../Shared/styled';
+import { Transaction } from '../Transactions/schema';
 import {
-    BudgetPlan,
-    Deposit,
     ExpenseCalculationResult,
     Frequency,
     Plan,
     PlanAccountPieChartStats,
-    PlanTransaction,
     SpendingProgress,
     SpendingTrendData,
     TrendDataPoint,
 } from './schema';
-import { formatDateTime } from '@/lib/utils/date';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { Account } from '../Accounts/schema';
-import { generatePalette } from '@/lib/utils/colour';
-import { Transaction } from '../Transactions/schema';
 
 /**
  * Calculates the total expense details from an array of budget plans.
@@ -49,100 +45,6 @@ export default function calculateTotalExpenseDetails(plans: Plan[]): ExpenseCalc
         totalExpenseRemainingPercentage,
         activePlansCount: expensePlans.length,
     };
-}
-
-export function calculateTotalSavingDetails(plans: Plan[]): ExpenseCalculationResult {
-    // Filter for active expense plans only
-    const savingPlans = plans.filter((plan) => plan.type === 'saving' && plan.deleted_at === null);
-
-    // Calculate totals
-    const totalSaving = savingPlans.reduce((acc, curr) => acc + curr.balance, 0);
-    const totalGoal = savingPlans.reduce((acc, curr) => acc + curr.target, 0);
-
-    // Prevent division by zero
-    const totalSavingPercentage = totalGoal === 0 ? 0 : (totalSaving / totalGoal) * 100;
-
-    const totalSavingRemaining = totalGoal - totalSaving;
-    const totalSavingRemainingPercentage =
-        totalGoal === 0 ? 0 : (totalSavingRemaining / totalGoal) * 100;
-
-    return {
-        totalExpense: totalSaving,
-        totalExpensePercentage: totalSavingPercentage,
-        totalExpenseRemaining: totalSavingRemaining,
-        totalExpenseRemainingPercentage: totalSavingRemainingPercentage,
-        activePlansCount: savingPlans.length,
-    };
-}
-
-/**
- * Determines if a user's spending is on track based on time elapsed and amount spent
- *
- * @param {Plan} plan - The spending plan to evaluate
- * @returns {SpendingProgress} Detailed analysis of spending progress
- */
-export function analyzeSpendingProgress(plan: Plan): SpendingProgress {
-    const now = new Date();
-    const startDate = new Date(plan.start_date);
-    const endDate = new Date(plan.end_date);
-
-    // Calculate time metrics
-    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const daysElapsed = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    // Handle edge cases
-    if (daysElapsed <= 0) {
-        return createProgressResponse(true, 0, 0, 0, totalDays, 0, 0, 0, "Plan hasn't started yet");
-    }
-
-    if (daysElapsed > totalDays) {
-        return createProgressResponse(
-            plan.balance <= plan.target,
-            plan.balance / totalDays,
-            plan.target / totalDays,
-            totalDays,
-            totalDays,
-            100,
-            (plan.balance / plan.target) * 100,
-            (plan.balance / plan.target - 1) * 100,
-            'Plan period has ended',
-        );
-    }
-
-    // Calculate rates and percentages
-    const percentTimeElapsed = (daysElapsed / totalDays) * 100;
-    const percentTargetSpent = (plan.balance / plan.target) * 100;
-
-    const expectedSpendingRate = plan.target / totalDays;
-    const actualSpendingRate = plan.balance / daysElapsed;
-
-    // Calculate deviation from expected spending (negative means under budget)
-    const deviation = percentTargetSpent - percentTimeElapsed;
-
-    // Determine if on track (allowing for 10% deviation)
-    const isOnTrack = Math.abs(deviation) <= 10;
-
-    // Generate appropriate message
-    let message = '';
-    if (deviation < -10) {
-        message = `Under budget by ${Math.abs(deviation).toFixed(1)}%`;
-    } else if (deviation > 10) {
-        message = `Over budget by ${deviation.toFixed(1)}%`;
-    } else {
-        message = 'Spending is on track';
-    }
-
-    return createProgressResponse(
-        isOnTrack,
-        actualSpendingRate,
-        expectedSpendingRate,
-        daysElapsed,
-        totalDays,
-        percentTimeElapsed,
-        percentTargetSpent,
-        deviation,
-        message,
-    );
 }
 
 /**
@@ -286,7 +188,7 @@ export function generateSpendingTrendData(
         if (pointDate >= now) {
             const currentAmount = getAmountUpToDate(now);
             const daysFromNow = (pointDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-            let projectedAmount = currentAmount + projectedDailyRate * daysFromNow;
+            const projectedAmount = currentAmount + projectedDailyRate * daysFromNow;
             let projectedValue = isExpense ? plan.target - projectedAmount : projectedAmount;
             projectedValue = Math.max(0, Math.min(projectedValue, plan.target || 0));
 
@@ -309,7 +211,7 @@ export function calculateAmountAddedOnDay(
 ): number {
     if (!transactions) return 0;
 
-    let dateToUse = date || new Date();
+    const dateToUse = date || new Date();
 
     // check if any transactions were made on this day
     const transactionsOnDate = transactions.filter(

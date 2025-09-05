@@ -12,5 +12,5 @@ const run = (cmd) => {
 };
 
 run('npx knip'); // unused packages + unused exports
-// run('npx ts-prune'); // unused exports only
-// run('npx eslint . --ext .js,.ts,.tsx'); // unused vars/imports
+run('npx ts-prune'); // unused exports only
+run('npx eslint . --ext .js,.ts,.tsx'); // unused vars/imports

@@ -5,7 +5,6 @@ import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
 import { Text } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';
-import { useAccountStore } from './hooks';
 import { Account } from './schema';
 
 export function createTransactionChartData(
@@ -62,11 +61,6 @@ export function createTransactionChartData(
         });
     }
     return chartData;
-}
-
-export function useGetAccountFromStore(accountID: string) {
-    const { accounts } = useAccountStore();
-    return accounts.find((account) => account.id === accountID);
 }
 
 export function groupAccountsByCategory(accounts: Account[]): Record<string, Account[]> {
