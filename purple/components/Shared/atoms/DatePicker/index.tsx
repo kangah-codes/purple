@@ -18,7 +18,8 @@ type DatePickerProps = {
     pickerKey: string;
     minimumDate?: Date;
     maximumDate?: Date;
-    value: Date;
+    value?: Date | string | null;
+    placeholder?: string;
 };
 
 export default function DatePicker({
@@ -28,19 +29,38 @@ export default function DatePicker({
     minimumDate,
     maximumDate,
     value,
+    placeholder = 'Select a date',
 }: DatePickerProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-
+    const getDateValue = (): Date => {
+        if (!value || value === '') {
+            return new Date();
+        }
+        if (typeof value === 'string') {
+            const parsed = new Date(value);
+            return isNaN(parsed.getTime()) ? new Date() : parsed;
+        }
+        return value;
+    };
+    const dateValue = getDateValue();
     const handleDateChange = (_event: DateTimePickerEvent, pickedDate?: Date) => {
         if (!pickedDate) return;
         if (typeof onChange === 'function') {
             onChange(pickedDate);
         }
     };
+    const formatDate = (date?: Date | string | null) => {
+        if (!date || date === '') return placeholder;
 
-    const formatDate = (date: Date) => {
-        if ((date as unknown as string) == 'Invalid Date') return 'Select a date';
-        return date.toDateString();
+        let dateObj: Date;
+        if (typeof date === 'string') {
+            dateObj = new Date(date);
+        } else {
+            dateObj = date;
+        }
+
+        if (isNaN(dateObj.getTime())) return placeholder;
+        return dateObj.toDateString();
     };
 
     return (
@@ -66,7 +86,7 @@ export default function DatePicker({
                         )}
                         <DateTimePicker
                             testID='datePicker'
-                            value={value}
+                            value={dateValue}
                             mode='date'
                             onChange={handleDateChange}
                             display='spinner'
@@ -90,7 +110,7 @@ export default function DatePicker({
                             setShowBottomSheetModal(pickerKey, true);
                         } else {
                             DateTimePickerAndroid.open({
-                                value,
+                                value: dateValue,
                                 onChange: handleDateChange,
                                 mode: 'date',
                                 is24Hour: true,

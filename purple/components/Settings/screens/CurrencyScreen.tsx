@@ -47,7 +47,7 @@ export default function CurrencyScreen() {
                 );
             },
         },
-        ...(Boolean(exchangeRates)
+        ...(exchangeRates
             ? [
                   {
                       icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
@@ -78,6 +78,8 @@ export default function CurrencyScreen() {
             : []),
     ];
 
+    console.log(currency);
+
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
@@ -89,6 +91,7 @@ export default function CurrencyScreen() {
                             new_value: item.code,
                             setting: 'currency',
                         });
+                        console.log('Cghanging currency, old: ', currency, ' new: ', item.code);
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
                         CurrencyService.getInstance().fetchExchangeRates(

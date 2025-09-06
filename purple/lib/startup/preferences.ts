@@ -2,11 +2,17 @@ import { usePreferencesStore } from '@/components/Settings/state';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { SettingsServiceFactory } from '../factory/SettingsFactory';
 import { UserPreferences } from '@/components/Settings/schema';
+import { nativeStorage } from '../utils/storage';
 
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
         const settingsService = SettingsServiceFactory.create(db);
         const existingCurrency = await settingsService.get('currency');
+        console.log(
+            'Existing Currency:',
+            existingCurrency,
+            nativeStorage.getItem('preferences-store'),
+        );
         const defaultSettings: UserPreferences = {
             currency: existingCurrency || 'USD',
             theme: 'light',

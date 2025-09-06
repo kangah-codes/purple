@@ -30,7 +30,7 @@ import { useQueryClient } from 'react-query';
 import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../constants';
 import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
-import { generateICalRRule } from '../utils';
+import { generateICalRRule, getMinimumEndDate } from '../utils';
 import HTTPError from '@/lib/utils/error';
 
 type FormData = {
@@ -116,6 +116,11 @@ export default function NewTransactionScreen() {
         defaultValue: '',
     });
 
+    const startDate = useWatch({
+        control,
+        name: 'start_date',
+    });
+
     const dateISO = useWatch({
         control,
         name: 'time',
@@ -191,7 +196,7 @@ export default function NewTransactionScreen() {
             let transformedData = transformObject(data, [
                 ['toAccount', 'to_account'],
                 ['fromAccount', 'from_account'],
-                ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
+                ['accountId', 'account_id', (value) => (value ? value : data.fromAccount)],
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
                 ['recurrence_rule', 'recurrence_rule', () => rrule],
@@ -237,7 +242,7 @@ export default function NewTransactionScreen() {
             let transformedData = transformObject(data, [
                 ['toAccount', 'to_account'],
                 ['fromAccount', 'from_account'],
-                ['accountId', 'account_id', (value) => (Boolean(value) ? value : data.fromAccount)],
+                ['accountId', 'account_id', (value) => (value ? value : data.fromAccount)],
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
             ]);
@@ -589,9 +594,17 @@ export default function NewTransactionScreen() {
                                 pickerKey='newTransactionStartDate'
                                 onChange={(date) => {
                                     onChange(date.toISOString());
+                                    // update end date to be at least the minimum end date based on frequency and new start date
+                                    setValue(
+                                        'end_date',
+                                        getMinimumEndDate(
+                                            frequency,
+                                            date.toISOString(),
+                                        ).toISOString(),
+                                    );
                                 }}
                                 // minimumDate={new Date()}
-                                value={new Date(value)}
+                                value={value}
                             />
                         )}
                         name='start_date'
@@ -599,6 +612,32 @@ export default function NewTransactionScreen() {
                     {errors.start_date && (
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
                             {errors.start_date.message}
+                        </Text>
+                    )}
+                </View>
+
+                <View className='flex flex-col space-y-1'>
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: "Date can't be empty",
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <DatePicker
+                                label='End Date'
+                                pickerKey='newTransactionEndDate'
+                                onChange={(date) => {
+                                    onChange(date.toISOString());
+                                }}
+                                minimumDate={getMinimumEndDate(frequency, startDate)}
+                                value={value}
+                            />
+                        )}
+                        name='end_date'
+                    />
+                    {errors.end_date && (
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-red-500'>
+                            {errors.end_date.message}
                         </Text>
                     )}
                 </View>

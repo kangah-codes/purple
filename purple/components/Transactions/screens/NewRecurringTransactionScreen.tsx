@@ -31,7 +31,8 @@ import {
 } from '../constants';
 import { useCreateRecurringTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
-import { generateICalRRule } from '../utils';
+import { generateICalRRule, getMinimumEndDate } from '../utils';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 
 type FormData = {
     amount: string;
@@ -69,7 +70,6 @@ export default function NewRecurringTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
-        watch,
     } = useForm<FormData>({
         defaultValues: {
             amount: '',
@@ -105,6 +105,11 @@ export default function NewRecurringTransactionScreen() {
         control,
         name: 'frequency',
         defaultValue: '',
+    });
+
+    const startDate = useWatch({
+        control,
+        name: 'start_date',
     });
 
     const dateISO = useWatch({
@@ -246,30 +251,37 @@ export default function NewRecurringTransactionScreen() {
                         </View>
                     </View>
 
-                    <View className='w-full bg-purple-100 rounded-full p-1.5 flex flex-row space-x-1.5'>
-                        {RECURRING_TRANSACTION_TYPES.map((transaction) => {
-                            return (
-                                <View
-                                    className='flex-grow flex items-center justify-center rounded-full'
-                                    style={{
-                                        backgroundColor:
-                                            transaction.key == transactionType
-                                                ? '#fff'
-                                                : 'rgb(243 232 255)',
-                                    }}
-                                    key={transaction.key}
+                    <View className='w-full'>
+                        <AnimatedPillSelect<string>
+                            options={RECURRING_TRANSACTION_TYPES.map((t) => ({
+                                label: t.label,
+                                value: t.key,
+                            }))}
+                            selected={transactionType}
+                            onChange={setTransactionType}
+                            styling={{
+                                pill: { backgroundColor: '#fff' },
+                                background: {
+                                    backgroundColor: 'rgb(243, 232, 255)',
+                                    padding: 4,
+                                    borderRadius: 999,
+                                },
+                                option: {
+                                    padding: 12,
+                                },
+                            }}
+                            renderItem={(opt, isSelected) => (
+                                <Text
+                                    style={[
+                                        satoshiFont.satoshiBlack,
+                                        { fontSize: 14 },
+                                        isSelected ? { color: '#8200db' } : { color: '#c27aff' },
+                                    ]}
                                 >
-                                    <TouchableOpacity
-                                        onPress={() => setTransactionType(transaction.key)}
-                                        className='w-full flex items-center justify-center py-2.5 rounded-full'
-                                    >
-                                        <Text style={satoshiFont.satoshiBlack} className='text-sm'>
-                                            {transaction.label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            );
-                        })}
+                                    {opt.label}
+                                </Text>
+                            )}
+                        />
                     </View>
                     <ScheduleSummary
                         frequency={frequency as any}
@@ -575,14 +587,18 @@ export default function NewRecurringTransactionScreen() {
                                     label='Start Date'
                                     pickerKey='newTransactionStartDate'
                                     onChange={(date) => {
-                                        // format "2006-01-02T15:04:05.000Z"
                                         onChange(date.toISOString());
+                                        // update end date to be at least the minimum end date based on frequency and new start date
+                                        setValue(
+                                            'end_date',
+                                            getMinimumEndDate(
+                                                frequency,
+                                                date.toISOString(),
+                                            ).toISOString(),
+                                        );
                                     }}
-                                    // selectedDate={value}
-                                    // make maximim date today
                                     minimumDate={new Date()}
-                                    // @ts-expect-error
-                                    value={new Date(value)}
+                                    value={value}
                                 />
                             )}
                             name='start_date'
@@ -597,25 +613,19 @@ export default function NewRecurringTransactionScreen() {
                         )}
                     </View>
 
-                    {/* <View className='flex flex-col space-y-1'>
+                    <View className='flex flex-col space-y-1'>
                         <Controller
                             control={control}
-                            rules={{
-                                required: "Date can't be empty",
-                            }}
                             render={({ field: { onChange, value } }) => (
                                 <DatePicker
                                     label='End Date'
                                     pickerKey='newTransactionEndDate'
                                     onChange={(date) => {
-                                        // format "2006-01-02T15:04:05.000Z"
                                         onChange(date.toISOString());
                                     }}
-                                    // selectedDate={value}
-                                    // make maximim date today
-                                    minimumDate={new Date()}
-                                    // @ts-expect-error
-                                    value={new Date(value)}
+                                    minimumDate={getMinimumEndDate(frequency, startDate)}
+                                    value={value}
+                                    placeholder='No end date selected'
                                 />
                             )}
                             name='end_date'
@@ -628,7 +638,7 @@ export default function NewRecurringTransactionScreen() {
                                 {errors.end_date.message}
                             </Text>
                         )}
-                    </View> */}
+                    </View>
 
                     {/* <View className='flex flex-col space-y-1'>
                         <Controller
@@ -696,27 +706,49 @@ export default function NewRecurringTransactionScreen() {
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity
-                    className='items-center self-center justify-center px-4 absolute bottom-5'
-                    onPress={handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                >
-                    <LinearGradient
-                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                        colors={['#c084fc', '#9333ea']}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size={15} color='#fff' />
-                        ) : (
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={router.back}
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
                             >
-                                Save
-                            </Text>
-                        )}
-                    </LinearGradient>
-                </TouchableOpacity>
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? (
+                                        <ActivityIndicator size={15} color='#fff' />
+                                    ) : (
+                                        <Text
+                                            style={satoshiFont.satoshiBlack}
+                                            className='text-white text-center'
+                                        >
+                                            Save
+                                        </Text>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </SafeAreaView>
         </>
     );

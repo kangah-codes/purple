@@ -11,21 +11,22 @@ import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 
 const now = new Date();
-const start = startOfMonth(now);
-const end = endOfMonth(now);
 const deviceWidth = Dimensions.get('window').width;
 const padding = 20;
 const numBlocksPerRow = 7; // for a week view
 const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const monthDays = eachDayOfInterval({ start, end });
-const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
 const blockSize = (deviceWidth - padding * 6) / numBlocksPerRow;
 
 type StatsHeatmapProps = {
     transactions: Transaction[];
+    startDate: Date;
 };
 
-function StatsHeatmap({ transactions }: StatsHeatmapProps) {
+function StatsHeatmap({ transactions, startDate }: StatsHeatmapProps) {
+    const start = startOfMonth(startDate);
+    const end = endOfMonth(startDate);
+    const monthDays = eachDayOfInterval({ start, end });
+    const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {

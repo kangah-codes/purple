@@ -1,4 +1,3 @@
-import AnimatedClouds from '@/components/Shared/molecules/AnimatedClouds';
 import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
@@ -11,13 +10,12 @@ import Animated, {
     useSharedValue,
 } from 'react-native-reanimated';
 import tw from 'twrnc';
+import SpendAreaChart from '../../Stats/molecules/SpendAreaChart';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import GettingStartedWidget from '../molecules/GettingStartedWidget';
 import IndexNavigationArea from '../molecules/IndexNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
-import SpendAreaChart from '../../Stats/molecules/SpendAreaChart';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
-const linearGradientColours = ['#e9d4ff', '#fff'];
 
 export default function IndexScreen() {
     const [sectionsLoaded, setSectionsLoaded] = useState({
@@ -27,7 +25,6 @@ export default function IndexScreen() {
     const allLoaded = Object.values(sectionsLoaded).every(Boolean);
     const handleSectionLoaded = (section: string) =>
         setSectionsLoaded((prev) => ({ ...prev, [section]: true }));
-
     const scrollY = useSharedValue(0);
     const onScroll = useAnimatedScrollHandler({
         onScroll: (event) => {
@@ -54,11 +51,6 @@ export default function IndexScreen() {
                         <LoadingScreen />
                     </View>
                 )}
-                <LinearGradient
-                    className='flex px-5 py-2.5 h-[450] absolute w-full'
-                    colors={linearGradientColours}
-                />
-                <AnimatedClouds baseSpeed={0.1} minHeight={50} maxHeight={450} spawnRate={1} />
                 <IndexNavigationArea />
                 <View className='flex flex-col mt-2.5 relative'>
                     <Animated.View
@@ -75,7 +67,7 @@ export default function IndexScreen() {
                         ]}
                         pointerEvents='none'
                     >
-                        <LinearGradient colors={['#e9d4ff', 'transparent']} style={{ flex: 1 }} />
+                        <LinearGradient colors={['#faf5ff', 'transparent']} style={{ flex: 1 }} />
                     </Animated.View>
 
                     <Animated.ScrollView

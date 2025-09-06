@@ -21,6 +21,50 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
+// Component that needs SQLite context for notifications
+function AppWithNotifications() {
+    useNotifications();
+    return (
+        <AnalyticsProvider
+            config={{
+                enableDebugLogs: true,
+                syncEveryMs: 180000,
+                batchSize: 25,
+            }}
+            disabled
+            autoFlushOnBackground={true}
+        >
+            <BottomSheetModalProvider>
+                <PortalProvider>
+                    {/* <SafeAreaProvider> */}
+                    <ThemeProvider value={DefaultTheme}>
+                        {/** Portal Rendering  */}
+                        <CurrentTransactionModal modalKey='transactionReceipt' />
+                        <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
+                        {/** Main Navigation Stack */}
+                        <Stack
+                            screenOptions={{
+                                contentStyle: {
+                                    backgroundColor: '#fff',
+                                },
+                            }}
+                        >
+                            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                            <Stack.Screen name='plans' options={{ headerShown: false }} />
+                            <Stack.Screen name='accounts' options={{ headerShown: false }} />
+                            <Stack.Screen name='transactions' options={{ headerShown: false }} />
+                            <Stack.Screen name='onboarding' options={{ headerShown: false }} />
+                            <Stack.Screen name='auth' options={{ headerShown: false }} />
+                            <Stack.Screen name='settings' options={{ headerShown: false }} />
+                        </Stack>
+                    </ThemeProvider>
+                    {/* </SafeAreaProvider> */}
+                </PortalProvider>
+            </BottomSheetModalProvider>
+        </AnalyticsProvider>
+    );
+}
+
 Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
 
@@ -52,7 +96,6 @@ if (__DEV__) {
 }
 
 export default Sentry.wrap(function RootLayout() {
-    useNotifications();
     const [appIsReady, setAppIsReady] = useState(true);
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
@@ -71,82 +114,25 @@ export default Sentry.wrap(function RootLayout() {
 
     return (
         <ErrorBoundary>
-            <AnalyticsProvider
-                config={{
-                    enableDebugLogs: true,
-                    syncEveryMs: 180000,
-                    batchSize: 25,
-                }}
-                disabled
-                autoFlushOnBackground={true}
-            >
-                <AppQueryClientProvider>
-                    <AuthProvider>
-                        <GestureHandlerRootView style={{ flex: 1 }}>
-                            <Suspense fallback={<LoadingScreen />}>
-                                <SQLiteProvider
-                                    databaseName='purple.db'
-                                    onInit={onInitialise}
-                                    useSuspense
-                                    // options={{
-                                    //     useNewConnection: true,
-                                    // }}
-                                >
-                                    <BottomSheetModalProvider>
-                                        <PortalProvider>
-                                            {/* <SafeAreaProvider> */}
-                                            <ThemeProvider value={DefaultTheme}>
-                                                {/** Portal Rendering  */}
-                                                <CurrentTransactionModal modalKey='transactionReceipt' />
-                                                <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
-                                                {/** Main Navigation Stack */}
-                                                <Stack
-                                                    screenOptions={{
-                                                        contentStyle: {
-                                                            backgroundColor: '#fff',
-                                                        },
-                                                    }}
-                                                >
-                                                    <Stack.Screen
-                                                        name='(tabs)'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='plans'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='accounts'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='transactions'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='onboarding'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='auth'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                    <Stack.Screen
-                                                        name='settings'
-                                                        options={{ headerShown: false }}
-                                                    />
-                                                </Stack>
-                                            </ThemeProvider>
-                                            {/* </SafeAreaProvider> */}
-                                        </PortalProvider>
-                                    </BottomSheetModalProvider>
-                                </SQLiteProvider>
-                            </Suspense>
-                        </GestureHandlerRootView>
-                        <Toast config={toastConfig} />
-                    </AuthProvider>
-                </AppQueryClientProvider>
-            </AnalyticsProvider>
+            <AppQueryClientProvider>
+                <AuthProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                        <Suspense fallback={<LoadingScreen />}>
+                            <SQLiteProvider
+                                databaseName='purple.db'
+                                onInit={onInitialise}
+                                useSuspense
+                                // options={{
+                                //     useNewConnection: true,
+                                // }}
+                            >
+                                <AppWithNotifications />
+                            </SQLiteProvider>
+                        </Suspense>
+                    </GestureHandlerRootView>
+                    <Toast config={toastConfig} />
+                </AuthProvider>
+            </AppQueryClientProvider>
         </ErrorBoundary>
     );
 });

@@ -208,6 +208,37 @@ export function formatLocalTime(timeString: string | undefined) {
     return format(date, 'p');
 }
 
+export function getMinimumEndDate(frequency?: string, startDate?: string) {
+    const start = startDate ? new Date(startDate) : new Date();
+
+    switch (frequency) {
+        case 'daily': {
+            //  minimum is next day
+            const dailyMin = new Date(start);
+            dailyMin.setDate(dailyMin.getDate() + 1);
+            return dailyMin;
+        }
+        case 'weekly': {
+            // minimum is one week later
+            const weeklyMin = new Date(start);
+            weeklyMin.setDate(weeklyMin.getDate() + 7);
+            return weeklyMin;
+        }
+        case 'monthly': {
+            // minimum is one month later
+            const monthlyMin = new Date(start);
+            monthlyMin.setMonth(monthlyMin.getMonth() + 1);
+            return monthlyMin;
+        }
+        default: {
+            // default to next day if no frequency selected
+            const defaultMin = new Date(start);
+            defaultMin.setDate(defaultMin.getDate() + 1);
+            return defaultMin;
+        }
+    }
+}
+
 export function calculateTransactionSchedule(
     frequency: 'daily' | 'weekly' | 'monthly' | 'custom' | '',
     time: string,

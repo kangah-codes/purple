@@ -1,6 +1,5 @@
-import { SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
+import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
-import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { addMonths, endOfMonth, format, isBefore, startOfMonth } from 'date-fns';
@@ -8,44 +7,15 @@ import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import CashflowBarChart from '../molecules/CashflowBarChart';
-import StatsHeatmap from '../molecules/Heatmap';
+import MonthlyStatsPage from '../molecules/MonthlyStatsReport';
 import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
-import SpendAreaChart from '../molecules/SpendAreaChart';
-import SpendOverview from '../molecules/SpendOverview';
-import SpendOverviewChart from '../molecules/SpendOverviewChart';
-import SpendVsBudgetLineChart from '../molecules/SpendVsBudgetLineChart';
 import StatsNavigationArea from '../molecules/StatsNavigationArea';
-
-interface MonthlyStatsPageProps {
-    currentDate: Date;
-    transactions: Transaction[];
-    isLoading: boolean;
-}
-
-const MonthlyStatsPage = React.memo<MonthlyStatsPageProps>(({ transactions, isLoading }) =>
-    isLoading ? (
-        <ReportLoadingScreen showNavigation={false} />
-    ) : (
-        <ScrollView className='px-5 pt-2.5' contentContainerStyle={styles.scrollView}>
-            <SpendOverview transactions={transactions} />
-            <SpendOverviewChart transactions={transactions} />
-            <SpendVsBudgetLineChart />
-            <SpendAreaChart />
-            <CashflowBarChart />
-            <StatsHeatmap transactions={transactions} />
-        </ScrollView>
-    ),
-);
-
-MonthlyStatsPage.displayName = 'MonthlyStatsPage';
 
 export default function StatsScreen() {
     const pagerRef = useRef<PagerView>(null);
     const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isInitialized, setIsInitialized] = useState(false);
-
     const { data: oldestTransaction, isLoading: isLoadingOldest } = useTransactions({
         requestQuery: {
             page_size: 1,
