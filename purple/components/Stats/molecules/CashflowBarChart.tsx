@@ -48,10 +48,10 @@ export default function CashflowBarChart() {
     }, [chartW, stackData.length]);
 
     return (
-        <View className='px-5 pt-5 pb-2.5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
+        <View className='p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
             <View className='mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
-                    Monthly Spend
+                    Cash Flow
                 </Text>
                 <View className='flex flex-row space-x-2'>
                     <View className='flex flex-row items-center space-x-1'>
@@ -85,13 +85,14 @@ export default function CashflowBarChart() {
                         xAxisColor='white'
                         yAxisThickness={0}
                         xAxisThickness={0}
-                        autoShiftLabels={true}
+                        // autoShiftLabels={true}
+                        xAxisLabelsAtBottom
                         yAxisTextStyle={{ fontSize: 12, fontFamily: 'SatoshiBlack' }}
                         xAxisLabelTextStyle={{
                             fontSize: 12,
                             fontFamily: 'SatoshiBlack',
-                            // marginLeft: 'auto',
-                            // marginRight: 'auto',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
                         }}
                         hideRules
                         noOfSections={4}

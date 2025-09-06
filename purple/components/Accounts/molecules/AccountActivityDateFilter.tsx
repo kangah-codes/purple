@@ -1,19 +1,33 @@
-import { View, Text } from '@/components/Shared/styled';
-import { satoshiFont } from '@/lib/constants/fonts';
-import React from 'react';
-import { useAccountStore } from '../hooks';
-import { getDateRange } from '@/lib/utils/date';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
+import { Text, View } from '@/components/Shared/styled';
+import { useTransactions } from '@/components/Transactions/hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { getDateRange } from '@/lib/utils/date';
+import React, { useMemo } from 'react';
+import { useAccountStore } from '../hooks';
 
 type AccountDatePeriod = '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
 const datePeriods: AccountDatePeriod[] = ['1W', '1M', '3M', '6M', '1Y', 'ALL'];
 
 export default function AccountActivityDateFilter() {
     const { currentAccountRequestParams, setCurrentAccountRequestParams } = useAccountStore();
+    // get the oldest transaction to use as reference for 'ALL' period
+    const { data: oldestTransactionData } = useTransactions({
+        requestQuery: {
+            accountID: currentAccountRequestParams.accountID,
+            sortOrder: 'asc',
+            page_size: 1,
+        },
+    });
+    const oldestTransactionDate = useMemo(() => {
+        return oldestTransactionData?.data?.[0]?.created_at
+            ? new Date(oldestTransactionData.data[0].created_at)
+            : undefined;
+    }, [oldestTransactionData?.data]);
 
     const handlePeriodChange = (period: AccountDatePeriod) => {
         try {
-            const dateRange = getDateRange(period);
+            const dateRange = getDateRange(period, oldestTransactionDate);
             setCurrentAccountRequestParams({
                 ...currentAccountRequestParams,
                 currentSelection: period,

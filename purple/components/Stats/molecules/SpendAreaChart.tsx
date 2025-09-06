@@ -7,23 +7,25 @@ import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 
-const now = new Date();
-const currentMonthStart = startOfMonth(now);
-const previousMonthStart = startOfMonth(subMonths(now, 1));
+type SpendAreaChartProps = {
+    startDate: Date;
+};
 
-export default function SpendAreaChart() {
+export default function SpendAreaChart({ startDate }: SpendAreaChartProps) {
+    const currentMonthStart = startOfMonth(startDate);
+    const previousMonthStart = startOfMonth(subMonths(startDate, 1));
     const { data: currentMonthTransactions, refetch } = useTransactions({
         requestQuery: {
-            start_date: startOfMonth(now).toISOString(),
-            end_date: endOfMonth(now).toISOString(),
+            start_date: startOfMonth(startDate).toISOString(),
+            end_date: endOfMonth(startDate).toISOString(),
             page_size: Infinity,
             type: 'debit',
         },
     });
     const { data: previousMonthTransactions, refetch: refetchPrevious } = useTransactions({
         requestQuery: {
-            start_date: startOfMonth(subMonths(now, 1)).toISOString(),
-            end_date: endOfMonth(subMonths(now, 1)).toISOString(),
+            start_date: startOfMonth(subMonths(startDate, 1)).toISOString(),
+            end_date: endOfMonth(subMonths(startDate, 1)).toISOString(),
             page_size: Infinity,
             type: 'debit',
         },
@@ -33,13 +35,11 @@ export default function SpendAreaChart() {
         const currentMonthData = generateNormalizedSpendChartData(
             currentMonthTransactions?.data ?? [],
             currentMonthStart,
-            5,
         );
 
         const previousMonthData = generateNormalizedSpendChartData(
             previousMonthTransactions?.data ?? [],
             previousMonthStart,
-            5,
         );
 
         const previousMonthLength = Math.max(
@@ -74,7 +74,7 @@ export default function SpendAreaChart() {
         const labelVal = Number(label);
         if (labelVal >= 1000000) return (labelVal / 1000000).toFixed(0) + 'M';
         if (labelVal >= 1000) return (labelVal / 1000).toFixed(0) + 'K';
-        return label;
+        return labelVal.toFixed(0);
     }, []);
 
     useRefreshOnFocus(refetch);

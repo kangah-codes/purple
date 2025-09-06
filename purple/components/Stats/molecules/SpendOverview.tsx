@@ -2,12 +2,9 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { generatePalette } from '@/lib/utils/colour';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { generatePalette } from '@/lib/utils/colour';
-import { mockTransactions } from '../contants';
-import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
 
 type SpendOverviewProps = {
     transactions: Transaction[];
@@ -220,7 +217,3 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    card: {},
-});

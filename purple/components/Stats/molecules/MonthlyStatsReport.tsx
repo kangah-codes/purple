@@ -70,9 +70,9 @@ export default function MonthlyStatsPage({
                 scrollEventThrottle={16}
             >
                 <SpendOverview transactions={transactions} />
-                <SpendOverviewChart transactions={transactions} />
+                <SpendOverviewChart transactions={transactions} startDate={currentDate} />
                 <SpendVsBudgetLineChart />
-                <SpendAreaChart />
+                <SpendAreaChart startDate={currentDate} />
                 <CashflowBarChart />
                 <StatsHeatmap transactions={transactions} startDate={currentDate} />
             </Animated.ScrollView>

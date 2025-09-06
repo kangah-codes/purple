@@ -1,6 +1,14 @@
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { groupBy } from '@/lib/utils/helpers';
-import { eachDayOfInterval, endOfMonth, format, isSameMonth, min, parseISO } from 'date-fns';
+import {
+    eachDayOfInterval,
+    endOfMonth,
+    format,
+    isSameMonth,
+    min,
+    parseISO,
+    addDays,
+} from 'date-fns';
 import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
 import { Text } from '../Shared/styled';
@@ -229,9 +237,11 @@ export function generateNormalizedSpendChartDataWithMissingDays(
         (isSameMonth(startDate, today)
             ? min([today, endOfMonth(startDate)])
             : endOfMonth(startDate));
+
     const totalDays = Math.ceil(
         (finalEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
     );
+
     const transactionsInRange = transactions.filter((tx) => {
         const txDate = new Date(tx.created_at);
         return txDate >= startDate && txDate <= finalEndDate;
@@ -239,55 +249,60 @@ export function generateNormalizedSpendChartDataWithMissingDays(
 
     let samplingInterval = 1;
     const maxDataPoints = 20;
-    const minDataPoints = 5;
 
-    const needsSampling = transactionsInRange.length > maxDataPoints || totalDays > maxDataPoints;
+    const needsSampling = totalDays > maxDataPoints;
 
     if (needsSampling) {
         if (totalDays > 365) {
-            samplingInterval = Math.max(
-                Math.ceil(totalDays / maxDataPoints),
-                Math.ceil(totalDays / minDataPoints),
-            );
+            // For very long periods (over a year), sample by weeks or months
+            samplingInterval = Math.max(7, Math.ceil(totalDays / maxDataPoints));
         } else {
-            samplingInterval = Math.ceil(
-                Math.max(totalDays, transactionsInRange.length) / maxDataPoints,
-            );
+            // For shorter periods, sample appropriately
+            samplingInterval = Math.ceil(totalDays / maxDataPoints);
         }
     }
 
+    // Generate sampling dates using date-fns for reliable date arithmetic
     const allDays: Date[] = [];
-    const currentDate = new Date(startDate);
+    let currentDate = startDate;
     let dayCount = 0;
 
     while (currentDate <= finalEndDate) {
         if (dayCount % samplingInterval === 0) {
             allDays.push(new Date(currentDate));
         }
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate = addDays(currentDate, 1);
         dayCount++;
     }
 
+    // Ensure we always include the end date
     if (allDays.length === 0 || allDays[allDays.length - 1].getTime() !== finalEndDate.getTime()) {
         allDays.push(new Date(finalEndDate));
     }
 
+    // Initialize balance changes for each sampling date
     const dailyBalanceChanges: Record<string, number> = {};
     for (const day of allDays) {
         const isoDate = format(day, 'yyyy-MM-dd');
         dailyBalanceChanges[isoDate] = 0;
     }
 
+    // Map each transaction to the closest sampling date
     for (const tx of transactionsInRange) {
         const txDate = new Date(tx.created_at);
-        const samplingDate =
-            allDays.find((day) => {
-                const nextSamplingDate = new Date(day);
-                nextSamplingDate.setDate(nextSamplingDate.getDate() + samplingInterval);
-                return txDate >= day && txDate < nextSamplingDate;
-            }) || allDays[allDays.length - 1];
 
-        const isoDate = format(samplingDate, 'yyyy-MM-dd');
+        // Find the closest sampling date (the one that comes at or before the transaction date)
+        let closestSamplingDate = allDays[0]; // Default to first sampling date
+
+        for (const samplingDate of allDays) {
+            if (samplingDate <= txDate) {
+                closestSamplingDate = samplingDate;
+            } else {
+                break; // Stop when we find a sampling date after the transaction
+            }
+        }
+
+        const isoDate = format(closestSamplingDate, 'yyyy-MM-dd');
         if (tx.type === 'credit') {
             dailyBalanceChanges[isoDate] += tx.amount;
         } else {
@@ -295,13 +310,24 @@ export function generateNormalizedSpendChartDataWithMissingDays(
         }
     }
 
+    // Calculate running balance and format dates appropriately
     let runningBalance = 0;
     const chartData = allDays.map((day) => {
         const isoDate = format(day, 'yyyy-MM-dd');
         runningBalance += dailyBalanceChanges[isoDate];
 
+        // Format date based on sampling interval
+        let dateFormat: string;
+        if (samplingInterval >= 30) {
+            dateFormat = 'MMM yyyy'; // Monthly format for long intervals
+        } else if (samplingInterval >= 7) {
+            dateFormat = 'd MMM'; // Day and month for weekly intervals
+        } else {
+            dateFormat = 'd MMM yyyy'; // Full format for daily/short intervals
+        }
+
         return {
-            date: format(day, samplingInterval > 30 ? 'MMM yyyy' : 'd MMM yyyy'),
+            date: format(day, dateFormat),
             value: runningBalance < 0 ? 0 : runningBalance,
         };
     });

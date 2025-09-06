@@ -43,8 +43,8 @@ type EventProperties = {
     };
     settings_set: {
         setting: string;
-        old_value: any;
-        new_value: any;
+        old_value: unknown;
+        new_value: unknown;
     };
     generic_event: Record<string, unknown>;
 };

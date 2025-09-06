@@ -27,7 +27,7 @@ export default function IndexNavigationArea() {
                 <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
                     <TouchableOpacity
                         className='flex items-center justify-center rounded-full w-10 h-10'
-                        onPress={() => router.push('/transactions/new-transaction')}
+                        onPress={() => router.push('/notifications')}
                     >
                         <BellIcon stroke={'#fff'} width={20} height={20} strokeWidth={2} />
                     </TouchableOpacity>

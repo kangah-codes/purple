@@ -88,6 +88,7 @@ function AccountScreen() {
                     },
                 });
             },
+            keepPreviousData: true,
         },
     });
     useRefreshOnFocus(transactionsRefetch);

@@ -18,12 +18,12 @@ export const dayLabels: Record<DayKey, string> = {
     Sa: 'S',
 };
 export const spendOverviewPalette = [
-    '#FECACA',
-    '#FCD34D',
-    '#A7F3D0',
-    '#93C5FD',
-    '#C4B5FD',
-    '#F9A8D4',
+    '#9810fa',
+    '#c800de',
+    '#e60076',
+    '#e17100',
+    '#009689',
+    '#e17100',
 ];
 
 export const mockTransactions: Partial<Transaction>[] = [

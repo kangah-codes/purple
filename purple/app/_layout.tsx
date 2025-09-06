@@ -21,7 +21,6 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
-// Component that needs SQLite context for notifications
 function AppWithNotifications() {
     useNotifications();
     return (
@@ -73,12 +72,12 @@ Sentry.init({
     sendDefaultPii: true,
 
     // Configure Session Replay
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 0,
+    // replaysSessionSampleRate: 0,
+    // replaysOnErrorSampleRate: 0,
     integrations: [],
 
     // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-    spotlight: __DEV__,
+    // spotlight: __DEV__,
     enabled: !__DEV__,
 });
 

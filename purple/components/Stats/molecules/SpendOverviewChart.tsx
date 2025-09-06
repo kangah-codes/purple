@@ -8,34 +8,43 @@ import WeekLegend from './SpendOverviewLegend';
 
 type SpendOverviewChartProps = {
     transactions: Transaction[];
+    startDate: Date;
 };
 
-export default function SpendOverviewChart({ transactions }: SpendOverviewChartProps) {
-    const { stackData, weekRanges } = useMemo(() => {
+export default function SpendOverviewChart({ transactions, startDate }: SpendOverviewChartProps) {
+    const { stackData, weekRanges, maxValue } = useMemo(() => {
+        const stackData = getStackedChartData(transactions, startDate);
         return {
-            stackData: getStackedChartData(transactions),
-            weekRanges: getWeekRangesForMonth(new Date()),
+            stackData,
+            weekRanges: getWeekRangesForMonth(startDate),
+            maxValue: Math.max(
+                ...stackData.map((item) => item.stacks.reduce((a, b) => a + b.value, 0)),
+                1,
+            ),
         };
-    }, [transactions]);
+    }, [transactions, startDate]);
     const renderYAxisLabel = useCallback((label: string) => {
         const labelVal = Number(label);
         if (labelVal >= 1000000) return (labelVal / 1000000).toFixed(0) + 'M';
         if (labelVal >= 1000) return (labelVal / 1000).toFixed(0) + 'K';
-        return label;
+        return labelVal.toFixed(0);
     }, []);
 
+    console.log(transactions, JSON.stringify(stackData));
+
     return (
-        <View className='flex-col space-y-2.5 p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
-            <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+        <View className='flex-col space-y-2.5 pt-5 pb-2.5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
+            <Text className='text-base text-black px-5' style={satoshiFont.satoshiBlack}>
                 Spend By Week
             </Text>
-            <View className='mb-5'>
+            <View className='mb-2.5 px-2.5'>
                 <BarChart
                     adjustToWidth
                     height={250}
                     barWidth={40}
                     spacing={5}
-                    noOfSections={2}
+                    noOfSections={1}
+                    maxValue={maxValue}
                     barBorderRadius={9}
                     stackData={stackData}
                     yAxisThickness={0}
@@ -54,7 +63,9 @@ export default function SpendOverviewChart({ transactions }: SpendOverviewChartP
                     formatYLabel={renderYAxisLabel}
                 />
             </View>
-            <WeekLegend weekRanges={weekRanges} />
+            <View className='px-5'>
+                <WeekLegend weekRanges={weekRanges} />
+            </View>
         </View>
     );
 }

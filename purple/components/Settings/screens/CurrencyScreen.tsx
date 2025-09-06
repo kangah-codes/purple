@@ -78,8 +78,6 @@ export default function CurrencyScreen() {
             : []),
     ];
 
-    console.log(currency);
-
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />

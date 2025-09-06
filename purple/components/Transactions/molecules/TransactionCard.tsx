@@ -3,12 +3,9 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
-import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
-import { useTransactionStore } from '../hooks';
 import { Transaction } from '../schema';
 import { getTransactionColour } from '../utils';
 

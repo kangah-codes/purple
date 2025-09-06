@@ -48,7 +48,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                         </Text>
                         <Text
                             style={satoshiFont.satoshiBold}
-                            className='text-sm text-black text-center'
+                            className='text-sm text-purple-500 text-center'
                         >
                             We've been alerted and are looking into this. Hang tight!
                         </Text>

@@ -5,14 +5,6 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    interpolateColor,
-    useDerivedValue,
-} from 'react-native-reanimated';
-
 const initialSetup = [
     { emoji: '🏦', text: 'Add an account', isCompleted: true },
     { emoji: '🗂️', text: 'Customise categories', isCompleted: false },

@@ -23,7 +23,11 @@ const getDayKey = (date: Date) => {
     return dayKeys[index];
 };
 
-export const groupTransactionsByWeek = (transactions: Transaction[], currentDate = new Date()) => {
+export const groupTransactionsByWeek = (
+    transactions: Transaction[],
+    currentDate: Date,
+    type: string = 'debit',
+) => {
     const monthStart = startOfMonth(currentDate);
     const weeks: Record<number, Record<string, number>> = {
         1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
@@ -33,7 +37,7 @@ export const groupTransactionsByWeek = (transactions: Transaction[], currentDate
     };
 
     for (const tx of transactions) {
-        if (tx.type !== 'debit') continue;
+        if (type !== 'debit') continue;
 
         const txDate = new Date(tx.created_at);
         const txMonth = txDate.getMonth();
@@ -58,8 +62,9 @@ export const groupTransactionsByWeek = (transactions: Transaction[], currentDate
     return weeks;
 };
 
-export const getStackedChartData = (transactions: Transaction[]) => {
-    const grouped = groupTransactionsByWeek(transactions);
+export const getStackedChartData = (transactions: Transaction[], date: Date) => {
+    const grouped = groupTransactionsByWeek(transactions, date);
+    console.log('Grouped Data:', grouped);
     const rawChartData = dayKeys.map((key) => {
         const stacks = Object.entries(grouped).map(([_, data], i) => ({
             value: data[key] || 0,
@@ -86,7 +91,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
             label,
             stacks: [
                 ...stacks,
-                ...(padding > 0 ? [{ value: padding, color: '#faf5ff', marginBottom: 2 }] : []),
+                ...(padding > 0 ? [{ value: padding, color: '#e4e4e7', marginBottom: 2 }] : []),
             ],
         };
     });

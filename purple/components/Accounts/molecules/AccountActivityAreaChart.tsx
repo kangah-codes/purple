@@ -4,21 +4,33 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { getMaxValue } from '@/lib/utils/object';
 import React, { useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
-import { generateChartData } from '../utils';
+import { generateNormalizedSpendChartDataWithMissingDays } from '../utils';
 import AccountActivityDateFilter from './AccountActivityDateFilter';
+import { useAccountStore } from '../hooks';
+import { getDateRange } from '@/lib/utils/date';
 
 type AccountActivityAreaChartProps = {
     transactions: Transaction[];
 };
 
 export default function AccountActivityAreaChart({ transactions }: AccountActivityAreaChartProps) {
+    const {
+        currentAccountRequestParams: { currentSelection },
+    } = useAccountStore();
+    const { startDate, endDate } = getDateRange(currentSelection || '1W');
     const { data, maxValue } = useMemo(() => {
-        const transformedData = generateChartData(transactions);
+        const transformedData = generateNormalizedSpendChartDataWithMissingDays(
+            transactions,
+            startDate,
+            endDate,
+        );
         return {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 10),
         };
     }, [transactions]);
+
+    console.log(data);
 
     return (
         <View className='relative -ml-[5px] flex flex-col scale-[1.03]'>

@@ -21,6 +21,9 @@ export default function StatsScreen() {
             page_size: 1,
             sortOrder: 'asc',
         },
+        options: {
+            keepPreviousData: true,
+        },
     });
 
     const earliestTransactionDate = useMemo(() => {
@@ -90,6 +93,7 @@ export default function StatsScreen() {
         },
         options: {
             enabled: isInitialized,
+            keepPreviousData: true,
         },
     });
 
@@ -148,7 +152,6 @@ export default function StatsScreen() {
         <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <StatsNavigationArea {...navigationProps} />
-
             <PagerView
                 ref={pagerRef}
                 style={styles.pagerView}
@@ -158,13 +161,14 @@ export default function StatsScreen() {
                 overdrag
                 scrollEnabled
             >
-                {availableMonths.map((month, index) => (
+                {availableMonths.map((month) => (
                     <View key={format(month, 'yyyy-MM')} style={styles.page}>
                         <MonthlyStatsPage
                             currentDate={month}
-                            transactions={
-                                index === currentMonthIndex ? monthlyTransactions?.data ?? [] : []
-                            }
+                            // transactions={
+                            //     index === currentMonthIndex ? monthlyTransactions?.data ?? [] : []
+                            // }
+                            transactions={monthlyTransactions?.data ?? []}
                             isLoading={isLoading && !monthlyTransactions}
                         />
                     </View>
