@@ -97,7 +97,31 @@ export default function StatsScreen() {
         },
     });
 
+    const { data: allHistoricalTransactions, refetch: refetchHistoricalTransactions } =
+        useTransactions({
+            requestQuery: {
+                page_size: Infinity,
+                // fetch from earliest transaction to now to cover all possible month views
+                start_date: earliestTransactionDate.toISOString(),
+                end_date: endOfMonth(new Date()).toISOString(),
+            },
+            options: {
+                enabled: isInitialized,
+                keepPreviousData: true,
+            },
+        });
+
+    const stableHistoricalData = useMemo(
+        () => allHistoricalTransactions?.data ?? [],
+        [allHistoricalTransactions?.data],
+    );
+    const stableMonthlyData = useMemo(
+        () => monthlyTransactions?.data ?? [],
+        [monthlyTransactions?.data],
+    );
+
     useRefreshOnFocus(refetch);
+    useRefreshOnFocus(refetchHistoricalTransactions);
 
     const goToPreviousMonth = useCallback(() => {
         if (currentMonthIndex > 0) {
@@ -155,22 +179,30 @@ export default function StatsScreen() {
             <PagerView
                 ref={pagerRef}
                 style={styles.pagerView}
-                initialPage={0}
+                // initialPage={0}
                 onPageSelected={handlePageSelected}
                 orientation='horizontal'
                 overdrag
                 scrollEnabled
             >
-                {availableMonths.map((month) => (
+                {availableMonths.map((month, index) => (
                     <View key={format(month, 'yyyy-MM')} style={styles.page}>
-                        <MonthlyStatsPage
-                            currentDate={month}
-                            // transactions={
-                            //     index === currentMonthIndex ? monthlyTransactions?.data ?? [] : []
-                            // }
-                            transactions={monthlyTransactions?.data ?? []}
-                            isLoading={isLoading && !monthlyTransactions}
-                        />
+                        {/* Only render the current month and adjacent months for better performance */}
+                        {Math.abs(index - currentMonthIndex) <= 1 ? (
+                            <MonthlyStatsPage
+                                currentDate={month}
+                                transactions={stableMonthlyData}
+                                allHistoricalTransactions={stableHistoricalData}
+                                oldestTransactionDate={earliestTransactionDate}
+                                isLoading={isLoading && !monthlyTransactions}
+                            />
+                        ) : (
+                            <View className='flex-1 items-center justify-center'>
+                                <Text style={satoshiFont.satoshiMedium} className='text-gray-500'>
+                                    {format(month, 'MMMM yyyy')}
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 ))}
             </PagerView>

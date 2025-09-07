@@ -30,8 +30,6 @@ export default function AccountActivityAreaChart({ transactions }: AccountActivi
         };
     }, [transactions]);
 
-    console.log(data);
-
     return (
         <View className='relative -ml-[5px] flex flex-col scale-[1.03]'>
             <View className='relative mt-10'>

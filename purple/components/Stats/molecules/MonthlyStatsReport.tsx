@@ -1,6 +1,6 @@
 import { LinearGradient, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import React from 'react';
+import React, { memo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
@@ -21,11 +21,15 @@ import SpendVsBudgetLineChart from '../molecules/SpendVsBudgetLineChart';
 interface MonthlyStatsPageProps {
     currentDate: Date;
     transactions: Transaction[];
+    allHistoricalTransactions?: Transaction[];
+    oldestTransactionDate?: Date;
     isLoading: boolean;
 }
 
-export default function MonthlyStatsPage({
+export default memo(function MonthlyStatsPage({
     transactions,
+    allHistoricalTransactions,
+    oldestTransactionDate,
     isLoading,
     currentDate,
 }: MonthlyStatsPageProps) {
@@ -73,12 +77,16 @@ export default function MonthlyStatsPage({
                 <SpendOverviewChart transactions={transactions} startDate={currentDate} />
                 <SpendVsBudgetLineChart />
                 <SpendAreaChart startDate={currentDate} />
-                <CashflowBarChart />
+                <CashflowBarChart
+                    currentDate={currentDate}
+                    allTransactions={allHistoricalTransactions || []}
+                    oldestTransactionDate={oldestTransactionDate}
+                />
                 <StatsHeatmap transactions={transactions} startDate={currentDate} />
             </Animated.ScrollView>
         </View>
     );
-}
+});
 
 const styles = StyleSheet.create({
     scrollView: {

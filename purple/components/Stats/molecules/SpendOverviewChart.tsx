@@ -30,8 +30,6 @@ export default function SpendOverviewChart({ transactions, startDate }: SpendOve
         return labelVal.toFixed(0);
     }, []);
 
-    console.log(transactions, JSON.stringify(stackData));
-
     return (
         <View className='flex-col space-y-2.5 pt-5 pb-2.5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
             <Text className='text-base text-black px-5' style={satoshiFont.satoshiBlack}>

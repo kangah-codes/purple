@@ -3,7 +3,7 @@ import TransactionsAccordion from '@/components/Transactions/molecules/Transacti
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect } from 'react';
-import { StatusBar as RNStatusBar, RefreshControl, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
     interpolate,
@@ -18,7 +18,7 @@ import TransactionsNavigationArea from '../molecules/TransactionsNavigationArea'
 
 export default function IndexScreen() {
     const { transactions: tx } = useTransactionStore();
-    const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
+    const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteTransactions({
         requestQuery: {
             page_size: 10,
         },

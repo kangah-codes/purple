@@ -64,7 +64,6 @@ export const groupTransactionsByWeek = (
 
 export const getStackedChartData = (transactions: Transaction[], date: Date) => {
     const grouped = groupTransactionsByWeek(transactions, date);
-    console.log('Grouped Data:', grouped);
     const rawChartData = dayKeys.map((key) => {
         const stacks = Object.entries(grouped).map(([_, data], i) => ({
             value: data[key] || 0,

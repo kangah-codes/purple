@@ -89,7 +89,6 @@ export default function CurrencyScreen() {
                             new_value: item.code,
                             setting: 'currency',
                         });
-                        console.log('Cghanging currency, old: ', currency, ' new: ', item.code);
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
                         CurrencyService.getInstance().fetchExchangeRates(
