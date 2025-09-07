@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
     InputField,
     LinearGradient,
@@ -15,6 +16,7 @@ import {
 import { satoshiFont } from '@/lib/constants/fonts';
 import { EDITABLE_TRANSACTION_TYPES } from '@/lib/constants/transactionTypes';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import HTTPError from '@/lib/utils/error';
 import { transformObject } from '@/lib/utils/object';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
@@ -25,8 +27,6 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useEditTransaction, useTransactionStore } from '../hooks';
 import { EditTransaction } from '../schema';
-import HTTPError from '@/lib/utils/error';
-import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 
 export default function EditTransactionScreen() {
     const { currentTransaction } = useTransactionStore();
@@ -93,8 +93,8 @@ export default function EditTransactionScreen() {
             return;
         }
 
-        // @ts-ignore
-        let transformedData = transformObject(data, [
+        // @ts-expect-error expect
+        const transformedData = transformObject(data, [
             ['amount', 'amount', (value) => Number(value)],
             ['currency', 'currency', () => account.currency],
         ]) as EditTransaction;
@@ -400,27 +400,49 @@ export default function EditTransactionScreen() {
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity
-                    className='items-center self-center justify-center px-4 absolute bottom-5'
-                    onPress={handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                >
-                    <LinearGradient
-                        className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
-                        colors={['#c084fc', '#9333ea']}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size={15} color='#fff' />
-                        ) : (
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-white text-center'
+                <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={router.back}
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
                             >
-                                Edit
-                            </Text>
-                        )}
-                    </LinearGradient>
-                </TouchableOpacity>
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? (
+                                        <ActivityIndicator size={15} color='#fff' />
+                                    ) : (
+                                        <Text
+                                            style={satoshiFont.satoshiBlack}
+                                            className='text-white text-center'
+                                        >
+                                            Save
+                                        </Text>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </SafeAreaView>
         </>
     );

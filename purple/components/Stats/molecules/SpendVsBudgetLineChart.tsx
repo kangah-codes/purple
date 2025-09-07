@@ -1,8 +1,6 @@
-import { generateChartData } from '@/components/Accounts/utils';
 import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { getMaxValue } from '@/lib/utils/object';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 import { generateMockTransactionsForMonth, generateNormalizedSpendChartData } from '../utils';
 import { startOfMonth } from 'date-fns';
@@ -37,7 +35,7 @@ export default function SpendVsBudgetLineChart() {
     }, []);
 
     return (
-        <View className='px-5 pt-5 pb-2.5 mb-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
+        <View className='px-5 pt-5 pb-2.5 mt-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl flex flex-col'>
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Spending vs Budget

@@ -74,14 +74,14 @@ export default memo(function MonthlyStatsPage({
                 scrollEventThrottle={16}
             >
                 <SpendOverview transactions={transactions} />
-                <SpendOverviewChart transactions={transactions} startDate={currentDate} />
-                <SpendVsBudgetLineChart />
-                <SpendAreaChart startDate={currentDate} />
                 <CashflowBarChart
                     currentDate={currentDate}
                     allTransactions={allHistoricalTransactions || []}
                     oldestTransactionDate={oldestTransactionDate}
                 />
+                <SpendAreaChart startDate={currentDate} />
+                <SpendVsBudgetLineChart />
+                <SpendOverviewChart transactions={transactions} startDate={currentDate} />
                 <StatsHeatmap transactions={transactions} startDate={currentDate} />
             </Animated.ScrollView>
         </View>

@@ -2,8 +2,8 @@ import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import TransactionsAccordion from '@/components/Transactions/molecules/TransactionAccordion';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import React from 'react';
+import { RefreshControl, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
     interpolate,
@@ -18,7 +18,7 @@ import TransactionsNavigationArea from '../molecules/TransactionsNavigationArea'
 
 export default function IndexScreen() {
     const { transactions: tx } = useTransactionStore();
-    const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteTransactions({
+    const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
         requestQuery: {
             page_size: 10,
         },
@@ -53,9 +53,9 @@ export default function IndexScreen() {
 
     // TODO: refactor this to use store hook with built-in sync, or probably some event driven shit
     // works for now so im leaving to future Joshua to figure out
-    useEffect(() => {
-        refetch();
-    }, [tx]);
+    // useEffect(() => {
+    //     refetch();
+    // }, [tx]);
 
     const transactions = data ? data.pages.flatMap((page) => page.data) : [];
     const handleLoadMore = () => {
@@ -89,10 +89,9 @@ export default function IndexScreen() {
                 <Animated.ScrollView
                     showsVerticalScrollIndicator={false}
                     onScroll={onScroll}
-                    // scrollEventThrottle={16}
-                    // refreshControl={
-                    //     <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-                    // }
+                    refreshControl={
+                        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+                    }
                 >
                     <RecurringTransactionsWidget />
                     <TransactionsAccordion

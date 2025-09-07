@@ -16,7 +16,11 @@ export default function StatsScreen() {
     const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isInitialized, setIsInitialized] = useState(false);
-    const { data: oldestTransaction, isLoading: isLoadingOldest } = useTransactions({
+    const {
+        data: oldestTransaction,
+        isLoading: isLoadingOldest,
+        refetch: refetchOldestTransaction,
+    } = useTransactions({
         requestQuery: {
             page_size: 1,
             sortOrder: 'asc',
@@ -122,6 +126,7 @@ export default function StatsScreen() {
 
     useRefreshOnFocus(refetch);
     useRefreshOnFocus(refetchHistoricalTransactions);
+    useRefreshOnFocus(refetchOldestTransaction);
 
     const goToPreviousMonth = useCallback(() => {
         if (currentMonthIndex > 0) {
@@ -197,11 +202,7 @@ export default function StatsScreen() {
                                 isLoading={isLoading && !monthlyTransactions}
                             />
                         ) : (
-                            <View className='flex-1 items-center justify-center'>
-                                <Text style={satoshiFont.satoshiMedium} className='text-gray-500'>
-                                    {format(month, 'MMMM yyyy')}
-                                </Text>
-                            </View>
+                            <ReportLoadingScreen showNavigation={false} />
                         )}
                     </View>
                 ))}

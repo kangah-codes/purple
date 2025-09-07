@@ -619,9 +619,9 @@ export default function NewTransactionScreen() {
                 <View className='flex flex-col space-y-1'>
                     <Controller
                         control={control}
-                        rules={{
-                            required: "Date can't be empty",
-                        }}
+                        // rules={{
+                        //     required: "Date can't be empty",
+                        // }}
                         render={({ field: { onChange, value } }) => (
                             <DatePicker
                                 label='End Date'
