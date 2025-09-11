@@ -1,3 +1,5 @@
+import pkg from './package.json';
+
 export default ({ config }) => {
     const isDev = process.env.EAS_BUILD_PROFILE === 'development';
 
@@ -6,7 +8,7 @@ export default ({ config }) => {
         name: isDev ? 'Purple Dev' : 'Purple',
         slug: isDev ? 'purple-dev' : 'purple',
         scheme: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
-        version: '0.1.0',
+        version: pkg.version,
         orientation: 'portrait',
         icon: './assets/images/icon.png',
         userInterfaceStyle: 'automatic',
