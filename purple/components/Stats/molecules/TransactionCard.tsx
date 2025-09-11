@@ -1,7 +1,7 @@
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { Text, View } from '@/components/Shared/styled';
 import { useTransactionStore } from '@/components/Transactions/hooks';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import TransactionCardComponent from '@/components/Transactions/molecules/TransactionCard';
 import { Transaction } from '@/components/Transactions/schema';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { formatDateTime } from '@/lib/utils/date';
@@ -10,6 +10,7 @@ import { FlashList } from '@shopify/flash-list';
 import React, { useMemo } from 'react';
 
 const ItemSeparator = () => <View className='h-1 border-b border-purple-100' />;
+
 export default function TransactionCard({
     groupName,
     transactions,
@@ -32,7 +33,7 @@ export default function TransactionCard({
     }, [transactions, calculateTotalBalance]);
     const renderItem = React.useCallback(
         ({ item }: { item: Transaction }) => (
-            <TransactionHistoryCard
+            <TransactionCardComponent
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);

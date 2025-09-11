@@ -3,6 +3,7 @@ import { StartupServiceFactory } from '../factory/StartupFactory';
 import { loadFonts } from './fonts';
 import { initializePreferences } from './preferences';
 import CurrencyService from '../services/CurrencyService';
+import { processRecurringTransactions } from './transaction';
 
 export async function initializeApp(db: SQLiteDatabase) {
     try {
@@ -14,6 +15,7 @@ export async function initializeApp(db: SQLiteDatabase) {
         startupService.registerStartupTask(loadFonts);
         startupService.registerStartupTask(() => initializePreferences(db));
         startupService.registerStartupTask(currencyService.fetchExchangeRates);
+        startupService.registerStartupTask(() => processRecurringTransactions(db));
 
         await startupService.runMigrations(db);
         await startupService.executeStartupTasks();

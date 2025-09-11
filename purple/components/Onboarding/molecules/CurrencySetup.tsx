@@ -44,6 +44,7 @@ export default function CurrencySetup() {
         mutate(
             {
                 category: '💵 Cash',
+                subcategory: '👛 Wallet',
                 name: 'Cash',
                 balance: 0,
                 currency: currency,
@@ -93,7 +94,8 @@ export default function CurrencySetup() {
                         One more thing...
                     </Text>
                     <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-500'>
-                        Select your preferred default currency
+                        Select your preferred default currency{'\n'}
+                        Don't worry - you can change this later on in your settings
                     </Text>
                 </View>
 

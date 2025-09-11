@@ -1,86 +1,58 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { formatCurrencyAccurate, keyExtractor } from '@/lib/utils/number';
-import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { useRouter } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { extractEmojiOrDefault, stripEmojis, truncateStringIfLongerThan } from '@/lib/utils/string';
+import { formatDistanceToNow } from 'date-fns';
+import { router } from 'expo-router';
+import React from 'react';
+import { useAccountStore, useCalculateAccountData } from '../hooks';
 import { Account } from '../schema';
-import { useAccountStore } from '../hooks';
 
-export default function AccountCard({
-    groupName,
-    accounts,
-}: {
-    groupName: string;
-    accounts: Account[];
-}) {
+type AccountCardProps = {
+    account: Account;
+};
+
+export default function AccountCard({ account }: AccountCardProps) {
     const { setCurrentAccount } = useAccountStore();
-    const router = useRouter();
-    const renderItemSeparator = useCallback(() => <View style={styles.separator} />, []);
-
-    const renderItem = ({ item, index }: { item: Account; index: number }) => (
-        <TouchableOpacity
-            className='flex flex-row justify-between py-2.5'
-            key={item.name + index}
-            onPress={() => {
-                setCurrentAccount(item);
-                router.push({
-                    pathname: '/accounts/account-transactions',
-                    params: { accountName: item.name, accountID: item.id },
-                });
-            }}
-        >
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-black text-sm'>
-                {truncateStringIfLongerThan(item.name, 20)}
-            </Text>
-            <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-700 text-sm'>
-                {formatCurrencyAccurate(item.currency, item.balance)}
-            </Text>
-        </TouchableOpacity>
-    );
-
-    const calculateTotalBalance = useMemo(() => {
-        return accounts.reduce((acc, curr) => acc + curr.balance, 0);
-    }, [accounts]);
 
     return (
-        <>
-            <View className='flex flex-row items-center justify-between px-5 py-2.5'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-black'>
-                    {truncateStringIfLongerThan(groupName, 20)}
-                </Text>
-                <Text
-                    style={[
-                        GLOBAL_STYLESHEET.satoshiBlack,
-                        {
-                            color: calculateTotalBalance >= 0 ? '#15803D' : '#FF3D71',
-                        },
-                    ]}
-                    className='text-sm'
-                >
-                    {formatCurrencyAccurate(
-                        accounts[0].currency,
-                        accounts.reduce((acc, curr) => acc + curr.balance, 0),
+        <TouchableOpacity
+            onPress={() => {
+                setCurrentAccount(account);
+                router.push({
+                    pathname: '/accounts/account-transactions',
+                    params: { accountName: account.name, accountID: account.id },
+                });
+            }}
+            className='flex flex-row justify-between'
+        >
+            <View className='flex flex-row space-x-2.5 items-center'>
+                <View className='flex items-center justify-center h-10 w-10 rounded-xl bg-purple-100'>
+                    <Text style={satoshiFont.satoshiBold} className='text-base'>
+                        {extractEmojiOrDefault(account.subcategory ?? '', '❔')}
+                    </Text>
+                </View>
+                <View className='flex flex-col justify-center space-y-1'>
+                    <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
+                        {truncateStringIfLongerThan(account.name, 20)}
+                    </Text>
+                    {account.subcategory && (
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
+                            {stripEmojis(account.subcategory)}
+                        </Text>
                     )}
+                </View>
+            </View>
+            <View className='flex flex-col justify-center items-end'>
+                <Text style={satoshiFont.satoshiBlack} className='text-sm text-black'>
+                    {formatCurrencyAccurate(account.currency, account.balance)}
+                </Text>
+                <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
+                    {formatDistanceToNow(new Date(account.updated_at), {
+                        addSuffix: true,
+                    })}
                 </Text>
             </View>
-            <View className='bg-purple-50 flex flex-col px-5 divide-y divide-purple-200'>
-                <FlatList
-                    data={accounts}
-                    renderItem={renderItem}
-                    keyExtractor={keyExtractor}
-                    ItemSeparatorComponent={renderItemSeparator}
-                    scrollEnabled={false} // Disable scrolling for the nested FlatList
-                />
-            </View>
-        </>
+        </TouchableOpacity>
     );
 }
-
-const styles = StyleSheet.create({
-    separator: {
-        height: 1,
-        backgroundColor: '#E9D8FD', // divide-purple-200
-    },
-});

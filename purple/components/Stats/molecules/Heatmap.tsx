@@ -4,30 +4,29 @@ import { colors } from '@/components/Shared/molecules/Heatmap/constants';
 import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 
 const now = new Date();
-const start = startOfMonth(now);
-const end = endOfMonth(now);
 const deviceWidth = Dimensions.get('window').width;
 const padding = 20;
 const numBlocksPerRow = 7; // for a week view
 const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const monthDays = eachDayOfInterval({ start, end });
-const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
-const offsetData = Array(offset).fill({ value: 0, key: '', index: 0 });
-const finalMonthDays = [...offsetData, ...monthDays];
-const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
+const blockSize = (deviceWidth - padding * 6) / numBlocksPerRow;
 
 type StatsHeatmapProps = {
     transactions: Transaction[];
+    startDate: Date;
 };
 
-function StatsHeatmap({ transactions }: StatsHeatmapProps) {
+function StatsHeatmap({ transactions, startDate }: StatsHeatmapProps) {
+    const start = startOfMonth(startDate);
+    const end = endOfMonth(startDate);
+    const monthDays = eachDayOfInterval({ start, end });
+    const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
     const heatmapData = useMemo(
         () =>
             monthDays.map((day, index) => {
@@ -70,16 +69,21 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
     );
 
     return (
-        <View className='flex-col space-y-2.5 px-5'>
-            <Text className='text-base text-black' style={GLOBAL_STYLESHEET.satoshiBlack}>
-                Daily Activity
-            </Text>
+        <View className='flex-col space-y-2.5 p-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
+            <View className='flex flex-col mb-2.5'>
+                <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                    Daily Activity
+                </Text>
+                <Text className='text-purple-500 text-xs' style={satoshiFont.satoshiBold}>
+                    How often you log your transactions
+                </Text>
+            </View>
             <View className='flex-row justify-between py-2'>
                 {days.map((day, key) => (
                     <Text
                         key={key}
                         className='text-black text-xs mx-auto'
-                        style={GLOBAL_STYLESHEET.satoshiBlack}
+                        style={satoshiFont.satoshiBlack}
                     >
                         {day}
                     </Text>
@@ -94,7 +98,7 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
                 renderCell={renderCell}
             />
             <View className='flex-row justify-end items-center space-x-2 mt-2'>
-                <Text className='text-black text-xs' style={GLOBAL_STYLESHEET.satoshiBold}>
+                <Text className='text-black text-xs' style={satoshiFont.satoshiBold}>
                     Less
                 </Text>
                 <View className='flex flex-row space-x-0.5'>
@@ -106,7 +110,7 @@ function StatsHeatmap({ transactions }: StatsHeatmapProps) {
                         />
                     ))}
                 </View>
-                <Text className='text-black text-xs' style={GLOBAL_STYLESHEET.satoshiBold}>
+                <Text className='text-black text-xs' style={satoshiFont.satoshiBold}>
                     More
                 </Text>
             </View>

@@ -1,9 +1,10 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { CoinsStackedIcon, EyeCloseIcon } from '@/components/SVG/icons/noscale';
-import Switch from '@/components/Shared/molecules/Switch';
+import Switch from '@/components/Shared/atoms/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -15,7 +16,6 @@ import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
-import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function PlansScreen() {
     const {

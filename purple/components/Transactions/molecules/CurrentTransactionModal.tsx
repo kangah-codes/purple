@@ -1,7 +1,8 @@
+import { EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import { LinearGradient, Text, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
+import { LinearGradient, Text, View, TouchableOpacity } from '@/components/Shared/styled';
+import { useDeleteTransaction, useTransactionStore } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -9,9 +10,13 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, isNotEmptyString } from '@/lib/utils/string';
-import React, { useEffect, useMemo } from 'react';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
+import Toast from 'react-native-toast-message';
+import { useQueryClient } from 'react-query';
+import * as Haptics from 'expo-haptics';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];
@@ -22,12 +27,16 @@ type CurrentTransactionModalProps = {
 };
 
 export default function CurrentTransactionModal({ modalKey }: CurrentTransactionModalProps) {
-    const { currentTransaction } = useTransactionStore();
+    const { currentTransaction, deleteTransaction } = useTransactionStore();
     const transactionDate = useMemo(
         () => formatDateTime(currentTransaction?.created_at ?? ''),
         [currentTransaction?.created_at],
     );
-    const { bottomSheetModalKeys } = useBottomSheetModalStore();
+    const queryClient = useQueryClient();
+    const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
+    const { mutate } = useDeleteTransaction({
+        transactionID: currentTransaction?.id ?? '',
+    });
     const { logEvent } = useAnalytics();
 
     useEffect(() => {
@@ -43,6 +52,34 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
         trackScreenView();
     }, [bottomSheetModalKeys, modalKey]);
 
+    const deleteTransactionCb = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        setShowBottomSheetModal(modalKey, false);
+        mutate(undefined, {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: 'There was an issue deleting transaction',
+                    },
+                });
+                setShowBottomSheetModal(modalKey, false);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts', 'user'] });
+                deleteTransaction(currentTransaction?.id ?? '');
+                Toast.show({
+                    type: 'success',
+                    props: {
+                        text1: 'Success!',
+                        text2: 'Transaction deleted successfully',
+                    },
+                });
+            },
+        });
+    }, []);
+
     if (!currentTransaction) return null;
 
     return (
@@ -52,9 +89,9 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             style={styles.customBottomSheetModal}
             handleIndicatorStyle={styles.handleIndicator}
         >
-            <View className='px-5'>
+            <View className='px-5 relative'>
                 <View className='w-full items-center' style={styles.receiptView}>
-                    {/* <Svg
+                    <Svg
                         height={12}
                         width='100%'
                         style={styles.zigZag}
@@ -62,9 +99,9 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         stroke='#c084fc'
                     >
                         {ZIGZAG_VIEW}
-                    </Svg> */}
+                    </Svg>
                     <LinearGradient
-                        className='w-full py-5 items-center justify-center rounded-t-3xl'
+                        className='w-full py-5 items-center justify-center'
                         colors={linearGradient}
                     >
                         <View className='relative items-center justify-center flex rounded-xl h-10 w-10 bg-purple-50'>
@@ -90,8 +127,8 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                                         currentTransaction.type === 'debit'
                                             ? '#DC2626'
                                             : currentTransaction.type === 'credit'
-                                              ? 'rgb(22 163 74)'
-                                              : '#9333EA',
+                                            ? 'rgb(22 163 74)'
+                                            : '#9333EA',
                                 },
                             ]}
                             className='text-3xl mb-5 text-center'
@@ -99,8 +136,8 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                             {currentTransaction.type == 'debit'
                                 ? '-'
                                 : currentTransaction.type == 'credit'
-                                  ? '+'
-                                  : ''}
+                                ? '+'
+                                : ''}
                             {formatCurrencyAccurate(
                                 currentTransaction.currency,
                                 currentTransaction.amount,
@@ -120,6 +157,48 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
                         {isNotEmptyString(currentTransaction.note) && (
                             <ReceiptDetail label='Note' value={currentTransaction.note} />
                         )}
+                        <View className='border-b border-purple-100 w-full mb-5' />
+                        <View className='flex flex-row space-x-2 w-[60%] justify-between'>
+                            <LinearGradient
+                                colors={['#c084fc', '#9333ea']}
+                                className='flex-grow flex items-center justify-center rounded-full'
+                            >
+                                <TouchableOpacity
+                                    className='w-full py-3 flex items-center'
+                                    onPress={() => {
+                                        setShowBottomSheetModal(modalKey, false);
+                                        router.push({
+                                            pathname: '/transactions/edit-transaction',
+                                        });
+                                    }}
+                                >
+                                    <EditSquareIcon stroke={'#fff'} />
+                                </TouchableOpacity>
+                            </LinearGradient>
+
+                            <LinearGradient
+                                colors={['#ff6467', '#e7000b']}
+                                className='flex-grow flex items-center justify-center rounded-full'
+                            >
+                                <TouchableOpacity
+                                    className='w-full py-3 flex items-center'
+                                    onLongPress={deleteTransactionCb}
+                                    delayLongPress={500}
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+                                        Toast.show({
+                                            type: 'info',
+                                            props: {
+                                                text1: 'Hold to delete',
+                                                text2: 'Press and hold to delete this transaction',
+                                            },
+                                        });
+                                    }}
+                                >
+                                    <TrashIcon stroke={'#fff'} />
+                                </TouchableOpacity>
+                            </LinearGradient>
+                        </View>
                     </View>
                     <Svg height={12} width='100%' fill={drawerBackground} stroke={drawerBackground}>
                         {ZIGZAG_VIEW}

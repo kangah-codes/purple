@@ -1,40 +1,70 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Account } from '@/components/Accounts/schema';
-import { CreateTransaction, Transaction } from '@/components/Transactions/schema';
+import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
+import {
+    CreateRecurringTransaction,
+    CreateTransaction,
+    EditTransaction,
+    RecurringTransaction,
+    Transaction,
+} from '@/components/Transactions/schema';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { rrulestr } from 'rrule';
+import { SettingsServiceFactory } from '../factory/SettingsFactory';
+import { dateToUNIX } from '../utils/date';
 import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
-import { BaseSQLiteService } from './SQLiteService';
-import CurrencyService from './CurrencyService';
-import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import { isNotEmptyString } from '../utils/string';
-import { SettingsServiceFactory } from '../factory/SettingsFactory';
+import CurrencyService from './CurrencyService';
+import { BaseSQLiteService } from './SQLiteService';
+import { WEEKDAY_MAP } from '@/components/Transactions/constants';
+import { startOfDay } from 'date-fns';
+import { occurrencesBetween } from '../utils/rrule';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
         super('transactions', db);
     }
 
-    async create(data: CreateTransaction): Promise<GenericAPIResponse<Transaction>> {
+    async create(
+        data: CreateTransaction,
+        options?: { useTransaction?: boolean },
+    ): Promise<GenericAPIResponse<Transaction>> {
         let transaction!: Transaction;
         let debitAccount: Account | null;
         let creditAccount: Account | null;
         const now = new Date().toISOString();
         const errorMessage = "Couldn't create transaction";
 
-        await this.db.withTransactionAsync(async () => {
+        const execute = async () => {
             const settingsService = SettingsServiceFactory.create(this.db);
+            const allowOverdraw = await settingsService.get('allowOverdraw');
+
             if (data.type === 'transfer') {
                 debitAccount = await this.db.getFirstAsync<Account>(
-                    'SELECT * from accounts where id = ?',
+                    'SELECT * FROM accounts WHERE id = ?',
                     [data.from_account!],
                 );
                 creditAccount = await this.db.getFirstAsync<Account>(
-                    'SELECT * from accounts where id = ?',
+                    'SELECT * FROM accounts WHERE id = ?',
                     [data.to_account!],
                 );
 
                 if (!creditAccount || !debitAccount) throw new Error(errorMessage);
+
+                // Check for overdraw on transfer (debit side)
+                if (allowOverdraw === false) {
+                    const debitAmount = data.amount + data.charges;
+                    if (
+                        typeof debitAccount.balance === 'number' &&
+                        debitAccount.balance < debitAmount
+                    ) {
+                        throw new HTTPError(
+                            'Insufficient funds in source account for transfer',
+                            400,
+                        );
+                    }
+                }
 
                 const defaultNote = `Transfer from ${debitAccount.name}`;
                 let creditAmount = data.amount;
@@ -60,9 +90,9 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 const debitUUID = UUID();
                 await this.db.runAsync(
                     `INSERT INTO transactions
-                      (id, created_at, updated_at, account_id, user_id, type,
-                       amount, note, category, from_account, to_account, currency, plan_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  (id, created_at, updated_at, account_id, user_id, type,
+                   amount, note, category, from_account, to_account, currency, plan_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         debitUUID,
                         data.date,
@@ -70,7 +100,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.from_account ?? null,
                         null,
                         'debit',
-                        data.amount,
+                        data.amount + data.charges,
                         isNotEmptyString(data.note) ? data.note! : defaultNote,
                         data.category,
                         data.from_account ?? null,
@@ -84,9 +114,9 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 const creditUUID = UUID();
                 await this.db.runAsync(
                     `INSERT INTO transactions
-                      (id, created_at, updated_at, account_id, user_id, type,
-                       amount, note, category, from_account, to_account, currency, plan_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  (id, created_at, updated_at, account_id, user_id, type,
+                   amount, note, category, from_account, to_account, currency, plan_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         creditUUID,
                         data.date,
@@ -104,29 +134,35 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     ],
                 );
 
-                // Update account balances
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    debitAccount.balance - data.amount - data.charges,
-                    debitAccount.id,
-                ]);
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    creditAccount.balance + creditAmount,
-                    creditAccount.id,
-                ]);
-
                 const result = await this.db.getFirstAsync<Transaction>(
-                    'SELECT * FROM transactions where id = ?',
+                    'SELECT * FROM transactions WHERE id = ?',
                     [debitUUID],
                 );
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
             } else {
+                // For debit, check for overdraw
+                if (data.type === 'debit' && allowOverdraw === false) {
+                    const account = await this.db.getFirstAsync<Account>(
+                        'SELECT * FROM accounts WHERE id = ?',
+                        [data.account_id],
+                    );
+                    if (!account) throw new HTTPError('Account not found', 404);
+                    const debitAmount = data.amount + (data.charges ?? 0);
+                    if (typeof account.balance === 'number' && account.balance < debitAmount) {
+                        throw new HTTPError(
+                            'Insufficient funds in account for debit transaction',
+                            400,
+                        );
+                    }
+                }
+
                 const uuid = UUID();
                 await this.db.runAsync(
                     `INSERT INTO transactions
-                      (id, created_at, updated_at, account_id, user_id, type,
-                       amount, note, category, from_account, to_account, currency, plan_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  (id, created_at, updated_at, account_id, user_id, type,
+                   amount, note, category, from_account, to_account, currency, plan_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         uuid,
                         data.date,
@@ -144,33 +180,22 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     ],
                 );
 
-                // Update account balance
-                const accountBalance = await this.db.getFirstAsync<{ balance: number }>(
-                    'SELECT balance from accounts where id = ?',
-                    [data.account_id!],
-                );
-
-                if (accountBalance?.balance === undefined || accountBalance?.balance === null)
-                    throw Error(errorMessage);
-
-                const newBalance =
-                    data.type === 'debit'
-                        ? accountBalance.balance - data.amount
-                        : accountBalance.balance + data.amount;
-
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    newBalance,
-                    data.account_id,
-                ]);
-
                 const result = await this.db.getFirstAsync<Transaction>(
-                    'SELECT * FROM transactions where id = ?',
+                    'SELECT * FROM transactions WHERE id = ?',
                     [uuid],
                 );
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
             }
-        });
+        };
+
+        if (options?.useTransaction === false) {
+            await execute();
+        } else {
+            await this.db.withTransactionAsync(async () => {
+                await execute();
+            });
+        }
 
         return this.formatResponse({
             data: transaction,
@@ -183,10 +208,12 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
-    async update(id: string, data: CreateTransaction): Promise<GenericAPIResponse<Transaction>> {
+    async update(id: string, data: EditTransaction): Promise<GenericAPIResponse<Transaction>> {
         let updatedTransaction!: Transaction;
         const now = new Date().toISOString();
         const errorMessage = "Couldn't update transaction";
+        const settingsService = SettingsServiceFactory.create(this.db);
+        const allowOverdraw = await settingsService.get('allowOverdraw');
 
         await this.db.withTransactionAsync(async () => {
             const original = await this.db.getFirstAsync<Transaction>(
@@ -195,52 +222,23 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             );
             if (!original) throw new HTTPError('Transaction not found', 404);
 
-            // Reverse original transaction effects
-            const reverseEffect = async () => {
-                if (original.type === 'transfer') {
-                    const debitAccount = await this.db.getFirstAsync<Account>(
-                        'SELECT * from accounts where id = ?',
-                        [original.from_account!],
-                    );
-                    const creditAccount = await this.db.getFirstAsync<Account>(
-                        'SELECT * from accounts where id = ?',
-                        [original.to_account!],
-                    );
-                    if (!debitAccount || !creditAccount) throw new Error(errorMessage);
-
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        debitAccount.balance + original.amount,
-                        debitAccount.id,
-                    ]);
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        creditAccount.balance - original.amount,
-                        creditAccount.id,
-                    ]);
-                } else {
-                    const account = await this.db.getFirstAsync<Account>(
-                        'SELECT * from accounts where id = ?',
-                        [original.account_id!],
-                    );
-                    if (!account) throw new Error(errorMessage);
-                    const revertAmount =
-                        original.type === 'debit'
-                            ? account.balance + original.amount
-                            : account.balance - original.amount;
-
-                    await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                        revertAmount,
-                        original.account_id,
-                    ]);
+            // check for overdraft if updating to a debit
+            if (data.type === 'debit') {
+                const account = await this.db.getFirstAsync<{ balance: number }>(
+                    'SELECT * FROM accounts WHERE id = ?',
+                    [data.account_id],
+                );
+                if (!account) throw new HTTPError('Account not found', 404);
+                if (allowOverdraw === false && Number(data.amount) > Number(account.balance)) {
+                    throw new HTTPError('Insufficient balance in account.', 400);
                 }
-            };
-
-            await reverseEffect();
+            }
 
             // Update the transaction
             await this.db.runAsync(
                 `UPDATE transactions SET
                     updated_at = ?, account_id = ?, type = ?, amount = ?, note = ?,
-                    category = ?, from_account = ?, to_account = ?, currency = ?, plan_id = ?, created_at = ?
+                    category = ?, created_at = ?
                 WHERE id = ?`,
                 [
                     now,
@@ -249,51 +247,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     data.amount,
                     data.note ?? null,
                     data.category,
-                    data.from_account ?? null,
-                    data.to_account ?? null,
-                    data.currency,
-                    data.plan_id ?? null,
                     data.date,
                     id,
                 ],
             );
-
-            // Apply new effects
-            if (data.type === 'transfer') {
-                const debitAccount = await this.db.getFirstAsync<Account>(
-                    'SELECT * from accounts where id = ?',
-                    [data.from_account!],
-                );
-                const creditAccount = await this.db.getFirstAsync<Account>(
-                    'SELECT * from accounts where id = ?',
-                    [data.to_account!],
-                );
-                if (!debitAccount || !creditAccount) throw new Error(errorMessage);
-
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    debitAccount.balance - data.amount,
-                    debitAccount.id,
-                ]);
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    creditAccount.balance + data.amount,
-                    creditAccount.id,
-                ]);
-            } else {
-                const account = await this.db.getFirstAsync<Account>(
-                    'SELECT * from accounts where id = ?',
-                    [data.account_id!],
-                );
-                if (!account) throw new Error(errorMessage);
-                const newBalance =
-                    data.type === 'debit'
-                        ? account.balance - data.amount
-                        : account.balance + data.amount;
-
-                await this.db.runAsync('UPDATE accounts SET balance = ? WHERE id = ?', [
-                    newBalance,
-                    data.account_id,
-                ]);
-            }
 
             const result = await this.db.getFirstAsync<Transaction>(
                 'SELECT * FROM transactions WHERE id = ?',
@@ -333,6 +290,155 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
+    async createRecurringTransaction(
+        data: CreateRecurringTransaction,
+    ): Promise<GenericAPIResponse<RecurringTransaction>> {
+        const now = new Date();
+        const uuid = UUID();
+        const nowUNIX = dateToUNIX(now);
+        const safeRule = data.recurrence_rule.replace(
+            /\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/g,
+            (match) => WEEKDAY_MAP[match],
+        );
+        const dtStart = startOfDay(new Date(data.start_date));
+        const rule = rrulestr(safeRule, { dtstart: dtStart });
+
+        const firstOccurrence = rule.after(dtStart, true);
+        if (!firstOccurrence)
+            throw new HTTPError("Couldn't compute next occurrence from recurrence rule", 400);
+
+        const fromAccount = data.type === 'transfer' ? data.from_account ?? null : null;
+        const toAccount = data.type === 'transfer' ? data.to_account ?? null : null;
+
+        let createdRecurring!: RecurringTransaction;
+
+        await this.db.withTransactionAsync(async () => {
+            // add recurring definition
+            await this.db.runAsync(
+                `INSERT INTO recurring_transactions (
+                    id, created_at, updated_at, account_id, type, amount, category,
+                    recurrence_rule, start_date, end_date, status, metadata,
+                    created_at_unix, updated_at_unix, start_date_unix, end_date_unix,
+                    create_next_at, create_next_at_unix, from_account, to_account
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?, ?, ?
+                )`,
+                [
+                    uuid,
+                    now.toISOString(),
+                    now.toISOString(),
+                    data.account_id,
+                    data.type,
+                    data.amount,
+                    data.category,
+                    data.recurrence_rule,
+                    data.start_date,
+                    data.end_date ?? null,
+                    'active',
+                    JSON.stringify(data.metadata ?? {}),
+                    nowUNIX,
+                    nowUNIX,
+                    dateToUNIX(dtStart),
+                    data.end_date ? dateToUNIX(new Date(data.end_date)) : null,
+                    firstOccurrence.toISOString(),
+                    dateToUNIX(firstOccurrence),
+                    fromAccount,
+                    toAccount,
+                ],
+            );
+
+            const account = await this.db.getFirstAsync<{ currency: string }>(
+                'SELECT currency FROM accounts WHERE id = ?',
+                [data.account_id],
+            );
+            if (!account) throw new HTTPError('Account not found for recurring transaction', 404);
+
+            const missedOccurrences = occurrencesBetween(
+                data.recurrence_rule,
+                dtStart,
+                dtStart,
+                now,
+            );
+
+            // create transactions for each missed occurrence
+            const txService = new TransactionSQLiteService(this.db);
+            let lastSuccessful: Date | null = null;
+            for (const occurrenceDate of missedOccurrences) {
+                try {
+                    const base = {
+                        account_id: data.account_id,
+                        type: data.type,
+                        amount: data.amount,
+                        category: data.category,
+                        currency: account.currency,
+                        date: occurrenceDate.toISOString(),
+                        charges: 0,
+                    } as const;
+
+                    if (data.type === 'transfer') {
+                        await txService.create(
+                            {
+                                ...base,
+                                note: `Recurring transfer for ${data.category}`,
+                                from_account: data.from_account ?? null,
+                                to_account: data.to_account ?? null,
+                            } as any,
+                            { useTransaction: false },
+                        );
+                    } else {
+                        await txService.create(
+                            {
+                                ...base,
+                                note: `Recurring transaction for ${data.category}`,
+                            } as any,
+                            { useTransaction: false },
+                        );
+                    }
+                    lastSuccessful = occurrenceDate;
+                } catch (err) {
+                    console.error('Failed to create missed occurrence', occurrenceDate, err);
+                }
+            }
+
+            if (lastSuccessful) {
+                const nextAfterLast = rule.after(lastSuccessful, false);
+                await this.db.runAsync(
+                    `UPDATE recurring_transactions
+                     SET create_next_at_unix = ?,
+                         create_next_at = datetime(?, 'unixepoch'),
+                         last_created_at = datetime(?, 'unixepoch'),
+                         last_created_at_unix = ?
+                     WHERE id = ?`,
+                    [
+                        nextAfterLast ? dateToUNIX(nextAfterLast) : null,
+                        nextAfterLast ? dateToUNIX(nextAfterLast) : null,
+                        dateToUNIX(lastSuccessful),
+                        dateToUNIX(lastSuccessful),
+                        uuid,
+                    ],
+                );
+            }
+
+            const result = await this.db.getFirstAsync<RecurringTransaction>(
+                'SELECT * FROM recurring_transactions WHERE id = ?',
+                [uuid],
+            );
+            if (!result) throw new HTTPError("Couldn't create recurring transaction", 500);
+            createdRecurring = result;
+        });
+
+        return this.formatResponse({
+            data: createdRecurring,
+            status: 201,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Created recurring transaction',
+        });
+    }
+
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
         const {
             page = 1,
@@ -340,9 +446,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             accountID = false,
             start_date = false,
             end_date = false,
+            accountGroup = false,
+            type = false,
+            sortOrder = 'desc',
         } = query;
         const offset = (page - 1) * page_size;
         const params: any[] = [];
+        const orderDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
         let paginationClause = '';
         let whereClause = 't.deleted_at IS NULL';
@@ -350,9 +460,17 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
         }
+        if (accountGroup) {
+            whereClause += ' AND t.account_id IN (SELECT id FROM accounts WHERE category = ?)';
+            params.push(accountGroup);
+        }
         if (start_date && end_date) {
             whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
             params.push(start_date, end_date);
+        }
+        if (type) {
+            whereClause += ' AND type = ?';
+            params.push(type);
         }
         if (Number.isFinite(page_size)) {
             const offset = (page - 1) * page_size;
@@ -372,16 +490,20 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 account_id: string;
                 account_currency: string;
                 account_name: string;
+                account_category: string;
+                account_subcategory: string | null;
             }
         >(
             `SELECT t.*,
                 a.id AS account_id,
                 a.name AS account_name,
-                a.currency AS account_currency
+                a.currency AS account_currency,
+                a.category as account_category,
+                a.subcategory as account_subcategory
             FROM transactions t
             INNER JOIN accounts a ON t.account_id = a.id
             WHERE ${whereClause}
-            ORDER BY t.created_at DESC
+            ORDER BY t.created_at ${orderDirection}
             ${paginationClause}`,
             params,
         );
@@ -393,8 +515,155 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 account: {
                     id: transaction.account_id,
                     name: transaction.account_name,
+                    category: transaction.account_category,
+                    subcategory: transaction.account_subcategory,
                 },
             })) as unknown as Transaction[],
+            status: 200,
+            page: Number(page),
+            page_size: Number(page_size),
+            total: 1,
+            total_items: result['COUNT(*)'],
+            message: 'Success',
+        });
+    }
+
+    async listUpcomingRecurringTransactions(
+        from_date: Date,
+        to_date: Date,
+        n: number = 10,
+    ): Promise<GenericAPIResponse<RecurringTransaction[]>> {
+        const fromUnix = dateToUNIX(from_date);
+        const toUnix = dateToUNIX(to_date);
+
+        const recurringDefs = await this.db.getAllAsync<RecurringTransaction>(
+            `SELECT * FROM recurring_transactions
+            WHERE start_date_unix <= ?
+            AND (end_date_unix IS NULL OR end_date_unix >= ?)
+            AND status = 'active'`,
+            [toUnix, fromUnix],
+        );
+
+        const occurrences: RecurringTransaction[] = [];
+
+        for (const def of recurringDefs) {
+            try {
+                const rule = rrulestr(def.recurrence_rule, {
+                    dtstart: new Date(def.start_date_unix * 1000),
+                });
+
+                const dates = rule.between(from_date, to_date, true);
+
+                for (const d of dates) {
+                    const occurrenceUnix = Math.floor(d.getTime() / 1000);
+
+                    if (occurrenceUnix >= fromUnix && occurrenceUnix <= toUnix) {
+                        occurrences.push({
+                            ...def,
+                            start_date: d.toISOString(),
+                            start_date_unix: occurrenceUnix,
+                            create_next_at: d.toISOString(),
+                            create_next_at_unix: occurrenceUnix,
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Invalid recurrence rule for', def.id, err);
+            }
+        }
+
+        occurrences.sort((a, b) => a.create_next_at_unix - b.create_next_at_unix);
+
+        const total_items = occurrences.length;
+        const limited = occurrences.slice(0, n);
+
+        return this.formatResponse({
+            data: limited,
+            status: 200,
+            page: 1,
+            page_size: n,
+            total: Math.ceil(total_items / n),
+            total_items,
+            message: 'Success',
+        });
+    }
+
+    async delete(id: string): Promise<GenericAPIResponse<null>> {
+        await this.db.runAsync(`DELETE from transactions where id = ?`, [id]);
+        return this.formatResponse({
+            data: null,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Deleted transaction',
+        });
+    }
+
+    async deleteRecurring(id: string): Promise<GenericAPIResponse<null>> {
+        await this.db.runAsync(`DELETE from recurring_transactions where id = ?`, [id]);
+        return this.formatResponse({
+            data: null,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Deleted transaction',
+        });
+    }
+
+    async listRecurringTransactions(
+        query: RequestParamQuery,
+    ): Promise<GenericAPIResponse<RecurringTransaction[]>> {
+        const {
+            page = 1,
+            page_size = 10,
+            accountID = false,
+            start_date = false,
+            end_date = false,
+            status = false,
+        } = query;
+        const offset = (page - 1) * page_size;
+        const params: any[] = [];
+
+        let paginationClause = '';
+        let whereClause = '1=1';
+        if (accountID) {
+            whereClause += ' AND rt.account_id = ?';
+            params.push(accountID);
+        }
+        if (start_date && end_date) {
+            whereClause += ` AND strftime('%s', rt.start_date) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
+            params.push(start_date, end_date);
+        }
+        if (status) {
+            whereClause += ' AND rt.status = ?';
+            params.push(status);
+        }
+        if (Number.isFinite(page_size)) {
+            paginationClause = 'LIMIT ? OFFSET ?';
+            params.push(page_size, offset);
+        }
+
+        const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
+            `SELECT COUNT(*) FROM recurring_transactions rt WHERE ${whereClause}`,
+            [...params],
+        );
+        if (!result) throw new Error('Error fetching recurring transactions');
+
+        params.push(page_size, offset);
+        const transactions = await this.db.getAllAsync<RecurringTransaction>(
+            `SELECT rt.* FROM recurring_transactions rt
+             WHERE ${whereClause}
+             ORDER BY rt.start_date DESC
+             ${paginationClause}`,
+            params,
+        );
+
+        return this.formatResponse({
+            data: transactions,
             status: 200,
             page: Number(page),
             page_size: Number(page_size),

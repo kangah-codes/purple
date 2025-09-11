@@ -1,5 +1,6 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
 import { useSQLiteContext } from 'expo-sqlite';
 import {
     UseInfiniteQueryOptions,
@@ -13,22 +14,40 @@ import {
 } from 'react-query';
 import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
-import { CreateTransaction, Transaction } from './schema';
+import {
+    CreateRecurringTransaction,
+    CreateTransaction,
+    EditTransaction,
+    RecurringTransaction,
+    Transaction,
+} from './schema';
 import { createTransactionStore } from './state';
 
 export function useTransactionStore() {
     const [
         transactions,
+        recurringTransactions,
         setTransactions,
+        setRecurringTransactions,
         currentTransaction,
+        currentRecurringTransaction,
         setCurrentTransaction,
+        setCurrentRecurringTransaction,
         updateTransactions,
+        updateRecurringTransactions,
+        deleteTransaction,
     ] = useStore(createTransactionStore, (state) => [
         state.transactions,
+        state.recurringTransactions,
         state.setTransactions,
+        state.setRecurringTransactions,
         state.currentTransaction,
+        state.currentRecurringTransaction,
         state.setCurrentTransaction,
+        state.setCurrentRecurringTransaction,
         state.updateTransactions,
+        state.updateRecurringTransactions,
+        state.deleteTransaction,
     ]);
 
     return {
@@ -37,6 +56,13 @@ export function useTransactionStore() {
         currentTransaction,
         setCurrentTransaction,
         updateTransactions,
+
+        recurringTransactions,
+        setRecurringTransactions,
+        currentRecurringTransaction,
+        setCurrentRecurringTransaction,
+        updateRecurringTransactions,
+        deleteTransaction,
     };
 }
 
@@ -55,6 +81,43 @@ export function useTransactions({
         async () => {
             const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
             return service.list(requestQuery);
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+        },
+    );
+}
+
+export function useRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: {
+        startDate: Date;
+        endDate: Date;
+        n: number;
+    };
+    options?: UseQueryOptions;
+}): UseQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useQuery(
+        ['recurring-transactions', requestQuery],
+        async () => {
+            const service = ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
+            ) as TransactionSQLiteService;
+            return service.listUpcomingRecurringTransactions(
+                requestQuery.startDate,
+                requestQuery.endDate,
+                requestQuery.n,
+            );
         },
         {
             ...(options as Omit<
@@ -101,6 +164,46 @@ export function useInfiniteTransactions({
     );
 }
 
+export function useInfiniteRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: RequestParamQuery;
+    options?: Omit<
+        UseInfiniteQueryOptions<GenericAPIResponse<RecurringTransaction[]>, Error>,
+        'queryKey' | 'queryFn'
+    >;
+}): UseInfiniteQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useInfiniteQuery<GenericAPIResponse<RecurringTransaction[]>, Error>(
+        ['recurring-transactions', requestQuery],
+        async ({ pageParam = 1 }) => {
+            const queryParams = {
+                ...requestQuery,
+                page: pageParam,
+                page_size: requestQuery.page_size || 10,
+                start_date: requestQuery.startDate || false,
+                end_date: requestQuery.endDate || false,
+                accountID: requestQuery.accountID || false,
+            };
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+            // @ts-expect-error: listRecurringTransactions exists on TransactionSQLiteService
+            return service.listRecurringTransactions(queryParams);
+        },
+        {
+            ...options,
+            getNextPageParam: (lastPage) => {
+                const nextPage = lastPage.page + 1;
+                return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
+                    ? nextPage
+                    : undefined;
+            },
+        },
+    );
+}
+
 export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Transaction>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
@@ -108,6 +211,39 @@ export function useCreateTransaction(): UseMutationResult<GenericAPIResponse<Tra
     return useMutation(['create-transaction'], async (transactionInformation) => {
         const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.create(transactionInformation as CreateTransaction);
+    });
+}
+
+export function useEditTransaction(): UseMutationResult<
+    GenericAPIResponse<Transaction>,
+    Error,
+    { id: string; data: EditTransaction }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-transaction'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.update(id, data);
+    });
+}
+
+export function useCreateRecurringTransaction(): UseMutationResult<
+    GenericAPIResponse<RecurringTransaction>,
+    Error
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['create-recurring-transaction'], async (recurringTransaction) => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.createRecurringTransaction(
+            recurringTransaction as CreateRecurringTransaction,
+        );
     });
 }
 
@@ -122,5 +258,37 @@ export function useUpdateTransaction(): UseMutationResult<
     return useMutation(['update-transaction'], async ({ id, data }) => {
         const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
         return service.update(id, data);
+    });
+}
+
+export function useDeleteTransaction({
+    transactionID,
+}: {
+    transactionID: string;
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['delete-transaction'], async () => {
+        const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+        return service.delete(transactionID);
+    });
+}
+
+export function useDeleteRecurringTransaction({
+    transactionID,
+}: {
+    transactionID: string;
+}): UseMutationResult<GenericAPIResponse<null>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['delete-recurring-transaction'], async () => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.deleteRecurring(transactionID);
     });
 }

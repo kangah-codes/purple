@@ -91,6 +91,10 @@ build-rc: setup
 	docker compose run --rm android-builder-rc
 	@echo "✅ Release candidate build complete! Check ./output/purple-rc.apk"
 
+build-rc-raw:
+	@echo "Building apk with eas cli"
+	npx dotenv -c -- eas build --non-interactive -p android --profile rc --local --output output/purple-rc.apk
+
 test:
 	@echo "🧪 Testing container setup..."
 	docker compose run --rm android-builder bash -c 'echo "Container works!" && node --version && java -version && which eas'

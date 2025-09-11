@@ -82,7 +82,16 @@ export default class CurrencyService {
         try {
             const rates = this.nativeStorage.getItem<CurrencyRates>('currency-exchange-rates');
             if (!rates || !rates[from.currency] || !rates[from.currency]![to.currency]) {
-                throw new Error(`Exchange rate from ${from.currency} to ${to.currency} not found.`);
+                // throw new Error(`Exchange rate from ${from.currency} to ${to.currency} not found.`);
+                // alert user instead and default to 1:1 conversion
+                // Toast.show({
+                //     type: 'error',
+                //     props: {
+                //         text1: 'Exchange rate not found',
+                //         text2: `Couldn't find exchange rate from ${from.currency.toUpperCase()} to ${to.currency.toUpperCase()}. Defaulting to 1:1 conversion.`,
+                //     },
+                // });
+                return from.amount;
             }
 
             const rate = rates[from.currency]![to.currency];

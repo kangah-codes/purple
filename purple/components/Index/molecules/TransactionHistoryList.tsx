@@ -2,38 +2,34 @@ import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { useTransactionStore } from '@/components/Transactions/hooks';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
+import { useTransactions, useTransactionStore } from '@/components/Transactions/hooks';
+import TransactionCard from '@/components/Transactions/molecules/TransactionCard';
 import { Transaction } from '@/components/Transactions/schema';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { dedupeByKey } from '@/lib/utils/array';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
-type TransactionHistoryList = {
-    transactions?: Transaction[];
-};
-
-export default function TransactionHistoryList({
-    transactions: propTransactions,
-}: TransactionHistoryList) {
+export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => void }) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { transactions, setCurrentTransaction } = useTransactionStore();
-    const getTopFiveTransactions = useCallback(
-        (transactions: Transaction[]) => {
-            // TODO: research why duplicate transactions were being sent in the first place instead of this shit
-            return dedupeByKey(transactions.slice(0, 5), 'id');
+    const { setCurrentTransaction } = useTransactionStore();
+    const { data: transactions, refetch } = useTransactions({
+        requestQuery: {
+            page_size: 5,
         },
-        [transactions],
-    );
+        options: {
+            onSettled: () => {
+                onLoaded();
+            },
+        },
+    });
 
     const renderItem = useCallback(
         ({ item }: { item: Transaction }) => (
-            <TransactionHistoryCard
+            <TransactionCard
                 data={item}
                 onPress={() => {
                     setCurrentTransaction(item);
@@ -50,15 +46,20 @@ export default function TransactionHistoryList({
     const renderEmptylist = useCallback(
         () => (
             <View className='my-5'>
-                <EmptyList message="Looks like you haven't created any transactions yet." />
+                <EmptyList message='Start by creating transactions' />
             </View>
         ),
         [],
     );
 
+    useRefreshOnFocus(refetch);
+
     return (
-        <View className='flex flex-col mt-5'>
-            <View className='flex flex-row w-full justify-between items-center px-5'>
+        <View
+            className='flex flex-col mt-5 bg-purple-50 px-5 pt-5 pb-2.5 rounded-3xl border border-purple-100'
+            // style={styles.shadow}
+        >
+            <View className='flex flex-row w-full justify-between items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
                     Recent Transactions
                 </Text>
@@ -76,12 +77,7 @@ export default function TransactionHistoryList({
 
             <FlashList
                 estimatedItemSize={50}
-                data={
-                    // TODO: refactor this to be neater later
-                    propTransactions
-                        ? getTopFiveTransactions(propTransactions)
-                        : getTopFiveTransactions(transactions)
-                }
+                data={transactions?.data ?? []}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.flatlistContainerStyle}
                 showsVerticalScrollIndicator={true}
@@ -124,13 +120,22 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     flatlistContainerStyle: {
-        paddingBottom: 200,
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
     },
     bottomDrawer: {
         backgroundColor: Platform.OS === 'android' ? '#F3F4F6' : 'white',
     },
     arrowRight: {
         position: 'absolute',
+    },
+    shadow: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });

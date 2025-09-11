@@ -1,15 +1,12 @@
-import { useCallback, useContext, useEffect, useMemo } from 'react';
-import { AnalyticsContext, AnalyticsContextType } from '../providers/Analytics';
+import { useCallback, useEffect, useMemo } from 'react';
+import { AnalyticsContextType } from '../providers/Analytics';
 import { EventProperties } from '../services/AnalyticsService';
+import { useAnalyticsCore } from './useAnalyticsCore';
 import { useDeepCompareMemo } from './useDeepCompareMemo';
 import { useAppLifecycleEvents } from './useTrackLifecycle';
 
 export const useAnalytics = (): AnalyticsContextType => {
-    const context = useContext(AnalyticsContext);
-    if (context === undefined) {
-        throw new Error('useAnalytics must be used within an AnalyticsProvider');
-    }
-    return context;
+    return useAnalyticsCore();
 };
 
 export const useAnalyticsEvent = () => {

@@ -6,6 +6,11 @@ export const TRANSACTION_TYPES = [
     { key: 'transfer', label: 'Transfer' },
 ];
 
+export const EDITABLE_TRANSACTION_TYPES = [
+    { key: 'debit', label: 'Expense' },
+    { key: 'credit', label: 'Income' },
+];
+
 export const TRANSACTION_CATEGORY: UserPreferences['customTransactionTypes'] = [
     {
         category: 'Food',

@@ -2,57 +2,45 @@ import { usePreferencesStore } from '@/components/Settings/state';
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { SettingsServiceFactory } from '../factory/SettingsFactory';
 import { UserPreferences } from '@/components/Settings/schema';
+import { nativeStorage } from '../utils/storage';
 
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
+        const settingsService = SettingsServiceFactory.create(db);
+        const existingCurrency = await settingsService.get('currency');
+        console.log(
+            'Existing Currency:',
+            existingCurrency,
+            nativeStorage.getItem('preferences-store'),
+        );
         const defaultSettings: UserPreferences = {
-            currency: 'USD',
+            currency: existingCurrency || 'USD',
             theme: 'light',
             allowOverdraw: false,
             hideCompletedPlans: true,
             trackUsageStatistics: true,
             sendDiagnosticData: true,
             allowCurrencyConversion: true,
+            pushNotificationsEnabled: false,
+            dailyNotificationsEnabled: false,
         } as UserPreferences;
-
-        const settingsService = SettingsServiceFactory.create(db);
         await settingsService.ensureDefaults(defaultSettings);
 
-        const [
-            transactionTypes,
-            allowOverdraw,
-            hideCompletedPlans,
-            trackUsageStatistics,
-            sendDiagnosticData,
-            allowCurrencyConversion,
-        ] = await Promise.all([
-            settingsService.listTransactionTypes(),
-            settingsService.getWithFallback('allowOverdraw', defaultSettings.allowOverdraw),
-            settingsService.getWithFallback(
-                'hideCompletedPlans',
-                defaultSettings.hideCompletedPlans,
-            ),
-            settingsService.getWithFallback(
-                'trackUsageStatistics',
-                defaultSettings.trackUsageStatistics,
-            ),
-            settingsService.getWithFallback(
-                'sendDiagnosticData',
-                defaultSettings.sendDiagnosticData,
-            ),
-            settingsService.getWithFallback(
-                'allowCurrencyConversion',
-                defaultSettings.allowCurrencyConversion,
-            ),
-        ]);
+        const transactionTypes = await settingsService.listTransactionTypes();
+        const settingsEntries = await Promise.all(
+            Object.keys(defaultSettings).map(async (key) => [
+                key,
+                await settingsService.getWithFallback(
+                    key as keyof UserPreferences,
+                    defaultSettings[key as keyof UserPreferences],
+                ),
+            ]),
+        );
+        const settings = Object.fromEntries(settingsEntries) as UserPreferences;
 
         usePreferencesStore.getState().setPreferences({
+            ...settings,
             customTransactionTypes: transactionTypes,
-            allowOverdraw,
-            hideCompletedPlans,
-            trackUsageStatistics,
-            sendDiagnosticData,
-            allowCurrencyConversion,
         });
     } catch (error) {
         console.error('Failed to initialize preferences:', error);

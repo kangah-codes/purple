@@ -1,38 +1,38 @@
-import { keyExtractor } from '@/lib/utils/number';
-import { FlashList } from '@shopify/flash-list';
-import React, { useCallback, useEffect } from 'react';
-import { useAccountStore } from '../hooks';
-import { Account } from '../schema';
+import { TouchableOpacity, View, Text, LinearGradient } from '@/components/Shared/styled';
+import React from 'react';
+import { useAccounts, useAccountStore } from '../hooks';
 import { groupAccountsByCategory } from '../utils';
-import AccountCard from './AccountCard';
+import AccountGroupCard from './AccountGroupCard';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { router } from 'expo-router';
 
 export default function AccountsAccordion() {
-    const { accounts } = useAccountStore();
-    const renderItem = useCallback(
-        ({ item }: { item: { groupName: string; currency?: string; accounts: Account[] } }) => (
-            <AccountCard groupName={item.groupName} accounts={item.accounts} />
-        ),
-        [],
-    );
+    const { data: accounts, refetch } = useAccounts({
+        requestQuery: {},
+    });
+    useRefreshOnFocus(refetch);
 
-    const groupedAccounts = groupAccountsByCategory(accounts);
-    const data = Object.entries(groupedAccounts)
-        .map(([key, value]) => {
-            const [category, currency] = key.split('_');
-            return {
-                groupName: category,
-                currency: currency,
-                accounts: value,
-            };
-        })
-        .filter((item) => item.accounts && item.accounts.length > 0);
+    const groupedAccounts = groupAccountsByCategory(accounts?.data ?? []);
 
     return (
-        <FlashList
-            estimatedItemSize={50}
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-        />
+        <View className='px-5 flex flex-col space-y-5 mt-5'>
+            {Object.keys(groupedAccounts).map((key) => (
+                <View key={key}>
+                    <AccountGroupCard group={key} accounts={groupedAccounts[key]} />
+                </View>
+            ))}
+
+            <TouchableOpacity onPress={() => router.push('/accounts/new-acount')}>
+                <LinearGradient
+                    className='rounded-full justify-center items-center p-4'
+                    colors={['#c084fc', '#9333ea']}
+                >
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-white'>
+                        Create Account
+                    </Text>
+                </LinearGradient>
+            </TouchableOpacity>
+        </View>
     );
 }

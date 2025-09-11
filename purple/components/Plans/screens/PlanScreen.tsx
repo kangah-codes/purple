@@ -1,5 +1,5 @@
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
-import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
+import TransactionsAccordion from '@/components/Transactions/molecules/TransactionAccordion';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect } from 'react';

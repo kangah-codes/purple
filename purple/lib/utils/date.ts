@@ -1,4 +1,14 @@
-import { endOfMonth, startOfMonth } from 'date-fns';
+import {
+    endOfDay,
+    endOfMonth,
+    startOfDay,
+    startOfMonth,
+    startOfYear,
+    subDays,
+    subMonths,
+    subWeeks,
+    subYears,
+} from 'date-fns';
 
 export function formatDate(
     date: string,
@@ -93,7 +103,7 @@ export function convertToJSDate(dateStr: string): Date | null {
 /**
  * Time period strings representing different date ranges
  */
-export type TimePeriod = '1W' | '1D' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+export type TimePeriod = '1W' | '1D' | '1M' | 'YTD' | '3M' | '6M' | '1Y' | 'ALL';
 
 /**
  * Interface representing a date range with start and end dates
@@ -105,54 +115,47 @@ interface DateRange {
 
 export function getDateRange(period: TimePeriod): DateRange {
     const now = new Date();
-    const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const endDate = endOfDay(now);
     let startDate: Date;
 
     switch (period) {
         case '1D':
-            startDate = new Date();
-            startDate.setDate(startDate.getDate() - 1);
+            startDate = subDays(now, 1);
             break;
         case '1W':
-            startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
+            startDate = subWeeks(now, 1);
             break;
         case '1M':
-            startDate = new Date();
-            startDate.setDate(startDate.getMonth() - 1);
+            startDate = subMonths(now, 1);
             break;
         case '3M':
-            startDate = new Date();
-            startDate.setMonth(startDate.getMonth() - 3);
+            startDate = subMonths(now, 3);
             break;
         case '6M':
-            startDate = new Date();
-            startDate.setMonth(startDate.getMonth() - 6);
+            startDate = subMonths(now, 6);
+            break;
+        case 'YTD':
+            startDate = startOfYear(now);
             break;
         case '1Y':
-            startDate = new Date();
-            startDate.setFullYear(startDate.getFullYear() - 1);
+            startDate = subYears(now, 1);
             break;
         case 'ALL':
             startDate = new Date(0);
             break;
         default:
-            startDate = new Date();
+            startDate = now;
             break;
     }
 
-    startDate = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        startDate.getDate(),
-        0,
-        0,
-        0,
-        0,
-    );
+    startDate = startOfDay(startDate);
 
     return {
         startDate,
         endDate,
     };
+}
+
+export function dateToUNIX(date: Date): number {
+    return Math.floor(date.getTime() / 1000);
 }

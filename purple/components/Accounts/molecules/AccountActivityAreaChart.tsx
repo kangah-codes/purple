@@ -37,7 +37,7 @@ export default function AccountActivityAreaChart({ transactions }: AccountActivi
                     hideDataPoints
                     hideRules
                     hideYAxisText
-                    curved
+                    // curved
                     hideAxesAndRules
                     adjustToWidth
                     color='#7E22CE'

@@ -1,9 +1,9 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { View, Text } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { useAccountStore } from '../hooks';
 import { getDateRange } from '@/lib/utils/date';
+import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 
 type AccountDatePeriod = '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
 const datePeriods: AccountDatePeriod[] = ['1W', '1M', '3M', '6M', '1Y', 'ALL'];
@@ -11,7 +11,7 @@ const datePeriods: AccountDatePeriod[] = ['1W', '1M', '3M', '6M', '1Y', 'ALL'];
 export default function AccountActivityDateFilter() {
     const { currentAccountRequestParams, setCurrentAccountRequestParams } = useAccountStore();
 
-    const handlePeriodChange = async (period: AccountDatePeriod) => {
+    const handlePeriodChange = (period: AccountDatePeriod) => {
         try {
             const dateRange = getDateRange(period);
             setCurrentAccountRequestParams({
@@ -26,47 +26,31 @@ export default function AccountActivityDateFilter() {
     };
 
     return (
-        <View className='flex flex-row justify-between items-center px-8'>
-            {datePeriods.map((period) => (
-                <TouchableOpacity
-                    key={period}
-                    style={[
-                        styles.pill,
-                        currentAccountRequestParams.currentSelection === period &&
-                            styles.activePill,
-                    ]}
-                    className='rounded-full px-3 py-1'
-                    onPress={() => handlePeriodChange(period)}
-                >
-                    <Text
-                        style={[
-                            satoshiFont.satoshiBold,
-                            currentAccountRequestParams.currentSelection === period
-                                ? styles.activeText
-                                : styles.inactiveText,
-                        ]}
-                        className='text-xs tracking-tighter'
-                    >
-                        {period}
-                    </Text>
-                </TouchableOpacity>
-            ))}
+        <View className=''>
+            <View className='px-[30px]'>
+                <AnimatedPillSelect
+                    options={datePeriods.map((p) => ({ label: p, value: p }))}
+                    selected={currentAccountRequestParams.currentSelection as AccountDatePeriod}
+                    onChange={handlePeriodChange}
+                    styling={{
+                        pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
+                        background: { backgroundColor: 'rgba(255, 255, 255, 0)' },
+                        option: { padding: 12 },
+                    }}
+                    renderItem={(opt, isSelected) => (
+                        <Text
+                            style={[
+                                satoshiFont.satoshiBlack,
+                                { fontSize: 12 },
+                                isSelected ? { color: '#8200db' } : { color: '#c27aff' },
+                            ]}
+                            className='tracking-tighter text-xs'
+                        >
+                            {opt.label}
+                        </Text>
+                    )}
+                />
+            </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    pill: {
-        backgroundColor: 'transparent',
-    },
-    activePill: {
-        backgroundColor: 'rgba(243, 232, 255, 0.7)',
-    },
-    activeText: {
-        color: '#8200db',
-        fontFamily: satoshiFont.satoshiBlack.fontFamily,
-    },
-    inactiveText: {
-        color: '#c27aff',
-    },
-});

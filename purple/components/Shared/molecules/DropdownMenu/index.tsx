@@ -1,6 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Modal, StyleSheet, TouchableWithoutFeedback, Dimensions } from 'react-native';
-
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    Dimensions,
+    Modal,
+    StyleProp,
+    StyleSheet,
+    TouchableWithoutFeedback,
+    View,
+    ViewStyle,
+} from 'react-native';
 interface DropdownMenuProps {
     visible: boolean;
     handleClose: () => void;
@@ -10,6 +18,9 @@ interface DropdownMenuProps {
     dropdownWidth?: number;
     padX?: number;
     padY?: number;
+    offsetY?: number;
+    animationDuration?: number;
+    style?: StyleProp<ViewStyle>;
 }
 
 interface Position {
@@ -27,65 +38,154 @@ export default function DropdownMenu({
     dropdownWidth = 150,
     padX = 5,
     padY = 5,
+    offsetY = 0,
+    animationDuration = 200,
+    style,
 }: DropdownMenuProps) {
     const triggerRef = useRef<View>(null);
     const [position, setPosition] = useState<Position>({ x: 0, y: 0, width: 0 });
+    const [modalVisible, setModalVisible] = useState(false);
 
-    useEffect(() => {
-        if (triggerRef.current && visible) {
+    // Animation values
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+    const translateYAnim = useRef(new Animated.Value(-10)).current;
+
+    const measureTrigger = () => {
+        if (triggerRef.current) {
             const screenWidth = Dimensions.get('window').width;
 
             triggerRef.current.measure((fx, fy, width, height, px, py) => {
                 // Calculate initial position (centered under trigger)
                 let xPosition = px + width / 2 - dropdownWidth / 2;
 
-                // Ensure dropdown stays 5px from right edge
+                // Ensure dropdown stays within screen bounds with padding
                 const rightEdgePosition = xPosition + dropdownWidth;
                 if (rightEdgePosition > screenWidth - padX) {
                     xPosition = screenWidth - dropdownWidth - padX;
                 }
 
-                // Ensure dropdown stays 5px from left edge
                 if (xPosition < padX) {
                     xPosition = padX;
                 }
 
                 setPosition({
                     x: xPosition,
-                    y: py + padY, // Position 5px below trigger
+                    y: height + offsetY,
                     width: width,
                 });
             });
         }
-    }, [visible, dropdownWidth]);
+    };
+
+    const showDropdown = () => {
+        measureTrigger();
+        setModalVisible(true);
+
+        // Reset animation values
+        scaleAnim.setValue(0.8);
+        opacityAnim.setValue(0);
+        translateYAnim.setValue(-10);
+
+        // Start entrance animation
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                useNativeDriver: true,
+                tension: 100,
+                friction: 8,
+            }),
+            Animated.timing(opacityAnim, {
+                toValue: 1,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateYAnim, {
+                toValue: 0,
+                duration: animationDuration,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    const hideDropdown = () => {
+        // Start exit animation
+        Animated.parallel([
+            Animated.timing(scaleAnim, {
+                toValue: 0.8,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+                toValue: 0,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateYAnim, {
+                toValue: -10,
+                duration: animationDuration * 0.8,
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            setModalVisible(false);
+            handleClose();
+        });
+    };
+
+    useEffect(() => {
+        if (visible) {
+            showDropdown();
+        } else if (modalVisible) {
+            hideDropdown();
+        }
+    }, [visible]);
 
     return (
         <View>
             <TouchableWithoutFeedback onPress={handleOpen}>
                 <View ref={triggerRef}>{trigger}</View>
             </TouchableWithoutFeedback>
-            {visible && (
+
+            {modalVisible && (
                 <Modal
                     transparent={true}
-                    visible={visible}
-                    animationType='fade'
+                    visible={modalVisible}
+                    animationType='none'
                     hardwareAccelerated
-                    onRequestClose={handleClose}
+                    onRequestClose={() => {
+                        if (visible) {
+                            hideDropdown();
+                        }
+                    }}
                 >
-                    <TouchableWithoutFeedback onPress={handleClose}>
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            if (visible) {
+                                hideDropdown();
+                            }
+                        }}
+                    >
                         <View style={styles.modalOverlay}>
-                            <View
-                                style={[
-                                    styles.menu,
-                                    {
-                                        top: position.y,
-                                        left: position.x,
-                                        width: dropdownWidth,
-                                    },
-                                ]}
-                            >
-                                {children}
-                            </View>
+                            <TouchableWithoutFeedback onPress={() => {}}>
+                                <Animated.View
+                                    style={[
+                                        styles.menu,
+                                        {
+                                            top: position.y + offsetY,
+                                            left: position.x,
+                                            width: dropdownWidth,
+                                            transform: [
+                                                { scale: scaleAnim },
+                                                { translateY: translateYAnim },
+                                            ],
+                                            opacity: opacityAnim,
+                                        },
+                                        style,
+                                    ]}
+                                >
+                                    {children}
+                                </Animated.View>
+                            </TouchableWithoutFeedback>
                         </View>
                     </TouchableWithoutFeedback>
                 </Modal>
@@ -103,16 +203,9 @@ const styles = StyleSheet.create({
     },
     menu: {
         position: 'absolute',
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    menuOption: {
-        padding: 5,
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
 });

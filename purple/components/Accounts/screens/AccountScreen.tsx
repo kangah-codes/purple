@@ -1,6 +1,6 @@
 import { GenericAPIResponse } from '@/@types/request';
 import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
-import TransactionsAccordion from '@/components/Stats/molecules/TransactionAccordion';
+import TransactionsAccordion from '@/components/Transactions/molecules/TransactionAccordion';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { getDateRange } from '@/lib/utils/date';

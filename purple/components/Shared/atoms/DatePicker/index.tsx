@@ -5,7 +5,7 @@ import DateTimePicker, {
     DateTimePickerAndroid,
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import React from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import CustomBottomSheetModal from '../../molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '../../molecules/GlobalBottomSheetModal/hooks';
@@ -18,7 +18,8 @@ type DatePickerProps = {
     pickerKey: string;
     minimumDate?: Date;
     maximumDate?: Date;
-    value: Date;
+    value?: Date | string | null;
+    placeholder?: string;
 };
 
 export default function DatePicker({
@@ -28,94 +29,75 @@ export default function DatePicker({
     minimumDate,
     maximumDate,
     value,
+    placeholder = 'Select a date',
 }: DatePickerProps) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    // const [selectedDate, setSelectedDate] = useState<Date>(value);
-
-    const onDateChange = (_event: DateTimePickerEvent, pickedDate: Date | undefined) => {
+    const getDateValue = (): Date => {
+        if (!value || value === '') {
+            return new Date();
+        }
+        if (typeof value === 'string') {
+            const parsed = new Date(value);
+            return isNaN(parsed.getTime()) ? new Date() : parsed;
+        }
+        return value;
+    };
+    const dateValue = getDateValue();
+    const handleDateChange = (_event: DateTimePickerEvent, pickedDate?: Date) => {
         if (!pickedDate) return;
-
-        DateTimePickerAndroid.open({
-            value: pickedDate,
-            onChange: (event, selectedTime) => onTimeChange(pickedDate, event, selectedTime),
-            mode: 'time',
-            is24Hour: true,
-        });
-    };
-
-    const onTimeChange = (
-        pickedDate: Date,
-        _event: DateTimePickerEvent,
-        pickedTime: Date | undefined,
-    ) => {
-        if (!pickedTime) return;
-
-        const combinedDateTime = new Date(pickedDate);
-        combinedDateTime.setHours(pickedTime.getHours());
-        combinedDateTime.setMinutes(pickedTime.getMinutes());
-        combinedDateTime.setSeconds(pickedTime.getSeconds());
-        combinedDateTime.setMilliseconds(0);
-
         if (typeof onChange === 'function') {
-            onChange(combinedDateTime);
+            onChange(pickedDate);
         }
     };
+    const formatDate = (date?: Date | string | null) => {
+        if (!date || date === '') return placeholder;
 
-    const onIOSDateTimeChange = (
-        _event: DateTimePickerEvent,
-        selectedDateTime: Date | undefined,
-    ) => {
-        if (!selectedDateTime) return;
-
-        if (typeof onChange === 'function') {
-            onChange(selectedDateTime);
+        let dateObj: Date;
+        if (typeof date === 'string') {
+            dateObj = new Date(date);
+        } else {
+            dateObj = date;
         }
-    };
 
-    const formatDateTime = (date: Date) => {
-        return `${date.toDateString()} ${date.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        })}`;
+        if (isNaN(dateObj.getTime())) return placeholder;
+        return dateObj.toDateString();
     };
 
     return (
         <>
-            {
-                // render bottom sheet modal for ios only
-                Platform.OS === 'ios' && (
-                    <CustomBottomSheetModal
-                        modalKey={pickerKey}
-                        snapPoints={snapPoints}
-                        style={styles.bottomSheet}
-                        handleIndicatorStyle={{
-                            backgroundColor: '#D4D4D4',
-                        }}
-                    >
-                        <View className='flex flex-col'>
-                            {label && (
-                                <View className='px-5 py-1'>
-                                    <Text
-                                        style={satoshiFont.satoshiBold}
-                                        className='text-base text-gray-900'
-                                    >
-                                        {label}
-                                    </Text>
-                                </View>
-                            )}
-                            <DateTimePicker
-                                testID='dateTimePicker'
-                                value={value}
-                                mode={'datetime'}
-                                onChange={onIOSDateTimeChange}
-                                display='spinner'
-                                minimumDate={minimumDate}
-                                maximumDate={maximumDate}
-                            />
-                        </View>
-                    </CustomBottomSheetModal>
-                )
-            }
+            {/* iOS modal */}
+            {Platform.OS === 'ios' && (
+                <CustomBottomSheetModal
+                    modalKey={pickerKey}
+                    snapPoints={snapPoints}
+                    style={styles.bottomSheet}
+                    handleIndicatorStyle={{ backgroundColor: '#D4D4D4' }}
+                >
+                    <View className='flex flex-col'>
+                        {label && (
+                            <View className='px-5 py-1'>
+                                <Text
+                                    style={satoshiFont.satoshiBold}
+                                    className='text-base text-gray-900'
+                                >
+                                    {label}
+                                </Text>
+                            </View>
+                        )}
+                        <DateTimePicker
+                            testID='datePicker'
+                            value={dateValue}
+                            mode='date'
+                            onChange={handleDateChange}
+                            display='spinner'
+                            minimumDate={minimumDate}
+                            maximumDate={maximumDate}
+                        />
+                    </View>
+                </CustomBottomSheetModal>
+            )}
+
+            {/* Trigger button */}
             <View className='flex flex-col space-y-1'>
                 {label && (
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
@@ -128,8 +110,8 @@ export default function DatePicker({
                             setShowBottomSheetModal(pickerKey, true);
                         } else {
                             DateTimePickerAndroid.open({
-                                value,
-                                onChange: onDateChange,
+                                value: dateValue,
+                                onChange: handleDateChange,
                                 mode: 'date',
                                 is24Hour: true,
                                 minimumDate,
@@ -144,7 +126,7 @@ export default function DatePicker({
                     </View>
 
                     <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
-                        {formatDateTime(value)}
+                        {formatDate(value)}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -157,10 +139,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 24,
         shadowColor: '#000000',
-        shadowOffset: {
-            width: 0,
-            height: 8,
-        },
+        shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.25,
         shadowRadius: 48,
         elevation: 10,

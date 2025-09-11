@@ -1,64 +1,188 @@
-import { SafeAreaView, ScrollView, Text, View } from '@/components/Shared/styled';
+import { SafeAreaView, Text, View } from '@/components/Shared/styled';
+import { useTransactions } from '@/components/Transactions/hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { addMonths, endOfMonth, format, isBefore, startOfMonth } from 'date-fns';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import StatsHeader from '../molecules/StatsHeader';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { getCurrentMonthYear } from '../utils';
-
-const currentMonthYear = getCurrentMonthYear();
+import PagerView from 'react-native-pager-view';
+import MonthlyStatsPage from '../molecules/MonthlyStatsReport';
+import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
+import StatsNavigationArea from '../molecules/StatsNavigationArea';
 
 export default function StatsScreen() {
-    return (
-        <SafeAreaView className='relative h-full bg-white'>
-            <ExpoStatusBar style='dark' />
-            <ScrollView className='' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5 px-5'>
-                    <Text style={GLOBAL_STYLESHEET.satoshiBlack} className='text-lg'>
-                        My Stats
+    const pagerRef = useRef<PagerView>(null);
+    const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [isInitialized, setIsInitialized] = useState(false);
+    const { data: oldestTransaction, isLoading: isLoadingOldest } = useTransactions({
+        requestQuery: {
+            page_size: 1,
+            sortOrder: 'asc',
+        },
+    });
+
+    const earliestTransactionDate = useMemo(() => {
+        const date = oldestTransaction?.data?.[0]?.created_at
+            ? new Date(oldestTransaction.data[0].created_at)
+            : new Date();
+        return startOfMonth(date);
+    }, [oldestTransaction?.data]);
+
+    const availableMonths = useMemo(() => {
+        if (isLoadingOldest) return [];
+
+        const months: Date[] = [];
+        const currentMonth = startOfMonth(new Date());
+        let iterDate = earliestTransactionDate;
+
+        while (!isBefore(currentMonth, iterDate)) {
+            months.push(iterDate);
+            iterDate = addMonths(iterDate, 1);
+        }
+
+        return months;
+    }, [earliestTransactionDate, isLoadingOldest]);
+
+    useEffect(() => {
+        if (availableMonths.length === 0 || isInitialized) return;
+
+        const now = new Date();
+        const currentMonthKey = format(now, 'yyyy-MM');
+        const currentMonthIdx = availableMonths.findIndex(
+            (month) => format(month, 'yyyy-MM') === currentMonthKey,
+        );
+
+        if (currentMonthIdx !== -1) {
+            setCurrentMonthIndex(currentMonthIdx);
+            setCurrentDate(availableMonths[currentMonthIdx]);
+            setIsInitialized(true);
+
+            setTimeout(() => {
+                pagerRef.current?.setPageWithoutAnimation(currentMonthIdx);
+            }, 150);
+        }
+    }, [availableMonths, isInitialized]);
+
+    const monthRange = useMemo(() => {
+        if (!isInitialized || !currentDate) {
+            return {
+                start_date: new Date().toISOString(),
+                end_date: new Date().toISOString(),
+            };
+        }
+
+        return {
+            start_date: startOfMonth(currentDate).toISOString(),
+            end_date: endOfMonth(currentDate).toISOString(),
+        };
+    }, [currentDate, isInitialized]);
+
+    const {
+        refetch,
+        data: monthlyTransactions,
+        isLoading,
+    } = useTransactions({
+        requestQuery: {
+            page_size: Infinity,
+            ...monthRange,
+        },
+        options: {
+            enabled: isInitialized,
+        },
+    });
+
+    useRefreshOnFocus(refetch);
+
+    const goToPreviousMonth = useCallback(() => {
+        if (currentMonthIndex > 0) {
+            pagerRef.current?.setPage(currentMonthIndex - 1);
+        }
+    }, [currentMonthIndex]);
+
+    const goToNextMonth = useCallback(() => {
+        if (currentMonthIndex < availableMonths.length - 1) {
+            pagerRef.current?.setPage(currentMonthIndex + 1);
+        }
+    }, [currentMonthIndex, availableMonths.length]);
+
+    const handlePageSelected = useCallback(
+        (e: { nativeEvent: { position: number } }) => {
+            const newIndex = e.nativeEvent.position;
+            setCurrentMonthIndex(newIndex);
+            setCurrentDate(availableMonths[newIndex]);
+        },
+        [availableMonths],
+    );
+
+    const navigationProps = useMemo(
+        () => ({
+            currentDate,
+            currentMonthIndex,
+            goToPreviousMonth,
+            goToNextMonth,
+            setCurrentMonthIndex,
+            setCurrentDate,
+            availableMonths,
+        }),
+        [currentDate, currentMonthIndex, goToPreviousMonth, goToNextMonth, availableMonths],
+    );
+
+    if (!isInitialized || (isLoadingOldest && !oldestTransaction)) return <ReportLoadingScreen />;
+
+    if (availableMonths.length === 0) {
+        return (
+            <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
+                <ExpoStatusBar style='dark' />
+                <View className='flex-1 items-center justify-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-lg'>
+                        {isLoadingOldest ? 'Loading...' : 'No transaction data available'}
                     </Text>
-                    <View className='bg-purple-50 px-2 py-1 rounded-full'>
-                        <Text
-                            style={GLOBAL_STYLESHEET.satoshiBold}
-                            className='text-xs text-purple-500'
-                        >
-                            {currentMonthYear}
-                        </Text>
-                    </View>
                 </View>
+            </SafeAreaView>
+        );
+    }
 
-                <StatsHeader />
+    return (
+        <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
+            <ExpoStatusBar style='dark' />
+            <StatsNavigationArea {...navigationProps} />
 
-                {/* <FlatList
-                    contentContainerStyle={styles.flatlist}
-                    showsVerticalScrollIndicator={false}
-                    data={[]}
-                    renderItem={() => <></>}
-                    ItemSeparatorComponent={itemSeparator}
-                    keyExtractor={keyExtractor}
-                    ListHeaderComponent={<StatsHeader />}
-                    onRefresh={refetch}
-                    refreshing={isFetching}
-                /> */}
-            </ScrollView>
+            <PagerView
+                ref={pagerRef}
+                style={styles.pagerView}
+                initialPage={0}
+                onPageSelected={handlePageSelected}
+                orientation='horizontal'
+                overdrag
+                scrollEnabled
+            >
+                {availableMonths.map((month, index) => (
+                    <View key={format(month, 'yyyy-MM')} style={styles.page}>
+                        <MonthlyStatsPage
+                            currentDate={month}
+                            transactions={
+                                index === currentMonthIndex ? monthlyTransactions?.data ?? [] : []
+                            }
+                            isLoading={isLoading && !monthlyTransactions}
+                        />
+                    </View>
+                ))}
+            </PagerView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    flatlist: {
+    scrollView: {
         paddingBottom: 100,
     },
-    flatlistContentContainer: {
-        paddingBottom: 100,
-        paddingHorizontal: 20,
-        backgroundColor: 'white',
+    pagerView: {
+        flex: 1,
     },
-    handleIndicator: {
-        backgroundColor: '#D4D4D4',
-    },
-    container: {
-        paddingHorizontal: 20,
+    page: {
+        flex: 1,
     },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,

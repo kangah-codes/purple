@@ -8,14 +8,18 @@ import Toast from 'react-native-toast-message';
 import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import { usePreferences } from '@/components/Settings/hooks';
 
 function ExpensesScreen() {
     const { setExpensePlans, expensePlans } = usePlanStore();
+    const {
+        preferences: { hideCompletedPlans },
+    } = usePreferences();
     const { data, fetchNextPage, hasNextPage, isLoading, refetch } = useInfinitePlans({
         requestQuery: {
             type: 'expense',
             page_size: 10,
-            is_completed: false,
+            is_completed: hideCompletedPlans ? false : undefined,
         },
         options: {
             onError: () => {

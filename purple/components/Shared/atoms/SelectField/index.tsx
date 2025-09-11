@@ -1,11 +1,12 @@
 import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { Portal } from '@gorhom/portal';
 import React, { useCallback, useEffect, useState } from 'react';
 import CustomBottomSheetFlatList from '../../molecules/GlobalBottomSheetFlatList';
 import { useBottomSheetFlatListStore } from '../../molecules/GlobalBottomSheetFlatList/hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
+import Checkbox from '../Checkbox';
 
 type SelectOption = {
     value: string | number | boolean;
@@ -37,13 +38,20 @@ export default function SelectField({
     const [val, setValue] = useState<string | undefined>(value);
     const renderDefaultItem = useCallback(
         (item: any) => (
-            <View className='py-3 border-b border-purple-100'>
-                <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-sm text-gray-800'>
+            <View className='py-3 border-b border-purple-100 flex flex-row justify-between'>
+                <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-800'>
                     {item.label}
                 </Text>
+
+                <Checkbox
+                    checked={item.value == val}
+                    onChange={() => {
+                        setValue(item.value.toString());
+                    }}
+                />
             </View>
         ),
-        [],
+        [value],
     );
 
     useEffect(() => {
@@ -63,7 +71,7 @@ export default function SelectField({
                             {label && (
                                 <View className='px-5 py-1'>
                                     <Text
-                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        style={satoshiFont.satoshiBold}
                                         className='text-base text-gray-900'
                                     >
                                         {label}
@@ -110,7 +118,7 @@ export default function SelectField({
 
             <View className='flex flex-col space-y-1'>
                 {label && (
-                    <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-xs text-gray-600'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                         {label}
                     </Text>
                 )}
@@ -123,7 +131,7 @@ export default function SelectField({
                         <ChevronDownIcon stroke={'#8B5CF6'} />
                     </View>
 
-                    <Text style={GLOBAL_STYLESHEET.satoshiMedium} className='text-xs text-gray-900'>
+                    <Text style={satoshiFont.satoshiMedium} className='text-xs text-gray-900'>
                         {truncateStringIfLongerThan(
                             options[val ?? '']?.label ?? `Select an option...`,
                             45,

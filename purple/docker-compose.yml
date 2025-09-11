@@ -26,3 +26,5 @@ services:
 volumes:
     node-modules:
     eas-build-cache:
+
+eas build --non-interactive -p android --profile rc --local --output purple-rc.apk

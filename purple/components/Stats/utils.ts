@@ -1,4 +1,13 @@
-import { addDays, differenceInDays, endOfMonth, format, startOfMonth } from 'date-fns';
+import {
+    addDays,
+    differenceInDays,
+    eachDayOfInterval,
+    endOfMonth,
+    format,
+    isSameMonth,
+    min,
+    startOfMonth,
+} from 'date-fns';
 import { Transaction } from '../Transactions/schema';
 import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
 
@@ -88,6 +97,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
 export const generateMockTransactionsForMonth = (
     monthDate: Date,
     trend: boolean = false,
+    cumulative: boolean = false,
 ): Transaction[] => {
     const start = startOfMonth(monthDate);
     const end = endOfMonth(monthDate);
@@ -100,9 +110,10 @@ export const generateMockTransactionsForMonth = (
     const endAmount = 10000;
 
     let previousAmount = startAmount;
+    let cumulativeBalance = cumulative ? 1000 : 0; // Starting balance for cumulative mode
 
     while (current <= end) {
-        const numTransactionsToday = Math.floor(Math.random() * 6);
+        const numTransactionsToday = Math.floor(Math.random() * 2);
 
         for (let i = 0; i < numTransactionsToday; i++) {
             let amount: number;
@@ -119,6 +130,39 @@ export const generateMockTransactionsForMonth = (
 
             amount = Math.max(amount, previousAmount + 1);
 
+            // Determine transaction type
+            let transactionType: 'credit' | 'debit';
+
+            if (cumulative) {
+                // In cumulative mode, bias towards credits to maintain growth
+                // but allow some debits for realism
+                transactionType = Math.random() > 0.25 ? 'credit' : 'debit';
+
+                // Prevent balance from going too negative
+                if (cumulativeBalance < 100 && Math.random() > 0.1) {
+                    transactionType = 'credit';
+                }
+            } else {
+                transactionType = trend
+                    ? Math.random() > 0.3
+                        ? 'credit'
+                        : 'debit'
+                    : Math.random() > 0.5
+                    ? 'debit'
+                    : 'credit';
+            }
+
+            // For cumulative mode, adjust amount based on current balance
+            if (cumulative) {
+                if (transactionType === 'debit') {
+                    // Limit debits to not exceed current balance (with some buffer)
+                    amount = Math.min(amount, Math.max(cumulativeBalance * 0.8, 50));
+                }
+
+                // Update cumulative balance
+                cumulativeBalance += transactionType === 'credit' ? amount : -amount;
+            }
+
             transactions.push({
                 id: id.toString(),
                 created_at: current.toISOString(),
@@ -126,13 +170,58 @@ export const generateMockTransactionsForMonth = (
                 deleted_at: null,
                 account_id: 'acc1',
                 user_id: 'user1',
-                type: trend
-                    ? Math.random() > 0.3
-                        ? 'credit'
-                        : 'debit'
-                    : Math.random() > 0.5
-                      ? 'debit'
-                      : 'credit',
+                type: transactionType,
+                amount: parseFloat(amount.toFixed(2)),
+                account: {} as any,
+                note: `Mock transaction ${id}${
+                    cumulative ? ` (Balance: ${cumulativeBalance.toFixed(2)})` : ''
+                }`,
+                category: 'Test',
+                from_account: '',
+                to_account: '',
+                currency: 'GHS',
+                plan_id: '',
+            } as Transaction);
+
+            previousAmount = amount;
+            id++;
+        }
+
+        current = addDays(current, 1);
+    }
+
+    return transactions;
+};
+
+export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transaction[] => {
+    const start = startOfMonth(monthDate);
+    const end = endOfMonth(monthDate);
+    const transactions: Transaction[] = [];
+    let id = 1;
+    let current = start;
+
+    const totalDays = differenceInDays(end, start) + 1;
+    const startAmount = 10;
+    const endAmount = 10000;
+
+    let previousAmount = startAmount;
+
+    while (current <= end) {
+        const numTransactionsToday = Math.floor(Math.random() * 2);
+
+        for (let i = 0; i < numTransactionsToday; i++) {
+            let amount: number;
+
+            amount = Math.random() * 5000;
+
+            transactions.push({
+                id: id.toString(),
+                created_at: current.toISOString(),
+                updated_at: current.toISOString(),
+                deleted_at: null,
+                account_id: 'acc1',
+                user_id: 'user1',
+                type: 'debit',
                 amount: parseFloat(amount.toFixed(2)),
                 account: {} as any,
                 note: `Mock transaction ${id}`,
@@ -191,4 +280,40 @@ export function getWeekRangesForMonth(date: Date): string[] {
     }
 
     return weeks;
+}
+
+type ChartPoint = {
+    value: number;
+    date: string;
+};
+export function generateNormalizedSpendChartData(
+    transactions: Array<Transaction & { account_category?: string }>,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const today = new Date();
+    const monthEnd = endOfMonth(monthStart);
+    const intervalEnd = isSameMonth(monthStart, today) ? min([today, monthEnd]) : monthEnd;
+    const allDays = eachDayOfInterval({ start: monthStart, end: intervalEnd });
+    const dailySpends: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+        if (!dailySpends[isoDate]) {
+            dailySpends[isoDate] = 0;
+        }
+        dailySpends[isoDate] += tx.amount;
+    }
+
+    let runningSpend = 0;
+    const chartData = allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        runningSpend += dailySpends[isoDate] || 0;
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: runningSpend,
+        };
+    });
+
+    return chartData;
 }

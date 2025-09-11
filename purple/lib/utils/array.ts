@@ -21,6 +21,15 @@ export function splitArrayIntoSubarrays<T>(arr: T[], subarrays: number): T[][] {
     );
 }
 
+export function splitArrayIntoChunks<T>(arr: T[], chunkSize: number): T[][] {
+    if (chunkSize <= 0) throw new Error('Chunk size must be greater than 0');
+    const chunks: T[][] = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        chunks.push(arr.slice(i, i + chunkSize));
+    }
+    return chunks;
+}
+
 /**
  * Removes duplicate objects from an array with O(n) time complexity
  * Works with both primitive values and complex objects

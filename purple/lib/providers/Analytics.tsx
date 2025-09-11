@@ -27,6 +27,7 @@ type AnalyticsProviderProps = {
     onInitialized?: (analytics: AnalyticsTracker) => void;
     onError?: (error: Error) => void;
     autoFlushOnBackground?: boolean;
+    disabled?: boolean;
 };
 
 export function AnalyticsProvider({
@@ -35,6 +36,7 @@ export function AnalyticsProvider({
     onInitialized,
     onError,
     autoFlushOnBackground = true,
+    disabled = false,
 }: AnalyticsProviderProps) {
     const analyticsRef = useRef<AnalyticsTracker | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
@@ -45,9 +47,11 @@ export function AnalyticsProvider({
     const { preferences } = usePreferences();
     const shouldTrackEvents = preferences?.trackUsageStatistics ?? true;
     const shouldSendDiagnostics = preferences?.sendDiagnosticData ?? true;
+    const trackingEnabled = !disabled && (shouldTrackEvents || shouldSendDiagnostics);
+    const diagnosticsEnabled = !disabled && shouldSendDiagnostics;
 
     useEffect(() => {
-        if (!shouldTrackEvents && !shouldSendDiagnostics) {
+        if (!trackingEnabled && !diagnosticsEnabled) {
             // clean up if tracking is disabled
             if (analyticsRef.current) {
                 analyticsRef.current.destroy();
@@ -98,7 +102,15 @@ export function AnalyticsProvider({
                 setIsInitialized(false);
             }
         };
-    }, [shouldTrackEvents, shouldSendDiagnostics, config, onInitialized, onError]);
+    }, [
+        shouldTrackEvents,
+        shouldSendDiagnostics,
+        config,
+        onInitialized,
+        onError,
+        trackingEnabled,
+        diagnosticsEnabled,
+    ]);
 
     useEffect(() => {
         if (!isInitialized || !analyticsRef.current) return;
@@ -117,7 +129,7 @@ export function AnalyticsProvider({
     }, [isInitialized]);
 
     useEffect(() => {
-        if (!autoFlushOnBackground || !isInitialized || !analyticsRef.current) return;
+        if (disabled || !autoFlushOnBackground || !isInitialized || !analyticsRef.current) return;
 
         const handleAppStateChange = (nextAppState: AppStateStatus) => {
             if (nextAppState === 'background' && analyticsRef.current) {
@@ -136,7 +148,11 @@ export function AnalyticsProvider({
             name: T | string,
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
-            if (!shouldTrackEvents || !analyticsRef.current) {
+            if (
+                !shouldTrackEvents ||
+                !analyticsRef.current ||
+                process.env.NODE_ENV !== 'development'
+            ) {
                 return;
             }
 
@@ -153,9 +169,7 @@ export function AnalyticsProvider({
     );
 
     const flush = useCallback(async (): Promise<void> => {
-        if (!analyticsRef.current) {
-            return;
-        }
+        if (disabled || !analyticsRef.current) return;
 
         try {
             await analyticsRef.current.flush();
@@ -167,9 +181,7 @@ export function AnalyticsProvider({
     }, [onError]);
 
     const clearQueue = useCallback(async (): Promise<void> => {
-        if (!analyticsRef.current) {
-            return;
-        }
+        if (disabled || !analyticsRef.current) return;
 
         try {
             await analyticsRef.current.clearQueue();
@@ -182,9 +194,7 @@ export function AnalyticsProvider({
     }, [onError]);
 
     const flushQueue = useCallback(async (): Promise<void> => {
-        if (!analyticsRef.current) {
-            return;
-        }
+        if (disabled || !analyticsRef.current) return;
 
         try {
             await analyticsRef.current.flushQueue();

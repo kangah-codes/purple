@@ -1,5 +1,6 @@
 export const colors = [
-    ['#faf5ff', '#f3e8ff'],
+    // ['#faf5ff', '#f3e8ff'],
+    ['#f3e8ff', '#f3e8ff'],
     ['#f3e8ff', '#e9d4ff'],
     ['#e9d4ff', '#dab2ff'],
     ['#dab2ff', '#c27aff'],

@@ -48,11 +48,10 @@ export default function HoldButton({
     }, []);
 
     const startProgress = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid); // give some haptic feedback
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
         setPressing(true);
         progressAnim.setValue(0);
 
-        // Store animation reference
         animationRef.current = Animated.timing(progressAnim, {
             toValue: buttonWidth,
             duration: duration,
@@ -65,11 +64,10 @@ export default function HoldButton({
             }
         });
 
-        // Backup timeout in case animation completion fails
         holdTimeout.current = setTimeout(() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); // some more haptic feedback nobody asked for
             onComplete();
-        }, duration + 100); // Add small buffer
+        }, duration + 100);
     };
 
     const endProgress = () => {

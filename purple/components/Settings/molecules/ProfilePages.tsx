@@ -2,6 +2,8 @@ import {
     AlertHexagonIcon,
     CashIcon,
     ClosedLockIcon,
+    CoinSwapIcon,
+    FlaskIcon,
     PiggyBankIcon,
     SafeIcon,
 } from '@/components/SVG/icons/noscale';
@@ -10,10 +12,10 @@ import { keyExtractor } from '@/lib/utils/number';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback } from 'react';
 import { FlatList, ListRenderItem, StyleSheet } from 'react-native';
-import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { ProfilePageLinkProps } from '../schema';
 import ProfilePageLink from './ProfilePageLink';
 import SettingsFooter from './SettingsFooter';
+import { BellIcon } from '@/components/SVG/icons/24x24';
 
 export default function ProfilePages() {
     const renderItem: ListRenderItem<ProfilePageLinkProps> = useCallback(
@@ -54,16 +56,28 @@ export default function ProfilePages() {
             description: 'Manage plan settings',
         },
         {
-            icon: <SettingsCogIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Categories',
-            link: '/settings/transaction-categories',
-            description: 'Manage transaction categories',
+            icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Transactions',
+            link: '/settings/transactions',
+            description: 'Manage transaction settings',
         },
         {
             icon: <ClosedLockIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Privacy & Security',
             link: '/settings/privacy-settings',
             description: 'Manage privacy & security settings',
+        },
+        {
+            icon: <BellIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Notifications',
+            link: '/settings/notifications',
+            description: 'Manage notification preferences',
+        },
+        {
+            icon: <FlaskIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Experimental',
+            link: '/settings/experimental',
+            description: 'Enable experimental features. Use with caution.',
         },
         {
             icon: <AlertHexagonIcon width={20} height={20} stroke={'#9333ea'} />,

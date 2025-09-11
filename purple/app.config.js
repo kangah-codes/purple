@@ -32,6 +32,14 @@ export default ({ config }) => {
         plugins: [
             'expo-router',
             [
+                'expo-notifications',
+                {
+                    icon: './assets/images/icon.png',
+                    color: '#ffffff',
+                    defaultChannel: 'default',
+                },
+            ],
+            [
                 'expo-font',
                 {
                     fonts: [
@@ -106,5 +114,11 @@ export default ({ config }) => {
             },
         },
         owner: 'akangah89',
+        updates: {
+            url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
+        },
+        runtimeVersion: {
+            policy: 'appVersion',
+        },
     };
 };
