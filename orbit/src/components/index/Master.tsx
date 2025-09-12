@@ -104,7 +104,8 @@ export default function Master() {
                             data-nimg={1}
                             className='rounded-md z-[2]'
                             style={{ color: 'transparent' }}
-                            src='/graphics/account_screen.png'
+                            src='/graphics/screenshots/accounts_screen.png'
+                            quality={100}
                         />
                     </div>
                 </div>
