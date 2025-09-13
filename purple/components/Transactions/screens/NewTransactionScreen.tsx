@@ -255,7 +255,14 @@ export default function NewTransactionScreen() {
             }
 
             createTransaction(transformedData, {
-                onError: () => {
+                onError: (err) => {
+                    if (err instanceof HTTPError) {
+                        Toast.show({
+                            type: 'error',
+                            props: { text1: 'Error!', text2: err.message },
+                        });
+                        return;
+                    }
                     Toast.show({
                         type: 'error',
                         props: { text1: 'Error!', text2: "Couldn't create transaction" },
