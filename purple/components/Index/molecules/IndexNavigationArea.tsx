@@ -17,7 +17,7 @@ export default function IndexNavigationArea() {
                 </Text>
             </View>
 
-            <View className='flex flex-row space-x-2.5'>
+            <View className='flex flex-row space-x-2.5 items-center'>
                 <TouchableOpacity
                     onPress={() => router.push('/settings')}
                     className='bg-purple-50 p-2 flex items-center justify-center rounded-full'
@@ -26,7 +26,7 @@ export default function IndexNavigationArea() {
                 </TouchableOpacity>
                 <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
                     <TouchableOpacity
-                        className='flex items-center justify-center rounded-full w-10 h-10'
+                        className='flex items-center justify-center rounded-full w-9 h-9'
                         onPress={() => router.push('/notifications')}
                     >
                         <BellIcon stroke={'#fff'} width={20} height={20} strokeWidth={2} />
