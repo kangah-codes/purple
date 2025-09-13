@@ -29,6 +29,19 @@ export type Account = {
     deleted_at_unix: string | null;
 };
 
+export type EditAccount = Partial<
+    Omit<
+        Account,
+        | 'id'
+        | 'created_at'
+        | 'created_at_unix'
+        | 'deleted_at'
+        | 'deleted_at_unix'
+        | 'user_id'
+        | 'balance'
+    >
+>;
+
 export type CurrentAccountRequestParams = {
     accountID?: string;
     page_size?: number;
@@ -62,3 +75,15 @@ export type AccountsReportStore = {
     showChart: boolean;
     setShowChart: (show: boolean) => void;
 };
+
+export interface AccountDataCalculation {
+    currentBalance: number;
+    previousBalance: number;
+    absoluteChange: number;
+    percentageChange: number;
+    trend: 'increase' | 'decrease' | 'neutral';
+    currency: CurrencyCode;
+    isLoading: boolean;
+    error?: string;
+    transactions: Transaction[];
+}

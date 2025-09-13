@@ -28,3 +28,4 @@ volumes:
     eas-build-cache:
 
 eas build --non-interactive -p android --profile rc --local --output purple-rc.apk
+eas build --non-interactive -p android --profile development --local --output purple-dev.apk

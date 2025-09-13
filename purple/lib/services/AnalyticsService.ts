@@ -9,6 +9,7 @@ type EventName =
     | 'button_tap'
     | 'error_occurred'
     | 'object_created'
+    | 'object_updated'
     | 'app_open'
     | 'app_exit'
     | 'settings_set'
@@ -30,6 +31,10 @@ type EventProperties = {
         severity: 'low' | 'medium' | 'high';
     };
     object_created: {
+        object_type: string;
+        payload: Record<string, unknown>;
+    };
+    object_updated: {
         object_type: string;
         payload: Record<string, unknown>;
     };

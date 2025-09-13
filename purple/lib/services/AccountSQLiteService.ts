@@ -94,6 +94,68 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         });
     }
 
+    async update(
+        id: string,
+        data: Partial<
+            Omit<
+                Account,
+                | 'id'
+                | 'created_at'
+                | 'created_at_unix'
+                | 'deleted_at'
+                | 'deleted_at_unix'
+                | 'user_id'
+                | 'balance'
+                | 'is_default_account'
+            >
+        >,
+    ): Promise<GenericAPIResponse<Account>> {
+        const account = await this.db.getFirstAsync<Account>(
+            `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
+            [id],
+        );
+        if (!account) throw new HTTPError('Account not found', 404);
+
+        const fields = Object.keys(data);
+        if (fields.length === 0) {
+            return this.formatResponse({
+                data: account,
+                status: 200,
+                page: 1,
+                page_size: 1,
+                total: 1,
+                total_items: 1,
+                message: 'No changes made',
+            });
+        }
+
+        const setString = fields.map((field) => `${field} = ?`).join(', ');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const values = fields.map((field) => (data as any)[field]);
+        values.push(new Date().toISOString()); // updated_at
+        values.push(Math.floor(Date.now() / 1000).toString()); // updated_at_unix
+        values.push(id); // where id = ?
+
+        const updateQuery = `UPDATE accounts SET ${setString}, updated_at = ?, updated_at_unix = ? WHERE id = ?`;
+        await this.db.runAsync(updateQuery, values);
+
+        const updatedAccount = await this.db.getFirstAsync<Account>(
+            `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
+            [id],
+        );
+        if (!updatedAccount) throw new HTTPError('Error fetching updated account', 500);
+
+        return this.formatResponse({
+            data: updatedAccount,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Updated account',
+        });
+    }
+
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Account[]>> {
         const { page = 1, page_size = 10 } = query;
         const offset = (page - 1) * page_size;

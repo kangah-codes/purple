@@ -22,19 +22,20 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useAccountStore, useCreateAccount } from '../hooks';
+import { useAccountStore, useEditAccount } from '../hooks';
+import { EditAccount } from '../schema';
 
-export default function NewAccountScreen() {
+export default function EditAccountScreen() {
     const {
         preferences: { currency },
     } = usePreferences();
+    const { currentAccount } = useAccountStore();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const { updateAccounts } = useAccountStore();
-    const { mutate, isLoading } = useCreateAccount();
+    const { mutate, isLoading } = useEditAccount();
     const { logEvent } = useAnalytics();
     const {
         control,
@@ -44,59 +45,45 @@ export default function NewAccountScreen() {
         setValue,
     } = useForm({
         defaultValues: {
-            category: '',
-            subcategory: '',
-            name: '',
-            balance: '0',
-            currency,
+            category: currentAccount?.category || '',
+            subcategory: currentAccount?.subcategory || '',
+            name: currentAccount?.name || '',
+            currency: currentAccount?.currency || currency,
         },
     });
 
-    const onSubmit = async (data: { category: string; name: string; balance: string }) => {
+    const onSubmit = async (data: EditAccount) => {
         await logEvent('button_tap', {
             button: 'submit',
-            screen: 'new_account_screen',
-            log: 'attempting to create account',
+            screen: 'edit_account_screen',
+            log: 'attempting to edit account',
             data,
         });
         Keyboard.dismiss();
         mutate(
-            {
-                ...data,
-                balance: Number(data.balance),
-            },
+            { id: currentAccount?.id ?? '', data },
             {
                 onError: () => {
                     Toast.show({
                         type: 'error',
                         props: {
                             text1: 'Error!',
-                            text2: 'There was an issue creating account',
+                            text2: 'There was an issue updating account',
                         },
                     });
                 },
                 onSuccess: async (res) => {
                     const { data } = res;
 
-                    updateAccounts(data);
-                    Toast.show({
-                        type: 'success',
-                        props: {
-                            text1: 'Success!',
-                            text2: 'Account created successfully',
-                        },
-                    });
-
-                    await logEvent('object_created', {
+                    await logEvent('object_updated', {
                         object_type: 'account',
                         payload: data,
                     });
-                    router.replace('/(tabs)/accounts');
+                    router.back();
                 },
             },
         );
     };
-
     const renderSelectedCurrency = () => {
         const selectedCode = getValues('currency');
         const currency = currencies.find((c) => c.code === selectedCode);
@@ -127,6 +114,12 @@ export default function NewAccountScreen() {
         );
     }, []);
 
+    useEffect(() => {
+        if (!currentAccount) {
+            router.back();
+        }
+    }, [currentAccount]);
+
     return (
         <>
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -141,7 +134,7 @@ export default function NewAccountScreen() {
 
                     <View className='absolute left-0 right-0 items-center'>
                         <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                            New Account
+                            Edit Account
                         </Text>
                     </View>
                 </View>
@@ -268,42 +261,6 @@ export default function NewAccountScreen() {
                             )}
                         </View>
                     </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Balance
-                        </Text>
-
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Balance can't be empty",
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                                        style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='0.00'
-                                        keyboardType='numeric'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                    />
-                                )}
-                                name='balance'
-                            />
-                            {errors.balance && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.balance.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
                     <View className='flex flex-col space-y-1'>
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Currency
@@ -378,6 +335,7 @@ export default function NewAccountScreen() {
                         <View className='flex-1'>
                             <TouchableOpacity
                                 style={{ width: '100%' }}
+                                // @ts-expect-error TODO: fix later
                                 onPress={handleSubmit(onSubmit)}
                                 disabled={isLoading}
                             >

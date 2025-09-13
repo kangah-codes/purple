@@ -1,5 +1,4 @@
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import React, { useEffect } from 'react';
 import CustomBottomSheetModal from '../GlobalBottomSheetModal';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -53,14 +52,14 @@ export default function ConfirmationModal() {
             <View className='flex flex-col p-5 space-y-7 relative h-full'>
                 <View className='flex flex-col space-y-2.5'>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiBlack}
+                        style={satoshiFont.satoshiBlack}
                         className='text-2xl text-black text-center'
                     >
                         {title}
                     </Text>
                     <Text
-                        style={GLOBAL_STYLESHEET.satoshiBold}
-                        className='text-sm textblack text-center'
+                        style={satoshiFont.satoshiBold}
+                        className='text-sm text-purple-500 text-center'
                     >
                         {message}
                     </Text>

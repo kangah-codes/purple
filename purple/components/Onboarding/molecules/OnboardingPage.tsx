@@ -1,6 +1,6 @@
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { ArrowLeftIcon, ArrowRightIcon } from '@/components/SVG/icons/24x24';
+import { ArrowRightIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 import React from 'react';
 
@@ -43,7 +43,7 @@ export default function OnboardingPage({
                 </Text>
             </View>
 
-            <View className='absolute bottom-5 left-5 right-5 flex-row justify-between items-center'>
+            <View className='absolute bottom-8 left-5 right-5 flex-row justify-between items-center'>
                 <TouchableOpacity
                     onPress={() =>
                         storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1)

@@ -17,7 +17,6 @@ interface DropdownMenuProps {
     children: React.ReactNode;
     dropdownWidth?: number;
     padX?: number;
-    padY?: number;
     offsetY?: number;
     animationDuration?: number;
     style?: StyleProp<ViewStyle>;
@@ -37,7 +36,6 @@ export default function DropdownMenu({
     children,
     dropdownWidth = 150,
     padX = 5,
-    padY = 5,
     offsetY = 0,
     animationDuration = 200,
     style,
@@ -55,7 +53,7 @@ export default function DropdownMenu({
         if (triggerRef.current) {
             const screenWidth = Dimensions.get('window').width;
 
-            triggerRef.current.measure((fx, fy, width, height, px, py) => {
+            triggerRef.current.measure((fx, fy, width, height, px) => {
                 // Calculate initial position (centered under trigger)
                 let xPosition = px + width / 2 - dropdownWidth / 2;
 

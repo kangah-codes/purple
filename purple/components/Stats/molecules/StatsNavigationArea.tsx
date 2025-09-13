@@ -29,7 +29,7 @@ export default function StatsNavigationArea({
 }: StatsNavigationAreaProps) {
     const textOpacity = useSharedValue(1);
     const textTranslateY = useSharedValue(0);
-    const [displayedText, setDisplayedText] = useState(`${format(currentDate, 'MMM yyyy')} Report`);
+    const [displayedText, setDisplayedText] = useState(`${format(currentDate, 'MMM yyyy')}`);
     const leftButtonEnabled = useSharedValue(currentMonthIndex > 0 ? 1 : 0);
     const rightButtonEnabled = useSharedValue(
         currentMonthIndex < availableMonths.length - 1 ? 1 : 0,
@@ -62,7 +62,7 @@ export default function StatsNavigationArea({
     }, [currentMonthIndex, availableMonths.length]);
 
     useEffect(() => {
-        const newText = `${format(currentDate, 'MMM yyyy')} Report`;
+        const newText = `${format(currentDate, 'MMM yyyy')}`;
         if (displayedText !== newText) {
             textOpacity.value = withSpring(0, { damping: 15, stiffness: 150 });
             textTranslateY.value = withSpring(-10, { damping: 15, stiffness: 150 });

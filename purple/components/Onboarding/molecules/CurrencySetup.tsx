@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { useCreateAccount } from '@/components/Accounts/hooks';
 import { useAuth } from '@/components/Auth/hooks';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -117,7 +118,7 @@ export default function CurrencySetup() {
                                 </Text>
                                 <Text
                                     style={satoshiFont.satoshiMedium}
-                                    className='text-sm text-black'
+                                    className='text-xs text-black'
                                 >
                                     {defaultCurrency.country}
                                 </Text>
@@ -127,10 +128,10 @@ export default function CurrencySetup() {
                     </View>
                 </TouchableOpacity>
 
-                <View className='flex flex-row items-center justify-center space-x-5 absolute bottom-5 w-screen'>
-                    <TouchableOpacity onPress={handleOnboarding}>
+                <View className='flex flex-row items-center justify-center space-x-5 absolute bottom-7 w-screen px-5'>
+                    <TouchableOpacity onPress={handleOnboarding} className='w-full'>
                         <LinearGradient
-                            className='flex items-center justify-center rounded-full px-4 py-2 w-[200] h-[50]'
+                            className='flex items-center justify-center rounded-full px-4 py-2 w-full h-[50]'
                             colors={['#c084fc', '#9333ea']}
                         >
                             <Text style={satoshiFont.satoshiBold} className='text-base text-white'>

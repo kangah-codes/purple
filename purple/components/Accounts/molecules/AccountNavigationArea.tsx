@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { ArrowLeftIcon, EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
@@ -25,7 +25,8 @@ export default function AccountNavigationArea() {
         setVisible(false);
         showConfirmationModal({
             title: 'Delete Account?',
-            message: 'This action cannot be undone.',
+            message:
+                'All transactions linked to this account will also be deleted. This action cannot be undone.',
             confirmText: 'Delete',
             onConfirm: () => {
                 mutate(undefined, {
@@ -104,15 +105,25 @@ export default function AccountNavigationArea() {
                     }
                     dropdownWidth={150}
                     offsetY={10}
-                    style={[tw`rounded-full bg-white p-2 px-4`, styles.shadow]}
+                    style={[tw`rounded-3xl bg-white p-2 px-4`, styles.shadow]}
                 >
-                    {/* <View className='h-[1px] border-b border-purple-200 my-0.5' /> */}
                     <TouchableOpacity
                         delayLongPress={500}
-                        // onLongPress={handleDeleteAccount}
-                        onPress={handleDeleteAccount}
+                        onPress={() => {
+                            setVisible(false);
+                            router.push('/accounts/edit-account');
+                        }}
                     >
-                        <View className='flex flex-row items-center space-x-1 py-1.5'>
+                        <View className='flex flex-row items-center space-x-2 py-1.5'>
+                            <EditSquareIcon stroke='#ad46ff' width={18} />
+                            <Text style={satoshiFont.satoshiMedium} className='text-sm'>
+                                Edit
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <View className='h-[1px] border-b border-purple-200 my-0.5' />
+                    <TouchableOpacity delayLongPress={500} onPress={handleDeleteAccount}>
+                        <View className='flex flex-row items-center space-x-2 py-1.5'>
                             <TrashIcon stroke='#EF4444' width={18} />
                             <Text style={satoshiFont.satoshiMedium} className='text-sm'>
                                 Delete

@@ -90,7 +90,7 @@ export const getStackedChartData = (transactions: Transaction[], date: Date) => 
             label,
             stacks: [
                 ...stacks,
-                ...(padding > 0 ? [{ value: padding, color: '#e4e4e7', marginBottom: 2 }] : []),
+                ...(padding > 0 ? [{ value: padding, color: '#f3e8ff', marginBottom: 2 }] : []),
             ],
         };
     });

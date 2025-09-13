@@ -16,10 +16,9 @@ import {
 import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
 import { usePreferences } from '../Settings/hooks';
-import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { useTransactions } from '../Transactions/hooks';
 import { Transaction } from '../Transactions/schema';
-import { Account, TimePeriod } from './schema';
+import { Account, AccountDataCalculation, EditAccount, TimePeriod } from './schema';
 import { createAccountsReportStore, createAccountStore } from './state';
 import { getEffectiveBalance, groupAccountsByCategory } from './utils';
 
@@ -155,6 +154,23 @@ export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account
     });
 }
 
+export function useEditAccount(): UseMutationResult<
+    GenericAPIResponse<Account>,
+    Error,
+    {
+        id: string;
+        data: EditAccount;
+    }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-account'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Account>('accounts', db, sessionData);
+        return service.update(id, data);
+    });
+}
+
 export function useDeleteAccount({
     id,
 }: {
@@ -167,18 +183,6 @@ export function useDeleteAccount({
         const service = ServiceFactory.create<Transaction>('accounts', db, sessionData);
         return service.delete(id);
     });
-}
-
-export interface AccountDataCalculation {
-    currentBalance: number;
-    previousBalance: number;
-    absoluteChange: number;
-    percentageChange: number;
-    trend: 'increase' | 'decrease' | 'neutral';
-    currency: CurrencyCode;
-    isLoading: boolean;
-    error?: string;
-    transactions: Transaction[];
 }
 
 export function useCalculateAccountData({

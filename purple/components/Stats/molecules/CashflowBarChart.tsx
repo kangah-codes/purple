@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { Transaction } from '@/components/Transactions/schema';
@@ -128,25 +129,25 @@ export default memo(function CashflowBarChart({
         return Math.max(120, Math.min(300, calculatedHeight));
     }, [chartW, stackData.length, maxValue, minValue]);
 
-    // const stepValue = useMemo(() => {
-    //     const range = maxValue - minValue;
-    //     const sections = 5;
+    const stepValue = useMemo(() => {
+        const range = maxValue - minValue;
+        const sections = 3;
 
-    //     if (range === 0) return 1;
+        if (range === 0) return 1;
 
-    //     const rawStep = range / sections;
-    //     // find order of magnitude
-    //     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-    //     const normalized = rawStep / magnitude;
+        const rawStep = range / sections;
+        // find order of magnitude
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+        const normalized = rawStep / magnitude;
 
-    //     let niceNormalized;
-    //     if (normalized <= 1) niceNormalized = 1;
-    //     else if (normalized <= 2) niceNormalized = 2;
-    //     else if (normalized <= 5) niceNormalized = 5;
-    //     else niceNormalized = 10;
+        let niceNormalized;
+        if (normalized <= 1) niceNormalized = 1;
+        else if (normalized <= 2) niceNormalized = 2;
+        else if (normalized <= 5) niceNormalized = 5;
+        else niceNormalized = 10;
 
-    //     return niceNormalized * magnitude;
-    // }, [maxValue, minValue]);
+        return niceNormalized * magnitude;
+    }, [maxValue, minValue]);
 
     return (
         <View className='p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
@@ -193,7 +194,10 @@ export default memo(function CashflowBarChart({
                             }}
                             width={chartW}
                             height={chartHeight}
-                            // stepValue={stepValue}
+                            // yAxisExtraHeight={}
+                            // stepValue={stepValue / 2}
+                            // stepHeight={10 * Math.log10(stepValue)}
+                            // noOfSectionsBelowXAxis={5}
                             stackData={stackData}
                             disableScroll
                             initialSpacing={0}

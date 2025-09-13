@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import Stories, { StoriesRef } from '@/components/Shared/molecules/Stories';
 import { View } from '@/components/Shared/styled';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
