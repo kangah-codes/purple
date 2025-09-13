@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Text, View } from '@/components/Shared/styled';
-import { satoshiFont } from '@/lib/constants/fonts';
 import { Transaction } from '@/components/Transactions/schema';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { eachMonthOfInterval, format, isSameMonth, startOfMonth, subMonths } from 'date-fns';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { BarChart } from 'react-native-gifted-charts';
-import { format, startOfMonth, eachMonthOfInterval, isSameMonth, subMonths } from 'date-fns';
+import CustomBarChart from '../../Shared/molecules/StackedBarChart';
 
 interface CashflowBarChartProps {
     currentDate: Date;
@@ -109,46 +108,6 @@ export default memo(function CashflowBarChart({
         return { maxValue: maxInflow, minValue: maxOutflow };
     }, [rawData]);
 
-    const chartHeight = useMemo(() => {
-        const numberOfBars = stackData.length;
-        const valueRange = maxValue - minValue;
-        const baseHeight = chartW / 2;
-        // scale based on number of bars fewer bars = shorter chart
-        const barCountMultiplier =
-            numberOfBars === 1 ? 0.5 : Math.max(0.6, Math.min(1.2, numberOfBars / 6));
-        // scale based on value range larger needs more height
-        let valueRangeMultiplier = 1;
-        if (valueRange > 100000) {
-            valueRangeMultiplier = 0.8;
-        } else if (valueRange > 10000) {
-            valueRangeMultiplier = 0.9;
-        }
-
-        const calculatedHeight = baseHeight * barCountMultiplier * valueRangeMultiplier;
-
-        return Math.max(120, Math.min(300, calculatedHeight));
-    }, [chartW, stackData.length, maxValue, minValue]);
-
-    const stepValue = useMemo(() => {
-        const range = maxValue - minValue;
-        const sections = 3;
-
-        if (range === 0) return 1;
-
-        const rawStep = range / sections;
-        // find order of magnitude
-        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-        const normalized = rawStep / magnitude;
-
-        let niceNormalized;
-        if (normalized <= 1) niceNormalized = 1;
-        else if (normalized <= 2) niceNormalized = 2;
-        else if (normalized <= 5) niceNormalized = 5;
-        else niceNormalized = 10;
-
-        return niceNormalized * magnitude;
-    }, [maxValue, minValue]);
-
     return (
         <View className='p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
             <View className='mb-2.5'>
@@ -174,62 +133,28 @@ export default memo(function CashflowBarChart({
             <View className='w-full' onLayout={(e) => setChartW(e.nativeEvent.layout.width)}>
                 {chartW > 0 &&
                     rawData.length > 0 &&
-                    stackData.length > 1 &&
+                    // stackData.length > 1 &&
                     isValidChart &&
                     barWidth > 0 &&
                     !isNaN(barWidth) &&
                     !isNaN(spacing) && (
-                        <BarChart
-                            showLine
-                            lineConfig={{
-                                color: '#3f3f46',
-                                thickness: 2,
-                                hideDataPoints: true,
-                                showArrow: true,
-                                arrowConfig: {
-                                    fillColor: '#3f3f46',
-                                    strokeColor: '#3f3f46',
-                                },
-                                strokeDashArray: [5],
-                            }}
+                        <CustomBarChart
                             width={chartW}
-                            height={chartHeight}
-                            // yAxisExtraHeight={}
-                            // stepValue={stepValue / 2}
-                            // stepHeight={10 * Math.log10(stepValue)}
-                            // noOfSectionsBelowXAxis={5}
+                            height={280}
                             stackData={stackData}
-                            disableScroll
-                            initialSpacing={0}
-                            endSpacing={0}
-                            spacing={spacing}
-                            barWidth={barWidth}
-                            yAxisLabelWidth={40}
-                            yAxisColor='white'
-                            xAxisColor='white'
-                            yAxisThickness={0}
-                            xAxisThickness={0}
-                            xAxisLabelsAtBottom
-                            yAxisTextStyle={{ fontSize: 12, fontFamily: 'SatoshiBlack' }}
-                            xAxisLabelTextStyle={{
-                                fontSize: 12,
-                                fontFamily: 'SatoshiBlack',
-                                marginLeft: 'auto',
-                                marginRight: 'auto',
-                            }}
-                            noOfSections={3}
-                            formatYLabel={renderYAxisLabel}
                             maxValue={maxValue}
                             mostNegativeValue={minValue}
-                            rulesType='dotted'
-                            rulesColor='#e9d4ff'
-                            xAxisType='dotted'
-                            dashWidth={4}
-                            dashGap={4}
-                            hideRules
+                            formatYLabel={renderYAxisLabel}
+                            barWidth={barWidth}
+                            spacing={spacing}
+                            noOfSections={4}
+                            stepValue={Math.max(
+                                1000,
+                                Math.ceil((maxValue - minValue) / 4 / 1000) * 1000,
+                            )}
                         />
                     )}
-                {(rawData.length === 0 || stackData.length < 2 || !isValidChart) && (
+                {(rawData.length === 0 || stackData.length < 1 || !isValidChart) && (
                     <View className='items-center justify-center py-8'>
                         <Text
                             className='text-purple-500 text-sm text-center'
