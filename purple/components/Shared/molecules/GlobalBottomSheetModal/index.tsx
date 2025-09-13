@@ -1,21 +1,26 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetModalProps,
     BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import { useBottomSheetModalStore, useKeyboardSnapEffect } from './hooks';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import { SharedValue } from 'react-native-reanimated';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Platform, StyleSheet } from 'react-native';
+import { useBottomSheetModalStore, useKeyboardSnapEffect } from './hooks';
 
 interface CustomBottomSheetModalProps extends BottomSheetModalProps {
     children: React.ReactNode;
     modalKey: string;
+    hideOnBackdropPress?: boolean;
 }
 
-const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomSheetModalProps) => {
+const CustomBottomSheetModal = ({
+    children,
+    modalKey,
+    hideOnBackdropPress = true,
+    ...rest
+}: CustomBottomSheetModalProps) => {
     const bottomSheetRef = useRef<BottomSheetModal>(null);
     // Memoize default snap points
     const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '70%'], [rest.snapPoints]);
@@ -42,8 +47,11 @@ const CustomBottomSheetModal = ({ children, modalKey, ...rest }: CustomBottomShe
     const renderBackdrop = useCallback(
         (props: BottomSheetDefaultBackdropProps) => (
             <BottomSheetBackdrop
-                onPress={() => setShowBottomSheetModal(modalKey, false)}
                 {...props}
+                onPress={() => {
+                    console.log(hideOnBackdropPress);
+                    if (hideOnBackdropPress) setShowBottomSheetModal(modalKey, false);
+                }}
                 appearsOnIndex={0}
                 disappearsOnIndex={-1}
             />

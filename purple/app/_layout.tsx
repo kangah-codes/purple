@@ -1,6 +1,7 @@
 import { AuthProvider } from '@/components/Auth/hooks';
 import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
+import ConfirmationModal from '@/components/Shared/molecules/ConfirmationModal';
 import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientProvider';
 import CurrentRecurringTransactionModal from '@/components/Transactions/molecules/CurrentRecurringTransactionModal';
@@ -40,6 +41,7 @@ function AppWithNotifications() {
                         {/** Portal Rendering  */}
                         <CurrentTransactionModal modalKey='transactionReceipt' />
                         <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
+                        <ConfirmationModal />
                         {/** Main Navigation Stack */}
                         <Stack
                             screenOptions={{

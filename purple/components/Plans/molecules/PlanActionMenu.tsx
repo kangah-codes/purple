@@ -1,4 +1,3 @@
-import { useAuth } from '@/components/Auth/hooks';
 import HoldButton from '@/components/Shared/atoms/HoldButton';
 import { Text, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
@@ -6,9 +5,9 @@ import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import Toast from 'react-native-toast-message';
+import { useQueryClient } from 'react-query';
 import CustomBottomSheetModal from '../../Shared/molecules/GlobalBottomSheetModal';
 import { useDeletePlan, usePlanStore } from '../hooks';
-import { useQueryClient } from 'react-query';
 
 export default function PlanActionMenu() {
     const queryClient = useQueryClient();

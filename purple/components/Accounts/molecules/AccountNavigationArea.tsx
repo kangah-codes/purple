@@ -2,57 +2,70 @@ import { ArrowLeftIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { useAccountStore, useDeleteAccount } from '../hooks';
-import { DotsHorizontalIcon, BarLineChartIcon } from '@/components/SVG/icons/noscale';
+import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { StyleSheet } from 'react-native';
 import tw from 'twrnc';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
-import * as Haptics from 'expo-haptics';
 import HTTPError from '@/lib/utils/error';
+import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
 
 export default function AccountNavigationArea() {
     const { currentAccount } = useAccountStore();
     const [visible, setVisible] = useState(false);
     const queryClient = useQueryClient();
     const { mutate } = useDeleteAccount({ id: currentAccount?.id ?? '' });
+    const { showConfirmationModal } = useConfirmationModalStore();
 
     const handleDeleteAccount = () => {
         setVisible(false);
-        mutate(undefined, {
-            onError: (err) => {
-                if (err instanceof HTTPError) {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: err.message,
-                        },
-                    });
-                    return;
-                }
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: 'There was an issue deleting transaction',
+        showConfirmationModal({
+            title: 'Delete Account?',
+            message: 'This action cannot be undone.',
+            confirmText: 'Delete',
+            onConfirm: () => {
+                mutate(undefined, {
+                    onError: (err) => {
+                        if (err instanceof HTTPError) {
+                            Toast.show({
+                                type: 'error',
+                                props: {
+                                    text1: 'Error!',
+                                    text2: err.message,
+                                },
+                            });
+                            return;
+                        }
+                        Toast.show({
+                            type: 'error',
+                            props: {
+                                text1: 'Error!',
+                                text2: 'There was an issue deleting account',
+                            },
+                        });
+                    },
+                    onSuccess: () => {
+                        queryClient.invalidateQueries({
+                            queryKey: ['transactions', 'accounts'],
+                        });
+                        Toast.show({
+                            type: 'success',
+                            props: {
+                                text1: 'Success!',
+                                text2: 'Account deleted successfully',
+                            },
+                        });
+                        router.back();
                     },
                 });
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
-                Toast.show({
-                    type: 'success',
-                    props: {
-                        text1: 'Success!',
-                        text2: 'Account deleted successfully',
-                    },
-                });
-                router.back();
+            onCancel: () => {
+                // Optional cancel callback
+                console.log('Delete cancelled');
             },
         });
     };
@@ -96,18 +109,8 @@ export default function AccountNavigationArea() {
                     {/* <View className='h-[1px] border-b border-purple-200 my-0.5' /> */}
                     <TouchableOpacity
                         delayLongPress={500}
-                        onLongPress={handleDeleteAccount}
-                        onPress={() => {
-                            setVisible(false);
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
-                            Toast.show({
-                                type: 'info',
-                                props: {
-                                    text1: 'Hold to delete',
-                                    text2: 'Press and hold to delete this account',
-                                },
-                            });
-                        }}
+                        // onLongPress={handleDeleteAccount}
+                        onPress={handleDeleteAccount}
                     >
                         <View className='flex flex-row items-center space-x-1 py-1.5'>
                             <TrashIcon stroke='#EF4444' width={18} />

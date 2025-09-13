@@ -1,4 +1,4 @@
-import { EditSquareIcon, PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { EditSquareIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, View, TouchableOpacity } from '@/components/Shared/styled';
@@ -84,7 +84,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
 
     return (
         <CustomBottomSheetModal
-            modalKey={modalKey}
+            modalKey={'transactionReceipt'}
             snapPoints={snapPoints}
             style={styles.customBottomSheetModal}
             handleIndicatorStyle={styles.handleIndicator}

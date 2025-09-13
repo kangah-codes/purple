@@ -161,7 +161,7 @@ export default function BlockSection() {
                                     width={276}
                                     height={600}
                                     decoding='async'
-                                    src='/graphics/accounts_screen.png'
+                                    src='/graphics/screenshots/accounts_screen.png'
                                     className='shadow-2xl translate-y-[75px]'
                                 />
                             </div>

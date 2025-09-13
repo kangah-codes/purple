@@ -1,7 +1,7 @@
 import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { Button, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
     interpolate,
@@ -16,10 +16,12 @@ import GettingStartedWidget from '../molecules/GettingStartedWidget';
 import IndexNavigationArea from '../molecules/IndexNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
 const now = new Date();
 
 export default function IndexScreen() {
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const [sectionsLoaded, setSectionsLoaded] = useState({
         accounts: false,
         transactions: false,
@@ -86,6 +88,10 @@ export default function IndexScreen() {
                         </View>
                         <TransactionHistoryList
                             onLoaded={() => handleSectionLoaded('transactions')}
+                        />
+                        <Button
+                            onPress={() => setShowBottomSheetModal('globalConfirmationModal', true)}
+                            title='Open Modal'
                         />
                     </Animated.ScrollView>
                 </View>
