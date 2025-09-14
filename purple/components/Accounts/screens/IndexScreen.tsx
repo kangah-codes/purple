@@ -13,8 +13,8 @@ import AccountsNavigationArea from '../molecules/AccountsNavigationArea';
 import { Account } from '../schema';
 
 export default function AccountsScreen() {
-    const { setAccounts, accounts } = useAccountStore();
-    const { refetch, isFetching } = useAccounts({
+    const { setAccounts } = useAccountStore();
+    const { refetch } = useAccounts({
         options: {
             onSuccess: (data) => {
                 const res = data as GenericAPIResponse<Account[]>;

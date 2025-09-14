@@ -4,20 +4,14 @@ import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
-import {
-    eachDayOfInterval,
-    endOfMonth,
-    format,
-    getDay,
-    getDaysInMonth,
-    startOfMonth,
-} from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useRecurringTransactions, useTransactions } from '../hooks';
+import { useRecurringTransactions } from '../hooks';
 import UpcomingTransactionCard from './UpcomingTransactionCard';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { occurrencesBetween } from '@/lib/utils/rrule';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -66,17 +60,6 @@ export default function RecurringTransactionsWidget() {
         };
     }, [data]);
 
-    // Build a set of dates that have at least one transaction actually created
-    const createdDatesSet = useMemo(() => {
-        const txs = transactions.transactions;
-        const set = new Set<string>();
-        txs.forEach((t) => {
-            const d = format(new Date(t.last_created_at), 'yyyy-MM-dd');
-            set.add(d);
-        });
-        return set;
-    }, [transactions]);
-
     const heatmapData = useMemo(() => {
         const groupedTransactions = groupBy(transactions.transactions, 'create_next_at_formatted');
         return monthDays.map((day, index) => {
@@ -89,11 +72,31 @@ export default function RecurringTransactionsWidget() {
         });
     }, [monthDays, transactions]);
 
+    const expectedOccurrences = useMemo(() => {
+        const occurrencesSet = new Set<string>();
+
+        (data?.data ?? []).forEach((recurring) => {
+            const occurrences = occurrencesBetween(
+                recurring.recurrence_rule,
+                new Date(recurring.start_date),
+                start,
+                end,
+            );
+
+            occurrences.forEach((occurrence) => {
+                const key = format(occurrence, 'yyyy-MM-dd');
+                occurrencesSet.add(key);
+            });
+        });
+
+        return occurrencesSet;
+    }, [data]);
+
     const renderCell = useCallback(
         (data: CellData) => {
-            const hasScheduled = data.value > 0;
+            const hasScheduled = expectedOccurrences.has(data.key);
+            const showCheckmark = hasScheduled && new Date(data.key) <= now;
             const cellColors = hasScheduled ? colors[4] : colors[0];
-            const hasCreated = createdDatesSet.has(data.key);
 
             return (
                 <LinearGradient
@@ -101,13 +104,13 @@ export default function RecurringTransactionsWidget() {
                     colors={cellColors}
                     className='flex items-center justify-center'
                 >
-                    {hasScheduled && hasCreated && (
+                    {showCheckmark && (
                         <CheckMarkIcon stroke='#fff' width={16} height={16} strokeWidth={3} />
                     )}
                 </LinearGradient>
             );
         },
-        [heatmapData, createdDatesSet],
+        [expectedOccurrences],
     );
 
     useRefreshOnFocus(refetch);

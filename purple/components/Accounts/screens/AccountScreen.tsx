@@ -158,7 +158,10 @@ function AccountScreen() {
                 <Animated.ScrollView showsVerticalScrollIndicator={false} onScroll={onScroll}>
                     <AccountInformation transactions={transactions?.data ?? []} />
                     <AccountActivityAreaChart transactions={transactions?.data ?? []} />
-                    <AccountTransactions transactions={transactions?.data ?? []} />
+                    <AccountTransactions
+                        transactions={transactions?.data ?? []}
+                        loading={transactionsLoading}
+                    />
                 </Animated.ScrollView>
             </View>
         </SafeAreaView>

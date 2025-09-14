@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -33,6 +34,7 @@ import { useCreateRecurringTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule, getMinimumEndDate } from '../utils';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
+import HTTPError from '@/lib/utils/error';
 
 type FormData = {
     amount: string;
@@ -59,9 +61,6 @@ export default function NewRecurringTransactionScreen() {
     const queryClient = useQueryClient();
     const { accounts, getAccountById } = useAccountStore();
     const { logEvent } = useAnalytics();
-    const {
-        preferences: { allowOverdraw },
-    } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const { mutate, isLoading } = useCreateRecurringTransaction();
 
@@ -202,6 +201,7 @@ export default function NewRecurringTransactionScreen() {
             };
         } else {
             // Remove transfer-specific fields for non-transfer transactions
+            // @ts-expect-error expect
             transformedData = transformObject(transformedData, [
                 ['from_account', 'from_account'],
                 ['to_account', 'to_account'],
@@ -209,7 +209,14 @@ export default function NewRecurringTransactionScreen() {
         }
 
         mutate(transformedData, {
-            onError: (error) => {
+            onError: (err) => {
+                if (err instanceof HTTPError) {
+                    Toast.show({
+                        type: 'error',
+                        props: { text1: 'Error!', text2: err.message },
+                    });
+                    return;
+                }
                 Toast.show({
                     type: 'error',
                     props: { text1: 'Error!', text2: "Couldn't create transaction" },

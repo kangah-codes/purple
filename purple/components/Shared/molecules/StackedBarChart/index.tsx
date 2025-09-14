@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, memo } from 'react';
 import { View, Text } from 'react-native';
+import Svg, { Line } from 'react-native-svg';
 
 interface StackItem {
     value: number;
@@ -192,26 +193,36 @@ export default memo(function CustomBarChart({
     }, [yAxisLabels, scaledMaxValue, totalRange, chartHeight, yAxisLabelWidth, formatYLabel]);
 
     const renderGridLines = useCallback(() => {
-        return yAxisLabels.map((value) => {
-            const normalizedPosition = (scaledMaxValue - value) / totalRange;
-            const y = normalizedPosition * chartHeight;
+        return (
+            <Svg
+                width={chartWidth}
+                height={chartHeight}
+                style={{
+                    position: 'absolute',
+                    left: yAxisLabelWidth,
+                    top: 0,
+                }}
+            >
+                {yAxisLabels.map((value) => {
+                    const normalizedPosition = (scaledMaxValue - value) / totalRange;
+                    const y = normalizedPosition * chartHeight;
 
-            return (
-                <View
-                    key={value}
-                    style={{
-                        position: 'absolute',
-                        left: yAxisLabelWidth,
-                        top: y,
-                        width: chartWidth,
-                        borderStyle: 'dotted',
-                        borderWidth: 0.5,
-                        borderColor: '#e9d4ff',
-                        opacity: 0.5,
-                    }}
-                />
-            );
-        });
+                    return (
+                        <Line
+                            key={value}
+                            x1={0}
+                            y1={y}
+                            x2={chartWidth}
+                            y2={y}
+                            stroke='#e9d4ff'
+                            strokeWidth={1}
+                            strokeDasharray={[4, 4]}
+                            opacity={0.5}
+                        />
+                    );
+                })}
+            </Svg>
+        );
     }, [yAxisLabels, scaledMaxValue, totalRange, chartHeight, yAxisLabelWidth, chartWidth]);
 
     const renderXAxisLabels = useCallback(() => {

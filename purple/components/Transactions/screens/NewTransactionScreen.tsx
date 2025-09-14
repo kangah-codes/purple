@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -60,9 +61,6 @@ export default function NewTransactionScreen() {
     const queryClient = useQueryClient();
     const { accounts, getAccountById } = useAccountStore();
     const { logEvent } = useAnalytics();
-    const {
-        preferences: { allowOverdraw },
-    } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const [isRecurring, setIsRecurring] = useState(false);
     const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
@@ -76,7 +74,6 @@ export default function NewTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
-        watch,
     } = useForm<FormData>({
         defaultValues: {
             amount: '',
@@ -346,7 +343,7 @@ export default function NewTransactionScreen() {
                                                     value: curr.id,
                                                 };
                                                 return acc;
-                                            }, {} as Record<string, string>)}
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
