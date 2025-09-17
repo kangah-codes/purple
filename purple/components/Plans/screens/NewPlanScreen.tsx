@@ -12,8 +12,6 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
-import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { transformObject } from '@/lib/utils/object';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -35,6 +33,7 @@ import { CreatePlan } from '../schema';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import DatePicker from '@/components/Shared/atoms/DatePicker';
 
 const depositFrequency = {
     weekly: {
@@ -87,7 +86,7 @@ export default function NewPlanScreen() {
             data,
         });
         Keyboard.dismiss();
-        let transformedData = transformObject(data, [
+        const transformedData = transformObject(data, [
             ['target', 'target', (value) => Number(value)],
         ]);
 
@@ -187,7 +186,7 @@ export default function NewPlanScreen() {
                                         >
                                             <View className='w-full px-5 py-2.5 flex flex-row justify-between'>
                                                 <View
-                                                    className='flex-1 mr-2.5 flex flex-col space-y-2 bg-purple-100 rounded-2xl'
+                                                    className='flex-1 mr-2.5 flex flex-col space-y-2 bg-purple-50 rounded-3xl border border-purple-100'
                                                     style={{
                                                         borderColor:
                                                             value === 'saving'
@@ -230,7 +229,7 @@ export default function NewPlanScreen() {
                                                     </TouchableOpacity>
                                                 </View>
                                                 <View
-                                                    className='flex-1 ml-2.5 flex flex-col space-y-2 bg-purple-100 rounded-2xl'
+                                                    className='flex-1 mr-2.5 flex flex-col space-y-2 bg-purple-50 rounded-3xl border border-purple-100'
                                                     style={{
                                                         borderColor:
                                                             value === 'expense'
@@ -305,19 +304,13 @@ export default function NewPlanScreen() {
                                             // TODO: optimise this
                                             options={customTransactionTypes
                                                 .map((t) => `${t.emoji} ${t.category}`)
-                                                .reduce(
-                                                    (acc, curr) => {
-                                                        acc[curr] = {
-                                                            label: curr,
-                                                            value: curr,
-                                                        };
-                                                        return acc;
-                                                    },
-                                                    {} as Record<
-                                                        string,
-                                                        { label: string; value: string }
-                                                    >,
-                                                )}
+                                                .reduce((acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
@@ -388,7 +381,7 @@ export default function NewPlanScreen() {
                                 required: "Start date can't be empty",
                             }}
                             render={({ field: { onChange, value } }) => (
-                                <DateAndTimePicker
+                                <DatePicker
                                     label='Start Date'
                                     pickerKey='newPlanStartDate'
                                     onChange={(date) => {

@@ -159,7 +159,15 @@ export default function RecurringTransactionsWidget() {
                     <View className='flex flex-col space-y-2'>
                         {transactions.slicedTransactions.map((transaction, index) => {
                             return (
-                                <UpcomingTransactionCard transaction={transaction} key={index} />
+                                <>
+                                    <UpcomingTransactionCard
+                                        transaction={transaction}
+                                        key={index}
+                                    />
+                                    {index !== transactions.slicedTransactions.length - 1 && (
+                                        <View className='h-1 border-b border-purple-100' />
+                                    )}
+                                </>
                             );
                         })}
                     </View>
