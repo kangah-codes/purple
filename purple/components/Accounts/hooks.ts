@@ -20,7 +20,7 @@ import { useTransactions } from '../Transactions/hooks';
 import { Transaction } from '../Transactions/schema';
 import { Account, AccountDataCalculation, EditAccount, TimePeriod } from './schema';
 import { createAccountsReportStore, createAccountStore } from './state';
-import { getEffectiveBalance, groupAccountsByCategory } from './utils';
+import { getEffectiveBalance, groupAccountsByCategory, isLiabilityAccount } from './utils';
 
 export function useAccountStore() {
     const [
@@ -285,7 +285,19 @@ export function useCalculateAccountData({
 
                 // calc the account balance at the start of the period
                 const transactionSum = accountTransactions.reduce((txSum, tx) => {
-                    return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
+                    const isLiability = isLiabilityAccount(account.category);
+
+                    // For liability accounts, reverse the logic:
+                    // - Credit increases liability (negative impact on net worth)
+                    // - Debit decreases liability (positive impact on net worth)
+                    if (isLiability) {
+                        return txSum + (tx.type === 'credit' ? -tx.amount : tx.amount);
+                    } else {
+                        // For asset accounts, normal logic:
+                        // - Credit increases balance
+                        // - Debit decreases balance
+                        return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
+                    }
                 }, 0);
 
                 const balanceAtStart = getEffectiveBalance(account) - transactionSum;
@@ -314,6 +326,24 @@ export function useCalculateAccountData({
                 trend = 'decrease';
             }
 
+            console.log(accountGroup);
+            const transformedTransactions =
+                accountGroup && !accountGroup.includes('Liability')
+                    ? transactions.map((tx) => {
+                          const account = accounts.find((acc) => acc.id === tx.account_id);
+                          if (account && isLiabilityAccount(account.category)) {
+                              return {
+                                  ...tx,
+                                  type:
+                                      tx.type === 'credit'
+                                          ? ('debit' as const)
+                                          : ('credit' as const),
+                              };
+                          }
+                          return tx;
+                      })
+                    : transactions;
+
             return {
                 currentBalance,
                 previousBalance,
@@ -325,7 +355,7 @@ export function useCalculateAccountData({
                 trend,
                 currency: preferredCurrency,
                 isLoading: false,
-                transactions,
+                transactions: transformedTransactions,
             };
         } catch (error) {
             console.error('Error calculating account data:', error);

@@ -153,7 +153,7 @@ function AccountScreen() {
                     ]}
                     pointerEvents='none'
                 >
-                    <LinearGradient colors={['#faf5ff', 'transparent']} style={{ flex: 1 }} />
+                    <LinearGradient colors={['#dab2ff', 'transparent']} style={{ flex: 1 }} />
                 </Animated.View>
                 <Animated.ScrollView showsVerticalScrollIndicator={false} onScroll={onScroll}>
                     <AccountInformation transactions={transactions?.data ?? []} />

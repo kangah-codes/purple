@@ -11,6 +11,8 @@ import AccountsAccordion from '../molecules/AccountsAccordion';
 import AccountsAreaChart from '../molecules/AccountsAreaChart';
 import AccountsNavigationArea from '../molecules/AccountsNavigationArea';
 import { Account } from '../schema';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AccountsScreen() {
     const { setAccounts } = useAccountStore();
@@ -37,6 +39,19 @@ export default function AccountsScreen() {
     });
     useRefreshOnFocus(refetch);
 
+    const shadowOpacity = useSharedValue(0);
+    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
+        const scrollY = event.nativeEvent.contentOffset.y;
+        const newOpacity = scrollY > 0 ? Math.min(scrollY / 20, 1) : 0;
+        shadowOpacity.value = withSpring(newOpacity, { damping: 15, stiffness: 150 });
+    };
+
+    const shadowStyle = useAnimatedStyle(() => {
+        return {
+            opacity: shadowOpacity.value,
+        };
+    });
+
     useScreenTracking('accounts', {
         source: 'navigation',
     });
@@ -44,9 +59,35 @@ export default function AccountsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
+            <AccountsNavigationArea />
 
-            <ScrollView className='flex flex-col' contentContainerStyle={{ paddingBottom: 100 }}>
-                <AccountsNavigationArea />
+            <Animated.View
+                style={[
+                    {
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: (RNStatusBar.currentHeight ?? 0) + 60,
+                        height: 20,
+                        zIndex: 999,
+                    },
+                    shadowStyle,
+                ]}
+                pointerEvents='none'
+            >
+                <LinearGradient
+                    colors={['rgba(250, 245, 255, 0.95)', 'transparent']}
+                    style={{ flex: 1 }}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                />
+            </Animated.View>
+
+            <ScrollView
+                onScroll={handleScroll}
+                className='flex flex-col'
+                contentContainerStyle={{ paddingBottom: 100 }}
+            >
                 <AccountsAreaChart />
                 <AccountsAccordion />
             </ScrollView>

@@ -57,24 +57,24 @@ export const migrationsV1 = [
         sql: `
           PRAGMA journal_mode = WAL;
           CREATE TABLE IF NOT EXISTS transactions (
-          id TEXT NOT NULL,
-          created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
-          deleted_at TEXT,
-          created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
-          deleted_at_unix INTEGER,
-          account_id TEXT,
-          user_id TEXT,
-          type TEXT NOT NULL,
-          amount NUMERIC NOT NULL,
-          note TEXT,
-          category TEXT,
-          from_account TEXT,
-          to_account TEXT,
-          currency TEXT,
-          plan_id TEXT,
-          PRIMARY KEY (id)
+            id TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            updated_at TEXT DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')),
+            deleted_at TEXT,
+            created_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            updated_at_unix INTEGER DEFAULT (STRFTIME('%s', 'NOW')),
+            deleted_at_unix INTEGER,
+            account_id TEXT,
+            user_id TEXT,
+            type TEXT NOT NULL,
+            amount NUMERIC NOT NULL,
+            note TEXT,
+            category TEXT,
+            from_account TEXT,
+            to_account TEXT,
+            currency TEXT,
+            plan_id TEXT,
+            PRIMARY KEY (id)
           );
           CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);
           CREATE TRIGGER IF NOT EXISTS trg_after_insert_debit
