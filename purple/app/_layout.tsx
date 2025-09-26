@@ -7,8 +7,6 @@ import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientPro
 import CurrentRecurringTransactionModal from '@/components/Transactions/molecules/CurrentRecurringTransactionModal';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
 import { useNotifications } from '@/lib/hooks/useNotifications';
-import { useDatabaseReconnection } from '@/lib/hooks/useDatabaseReconnection';
-import '@/lib/utils/suppressDatabaseErrors'; // Suppress database error spam
 import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -26,7 +24,6 @@ import Toast from 'react-native-toast-message';
 
 function AppWithNotifications() {
     useNotifications();
-    useDatabaseReconnection(); // Add database reconnection handling
     return (
         <AnalyticsProvider
             config={{

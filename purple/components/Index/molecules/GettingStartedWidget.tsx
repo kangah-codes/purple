@@ -2,15 +2,21 @@ import Checkbox from '@/components/Shared/atoms/Checkbox';
 import { ProgressBar } from '@/components/Shared/atoms/ProgressBar';
 import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList } from 'react-native';
 
 const initialSetup = [
-    { emoji: '🏦', text: 'Add an account', isCompleted: true },
-    { emoji: '🗂️', text: 'Customise categories', isCompleted: false },
-    { emoji: '💸', text: 'Create your first transaction', isCompleted: false },
-    { emoji: '🎯', text: 'Create a saving plan', isCompleted: false },
-    { emoji: '📊', text: 'Create a budget', isCompleted: false },
+    { emoji: '🏦', text: 'Add an account', isCompleted: true, cb: () => alert() },
+    {
+        emoji: '🗂️',
+        text: 'Customise categories',
+        isCompleted: false,
+        cb: () => router.push('/settings/new-transaction-category'),
+    },
+    { emoji: '💸', text: 'Create your first transaction', isCompleted: false, cb: () => alert() },
+    { emoji: '🎯', text: 'Create a saving plan', isCompleted: false, cb: () => alert() },
+    { emoji: '📊', text: 'Create a budget', isCompleted: false, cb: () => alert() },
 ];
 
 export default function GettingStartedWidget() {
@@ -36,6 +42,7 @@ export default function GettingStartedWidget() {
             // If not all previous are completed, do nothing (item remains unchecked)
         }
 
+        currentItem.cb();
         setSetup(updated);
     };
 
@@ -104,7 +111,7 @@ export default function GettingStartedWidget() {
                                 <Checkbox
                                     checked={item.isCompleted}
                                     onChange={() => isClickable && handleItemPress(index)}
-                                    disabled={true}
+                                    // disabled={true}
                                 />
                             </View>
                         </View>
@@ -118,16 +125,3 @@ export default function GettingStartedWidget() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    shadow: {
-        shadowColor: '#A855F7',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-});

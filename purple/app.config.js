@@ -31,12 +31,18 @@ const withNavigationBarColor = (config) => {
 export default ({ config }) => {
     // eslint-disable-next-line no-undef
     const isDev = process.env.EAS_BUILD_PROFILE === 'development';
+    // eslint-disable-next-line no-undef
+    const isRc = process.env.EAS_BUILD_PROFILE === 'rc';
 
     return {
         ...config,
-        name: isDev ? 'Purple Dev' : 'Purple',
-        slug: isDev ? 'purple-dev' : 'purple',
-        scheme: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
+        name: isDev ? 'Purple Dev' : isRc ? 'Purple RC' : 'Purple',
+        slug: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
+        scheme: isDev
+            ? 'com.akangah89.PurpleDev'
+            : isRc
+            ? 'com.akangah89.PurpleRC'
+            : 'com.akangah89.Purple',
         version: pkg.version,
         orientation: 'portrait',
         icon: './assets/images/icon.png',
@@ -51,10 +57,19 @@ export default ({ config }) => {
         assetBundlePatterns: ['**/*'],
         ios: {
             supportsTablet: false,
-            bundleIdentifier: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
+            bundleIdentifier: isDev
+                ? 'com.akangah89.PurpleDev'
+                : isRc
+                ? 'com.akangah89.PurpleRc'
+                : 'com.akangah89.Purple',
+            scheme: isDev ? 'PurpleDev' : isRc ? 'PurpleRc' : 'Purple',
         },
         android: {
-            package: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
+            package: isDev
+                ? 'com.akangah89.PurpleDev'
+                : isRc
+                ? 'com.akangah89.PurpleRc'
+                : 'com.akangah89.Purple',
             adaptiveIcon: {
                 foregroundImage: './assets/images/icon.png',
                 backgroundColor: '#00000000',
@@ -148,9 +163,11 @@ export default ({ config }) => {
         owner: 'akangah89',
         updates: {
             url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
+            fallbackToCacheTimeout: 0,
+            runtimeVersion: '0.2.0',
         },
-        runtimeVersion: {
-            policy: 'appVersion',
-        },
+        // runtimeVersion: {
+        //     policy: 'appVersion',
+        // },
     };
 };
