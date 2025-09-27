@@ -17,7 +17,6 @@ export default memo(function CashflowBarChart({
     allTransactions,
     oldestTransactionDate,
 }: CashflowBarChartProps) {
-    console.log('CashflowBarChart rendering for:', format(currentDate, 'MMM yyyy'));
     const [chartW, setChartW] = useState(0);
     const stableTransactions = useMemo(
         () => allTransactions,

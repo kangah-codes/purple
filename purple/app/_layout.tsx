@@ -20,6 +20,7 @@ import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useCallback, useState } from 'react';
 import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 function AppWithNotifications() {
@@ -36,30 +37,33 @@ function AppWithNotifications() {
         >
             <BottomSheetModalProvider>
                 <PortalProvider>
-                    {/* <SafeAreaProvider> */}
-                    <ThemeProvider value={DefaultTheme}>
-                        {/** Portal Rendering  */}
-                        <CurrentTransactionModal modalKey='transactionReceipt' />
-                        <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
-                        <ConfirmationModal />
-                        {/** Main Navigation Stack */}
-                        <Stack
-                            screenOptions={{
-                                contentStyle: {
-                                    backgroundColor: '#fff',
-                                },
-                            }}
-                        >
-                            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                            <Stack.Screen name='plans' options={{ headerShown: false }} />
-                            <Stack.Screen name='accounts' options={{ headerShown: false }} />
-                            <Stack.Screen name='transactions' options={{ headerShown: false }} />
-                            <Stack.Screen name='onboarding' options={{ headerShown: false }} />
-                            <Stack.Screen name='auth' options={{ headerShown: false }} />
-                            <Stack.Screen name='settings' options={{ headerShown: false }} />
-                        </Stack>
-                    </ThemeProvider>
-                    {/* </SafeAreaProvider> */}
+                    <SafeAreaProvider>
+                        <ThemeProvider value={DefaultTheme}>
+                            {/** Portal Rendering  */}
+                            <CurrentTransactionModal modalKey='transactionReceipt' />
+                            <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
+                            <ConfirmationModal />
+                            {/** Main Navigation Stack */}
+                            <Stack
+                                screenOptions={{
+                                    contentStyle: {
+                                        backgroundColor: '#fff',
+                                    },
+                                }}
+                            >
+                                <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                                <Stack.Screen name='plans' options={{ headerShown: false }} />
+                                <Stack.Screen name='accounts' options={{ headerShown: false }} />
+                                <Stack.Screen
+                                    name='transactions'
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen name='onboarding' options={{ headerShown: false }} />
+                                <Stack.Screen name='auth' options={{ headerShown: false }} />
+                                <Stack.Screen name='settings' options={{ headerShown: false }} />
+                            </Stack>
+                        </ThemeProvider>
+                    </SafeAreaProvider>
                 </PortalProvider>
             </BottomSheetModalProvider>
         </AnalyticsProvider>

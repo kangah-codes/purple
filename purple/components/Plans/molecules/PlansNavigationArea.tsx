@@ -1,21 +1,17 @@
+import { CalendarIcon } from '@/components/SVG/icons/16x16';
 import { PlusIcon } from '@/components/SVG/icons/24x24';
-import { BarLineChartIcon, DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
+import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
+import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
-import { useAccountReportStore } from '../hooks';
 
-export default function AccountsNavigationArea() {
-    const { setShowChart, showChart } = useAccountReportStore();
+export default function PlansNavigationArea() {
     const [visible, setVisible] = useState(false);
-
-    const handleNavigation = useCallback(() => {
-        router.push('/accounts/new-acount');
-    }, []);
 
     return (
         <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
@@ -34,28 +30,28 @@ export default function AccountsNavigationArea() {
                     </View>
                 }
                 padX={20}
-                dropdownWidth={180}
+                dropdownWidth={210}
                 offsetY={10}
                 style={[tw`rounded-full bg-white p-2 px-4`, styles.shadow]}
             >
-                <TouchableOpacity
-                    onPress={() => {
+                <MenuOption
+                    onSelect={() => {
                         setVisible(false);
-                        setShowChart(!showChart);
+                        router.push('/settings/transactions/recurring-transactions');
                     }}
                 >
                     <View className='flex flex-row items-center space-x-2 py-1.5'>
-                        <BarLineChartIcon stroke='#9333EA' width={18} height={18} strokeWidth={2} />
+                        <CalendarIcon stroke='#9333EA' width={18} height={18} strokeWidth={1.5} />
                         <Text style={satoshiFont.satoshiMedium} className='text-sm'>
-                            {showChart ? 'Hide' : 'Show'} Chart
+                            Recurring transactions
                         </Text>
                     </View>
-                </TouchableOpacity>
+                </MenuOption>
             </DropdownMenu>
 
             <View className='absolute left-0 right-0 items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                    Accounts
+                    Plans
                 </Text>
             </View>
 
@@ -65,7 +61,7 @@ export default function AccountsNavigationArea() {
             >
                 <TouchableOpacity
                     className='px-4 py-2 flex items-center justify-center rounded-full'
-                    onPress={handleNavigation}
+                    onPress={() => router.push('/plans/new')}
                 >
                     <PlusIcon stroke={'#fff'} width={24} height={24} />
                 </TouchableOpacity>
@@ -75,6 +71,10 @@ export default function AccountsNavigationArea() {
 }
 
 const styles = StyleSheet.create({
+    contentContainer: {
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+    },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,
     },

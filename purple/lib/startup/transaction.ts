@@ -22,7 +22,6 @@ export interface ProcessingStats {
 
 export async function processRecurringTransactions(db: SQLiteDatabase): Promise<ProcessingStats> {
     const now = new Date();
-    const nowUnix = dateToUNIX(now);
 
     const stats: ProcessingStats = {
         totalProcessed: 0,

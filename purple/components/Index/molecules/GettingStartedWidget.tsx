@@ -2,51 +2,23 @@ import Checkbox from '@/components/Shared/atoms/Checkbox';
 import { ProgressBar } from '@/components/Shared/atoms/ProgressBar';
 import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useStartupGuide } from '@/components/Settings/hooks/useStartupGuide';
+import React from 'react';
 import { FlatList } from 'react-native';
 
-const initialSetup = [
-    { emoji: '🏦', text: 'Add an account', isCompleted: true, cb: () => alert() },
-    {
-        emoji: '🗂️',
-        text: 'Customise categories',
-        isCompleted: false,
-        cb: () => router.push('/settings/new-transaction-category'),
-    },
-    { emoji: '💸', text: 'Create your first transaction', isCompleted: false, cb: () => alert() },
-    { emoji: '🎯', text: 'Create a saving plan', isCompleted: false, cb: () => alert() },
-    { emoji: '📊', text: 'Create a budget', isCompleted: false, cb: () => alert() },
-];
-
 export default function GettingStartedWidget() {
-    const [setup, setSetup] = useState(initialSetup);
+    const { steps, completed, total, shouldShowGuide, markStepCompleted } = useStartupGuide();
 
-    const handleItemPress = (index: number) => {
-        const updated = [...setup];
-        const currentItem = updated[index];
+    // Don't show widget if startup guide is completed
+    if (!shouldShowGuide) {
+        return null;
+    }
 
-        // If trying to uncheck an item, allow it
-        if (currentItem.isCompleted) {
-            currentItem.isCompleted = false;
-            // Also uncheck all subsequent items to maintain sequential completion
-            for (let i = index + 1; i < updated.length; i++) {
-                updated[i].isCompleted = false;
-            }
-        } else {
-            // If trying to check an item, only allow if all previous items are completed
-            const allPreviousCompleted = updated.slice(0, index).every((item) => item.isCompleted);
-            if (allPreviousCompleted) {
-                currentItem.isCompleted = true;
-            }
-            // If not all previous are completed, do nothing (item remains unchecked)
-        }
-
-        currentItem.cb();
-        setSetup(updated);
+    const handleItemPress = (stepId: string, callback: () => void) => {
+        callback();
+        // Note: markStepCompleted will be called automatically for customize_categories
+        // when a category is created, or manually for other steps
     };
-
-    const completedSteps = setup.filter((item) => item.isCompleted).length;
 
     return (
         <View
@@ -63,17 +35,17 @@ export default function GettingStartedWidget() {
             </View>
 
             <View>
-                <ProgressBar steps={setup.length} currentStep={completedSteps} />
+                <ProgressBar steps={total} currentStep={completed} />
             </View>
 
             <View className='h-[1px] border-b border-purple-100' />
 
             <FlatList
-                data={setup}
-                keyExtractor={(item) => item.text}
+                data={steps}
+                keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => {
                     // Determine if this item can be interacted with
-                    const allPreviousCompleted = setup
+                    const allPreviousCompleted = steps
                         .slice(0, index)
                         .every((prevItem) => prevItem.isCompleted);
                     const isClickable = item.isCompleted || allPreviousCompleted;
@@ -86,7 +58,9 @@ export default function GettingStartedWidget() {
                         >
                             <View
                                 className='flex flex-row items-center justify-center space-x-2.5'
-                                onTouchEnd={() => isClickable && handleItemPress(index)}
+                                onTouchEnd={() =>
+                                    isClickable && handleItemPress(item.id, item.callback)
+                                }
                             >
                                 <Text
                                     style={satoshiFont.satoshiBold}
@@ -110,7 +84,9 @@ export default function GettingStartedWidget() {
                             <View style={{ opacity: isClickable ? 1 : 0.5 }}>
                                 <Checkbox
                                     checked={item.isCompleted}
-                                    onChange={() => isClickable && handleItemPress(index)}
+                                    onChange={() =>
+                                        isClickable && handleItemPress(item.id, item.callback)
+                                    }
                                     // disabled={true}
                                 />
                             </View>

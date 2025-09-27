@@ -49,7 +49,6 @@ const CustomBottomSheetModal = ({
             <BottomSheetBackdrop
                 {...props}
                 onPress={() => {
-                    console.log(hideOnBackdropPress);
                     if (hideOnBackdropPress) setShowBottomSheetModal(modalKey, false);
                 }}
                 appearsOnIndex={0}

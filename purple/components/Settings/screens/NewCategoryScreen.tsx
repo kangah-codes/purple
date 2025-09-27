@@ -1,5 +1,6 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { useCreateCategory, usePreferences } from '@/components/Settings/hooks';
+import { useStartupGuide } from '@/components/Settings/hooks/useStartupGuide';
 import {
     InputField,
     LinearGradient,
@@ -21,6 +22,7 @@ import Toast from 'react-native-toast-message';
 
 export default function NewCategoryScreen() {
     const { addCategory } = usePreferences();
+    const { markStepCompleted } = useStartupGuide();
     const {
         control,
         handleSubmit,
@@ -54,6 +56,7 @@ export default function NewCategoryScreen() {
             },
             onSuccess: () => {
                 addCategory(data);
+                markStepCompleted('customize_categories');
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Category created successfully' },

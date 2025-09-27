@@ -36,7 +36,7 @@ export type UserStore = {
 export type CustomTransactionType = {
     category: string;
     emoji: string;
-    is_custom?: boolean;
+    is_custom?: number;
 };
 
 export type UserPreferences = {
@@ -53,4 +53,21 @@ export type UserPreferences = {
     // notification preferences
     pushNotificationsEnabled: boolean;
     dailyNotificationsEnabled: boolean;
+
+    // startup guide preferences
+    startupGuide: {
+        isCompleted: boolean;
+        completedSteps: string[];
+        availableSteps: StartupStep[];
+    };
+};
+
+export type StartupStep = {
+    id: string;
+    emoji: string;
+    text: string;
+    isCompleted: boolean;
+    isRequired: boolean;
+    order: number;
+    callback: () => void;
 };

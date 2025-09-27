@@ -326,7 +326,6 @@ export function useCalculateAccountData({
                 trend = 'decrease';
             }
 
-            console.log(accountGroup);
             const transformedTransactions =
                 accountGroup && !accountGroup.includes('Liability')
                     ? transactions.map((tx) => {

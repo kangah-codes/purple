@@ -66,7 +66,6 @@ export default function AccountNavigationArea() {
             },
             onCancel: () => {
                 // Optional cancel callback
-                console.log('Delete cancelled');
             },
         });
     };

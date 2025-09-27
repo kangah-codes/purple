@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Text, LinearGradient } from '@/components/Shared/styled';
 import React from 'react';
-import { useAccounts, useAccountStore } from '../hooks';
+import { useAccounts } from '../hooks';
 import { groupAccountsByCategory } from '../utils';
 import AccountGroupCard from './AccountGroupCard';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
