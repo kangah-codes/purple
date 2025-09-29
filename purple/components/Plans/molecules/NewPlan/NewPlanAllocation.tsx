@@ -14,6 +14,8 @@ import { router } from 'expo-router';
 import React, { useRef, useCallback, useEffect } from 'react';
 import { ActivityIndicator, StatusBar as RNStatusBar } from 'react-native';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
+import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
+import { TRANSACTION_CATEGORY } from '@/lib/constants/transactionTypes';
 
 type NewPlanAllocationProps = {
     storiesRef: React.RefObject<StoriesRef>;
@@ -83,14 +85,14 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
 
                     <View className='flex flex-col space-y-3'>
                         {/* Rent */}
-                        {Array.from({ length: 10 }).map(() => (
+                        {TRANSACTION_CATEGORY.map((c) => (
                             <View className='flex flex-row items-center justify-between space-x-2.5'>
                                 <TouchableOpacity className='flex flex-row items-center space-x-3'>
                                     <View className='relative items-center justify-center flex rounded-full h-12 w-12 bg-purple-100'>
-                                        <Text className='absolute text-lg'>🏠</Text>
+                                        <Text className='absolute text-lg'>{c.emoji}</Text>
                                     </View>
                                 </TouchableOpacity>
-                                <InputField
+                                {/* <InputField
                                     className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 flex-1'
                                     style={satoshiFont.satoshiMedium}
                                     cursorColor={'#8B5CF6'}
@@ -99,16 +101,37 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
                                     // onBlur={onBlur}
                                     // value={value}
                                     value='Rent'
-                                />
+                                /> */}
+                                <View className='flex flex-col'>
+                                    <Text className='text-sm' style={satoshiFont.satoshiBold}>
+                                        {c.category}
+                                    </Text>
+                                    <Text
+                                        className='text-xs text-purple-500'
+                                        style={satoshiFont.satoshiBold}
+                                    >
+                                        32%
+                                    </Text>
+                                </View>
                                 <InputField
                                     className='bg-purple-50/80 rounded-full px-4 w-[40%] text-xs border border-purple-200 h-12 flex-1'
                                     style={satoshiFont.satoshiMedium}
                                     cursorColor={'#8B5CF6'}
-                                    placeholder='Add a note...'
+                                    placeholder='Amount'
+                                    keyboardType='numeric'
                                     // onChangeText={onChange}
                                     // onBlur={onBlur}
                                     // value={value}
                                 />
+                                <TouchableOpacity className='flex flex-row items-center space-x-3'>
+                                    <View className='relative items-center justify-center flex rounded-full h-12 w-12 bg-purple-100'>
+                                        <ChevronDownIcon
+                                            strokeWidth={3}
+                                            width={17}
+                                            stroke='#9333ea'
+                                        />
+                                    </View>
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>
