@@ -11,7 +11,6 @@ import NewPlanAllocation from '../molecules/NewPlan/NewPlanAllocation';
 
 export default function NewPlanScreen() {
     const storiesRef = useRef<StoriesRef>(null);
-
     const pages = [
         <NewPlanLimits storiesRef={storiesRef} />,
         <NewPlanDateRange storiesRef={storiesRef} />,
@@ -28,7 +27,6 @@ export default function NewPlanScreen() {
             <Stories
                 pages={pages}
                 ref={storiesRef}
-                timePerPage={process.env.NODE_ENV == 'development' ? 1000 : 3000}
                 enableNavigation={false}
                 disableAutomaticScroll
                 style={tw`bg-white`}

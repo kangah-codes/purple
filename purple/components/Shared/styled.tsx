@@ -9,7 +9,6 @@ import {
     Image as _Image,
     StyleSheet,
     Animated,
-    ViewStyle,
 } from 'react-native';
 import { LinearGradient as _LinearGradient } from 'expo-linear-gradient';
 import { BottomSheetModal as _BottomSheetModal } from '@gorhom/bottom-sheet';

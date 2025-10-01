@@ -33,30 +33,35 @@ export default function PlansScreen() {
     const renderTabBar = useCallback(() => {
         return (
             <View className='px-5'>
-                <AnimatedPillSelect
-                    options={routes.map((p) => ({ label: p.title, value: p.key }))}
-                    selected={routes[index].key}
-                    onChange={(key) => {
-                        const idx = routes.findIndex((r) => r.key === key);
-                        if (idx !== -1) setIndex(idx);
-                    }}
-                    styling={{
-                        pill: { backgroundColor: 'rgba(243, 232, 255, 0.5)' },
-                        background: {},
-                        option: { ...tw`p-3` },
-                    }}
-                    renderItem={(opt, isSelected) => (
-                        <Text
-                            style={[
-                                satoshiFont.satoshiBold,
-                                isSelected ? styles.activeText : styles.inactiveText,
-                            ]}
-                            className='text-sm py-2'
-                        >
-                            {opt.label}
-                        </Text>
-                    )}
-                />
+                <View
+                    className='bg-[] rounded-full px-1'
+                    style={{ backgroundColor: 'rgba(243, 232, 255, 0.5)' }}
+                >
+                    <AnimatedPillSelect
+                        options={routes.map((p) => ({ label: p.title, value: p.key }))}
+                        selected={routes[index].key}
+                        onChange={(key) => {
+                            const idx = routes.findIndex((r) => r.key === key);
+                            if (idx !== -1) setIndex(idx);
+                        }}
+                        styling={{
+                            pill: { backgroundColor: 'white' },
+                            background: {},
+                            option: { ...tw`p-3` },
+                        }}
+                        renderItem={(opt, isSelected) => (
+                            <Text
+                                style={[
+                                    satoshiFont.satoshiBold,
+                                    isSelected ? styles.activeText : styles.inactiveText,
+                                ]}
+                                className='text-sm py-2'
+                            >
+                                {opt.label}
+                            </Text>
+                        )}
+                    />
+                </View>
             </View>
         );
     }, [routes, index]);

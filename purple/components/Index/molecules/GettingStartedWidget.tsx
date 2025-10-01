@@ -3,7 +3,7 @@ import { ProgressBar } from '@/components/Shared/atoms/ProgressBar';
 import { Text, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useStartupGuide } from '@/components/Settings/hooks/useStartupGuide';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList } from 'react-native';
 
 export default function GettingStartedWidget() {
@@ -19,6 +19,51 @@ export default function GettingStartedWidget() {
         // Note: markStepCompleted will be called automatically for customize_categories
         // when a category is created, or manually for other steps
     };
+
+    const renderItem = useCallback(
+        ({ item, index }: { item: any; index: number }) => {
+            // Determine if this item can be interacted with
+            const allPreviousCompleted = steps
+                .slice(0, index)
+                .every((prevItem) => prevItem.isCompleted);
+            const isClickable = item.isCompleted || allPreviousCompleted;
+
+            return (
+                <View
+                    className={`flex flex-row justify-between items-center ${
+                        index === 0 ? 'pb-2' : 'py-2'
+                    } ${!isClickable ? 'opacity-50' : ''}`}
+                >
+                    <View
+                        className='flex flex-row items-center justify-center space-x-2.5'
+                        onTouchEnd={() => isClickable && handleItemPress(item.id, item.callback)}
+                    >
+                        <Text style={satoshiFont.satoshiBold} className='text-lg text-black'>
+                            {item.emoji}
+                        </Text>
+                        <Text
+                            style={[
+                                satoshiFont.satoshiBold,
+                                item.isCompleted ? { textDecorationLine: 'line-through' } : {},
+                            ]}
+                            className='text-base text-black'
+                        >
+                            {item.text}
+                        </Text>
+                    </View>
+
+                    <View style={{ opacity: isClickable ? 1 : 0.5 }}>
+                        <Checkbox
+                            checked={item.isCompleted}
+                            onChange={() => isClickable && handleItemPress(item.id, item.callback)}
+                            // disabled={true}
+                        />
+                    </View>
+                </View>
+            );
+        },
+        [steps],
+    );
 
     return (
         <View
@@ -43,56 +88,7 @@ export default function GettingStartedWidget() {
             <FlatList
                 data={steps}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item, index }) => {
-                    // Determine if this item can be interacted with
-                    const allPreviousCompleted = steps
-                        .slice(0, index)
-                        .every((prevItem) => prevItem.isCompleted);
-                    const isClickable = item.isCompleted || allPreviousCompleted;
-
-                    return (
-                        <View
-                            className={`flex flex-row justify-between items-center ${
-                                index === 0 ? 'pb-2' : 'py-2'
-                            } ${!isClickable ? 'opacity-50' : ''}`}
-                        >
-                            <View
-                                className='flex flex-row items-center justify-center space-x-2.5'
-                                onTouchEnd={() =>
-                                    isClickable && handleItemPress(item.id, item.callback)
-                                }
-                            >
-                                <Text
-                                    style={satoshiFont.satoshiBold}
-                                    className='text-lg text-black'
-                                >
-                                    {item.emoji}
-                                </Text>
-                                <Text
-                                    style={[
-                                        satoshiFont.satoshiBold,
-                                        item.isCompleted
-                                            ? { textDecorationLine: 'line-through' }
-                                            : {},
-                                    ]}
-                                    className='text-base text-black'
-                                >
-                                    {item.text}
-                                </Text>
-                            </View>
-
-                            <View style={{ opacity: isClickable ? 1 : 0.5 }}>
-                                <Checkbox
-                                    checked={item.isCompleted}
-                                    onChange={() =>
-                                        isClickable && handleItemPress(item.id, item.callback)
-                                    }
-                                    // disabled={true}
-                                />
-                            </View>
-                        </View>
-                    );
-                }}
+                renderItem={renderItem}
                 ItemSeparatorComponent={() => (
                     <View className='h-[1px] border-b border-purple-100' />
                 )}

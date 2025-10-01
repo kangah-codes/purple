@@ -2,8 +2,7 @@ import DateRangePicker from '@/components/Shared/atoms/DateRangePicker';
 import GlobalBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { ArrowRightIcon } from '@/components/SVG/icons/24x24';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
@@ -59,19 +58,6 @@ function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
     }, [selectedDateRange.startDate, selectedDateRange.endDate]);
 
     return (
-        // <View style={styles.linearContainer}>
-        // <Calendar
-        //     calendarActiveDateRanges={calendarActiveDateRanges}
-        //     calendarDayHeight={30}
-        //     calendarFirstDayOfWeek='sunday'
-        //     calendarMonthId={toDateId(startOfThisMonth)}
-        //     calendarRowHorizontalSpacing={16}
-        //     calendarRowVerticalSpacing={16}
-        //     getCalendarWeekDayFormat={format('iiiiii')}
-        //     onCalendarDayPress={loggingHandler('onCalendarDayPress')}
-        //     theme={linearTheme}
-        // />
-        // </View>
         <>
             <View className='flex flex-col space-y-5 justify-center h-[100%] relative px-5'>
                 <View className='flex flex-col space-y-2.5'>
@@ -84,34 +70,57 @@ function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
                     onPress={() => setShowBottomSheetModal('newPlanDateRange', true)}
                     className='flex flex-row justify-between items-center'
                 >
-                    {/* <Calendar.List
-                    calendarActiveDateRanges={calendarActiveDateRanges}
-                    onCalendarDayPress={onCalendarDayPress}
-                    /> */}
                     <Text style={satoshiFont.satoshiBlack} className='text-4xl text-black'>
                         {formatDateRange}
                     </Text>
                 </TouchableOpacity>
 
-                <View className='absolute bottom-8 left-5 right-5 flex-row justify-between items-center'>
-                    <TouchableOpacity
-                        onPress={() => {
-                            storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1);
-                        }}
-                    >
-                        <Text style={satoshiFont.satoshiBlack} className='text-sm text-purple-500'>
-                            Back
-                        </Text>
-                    </TouchableOpacity>
+                <View className='items-center self-center justify-center absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={() =>
+                                    storiesRef?.current?.goToPage(
+                                        storiesRef.current.currentIndex - 1,
+                                    )
+                                }
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                            >
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Back
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
-                    <TouchableOpacity
-                        onPress={() =>
-                            storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
-                        }
-                        className='bg-purple-300 px-4 py-2.5 w-[75px] flex items-center justify-center rounded-full'
-                    >
-                        <ArrowRightIcon stroke='#9810fa' strokeWidth={2.5} />
-                    </TouchableOpacity>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={() =>
+                                    storiesRef?.current?.goToPage(
+                                        storiesRef.current.currentIndex + 1,
+                                    )
+                                }
+                                // disabled={true}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    <Text
+                                        style={satoshiFont.satoshiBlack}
+                                        className='text-white text-center'
+                                    >
+                                        Next
+                                    </Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
             </View>
             <GlobalBottomSheetModal
@@ -137,6 +146,10 @@ function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
                     <DateRangePicker
                         onDateRangeChange={handleDateRangeChange}
                         initialDateRange={selectedDateRange}
+                        minDate={new Date().toISOString()}
+                        maxDate={new Date(
+                            new Date().setFullYear(new Date().getFullYear() + 5),
+                        ).toISOString()}
                     />
                 </BottomSheetScrollView>
             </GlobalBottomSheetModal>

@@ -2,7 +2,7 @@ import { Text, View } from '@/components/Shared/styled';
 import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { ChevronLeftIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, memo } from 'react';
 import { Calendar, DateData } from 'react-native-calendars';
 
 const PURPLE = {
@@ -16,15 +16,17 @@ interface DateRange {
     endDate: string | null;
 }
 
-interface Props {
+interface DateRangePickerProps {
     onDateRangeChange?: (dateRange: DateRange) => void;
     initialDateRange?: DateRange;
+    minDate?: string;
+    maxDate?: string;
 }
 
 const currentDateString = new Date().toISOString().split('T')[0];
 
-const DateRangePicker = (props: Props) => {
-    const { onDateRangeChange, initialDateRange } = props;
+const DateRangePicker = (props: DateRangePickerProps) => {
+    const { onDateRangeChange, initialDateRange, minDate, maxDate } = props;
     const [dateRange, setDateRange] = useState<DateRange>(
         initialDateRange || { startDate: null, endDate: null },
     );
@@ -108,7 +110,9 @@ const DateRangePicker = (props: Props) => {
             markedDates={marked}
             markingType='period'
             renderHeader={renderCustomHeader}
-            enableSwipeMonths={true}
+            enableSwipeMonths={false}
+            minDate={minDate}
+            maxDate={maxDate}
             theme={{
                 backgroundColor: '#ffffff',
                 calendarBackground: '#ffffff',
@@ -156,4 +160,4 @@ function renderCustomHeader(date: { toString: (format: string) => string }) {
     );
 }
 
-export default React.memo(DateRangePicker);
+export default memo(DateRangePicker);

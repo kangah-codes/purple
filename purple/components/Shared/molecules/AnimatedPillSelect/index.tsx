@@ -39,9 +39,9 @@ export function AnimatedPillSelect<T extends string | number>({
 }: AnimatedPillSelectProps<T>) {
     const indicatorX = useSharedValue(0);
     const indicatorW = useSharedValue(0);
-
-    // @ts-ignore
-    const layouts = useRef<Record<T, { x: number; width: number }>>({});
+    const layouts = useRef<Record<T, { x: number; width: number }>>(
+        {} as Record<T, { x: number; width: number }>,
+    );
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: indicatorX.value }],

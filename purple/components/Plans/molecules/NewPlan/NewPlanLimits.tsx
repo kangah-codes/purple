@@ -1,12 +1,12 @@
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { ArrowRightIcon, MinusIcon, PlusIcon } from '@/components/SVG/icons/24x24';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { MinusIcon, PlusIcon } from '@/components/SVG/icons/24x24';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
-import { router } from 'expo-router';
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Pressable, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 
 type NewPlanLimitsProps = {
     storiesRef: React.RefObject<StoriesRef>;
@@ -195,29 +195,45 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                 </Pressable>
             </View>
 
-            <View className='absolute bottom-8 left-5 right-5 flex-row justify-between items-center'>
-                <TouchableOpacity
-                    onPress={() => {
-                        if (storiesRef?.current?.currentIndex === 0) {
-                            router.back();
-                            return;
-                        }
-                        storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1);
-                    }}
-                >
-                    <Text style={satoshiFont.satoshiBlack} className='text-sm text-purple-500'>
-                        Back
-                    </Text>
-                </TouchableOpacity>
+            <View className='items-center self-center justify-center absolute bottom-7 w-full'>
+                <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                    <View className='flex-1'>
+                        <TouchableOpacity
+                            onPress={router.back}
+                            style={{ width: '100%' }}
+                            className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                        >
+                            <Text
+                                style={satoshiFont.satoshiBlack}
+                                className='text-purple-600 text-center'
+                            >
+                                Back
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <TouchableOpacity
-                    onPress={() =>
-                        storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
-                    }
-                    className='bg-purple-300 px-4 py-2.5 w-[75px] flex items-center justify-center rounded-full'
-                >
-                    <ArrowRightIcon stroke='#9810fa' strokeWidth={2.5} />
-                </TouchableOpacity>
+                    <View className='flex-1'>
+                        <TouchableOpacity
+                            style={{ width: '100%' }}
+                            onPress={() =>
+                                storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
+                            }
+                        >
+                            <LinearGradient
+                                className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                colors={['#c084fc', '#9333ea']}
+                                style={{ width: '100%' }}
+                            >
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-white text-center'
+                                >
+                                    Next
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </View>
         </View>
     );

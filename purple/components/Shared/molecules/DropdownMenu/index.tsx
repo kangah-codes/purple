@@ -53,9 +53,9 @@ export default function DropdownMenu({
         if (triggerRef.current) {
             const screenWidth = Dimensions.get('window').width;
 
-            triggerRef.current.measure((fx, fy, width, height, px) => {
+            triggerRef.current.measureInWindow((x, y, width, height) => {
                 // Calculate initial position (centered under trigger)
-                let xPosition = px + width / 2 - dropdownWidth / 2;
+                let xPosition = x + width / 2 - dropdownWidth / 2;
 
                 // Ensure dropdown stays within screen bounds with padding
                 const rightEdgePosition = xPosition + dropdownWidth;
@@ -69,7 +69,7 @@ export default function DropdownMenu({
 
                 setPosition({
                     x: xPosition,
-                    y: height + offsetY,
+                    y: y + height + offsetY,
                     width: width,
                 });
             });
@@ -169,7 +169,7 @@ export default function DropdownMenu({
                                     style={[
                                         styles.menu,
                                         {
-                                            top: position.y + offsetY,
+                                            top: position.y,
                                             left: position.x,
                                             width: dropdownWidth,
                                             transform: [
