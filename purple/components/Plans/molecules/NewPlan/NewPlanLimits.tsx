@@ -7,20 +7,26 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Pressable, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { useCreateNewPlanStore } from '../../hooks';
 
 type NewPlanLimitsProps = {
     storiesRef: React.RefObject<StoriesRef>;
 };
 
 export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
-    const [amount, setAmount] = useState(100);
     const [isEditing, setIsEditing] = useState(false);
     const [inputValue, setInputValue] = useState('100');
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const holdDurationRef = useRef(0);
+    const { amount, setAmount, reset } = useCreateNewPlanStore();
+    const amountRef = useRef(amount);
 
-    // Clear any active timers
+    // Keep the ref in sync with the current amount
+    useEffect(() => {
+        amountRef.current = amount;
+    }, [amount]);
+
     const clearTimers = useCallback(() => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -33,7 +39,6 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
         holdDurationRef.current = 0;
     }, []);
 
-    // Calculate increment based on hold duration
     const getIncrement = useCallback((holdDuration: number) => {
         if (holdDuration < 1000) return 10; // First 1s: +10
         if (holdDuration < 3000) return 25; // 1-3s: +25
@@ -42,15 +47,12 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
         return 250; // 8s+: +250
     }, []);
 
-    // Handle continuous increment/decrement
     const startContinuousChange = useCallback(
         (increment: number) => {
             clearTimers();
             const startTime = Date.now();
 
-            // Initial delay before continuous change starts
             timeoutRef.current = setTimeout(() => {
-                // Medium haptic feedback when continuous change starts
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
                 let lastIncrement = 0;
@@ -58,35 +60,31 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                     holdDurationRef.current = Date.now() - startTime;
                     const currentIncrement = getIncrement(holdDurationRef.current);
 
-                    // Heavy haptic feedback when increment level increases
                     if (currentIncrement > lastIncrement) {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                         lastIncrement = currentIncrement;
                     }
 
-                    setAmount((prev) => {
-                        const newAmount =
-                            prev + (increment > 0 ? currentIncrement : -currentIncrement);
-                        return Math.max(0, newAmount); // Prevent negative amounts
-                    });
-                }, 100); // Update every 100ms for smooth acceleration
-            }, 500); // Start continuous after 500ms hold
+                    const currentAmount = amountRef.current;
+                    setAmount(
+                        Math.max(
+                            0,
+                            currentAmount + (increment > 0 ? currentIncrement : -currentIncrement),
+                        ),
+                    );
+                }, 100);
+            }, 500);
         },
         [clearTimers, getIncrement],
     );
 
     const handlePressIn = useCallback(
         (increment: number) => {
-            // Light haptic feedback for initial press
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-            // Immediate single increment
-            setAmount((prev) => {
-                const newAmount = prev + increment;
-                return Math.max(0, newAmount);
-            });
+            const currentAmount = amountRef.current;
+            setAmount(Math.max(0, currentAmount + increment));
 
-            // Start continuous change
             startContinuousChange(increment);
         },
         [startContinuousChange],
@@ -121,6 +119,7 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
             clearTimers();
         };
     }, [clearTimers]);
+
     return (
         <View className='flex flex-col space-y-5 justify-center h-[100%] relative px-5'>
             <View className='flex flex-col space-y-2.5'>
@@ -199,7 +198,10 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                 <View className='flex flex-row space-x-2.5 justify-between w-full'>
                     <View className='flex-1'>
                         <TouchableOpacity
-                            onPress={router.back}
+                            onPress={() => {
+                                router.back();
+                                reset();
+                            }}
                             style={{ width: '100%' }}
                             className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
                         >
@@ -207,7 +209,7 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                                 style={satoshiFont.satoshiBlack}
                                 className='text-purple-600 text-center'
                             >
-                                Back
+                                Cancel
                             </Text>
                         </TouchableOpacity>
                     </View>

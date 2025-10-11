@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { Image } from 'expo-image';
@@ -14,13 +15,13 @@ export default function NotFoundScreen() {
                 <View className='flex flex-col space-y-2.5'>
                     <Text
                         style={satoshiFont.satoshiBlack}
-                        className='text-2xl text-purple-600 text-center'
+                        className='text-2xl text-black text-center'
                     >
                         Looks like you're lost!
                     </Text>
                     <Text
                         style={satoshiFont.satoshiBold}
-                        className='text-base textblack text-center'
+                        className='text-base  text-purple-500 text-center'
                     >
                         The page you're looking for doesn't exist or has been moved.
                     </Text>

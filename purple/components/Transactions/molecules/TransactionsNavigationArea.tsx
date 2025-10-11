@@ -61,7 +61,7 @@ export default function TransactionsNavigationArea() {
             >
                 <TouchableOpacity
                     className='px-4 py-2 flex items-center justify-center rounded-full'
-                    onPress={() => router.push('/transactions/new-transaction')}
+                    onPress={() => router.push('/transactions/new')}
                 >
                     <PlusIcon stroke={'#fff'} width={24} height={24} />
                 </TouchableOpacity>

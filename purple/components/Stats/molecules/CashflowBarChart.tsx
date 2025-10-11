@@ -4,6 +4,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { eachMonthOfInterval, format, isSameMonth, startOfMonth, subMonths } from 'date-fns';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import CustomBarChart from '../../Shared/molecules/StackedBarChart';
+import { isTransferTransaction } from '@/components/Transactions/utils';
 
 interface CashflowBarChartProps {
     currentDate: Date;
@@ -42,11 +43,11 @@ export default memo(function CashflowBarChart({
             });
 
             const inflow = monthTransactions
-                .filter((t) => t.type === 'credit')
+                .filter((t) => t.type === 'credit' && !isTransferTransaction(t))
                 .reduce((sum, t) => sum + Number(t.amount), 0);
 
             const outflow = monthTransactions
-                .filter((t) => t.type === 'debit')
+                .filter((t) => t.type === 'debit' && !isTransferTransaction(t))
                 .reduce((sum, t) => sum - Math.abs(Number(t.amount)), 0);
 
             return {

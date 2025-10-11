@@ -32,9 +32,14 @@ export default function SpendOverviewChart({ transactions, startDate }: SpendOve
 
     return (
         <View className='flex-col space-y-2.5 pt-5 pb-2.5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
-            <Text className='text-base text-black px-5' style={satoshiFont.satoshiBlack}>
-                Spend By Week
-            </Text>
+            <View className='flex flex-col mb-2.5 px-5'>
+                <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                    Spend By Week
+                </Text>
+                <Text className='text-purple-500 text-xs' style={satoshiFont.satoshiBold}>
+                    Overview of your weekly spend
+                </Text>
+            </View>
             <View className='mb-2.5 px-2.5'>
                 <BarChart
                     adjustToWidth

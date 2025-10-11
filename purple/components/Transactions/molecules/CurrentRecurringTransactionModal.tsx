@@ -187,7 +187,7 @@ export default function CurrentRecurringTransactionModal({
                                     onPress={() => {
                                         setShowBottomSheetModal(modalKey, false);
                                         router.push({
-                                            pathname: '/transactions/edit-transaction',
+                                            pathname: '/transactions/recurring/edit',
                                         });
                                     }}
                                 >

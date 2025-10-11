@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { usePreferences } from '../hooks';
 import { useAccounts } from '../../Accounts/hooks';
 import { useTransactions } from '../../Transactions/hooks';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
 export type StartupStepId =
     | 'add_account'
@@ -77,7 +78,8 @@ export function useStartupGuide() {
     const accounts = accountsData?.data || [];
 
     // Get transactions data to check completion
-    const { data: transactionsData } = useTransactions({ requestQuery: { page_size: 1 } });
+    const { data: transactionsData, refetch } = useTransactions({ requestQuery: { page_size: 1 } });
+    useRefreshOnFocus(refetch);
     const transactions = transactionsData?.data || [];
 
     // Initialize startup guide in preferences if not exists

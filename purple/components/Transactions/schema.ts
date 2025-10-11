@@ -96,3 +96,19 @@ export type CreateRecurringTransaction = {
     from_account?: string;
     to_account?: string;
 };
+
+export type EditRecurringTransaction = {
+    account_id: string;
+    type: 'debit' | 'credit' | 'transfer';
+    amount: number;
+    category: string;
+    recurrence_rule: string;
+    start_date: string;
+    end_date?: string;
+    metadata?: Record<string, any>;
+    currency: string;
+    from_account?: string;
+    to_account?: string;
+    is_active: boolean;
+    status: 'active' | 'paused' | 'cancelled';
+};

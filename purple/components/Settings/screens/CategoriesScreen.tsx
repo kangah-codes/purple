@@ -12,7 +12,7 @@ import {
 import { satoshiFont } from '@/lib/constants/fonts';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useMemo, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';

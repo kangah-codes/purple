@@ -1,6 +1,7 @@
 import { usePreferences } from '@/components/Settings/hooks';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
+import { isTransferTransaction } from '@/components/Transactions/utils';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { generatePalette } from '@/lib/utils/colour';
 import { formatCurrencyRounded } from '@/lib/utils/number';
@@ -80,6 +81,10 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
 
         for (const tx of transactions) {
             if (!tx?.amount || !tx?.type || !tx?.category) continue;
+
+            // Skip transactions that are part of transfers to avoid inflating income/expense totals
+            if (isTransferTransaction(tx)) continue;
+
             if (tx.type === 'debit') {
                 totalDebits += tx.amount;
                 debitMap[tx.category] = (debitMap[tx.category] || 0) + tx.amount;

@@ -9,6 +9,7 @@ import {
     startOfMonth,
 } from 'date-fns';
 import { Transaction } from '../Transactions/schema';
+import { isTransferTransaction } from '../Transactions/utils';
 import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
 
 export function getCurrentMonthYear() {
@@ -37,7 +38,7 @@ export const groupTransactionsByWeek = (
     };
 
     for (const tx of transactions) {
-        if (type !== 'debit') continue;
+        if (tx.type !== type || isTransferTransaction(tx)) continue;
 
         const txDate = new Date(tx.created_at);
         const txMonth = txDate.getMonth();
@@ -301,6 +302,9 @@ export function generateNormalizedSpendChartData(
     const dailySpends: Record<string, number> = {};
 
     for (const tx of transactions) {
+        // Only include debit transactions that are not transfers
+        if (tx.type !== 'debit' || isTransferTransaction(tx)) continue;
+
         const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
         if (!dailySpends[isoDate]) {
             dailySpends[isoDate] = 0;

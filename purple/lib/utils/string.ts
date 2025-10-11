@@ -59,7 +59,7 @@ export function stringify(obj: ParsedQuery): string {
     const parts: string[] = [];
 
     for (const [key, value] of Object.entries(obj)) {
-        if (!Boolean(value)) {
+        if (!value) {
             // Skip undefined or null values
             continue;
         }
@@ -129,4 +129,8 @@ export function extractEmojiOrDefault(str: string, defaultEmoji: string = '❓')
     const regex = /\p{Extended_Pictographic}/u;
     const match = str.match(regex);
     return match ? match[0] : defaultEmoji;
+}
+
+export function removeEmojis(str: string): string {
+    return str.replace(/\p{Extended_Pictographic}/gu, '').trim();
 }

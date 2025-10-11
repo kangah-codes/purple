@@ -7,6 +7,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import React, { memo, useCallback, useEffect } from 'react';
+import { useCreateNewPlanStore } from '../../hooks';
 
 interface DateRange {
     startDate: string | null;
@@ -19,43 +20,45 @@ type NewPlanDateRange = {
 
 function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const [selectedDateRange, setSelectedDateRange] = React.useState<DateRange>({
-        startDate: null,
-        endDate: null,
-    });
+    const { startDate, endDate, setStartDate, setEndDate } = useCreateNewPlanStore();
 
-    const handleDateRangeChange = useCallback((dateRange: DateRange) => {
-        setSelectedDateRange(dateRange);
-    }, []);
+    const handleDateRangeChange = useCallback(
+        (dateRange: DateRange) => {
+            if (dateRange.startDate) {
+                setStartDate(new Date(dateRange.startDate));
+            }
+            if (dateRange.endDate) {
+                setEndDate(new Date(dateRange.endDate));
+            }
+        },
+        [setStartDate, setEndDate],
+    );
 
     useEffect(() => {
-        if (selectedDateRange.startDate && selectedDateRange.endDate) {
+        if (startDate && endDate) {
             // add a small delay
             const timeout = setTimeout(() => {
                 setShowBottomSheetModal('newPlanDateRange', false);
             }, 100);
             return () => clearTimeout(timeout);
         }
-    }, [selectedDateRange.startDate, selectedDateRange.endDate, setShowBottomSheetModal]);
+    }, [startDate, endDate, setShowBottomSheetModal]);
 
     const formatDateRange = React.useMemo(() => {
-        if (!selectedDateRange.startDate && !selectedDateRange.endDate) {
+        if (!startDate && !endDate) {
             return 'Select period';
         }
 
-        if (selectedDateRange.startDate && !selectedDateRange.endDate) {
-            return format(new Date(selectedDateRange.startDate), 'd MMM');
+        if (startDate && !endDate) {
+            return format(startDate, 'd MMM');
         }
 
-        if (selectedDateRange.startDate && selectedDateRange.endDate) {
-            return `${format(new Date(selectedDateRange.startDate), 'd MMM')} - ${format(
-                new Date(selectedDateRange.endDate),
-                'd MMM',
-            )}`;
+        if (startDate && endDate) {
+            return `${format(startDate, 'd MMM')} - ${format(endDate, 'd MMM')}`;
         }
 
         return 'Select period';
-    }, [selectedDateRange.startDate, selectedDateRange.endDate]);
+    }, [startDate, endDate]);
 
     return (
         <>
@@ -104,16 +107,27 @@ function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
                                         storiesRef.current.currentIndex + 1,
                                     )
                                 }
-                                // disabled={true}
+                                disabled={!startDate || !endDate}
                             >
                                 <LinearGradient
                                     className='flex items-center justify-center rounded-full px-5 h-[50]'
-                                    colors={['#c084fc', '#9333ea']}
-                                    style={{ width: '100%' }}
+                                    colors={
+                                        startDate && endDate
+                                            ? ['#c084fc', '#9333ea']
+                                            : ['#f9fafb', '#e5e7eb']
+                                    }
+                                    style={{
+                                        width: '100%',
+                                        borderColor:
+                                            !startDate || !endDate ? '#e5e7eb' : 'transparent',
+                                        borderWidth: 1,
+                                    }}
                                 >
                                     <Text
                                         style={satoshiFont.satoshiBlack}
-                                        className='text-white text-center'
+                                        className={`text-center ${
+                                            startDate && endDate ? 'text-white' : 'text-gray-500'
+                                        }`}
                                     >
                                         Next
                                     </Text>
@@ -145,7 +159,10 @@ function NewPlanDateRange({ storiesRef }: NewPlanDateRange) {
                 <BottomSheetScrollView showsVerticalScrollIndicator={false}>
                     <DateRangePicker
                         onDateRangeChange={handleDateRangeChange}
-                        initialDateRange={selectedDateRange}
+                        initialDateRange={{
+                            startDate: startDate?.toISOString() || null,
+                            endDate: endDate?.toISOString() || null,
+                        }}
                         minDate={new Date().toISOString()}
                         maxDate={new Date(
                             new Date().setFullYear(new Date().getFullYear() + 5),

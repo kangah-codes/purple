@@ -13,6 +13,7 @@ import React from 'react';
 import { formatDateLabel } from '../Plans/utils';
 import { Text } from '../Shared/styled';
 import { Transaction } from '../Transactions/schema';
+import { isTransferTransaction } from '../Transactions/utils';
 import { Account } from './schema';
 
 export function createTransactionChartData(
@@ -160,8 +161,8 @@ export function generateSpendChartData(
     const dailySpends: Record<string, number> = {};
 
     for (const tx of transactions) {
-        // only process debit transactions
-        if (tx.type !== 'debit') {
+        // only process debit transactions that are not part of transfers
+        if (tx.type !== 'debit' || isTransferTransaction(tx)) {
             continue;
         }
 
@@ -203,7 +204,7 @@ export function generateNormalizedSpendChartData(
     const dailySpends: Record<string, number> = {};
 
     for (const tx of transactions) {
-        if (tx.type !== 'debit') continue;
+        if (tx.type !== 'debit' || isTransferTransaction(tx)) continue;
 
         const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
         if (!dailySpends[isoDate]) {

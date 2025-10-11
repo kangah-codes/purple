@@ -439,6 +439,153 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
+    async updateRecurringTransaction(
+        id: string,
+        data: Partial<CreateRecurringTransaction> & {
+            is_active?: boolean;
+            status?: 'active' | 'paused' | 'cancelled';
+        },
+    ): Promise<GenericAPIResponse<RecurringTransaction>> {
+        const now = new Date().toISOString();
+        let updatedRecurring!: RecurringTransaction;
+
+        // First check if the recurring transaction exists
+        const existing = await this.db.getFirstAsync<RecurringTransaction>(
+            'SELECT * FROM recurring_transactions WHERE id = ?',
+            [id],
+        );
+        if (!existing) {
+            throw new HTTPError('Recurring transaction not found', 404);
+        }
+
+        await this.db.withTransactionAsync(async () => {
+            const updateFields: string[] = [];
+            const updateValues: any[] = [];
+
+            // Handle basic fields
+            if (data.amount !== undefined) {
+                updateFields.push('amount = ?');
+                updateValues.push(data.amount);
+            }
+            if (data.category !== undefined) {
+                updateFields.push('category = ?');
+                updateValues.push(data.category);
+            }
+            if (data.type !== undefined) {
+                updateFields.push('type = ?');
+                updateValues.push(data.type);
+            }
+            if (data.account_id !== undefined) {
+                updateFields.push('account_id = ?');
+                updateValues.push(data.account_id);
+            }
+            if (data.from_account !== undefined) {
+                updateFields.push('from_account = ?');
+                updateValues.push(data.from_account);
+            }
+            if (data.to_account !== undefined) {
+                updateFields.push('to_account = ?');
+                updateValues.push(data.to_account);
+            }
+            if (data.currency !== undefined) {
+                updateFields.push('currency = ?');
+                updateValues.push(data.currency);
+            }
+            if (data.status !== undefined) {
+                updateFields.push('status = ?');
+                updateValues.push(data.status);
+                // Update is_active based on status
+                updateFields.push('is_active = ?');
+                updateValues.push(data.status === 'active' ? 1 : 0);
+            } else if (data.is_active !== undefined) {
+                updateFields.push('is_active = ?');
+                updateValues.push(data.is_active ? 1 : 0);
+                // Update status based on is_active
+                updateFields.push('status = ?');
+                updateValues.push(data.is_active ? 'active' : 'paused');
+            }
+
+            // Handle recurrence rule and dates if provided
+            if (data.recurrence_rule !== undefined) {
+                const safeRule = data.recurrence_rule.replace(
+                    /\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/g,
+                    (match) => WEEKDAY_MAP[match],
+                );
+                updateFields.push('recurrence_rule = ?');
+                updateValues.push(safeRule);
+
+                // Recalculate next occurrence if rule changed
+                const startDate = data.start_date
+                    ? new Date(data.start_date)
+                    : new Date(existing.start_date);
+                const dtStart = startOfDay(startDate);
+                const rule = rrulestr(safeRule, { dtstart: dtStart });
+                const nextOccurrence = rule.after(new Date(), true);
+
+                updateFields.push('create_next_at_unix = ?');
+                updateFields.push('create_next_at = datetime(?, "unixepoch")');
+                updateValues.push(nextOccurrence ? dateToUNIX(nextOccurrence) : null);
+                updateValues.push(nextOccurrence ? dateToUNIX(nextOccurrence) : null);
+            }
+
+            if (data.start_date !== undefined) {
+                updateFields.push('start_date = ?');
+                updateFields.push('start_date_unix = ?');
+                updateValues.push(data.start_date);
+                updateValues.push(dateToUNIX(new Date(data.start_date)));
+            }
+
+            if (data.end_date !== undefined) {
+                updateFields.push('end_date = ?');
+                updateFields.push('end_date_unix = ?');
+                updateValues.push(data.end_date);
+                updateValues.push(data.end_date ? dateToUNIX(new Date(data.end_date)) : null);
+            }
+
+            if (data.metadata !== undefined) {
+                updateFields.push('metadata = ?');
+                updateValues.push(JSON.stringify(data.metadata));
+            }
+
+            // Always update the updated_at timestamp
+            updateFields.push('updated_at = ?');
+            updateValues.push(now);
+
+            if (updateFields.length === 0) {
+                throw new HTTPError('No fields to update', 400);
+            }
+
+            // Add the ID for the WHERE clause
+            updateValues.push(id);
+
+            await this.db.runAsync(
+                `UPDATE recurring_transactions 
+                 SET ${updateFields.join(', ')} 
+                 WHERE id = ?`,
+                updateValues,
+            );
+
+            const result = await this.db.getFirstAsync<RecurringTransaction>(
+                'SELECT * FROM recurring_transactions WHERE id = ?',
+                [id],
+            );
+            if (!result) {
+                throw new HTTPError("Couldn't update recurring transaction", 500);
+            }
+            updatedRecurring = result;
+        });
+
+        return this.formatResponse({
+            data: updatedRecurring,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Updated recurring transaction',
+        });
+    }
+
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
         const {
             page = 1,

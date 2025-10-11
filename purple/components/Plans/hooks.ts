@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
-import { stringify } from '@/lib/utils/string';
 import {
     useInfiniteQuery,
     UseInfiniteQueryOptions,
@@ -13,10 +13,55 @@ import {
 import { useStore } from 'zustand';
 import { SessionData } from '../Auth/schema';
 import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './schema';
-import { createPlanStore } from './state';
+import { createNewPlanStore, createPlanStore } from './state';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { useAuth } from '../Auth/hooks';
+
+export function useCreateNewPlanStore() {
+    const [
+        amount,
+        startDate,
+        endDate,
+        categories,
+        setAmount,
+        setStartDate,
+        setEndDate,
+        setCategories,
+        reset,
+        addCategory,
+        removeCategory,
+        updateCategory,
+    ] = useStore(createNewPlanStore, (state) => [
+        state.amount,
+        state.startDate,
+        state.endDate,
+        state.categories,
+        state.setAmount,
+        state.setStartDate,
+        state.setEndDate,
+        state.setCategories,
+        state.reset,
+        state.addCategory,
+        state.removeCategory,
+        state.updateCategory,
+    ]);
+
+    return {
+        amount,
+        startDate,
+        endDate,
+        categories,
+        setAmount,
+        setStartDate,
+        setEndDate,
+        setCategories,
+        reset,
+        addCategory,
+        removeCategory,
+        updateCategory,
+    };
+}
 
 export function usePlanStore() {
     const [
@@ -155,7 +200,7 @@ export function usePlanStatus({
 
             if (!res.ok) {
                 const err = new Error(json.message || 'Unknown error occurred');
-                // @ts-ignore
+                // @ts-expect-error expect
                 err.statusCode = statusCode;
                 throw err;
             }

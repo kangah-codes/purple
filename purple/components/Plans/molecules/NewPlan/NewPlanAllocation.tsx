@@ -9,8 +9,7 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { router } from 'expo-router';
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect, useMemo } from 'react';
 import {
     ActivityIndicator,
     StatusBar as RNStatusBar,
@@ -18,18 +17,26 @@ import {
     Platform,
 } from 'react-native';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import { TRANSACTION_CATEGORY } from '@/lib/constants/transactionTypes';
 import NewPlanItem from './NewPlanItem';
 import { FlashList } from '@shopify/flash-list';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
+import SelectPlanCategory from './SelectPlanCategory';
+import { usePreferences } from '@/components/Settings/hooks';
+import { useCreateNewPlanStore } from '../../hooks';
 
 type NewPlanAllocationProps = {
     storiesRef: React.RefObject<StoriesRef>;
 };
 
 export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps) {
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const {
+        preferences: { customTransactionTypes },
+    } = usePreferences();
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const holdDurationRef = useRef(0);
+    const { categories } = useCreateNewPlanStore();
 
     // Clear any active timers
     const clearTimers = useCallback(() => {
@@ -44,6 +51,14 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
         holdDurationRef.current = 0;
     }, []);
 
+    const transactionTypes = useMemo(
+        () =>
+            customTransactionTypes.map(
+                (transaction) => `${transaction.emoji} ${transaction.category}`,
+            ),
+        [customTransactionTypes],
+    );
+
     // Cleanup timers on unmount
     useEffect(() => {
         return () => {
@@ -56,11 +71,22 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            <SelectPlanCategory
+                options={transactionTypes.reduce((acc, curr) => {
+                    acc[curr] = {
+                        label: curr,
+                        value: curr,
+                    };
+                    return acc;
+                }, {} as Record<string, { label: string; value: string }>)}
+                selectKey='newPlanAllocationCategory'
+                customSnapPoints={['40%', '50%']}
+            />
             <View className='flex flex-col space-y-5 h-[100%] relative px-5'>
                 <SafeAreaView
                     className='flex flex-col space-y-2.5 h-[100%] relative'
                     style={{
-                        paddingTop: RNStatusBar.currentHeight! * 1.875,
+                        paddingTop: RNStatusBar.currentHeight! * 2,
                     }}
                 >
                     <View className='flex flex-col'>
@@ -88,11 +114,14 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
                     >
                         <View>
                             <FlashList
-                                data={TRANSACTION_CATEGORY}
+                                data={categories}
                                 keyExtractor={(item) => item.category}
                                 renderItem={({ item }) => (
                                     <View className='flex flex-col my-2.5'>
-                                        <NewPlanItem category={item.category} emoji={item.emoji} />
+                                        <NewPlanItem
+                                            category={item.category}
+                                            allocation={item.allocation}
+                                        />
                                     </View>
                                 )}
                                 scrollEnabled={false}
@@ -110,7 +139,9 @@ export default function NewPlanAllocation({ storiesRef }: NewPlanAllocationProps
                                 borderColor: '#a855f7',
                                 borderStyle: 'dashed',
                             }}
-                            onPress={() => router.push('/accounts/new-acount')}
+                            onPress={() => {
+                                setShowBottomSheetFlatList('newPlanAllocationCategory', true);
+                            }}
                         >
                             <Text
                                 style={satoshiFont.satoshiBold}

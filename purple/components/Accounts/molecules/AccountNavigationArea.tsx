@@ -138,7 +138,7 @@ export default function AccountNavigationArea() {
                         className='px-4 py-2 flex items-center justify-center rounded-full'
                         onPress={() => {
                             router.push({
-                                pathname: '/transactions/new-transaction',
+                                pathname: '/transactions/new',
                                 params: {
                                     accountId: currentAccount.id,
                                 },

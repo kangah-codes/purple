@@ -55,7 +55,7 @@ export default function NewCategoryScreen() {
                 });
             },
             onSuccess: () => {
-                addCategory(data);
+                addCategory({ ...data, is_custom: 1 });
                 markStepCompleted('customize_categories');
                 Toast.show({
                     type: 'success',

@@ -247,6 +247,30 @@ export function useCreateRecurringTransaction(): UseMutationResult<
     });
 }
 
+export function useEditRecurringTransaction(): UseMutationResult<
+    GenericAPIResponse<RecurringTransaction>,
+    Error,
+    {
+        id: string;
+        data: Partial<CreateRecurringTransaction> & {
+            is_active?: boolean;
+            status?: 'active' | 'paused' | 'cancelled';
+        };
+    }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-recurring-transaction'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.updateRecurringTransaction(id, data);
+    });
+}
+
 export function useUpdateTransaction(): UseMutationResult<
     GenericAPIResponse<Transaction>,
     Error,

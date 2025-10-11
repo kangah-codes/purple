@@ -31,7 +31,7 @@ export default function SpendVsBudgetLineChart() {
         const labelVal = Number(label);
         if (labelVal >= 1000000) return (labelVal / 1000000).toFixed(0) + 'M';
         if (labelVal >= 1000) return (labelVal / 1000).toFixed(0) + 'K';
-        return label;
+        return labelVal.toString();
     }, []);
 
     return (

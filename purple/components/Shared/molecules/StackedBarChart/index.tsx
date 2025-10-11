@@ -234,7 +234,7 @@ export default memo(function CustomBarChart({
                             x2={chartWidth}
                             y2={y}
                             stroke={'#e9d4ff'}
-                            strokeWidth={1}
+                            strokeWidth={1.5}
                             strokeDasharray={[4, 4]}
                             opacity={0.5}
                         />

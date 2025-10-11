@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useAccounts } from '@/components/Accounts/hooks';
+import { useAccountStore } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
-import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
-import Switch from '@/components/Shared/atoms/Switch';
 import TimePicker from '@/components/Shared/atoms/TimePicker';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
@@ -29,10 +27,11 @@ import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-nat
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../constants';
-import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
+import { useTransactionStore, useEditRecurringTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule, getMinimumEndDate } from '../utils';
 import HTTPError from '@/lib/utils/error';
+import { RRule } from 'rrule';
 
 type FormData = {
     amount: string;
@@ -53,23 +52,46 @@ type FormData = {
     end_date?: string;
 };
 
-export default function NewTransactionScreen() {
-    const { type, accountId } = useLocalSearchParams();
+export default function EditRecurringTransactionScreen() {
+    const { type } = useLocalSearchParams();
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
     const queryClient = useQueryClient();
+    const { accounts, getAccountById } = useAccountStore();
     const { logEvent } = useAnalytics();
-    const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
-    const [isRecurring, setIsRecurring] = useState(false);
-    const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
-    const { mutate: createRecurringTransaction, isLoading: isCreatingRecurring } =
-        useCreateRecurringTransaction();
-    const { data } = useAccounts({
-        requestQuery: {},
-    });
-    const isLoading = isCreatingTransaction || isCreatingRecurring;
-    const accounts = data?.data || [];
+    const { currentRecurringTransaction } = useTransactionStore();
+    const [transactionType, setTransactionType] = useState<string>(
+        currentRecurringTransaction?.type ?? (type as string) ?? 'debit',
+    );
+    const { mutate: editRecurringTransaction, isLoading } = useEditRecurringTransaction();
+
+    // Parse the existing recurrence rule to populate form fields
+    const parsedRecurrence = useMemo(() => {
+        if (currentRecurringTransaction?.recurrence_rule) {
+            const parsedRule = RRule.fromString(currentRecurringTransaction.recurrence_rule);
+            return {
+                frequency: RRule.FREQUENCIES[parsedRule.options.freq],
+                dayOfWeek: parsedRule.options.byweekday
+                    ? DAYS_OF_WEEK.find(
+                          (d) => d.value === parsedRule.options.byweekday[0]?.toString(),
+                      )?.label
+                    : undefined,
+                dayOfMonth: parsedRule.options.bymonthday
+                    ? parsedRule.options.bymonthday[0]
+                    : undefined,
+                time: parsedRule.options.dtstart
+                    ? parsedRule.options.dtstart.toISOString()
+                    : new Date().toISOString(),
+            };
+        }
+        return {
+            frequency: 'daily',
+            dayOfWeek: undefined,
+            dayOfMonth: undefined,
+            time: new Date().toISOString(),
+        };
+    }, [currentRecurringTransaction?.recurrence_rule]);
 
     const {
         control,
@@ -78,24 +100,24 @@ export default function NewTransactionScreen() {
         setValue,
     } = useForm<FormData>({
         defaultValues: {
-            amount: '',
-            category: '',
-            note: '',
-            fromAccount: type == 'transfer' ? (accountId as string) ?? '' : '',
-            toAccount: '',
-            type: '',
-            accountId: (accountId as string) ?? '',
-            date: new Date().toISOString(),
-            charges: '',
-            time: new Date().toISOString(),
-            frequency: undefined,
-            dayOfWeek: undefined,
-            dayOfMonth: undefined,
-            recurrence_rule: '',
-            start_date: new Date().toISOString(),
-            end_date: undefined,
+            amount: currentRecurringTransaction?.amount.toString() ?? '',
+            category: currentRecurringTransaction?.category ?? '',
+            note: currentRecurringTransaction?.metadata?.note ?? '',
+            fromAccount: currentRecurringTransaction?.from_account ?? '',
+            toAccount: currentRecurringTransaction?.to_account ?? '',
+            type: currentRecurringTransaction?.type ?? transactionType,
+            accountId: currentRecurringTransaction?.account_id ?? '',
+            frequency: parsedRecurrence.frequency.toLowerCase(),
+            dayOfWeek: parsedRecurrence.dayOfWeek,
+            dayOfMonth: parsedRecurrence.dayOfMonth,
+            recurrence_rule: currentRecurringTransaction?.recurrence_rule ?? '',
+            start_date: currentRecurringTransaction?.start_date,
+            end_date: currentRecurringTransaction?.end_date ?? undefined,
+            time: parsedRecurrence.time,
         },
     });
+
+    console.log(parsedRecurrence, parsedRecurrence.dayOfWeek, currentRecurringTransaction);
 
     const transactionTypes = useMemo(
         () =>
@@ -147,16 +169,23 @@ export default function NewTransactionScreen() {
     const onSubmit = async (data: FormData) => {
         await logEvent('button_tap', {
             button: 'submit',
-            screen: 'new_transactiont_screen',
-            log: 'attempting to create transaction',
+            screen: 'edit_recurring_transaction_screen',
+            log: 'attempting to edit recurring transaction',
             data,
         });
         Keyboard.dismiss();
 
+        if (!currentRecurringTransaction?.id) {
+            Toast.show({
+                type: 'error',
+                props: { text1: 'Error!', text2: 'No transaction to edit' },
+            });
+            return;
+        }
+
         const accountId = transactionType !== 'transfer' ? data.accountId : data.fromAccount;
-        const account = accounts.find((acc) => acc.id === accountId);
+        const account = getAccountById(accountId);
         if (!account) {
-            console.log(account, accounts, accountId, data);
             await logEvent('error_occurred', {
                 error_type: 'NOT_FOUND_ERROR',
                 context: `Account with id ${accountId} not found`,
@@ -164,12 +193,12 @@ export default function NewTransactionScreen() {
             });
             Toast.show({
                 type: 'error',
-                props: { text1: 'Error!', text2: "Couldn't create transaction" },
+                props: { text1: 'Error!', text2: "Couldn't find account" },
             });
             return;
         }
 
-        if (transactionType == 'transfer' && data.fromAccount === data.toAccount) {
+        if (transactionType === 'transfer' && data.fromAccount === data.toAccount) {
             Toast.show({
                 type: 'warning',
                 props: { text1: 'Oops!', text2: 'Cannot transfer to same account' },
@@ -177,51 +206,61 @@ export default function NewTransactionScreen() {
             return;
         }
 
-        if (isRecurring) {
-            // Handle recurring transaction creation
-            const timeString = new Date(data.time).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-            });
+        // Generate new recurrence rule
+        const timeString = new Date(data.time).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
 
-            const rrule = generateICalRRule(
-                data.frequency as 'daily' | 'weekly' | 'monthly',
-                data.dayOfWeek,
-                data.dayOfMonth ? Number(data.dayOfMonth) : undefined,
-                timeString,
-            );
+        const rrule = generateICalRRule(
+            data.frequency as 'daily' | 'weekly' | 'monthly',
+            data.dayOfWeek,
+            data.dayOfMonth ? Number(data.dayOfMonth) : undefined,
+            timeString,
+        );
 
-            let transformedData = transformObject(data, [
-                ['toAccount', 'to_account'],
-                ['fromAccount', 'from_account'],
-                ['accountId', 'account_id', (value) => (value ? value : data.fromAccount)],
-                ['amount', 'amount', (value) => Number(value)],
-                ['charges', 'charges', (value) => Number(value)],
-                ['recurrence_rule', 'recurrence_rule', () => rrule],
-            ]);
+        let transformedData = transformObject(data, [
+            ['toAccount', 'to_account'],
+            ['fromAccount', 'from_account'],
+            ['accountId', 'account_id', (value) => (value ? value : data.fromAccount)],
+            ['amount', 'amount', (value) => Number(value)],
+            ['charges', 'charges', (value) => Number(value)],
+            ['recurrence_rule', 'recurrence_rule', () => rrule],
+            ['note', 'metadata', (value) => ({ note: value })],
+            ['type', 'type', () => transactionType as 'debit' | 'credit' | 'transfer'],
+        ]);
 
-            // For transfers, ensure both from_account and to_account are included
-            if (transactionType === 'transfer') {
-                transformedData = {
-                    ...transformedData,
-                    from_account: data.fromAccount,
-                    to_account: data.toAccount,
-                };
-            } else {
-                // Remove transfer-specific fields for non-transfer transactions
-                transformedData = omit(transformedData, [
-                    'from_account',
-                    'to_account',
-                ]) as typeof transformedData;
-            }
+        // For transfers, ensure both from_account and to_account are included
+        if (transactionType === 'transfer') {
+            transformedData = {
+                ...transformedData,
+                from_account: data.fromAccount,
+                to_account: data.toAccount,
+            };
+        } else {
+            // Remove transfer-specific fields for non-transfer transactions
+            transformedData = omit(transformedData, [
+                'from_account',
+                'to_account',
+            ]) as typeof transformedData;
+        }
 
-            createRecurringTransaction(transformedData, {
+        editRecurringTransaction(
+            { id: currentRecurringTransaction.id, data: transformedData },
+            {
                 onSuccess: () => {
                     queryClient.invalidateQueries(['recurring-transactions']);
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Success!',
+                            text2: 'Recurring transaction updated successfully',
+                        },
+                    });
                     router.back();
                 },
-                onError: (error) => {
+                onError: (error: any) => {
                     if (error instanceof HTTPError) {
                         Toast.show({
                             type: 'error',
@@ -231,52 +270,12 @@ export default function NewTransactionScreen() {
                     }
                     Toast.show({
                         type: 'error',
-                        props: { text1: 'Error!', text2: "Couldn't create transaction" },
+                        props: { text1: 'Error!', text2: "Couldn't update recurring transaction" },
                     });
-                    console.error('Error creating recurring transaction:', error);
+                    console.error('Error updating recurring transaction:', error);
                 },
-            });
-        } else {
-            // Handle regular transaction creation
-            let transformedData = transformObject(data, [
-                ['toAccount', 'to_account'],
-                ['fromAccount', 'from_account'],
-                ['accountId', 'account_id', (value) => (value ? value : data.fromAccount)],
-                ['amount', 'amount', (value) => Number(value)],
-                ['charges', 'charges', (value) => Number(value)],
-            ]);
-
-            if (transactionType !== 'transfer') {
-                transformedData = omit(transformedData, [
-                    'from_account',
-                    'to_account',
-                ]) as typeof transformedData;
-            }
-
-            createTransaction(transformedData, {
-                onError: (err) => {
-                    if (err instanceof HTTPError) {
-                        Toast.show({
-                            type: 'error',
-                            props: { text1: 'Error!', text2: err.message },
-                        });
-                        return;
-                    }
-                    Toast.show({
-                        type: 'error',
-                        props: { text1: 'Error!', text2: "Couldn't create transaction" },
-                    });
-                },
-                onSuccess: () => {
-                    queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
-                    Toast.show({
-                        type: 'success',
-                        props: { text1: 'Success!', text2: 'Transaction created successfully' },
-                    });
-                    router.back();
-                },
-            });
-        }
+            },
+        );
     };
 
     const renderAccountFields = () => {
@@ -445,8 +444,6 @@ export default function NewTransactionScreen() {
     };
 
     const renderRecurringFields = () => {
-        if (!isRecurring) return null;
-
         return (
             <View className='space-y-5'>
                 <View className='h-1 border-b border-purple-100 w-full' />
@@ -671,7 +668,7 @@ export default function NewTransactionScreen() {
 
                         <View className='absolute left-0 right-0 items-center'>
                             <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                                New Transaction
+                                Edit Recurring Transaction
                             </Text>
                         </View>
                     </View>
@@ -709,21 +706,19 @@ export default function NewTransactionScreen() {
                     </View>
 
                     {/* Schedule Summary for recurring transactions */}
-                    {isRecurring && (
-                        <ScheduleSummary
-                            frequency={frequency as any}
-                            dayOfMonth={dayOfMonth}
-                            dayOfWeek={dayOfWeek}
-                            time={time}
-                        />
-                    )}
+                    <ScheduleSummary
+                        frequency={frequency as any}
+                        dayOfMonth={dayOfMonth}
+                        dayOfWeek={dayOfWeek}
+                        time={time}
+                    />
 
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={{
-                        paddingBottom: 100,
+                        paddingBottom: 200,
                     }}
                 >
                     <View className='flex flex-col space-y-1'>
@@ -810,64 +805,14 @@ export default function NewTransactionScreen() {
                         </View>
                     </View>
 
-                    {/* Date picker - only for non-recurring transactions */}
-                    {!isRecurring && (
-                        <View className='space-y-5'>
-                            <View className='h-1 border-b border-purple-100 w-full' />
-                            <View className='flex flex-col space-y-1'>
-                                <Controller
-                                    control={control}
-                                    rules={{
-                                        required: "Date can't be empty",
-                                    }}
-                                    render={({ field: { onChange, value } }) => (
-                                        <DateAndTimePicker
-                                            label='Date'
-                                            pickerKey='newTransactionStartDate'
-                                            onChange={(date) => {
-                                                onChange(date.toISOString());
-                                            }}
-                                            maximumDate={new Date()}
-                                            value={new Date(value)}
-                                        />
-                                    )}
-                                    name='date'
-                                />
-                                {errors.date && (
-                                    <Text
-                                        style={satoshiFont.satoshiMedium}
-                                        className='text-xs text-red-500'
-                                    >
-                                        {errors.date.message}
-                                    </Text>
-                                )}
-                            </View>
-                        </View>
-                    )}
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
                     {renderAccountFields()}
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    {/* Recurring Transaction Toggle */}
-                    <View className='flex flex-row w-full justify-between items-center'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Repeat Transaction
-                        </Text>
-
-                        <View>
-                            <Switch value={isRecurring} onValueChange={setIsRecurring} />
-                        </View>
-                    </View>
 
                     {/* Recurring transaction fields */}
                     {renderRecurringFields()}
 
                     <View className='h-1 border-b border-purple-100 w-full' />
 
-                    <View className='flex flex-col space-y-1 mb-20'>
+                    <View className='flex flex-col space-y-1'>
                         <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Note
                         </Text>
@@ -898,6 +843,8 @@ export default function NewTransactionScreen() {
                             )}
                         </View>
                     </View>
+
+                    <View className='h-1 border-b border-purple-100 w-full' />
                 </ScrollView>
 
                 <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
@@ -935,7 +882,7 @@ export default function NewTransactionScreen() {
                                             style={satoshiFont.satoshiBlack}
                                             className='text-white text-center'
                                         >
-                                            Save
+                                            Update
                                         </Text>
                                     )}
                                 </LinearGradient>
