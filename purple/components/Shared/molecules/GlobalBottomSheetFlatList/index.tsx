@@ -20,6 +20,7 @@ import { keyExtractor } from '@/lib/utils/number';
 import EmptyList from '../ListStates/Empty';
 import { View } from '../../styled';
 
+// TODO: this typing is wrong - it should extend bottomflatlist
 interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
     sheetKey: string;
     data: T[];
@@ -31,6 +32,7 @@ interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
         | SharedValue<ComponentType<any> | null | undefined>
         | null
         | undefined;
+    ListFooterComponent?: any;
 }
 
 function CustomBottomSheetFlatList<T>({
@@ -40,6 +42,7 @@ function CustomBottomSheetFlatList<T>({
     flatListContentContainerStyle,
     children,
     itemSeparator,
+    ListFooterComponent,
     ...rest
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -149,6 +152,7 @@ function CustomBottomSheetFlatList<T>({
                 maxToRenderPerBatch={10}
                 windowSize={10}
                 updateCellsBatchingPeriod={50}
+                ListFooterComponent={ListFooterComponent}
             />
         </BottomSheet>
     );

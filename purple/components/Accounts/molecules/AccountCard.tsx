@@ -1,11 +1,11 @@
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, stripEmojis, truncateStringIfLongerThan } from '@/lib/utils/string';
 import { formatDistanceToNow } from 'date-fns';
 import { router } from 'expo-router';
 import React from 'react';
-import { useAccountStore, useCalculateAccountData } from '../hooks';
+import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
 
 type AccountCardProps = {

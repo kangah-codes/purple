@@ -33,6 +33,7 @@ import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule, getMinimumEndDate } from '../utils';
 import HTTPError from '@/lib/utils/error';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 
 type FormData = {
     amount: string;
@@ -54,6 +55,7 @@ type FormData = {
 };
 
 export default function NewTransactionScreen() {
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { type, accountId } = useLocalSearchParams();
     const {
         preferences: { customTransactionTypes },
@@ -81,7 +83,7 @@ export default function NewTransactionScreen() {
             amount: '',
             category: '',
             note: '',
-            fromAccount: type == 'transfer' ? (accountId as string) ?? '' : '',
+            fromAccount: type == 'transfer' ? ((accountId as string) ?? '') : '',
             toAccount: '',
             type: '',
             accountId: (accountId as string) ?? '',
@@ -297,13 +299,19 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionDebitAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.id] = {
-                                                    label: curr.name,
-                                                    value: curr.id,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accounts.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.id] = {
+                                                        label: curr.name,
+                                                        value: curr.id,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -339,13 +347,19 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCreditAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.id] = {
-                                                    label: curr.name,
-                                                    value: curr.id,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accounts.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.id] = {
+                                                        label: curr.name,
+                                                        value: curr.id,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -416,13 +430,16 @@ export default function NewTransactionScreen() {
                             <>
                                 <SelectField
                                     selectKey='newTransactionAccount'
-                                    options={accounts.reduce((acc, curr) => {
-                                        acc[curr.id] = {
-                                            label: curr.name,
-                                            value: curr.id,
-                                        };
-                                        return acc;
-                                    }, {} as Record<string, { label: string; value: string }>)}
+                                    options={accounts.reduce(
+                                        (acc, curr) => {
+                                            acc[curr.id] = {
+                                                label: curr.name,
+                                                value: curr.id,
+                                            };
+                                            return acc;
+                                        },
+                                        {} as Record<string, { label: string; value: string }>,
+                                    )}
                                     customSnapPoints={['50%', '70%']}
                                     value={value}
                                     onChange={(val) => {
@@ -465,13 +482,16 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, value } }) => (
                                 <SelectField
                                     selectKey='transactionRecurrenceRule'
-                                    options={TRANSACTION_RECURRENCE_RULES.reduce((acc, curr) => {
-                                        acc[curr.value] = {
-                                            label: curr.label,
-                                            value: curr.value,
-                                        };
-                                        return acc;
-                                    }, {} as Record<string, { label: string; value: string }>)}
+                                    options={TRANSACTION_RECURRENCE_RULES.reduce(
+                                        (acc, curr) => {
+                                            acc[curr.value] = {
+                                                label: curr.label,
+                                                value: curr.value,
+                                            };
+                                            return acc;
+                                        },
+                                        {} as Record<string, { label: string; value: string }>,
+                                    )}
                                     customSnapPoints={['50%', '70%']}
                                     value={value !== undefined ? String(value) : undefined}
                                     onChange={onChange}
@@ -529,13 +549,16 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, value } }) => (
                                     <SelectField
                                         selectKey='dayOfWeekSelect'
-                                        options={DAYS_OF_WEEK.reduce((acc, curr) => {
-                                            acc[curr.value] = {
-                                                label: curr.label,
-                                                value: curr.value,
-                                            };
-                                            return acc;
-                                        }, {} as Record<string, { label: string; value: string }>)}
+                                        options={DAYS_OF_WEEK.reduce(
+                                            (acc, curr) => {
+                                                acc[curr.value] = {
+                                                    label: curr.label,
+                                                    value: curr.value,
+                                                };
+                                                return acc;
+                                            },
+                                            {} as Record<string, { label: string; value: string }>,
+                                        )}
                                         customSnapPoints={['50%', '70%']}
                                         value={value !== undefined ? String(value) : undefined}
                                         onChange={onChange}
@@ -566,13 +589,16 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, value } }) => (
                                     <SelectField
                                         selectKey='dayOfMonthSelect'
-                                        options={DAYS_OF_MONTH.reduce((acc, curr) => {
-                                            acc[curr.value] = {
-                                                label: curr.label,
-                                                value: curr.value,
-                                            };
-                                            return acc;
-                                        }, {} as Record<string, { label: string; value: string }>)}
+                                        options={DAYS_OF_MONTH.reduce(
+                                            (acc, curr) => {
+                                                acc[curr.value] = {
+                                                    label: curr.label,
+                                                    value: curr.value,
+                                                };
+                                                return acc;
+                                            },
+                                            {} as Record<string, { label: string; value: string }>,
+                                        )}
                                         customSnapPoints={['50%', '70%']}
                                         value={value !== undefined ? String(value) : undefined}
                                         onChange={onChange}
@@ -601,13 +627,13 @@ export default function NewTransactionScreen() {
                                 onChange={(date) => {
                                     onChange(date.toISOString());
                                     // update end date to be at least the minimum end date based on frequency and new start date
-                                    setValue(
-                                        'end_date',
-                                        getMinimumEndDate(
-                                            frequency,
-                                            date.toISOString(),
-                                        ).toISOString(),
-                                    );
+                                    // setValue(
+                                    //     'end_date',
+                                    //     getMinimumEndDate(
+                                    //         frequency,
+                                    //         date.toISOString(),
+                                    //     ).toISOString(),
+                                    // );
                                 }}
                                 // minimumDate={new Date()}
                                 value={value}
@@ -784,16 +810,52 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={transactionTypes.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    { label: string; value: string }
+                                                >,
+                                            )}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}
+                                            renderFooter={() => (
+                                                <View className='my-5'>
+                                                    <TouchableOpacity
+                                                        style={{ width: '100%' }}
+                                                        onPress={() => {
+                                                            router.push(
+                                                                '/settings/new-transaction-category',
+                                                            );
+                                                            setShowBottomSheetFlatList(
+                                                                'newTransactionCategory',
+                                                                false,
+                                                            );
+                                                        }}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <LinearGradient
+                                                            className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                                            colors={['#c084fc', '#9333ea']}
+                                                            style={{ width: '100%' }}
+                                                        >
+                                                            <Text
+                                                                style={satoshiFont.satoshiBlack}
+                                                                className='text-white text-center'
+                                                            >
+                                                                New Category
+                                                            </Text>
+                                                        </LinearGradient>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
                                         />
                                     </>
                                 )}

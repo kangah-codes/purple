@@ -62,10 +62,13 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
                 )}
             </View>
             <View className='h-1 border-purple-100 border-b w-full mb-2.5' />
-            <View className='flex flex-col space-y-4'>
-                {accounts.map((account) => (
+            <View className='flex flex-col'>
+                {accounts.map((account, index) => (
                     <View>
                         <AccountCard account={account} key={account.id} />
+                        {index !== accounts.length - 1 && (
+                            <View className='h-1 border-purple-100 border-b w-full my-2' />
+                        )}
                     </View>
                 ))}
             </View>

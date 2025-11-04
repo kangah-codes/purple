@@ -73,23 +73,22 @@ const defaultSteps: StartupStep[] = [
 export function useStartupGuide() {
     const { preferences, setPreference } = usePreferences();
 
-    // Get accounts data to check completion
-    const { data: accountsData } = useAccounts({ requestQuery: {} });
+    const { data: accountsData, refetch: refetchAccounts } = useAccounts({ requestQuery: {} });
     const accounts = accountsData?.data || [];
+    useRefreshOnFocus(refetchAccounts);
 
-    // Get transactions data to check completion
-    const { data: transactionsData, refetch } = useTransactions({ requestQuery: { page_size: 1 } });
-    useRefreshOnFocus(refetch);
+    const { data: transactionsData, refetch: refetchTransactions } = useTransactions({
+        requestQuery: { page_size: 1 },
+    });
+    useRefreshOnFocus(refetchTransactions);
     const transactions = transactionsData?.data || [];
 
-    // Initialize startup guide in preferences if not exists
     const startupGuide = preferences.startupGuide || {
         isCompleted: false,
         completedSteps: [],
         availableSteps: [],
     };
 
-    // Cache-resilient completion detection based on actual user data from database
     const detectCompletionFromData = useCallback(
         (stepId: StartupStepId): boolean => {
             switch (stepId) {
@@ -99,10 +98,8 @@ export function useStartupGuide() {
                             .length > 0
                     );
                 case 'add_account':
-                    // check if user has any accounts in database
                     return accounts.length > 0;
                 case 'first_transaction':
-                    // check if user has any transactions in database
                     return transactions.length > 0;
                 case 'saving_plan':
                 case 'budget':
@@ -120,7 +117,6 @@ export function useStartupGuide() {
         ],
     );
 
-    // Get steps with current completion status
     const getSteps = useCallback((): StartupStep[] => {
         return defaultSteps.map((step) => ({
             ...step,
@@ -163,7 +159,6 @@ export function useStartupGuide() {
         };
     }, [getSteps]);
 
-    // Sync actual data completion back to cache (cache restoration)
     useEffect(() => {
         const steps = getSteps();
         const actuallyCompletedSteps = steps
@@ -182,7 +177,7 @@ export function useStartupGuide() {
             setPreference('startupGuide', {
                 ...startupGuide,
                 isCompleted: isGuideCompleted,
-                completedSteps: [...new Set([...cachedSteps, ...actuallyCompletedSteps])], // Merge and dedupe
+                completedSteps: [...new Set([...cachedSteps, ...actuallyCompletedSteps])],
             });
         }
     }, [getSteps, detectCompletionFromData, startupGuide, setPreference]);

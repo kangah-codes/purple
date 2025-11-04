@@ -2,7 +2,11 @@ import { EditSquareIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, View, TouchableOpacity } from '@/components/Shared/styled';
-import { useDeleteTransaction, useTransactionStore } from '@/components/Transactions/hooks';
+import {
+    useDeleteTransaction,
+    useInfiniteTransactions,
+    useTransactionStore,
+} from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
 import { ZIGZAG_VIEW } from '@/lib/constants/ZigZagView';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -32,6 +36,11 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
         () => formatDateTime(currentTransaction?.created_at ?? ''),
         [currentTransaction?.created_at],
     );
+    const { refetch } = useInfiniteTransactions({
+        requestQuery: {
+            page_size: 10,
+        },
+    });
     const queryClient = useQueryClient();
     const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
     const { mutate } = useDeleteTransaction({
@@ -68,6 +77,7 @@ export default function CurrentTransactionModal({ modalKey }: CurrentTransaction
             },
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts', 'user'] });
+                refetch();
                 deleteTransaction(currentTransaction?.id ?? '');
                 Toast.show({
                     type: 'success',

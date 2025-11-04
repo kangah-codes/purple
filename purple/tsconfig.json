@@ -3,10 +3,10 @@
     "compilerOptions": {
         "jsx": "react",
         "strict": true,
-        "ignoreDeprecations": "6.0",
         "paths": {
             "@/*": ["./*"]
-        }
+        },
+        "noImplicitAny": false
     },
     "include": [
         "**/*.ts",

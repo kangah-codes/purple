@@ -117,8 +117,6 @@ export default function EditRecurringTransactionScreen() {
         },
     });
 
-    console.log(parsedRecurrence, parsedRecurrence.dayOfWeek, currentRecurringTransaction);
-
     const transactionTypes = useMemo(
         () =>
             customTransactionTypes.map(
@@ -157,6 +155,8 @@ export default function EditRecurringTransactionScreen() {
         control,
         name: 'dayOfMonth',
     });
+
+    console.log(errors, 'ERRORS');
 
     const date = dateISO ? new Date(dateISO) : new Date();
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -230,7 +230,6 @@ export default function EditRecurringTransactionScreen() {
             ['note', 'metadata', (value) => ({ note: value })],
             ['type', 'type', () => transactionType as 'debit' | 'credit' | 'transfer'],
         ]);
-
         // For transfers, ensure both from_account and to_account are included
         if (transactionType === 'transfer') {
             transformedData = {
@@ -598,13 +597,13 @@ export default function EditRecurringTransactionScreen() {
                                 onChange={(date) => {
                                     onChange(date.toISOString());
                                     // update end date to be at least the minimum end date based on frequency and new start date
-                                    setValue(
-                                        'end_date',
-                                        getMinimumEndDate(
-                                            frequency,
-                                            date.toISOString(),
-                                        ).toISOString(),
-                                    );
+                                    // setValue(
+                                    //     'end_date',
+                                    //     getMinimumEndDate(
+                                    //         frequency,
+                                    //         date.toISOString(),
+                                    //     ).toISOString(),
+                                    // );
                                 }}
                                 // minimumDate={new Date()}
                                 value={value}
@@ -712,6 +711,17 @@ export default function EditRecurringTransactionScreen() {
                         dayOfWeek={dayOfWeek}
                         time={time}
                     />
+
+                    <View className='bg-purple-50 border border-purple-100 rounded-3xl w-full mt-2.5 flex flex-col'>
+                        <View className='flex flex-row items-center p-3'>
+                            <Text
+                                style={satoshiFont.satoshiBold}
+                                className='text-xs text-purple-600'
+                            >
+                                Editing this transaction will only affect future occurrences.
+                            </Text>
+                        </View>
+                    </View>
 
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>

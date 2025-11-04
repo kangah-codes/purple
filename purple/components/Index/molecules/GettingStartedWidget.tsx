@@ -7,9 +7,9 @@ import React, { useCallback } from 'react';
 import { FlatList } from 'react-native';
 
 export default function GettingStartedWidget() {
-    const { steps, completed, total, shouldShowGuide, markStepCompleted } = useStartupGuide();
+    const { steps, completed, total, shouldShowGuide } = useStartupGuide();
 
-    // Don't show widget if startup guide is completed
+    // dont show widget if startup guide is completed
     if (!shouldShowGuide) {
         return null;
     }
@@ -22,7 +22,6 @@ export default function GettingStartedWidget() {
 
     const renderItem = useCallback(
         ({ item, index }: { item: any; index: number }) => {
-            // Determine if this item can be interacted with
             const allPreviousCompleted = steps
                 .slice(0, index)
                 .every((prevItem) => prevItem.isCompleted);
@@ -56,7 +55,6 @@ export default function GettingStartedWidget() {
                         <Checkbox
                             checked={item.isCompleted}
                             onChange={() => isClickable && handleItemPress(item.id, item.callback)}
-                            // disabled={true}
                         />
                     </View>
                 </View>
@@ -66,10 +64,7 @@ export default function GettingStartedWidget() {
     );
 
     return (
-        <View
-            className='w-full rounded-3xl bg-purple-50 border border-purple-100 p-5 flex flex-col space-y-5 mt-5'
-            // style={styles.shadow}
-        >
+        <View className='w-full rounded-3xl bg-purple-50 border border-purple-100 p-5 flex flex-col space-y-5 mt-5'>
             <View className='flex flex-col'>
                 <Text style={satoshiFont.satoshiBlack} className='text-base'>
                     Getting Started
