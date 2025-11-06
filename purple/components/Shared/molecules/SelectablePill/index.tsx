@@ -101,7 +101,7 @@ export default function SelectablePill({
                         satoshiFont.satoshiBold,
                     ]}
                     numberOfLines={1}
-                    className='text-xs'
+                    className='text-sm'
                 >
                     {label}
                 </Text>
@@ -111,7 +111,7 @@ export default function SelectablePill({
                         width={14}
                         height={14}
                         stroke={isSelected ? selectedIconColor : iconColor}
-                        strokeWidth={2}
+                        strokeWidth={3}
                     />
                 </Animated.View>
             </Animated.View>
