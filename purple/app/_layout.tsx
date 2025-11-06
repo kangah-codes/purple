@@ -18,7 +18,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useCallback, useState } from 'react';
-import { LogBox, View, Text } from 'react-native';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -102,16 +102,13 @@ if (__DEV__) {
 }
 
 export default Sentry.wrap(function RootLayout() {
-    const [appIsReady, setAppIsReady] = useState(true);
-    const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+    const [appIsReady, setAppIsReady] = useState(false);
+
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
             if (!__DEV__) {
                 try {
-                    setUpdateStatus('Checking for updates...');
-
                     const update = await Updates.checkForUpdateAsync();
-
                     console.log('Update check result:', {
                         isAvailable: update.isAvailable,
                         manifest: update.manifest?.id,
@@ -119,77 +116,24 @@ export default Sentry.wrap(function RootLayout() {
                     });
 
                     if (update.isAvailable) {
-                        setUpdateStatus('Update found! Downloading...');
-
                         try {
-                            // Simplified fetch for debugging
                             console.log('Starting update fetch...');
                             const fetchResult = await Updates.fetchUpdateAsync();
                             console.log('Fetch completed:', fetchResult);
 
-                            console.log('Fetch result:', fetchResult);
-
                             if (fetchResult && 'isNew' in fetchResult && fetchResult.isNew) {
-                                setUpdateStatus('Update downloaded! Restarting...');
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
                                 await Updates.reloadAsync();
                                 return;
                             } else {
-                                setUpdateStatus('Update ready, restarting...');
                                 await Updates.reloadAsync();
                                 return;
                             }
                         } catch (fetchError) {
-                            const errorMessage =
-                                fetchError instanceof Error
-                                    ? fetchError.message
-                                    : 'Download failed';
-
                             console.log('Full fetch error:', fetchError);
-
-                            setUpdateStatus(`Download failed: ${errorMessage}`);
-
-                            // Log detailed error to Sentry
-                            Sentry.captureException(fetchError, {
-                                tags: { component: 'update_fetch' },
-                                extra: {
-                                    updateInfo: update,
-                                    errorDetails: {
-                                        message: errorMessage,
-                                        stack:
-                                            fetchError instanceof Error
-                                                ? fetchError.stack
-                                                : undefined,
-                                    },
-                                },
-                            });
-
-                            setTimeout(() => setUpdateStatus(null), 1000);
                         }
-                    } else {
-                        setUpdateStatus('No updates available');
-                        setTimeout(() => setUpdateStatus(null), 1000);
                     }
                 } catch (updateError) {
-                    const errorMessage =
-                        updateError instanceof Error ? updateError.message : 'Unknown error';
-
                     console.log('Update check error:', updateError);
-
-                    setUpdateStatus(`Update check failed: ${errorMessage}`);
-
-                    // Log to Sentry with more context
-                    Sentry.captureException(updateError, {
-                        tags: { component: 'update_check' },
-                        extra: {
-                            errorDetails: {
-                                message: errorMessage,
-                                stack: updateError instanceof Error ? updateError.stack : undefined,
-                            },
-                        },
-                    });
-
-                    setTimeout(() => setUpdateStatus(null), 1000);
                 }
             }
 
@@ -204,42 +148,6 @@ export default Sentry.wrap(function RootLayout() {
 
     if (!appIsReady) {
         return null;
-    }
-
-    if (updateStatus) {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'black',
-                    padding: 20,
-                }}
-            >
-                <Text
-                    style={{
-                        color: 'white',
-                        fontSize: 18,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                        marginBottom: 20,
-                    }}
-                >
-                    {updateStatus}
-                </Text>
-                <View
-                    style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        borderWidth: 3,
-                        borderColor: 'white',
-                        borderTopColor: 'transparent',
-                    }}
-                />
-            </View>
-        );
     }
 
     return (

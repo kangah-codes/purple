@@ -161,7 +161,7 @@ export default ({ config }) => {
             url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
             fallbackToCacheTimeout: 0,
             runtimeVersion: 'appVersion',
-            enabled: false, // Temporarily disabled for testing
+            enabled: true,
         },
         runtimeVersion: {
             policy: 'appVersion',
