@@ -1,87 +1,129 @@
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, View, TouchableOpacity, Text } from '@/components/Shared/styled';
-import {
-    useDeleteTransaction,
-    useInfiniteTransactions,
-    useTransactionStore,
-} from '@/components/Transactions/hooks';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import { formatDateTime } from '@/lib/utils/date';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import Toast from 'react-native-toast-message';
-import { useQueryClient } from 'react-query';
-import * as Haptics from 'expo-haptics';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
-
+import AnimatedAccordion, { AccordionItem } from '@/components/Shared/molecules/AnimatedAccordion';
+import SelectablePill from '@/components/Shared/molecules/SelectablePill';
+import tw from 'twrnc';
 const snapPoints = ['55%', '70%'];
-const linearGradient = ['#c084fc', '#9333ea'];
-const drawerBackground = Platform.OS === 'android' ? '#faf5ff' : '#fff';
 
 export default function TransactionsFilter() {
-    const { currentTransaction, deleteTransaction } = useTransactionStore();
-    const transactionDate = useMemo(
-        () => formatDateTime(currentTransaction?.created_at ?? ''),
-        [currentTransaction?.created_at],
-    );
-    const { refetch } = useInfiniteTransactions({
-        requestQuery: {
-            page_size: 10,
-        },
-    });
-    const queryClient = useQueryClient();
-    const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { mutate } = useDeleteTransaction({
-        transactionID: currentTransaction?.id ?? '',
-    });
+    const { bottomSheetModalKeys } = useBottomSheetModalStore();
     const { logEvent } = useAnalytics();
+    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
+    const [selectedAccounts, setSelectedAccounts] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const trackScreenView = async () => {
             if (bottomSheetModalKeys['transactionsFilter']) {
                 await logEvent('screen_view', {
-                    screen: 'transaction_modal',
-                    transaction: currentTransaction,
+                    screen: 'transactions_filter_modal',
                 });
             }
         };
 
         trackScreenView();
-    }, [bottomSheetModalKeys]);
+    }, [bottomSheetModalKeys, logEvent]);
 
-    const deleteTransactionCb = useCallback(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        setShowBottomSheetModal('transactionsFilter', false);
-        mutate(undefined, {
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    props: {
-                        text1: 'Error!',
-                        text2: 'There was an issue deleting transaction',
-                    },
-                });
-                setShowBottomSheetModal('transactionsFilter', false);
-            },
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts', 'user'] });
-                refetch();
-                deleteTransaction(currentTransaction?.id ?? '');
-                Toast.show({
-                    type: 'success',
-                    props: {
-                        text1: 'Success!',
-                        text2: 'Transaction deleted successfully',
-                    },
-                });
-            },
+    const handleTypeSelect = (id: string) => {
+        setSelectedTypes((prev) => new Set([...prev, id]));
+    };
+
+    const handleTypeDeselect = (id: string) => {
+        setSelectedTypes((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(id);
+            return newSet;
         });
-    }, []);
+    };
 
-    if (!currentTransaction) return null;
+    const handleAccountSelect = (id: string) => {
+        setSelectedAccounts((prev) => new Set([...prev, id]));
+    };
+
+    const handleAccountDeselect = (id: string) => {
+        setSelectedAccounts((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(id);
+            return newSet;
+        });
+    };
+    console.log('Selected Types:', selectedTypes);
+    const accordionItems: AccordionItem[] = [
+        {
+            id: 'type',
+            title: 'Type',
+            content: (
+                <View className='p-5 bg-purple-50'>
+                    <View className='flex flex-row space-x-2'>
+                        <View>
+                            <SelectablePill
+                                id='income'
+                                label='Income'
+                                isSelected={selectedTypes.has('income')}
+                                onSelect={handleTypeSelect}
+                                onDeselect={handleTypeDeselect}
+                                textStyle={satoshiFont.satoshiMedium}
+                                selectedTextStyle={satoshiFont.satoshiBold}
+                            />
+                        </View>
+                        <View>
+                            <SelectablePill
+                                id='expense'
+                                label='Expense'
+                                isSelected={selectedTypes.has('expense')}
+                                onSelect={handleTypeSelect}
+                                onDeselect={handleTypeDeselect}
+                                textStyle={satoshiFont.satoshiMedium}
+                                selectedTextStyle={satoshiFont.satoshiBold}
+                            />
+                        </View>
+                    </View>
+                </View>
+            ),
+        },
+        {
+            id: 'account',
+            title: 'Account',
+            content: (
+                <View className='px-5 pb-4'>
+                    <View className='flex flex-row flex-wrap'>
+                        <SelectablePill
+                            id='checking'
+                            label='Checking Account'
+                            isSelected={selectedAccounts.has('checking')}
+                            onSelect={handleAccountSelect}
+                            onDeselect={handleAccountDeselect}
+                            textStyle={satoshiFont.satoshiMedium}
+                            selectedTextStyle={satoshiFont.satoshiBold}
+                        />
+                        <SelectablePill
+                            id='savings'
+                            label='Savings Account'
+                            isSelected={selectedAccounts.has('savings')}
+                            onSelect={handleAccountSelect}
+                            onDeselect={handleAccountDeselect}
+                            textStyle={satoshiFont.satoshiMedium}
+                            selectedTextStyle={satoshiFont.satoshiBold}
+                        />
+                        <SelectablePill
+                            id='credit'
+                            label='Credit Card'
+                            isSelected={selectedAccounts.has('credit')}
+                            onSelect={handleAccountSelect}
+                            onDeselect={handleAccountDeselect}
+                            textStyle={satoshiFont.satoshiMedium}
+                            selectedTextStyle={satoshiFont.satoshiBold}
+                        />
+                    </View>
+                </View>
+            ),
+        },
+    ];
 
     return (
         <CustomBottomSheetModal
@@ -100,39 +142,21 @@ export default function TransactionsFilter() {
                             Filters
                         </Text>
                     </View>
-                    <View className='w-full flex flex-col space-y-4 px-5'>
-                        <View className='w-full flex flex-row justify-between items-center'>
-                            <Text
-                                style={satoshiFont.satoshiBold}
-                                className='text-sm text-center text-gray-900'
-                            >
-                                Type
-                            </Text>
 
-                            <ChevronDownIcon
-                                width={16}
-                                height={16}
-                                stroke='#9333EA'
-                                strokeWidth={2}
-                            />
-                        </View>
-                    </View>
-                    <View className='w-full flex flex-col space-y-4 px-5'>
-                        <View className='w-full flex flex-row justify-between items-center'>
-                            <Text
-                                style={satoshiFont.satoshiBold}
-                                className='text-sm text-center text-gray-900'
-                            >
-                                Account
-                            </Text>
-                            <ChevronDownIcon
-                                width={16}
-                                height={16}
-                                stroke='#9333EA'
-                                strokeWidth={2}
-                            />
-                        </View>
-                    </View>
+                    <AnimatedAccordion
+                        items={accordionItems}
+                        titleStyle={{
+                            text: {
+                                ...satoshiFont.satoshiBold,
+                            },
+                            container: {
+                                ...tw`bg-white border-b border-purple-100`,
+                            },
+                        }}
+                        chevronColor='#9333EA'
+                        allowMultiple={false}
+                        animationDuration={250}
+                    />
                 </View>
                 <View className='flex flex-row space-x-2.5 justify-between w-full absolute bottom-5 px-5'>
                     <View className='flex-1'>
