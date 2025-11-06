@@ -109,6 +109,7 @@ export default Sentry.wrap(function RootLayout() {
             if (!__DEV__) {
                 try {
                     const update = await Updates.checkForUpdateAsync();
+
                     console.log('Update check result:', {
                         isAvailable: update.isAvailable,
                         manifest: update.manifest?.id,
