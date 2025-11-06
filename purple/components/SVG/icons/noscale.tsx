@@ -31,6 +31,34 @@ export function SearchIcon(props: SvgProps) {
     );
 }
 
+export function XIcon(props: SvgProps) {
+    return (
+        <Svg fill='none' {...props} viewBox='0 0 24 24'>
+            <Path
+                d='M17 7L7 17M7 7L17 17'
+                stroke={props.stroke}
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={props.strokeWidth ?? 2}
+            />
+        </Svg>
+    );
+}
+
+export function FilterLinesIcon(props: SvgProps) {
+    return (
+        <Svg viewBox='0 0 24 24' fill='none' {...props}>
+            <Path
+                d='M6 12H18M3 6H21M9 18H15'
+                stroke={props.stroke}
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={props.strokeWidth ?? 2}
+            />
+        </Svg>
+    );
+}
+
 export function CoinSwapIcon(props: SvgProps) {
     return (
         <Svg fill='none' viewBox='0 0 24 24' {...props}>

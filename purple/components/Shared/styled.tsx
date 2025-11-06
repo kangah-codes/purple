@@ -20,10 +20,11 @@ function _UnstyledText(props: _Text['props']) {
     return <_Text {...props} style={[props.style]} />;
 }
 
-function UnstyledTextInput(props: _TextInput['props']) {
+function UnstyledTextInput(props: _TextInput['props'] & { animateBorder?: boolean }) {
     const [isFocused, setIsFocused] = useState(false);
     const borderWidth = useRef(new Animated.Value(1)).current;
     const borderColor = useRef(new Animated.Value(0)).current;
+    const shouldAnimateBorder = props.animateBorder ?? true;
 
     useEffect(() => {
         Animated.parallel([
@@ -61,7 +62,8 @@ function UnstyledTextInput(props: _TextInput['props']) {
                 props.style,
                 {
                     borderWidth,
-                    borderColor: animatedBorderColor,
+                    // TODO: i should be able to disable default border
+                    borderColor: shouldAnimateBorder ? animatedBorderColor : undefined,
                 },
             ]}
         />

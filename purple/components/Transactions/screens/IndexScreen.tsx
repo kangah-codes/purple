@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, StatusBar as RNStatusBar, StyleSheet, FlatList } from 'react-native';
 import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import RecurringTransactionsWidget from '../molecules/RecurringTransactionsWidget';
@@ -12,10 +12,31 @@ import { groupBy } from '@/lib/utils/helpers';
 import { format } from 'date-fns';
 import { useInfiniteTransactions } from '../hooks';
 import { Transaction } from '../schema';
+import { useDebounce } from '@/lib/utils/debounce';
 
 export default function IndexScreen() {
+    const flatListRef = useRef<FlatList>(null);
+    const [searchValue, setSearchValue] = useState('');
+    const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
+
+    // Debounce search to avoid too many API calls
+    const debouncedSetSearch = useDebounce((value: string) => {
+        setDebouncedSearchValue(value);
+    }, 500);
+
+    const handleSearchChange = useCallback(
+        (value: string) => {
+            setSearchValue(value);
+            debouncedSetSearch(value);
+        },
+        [debouncedSetSearch],
+    );
+
     const { data, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteTransactions({
-        requestQuery: { page_size: 10 },
+        requestQuery: {
+            page_size: 10,
+            ...(debouncedSearchValue !== '' && { search_value: debouncedSearchValue }),
+        },
         options: {
             onError: () => {
                 Toast.show({
@@ -60,6 +81,34 @@ export default function IndexScreen() {
 
     useRefreshOnFocus(refetch);
 
+    const scrollToTransactionsList = useCallback(() => {
+        if (flatListRef.current) {
+            if (groupedTransactionData.length > 0) {
+                setTimeout(() => {
+                    try {
+                        flatListRef.current?.scrollToIndex({
+                            index: 0,
+                            animated: true,
+                            viewPosition: 0,
+                        });
+                    } catch {
+                        flatListRef.current?.scrollToOffset({
+                            offset: 250, // est height of RecurringTransactionsWidget
+                            animated: true,
+                        });
+                    }
+                }, 100);
+            } else {
+                setTimeout(() => {
+                    flatListRef.current?.scrollToOffset({
+                        offset: 250, // est height of RecurringTransactionsWidget
+                        animated: true,
+                    });
+                }, 100);
+            }
+        }
+    }, [groupedTransactionData]);
+
     const fetchingNextRef = useRef(false);
     const initialMountRef = useRef(true);
     useEffect(() => {
@@ -96,7 +145,11 @@ export default function IndexScreen() {
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
-            <TransactionsNavigationArea />
+            <TransactionsNavigationArea
+                onSearchFocus={scrollToTransactionsList}
+                onSearchChange={handleSearchChange}
+                searchValue={searchValue}
+            />
 
             {/* <View className='relative'> */}
             {/* Shadow overlay */}
@@ -106,7 +159,7 @@ export default function IndexScreen() {
                         position: 'absolute',
                         left: 0,
                         right: 0,
-                        top: (RNStatusBar.currentHeight ?? 0) + 60,
+                        top: (RNStatusBar.currentHeight ?? 0) + 60 + 58,
                         height: 20,
                         zIndex: 999,
                     },
@@ -123,8 +176,9 @@ export default function IndexScreen() {
             </Animated.View>
 
             <FlatList
+                ref={flatListRef}
                 data={groupedTransactionData}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.groupName}
                 renderItem={renderItem}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}

@@ -596,28 +596,41 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             accountGroup = false,
             type = false,
             sortOrder = 'desc',
+            search_value = false,
         } = query;
-        const offset = (page - 1) * page_size;
         const params: any[] = [];
+        const searchParams: any[] = [];
         const orderDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
         let paginationClause = '';
         let whereClause = 't.deleted_at IS NULL';
+        let searchClause = '';
+
         if (accountID) {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
+            searchParams.push(accountID);
         }
         if (accountGroup) {
             whereClause += ' AND t.account_id IN (SELECT id FROM accounts WHERE category = ?)';
             params.push(accountGroup);
+            searchParams.push(accountGroup);
         }
         if (start_date && end_date) {
             whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
             params.push(start_date, end_date);
+            searchParams.push(start_date, end_date);
+        }
+        if (search_value) {
+            searchClause = ' AND (t.note LIKE ? OR t.category LIKE ? OR a.name LIKE ?)';
+            const likeTerm = `%${search_value}%`;
+            params.push(likeTerm, likeTerm, likeTerm);
+            searchParams.push(likeTerm, likeTerm, likeTerm);
         }
         if (type) {
             whereClause += ' AND type = ?';
             params.push(type);
+            searchParams.push(type);
         }
         if (Number.isFinite(page_size)) {
             const offset = (page - 1) * page_size;
@@ -625,13 +638,17 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             params.push(page_size, offset);
         }
 
+        // For count query, use JOIN if search includes account name
+        const countQuery = search_value
+            ? `SELECT COUNT(*) FROM transactions t INNER JOIN accounts a ON t.account_id = a.id WHERE ${whereClause}${searchClause}`
+            : `SELECT COUNT(*) FROM transactions t WHERE ${whereClause}`;
+
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
-            `SELECT COUNT(*) FROM transactions t WHERE ${whereClause}`,
-            [...params],
+            countQuery,
+            search_value ? [...searchParams] : [...params.slice(0, -2)], // exclude pagination params
         );
         if (!result) throw new Error('Error fetching transactions');
 
-        params.push(page_size, offset);
         const transactions = await this.db.getAllAsync<
             Transaction & {
                 account_id: string;
@@ -649,7 +666,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 a.subcategory as account_subcategory
             FROM transactions t
             INNER JOIN accounts a ON t.account_id = a.id
-            WHERE ${whereClause}
+            WHERE ${whereClause}${searchClause}
             ORDER BY t.created_at ${orderDirection}
             ${paginationClause}`,
             params,

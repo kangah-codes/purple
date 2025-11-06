@@ -37,12 +37,8 @@ export default ({ config }) => {
     return {
         ...config,
         name: isDev ? 'Purple Dev' : isRc ? 'Purple RC' : 'Purple',
-        slug: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
-        scheme: isDev
-            ? 'com.akangah89.PurpleDev'
-            : isRc
-            ? 'com.akangah89.PurpleRC'
-            : 'com.akangah89.Purple',
+        slug: 'purple',
+        scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
         version: pkg.version,
         orientation: 'portrait',
         icon: './assets/images/icon.png',
@@ -60,16 +56,16 @@ export default ({ config }) => {
             bundleIdentifier: isDev
                 ? 'com.akangah89.PurpleDev'
                 : isRc
-                ? 'com.akangah89.PurpleRc'
-                : 'com.akangah89.Purple',
-            scheme: isDev ? 'PurpleDev' : isRc ? 'PurpleRc' : 'Purple',
+                    ? 'com.akangah89.PurpleRc'
+                    : 'com.akangah89.Purple',
+            scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
         },
         android: {
             package: isDev
                 ? 'com.akangah89.PurpleDev'
                 : isRc
-                ? 'com.akangah89.PurpleRc'
-                : 'com.akangah89.Purple',
+                    ? 'com.akangah89.PurpleRc'
+                    : 'com.akangah89.Purple',
             adaptiveIcon: {
                 foregroundImage: './assets/images/icon.png',
                 backgroundColor: '#00000000',
@@ -164,10 +160,11 @@ export default ({ config }) => {
         updates: {
             url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
             fallbackToCacheTimeout: 0,
-            runtimeVersion: '0.2.0',
+            runtimeVersion: 'appVersion',
+            enabled: false, // Temporarily disabled for testing
         },
-        // runtimeVersion: {
-        //     policy: 'appVersion',
-        // },
+        runtimeVersion: {
+            policy: 'appVersion',
+        },
     };
 };

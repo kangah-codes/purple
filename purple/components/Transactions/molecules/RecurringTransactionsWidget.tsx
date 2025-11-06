@@ -118,7 +118,7 @@ export default function RecurringTransactionsWidget() {
     if (transactions.transactions.length === 0) return null;
 
     return (
-        <View className='w-full space-y-5 flex flex-col px-5 my-5'>
+        <View className='w-full space-y-5 flex flex-col px-5 mb-5'>
             <View className='flex flex-row w-full justify-between'>
                 <View className='w-[38%] flex flex-col justify-between items-start'>
                     <View className='bg-purple-50 px-2 py-1 rounded-full'>
