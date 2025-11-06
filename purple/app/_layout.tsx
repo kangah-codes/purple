@@ -18,7 +18,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useCallback, useState } from 'react';
-import { LogBox, View, Text } from 'react-native';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -206,41 +206,41 @@ export default Sentry.wrap(function RootLayout() {
         return null;
     }
 
-    if (updateStatus) {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'black',
-                    padding: 20,
-                }}
-            >
-                <Text
-                    style={{
-                        color: 'white',
-                        fontSize: 18,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                        marginBottom: 20,
-                    }}
-                >
-                    {updateStatus}
-                </Text>
-                <View
-                    style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        borderWidth: 3,
-                        borderColor: 'white',
-                        borderTopColor: 'transparent',
-                    }}
-                />
-            </View>
-        );
-    }
+    // if (updateStatus) {
+    //     return (
+    //         <View
+    //             style={{
+    //                 flex: 1,
+    //                 justifyContent: 'center',
+    //                 alignItems: 'center',
+    //                 backgroundColor: 'black',
+    //                 padding: 20,
+    //             }}
+    //         >
+    //             <Text
+    //                 style={{
+    //                     color: 'white',
+    //                     fontSize: 18,
+    //                     fontWeight: 'bold',
+    //                     textAlign: 'center',
+    //                     marginBottom: 20,
+    //                 }}
+    //             >
+    //                 {updateStatus}
+    //             </Text>
+    //             <View
+    //                 style={{
+    //                     width: 50,
+    //                     height: 50,
+    //                     borderRadius: 25,
+    //                     borderWidth: 3,
+    //                     borderColor: 'white',
+    //                     borderTopColor: 'transparent',
+    //                 }}
+    //             />
+    //         </View>
+    //     );
+    // }
 
     return (
         <ErrorBoundary>
