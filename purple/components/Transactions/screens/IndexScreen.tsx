@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { useInfiniteTransactions } from '../hooks';
 import { Transaction } from '../schema';
 import { useDebounce } from '@/lib/utils/debounce';
+import TransactionsFilter from '../molecules/TransactionsFilter';
 
 export default function IndexScreen() {
     const flatListRef = useRef<FlatList>(null);
@@ -150,8 +151,8 @@ export default function IndexScreen() {
                 onSearchChange={handleSearchChange}
                 searchValue={searchValue}
             />
+            <TransactionsFilter />
 
-            {/* <View className='relative'> */}
             {/* Shadow overlay */}
             <Animated.View
                 style={[
@@ -193,7 +194,6 @@ export default function IndexScreen() {
                 maxToRenderPerBatch={10}
                 windowSize={10}
             />
-            {/* </View> */}
         </SafeAreaView>
     );
 }

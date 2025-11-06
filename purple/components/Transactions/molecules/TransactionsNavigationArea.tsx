@@ -8,6 +8,7 @@ import {
 } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
 import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
+import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import {
     InputField,
     LinearGradient,
@@ -34,8 +35,8 @@ export default function TransactionsNavigationArea({
 }: TransactionsNavigationAreaProps) {
     const [visible, setVisible] = useState(false);
     const [searchValue, setSearchValue] = useState('');
+    const { setShowBottomSheetModal } = useBottomSheetModalStore();
 
-    // Use external search value if provided, otherwise use internal state
     const displaySearchValue =
         externalSearchValue !== undefined ? externalSearchValue : searchValue;
 
@@ -145,6 +146,7 @@ export default function TransactionsNavigationArea({
                         position: 'absolute',
                         right: 15,
                     }}
+                    onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
                 >
                     <FilterLinesIcon width={16} height={16} stroke='#9333EA' strokeWidth={3} />
                 </TouchableOpacity>
