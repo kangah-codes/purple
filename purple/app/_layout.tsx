@@ -213,7 +213,7 @@ export default Sentry.wrap(function RootLayout() {
                     flex: 1,
                     justifyContent: 'center',
                     alignItems: 'center',
-                    backgroundColor: 'purple',
+                    backgroundColor: 'black',
                     padding: 20,
                 }}
             >
