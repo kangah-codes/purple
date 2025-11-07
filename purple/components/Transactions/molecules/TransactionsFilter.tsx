@@ -1,21 +1,20 @@
+import AnimatedAccordion, { AccordionItem } from '@/components/Shared/molecules/AnimatedAccordion';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
-import { LinearGradient, View, TouchableOpacity, Text } from '@/components/Shared/styled';
-import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import AnimatedAccordion, { AccordionItem } from '@/components/Shared/molecules/AnimatedAccordion';
-import SelectablePill from '@/components/Shared/molecules/SelectablePill';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import React, { useEffect } from 'react';
+import { Platform, StyleSheet } from 'react-native';
 import tw from 'twrnc';
+import TransactionTypeFilter from './TransactionsFilters/TransactionType';
+import AccountsFilter from './TransactionsFilters/Accounts';
+import TransactionCategoryFilter from './TransactionsFilters/TransactionCategory';
 const snapPoints = ['55%', '70%'];
 
 export default function TransactionsFilter() {
     const { bottomSheetModalKeys } = useBottomSheetModalStore();
     const { logEvent } = useAnalytics();
-    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
-    const [selectedAccounts, setSelectedAccounts] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const trackScreenView = async () => {
@@ -29,99 +28,21 @@ export default function TransactionsFilter() {
         trackScreenView();
     }, [bottomSheetModalKeys, logEvent]);
 
-    const handleTypeSelect = (id: string) => {
-        setSelectedTypes((prev) => new Set([...prev, id]));
-    };
-
-    const handleTypeDeselect = (id: string) => {
-        setSelectedTypes((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(id);
-            return newSet;
-        });
-    };
-
-    const handleAccountSelect = (id: string) => {
-        setSelectedAccounts((prev) => new Set([...prev, id]));
-    };
-
-    const handleAccountDeselect = (id: string) => {
-        setSelectedAccounts((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(id);
-            return newSet;
-        });
-    };
-    console.log('Selected Types:', selectedTypes);
     const accordionItems: AccordionItem[] = [
         {
             id: 'type',
             title: 'Type',
-            content: (
-                <View className='p-5 bg-purple-50'>
-                    <View className='flex flex-row space-x-2'>
-                        <View>
-                            <SelectablePill
-                                id='income'
-                                label='Income'
-                                isSelected={selectedTypes.has('income')}
-                                onSelect={handleTypeSelect}
-                                onDeselect={handleTypeDeselect}
-                                textStyle={satoshiFont.satoshiMedium}
-                                selectedTextStyle={satoshiFont.satoshiBold}
-                            />
-                        </View>
-                        <View>
-                            <SelectablePill
-                                id='expense'
-                                label='Expense'
-                                isSelected={selectedTypes.has('expense')}
-                                onSelect={handleTypeSelect}
-                                onDeselect={handleTypeDeselect}
-                                textStyle={satoshiFont.satoshiMedium}
-                                selectedTextStyle={satoshiFont.satoshiBold}
-                            />
-                        </View>
-                    </View>
-                </View>
-            ),
+            content: <TransactionTypeFilter />,
         },
         {
             id: 'account',
             title: 'Account',
-            content: (
-                <View className='px-5 pb-4'>
-                    <View className='flex flex-row flex-wrap'>
-                        <SelectablePill
-                            id='checking'
-                            label='Checking Account'
-                            isSelected={selectedAccounts.has('checking')}
-                            onSelect={handleAccountSelect}
-                            onDeselect={handleAccountDeselect}
-                            textStyle={satoshiFont.satoshiMedium}
-                            selectedTextStyle={satoshiFont.satoshiBold}
-                        />
-                        <SelectablePill
-                            id='savings'
-                            label='Savings Account'
-                            isSelected={selectedAccounts.has('savings')}
-                            onSelect={handleAccountSelect}
-                            onDeselect={handleAccountDeselect}
-                            textStyle={satoshiFont.satoshiMedium}
-                            selectedTextStyle={satoshiFont.satoshiBold}
-                        />
-                        <SelectablePill
-                            id='credit'
-                            label='Credit Card'
-                            isSelected={selectedAccounts.has('credit')}
-                            onSelect={handleAccountSelect}
-                            onDeselect={handleAccountDeselect}
-                            textStyle={satoshiFont.satoshiMedium}
-                            selectedTextStyle={satoshiFont.satoshiBold}
-                        />
-                    </View>
-                </View>
-            ),
+            content: <AccountsFilter />,
+        },
+        {
+            id: 'category',
+            title: 'Categories',
+            content: <TransactionCategoryFilter />,
         },
     ];
 
@@ -161,7 +82,7 @@ export default function TransactionsFilter() {
                 <View className='flex flex-row space-x-2.5 justify-between w-full absolute bottom-5 px-5'>
                     <View className='flex-1'>
                         <TouchableOpacity
-                            onPress={router.back}
+                            onPress={() => {}}
                             style={{ width: '100%' }}
                             className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
                         >

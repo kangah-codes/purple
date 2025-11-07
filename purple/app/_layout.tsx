@@ -22,7 +22,6 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import * as Updates from 'expo-updates';
 
 function AppWithNotifications() {
     useNotifications();
@@ -105,58 +104,6 @@ export default Sentry.wrap(function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
-            if (!__DEV__) {
-                try {
-                    const update = await Updates.checkForUpdateAsync();
-
-                    if (update.isAvailable) {
-                        try {
-                            const fetchResult = await Updates.fetchUpdateAsync();
-
-                            if (fetchResult && 'isNew' in fetchResult && fetchResult.isNew) {
-                                await new Promise((resolve) => setTimeout(resolve, 1000));
-                                await Updates.reloadAsync();
-                                return;
-                            } else {
-                                await Updates.reloadAsync();
-                                return;
-                            }
-                        } catch (fetchError) {
-                            const errorMessage =
-                                fetchError instanceof Error
-                                    ? fetchError.message
-                                    : 'Download failed';
-
-                            Sentry.captureException(fetchError, {
-                                tags: { component: 'update_fetch' },
-                                extra: {
-                                    updateInfo: update,
-                                    errorDetails: {
-                                        message: errorMessage,
-                                        stack:
-                                            fetchError instanceof Error
-                                                ? fetchError.stack
-                                                : undefined,
-                                    },
-                                },
-                            });
-                        }
-                    }
-                } catch (updateError) {
-                    const errorMessage =
-                        updateError instanceof Error ? updateError.message : 'Unknown error';
-                    Sentry.captureException(updateError, {
-                        tags: { component: 'update_check' },
-                        extra: {
-                            errorDetails: {
-                                message: errorMessage,
-                                stack: updateError instanceof Error ? updateError.stack : undefined,
-                            },
-                        },
-                    });
-                }
-            }
-
             await initializeApp(db);
         } catch (e) {
             console.error('Error during app initialization:', e);

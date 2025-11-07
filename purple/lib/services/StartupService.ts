@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import migrations from '../migrations';
 
-export type StartupTask = () => Promise<void>;
+export type StartupTask = () => Promise<any>;
 
 export default class StartupService {
     protected db: SQLite.SQLiteDatabase;
