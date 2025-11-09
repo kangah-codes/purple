@@ -32,11 +32,7 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
     useRefreshOnFocus(refetch);
 
     return (
-        <View
-            className='bg-purple-50 p-5 border border-purple-100 rounded-3xl'
-            // style={styles.shadow}
-        >
-            {/** @ts-ignore */}
+        <View className='bg-purple-50 p-5 border border-purple-100 rounded-3xl'>
             <Carousel
                 data={accounts?.data ?? []}
                 renderItem={renderItem}
@@ -49,8 +45,6 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
                 loop
                 firstItem={pinnedIndex === -1 ? undefined : pinnedIndex}
             />
-
-            {/** @ts-ignore */}
             <Pagination
                 dotsLength={accounts?.total_items ?? 1}
                 activeDotIndex={activeSlide}

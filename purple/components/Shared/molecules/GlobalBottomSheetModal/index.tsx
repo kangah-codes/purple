@@ -2,26 +2,30 @@ import {
     BottomSheetBackdrop,
     BottomSheetModal,
     BottomSheetModalProps,
+    BottomSheetScrollView,
     BottomSheetView,
 } from '@gorhom/bottom-sheet';
-import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useBottomSheetModalStore, useKeyboardSnapEffect } from './hooks';
+import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 
 interface CustomBottomSheetModalProps extends BottomSheetModalProps {
     children: React.ReactNode;
     modalKey: string;
     hideOnBackdropPress?: boolean;
+    isScrollable?: boolean;
 }
 
 const CustomBottomSheetModal = ({
     children,
     modalKey,
+    isScrollable = false,
     hideOnBackdropPress = true,
     ...rest
 }: CustomBottomSheetModalProps) => {
     const bottomSheetRef = useRef<BottomSheetModal>(null);
+
     // Memoize default snap points
     const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '70%'], [rest.snapPoints]);
 
@@ -55,10 +59,11 @@ const CustomBottomSheetModal = ({
                 disappearsOnIndex={-1}
             />
         ),
-        [modalKey, setShowBottomSheetModal],
+        [modalKey, setShowBottomSheetModal, hideOnBackdropPress],
     );
 
     useKeyboardSnapEffect(bottomSheetRef);
+
     useEffect(() => {
         createBottomSheetModal(modalKey);
     }, [modalKey, createBottomSheetModal]);
@@ -78,7 +83,18 @@ const CustomBottomSheetModal = ({
             {...rest}
             style={{ borderRadius: 28, overflow: 'hidden' }}
         >
-            <BottomSheetView style={styles.bottomSheetView}>{children}</BottomSheetView>
+            {isScrollable ? (
+                <View style={styles.scrollableContainer}>
+                    <BottomSheetScrollView
+                        contentContainerStyle={styles.scrollableContent}
+                        style={styles.scrollView}
+                    >
+                        {children}
+                    </BottomSheetScrollView>
+                </View>
+            ) : (
+                <BottomSheetView style={styles.bottomSheetView}>{children}</BottomSheetView>
+            )}
         </BottomSheetModal>
     );
 };
@@ -86,6 +102,15 @@ const CustomBottomSheetModal = ({
 const styles = StyleSheet.create({
     bottomSheetView: {
         flex: 1,
+        paddingBottom: 20,
+    },
+    scrollableContainer: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollableContent: {
         paddingBottom: 20,
     },
 });

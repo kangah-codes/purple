@@ -53,6 +53,7 @@ export default function GettingStartedWidget() {
 
                     <View style={{ opacity: isClickable ? 1 : 0.5 }}>
                         <Checkbox
+                            checkedColor='#8b5cf6'
                             checked={item.isCompleted}
                             onChange={() => isClickable && handleItemPress(item.id, item.callback)}
                         />

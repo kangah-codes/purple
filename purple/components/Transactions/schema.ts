@@ -84,7 +84,7 @@ export type EditTransaction = {
 
 export type CreateRecurringTransaction = {
     account_id: string;
-    type: Transaction['type']; // This already supports 'transfer'
+    type: Transaction['type'];
     amount: number;
     category: string;
     recurrence_rule: string;
@@ -92,7 +92,6 @@ export type CreateRecurringTransaction = {
     end_date?: string;
     metadata?: Record<string, any>;
     currency: string;
-    // Add fields needed for transfer transactions
     from_account?: string;
     to_account?: string;
 };
@@ -111,4 +110,14 @@ export type EditRecurringTransaction = {
     to_account?: string;
     is_active: boolean;
     status: 'active' | 'paused' | 'cancelled';
+};
+
+export type TransactionsFilter = {
+    type?: Transaction['type'][];
+    category?: string[];
+    account_id?: string[];
+    min_amount?: number;
+    max_amount?: number;
+    start_date?: string;
+    end_date?: string;
 };

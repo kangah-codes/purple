@@ -8,12 +8,10 @@ export default function TransactionTypeFilter() {
     const handleTypeSelect = (id: string) => {
         setSelectedTypes(new Set([...selectedTypes, id]));
     };
-
     const handleTypeDeselect = (id: string) => {
         setSelectedTypes(new Set([...selectedTypes].filter((t) => t !== id)));
     };
-
-    const transactionTypes: Array<{ id: string; label: string }> = [
+    const transactionTypes = [
         { id: 'income', label: 'Income' },
         { id: 'expense', label: 'Expense' },
     ];

@@ -4,6 +4,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import SelectablePill from '@/components/Shared/molecules/SelectablePill';
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { extractEmojiOrDefault } from '@/lib/utils/string';
+import tw from 'twrnc';
 
 export default function AccountsFilter() {
     const { accounts } = useAccountStore();
@@ -29,8 +30,8 @@ export default function AccountsFilter() {
                                 isSelected={selectedTypes.has(account.id)}
                                 onSelect={handleSelect}
                                 onDeselect={handleDeselect}
-                                textStyle={satoshiFont.satoshiMedium}
-                                selectedTextStyle={satoshiFont.satoshiBold}
+                                textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
+                                selectedTextStyle={[satoshiFont.satoshiBold, tw`text-xs`]}
                             />
                         </View>
                     );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -98,8 +98,8 @@ function AccordionItemComponent({
     const heightValue = useSharedValue(isExpanded ? 1 : 0);
     const rotationValue = useSharedValue(isExpanded ? 1 : 0);
 
-    React.useEffect(() => {
-        // Only animate if content has been measured
+    useEffect(() => {
+        // animate if content has been measured
         if (isContentMeasured) {
             heightValue.value = withTiming(isExpanded ? 1 : 0, {
                 duration: animationDuration,
@@ -112,11 +112,20 @@ function AccordionItemComponent({
         });
     }, [isExpanded, animationDuration, isContentMeasured]);
 
+    // update height animation when contentHeight changes
+    useEffect(() => {
+        if (isContentMeasured && isExpanded && contentHeight > 0) {
+            heightValue.value = withTiming(1, {
+                duration: animationDuration,
+                easing: Easing.out(Easing.cubic),
+            });
+        }
+    }, [contentHeight, isContentMeasured, isExpanded, animationDuration]);
+
     const animatedHeightStyle = useAnimatedStyle(() => {
         if (!isContentMeasured) {
-            // If content isn't measured yet, allow it to show at natural height for measurement
             return {
-                height: undefined, // Let it size naturally
+                height: undefined,
                 opacity: isExpanded ? 1 : 0,
             };
         }
@@ -137,11 +146,14 @@ function AccordionItemComponent({
 
     const onContentLayout = (event: any) => {
         const { height } = event.nativeEvent.layout;
-        if (height > 0 && !isContentMeasured) {
+        // update height whenever it changes
+        if (height > 0) {
             setContentHeight(height);
-            setIsContentMeasured(true);
-            // Set initial height value after measurement
-            heightValue.value = isExpanded ? 1 : 0;
+            if (!isContentMeasured) {
+                setIsContentMeasured(true);
+                // set initial height value after measurement
+                heightValue.value = isExpanded ? 1 : 0;
+            }
         }
     };
 

@@ -10,7 +10,10 @@ import tw from 'twrnc';
 import TransactionTypeFilter from './TransactionsFilters/TransactionType';
 import AccountsFilter from './TransactionsFilters/Accounts';
 import TransactionCategoryFilter from './TransactionsFilters/TransactionCategory';
-const snapPoints = ['55%', '70%'];
+import TransactionAmountFilter from './TransactionsFilters/TransactionAmount';
+import TransactionDateFilter from './TransactionsFilters/TransactionDate';
+
+const snapPoints = ['70%', '70%'];
 
 export default function TransactionsFilter() {
     const { bottomSheetModalKeys } = useBottomSheetModalStore();
@@ -44,7 +47,51 @@ export default function TransactionsFilter() {
             title: 'Categories',
             content: <TransactionCategoryFilter />,
         },
+        {
+            id: 'amount',
+            title: 'Amount',
+            content: <TransactionAmountFilter />,
+        },
+        {
+            id: 'date',
+            title: 'Created date',
+            content: <TransactionDateFilter />,
+        },
     ];
+
+    const footerButtons = () => (
+        <View className='flex flex-row space-x-2.5 justify-between w-full px-5 py-5 mb-5'>
+            <View className='flex-1'>
+                <TouchableOpacity
+                    onPress={() => {}}
+                    style={{ width: '100%' }}
+                    className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                >
+                    <Text style={satoshiFont.satoshiBlack} className='text-purple-600 text-center'>
+                        Clear all
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <View className='flex-1'>
+                <TouchableOpacity
+                    style={{ width: '100%' }}
+                    // onPress={handleSubmit(onSubmit)}
+                    // disabled={isLoading}
+                >
+                    <LinearGradient
+                        className='flex items-center justify-center rounded-full px-5 h-[50]'
+                        colors={['#c084fc', '#9333ea']}
+                        style={{ width: '100%' }}
+                    >
+                        <Text style={satoshiFont.satoshiBlack} className='text-white text-center'>
+                            Apply
+                        </Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 
     return (
         <CustomBottomSheetModal
@@ -52,70 +99,33 @@ export default function TransactionsFilter() {
             snapPoints={snapPoints}
             style={styles.customBottomSheetModal}
             handleIndicatorStyle={styles.handleIndicator}
+            isScrollable
+            footerComponent={footerButtons}
         >
-            <View className='flex flex-col relative h-full'>
-                <View className='flex flex-col'>
-                    <View className='w-full flex flex-row justify-center items-center pb-2.5'>
-                        <Text
-                            style={satoshiFont.satoshiBlack}
-                            className='text-base text-center text-gray-900'
-                        >
-                            Filters
-                        </Text>
-                    </View>
-
-                    <AnimatedAccordion
-                        items={accordionItems}
-                        titleStyle={{
-                            text: {
-                                ...satoshiFont.satoshiBold,
-                            },
-                            container: {
-                                ...tw`bg-white border-b border-purple-100`,
-                            },
-                        }}
-                        chevronColor='#9333EA'
-                        allowMultiple={false}
-                        animationDuration={250}
-                    />
+            <View className='flex flex-col'>
+                <View className='w-full flex flex-row justify-center items-center pb-2.5'>
+                    <Text
+                        style={satoshiFont.satoshiBlack}
+                        className='text-base text-center text-gray-900'
+                    >
+                        Filters
+                    </Text>
                 </View>
-                <View className='flex flex-row space-x-2.5 justify-between w-full absolute bottom-5 px-5'>
-                    <View className='flex-1'>
-                        <TouchableOpacity
-                            onPress={() => {}}
-                            style={{ width: '100%' }}
-                            className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
-                        >
-                            <Text
-                                style={satoshiFont.satoshiBlack}
-                                className='text-purple-600 text-center'
-                            >
-                                Clear all
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    <View className='flex-1'>
-                        <TouchableOpacity
-                            style={{ width: '100%' }}
-                            // onPress={handleSubmit(onSubmit)}
-                            // disabled={isLoading}
-                        >
-                            <LinearGradient
-                                className='flex items-center justify-center rounded-full px-5 h-[50]'
-                                colors={['#c084fc', '#9333ea']}
-                                style={{ width: '100%' }}
-                            >
-                                <Text
-                                    style={satoshiFont.satoshiBlack}
-                                    className='text-white text-center'
-                                >
-                                    Apply
-                                </Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <AnimatedAccordion
+                    items={accordionItems}
+                    titleStyle={{
+                        text: {
+                            ...satoshiFont.satoshiBold,
+                        },
+                        container: {
+                            ...tw`bg-white border-b border-purple-100`,
+                        },
+                    }}
+                    chevronColor='#9333EA'
+                    allowMultiple={false}
+                    animationDuration={250}
+                />
             </View>
         </CustomBottomSheetModal>
     );

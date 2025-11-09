@@ -5,7 +5,6 @@ import { RecurringTransaction } from '@/components/Transactions/schema';
 import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
 import { occurrencesBetween } from '../utils/rrule';
 
-// Result types for extensibility
 export interface ProcessingResult {
     success: boolean;
     recurringTransactionId: string;

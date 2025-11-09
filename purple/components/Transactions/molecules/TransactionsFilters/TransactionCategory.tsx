@@ -3,6 +3,7 @@ import { View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import SelectablePill from '@/components/Shared/molecules/SelectablePill';
 import { usePreferences } from '@/components/Settings/hooks';
+import tw from 'twrnc';
 
 export default function TransactionCategoryFilter() {
     const {
@@ -29,8 +30,8 @@ export default function TransactionCategoryFilter() {
                             isSelected={selectedTypes.has(category.category)}
                             onSelect={handleTypeSelect}
                             onDeselect={handleTypeDeselect}
-                            textStyle={satoshiFont.satoshiMedium}
-                            selectedTextStyle={satoshiFont.satoshiBold}
+                            textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
+                            selectedTextStyle={(satoshiFont.satoshiBold, tw`text-xs`)}
                         />
                     </View>
                 ))}

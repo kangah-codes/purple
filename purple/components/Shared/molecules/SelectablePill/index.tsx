@@ -101,7 +101,6 @@ export default function SelectablePill({
                         satoshiFont.satoshiBold,
                     ]}
                     numberOfLines={1}
-                    className='text-sm'
                 >
                     {label}
                 </Text>

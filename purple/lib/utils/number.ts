@@ -49,6 +49,8 @@ export const formatCurrencyRounded = (
     // NOTE: idk why I filter out ALL currency code
     // if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
     if (!currency || currency === '') return 'N/A';
+    if (!amount || amount === 0) return `${currency} 0`;
+    if (amount < 0.01 && amount > 0) return `${currency} 0.01`;
 
     if (amount === undefined || amount === null || currency === undefined || currency === '')
         return 'N/A';
@@ -79,7 +81,7 @@ export function formatCurrencyAccurate(currency: string, amount: number): string
             style: 'currency',
             currency: currency,
         }).format(isNaN(amount) ? 0 : amount);
-    } catch (error) {
+    } catch {
         console.error(`Invalid currency code: ${currency}`);
         return 'N/A';
     }
