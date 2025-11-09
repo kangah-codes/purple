@@ -2,7 +2,7 @@ import { dedupeByKey } from '@/lib/utils/array';
 import { nativeStorage } from '@/lib/utils/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { RecurringTransaction, Transaction } from './schema';
+import { RecurringTransaction, Transaction, TransactionsFilter } from './schema';
 
 type TransactionStore = {
     transactions: Transaction[];
@@ -20,7 +20,20 @@ type TransactionStore = {
     resetRecurringTransactions: () => void;
     reset: () => void;
     deleteTransaction: (id: string) => void;
+    transactionsFilter: TransactionsFilter;
+    setTransactionsFilter: (filter: TransactionsFilter) => void;
+    resetTransactionsFilter: () => void;
 };
+
+/**
+ *     type?: Transaction['type'][];
+    category?: string[];
+    account_ids?: string[];
+    min_amount?: number;
+    max_amount?: number;
+    start_date?: string;
+    end_date?: string;
+ */
 
 export const createTransactionStore = create<TransactionStore>()(
     persist(
@@ -60,6 +73,28 @@ export const createTransactionStore = create<TransactionStore>()(
                 set((state) => ({
                     transactions: state.transactions.filter((t) => t.id !== id),
                 })),
+            transactionsFilter: {
+                type: [],
+                category: [],
+                account_ids: [],
+                min_amount: undefined,
+                max_amount: undefined,
+                start_date: undefined,
+                end_date: undefined,
+            },
+            setTransactionsFilter: (filter) => set({ transactionsFilter: filter }),
+            resetTransactionsFilter: () =>
+                set({
+                    transactionsFilter: {
+                        type: [],
+                        category: [],
+                        account_ids: [],
+                        min_amount: undefined,
+                        max_amount: undefined,
+                        start_date: undefined,
+                        end_date: undefined,
+                    },
+                }),
         }),
         {
             name: 'transaction-store',

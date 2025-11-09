@@ -100,55 +100,53 @@ export default function TransactionsNavigationArea({
                     </TouchableOpacity>
                 </LinearGradient>
             </View>
-            <View className='relative flex justify-center mt-2.5'>
-                <InputField
-                    className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-white'
-                    style={satoshiFont.satoshiBold}
-                    placeholder='Search'
-                    cursorColor={'#000'}
-                    onFocus={onSearchFocus}
-                    onChangeText={(text) => {
-                        if (externalSearchValue === undefined) {
-                            setSearchValue(text);
-                        }
-                        onSearchChange?.(text);
-                    }}
-                    value={displaySearchValue}
-                    animateBorder={false}
-                />
-                <SearchIcon
-                    width={16}
-                    height={16}
-                    style={{
-                        position: 'absolute',
-                        left: 15,
-                    }}
-                    stroke='#9333EA'
-                />
-
-                {displaySearchValue.length > 0 && (
-                    <TouchableOpacity
+            <View className='flex flex-row space-x-2.5 mt-2.5'>
+                <View className='relative flex justify-center flex-1'>
+                    <InputField
+                        className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-white'
+                        style={satoshiFont.satoshiBold}
+                        placeholder='Search'
+                        cursorColor={'#000'}
+                        onFocus={onSearchFocus}
+                        onChangeText={(text) => {
+                            if (externalSearchValue === undefined) {
+                                setSearchValue(text);
+                            }
+                            onSearchChange?.(text);
+                        }}
+                        value={displaySearchValue}
+                        animateBorder={false}
+                    />
+                    <SearchIcon
+                        width={16}
+                        height={16}
                         style={{
                             position: 'absolute',
-                            right: 35,
+                            left: 15,
                         }}
-                        onPress={() => {
-                            setSearchValue('');
-                            onSearchChange?.('');
-                        }}
-                    >
-                        <XIcon width={16} height={16} stroke='#c27aff' strokeWidth={3} />
-                    </TouchableOpacity>
-                )}
+                        stroke='#9333EA'
+                    />
 
+                    {displaySearchValue.length > 0 && (
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                right: 35,
+                            }}
+                            onPress={() => {
+                                setSearchValue('');
+                                onSearchChange?.('');
+                            }}
+                        >
+                            <XIcon width={16} height={16} stroke='#c27aff' strokeWidth={3} />
+                        </TouchableOpacity>
+                    )}
+                </View>
                 <TouchableOpacity
-                    style={{
-                        position: 'absolute',
-                        right: 15,
-                    }}
+                    className='bg-purple-50 px-5 py-2 flex items-center justify-center rounded-full'
                     onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
                 >
-                    <FilterLinesIcon width={16} height={16} stroke='#9333EA' strokeWidth={3} />
+                    <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
                 </TouchableOpacity>
             </View>
         </View>

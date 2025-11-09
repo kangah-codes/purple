@@ -1,14 +1,12 @@
+import { Text, TouchableOpacity } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useEffect } from 'react';
 import Animated, {
+    Easing,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
-    interpolate,
-    Easing,
 } from 'react-native-reanimated';
-import { TouchableOpacity, Text } from '@/components/Shared/styled';
-import { XIcon } from '@/components/SVG/icons/noscale';
-import { satoshiFont } from '@/lib/constants/fonts';
 import tw from 'twrnc';
 
 export interface SelectablePillProps {
@@ -25,7 +23,6 @@ export interface SelectablePillProps {
     selectedTextStyle?: any;
     animationDuration?: number;
     iconColor?: string;
-    selectedIconColor?: string;
     borderColor?: string;
     selectedBorderColor?: string;
 }
@@ -39,42 +36,21 @@ export default function SelectablePill({
     textStyle,
     selectedTextStyle,
     animationDuration = 250,
-    iconColor = '#6B7280',
-    selectedIconColor = '#9333EA',
     borderColor = '#E5E7EB',
     selectedBorderColor = '#9333EA',
 }: SelectablePillProps) {
-    const iconOpacity = useSharedValue(isSelected ? 1 : 0);
-    const iconScale = useSharedValue(isSelected ? 1 : 0);
-    const iconWidth = useSharedValue(isSelected ? 22 : 0);
+    const borderProgress = useSharedValue(isSelected ? 1 : 0);
 
     useEffect(() => {
-        iconOpacity.value = withTiming(isSelected ? 1 : 0, {
-            duration: animationDuration,
-            easing: Easing.out(Easing.cubic),
-        });
-        iconScale.value = withTiming(isSelected ? 1 : 0, {
-            duration: animationDuration,
-            easing: Easing.out(Easing.cubic),
-        });
-        iconWidth.value = withTiming(isSelected ? 22 : 0, {
+        borderProgress.value = withTiming(isSelected ? 1 : 0, {
             duration: animationDuration,
             easing: Easing.out(Easing.cubic),
         });
     }, [isSelected, animationDuration]);
 
-    const animatedContainerStyle = useAnimatedStyle(() => ({
+    const animatedStyle = useAnimatedStyle(() => ({
         borderColor: isSelected ? selectedBorderColor : borderColor,
         borderWidth: 1,
-    }));
-
-    const animatedIconStyle = useAnimatedStyle(() => ({
-        opacity: iconOpacity.value,
-        width: iconWidth.value,
-        transform: [
-            { scale: iconScale.value },
-            { translateX: interpolate(iconScale.value, [0, 1], [8, 0]) },
-        ],
     }));
 
     const handlePress = () => {
@@ -88,7 +64,7 @@ export default function SelectablePill({
         <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
             <Animated.View
                 style={[
-                    animatedContainerStyle,
+                    animatedStyle,
                     tw`rounded-full px-2 py-1 items-center justify-center flex flex-row bg-purple-100`,
                 ]}
             >
@@ -104,15 +80,6 @@ export default function SelectablePill({
                 >
                     {label}
                 </Text>
-
-                <Animated.View style={[animatedIconStyle, tw`items-center justify-center`]}>
-                    <XIcon
-                        width={14}
-                        height={14}
-                        stroke={isSelected ? selectedIconColor : iconColor}
-                        strokeWidth={3}
-                    />
-                </Animated.View>
             </Animated.View>
         </TouchableOpacity>
     );

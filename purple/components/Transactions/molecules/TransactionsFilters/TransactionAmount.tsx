@@ -69,7 +69,6 @@ export default function TransactionAmountFilter({
     );
 }
 
-// Hook for managing transaction amount filter state
 export function useTransactionAmountFilter(
     minLimit = 0,
     maxLimit = 10000,

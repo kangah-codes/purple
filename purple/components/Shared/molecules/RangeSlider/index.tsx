@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedGestureHandler,
@@ -40,7 +40,7 @@ export default function RangeSlider({
     initialMax = max,
     onValueChange,
     formatValue = (value) => value.toString(),
-    trackColor = '#E5E7EB',
+    trackColor = '#dab2ff',
     activeTrackColor = '#9333EA',
     thumbColor = '#ad46ff',
     trackHeight = 4,
@@ -50,61 +50,70 @@ export default function RangeSlider({
     style,
     hapticFeedback = true,
 }: RangeSliderProps) {
-    const [sliderWidth, setSliderWidth] = useState(280 - thumbSize); // Default fallback width minus thumb size
+    const [sliderWidth, setSliderWidth] = useState(280 - thumbSize);
     const THUMB_RADIUS = thumbSize / 2;
-
-    const [minValue, setMinValue] = useState(initialMin);
-    const [maxValue, setMaxValue] = useState(initialMax);
-
+    const minValueShared = useSharedValue(initialMin);
+    const maxValueShared = useSharedValue(initialMax);
+    const [minDisplay, setMinDisplay] = useState(initialMin);
+    const [maxDisplay, setMaxDisplay] = useState(initialMax);
     const minPosition = useSharedValue(((initialMin - min) / (max - min)) * sliderWidth);
     const maxPosition = useSharedValue(((initialMax - min) / (max - min)) * sliderWidth);
 
-    const snapToStep = (value: number) => {
-        const snappedValue = Math.round(value / step) * step;
-        return Math.max(min, Math.min(max, snappedValue));
-    };
+    const notifyValueChange = useCallback(
+        (minVal: number, maxVal: number) => {
+            onValueChange?.(minVal, maxVal);
+        },
+        [onValueChange],
+    );
 
-    const updateMinValue = (value: number) => {
-        const snappedValue = snapToStep(value);
-        const clampedValue = Math.min(snappedValue, maxValue - step);
-        setMinValue(clampedValue);
-        onValueChange?.(clampedValue, maxValue);
-    };
+    const updateMinDisplay = useCallback((value: number) => {
+        setMinDisplay(value);
+    }, []);
 
-    const updateMaxValue = (value: number) => {
-        const snappedValue = snapToStep(value);
-        const clampedValue = Math.max(snappedValue, minValue + step);
-        setMaxValue(clampedValue);
-        onValueChange?.(minValue, clampedValue);
-    };
+    const updateMaxDisplay = useCallback((value: number) => {
+        setMaxDisplay(value);
+    }, []);
 
-    const onSliderLayout = (event: any) => {
-        const { width } = event.nativeEvent.layout;
-        if (width > 0) {
-            // Subtract thumb size to prevent overflow
-            const availableWidth = width - thumbSize;
-            if (availableWidth !== sliderWidth) {
-                setSliderWidth(availableWidth);
-                // Update positions based on new available width
-                minPosition.value = ((minValue - min) / (max - min)) * availableWidth;
-                maxPosition.value = ((maxValue - min) / (max - min)) * availableWidth;
+    const onSliderLayout = useCallback(
+        (event: any) => {
+            const { width } = event.nativeEvent.layout;
+            if (width > 0) {
+                const availableWidth = width - thumbSize;
+                if (availableWidth !== sliderWidth) {
+                    setSliderWidth(availableWidth);
+                    minPosition.value =
+                        ((minValueShared.value - min) / (max - min)) * availableWidth;
+                    maxPosition.value =
+                        ((maxValueShared.value - min) / (max - min)) * availableWidth;
+                }
             }
-        }
-    };
+        },
+        [
+            sliderWidth,
+            thumbSize,
+            min,
+            max,
+            minPosition,
+            maxPosition,
+            minValueShared,
+            maxValueShared,
+        ],
+    );
 
-    const triggerHapticFeedback = () => {
+    const triggerHaptic = useCallback(() => {
         if (hapticFeedback) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
-    };
+    }, [hapticFeedback]);
 
     const minGestureHandler = useAnimatedGestureHandler<
         PanGestureHandlerGestureEvent,
-        { startX: number }
+        { startX: number; lastSnappedValue: number }
     >({
         onStart: (_, context) => {
             context.startX = minPosition.value;
-            runOnJS(triggerHapticFeedback)();
+            context.lastSnappedValue = minValueShared.value;
+            runOnJS(triggerHaptic)();
         },
         onActive: (event, context) => {
             const newPosition = Math.max(
@@ -113,23 +122,41 @@ export default function RangeSlider({
             );
             minPosition.value = newPosition;
 
-            const newValue = interpolate(
+            const rawValue = interpolate(
                 newPosition,
                 [0, sliderWidth],
                 [min, max],
                 Extrapolate.CLAMP,
             );
-            runOnJS(updateMinValue)(newValue);
+
+            minValueShared.value = rawValue;
+
+            const snappedValue = Math.round(rawValue / step) * step;
+            if (snappedValue !== context.lastSnappedValue) {
+                context.lastSnappedValue = snappedValue;
+                const clampedValue = Math.min(snappedValue, maxValueShared.value - step);
+                runOnJS(updateMinDisplay)(clampedValue);
+            }
+        },
+        onEnd: () => {
+            const snappedValue = Math.round(minValueShared.value / step) * step;
+            const clampedValue = Math.min(snappedValue, maxValueShared.value - step);
+            minValueShared.value = clampedValue;
+            minPosition.value = ((clampedValue - min) / (max - min)) * sliderWidth;
+
+            runOnJS(updateMinDisplay)(clampedValue);
+            runOnJS(notifyValueChange)(clampedValue, maxValueShared.value);
         },
     });
 
     const maxGestureHandler = useAnimatedGestureHandler<
         PanGestureHandlerGestureEvent,
-        { startX: number }
+        { startX: number; lastSnappedValue: number }
     >({
         onStart: (_, context) => {
             context.startX = maxPosition.value;
-            runOnJS(triggerHapticFeedback)();
+            context.lastSnappedValue = maxValueShared.value;
+            runOnJS(triggerHaptic)();
         },
         onActive: (event, context) => {
             const newPosition = Math.min(
@@ -138,13 +165,30 @@ export default function RangeSlider({
             );
             maxPosition.value = newPosition;
 
-            const newValue = interpolate(
+            const rawValue = interpolate(
                 newPosition,
                 [0, sliderWidth],
                 [min, max],
                 Extrapolate.CLAMP,
             );
-            runOnJS(updateMaxValue)(newValue);
+
+            maxValueShared.value = rawValue;
+
+            const snappedValue = Math.round(rawValue / step) * step;
+            if (snappedValue !== context.lastSnappedValue) {
+                context.lastSnappedValue = snappedValue;
+                const clampedValue = Math.max(snappedValue, minValueShared.value + step);
+                runOnJS(updateMaxDisplay)(clampedValue);
+            }
+        },
+        onEnd: () => {
+            const snappedValue = Math.round(maxValueShared.value / step) * step;
+            const clampedValue = Math.max(snappedValue, minValueShared.value + step);
+            maxValueShared.value = clampedValue;
+            maxPosition.value = ((clampedValue - min) / (max - min)) * sliderWidth;
+
+            runOnJS(updateMaxDisplay)(clampedValue);
+            runOnJS(notifyValueChange)(minValueShared.value, clampedValue);
         },
     });
 
@@ -161,103 +205,79 @@ export default function RangeSlider({
         transform: [{ translateX: maxPosition.value - THUMB_RADIUS }],
     }));
 
+    const containerStyle = useMemo(
+        () => ({
+            height: thumbSize,
+            justifyContent: 'center' as const,
+            paddingHorizontal: THUMB_RADIUS,
+        }),
+        [thumbSize, THUMB_RADIUS],
+    );
+
+    const trackStyle = useMemo(
+        () => ({
+            height: trackHeight,
+            width: '100%' as const,
+            backgroundColor: trackColor,
+            borderRadius: trackHeight / 2,
+            position: 'relative' as const,
+        }),
+        [trackHeight, trackColor],
+    );
+
+    const activeTrackStaticStyle = useMemo(
+        () => ({
+            height: trackHeight,
+            backgroundColor: activeTrackColor,
+            borderRadius: trackHeight / 2,
+            position: 'absolute' as const,
+            top: 0,
+        }),
+        [trackHeight, activeTrackColor],
+    );
+
+    const thumbStaticStyle = useMemo(
+        () => ({
+            position: 'absolute' as const,
+            top: -((thumbSize - trackHeight) / 2),
+            width: thumbSize * 1.9,
+            height: thumbSize,
+            borderRadius: thumbSize / 2,
+            backgroundColor: thumbColor,
+        }),
+        [thumbSize, trackHeight, thumbColor],
+    );
+
     return (
         <View style={[style]}>
             {showLabels && (
                 <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}
+                    style={{ flexDirection: 'row', justifyContent: 'space-between' }}
                     className='mb-2.5'
                 >
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-black'>
-                        {formatValue(minValue)}
+                        {formatValue(minDisplay)}
                     </Text>
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-black'>
-                        {formatValue(maxValue)}
+                        {formatValue(maxDisplay)}
                     </Text>
                 </View>
             )}
 
-            <View
-                style={{
-                    height: thumbSize,
-                    justifyContent: 'center',
-                    paddingHorizontal: THUMB_RADIUS,
-                }}
-            >
-                <View
-                    onLayout={onSliderLayout}
-                    style={{
-                        height: trackHeight,
-                        width: '100%',
-                        backgroundColor: trackColor,
-                        borderRadius: trackHeight / 2,
-                        position: 'relative',
-                    }}
-                >
-                    {/* Active track */}
-                    <Animated.View
-                        style={[
-                            activeTrackStyle,
-                            {
-                                height: trackHeight,
-                                backgroundColor: activeTrackColor,
-                                borderRadius: trackHeight / 2,
-                                position: 'absolute',
-                                top: 0,
-                            },
-                        ]}
-                    />
+            <View style={containerStyle}>
+                <View onLayout={onSliderLayout} style={trackStyle}>
+                    <Animated.View style={[activeTrackStaticStyle, activeTrackStyle]} />
 
-                    {/* Min thumb */}
                     <PanGestureHandler onGestureEvent={minGestureHandler}>
-                        <Animated.View
-                            style={[
-                                minThumbStyle,
-                                {
-                                    position: 'absolute',
-                                    top: -((thumbSize - trackHeight) / 2),
-                                    width: thumbSize * 1.9,
-                                    height: thumbSize,
-                                    borderRadius: thumbSize / 2,
-                                    backgroundColor: thumbColor,
-                                    // shadowColor: '#000',
-                                    // shadowOffset: { width: 0, height: 2 },
-                                    // shadowOpacity: 0.25,
-                                    // shadowRadius: 4,
-                                    // elevation: 5,
-                                },
-                                thumbStyle,
-                            ]}
-                        />
+                        <Animated.View style={[thumbStaticStyle, minThumbStyle, thumbStyle]} />
                     </PanGestureHandler>
 
-                    {/* Max thumb */}
                     <PanGestureHandler onGestureEvent={maxGestureHandler}>
-                        <Animated.View
-                            style={[
-                                maxThumbStyle,
-                                {
-                                    position: 'absolute',
-                                    top: -((thumbSize - trackHeight) / 2),
-                                    width: thumbSize * 1.9,
-                                    height: thumbSize,
-                                    borderRadius: thumbSize / 2,
-                                    backgroundColor: thumbColor,
-                                    // shadowColor: '#000',
-                                    // shadowOffset: { width: 0, height: 2 },
-                                    // shadowOpacity: 0.25,
-                                    // shadowRadius: 4,
-                                    // elevation: 5,
-                                },
-                                thumbStyle,
-                            ]}
-                        />
+                        <Animated.View style={[thumbStaticStyle, maxThumbStyle, thumbStyle]} />
                     </PanGestureHandler>
                 </View>
             </View>
+
             {showLabels && (
                 <View
                     style={{ flexDirection: 'row', justifyContent: 'space-between' }}

@@ -115,7 +115,7 @@ export type EditRecurringTransaction = {
 export type TransactionsFilter = {
     type?: Transaction['type'][];
     category?: string[];
-    account_id?: string[];
+    account_ids?: string[];
     min_amount?: number;
     max_amount?: number;
     start_date?: string;

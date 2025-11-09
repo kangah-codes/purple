@@ -4,93 +4,106 @@ import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBo
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import tw from 'twrnc';
 import TransactionTypeFilter from './TransactionsFilters/TransactionType';
-import AccountsFilter from './TransactionsFilters/Accounts';
+import AccountsFilter from './TransactionsFilters/TransactionAccounts';
 import TransactionCategoryFilter from './TransactionsFilters/TransactionCategory';
 import TransactionAmountFilter from './TransactionsFilters/TransactionAmount';
 import TransactionDateFilter from './TransactionsFilters/TransactionDate';
 
 const snapPoints = ['70%', '70%'];
+const titleStyle = {
+    text: {
+        ...satoshiFont.satoshiBold,
+    },
+    container: {
+        ...tw`bg-white border-b border-purple-100`,
+    },
+};
+
+const FooterButtons = React.memo(() => (
+    <View className='flex flex-row space-x-2.5 justify-between w-full px-5 py-5 mb-5'>
+        <View className='flex-1'>
+            <TouchableOpacity
+                onPress={() => {}}
+                style={{ width: '100%' }}
+                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+            >
+                <Text style={satoshiFont.satoshiBlack} className='text-purple-600 text-center'>
+                    Clear all
+                </Text>
+            </TouchableOpacity>
+        </View>
+
+        <View className='flex-1'>
+            <TouchableOpacity
+                style={{ width: '100%' }}
+                // onPress={handleSubmit(onSubmit)}
+                // disabled={isLoading}
+            >
+                <LinearGradient
+                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                    colors={['#c084fc', '#9333ea']}
+                    style={{ width: '100%' }}
+                >
+                    <Text style={satoshiFont.satoshiBlack} className='text-white text-center'>
+                        Apply
+                    </Text>
+                </LinearGradient>
+            </TouchableOpacity>
+        </View>
+    </View>
+));
+
+FooterButtons.displayName = 'FooterButtons';
 
 export default function TransactionsFilter() {
     const { bottomSheetModalKeys } = useBottomSheetModalStore();
     const { logEvent } = useAnalytics();
 
-    useEffect(() => {
-        const trackScreenView = async () => {
-            if (bottomSheetModalKeys['transactionsFilter']) {
-                await logEvent('screen_view', {
-                    screen: 'transactions_filter_modal',
-                });
-            }
-        };
-
-        trackScreenView();
+    const trackScreenView = useCallback(async () => {
+        if (bottomSheetModalKeys['transactionsFilter']) {
+            await logEvent('screen_view', {
+                screen: 'transactions_filter_modal',
+            });
+        }
     }, [bottomSheetModalKeys, logEvent]);
 
-    const accordionItems: AccordionItem[] = [
-        {
-            id: 'type',
-            title: 'Type',
-            content: <TransactionTypeFilter />,
-        },
-        {
-            id: 'account',
-            title: 'Account',
-            content: <AccountsFilter />,
-        },
-        {
-            id: 'category',
-            title: 'Categories',
-            content: <TransactionCategoryFilter />,
-        },
-        {
-            id: 'amount',
-            title: 'Amount',
-            content: <TransactionAmountFilter />,
-        },
-        {
-            id: 'date',
-            title: 'Created date',
-            content: <TransactionDateFilter />,
-        },
-    ];
+    useEffect(() => {
+        trackScreenView();
+    }, [trackScreenView]);
 
-    const footerButtons = () => (
-        <View className='flex flex-row space-x-2.5 justify-between w-full px-5 py-5 mb-5'>
-            <View className='flex-1'>
-                <TouchableOpacity
-                    onPress={() => {}}
-                    style={{ width: '100%' }}
-                    className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
-                >
-                    <Text style={satoshiFont.satoshiBlack} className='text-purple-600 text-center'>
-                        Clear all
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <View className='flex-1'>
-                <TouchableOpacity
-                    style={{ width: '100%' }}
-                    // onPress={handleSubmit(onSubmit)}
-                    // disabled={isLoading}
-                >
-                    <LinearGradient
-                        className='flex items-center justify-center rounded-full px-5 h-[50]'
-                        colors={['#c084fc', '#9333ea']}
-                        style={{ width: '100%' }}
-                    >
-                        <Text style={satoshiFont.satoshiBlack} className='text-white text-center'>
-                            Apply
-                        </Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        </View>
+    const accordionItems: AccordionItem[] = useMemo(
+        () => [
+            {
+                id: 'type',
+                title: 'Type',
+                content: <TransactionTypeFilter />,
+            },
+            {
+                id: 'account',
+                title: 'Account',
+                content: <AccountsFilter />,
+            },
+            {
+                id: 'category',
+                title: 'Categories',
+                content: <TransactionCategoryFilter />,
+            },
+            {
+                id: 'amount',
+                title: 'Amount',
+                content: <TransactionAmountFilter />,
+            },
+            {
+                id: 'date',
+                title: 'Created date',
+                content: <TransactionDateFilter />,
+            },
+        ],
+        [],
     );
 
     return (
@@ -100,7 +113,7 @@ export default function TransactionsFilter() {
             style={styles.customBottomSheetModal}
             handleIndicatorStyle={styles.handleIndicator}
             isScrollable
-            footerComponent={footerButtons}
+            footerComponent={FooterButtons}
         >
             <View className='flex flex-col'>
                 <View className='w-full flex flex-row justify-center items-center pb-2.5'>
@@ -114,17 +127,10 @@ export default function TransactionsFilter() {
 
                 <AnimatedAccordion
                     items={accordionItems}
-                    titleStyle={{
-                        text: {
-                            ...satoshiFont.satoshiBold,
-                        },
-                        container: {
-                            ...tw`bg-white border-b border-purple-100`,
-                        },
-                    }}
+                    titleStyle={titleStyle}
                     chevronColor='#9333EA'
                     allowMultiple={false}
-                    animationDuration={250}
+                    animationDuration={200}
                 />
             </View>
         </CustomBottomSheetModal>

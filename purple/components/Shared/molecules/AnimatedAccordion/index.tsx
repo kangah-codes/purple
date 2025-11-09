@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo, useCallback } from 'react';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -41,25 +41,26 @@ export default function AnimatedAccordion({
         new Set(items.filter((item) => item.defaultExpanded).map((item) => item.id)),
     );
 
-    const toggleItem = (itemId: string) => {
-        setExpandedItems((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(itemId)) {
-                newSet.delete(itemId);
-            } else {
-                if (!allowMultiple) {
-                    newSet.clear();
+    const toggleItem = useCallback(
+        (itemId: string) => {
+            setExpandedItems((prev) => {
+                const newSet = new Set(prev);
+                if (newSet.has(itemId)) {
+                    newSet.delete(itemId);
+                } else {
+                    if (!allowMultiple) newSet.clear();
+                    newSet.add(itemId);
                 }
-                newSet.add(itemId);
-            }
-            return newSet;
-        });
-    };
+                return newSet;
+            });
+        },
+        [allowMultiple],
+    );
 
     return (
-        <View className={`w-full flex flex-col ${className}`}>
+        <View className={`w-full flex flex-col ${className}`} removeClippedSubviews>
             {items.map((item) => (
-                <AccordionItemComponent
+                <MemoizedAccordionItem
                     key={item.id}
                     item={item}
                     isExpanded={expandedItems.has(item.id)}
@@ -85,55 +86,63 @@ interface AccordionItemComponentProps {
     animationDuration: number;
 }
 
-function AccordionItemComponent({
+const AccordionItemComponent = ({
     item,
     isExpanded,
     onToggle,
     chevronColor,
     titleStyle,
     animationDuration,
-}: AccordionItemComponentProps) {
+}: AccordionItemComponentProps) => {
     const [contentHeight, setContentHeight] = useState(0);
     const [isContentMeasured, setIsContentMeasured] = useState(false);
+    const [isMounted, setIsMounted] = useState(item.defaultExpanded ?? false);
     const heightValue = useSharedValue(isExpanded ? 1 : 0);
     const rotationValue = useSharedValue(isExpanded ? 1 : 0);
 
     useEffect(() => {
-        // animate if content has been measured
+        if (isExpanded && !isMounted) {
+            setIsMounted(true);
+        }
+    }, [isExpanded, isMounted]);
+
+    useEffect(() => {
         if (isContentMeasured) {
             heightValue.value = withTiming(isExpanded ? 1 : 0, {
                 duration: animationDuration,
                 easing: Easing.out(Easing.cubic),
             });
         }
+
         rotationValue.value = withTiming(isExpanded ? 1 : 0, {
             duration: animationDuration,
             easing: Easing.out(Easing.cubic),
         });
     }, [isExpanded, animationDuration, isContentMeasured]);
 
-    // update height animation when contentHeight changes
     useEffect(() => {
-        if (isContentMeasured && isExpanded && contentHeight > 0) {
-            heightValue.value = withTiming(1, {
-                duration: animationDuration,
-                easing: Easing.out(Easing.cubic),
-            });
+        if (!isExpanded && isMounted) {
+            const timeout = setTimeout(() => {
+                setIsMounted(false);
+            }, animationDuration);
+            return () => clearTimeout(timeout);
         }
-    }, [contentHeight, isContentMeasured, isExpanded, animationDuration]);
+    }, [isExpanded, isMounted, animationDuration]);
 
     const animatedHeightStyle = useAnimatedStyle(() => {
-        if (!isContentMeasured) {
+        if (!isContentMeasured || contentHeight === 0) {
             return {
                 height: undefined,
-                opacity: isExpanded ? 1 : 0,
+                opacity: 0,
             };
         }
 
         const height = interpolate(heightValue.value, [0, 1], [0, contentHeight]);
+        const opacity = interpolate(heightValue.value, [0, 0.3, 1], [0, 0, 1]);
+
         return {
             height,
-            opacity: interpolate(heightValue.value, [0, 0.5, 1], [0, 0.5, 1]),
+            opacity,
         };
     });
 
@@ -144,26 +153,22 @@ function AccordionItemComponent({
         };
     });
 
-    const onContentLayout = (event: any) => {
-        const { height } = event.nativeEvent.layout;
-        // update height whenever it changes
-        if (height > 0) {
-            setContentHeight(height);
-            if (!isContentMeasured) {
+    const onContentLayout = useCallback(
+        (event: any) => {
+            const { height } = event.nativeEvent.layout;
+            if (height > 0 && (!isContentMeasured || height !== contentHeight)) {
+                setContentHeight(height);
                 setIsContentMeasured(true);
-                // set initial height value after measurement
-                heightValue.value = isExpanded ? 1 : 0;
             }
-        }
-    };
+        },
+        [isContentMeasured, contentHeight],
+    );
 
     return (
-        <View className={`w-full`}>
+        <View className='w-full'>
             <TouchableOpacity
                 onPress={onToggle}
-                className={['w-full flex flex-row justify-between items-center px-5 py-4']
-                    .filter(Boolean)
-                    .join(' ')}
+                className='w-full flex flex-row justify-between items-center px-5 py-4'
                 activeOpacity={0.7}
                 style={titleStyle?.container}
             >
@@ -176,11 +181,15 @@ function AccordionItemComponent({
                 </Animated.View>
             </TouchableOpacity>
 
-            <Animated.View style={[animatedHeightStyle, { overflow: 'hidden' }]}>
-                <View onLayout={onContentLayout} className={`w-full`}>
-                    {item.content}
-                </View>
-            </Animated.View>
+            {isMounted && (
+                <Animated.View style={[animatedHeightStyle, { overflow: 'hidden' }]}>
+                    <View onLayout={onContentLayout} className='w-full'>
+                        {item.content}
+                    </View>
+                </Animated.View>
+            )}
         </View>
     );
-}
+};
+
+const MemoizedAccordionItem = memo(AccordionItemComponent);
