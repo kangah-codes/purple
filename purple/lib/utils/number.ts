@@ -13,10 +13,7 @@ export const numberFormatter = (num: number, digits: number): string => {
         { value: 1e9, symbol: 'B' },
     ];
 
-    // Handle the case when num is exactly 0
     if (num === 0) return '0';
-
-    // Take the absolute value for comparison, but keep track of sign
     const isNegative = num < 0;
     const absNum = Math.abs(num);
 
@@ -25,11 +22,16 @@ export const numberFormatter = (num: number, digits: number): string => {
         .reverse()
         .find((item) => absNum >= item.value);
 
-    if (!item) return num.toString();
+    if (!item) {
+        // round the number properly to avoid floating point precision issues
+        const rounded = Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
+        return rounded.toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1');
+    }
 
-    const formattedNumber = (absNum / item.value)
-        .toFixed(digits)
-        .replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1');
+    const scaledValue = absNum / item.value;
+    // round the scaled value properly to avoid floating point precision issues
+    const rounded = Math.round(scaledValue * Math.pow(10, digits)) / Math.pow(10, digits);
+    const formattedNumber = rounded.toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1');
 
     return isNegative ? `-${formattedNumber}${item.symbol}` : `${formattedNumber}${item.symbol}`;
 };
