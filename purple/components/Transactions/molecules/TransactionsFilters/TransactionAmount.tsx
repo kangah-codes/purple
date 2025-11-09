@@ -1,31 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from '@/components/Shared/styled';
 import RangeSlider from '@/components/Shared/molecules/RangeSlider';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { usePreferences } from '@/components/Settings/hooks';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 
 interface TransactionAmountFilterProps {
-    onRangeChange?: (minAmount: number, maxAmount: number) => void;
     minLimit?: number;
     maxLimit?: number;
     step?: number;
-    initialMin?: number;
-    initialMax?: number;
 }
 
 export default function TransactionAmountFilter({
-    onRangeChange,
     minLimit = 0,
     maxLimit = 10000,
     step = 10,
-    initialMin,
-    initialMax,
 }: TransactionAmountFilterProps) {
-    const [selectedMin, setSelectedMin] = useState(initialMin ?? minLimit);
-    const [selectedMax, setSelectedMax] = useState(initialMax ?? maxLimit);
+    const { pendingTransactionsFilter, setPendingTransactionsFilter } = useTransactionStore();
+    const [selectedMin, setSelectedMin] = useState(
+        pendingTransactionsFilter.min_amount ?? minLimit,
+    );
+    const [selectedMax, setSelectedMax] = useState(
+        pendingTransactionsFilter.max_amount ?? maxLimit,
+    );
     const {
         preferences: { currency },
     } = usePreferences();
+
+    // Reset local state when global filter is reset
+    useEffect(() => {
+        setSelectedMin(pendingTransactionsFilter.min_amount ?? minLimit);
+        setSelectedMax(pendingTransactionsFilter.max_amount ?? maxLimit);
+    }, [
+        pendingTransactionsFilter.min_amount,
+        pendingTransactionsFilter.max_amount,
+        minLimit,
+        maxLimit,
+    ]);
 
     const formatCurrency = (value: number) => {
         return formatCurrencyRounded(value, currency);
@@ -34,8 +45,32 @@ export default function TransactionAmountFilter({
     const handleRangeChange = (min: number, max: number) => {
         setSelectedMin(min);
         setSelectedMax(max);
-        onRangeChange?.(min, max);
     };
+
+    // Update global filter when local values change
+    useEffect(() => {
+        const newMin = selectedMin === minLimit ? undefined : selectedMin;
+        const newMax = selectedMax === maxLimit ? undefined : selectedMax;
+
+        // Only update if values have changed
+        if (
+            newMin !== pendingTransactionsFilter.min_amount ||
+            newMax !== pendingTransactionsFilter.max_amount
+        ) {
+            setPendingTransactionsFilter({
+                ...pendingTransactionsFilter,
+                min_amount: newMin,
+                max_amount: newMax,
+            });
+        }
+    }, [
+        selectedMin,
+        selectedMax,
+        pendingTransactionsFilter,
+        setPendingTransactionsFilter,
+        minLimit,
+        maxLimit,
+    ]);
 
     return (
         <View className='p-5 bg-purple-50'>

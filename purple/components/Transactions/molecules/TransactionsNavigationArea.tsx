@@ -21,6 +21,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
+import { hasActiveTransactionFilters, useTransactionStore } from '../hooks';
 
 type TransactionsNavigationAreaProps = {
     onSearchFocus?: () => void;
@@ -36,9 +37,12 @@ export default function TransactionsNavigationArea({
     const [visible, setVisible] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
+    const { transactionsFilter } = useTransactionStore();
 
     const displaySearchValue =
         externalSearchValue !== undefined ? externalSearchValue : searchValue;
+
+    const hasActiveFilters = hasActiveTransactionFilters(transactionsFilter);
 
     return (
         <View className='w-full flex flex-col px-5 py-2.5'>
@@ -142,12 +146,26 @@ export default function TransactionsNavigationArea({
                         </TouchableOpacity>
                     )}
                 </View>
-                <TouchableOpacity
-                    className='bg-purple-50 px-5 py-2 flex items-center justify-center rounded-full'
-                    onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
-                >
-                    <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
-                </TouchableOpacity>
+                {hasActiveFilters ? (
+                    <LinearGradient
+                        className='rounded-full relative flex justify-center items-center'
+                        colors={['#c084fc', '#9333ea']}
+                    >
+                        <TouchableOpacity
+                            className='px-5 py-2 flex items-center justify-center rounded-full'
+                            onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
+                        >
+                            <FilterLinesIcon width={20} height={20} stroke='#fff' strokeWidth={2} />
+                        </TouchableOpacity>
+                    </LinearGradient>
+                ) : (
+                    <TouchableOpacity
+                        className='bg-purple-50 px-5 py-2 flex items-center justify-center rounded-full'
+                        onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
+                    >
+                        <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );

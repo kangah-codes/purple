@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import SelectablePill from '@/components/Shared/molecules/SelectablePill';
 import { usePreferences } from '@/components/Settings/hooks';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 import tw from 'twrnc';
 
 const textStyle = [satoshiFont.satoshiMedium, tw`text-xs`];
@@ -12,7 +13,15 @@ export default function TransactionCategoryFilter() {
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
-    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
+    const { pendingTransactionsFilter, setPendingTransactionsFilter } = useTransactionStore();
+    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(
+        new Set(pendingTransactionsFilter.category || []),
+    );
+
+    useEffect(() => {
+        const globalCategories = new Set(pendingTransactionsFilter.category || []);
+        setSelectedTypes(globalCategories);
+    }, [pendingTransactionsFilter.category]);
 
     const handleTypeSelect = useCallback((id: string) => {
         setSelectedTypes((prev) => new Set([...prev, id]));
@@ -26,9 +35,21 @@ export default function TransactionCategoryFilter() {
         });
     }, []);
 
+    useEffect(() => {
+        const newCategories = Array.from(selectedTypes);
+        const currentCategories = pendingTransactionsFilter.category || [];
+
+        if (JSON.stringify(newCategories.sort()) !== JSON.stringify(currentCategories.sort())) {
+            setPendingTransactionsFilter({
+                ...pendingTransactionsFilter,
+                category: newCategories,
+            });
+        }
+    }, [selectedTypes, pendingTransactionsFilter, setPendingTransactionsFilter]);
+
     const processedCategories = useMemo(() => {
         return customTransactionTypes.map((category) => ({
-            id: category.category,
+            id: `${category.emoji} ${category.category}`,
             category: category.category,
             emoji: category.emoji,
             label: `${category.emoji} ${category.category}`,

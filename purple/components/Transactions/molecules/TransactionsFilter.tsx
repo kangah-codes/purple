@@ -12,6 +12,8 @@ import AccountsFilter from './TransactionsFilters/TransactionAccounts';
 import TransactionCategoryFilter from './TransactionsFilters/TransactionCategory';
 import TransactionAmountFilter from './TransactionsFilters/TransactionAmount';
 import TransactionDateFilter from './TransactionsFilters/TransactionDate';
+import { useTransactionStore } from '../hooks';
+import { useQueryClient } from 'react-query';
 
 const snapPoints = ['70%', '70%'];
 const titleStyle = {
@@ -23,45 +25,16 @@ const titleStyle = {
     },
 };
 
-const FooterButtons = React.memo(() => (
-    <View className='flex flex-row space-x-2.5 justify-between w-full px-5 py-5 mb-5'>
-        <View className='flex-1'>
-            <TouchableOpacity
-                onPress={() => {}}
-                style={{ width: '100%' }}
-                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
-            >
-                <Text style={satoshiFont.satoshiBlack} className='text-purple-600 text-center'>
-                    Clear all
-                </Text>
-            </TouchableOpacity>
-        </View>
-
-        <View className='flex-1'>
-            <TouchableOpacity
-                style={{ width: '100%' }}
-                // onPress={handleSubmit(onSubmit)}
-                // disabled={isLoading}
-            >
-                <LinearGradient
-                    className='flex items-center justify-center rounded-full px-5 h-[50]'
-                    colors={['#c084fc', '#9333ea']}
-                    style={{ width: '100%' }}
-                >
-                    <Text style={satoshiFont.satoshiBlack} className='text-white text-center'>
-                        Apply
-                    </Text>
-                </LinearGradient>
-            </TouchableOpacity>
-        </View>
-    </View>
-));
-
-FooterButtons.displayName = 'FooterButtons';
-
 export default function TransactionsFilter() {
-    const { bottomSheetModalKeys } = useBottomSheetModalStore();
+    const { bottomSheetModalKeys, setShowBottomSheetModal } = useBottomSheetModalStore();
     const { logEvent } = useAnalytics();
+    const {
+        resetTransactionsFilter,
+        applyPendingFilters,
+        transactionsFilter,
+        setPendingTransactionsFilter,
+    } = useTransactionStore();
+    const queryClient = useQueryClient();
 
     const trackScreenView = useCallback(async () => {
         if (bottomSheetModalKeys['transactionsFilter']) {
@@ -70,6 +43,62 @@ export default function TransactionsFilter() {
             });
         }
     }, [bottomSheetModalKeys, logEvent]);
+
+    useEffect(() => {
+        if (bottomSheetModalKeys['transactionsFilter']) {
+            setPendingTransactionsFilter(transactionsFilter);
+        }
+    }, [bottomSheetModalKeys, transactionsFilter, setPendingTransactionsFilter]);
+
+    const handleClearAll = useCallback(() => {
+        resetTransactionsFilter();
+        queryClient.invalidateQueries(['transactions']);
+    }, [resetTransactionsFilter, queryClient]);
+
+    const handleApply = useCallback(() => {
+        applyPendingFilters();
+        queryClient.invalidateQueries(['transactions']);
+        setShowBottomSheetModal('transactionsFilter', false);
+    }, [applyPendingFilters, queryClient, setShowBottomSheetModal]);
+
+    const FooterButtonsWithHandlers = useCallback(
+        () => (
+            <View className='flex flex-row space-x-2.5 justify-between w-full px-5 py-5 mb-5'>
+                <View className='flex-1'>
+                    <TouchableOpacity
+                        onPress={handleClearAll}
+                        style={{ width: '100%' }}
+                        className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                    >
+                        <Text
+                            style={satoshiFont.satoshiBlack}
+                            className='text-purple-600 text-center'
+                        >
+                            Clear all
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View className='flex-1'>
+                    <TouchableOpacity onPress={handleApply} style={{ width: '100%' }}>
+                        <LinearGradient
+                            className='flex items-center justify-center rounded-full px-5 h-[50]'
+                            colors={['#c084fc', '#9333ea']}
+                            style={{ width: '100%' }}
+                        >
+                            <Text
+                                style={satoshiFont.satoshiBlack}
+                                className='text-white text-center'
+                            >
+                                Apply
+                            </Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ),
+        [handleClearAll, handleApply],
+    );
 
     useEffect(() => {
         trackScreenView();
@@ -113,7 +142,7 @@ export default function TransactionsFilter() {
             style={styles.customBottomSheetModal}
             handleIndicatorStyle={styles.handleIndicator}
             isScrollable
-            footerComponent={FooterButtons}
+            footerComponent={FooterButtonsWithHandlers}
         >
             <View className='flex flex-col'>
                 <View className='w-full flex flex-row justify-center items-center pb-2.5'>

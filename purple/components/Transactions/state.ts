@@ -20,8 +20,11 @@ type TransactionStore = {
     resetRecurringTransactions: () => void;
     reset: () => void;
     deleteTransaction: (id: string) => void;
-    transactionsFilter: TransactionsFilter;
+    transactionsFilter: TransactionsFilter; // Applied filters (used for queries)
+    pendingTransactionsFilter: TransactionsFilter; // Pending filters (used in UI)
     setTransactionsFilter: (filter: TransactionsFilter) => void;
+    setPendingTransactionsFilter: (filter: TransactionsFilter) => void;
+    applyPendingFilters: () => void;
     resetTransactionsFilter: () => void;
 };
 
@@ -82,10 +85,31 @@ export const createTransactionStore = create<TransactionStore>()(
                 start_date: undefined,
                 end_date: undefined,
             },
+            pendingTransactionsFilter: {
+                type: [],
+                category: [],
+                account_ids: [],
+                min_amount: undefined,
+                max_amount: undefined,
+                start_date: undefined,
+                end_date: undefined,
+            },
             setTransactionsFilter: (filter) => set({ transactionsFilter: filter }),
+            setPendingTransactionsFilter: (filter) => set({ pendingTransactionsFilter: filter }),
+            applyPendingFilters: () =>
+                set((state) => ({ transactionsFilter: { ...state.pendingTransactionsFilter } })),
             resetTransactionsFilter: () =>
                 set({
                     transactionsFilter: {
+                        type: [],
+                        category: [],
+                        account_ids: [],
+                        min_amount: undefined,
+                        max_amount: undefined,
+                        start_date: undefined,
+                        end_date: undefined,
+                    },
+                    pendingTransactionsFilter: {
                         type: [],
                         category: [],
                         account_ids: [],

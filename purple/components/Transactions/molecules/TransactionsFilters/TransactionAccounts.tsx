@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import SelectablePill from '@/components/Shared/molecules/SelectablePill';
@@ -12,8 +12,16 @@ const selectedTextStyle = [satoshiFont.satoshiBold, tw`text-xs`];
 
 export default function AccountsFilter() {
     const { accounts } = useAccountStore();
-    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
-    const { transactionsFilter, setTransactionsFilter } = useTransactionStore();
+    const { pendingTransactionsFilter, setPendingTransactionsFilter } = useTransactionStore();
+    const [selectedTypes, setSelectedTypes] = useState<Set<string>>(
+        new Set(pendingTransactionsFilter.account_ids || []),
+    );
+
+    // Reset local state when global filter is reset
+    useEffect(() => {
+        const globalAccountIds = new Set(pendingTransactionsFilter.account_ids || []);
+        setSelectedTypes(globalAccountIds);
+    }, [pendingTransactionsFilter.account_ids]);
 
     const handleSelect = useCallback((id: string) => {
         setSelectedTypes((prev) => new Set([...prev, id]));
@@ -26,6 +34,20 @@ export default function AccountsFilter() {
             return newSet;
         });
     }, []);
+
+    // Update global filter when local selection changes
+    useEffect(() => {
+        const newAccountIds = Array.from(selectedTypes);
+        const currentAccountIds = pendingTransactionsFilter.account_ids || [];
+
+        // Only update if the arrays are different
+        if (JSON.stringify(newAccountIds.sort()) !== JSON.stringify(currentAccountIds.sort())) {
+            setPendingTransactionsFilter({
+                ...pendingTransactionsFilter,
+                account_ids: newAccountIds,
+            });
+        }
+    }, [selectedTypes, pendingTransactionsFilter, setPendingTransactionsFilter]);
 
     const processedAccounts = useMemo(() => {
         return accounts.map((account) => ({

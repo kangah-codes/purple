@@ -597,6 +597,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             type = false,
             sortOrder = 'desc',
             search_value = false,
+            // New filter parameters
+            account_ids = false,
+            category = false,
+            min_amount = false,
+            max_amount = false,
         } = query;
         const params: any[] = [];
         const searchParams: any[] = [];
@@ -606,32 +611,73 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         let whereClause = 't.deleted_at IS NULL';
         let searchClause = '';
 
+        // Legacy accountID support (single account)
         if (accountID) {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
             searchParams.push(accountID);
         }
+
+        // New account_ids filter support (multiple accounts)
+        if (account_ids && Array.isArray(account_ids) && account_ids.length > 0) {
+            const placeholders = account_ids.map(() => '?').join(',');
+            whereClause += ` AND t.account_id IN (${placeholders})`;
+            params.push(...account_ids);
+            searchParams.push(...account_ids);
+        }
+
         if (accountGroup) {
             whereClause += ' AND t.account_id IN (SELECT id FROM accounts WHERE category = ?)';
             params.push(accountGroup);
             searchParams.push(accountGroup);
         }
+
         if (start_date && end_date) {
             whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
             params.push(start_date, end_date);
             searchParams.push(start_date, end_date);
         }
+
         if (search_value) {
             searchClause = ' AND (t.note LIKE ? OR t.category LIKE ? OR a.name LIKE ?)';
             const likeTerm = `%${search_value}%`;
             params.push(likeTerm, likeTerm, likeTerm);
             searchParams.push(likeTerm, likeTerm, likeTerm);
         }
-        if (type) {
-            whereClause += ' AND type = ?';
+
+        if (type && !Array.isArray(type)) {
+            whereClause += ' AND t.type = ?';
             params.push(type);
             searchParams.push(type);
         }
+
+        if (type && Array.isArray(type) && type.length > 0) {
+            const placeholders = type.map(() => '?').join(',');
+            whereClause += ` AND t.type IN (${placeholders})`;
+            params.push(...type);
+            searchParams.push(...type);
+        }
+
+        if (category && Array.isArray(category) && category.length > 0) {
+            const placeholders = category.map(() => '?').join(',');
+            whereClause += ` AND t.category IN (${placeholders})`;
+            params.push(...category);
+            searchParams.push(...category);
+            console.log(placeholders, category);
+        }
+
+        if (min_amount && typeof min_amount === 'number') {
+            whereClause += ' AND t.amount >= ?';
+            params.push(min_amount);
+            searchParams.push(min_amount);
+        }
+
+        if (max_amount && typeof max_amount === 'number') {
+            whereClause += ' AND t.amount <= ?';
+            params.push(max_amount);
+            searchParams.push(max_amount);
+        }
+
         if (Number.isFinite(page_size)) {
             const offset = (page - 1) * page_size;
             paginationClause = 'LIMIT ? OFFSET ?';

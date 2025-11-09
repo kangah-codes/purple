@@ -19,8 +19,6 @@ export default function IndexScreen() {
     const flatListRef = useRef<FlatList>(null);
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
-
-    // Debounce search to avoid too many API calls
     const debouncedSetSearch = useDebounce((value: string) => {
         setDebouncedSearchValue(value);
     }, 500);

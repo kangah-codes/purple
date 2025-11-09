@@ -1,6 +1,7 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
+import { formPreprocessor } from '@/lib/utils/object';
 import { useSQLiteContext } from 'expo-sqlite';
 import {
     UseInfiniteQueryOptions,
@@ -20,6 +21,7 @@ import {
     EditTransaction,
     RecurringTransaction,
     Transaction,
+    TransactionsFilter,
 } from './schema';
 import { createTransactionStore } from './state';
 
@@ -36,6 +38,12 @@ export function useTransactionStore() {
         updateTransactions,
         updateRecurringTransactions,
         deleteTransaction,
+        transactionsFilter,
+        pendingTransactionsFilter,
+        setTransactionsFilter,
+        setPendingTransactionsFilter,
+        applyPendingFilters,
+        resetTransactionsFilter,
     ] = useStore(createTransactionStore, (state) => [
         state.transactions,
         state.recurringTransactions,
@@ -48,6 +56,12 @@ export function useTransactionStore() {
         state.updateTransactions,
         state.updateRecurringTransactions,
         state.deleteTransaction,
+        state.transactionsFilter,
+        state.pendingTransactionsFilter,
+        state.setTransactionsFilter,
+        state.setPendingTransactionsFilter,
+        state.applyPendingFilters,
+        state.resetTransactionsFilter,
     ]);
 
     return {
@@ -63,6 +77,14 @@ export function useTransactionStore() {
         setCurrentRecurringTransaction,
         updateRecurringTransactions,
         deleteTransaction,
+
+        // Filter functionality
+        transactionsFilter,
+        pendingTransactionsFilter,
+        setTransactionsFilter,
+        setPendingTransactionsFilter,
+        applyPendingFilters,
+        resetTransactionsFilter,
     };
 }
 
@@ -140,12 +162,21 @@ export function useInfiniteTransactions({
 }): UseInfiniteQueryResult<GenericAPIResponse<Transaction[]>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
+    const { transactionsFilter } = useTransactionStore();
+
+    // Process and clean the filter data
+    const processedFilter = formPreprocessor({
+        data: transactionsFilter,
+        omit: [undefined, null, '', []],
+        omitKeys: [],
+    });
 
     return useInfiniteQuery<GenericAPIResponse<Transaction[]>, Error>(
-        ['transactions', requestQuery],
+        ['transactions', requestQuery, processedFilter],
         async ({ pageParam = 1 }) => {
             const queryParams = {
                 ...requestQuery,
+                ...processedFilter,
                 page: pageParam,
                 page_size: requestQuery.page_size || 10,
             };
@@ -315,4 +346,17 @@ export function useDeleteRecurringTransaction({
         ) as TransactionSQLiteService;
         return service.deleteRecurring(transactionID);
     });
+}
+
+// Utility function to check if any filters are active
+export function hasActiveTransactionFilters(filter: TransactionsFilter): boolean {
+    return (
+        (filter.type && filter.type.length > 0) ||
+        (filter.category && filter.category.length > 0) ||
+        (filter.account_ids && filter.account_ids.length > 0) ||
+        filter.min_amount !== undefined ||
+        filter.max_amount !== undefined ||
+        filter.start_date !== undefined ||
+        filter.end_date !== undefined
+    );
 }
