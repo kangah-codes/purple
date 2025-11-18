@@ -54,6 +54,9 @@ export type UserPreferences = {
     pushNotificationsEnabled: boolean;
     dailyNotificationsEnabled: boolean;
 
+    // update preferences
+    updateFrequency: 'on_app_open' | 'interval';
+
     // startup guide preferences
     startupGuide: {
         isCompleted: boolean;

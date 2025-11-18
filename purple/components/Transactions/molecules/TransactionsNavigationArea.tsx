@@ -21,7 +21,6 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
-import { hasActiveTransactionFilters, useTransactionStore } from '../hooks';
 
 type TransactionsNavigationAreaProps = {
     onSearchFocus?: () => void;
@@ -37,12 +36,9 @@ export default function TransactionsNavigationArea({
     const [visible, setVisible] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-    const { transactionsFilter } = useTransactionStore();
 
     const displaySearchValue =
         externalSearchValue !== undefined ? externalSearchValue : searchValue;
-
-    const hasActiveFilters = hasActiveTransactionFilters(transactionsFilter);
 
     return (
         <View className='w-full flex flex-col px-5 py-2.5'>
@@ -105,67 +101,54 @@ export default function TransactionsNavigationArea({
                 </LinearGradient>
             </View>
             <View className='flex flex-row space-x-2.5 mt-2.5'>
-                <View className='relative flex justify-center flex-1'>
-                    <InputField
-                        className='bg-purple-50 rounded-full px-4 pl-10 text-xs h-12 text-gray-900 border border-white'
-                        style={satoshiFont.satoshiBold}
-                        placeholder='Search'
-                        cursorColor={'#000'}
-                        onFocus={onSearchFocus}
-                        onChangeText={(text) => {
-                            if (externalSearchValue === undefined) {
-                                setSearchValue(text);
-                            }
-                            onSearchChange?.(text);
-                        }}
-                        value={displaySearchValue}
-                        animateBorder={false}
-                    />
-                    <SearchIcon
-                        width={16}
-                        height={16}
-                        style={{
-                            position: 'absolute',
-                            left: 15,
-                        }}
-                        stroke='#9333EA'
-                    />
-
-                    {displaySearchValue.length > 0 && (
-                        <TouchableOpacity
+                <View className='bg-purple-50 h-12 border border-white rounded-full px-4 flex flex-row items-center w-full'>
+                    <View className='flex-1 flex-row items-center'>
+                        <SearchIcon
+                            width={16}
+                            height={16}
                             style={{
                                 position: 'absolute',
-                                right: 35,
+                                left: 0,
                             }}
-                            onPress={() => {
-                                setSearchValue('');
-                                onSearchChange?.('');
+                            stroke='#9333EA'
+                        />
+                        <InputField
+                            className='border border-purple-50 text-xs text-gray-900 pl-5 flex-1'
+                            style={satoshiFont.satoshiBold}
+                            placeholder='Search'
+                            cursorColor={'#000'}
+                            onFocus={onSearchFocus}
+                            onChangeText={(text) => {
+                                if (externalSearchValue === undefined) {
+                                    setSearchValue(text);
+                                }
+                                onSearchChange?.(text);
                             }}
-                        >
-                            <XIcon width={16} height={16} stroke='#c27aff' strokeWidth={3} />
-                        </TouchableOpacity>
-                    )}
-                </View>
-                {hasActiveFilters ? (
-                    <LinearGradient
-                        className='rounded-full relative flex justify-center items-center'
-                        colors={['#c084fc', '#9333ea']}
-                    >
-                        <TouchableOpacity
-                            className='px-5 py-2 flex items-center justify-center rounded-full'
-                            onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
-                        >
-                            <FilterLinesIcon width={20} height={20} stroke='#fff' strokeWidth={2} />
-                        </TouchableOpacity>
-                    </LinearGradient>
-                ) : (
+                            value={displaySearchValue}
+                            animateBorder={false}
+                        />
+                        {displaySearchValue.length > 0 && (
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                }}
+                                onPress={() => {
+                                    setSearchValue('');
+                                    onSearchChange?.('');
+                                }}
+                            >
+                                <XIcon width={16} height={16} stroke='#c27aff' strokeWidth={3} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                     <TouchableOpacity
-                        className='bg-purple-50 px-5 py-2 flex items-center justify-center rounded-full'
+                        className='ml-3'
                         onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
                     >
                         <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
                     </TouchableOpacity>
-                )}
+                </View>
             </View>
         </View>
     );

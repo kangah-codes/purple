@@ -11,9 +11,14 @@ import Toast from 'react-native-toast-message';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
 import { exportDatabase, importDatabase } from '../utils';
+import { usePreferences } from '../hooks';
+import SelectablePill from '@/components/Shared/molecules/SelectablePill';
+import tw from 'twrnc';
 
 export default function ExperimentalSettingsScreen() {
     const { logEvent } = useAnalytics();
+    const { preferences, setPreference } = usePreferences();
+    const { updateFrequency } = preferences;
 
     const handleRestore = async () => {
         Alert.alert(
@@ -68,7 +73,41 @@ export default function ExperimentalSettingsScreen() {
         );
     };
 
+    const handleUpdateFrequencyChange = (frequency: 'on_app_open' | 'interval') => {
+        setPreference('updateFrequency', frequency);
+    };
+
+    const UpdateFrequencySelector = () => (
+        <View className='flex flex-row space-x-2'>
+            <SelectablePill
+                id='interval'
+                label='Daily'
+                isSelected={updateFrequency === 'interval'}
+                onSelect={() => handleUpdateFrequencyChange('interval')}
+                onDeselect={() => {}}
+                textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
+                selectedTextStyle={[satoshiFont.satoshiBold, tw`text-xs`]}
+            />
+            <SelectablePill
+                id='on_app_open'
+                label='Every Open'
+                isSelected={updateFrequency === 'on_app_open'}
+                onSelect={() => handleUpdateFrequencyChange('on_app_open')}
+                onDeselect={() => {}}
+                textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
+                selectedTextStyle={[satoshiFont.satoshiBold, tw`text-xs`]}
+            />
+        </View>
+    );
+
     const settingsItems: SettingsListItem[] = [
+        {
+            icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Update Check Frequency',
+            description:
+                'Choose when to check for app updates. "Daily" checks once per day, "Every Open" checks on every app launch.',
+            customItem: UpdateFrequencySelector,
+        },
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Database',

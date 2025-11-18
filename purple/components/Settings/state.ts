@@ -24,6 +24,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
                 allowCurrencyConversion: true,
                 pushNotificationsEnabled: true,
                 dailyNotificationsEnabled: true,
+                updateFrequency: 'interval' as const,
                 startupGuide: {
                     isCompleted: false,
                     completedSteps: [],

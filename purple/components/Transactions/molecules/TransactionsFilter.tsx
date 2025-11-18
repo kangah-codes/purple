@@ -53,6 +53,7 @@ export default function TransactionsFilter() {
     const handleClearAll = useCallback(() => {
         resetTransactionsFilter();
         queryClient.invalidateQueries(['transactions']);
+        setShowBottomSheetModal('transactionsFilter', false);
     }, [resetTransactionsFilter, queryClient]);
 
     const handleApply = useCallback(() => {

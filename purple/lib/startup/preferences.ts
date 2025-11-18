@@ -17,6 +17,7 @@ export async function initializePreferences(db: SQLiteDatabase) {
             allowCurrencyConversion: true,
             pushNotificationsEnabled: false,
             dailyNotificationsEnabled: false,
+            updateFrequency: 'interval',
         } as UserPreferences;
         await settingsService.ensureDefaults(defaultSettings);
 
