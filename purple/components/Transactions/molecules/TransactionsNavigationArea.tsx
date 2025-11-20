@@ -21,6 +21,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
+import { useTransactionStore, hasActiveTransactionFilters } from '../hooks';
 
 type TransactionsNavigationAreaProps = {
     onSearchFocus?: () => void;
@@ -36,9 +37,18 @@ export default function TransactionsNavigationArea({
     const [visible, setVisible] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
-
+    const { transactionsFilter } = useTransactionStore();
     const displaySearchValue =
         externalSearchValue !== undefined ? externalSearchValue : searchValue;
+    const hasActiveFilters = hasActiveTransactionFilters(transactionsFilter);
+    const activeFilterCount = Object.values(transactionsFilter).reduce<number>((count, filter) => {
+        if (Array.isArray(filter)) {
+            return count + (filter.length > 0 ? 1 : 0);
+        } else if (filter !== null && filter !== undefined) {
+            return count + 1;
+        }
+        return count;
+    }, 0);
 
     return (
         <View className='w-full flex flex-col px-5 py-2.5'>
@@ -142,15 +152,32 @@ export default function TransactionsNavigationArea({
                             </TouchableOpacity>
                         )}
                     </View>
-                    <TouchableOpacity
-                        className='ml-3'
-                        onPress={() => {
-                            setShowBottomSheetModal('transactionsFilter', true);
-                            Keyboard.dismiss();
-                        }}
-                    >
-                        <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
-                    </TouchableOpacity>
+                    <View className='h-full flex items-center justify-center relative'>
+                        {hasActiveFilters && (
+                            <View className='absolute top-[6px] -right-[4px] w-4 h-4 rounded-full bg-purple-500 border-2 border-purple-50 flex items-center justify-center z-10'>
+                                <Text
+                                    style={satoshiFont.satoshiBold}
+                                    className='text-[8px] text-white'
+                                >
+                                    {activeFilterCount > 9 ? '9+' : activeFilterCount}
+                                </Text>
+                            </View>
+                        )}
+                        <TouchableOpacity
+                            className='pl-3 h-full flex items-center justify-center'
+                            onPress={() => {
+                                setShowBottomSheetModal('transactionsFilter', true);
+                                Keyboard.dismiss();
+                            }}
+                        >
+                            <FilterLinesIcon
+                                width={20}
+                                height={20}
+                                stroke='#9333EA'
+                                strokeWidth={2}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </View>

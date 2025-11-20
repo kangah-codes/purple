@@ -3,22 +3,21 @@ import { FloppyDiskIcon, RefreshIcon } from '@/components/SVG/icons/noscale';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import SettingsList from '../molecules/SettingsList';
+import UpdateFrequency from '../molecules/UpdateFrequency';
 import { SettingsListItem } from '../schema';
 import { exportDatabase, importDatabase } from '../utils';
-import { usePreferences } from '../hooks';
-import SelectablePill from '@/components/Shared/molecules/SelectablePill';
-import tw from 'twrnc';
 
 export default function ExperimentalSettingsScreen() {
     const { logEvent } = useAnalytics();
-    const { preferences, setPreference } = usePreferences();
-    const { updateFrequency } = preferences;
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
 
     const handleRestore = async () => {
         Alert.alert(
@@ -74,47 +73,23 @@ export default function ExperimentalSettingsScreen() {
         );
     };
 
-    const handleUpdateFrequencyChange = (frequency: 'on_app_open' | 'interval') => {
-        setPreference('updateFrequency', frequency);
-    };
-
-    const UpdateFrequencySelector = () => (
-        <View className='flex flex-row space-x-2'>
-            <SelectablePill
-                id='interval'
-                label='Daily'
-                isSelected={updateFrequency === 'interval'}
-                onSelect={() => handleUpdateFrequencyChange('interval')}
-                onDeselect={() => {}}
-                textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
-                selectedTextStyle={[satoshiFont.satoshiBold, tw`text-xs`]}
-            />
-            <SelectablePill
-                id='on_app_open'
-                label='Every Open'
-                isSelected={updateFrequency === 'on_app_open'}
-                onSelect={() => handleUpdateFrequencyChange('on_app_open')}
-                onDeselect={() => {}}
-                textStyle={[satoshiFont.satoshiMedium, tw`text-xs`]}
-                selectedTextStyle={[satoshiFont.satoshiBold, tw`text-xs`]}
-            />
-        </View>
-    );
-
     const settingsItems: SettingsListItem[] = [
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Update Check Frequency',
-            callback: alert,
+            description: 'Choose when to check for app updates',
+            callback: () => setShowBottomSheetFlatList('preferences-update-frequency', true),
         },
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Database',
+            description: 'Backup your data to a file',
             callback: exportDatabase,
         },
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Restore Database',
+            description: 'Restore your data from a backup file. This will overwrite existing data.',
             callback: handleRestore,
         },
     ];
@@ -122,6 +97,9 @@ export default function ExperimentalSettingsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
+            <Portal>
+                <UpdateFrequency />
+            </Portal>
             <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity
                     onPress={router.back}
