@@ -1,5 +1,5 @@
-import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-import { BellIcon, CoinsStackedIcon, EyeCloseIcon } from '@/components/SVG/icons/noscale';
+import { ArrowLeftIcon, BellIcon } from '@/components/SVG/icons/24x24';
+import { CoinsStackedIcon } from '@/components/SVG/icons/noscale';
 import Switch from '@/components/Shared/atoms/Switch';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -51,9 +51,8 @@ export default function NotificationsScreen() {
 
     const settingsItems: SettingsListItem[] = [
         {
-            icon: <BellIcon width={20} height={20} stroke={'#9333ea'} />,
+            icon: <BellIcon width={18} height={18} stroke={'#9333ea'} strokeWidth={2.5} />,
             title: 'Push Notifications',
-            description: 'Receive notifications for important updates and reminders',
             customItem: () => (
                 <Switch
                     value={preferences.pushNotificationsEnabled}
@@ -66,8 +65,6 @@ export default function NotificationsScreen() {
                   {
                       icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
                       title: 'Daily transaction reminder',
-                      description:
-                          'Get reminded towards the end of each day to log your transactions',
                       customItem: () => (
                           <Switch
                               value={preferences.dailyNotificationsEnabled}
@@ -102,7 +99,7 @@ export default function NotificationsScreen() {
                 </View>
             </View>
 
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

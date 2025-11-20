@@ -9,7 +9,7 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import React, { useCallback } from 'react';
 import { usePreferences } from '../hooks';
 
-export default function PinAccount() {
+export default function UpdateFrequency() {
     const { setPreference, preferences } = usePreferences();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { logEvent } = useAnalytics();

@@ -105,19 +105,16 @@ export default function ExperimentalSettingsScreen() {
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Update Check Frequency',
-            description: 'Choose when to check for app updates',
             callback: alert,
         },
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Database',
-            description: 'Backup your data to a file',
             callback: exportDatabase,
         },
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Restore Database',
-            description: 'Restore your data from a backup file. This will overwrite existing data.',
             callback: handleRestore,
         },
     ];
@@ -140,7 +137,7 @@ export default function ExperimentalSettingsScreen() {
                 </View>
             </View>
 
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

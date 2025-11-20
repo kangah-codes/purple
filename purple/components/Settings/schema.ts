@@ -15,7 +15,6 @@ export type SettingsListItem = {
     title: string;
     link?: string;
     callback?: () => void;
-    description: string;
     customItem?: () => React.ReactNode;
     renderIcon?: () => React.ReactNode;
     disabled?: boolean;

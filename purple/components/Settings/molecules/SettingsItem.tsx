@@ -10,7 +10,6 @@ export default function SettingsItem({
     title,
     link,
     callback,
-    description,
     customItem,
     disabled,
     renderIcon,
@@ -26,12 +25,12 @@ export default function SettingsItem({
 
     return (
         <TouchableOpacity onPress={handlePress} disabled={disabled}>
-            <View className='flex-row items-center justify-between py-4 w-full'>
-                <View className='flex-row items-start space-x-2.5'>
+            <View className='flex-row items-center justify-between w-full'>
+                <View className='flex-row items-center space-x-2.5'>
                     {renderIcon ? (
                         renderIcon()
                     ) : (
-                        <View className='items-center justify-center rounded-full border border-purple-300 w-[40px] h-[40px]'>
+                        <View className='items-center justify-center rounded-lg bg-purple-100 w-[30px] h-[30px]'>
                             {icon}
                         </View>
                     )}
@@ -39,9 +38,6 @@ export default function SettingsItem({
                     <View className='flex flex-col w-full max-w-[70%]'>
                         <Text style={satoshiFont.satoshiBold} className='text-base text-black'>
                             {title}
-                        </Text>
-                        <Text style={satoshiFont.satoshiMedium} className='text-sm text-black'>
-                            {description}
                         </Text>
                     </View>
                 </View>
