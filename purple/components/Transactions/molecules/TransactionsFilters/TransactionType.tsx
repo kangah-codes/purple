@@ -8,10 +8,9 @@ import { useTransactionStore } from '../../hooks';
 const transactionTypes = [
     { id: 'debit', label: 'Expense' },
     { id: 'credit', label: 'Income' },
-    { id: 'transfer', label: 'Transfer' },
 ];
-const textStyle = [satoshiFont.satoshiMedium, tw`text-xs`];
-const selectedTextStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const textStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const selectedTextStyle = [satoshiFont.satoshiBlack, tw`text-xs`];
 
 export default function TransactionTypeFilter() {
     const { pendingTransactionsFilter, setPendingTransactionsFilter } = useTransactionStore();
@@ -53,7 +52,7 @@ export default function TransactionTypeFilter() {
 
     return (
         <View className='p-5 bg-purple-50'>
-            <View className='flex flex-row flex-wrap space-x-2'>
+            <View className='flex flex-row flex-wrap gap-2 h-auto'>
                 {transactionTypes.map((type) => (
                     <View key={type.id}>
                         <SelectablePill

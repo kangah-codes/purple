@@ -58,6 +58,7 @@ export default function ExperimentalSettingsScreen() {
                                 error_type: 'DATABASE_RESTORE_ERROR',
                                 context: 'Failed to restore database',
                                 severity: 'high',
+                                error,
                             });
                             Toast.show({
                                 type: 'error',
@@ -104,9 +105,8 @@ export default function ExperimentalSettingsScreen() {
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Update Check Frequency',
-            description:
-                'Choose when to check for app updates. "Daily" checks once per day, "Every Open" checks on every app launch.',
-            customItem: UpdateFrequencySelector,
+            description: 'Choose when to check for app updates',
+            callback: alert,
         },
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,

@@ -9,9 +9,9 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import ProfilePages from '../molecules/ProfilePages';
 import { router } from 'expo-router';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import SettingsGroup from '../molecules/SettingsGroup';
 
 const linearGradientColours = ['#D8B4FE', '#fff'];
 
@@ -37,8 +37,10 @@ export default function SettingsScreen() {
                     </Text>
                 </View>
             </View>
-            <View className='mt-2.5'>
-                <ProfilePages />
+            <View className='mt-2.5 px-5'>
+                {/* <ProfilePages /> */}
+                <SettingsGroup groupName='Support' items={[]} />
+                <SettingsGroup groupName='Support' items={[]} />
             </View>
         </SafeAreaView>
     );

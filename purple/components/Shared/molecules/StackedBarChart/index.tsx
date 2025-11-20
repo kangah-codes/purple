@@ -50,9 +50,17 @@ export default memo(function CustomBarChart({
     // 1. SCALE DATA & BOUNDS
     // ---------------------------
     const { scaledMaxValue, scaledMinValue, scaledStackData } = useMemo(() => {
-        // Round up for positive side, down for negative side (keeps caps sane)
-        const cappedMax = niceRound(Math.max(maxValue, 0));
-        const cappedMin = -niceRound(Math.max(Math.abs(mostNegativeValue), 0));
+        let cappedMax: number;
+        let cappedMin: number;
+
+        if (stepValue && stepValue > 0) {
+            cappedMax = Math.ceil(Math.max(maxValue, 0) / stepValue) * stepValue;
+            cappedMin = Math.floor(Math.min(mostNegativeValue, 0) / stepValue) * stepValue;
+        } else {
+            // Round up for positive side, down for negative side (keeps caps sane)
+            cappedMax = niceRound(Math.max(maxValue, 0));
+            cappedMin = -niceRound(Math.max(Math.abs(mostNegativeValue), 0));
+        }
 
         // Clamp stack values so nothing exceeds caps
         const scaledData = stackData.map((item) => ({
@@ -68,7 +76,7 @@ export default memo(function CustomBarChart({
             scaledMinValue: cappedMin,
             scaledStackData: scaledData,
         };
-    }, [stackData, maxValue, mostNegativeValue]);
+    }, [stackData, maxValue, mostNegativeValue, stepValue]);
 
     // Chart calculations
     const totalRange = scaledMaxValue - scaledMinValue || 1;

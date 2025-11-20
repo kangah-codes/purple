@@ -7,8 +7,8 @@ import { extractEmojiOrDefault } from '@/lib/utils/string';
 import tw from 'twrnc';
 import { useTransactionStore } from '../../hooks';
 
-const textStyle = [satoshiFont.satoshiMedium, tw`text-xs`];
-const selectedTextStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const textStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const selectedTextStyle = [satoshiFont.satoshiBlack, tw`text-xs`];
 
 export default function AccountsFilter() {
     const { accounts } = useAccountStore();
@@ -60,7 +60,7 @@ export default function AccountsFilter() {
 
     return (
         <View className='p-5 bg-purple-50'>
-            <View className='flex flex-row flex-wrap gap-2'>
+            <View className='flex flex-row flex-wrap gap-2 h-auto'>
                 {processedAccounts.map((account) => (
                     <View key={account.id}>
                         <SelectablePill

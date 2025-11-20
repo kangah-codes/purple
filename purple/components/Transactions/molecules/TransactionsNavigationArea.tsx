@@ -19,7 +19,7 @@ import {
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
 
 type TransactionsNavigationAreaProps = {
@@ -144,7 +144,10 @@ export default function TransactionsNavigationArea({
                     </View>
                     <TouchableOpacity
                         className='ml-3'
-                        onPress={() => setShowBottomSheetModal('transactionsFilter', true)}
+                        onPress={() => {
+                            setShowBottomSheetModal('transactionsFilter', true);
+                            Keyboard.dismiss();
+                        }}
                     >
                         <FilterLinesIcon width={20} height={20} stroke='#9333EA' strokeWidth={2} />
                     </TouchableOpacity>

@@ -21,7 +21,7 @@ export default function SettingsItem({
             router.push(link as Href<string>);
             return;
         }
-        callback && callback();
+        if (callback) callback();
     }, [link, callback]);
 
     return (

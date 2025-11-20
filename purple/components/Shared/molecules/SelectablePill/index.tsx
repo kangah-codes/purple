@@ -1,5 +1,4 @@
 import { Text, TouchableOpacity } from '@/components/Shared/styled';
-import { satoshiFont } from '@/lib/constants/fonts';
 import React, { useEffect } from 'react';
 import Animated, {
     Easing,
@@ -15,14 +14,9 @@ export interface SelectablePillProps {
     isSelected?: boolean;
     onSelect?: (id: string) => void;
     onDeselect?: (id: string) => void;
-    className?: string;
-    textClassName?: string;
-    selectedClassName?: string;
-    selectedTextClassName?: string;
     textStyle?: any;
     selectedTextStyle?: any;
     animationDuration?: number;
-    iconColor?: string;
     borderColor?: string;
     selectedBorderColor?: string;
 }
@@ -65,7 +59,7 @@ export default function SelectablePill({
             <Animated.View
                 style={[
                     animatedStyle,
-                    tw`rounded-full px-2 py-1 items-center justify-center flex flex-row bg-purple-100`,
+                    tw`rounded-full px-2 py-1 items-center justify-center flex flex-row bg-purple-100 h-7`,
                 ]}
             >
                 <Text
@@ -74,7 +68,6 @@ export default function SelectablePill({
                             color: isSelected ? '#9810fa' : '#c27aff',
                         },
                         currentTextStyle,
-                        satoshiFont.satoshiBold,
                     ]}
                     numberOfLines={1}
                 >

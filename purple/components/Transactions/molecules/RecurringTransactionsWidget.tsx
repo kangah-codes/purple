@@ -22,10 +22,10 @@ const numBlocksPerRow = 7;
 const monthDays = eachDayOfInterval({ start, end });
 const offset = monthDays[0].getDay();
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
+const startDate = startOfMonth(now);
+const endDate = endOfMonth(now);
 
 export default function RecurringTransactionsWidget() {
-    const startDate = startOfMonth(new Date());
-    const endDate = endOfMonth(new Date());
     const { data, refetch } = useRecurringTransactions({
         // its ok to use infinity here since we WANT to fetch all
         // recurring tx within the month

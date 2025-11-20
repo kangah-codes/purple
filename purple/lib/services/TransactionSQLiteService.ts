@@ -362,6 +362,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             );
 
             // create transactions for each missed occurrence
+            // TODO: why tf am i creating a new transaction service here???
             const txService = new TransactionSQLiteService(this.db);
             let lastSuccessful: Date | null = null;
             for (const occurrenceDate of missedOccurrences) {
@@ -745,7 +746,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     ): Promise<GenericAPIResponse<RecurringTransaction[]>> {
         const fromUnix = dateToUNIX(from_date);
         const toUnix = dateToUNIX(to_date);
-
+        const occurrences: RecurringTransaction[] = [];
         const recurringDefs = await this.db.getAllAsync<RecurringTransaction>(
             `SELECT * FROM recurring_transactions
             WHERE start_date_unix <= ?
@@ -754,12 +755,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             [toUnix, fromUnix],
         );
 
-        const occurrences: RecurringTransaction[] = [];
-
         for (const def of recurringDefs) {
             try {
                 const rule = rrulestr(def.recurrence_rule, {
-                    dtstart: new Date(def.start_date_unix * 1000),
+                    // we want to start from the start of the month in question
+                    dtstart: from_date,
                 });
 
                 const dates = rule.between(from_date, to_date, true);

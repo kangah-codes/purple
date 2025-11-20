@@ -6,8 +6,8 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { useTransactionStore } from '@/components/Transactions/hooks';
 import tw from 'twrnc';
 
-const textStyle = [satoshiFont.satoshiMedium, tw`text-xs`];
-const selectedTextStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const textStyle = [satoshiFont.satoshiBold, tw`text-xs`];
+const selectedTextStyle = [satoshiFont.satoshiBlack, tw`text-xs`];
 
 export default function TransactionCategoryFilter() {
     const {
@@ -58,7 +58,7 @@ export default function TransactionCategoryFilter() {
 
     return (
         <View className='p-5 bg-purple-50'>
-            <View className='flex flex-row flex-wrap gap-2'>
+            <View className='flex flex-row flex-wrap gap-2 h-auto'>
                 {processedCategories.map((category) => (
                     <View key={category.id}>
                         <SelectablePill
