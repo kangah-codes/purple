@@ -16,6 +16,8 @@ export default class StartupService {
     }
 
     public async runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+        const isDev = __DEV__;
+
         const dbVersion = (await db.getFirstAsync<{ user_version: number }>(
             'PRAGMA user_version',
         )) ?? { user_version: 0 };
@@ -23,9 +25,24 @@ export default class StartupService {
         let highestAppliedVersion = dbVersion.user_version;
 
         for (const { version, sql } of migrations) {
-            if (version > dbVersion.user_version) {
-                console.log(`Running migration v${version}`);
-                await db.execAsync(sql);
+            // in dev mode run all migrations; in production only run new ones
+            const shouldRunMigration = isDev || version > dbVersion.user_version;
+
+            if (shouldRunMigration) {
+                console.log(`Running migration v${version}${isDev ? ' (dev mode)' : ''}`);
+
+                try {
+                    await db.execAsync(sql);
+                } catch (error) {
+                    if (isDev) {
+                        console.warn(
+                            `Migration v${version} failed (continuing in dev mode):`,
+                            error,
+                        );
+                    } else {
+                        throw error;
+                    }
+                }
 
                 if (version > highestAppliedVersion) {
                     highestAppliedVersion = version;

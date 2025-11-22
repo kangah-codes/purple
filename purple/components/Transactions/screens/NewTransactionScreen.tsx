@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccounts } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -72,6 +71,15 @@ export default function NewTransactionScreen() {
     });
     const isLoading = isCreatingTransaction || isCreatingRecurring;
     const accounts = data?.data || [];
+    const accountsToUse = accounts
+        .filter((a) => a.is_open)
+        .reduce((acc, curr) => {
+            acc[curr.id] = {
+                label: curr.name,
+                value: curr.id,
+            };
+            return acc;
+        }, {} as Record<string, { label: string; value: string }>);
 
     const {
         control,
@@ -83,7 +91,7 @@ export default function NewTransactionScreen() {
             amount: '',
             category: '',
             note: '',
-            fromAccount: type == 'transfer' ? ((accountId as string) ?? '') : '',
+            fromAccount: type == 'transfer' ? (accountId as string) ?? '' : '',
             toAccount: '',
             type: '',
             accountId: (accountId as string) ?? '',
@@ -158,7 +166,6 @@ export default function NewTransactionScreen() {
         const accountId = transactionType !== 'transfer' ? data.accountId : data.fromAccount;
         const account = accounts.find((acc) => acc.id === accountId);
         if (!account) {
-            console.log(account, accounts, accountId, data);
             await logEvent('error_occurred', {
                 error_type: 'NOT_FOUND_ERROR',
                 context: `Account with id ${accountId} not found`,
@@ -201,6 +208,7 @@ export default function NewTransactionScreen() {
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
                 ['recurrence_rule', 'recurrence_rule', () => rrule],
+                ['note', 'notes', (value) => value ?? null],
             ]);
 
             // For transfers, ensure both from_account and to_account are included
@@ -299,19 +307,7 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionDebitAccount'
-                                            options={accounts.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.id] = {
-                                                        label: curr.name,
-                                                        value: curr.id,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={accountsToUse}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -347,19 +343,7 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCreditAccount'
-                                            options={accounts.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr.id] = {
-                                                        label: curr.name,
-                                                        value: curr.id,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={accountsToUse}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -430,16 +414,7 @@ export default function NewTransactionScreen() {
                             <>
                                 <SelectField
                                     selectKey='newTransactionAccount'
-                                    options={accounts.reduce(
-                                        (acc, curr) => {
-                                            acc[curr.id] = {
-                                                label: curr.name,
-                                                value: curr.id,
-                                            };
-                                            return acc;
-                                        },
-                                        {} as Record<string, { label: string; value: string }>,
-                                    )}
+                                    options={accountsToUse}
                                     customSnapPoints={['50%', '70%']}
                                     value={value}
                                     onChange={(val) => {
@@ -482,16 +457,13 @@ export default function NewTransactionScreen() {
                             render={({ field: { onChange, value } }) => (
                                 <SelectField
                                     selectKey='transactionRecurrenceRule'
-                                    options={TRANSACTION_RECURRENCE_RULES.reduce(
-                                        (acc, curr) => {
-                                            acc[curr.value] = {
-                                                label: curr.label,
-                                                value: curr.value,
-                                            };
-                                            return acc;
-                                        },
-                                        {} as Record<string, { label: string; value: string }>,
-                                    )}
+                                    options={TRANSACTION_RECURRENCE_RULES.reduce((acc, curr) => {
+                                        acc[curr.value] = {
+                                            label: curr.label,
+                                            value: curr.value,
+                                        };
+                                        return acc;
+                                    }, {} as Record<string, { label: string; value: string }>)}
                                     customSnapPoints={['50%', '70%']}
                                     value={value !== undefined ? String(value) : undefined}
                                     onChange={onChange}
@@ -549,16 +521,13 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, value } }) => (
                                     <SelectField
                                         selectKey='dayOfWeekSelect'
-                                        options={DAYS_OF_WEEK.reduce(
-                                            (acc, curr) => {
-                                                acc[curr.value] = {
-                                                    label: curr.label,
-                                                    value: curr.value,
-                                                };
-                                                return acc;
-                                            },
-                                            {} as Record<string, { label: string; value: string }>,
-                                        )}
+                                        options={DAYS_OF_WEEK.reduce((acc, curr) => {
+                                            acc[curr.value] = {
+                                                label: curr.label,
+                                                value: curr.value,
+                                            };
+                                            return acc;
+                                        }, {} as Record<string, { label: string; value: string }>)}
                                         customSnapPoints={['50%', '70%']}
                                         value={value !== undefined ? String(value) : undefined}
                                         onChange={onChange}
@@ -589,16 +558,13 @@ export default function NewTransactionScreen() {
                                 render={({ field: { onChange, value } }) => (
                                     <SelectField
                                         selectKey='dayOfMonthSelect'
-                                        options={DAYS_OF_MONTH.reduce(
-                                            (acc, curr) => {
-                                                acc[curr.value] = {
-                                                    label: curr.label,
-                                                    value: curr.value,
-                                                };
-                                                return acc;
-                                            },
-                                            {} as Record<string, { label: string; value: string }>,
-                                        )}
+                                        options={DAYS_OF_MONTH.reduce((acc, curr) => {
+                                            acc[curr.value] = {
+                                                label: curr.label,
+                                                value: curr.value,
+                                            };
+                                            return acc;
+                                        }, {} as Record<string, { label: string; value: string }>)}
                                         customSnapPoints={['50%', '70%']}
                                         value={value !== undefined ? String(value) : undefined}
                                         onChange={onChange}
@@ -810,19 +776,13 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce(
-                                                (acc, curr) => {
-                                                    acc[curr] = {
-                                                        label: curr,
-                                                        value: curr,
-                                                    };
-                                                    return acc;
-                                                },
-                                                {} as Record<
-                                                    string,
-                                                    { label: string; value: string }
-                                                >,
-                                            )}
+                                            options={transactionTypes.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={onChange}

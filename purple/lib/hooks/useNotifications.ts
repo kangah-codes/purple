@@ -80,7 +80,6 @@ export function useNotifications() {
             const alreadyScheduled = existing.some((n) => n.content.data.dailyReminder === true);
 
             if (alreadyScheduled) {
-                console.log('Daily notification already scheduled, skipping.');
                 return;
             }
 

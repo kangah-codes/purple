@@ -56,6 +56,8 @@ export type RecurringTransaction = {
     created_at_unix: string;
     updated_at_unix: string;
     deleted_at_unix: string | null;
+    account_currency: string;
+    notes: string | null;
 };
 
 export type CreateTransaction = {
@@ -94,6 +96,7 @@ export type CreateRecurringTransaction = {
     currency: string;
     from_account?: string;
     to_account?: string;
+    notes?: string;
 };
 
 export type EditRecurringTransaction = {
@@ -110,6 +113,7 @@ export type EditRecurringTransaction = {
     to_account?: string;
     is_active: boolean;
     status: 'active' | 'paused' | 'cancelled';
+    notes?: string;
 };
 
 export type TransactionsFilter = {

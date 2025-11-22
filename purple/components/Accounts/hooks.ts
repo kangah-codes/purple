@@ -313,12 +313,25 @@ export function useCalculateAccountData({
             }, 0);
 
             const absoluteChange = currentBalance - previousBalance;
-            const percentageChange = (
-                previousBalance !== 0 ? (absoluteChange / Math.abs(previousBalance)) * 100 : 0
-            ).toFixed(1);
+
+            // Handle percentage change calculation with safeguards for very small balances
+            let percentageChange: number;
+            const minThreshold = 0.01; // Minimum balance threshold for meaningful percentage calculation
+
+            if (Math.abs(previousBalance) < minThreshold) {
+                // If previous balance is very small, treat it as zero
+                percentageChange = 0;
+            } else {
+                const rawPercentage = (absoluteChange / Math.abs(previousBalance)) * 100;
+                // Cap the percentage at a reasonable maximum to avoid extreme values
+                const maxPercentage = 10000; // 10,000% maximum
+                percentageChange = Math.max(-maxPercentage, Math.min(maxPercentage, rawPercentage));
+            }
+
+            const formattedPercentageChange = Number(percentageChange.toFixed(1));
 
             let trend: 'increase' | 'decrease' | 'neutral';
-            if (Math.abs(Number(percentageChange)) < 0.01) {
+            if (Math.abs(percentageChange) < 0.01) {
                 trend = 'neutral';
             } else if (absoluteChange > 0) {
                 trend = 'increase';
@@ -347,10 +360,7 @@ export function useCalculateAccountData({
                 currentBalance,
                 previousBalance,
                 absoluteChange,
-                percentageChange:
-                    Number(percentageChange) % 1 === 0
-                        ? Number(percentageChange)
-                        : percentageChange,
+                percentageChange: formattedPercentageChange,
                 trend,
                 currency: preferredCurrency,
                 isLoading: false,

@@ -176,6 +176,9 @@ export default function CurrentRecurringTransactionModal({
                                 value={format(currentRecurringTransaction.end_date, 'dd MMM, yyyy')}
                             />
                         )}
+                        {currentRecurringTransaction.notes && (
+                            <ReceiptDetail label='Note' value={currentRecurringTransaction.notes} />
+                        )}
                         <View className='border-b border-purple-100 w-full mb-5' />
                         <View className='flex flex-row space-x-2 w-[60%] justify-between'>
                             <LinearGradient

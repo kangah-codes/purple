@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -32,6 +31,7 @@ import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule, getMinimumEndDate } from '../utils';
 import HTTPError from '@/lib/utils/error';
 import { RRule } from 'rrule';
+import { isNotEmptyString } from '@/lib/utils/string';
 
 type FormData = {
     amount: string;
@@ -102,7 +102,6 @@ export default function EditRecurringTransactionScreen() {
         defaultValues: {
             amount: currentRecurringTransaction?.amount.toString() ?? '',
             category: currentRecurringTransaction?.category ?? '',
-            note: currentRecurringTransaction?.metadata?.note ?? '',
             fromAccount: currentRecurringTransaction?.from_account ?? '',
             toAccount: currentRecurringTransaction?.to_account ?? '',
             type: currentRecurringTransaction?.type ?? transactionType,
@@ -114,6 +113,7 @@ export default function EditRecurringTransactionScreen() {
             start_date: currentRecurringTransaction?.start_date,
             end_date: currentRecurringTransaction?.end_date ?? undefined,
             time: parsedRecurrence.time,
+            note: currentRecurringTransaction?.notes ?? '',
         },
     });
 
@@ -155,8 +155,6 @@ export default function EditRecurringTransactionScreen() {
         control,
         name: 'dayOfMonth',
     });
-
-    console.log(errors, 'ERRORS');
 
     const date = dateISO ? new Date(dateISO) : new Date();
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -227,7 +225,11 @@ export default function EditRecurringTransactionScreen() {
             ['amount', 'amount', (value) => Number(value)],
             ['charges', 'charges', (value) => Number(value)],
             ['recurrence_rule', 'recurrence_rule', () => rrule],
-            ['note', 'metadata', (value) => ({ note: value })],
+            [
+                'note',
+                'notes',
+                (value) => (value && isNotEmptyString(value as string | undefined) ? value : null),
+            ],
             ['type', 'type', () => transactionType as 'debit' | 'credit' | 'transfer'],
         ]);
         // For transfers, ensure both from_account and to_account are included

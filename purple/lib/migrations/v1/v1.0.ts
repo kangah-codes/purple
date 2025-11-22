@@ -1,4 +1,4 @@
-export const migrationsV1 = [
+export const migrationsV1_0 = [
     {
         version: 1,
         sql: `

@@ -63,7 +63,7 @@ export default function RecurringTransactionCard({ transaction }: RecurringTrans
                             : transaction.type === 'credit'
                             ? '+'
                             : ''}
-                        {formatCurrencyRounded(transaction.amount, 'USD')}
+                        {formatCurrencyRounded(transaction.amount, transaction.account_currency)}
                     </Text>
 
                     <ChevronRightIcon stroke='#9333ea' />

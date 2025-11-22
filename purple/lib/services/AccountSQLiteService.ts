@@ -105,7 +105,6 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
                 | 'deleted_at'
                 | 'deleted_at_unix'
                 | 'user_id'
-                | 'balance'
                 | 'is_default_account'
             >
         >,
@@ -130,7 +129,6 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
         }
 
         const setString = fields.map((field) => `${field} = ?`).join(', ');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const values = fields.map((field) => (data as any)[field]);
         values.push(new Date().toISOString()); // updated_at
         values.push(Math.floor(Date.now() / 1000).toString()); // updated_at_unix

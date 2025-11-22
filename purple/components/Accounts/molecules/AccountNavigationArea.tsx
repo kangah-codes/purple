@@ -4,8 +4,8 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { truncateStringIfLongerThan } from '@/lib/utils/string';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { useAccountStore, useDeleteAccount } from '../hooks';
-import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
+import { useAccountStore, useDeleteAccount, useEditAccount } from '../hooks';
+import { ArchiveIcon, DotsHorizontalIcon, PinIcon } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
 import { StyleSheet } from 'react-native';
 import tw from 'twrnc';
@@ -13,13 +13,121 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import HTTPError from '@/lib/utils/error';
 import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
+import { usePreferences } from '@/components/Settings/hooks';
+import { formatCurrencyRounded } from '@/lib/utils/number';
+import { Account } from '../schema';
+import { dateToUNIX } from '@/lib/utils/date';
 
 export default function AccountNavigationArea() {
-    const { currentAccount } = useAccountStore();
+    const {
+        setPreference,
+        preferences: { pinnedAccount },
+    } = usePreferences();
+    const { currentAccount, setCurrentAccount } = useAccountStore();
     const [visible, setVisible] = useState(false);
     const queryClient = useQueryClient();
     const { mutate } = useDeleteAccount({ id: currentAccount?.id ?? '' });
     const { showConfirmationModal } = useConfirmationModalStore();
+    const { mutate: editMutate } = useEditAccount();
+    const isOpen = currentAccount?.is_open === 1;
+    const trimLength = isOpen ? 10 : 15;
+
+    const pinAccount = () => {
+        if (currentAccount) {
+            if (pinnedAccount === currentAccount.id) {
+                setPreference('pinnedAccount', '');
+                return;
+            }
+            setPreference('pinnedAccount', currentAccount?.id);
+        }
+        setVisible(false);
+    };
+
+    const handleCloseAccount = () => {
+        setVisible(false);
+        showConfirmationModal({
+            title: `${isOpen ? 'Close' : 'Reopen'} Account?`,
+            message: isOpen
+                ? `The account balance will be set to ${formatCurrencyRounded(
+                      0,
+                      currentAccount?.currency,
+                  )}, however historical records will remain intact. You can also reopen the account later if needed.`
+                : 'Reopening this account will restore its previous balance and all historical records will remain intact.',
+            confirmText: isOpen ? 'Close' : 'Reopen',
+            onConfirm: () => {
+                if (!currentAccount) {
+                    router.back();
+                    return;
+                }
+                const now = new Date();
+                console.log('Account operation:', {
+                    isOpen,
+                    currentBalance: currentAccount.balance,
+                    closedBalance: currentAccount.closed_balance,
+                });
+
+                const newBalance = isOpen
+                    ? 0 // closing set to 0
+                    : currentAccount.closed_balance ?? currentAccount.balance; // reopening restore from closed_balance
+
+                console.log('New balance will be:', newBalance);
+
+                editMutate(
+                    {
+                        id: currentAccount?.id ?? '',
+                        data: {
+                            is_open: currentAccount.is_open ? 0 : 1,
+                            closed_at: isOpen ? now.toISOString() : null,
+                            closed_at_unix: isOpen ? dateToUNIX(now).toString() : null,
+                            closed_balance: isOpen ? currentAccount.balance : null,
+                            balance: newBalance,
+                        },
+                    },
+                    {
+                        onError: (err) => {
+                            if (err instanceof HTTPError) {
+                                Toast.show({
+                                    type: 'error',
+                                    props: {
+                                        text1: 'Error!',
+                                        text2: err.message,
+                                    },
+                                });
+                                return;
+                            }
+                            Toast.show({
+                                type: 'error',
+                                props: {
+                                    text1: 'Error!',
+                                    text2: 'There was an issue closing account',
+                                },
+                            });
+                        },
+                        onSuccess: () => {
+                            setCurrentAccount({
+                                ...currentAccount,
+                                is_open: currentAccount.is_open ? 0 : 1,
+                                balance: newBalance,
+                                closed_at: isOpen ? now.toISOString() : null,
+                                closed_at_unix: isOpen ? dateToUNIX(now).toString() : null,
+                                closed_balance: isOpen ? currentAccount.balance : null,
+                            } as Account);
+                            queryClient.invalidateQueries({
+                                queryKey: ['accounts'],
+                            });
+                            Toast.show({
+                                type: 'success',
+                                props: {
+                                    text1: 'Success!',
+                                    text2: `Account ${isOpen ? 'closed' : 'reopened'} successfully`,
+                                },
+                            });
+                        },
+                    },
+                );
+            },
+        });
+    };
 
     const handleDeleteAccount = () => {
         setVisible(false);
@@ -64,9 +172,6 @@ export default function AccountNavigationArea() {
                     },
                 });
             },
-            onCancel: () => {
-                // Optional cancel callback
-            },
         });
     };
 
@@ -83,7 +188,7 @@ export default function AccountNavigationArea() {
 
             <View className='absolute left-0 right-0 items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                    {truncateStringIfLongerThan(currentAccount.name as string, 10)}
+                    {truncateStringIfLongerThan(currentAccount.name as string, trimLength)}
                 </Text>
             </View>
 
@@ -102,7 +207,7 @@ export default function AccountNavigationArea() {
                             />
                         </View>
                     }
-                    dropdownWidth={150}
+                    dropdownWidth={170}
                     offsetY={10}
                     style={[tw`rounded-3xl bg-white p-2 px-4`, styles.shadow]}
                 >
@@ -121,6 +226,26 @@ export default function AccountNavigationArea() {
                         </View>
                     </TouchableOpacity>
                     <View className='h-[1px] border-b border-purple-200 my-0.5' />
+                    <TouchableOpacity delayLongPress={500} onPress={pinAccount}>
+                        <View className='flex flex-row items-center space-x-2 py-1.5'>
+                            <PinIcon stroke='#ad46ff' width={18} height={18} />
+                            <Text style={satoshiFont.satoshiMedium} className='text-sm'>
+                                {pinnedAccount === currentAccount.id ? 'Unpin ' : 'Pin '}
+                                Account
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <View className='h-[1px] border-b border-purple-200 my-0.5' />
+                    <TouchableOpacity delayLongPress={500} onPress={handleCloseAccount}>
+                        <View className='flex flex-row items-center space-x-2 py-1.5'>
+                            <ArchiveIcon stroke='#ad46ff' width={18} height={18} />
+                            <Text style={satoshiFont.satoshiMedium} className='text-sm'>
+                                {currentAccount.is_open ? 'Close ' : 'Reopen '}
+                                Account
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <View className='h-[1px] border-b border-purple-200 my-0.5' />
                     <TouchableOpacity delayLongPress={500} onPress={handleDeleteAccount}>
                         <View className='flex flex-row items-center space-x-2 py-1.5'>
                             <TrashIcon stroke='#EF4444' width={18} />
@@ -130,24 +255,26 @@ export default function AccountNavigationArea() {
                         </View>
                     </TouchableOpacity>
                 </DropdownMenu>
-                <LinearGradient
-                    className='rounded-full justify-center items-center'
-                    colors={['#c084fc', '#9333ea']}
-                >
-                    <TouchableOpacity
-                        className='px-4 py-2 flex items-center justify-center rounded-full'
-                        onPress={() => {
-                            router.push({
-                                pathname: '/transactions/new',
-                                params: {
-                                    accountId: currentAccount.id,
-                                },
-                            });
-                        }}
+                {currentAccount.is_open && (
+                    <LinearGradient
+                        className='rounded-full justify-center items-center'
+                        colors={['#c084fc', '#9333ea']}
                     >
-                        <PlusIcon stroke={'#fff'} width={24} height={24} />
-                    </TouchableOpacity>
-                </LinearGradient>
+                        <TouchableOpacity
+                            className='px-4 py-2 flex items-center justify-center rounded-full'
+                            onPress={() => {
+                                router.push({
+                                    pathname: '/transactions/new',
+                                    params: {
+                                        accountId: currentAccount.id,
+                                    },
+                                });
+                            }}
+                        >
+                            <PlusIcon stroke={'#fff'} width={24} height={24} />
+                        </TouchableOpacity>
+                    </LinearGradient>
+                )}
             </View>
         </View>
     );

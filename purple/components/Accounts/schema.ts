@@ -27,18 +27,16 @@ export type Account = {
     created_at_unix: string;
     updated_at_unix: string;
     deleted_at_unix: string | null;
+    is_open: number;
+    closed_at: string | null;
+    closed_at_unix: string | null;
+    closed_balance: number | null;
 };
 
 export type EditAccount = Partial<
     Omit<
         Account,
-        | 'id'
-        | 'created_at'
-        | 'created_at_unix'
-        | 'deleted_at'
-        | 'deleted_at_unix'
-        | 'user_id'
-        | 'balance'
+        'id' | 'created_at' | 'created_at_unix' | 'deleted_at' | 'deleted_at_unix' | 'user_id'
     >
 >;
 

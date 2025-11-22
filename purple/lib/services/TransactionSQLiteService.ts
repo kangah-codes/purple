@@ -1,5 +1,6 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Account } from '@/components/Accounts/schema';
+import { isLiabilityAccount } from '@/components/Accounts/utils';
 import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import {
     CreateRecurringTransaction,
@@ -52,8 +53,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 if (!creditAccount || !debitAccount) throw new Error(errorMessage);
 
-                // Check for overdraw on transfer (debit side)
-                if (allowOverdraw === false) {
+                // Check for overdraw on transfer (debit side) - skip for liability accounts
+                const isDebitLiability = isLiabilityAccount(debitAccount.category);
+                const isCreditLiability = isLiabilityAccount(creditAccount.category);
+
+                if (allowOverdraw === false && !isDebitLiability) {
                     const debitAmount = data.amount + data.charges;
                     if (
                         typeof debitAccount.balance === 'number' &&
@@ -86,32 +90,42 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     });
                 }
 
-                // Create debit entry
-                const debitUUID = UUID();
-                await this.db.runAsync(
-                    `INSERT INTO transactions
-                  (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        debitUUID,
-                        data.date,
-                        now,
-                        data.from_account ?? null,
-                        null,
-                        'debit',
-                        data.amount + data.charges,
-                        isNotEmptyString(data.note) ? data.note! : defaultNote,
-                        data.category,
-                        data.from_account ?? null,
-                        data.to_account ?? null,
-                        debitAccount.currency,
-                        data.plan_id ?? null,
-                    ],
-                );
+                // Create debit entry only if source account is not a liability account
+                // For liability accounts, we don't want to reduce the debt when spending from it
+                let debitUUID: string;
+                if (!isDebitLiability) {
+                    debitUUID = UUID();
+                    await this.db.runAsync(
+                        `INSERT INTO transactions
+                      (id, created_at, updated_at, account_id, user_id, type,
+                       amount, note, category, from_account, to_account, currency, plan_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            debitUUID,
+                            data.date,
+                            now,
+                            data.from_account ?? null,
+                            null,
+                            'debit',
+                            data.amount + data.charges,
+                            isNotEmptyString(data.note) ? data.note! : defaultNote,
+                            data.category,
+                            data.from_account ?? null,
+                            data.to_account ?? null,
+                            debitAccount.currency,
+                            data.plan_id ?? null,
+                        ],
+                    );
+                } else {
+                    // For liability accounts, just create a placeholder UUID for return
+                    debitUUID = UUID();
+                }
 
                 // Create credit entry
+                // For liability accounts, use debit to reduce the debt when receiving payment
                 const creditUUID = UUID();
+                const creditTransactionType = isCreditLiability ? 'debit' : 'credit';
+
                 await this.db.runAsync(
                     `INSERT INTO transactions
                   (id, created_at, updated_at, account_id, user_id, type,
@@ -123,7 +137,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         now,
                         data.to_account ?? null,
                         null,
-                        'credit',
+                        creditTransactionType,
                         creditAmount,
                         isNotEmptyString(data.note) ? data.note! : defaultNote,
                         data.category,
@@ -136,7 +150,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 const result = await this.db.getFirstAsync<Transaction>(
                     'SELECT * FROM transactions WHERE id = ?',
-                    [debitUUID],
+                    [isDebitLiability ? creditUUID : debitUUID],
                 );
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
@@ -319,10 +333,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     id, created_at, updated_at, account_id, type, amount, category,
                     recurrence_rule, start_date, end_date, status, metadata,
                     created_at_unix, updated_at_unix, start_date_unix, end_date_unix,
-                    create_next_at, create_next_at_unix, from_account, to_account
+                    create_next_at, create_next_at_unix, from_account, to_account, notes
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )`,
                 [
                     uuid,
@@ -345,6 +359,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     dateToUNIX(firstOccurrence),
                     fromAccount,
                     toAccount,
+                    data.notes ?? null,
                 ],
             );
 
@@ -487,6 +502,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             if (data.to_account !== undefined) {
                 updateFields.push('to_account = ?');
                 updateValues.push(data.to_account);
+            }
+            if (data.notes !== undefined) {
+                updateFields.push('notes = ?');
+                updateValues.push(data.notes);
             }
             if (data.currency !== undefined) {
                 updateFields.push('currency = ?');
@@ -664,7 +683,6 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             whereClause += ` AND t.category IN (${placeholders})`;
             params.push(...category);
             searchParams.push(...category);
-            console.log(placeholders, category);
         }
 
         if (min_amount && typeof min_amount === 'number') {
@@ -858,14 +876,18 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
-            `SELECT COUNT(*) FROM recurring_transactions rt WHERE ${whereClause}`,
+            `SELECT COUNT(*) FROM recurring_transactions rt 
+             INNER JOIN accounts a ON rt.account_id = a.id 
+             WHERE ${whereClause}`,
             [...params],
         );
         if (!result) throw new Error('Error fetching recurring transactions');
 
         params.push(page_size, offset);
         const transactions = await this.db.getAllAsync<RecurringTransaction>(
-            `SELECT rt.* FROM recurring_transactions rt
+            `SELECT rt.*, a.currency AS account_currency 
+             FROM recurring_transactions rt
+             INNER JOIN accounts a ON rt.account_id = a.id
              WHERE ${whereClause}
              ORDER BY rt.start_date DESC
              ${paginationClause}`,

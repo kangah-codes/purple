@@ -28,11 +28,17 @@ export default function ConfirmationModal() {
         onConfirm?.();
     };
 
+    const handleDismiss = () => {
+        hideConfirmationModal();
+        onCancel?.();
+    };
+
     return (
         <CustomBottomSheetModal
             modalKey={modalKey}
             snapPoints={snapPoints}
-            hideOnBackdropPress={false}
+            hideOnBackdropPress={true}
+            onDismiss={handleDismiss}
             style={{
                 backgroundColor: 'white',
                 borderRadius: 24,
