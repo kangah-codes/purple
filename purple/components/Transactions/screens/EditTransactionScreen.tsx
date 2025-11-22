@@ -22,7 +22,13 @@ import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
+import {
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    StatusBar as RNStatusBar,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useEditTransaction, useTransactionStore } from '../hooks';
@@ -36,9 +42,6 @@ export default function EditTransactionScreen() {
     const queryClient = useQueryClient();
     const { accounts, getAccountById } = useAccountStore();
     const { logEvent } = useAnalytics();
-    const {
-        preferences: { allowOverdraw },
-    } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>(
         currentTransaction?.type || 'debit',
     );
@@ -198,207 +201,213 @@ export default function EditTransactionScreen() {
                     </View>
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
-                <ScrollView
-                    className='space-y-5 flex-1 flex flex-col p-5'
-                    contentContainerStyle={{
-                        paddingBottom: 100,
-                    }}
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
                 >
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Amount
-                        </Text>
-
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Amount can't be empty",
-                                    pattern: {
-                                        value: /^\d+(\.\d{1,2})?$/,
-                                        message: 'Amount must be a valid number',
-                                    },
-                                    min: {
-                                        value: 0.01,
-                                        message: 'Amount must be at least 0.01',
-                                    },
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='0.00'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                        keyboardType='numeric'
-                                    />
-                                )}
-                                name='amount'
-                            />
-                            {errors.amount && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.amount.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Category
-                        </Text>
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Category can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
-                                            customSnapPoints={['50%', '70%']}
-                                            value={value}
-                                            onChange={onChange}
-                                        />
-                                    </>
-                                )}
-                                name='category'
-                            />
-                            {errors.category && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.category.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    <View className='flex flex-col space-y-1'>
-                        <Controller
-                            control={control}
-                            rules={{
-                                required: "Date can't be empty",
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <DateAndTimePicker
-                                    label='Date'
-                                    pickerKey='newTransactionStartDate'
-                                    onChange={(date) => {
-                                        // format "2006-01-02T15:04:05.000Z"
-                                        onChange(date.toISOString());
-                                    }}
-                                    // selectedDate={value}
-                                    // make maximim date today
-                                    maximumDate={new Date()}
-                                    value={new Date(value)}
-                                />
-                            )}
-                            name='date'
-                        />
-                        {errors.date && (
-                            <Text
-                                style={satoshiFont.satoshiMedium}
-                                className='text-xs text-red-500'
-                            >
-                                {errors.date.message}
+                    <ScrollView
+                        className='space-y-5 flex-1 flex flex-col p-5'
+                        contentContainerStyle={{
+                            paddingBottom: 120,
+                        }}
+                    >
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Amount
                             </Text>
-                        )}
-                    </View>
 
-                    <View className='h-1 border-b border-purple-100 w-full' />
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Amount can't be empty",
+                                        pattern: {
+                                            value: /^\d+(\.\d{1,2})?$/,
+                                            message: 'Amount must be a valid number',
+                                        },
+                                        min: {
+                                            value: 0.01,
+                                            message: 'Amount must be at least 0.01',
+                                        },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='0.00'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            keyboardType='numeric'
+                                        />
+                                    )}
+                                    name='amount'
+                                />
+                                {errors.amount && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.amount.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
 
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Account
-                        </Text>
-                        <View>
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Category
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Category can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SelectField
+                                                selectKey='newTransactionCategory'
+                                                options={transactionTypes.reduce((acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                }, {} as Record<string, { label: string; value: string }>)}
+                                                customSnapPoints={['50%', '70%']}
+                                                value={value}
+                                                onChange={onChange}
+                                            />
+                                        </>
+                                    )}
+                                    name='category'
+                                />
+                                {errors.category && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.category.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        <View className='flex flex-col space-y-1'>
                             <Controller
                                 control={control}
                                 rules={{
-                                    required: "Account can't be empty",
+                                    required: "Date can't be empty",
                                 }}
                                 render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newTransactionAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.id] = {
-                                                    label: curr.name,
-                                                    value: curr.id,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
-                                            customSnapPoints={['50%', '70%']}
-                                            value={value}
-                                            onChange={(val) => {
-                                                onChange(val);
-                                                setValue('account_id', val);
-                                            }}
-                                        />
-                                    </>
-                                )}
-                                name='account_id'
-                            />
-                            {errors.account_id && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.account_id.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Note
-                        </Text>
-
-                        <View>
-                            <Controller
-                                control={control}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='Add a note...'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
+                                    <DateAndTimePicker
+                                        label='Date'
+                                        pickerKey='newTransactionStartDate'
+                                        onChange={(date) => {
+                                            // format "2006-01-02T15:04:05.000Z"
+                                            onChange(date.toISOString());
+                                        }}
+                                        // selectedDate={value}
+                                        // make maximim date today
+                                        maximumDate={new Date()}
+                                        value={new Date(value)}
                                     />
                                 )}
-                                name='note'
+                                name='date'
                             />
-                            {errors.note && (
+                            {errors.date && (
                                 <Text
                                     style={satoshiFont.satoshiMedium}
                                     className='text-xs text-red-500'
                                 >
-                                    {errors.note.message}
+                                    {errors.date.message}
                                 </Text>
                             )}
                         </View>
-                    </View>
-                </ScrollView>
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Account
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Account can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SelectField
+                                                selectKey='newTransactionAccount'
+                                                options={accounts.reduce((acc, curr) => {
+                                                    acc[curr.id] = {
+                                                        label: curr.name,
+                                                        value: curr.id,
+                                                    };
+                                                    return acc;
+                                                }, {} as Record<string, { label: string; value: string }>)}
+                                                customSnapPoints={['50%', '70%']}
+                                                value={value}
+                                                onChange={(val) => {
+                                                    onChange(val);
+                                                    setValue('account_id', val);
+                                                }}
+                                            />
+                                        </>
+                                    )}
+                                    name='account_id'
+                                />
+                                {errors.account_id && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.account_id.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Note
+                            </Text>
+
+                            <View>
+                                <Controller
+                                    control={control}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='Add a note...'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                        />
+                                    )}
+                                    name='note'
+                                />
+                                {errors.note && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.note.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
 
                 <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
                     <View className='flex flex-row space-x-2.5 justify-between w-full'>

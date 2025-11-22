@@ -35,7 +35,6 @@ export default function TransactionsFilter() {
         setPendingTransactionsFilter,
     } = useTransactionStore();
     const queryClient = useQueryClient();
-
     const trackScreenView = useCallback(async () => {
         if (bottomSheetModalKeys['transactionsFilter']) {
             await logEvent('screen_view', {

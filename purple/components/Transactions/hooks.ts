@@ -150,6 +150,43 @@ export function useRecurringTransactions({
     );
 }
 
+export function useUpcomingRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: {
+        startDate: Date;
+        endDate: Date;
+        n: number;
+    };
+    options?: UseQueryOptions;
+}): UseQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useQuery(
+        ['recurring-transactions', requestQuery],
+        async () => {
+            const service = ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
+            ) as TransactionSQLiteService;
+            return service.listUpcomingRecurringTransactions(
+                requestQuery.startDate,
+                requestQuery.endDate,
+                requestQuery.n,
+            );
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+        },
+    );
+}
+
 export function useInfiniteTransactions({
     requestQuery,
     options,

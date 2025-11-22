@@ -775,12 +775,15 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
         for (const def of recurringDefs) {
             try {
+                const originalStartDate = new Date(def.start_date);
                 const rule = rrulestr(def.recurrence_rule, {
-                    // we want to start from the start of the month in question
-                    dtstart: from_date,
+                    dtstart: originalStartDate,
                 });
 
-                const dates = rule.between(from_date, to_date, true);
+                // Get occurrences between the effective start date and end date
+                const effectiveStartDate =
+                    originalStartDate > from_date ? originalStartDate : from_date;
+                const dates = rule.between(effectiveStartDate, to_date, true);
 
                 for (const d of dates) {
                     const occurrenceUnix = Math.floor(d.getTime() / 1000);

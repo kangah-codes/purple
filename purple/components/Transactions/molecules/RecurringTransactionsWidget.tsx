@@ -8,10 +8,9 @@ import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'dat
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useRecurringTransactions } from '../hooks';
+import { useUpcomingRecurringTransactions } from '../hooks';
 import UpcomingTransactionCard from './UpcomingTransactionCard';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import { occurrencesBetween } from '@/lib/utils/rrule';
 
 const now = new Date();
 const start = startOfMonth(now);
@@ -26,7 +25,7 @@ const startDate = startOfMonth(now);
 const endDate = endOfMonth(now);
 
 export default function RecurringTransactionsWidget() {
-    const { data, refetch } = useRecurringTransactions({
+    const { data, refetch } = useUpcomingRecurringTransactions({
         // its ok to use infinity here since we WANT to fetch all
         // recurring tx within the month
         // TODO: I should probably refactor the hook or add a new one to return
@@ -76,17 +75,9 @@ export default function RecurringTransactionsWidget() {
         const occurrencesSet = new Set<string>();
 
         (data?.data ?? []).forEach((recurring) => {
-            const occurrences = occurrencesBetween(
-                recurring.recurrence_rule,
-                new Date(recurring.start_date),
-                start,
-                end,
-            );
-
-            occurrences.forEach((occurrence) => {
-                const key = format(occurrence, 'yyyy-MM-dd');
-                occurrencesSet.add(key);
-            });
+            const key = format(new Date(recurring.create_next_at), 'yyyy-MM-dd');
+            occurrencesSet.add(key);
+            console.log(occurrencesSet);
         });
 
         return occurrencesSet;

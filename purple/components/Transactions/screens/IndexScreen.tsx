@@ -10,7 +10,11 @@ import Toast from 'react-native-toast-message';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { groupBy } from '@/lib/utils/helpers';
 import { format } from 'date-fns';
-import { useInfiniteTransactions } from '../hooks';
+import {
+    hasActiveTransactionFilters,
+    useInfiniteTransactions,
+    useTransactionStore,
+} from '../hooks';
 import { Transaction } from '../schema';
 import { useDebounce } from '@/lib/utils/debounce';
 import TransactionsFilter from '../molecules/TransactionsFilter';
@@ -22,7 +26,8 @@ export default function IndexScreen() {
     const debouncedSetSearch = useDebounce((value: string) => {
         setDebouncedSearchValue(value);
     }, 500);
-
+    const { transactionsFilter } = useTransactionStore();
+    const hasActiveFilters = hasActiveTransactionFilters(transactionsFilter);
     const handleSearchChange = useCallback(
         (value: string) => {
             setSearchValue(value);
@@ -132,7 +137,10 @@ export default function IndexScreen() {
             <TransactionCard groupName={item.groupName} transactions={item.transactions} />
         </View>
     );
-    const ListHeaderComponent = useMemo(() => <RecurringTransactionsWidget />, []);
+    const ListHeaderComponent = useMemo(() => {
+        if (debouncedSearchValue.length > 0 || hasActiveFilters) return null;
+        return <RecurringTransactionsWidget />;
+    }, [debouncedSearchValue, hasActiveFilters]);
     const ListEmptyComponent = useMemo(
         () => (
             <View style={{ marginTop: 40 }}>

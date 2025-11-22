@@ -22,7 +22,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
+import {
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    StatusBar as RNStatusBar,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../constants';
@@ -727,137 +733,147 @@ export default function EditRecurringTransactionScreen() {
 
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
-                <ScrollView
-                    className='space-y-5 flex-1 flex flex-col p-5'
-                    contentContainerStyle={{
-                        paddingBottom: 200,
-                    }}
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
                 >
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Amount
-                        </Text>
+                    <ScrollView
+                        className='space-y-5 flex-1 flex flex-col p-5'
+                        contentContainerStyle={{
+                            paddingBottom: 120,
+                        }}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps='handled'
+                    >
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Amount
+                            </Text>
 
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Amount can't be empty",
-                                    pattern: {
-                                        value: /^\d+(\.\d{1,2})?$/,
-                                        message: 'Amount must be a valid number',
-                                    },
-                                    min: {
-                                        value: 0.01,
-                                        message: 'Amount must be at least 0.01',
-                                    },
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='0.00'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                        keyboardType='numeric'
-                                    />
-                                )}
-                                name='amount'
-                            />
-                            {errors.amount && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.amount.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Category
-                        </Text>
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Category can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
-                                            customSnapPoints={['50%', '70%']}
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Amount can't be empty",
+                                        pattern: {
+                                            value: /^\d+(\.\d{1,2})?$/,
+                                            message: 'Amount must be a valid number',
+                                        },
+                                        min: {
+                                            value: 0.01,
+                                            message: 'Amount must be at least 0.01',
+                                        },
+                                    }}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='0.00'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
                                             value={value}
-                                            onChange={onChange}
+                                            keyboardType='numeric'
                                         />
-                                    </>
-                                )}
-                                name='category'
-                            />
-                            {errors.category && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.category.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    {renderAccountFields()}
-
-                    {/* Recurring transaction fields */}
-                    {renderRecurringFields()}
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Note
-                        </Text>
-
-                        <View>
-                            <Controller
-                                control={control}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                    )}
+                                    name='amount'
+                                />
+                                {errors.amount && (
+                                    <Text
                                         style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='Add a note...'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                    />
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.amount.message}
+                                    </Text>
                                 )}
-                                name='note'
-                            />
-                            {errors.note && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.note.message}
-                                </Text>
-                            )}
+                            </View>
                         </View>
-                    </View>
 
-                    <View className='h-1 border-b border-purple-100 w-full' />
-                </ScrollView>
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Category
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Category can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SelectField
+                                                selectKey='newTransactionCategory'
+                                                options={transactionTypes.reduce((acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                }, {} as Record<string, { label: string; value: string }>)}
+                                                customSnapPoints={['50%', '70%']}
+                                                value={value}
+                                                onChange={onChange}
+                                            />
+                                        </>
+                                    )}
+                                    name='category'
+                                />
+                                {errors.category && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.category.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        {renderAccountFields()}
+
+                        {/* Recurring transaction fields */}
+                        {renderRecurringFields()}
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Note
+                            </Text>
+
+                            <View>
+                                <Controller
+                                    control={control}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='Add a note...'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            returnKeyType='done'
+                                            onSubmitEditing={Keyboard.dismiss}
+                                        />
+                                    )}
+                                    name='note'
+                                />
+                                {errors.note && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.note.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+                    </ScrollView>
+                </KeyboardAvoidingView>
 
                 <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
                     <View className='flex flex-row space-x-2.5 justify-between w-full'>
