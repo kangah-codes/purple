@@ -56,6 +56,8 @@ export default class StartupService {
     }
 
     public async executeStartupTasks(): Promise<void> {
-        await Promise.all(this.startupTasks.map((task) => task()));
+        for (const task of this.startupTasks) {
+            await task();
+        }
     }
 }
