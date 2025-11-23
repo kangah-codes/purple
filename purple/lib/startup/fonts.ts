@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import * as Font from 'expo-font';
-import { nativeStorage } from '../utils/storage';
 
 export async function loadFonts() {
     try {
@@ -17,7 +16,6 @@ export async function loadFonts() {
             SatoshiRegular: require('../../assets/fonts/satoshi/Satoshi-Regular.otf'),
         });
     } catch (e) {
-        nativeStorage.setItem('fontLoadError', JSON.stringify(e));
         console.warn(e);
     }
 }
