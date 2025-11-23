@@ -5,6 +5,7 @@ import { eachMonthOfInterval, format, isSameMonth, startOfMonth, subMonths } fro
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import CustomBarChart from '../../Shared/molecules/StackedBarChart';
 import { isTransferTransaction } from '@/components/Transactions/utils';
+import { formatCurrencyRounded } from '@/lib/utils/number';
 
 interface CashflowBarChartProps {
     currentDate: Date;
@@ -101,6 +102,7 @@ export default memo(function CashflowBarChart({
 
         return { barWidth: bw, spacing: sp };
     }, [chartW, stackData.length]);
+
     const { maxValue, minValue } = useMemo(() => {
         if (rawData.length === 0) return { maxValue: 0, minValue: 0 };
         const maxInflow = Math.max(...rawData.map((d) => d.inflow));
@@ -108,9 +110,40 @@ export default memo(function CashflowBarChart({
         return { maxValue: maxInflow, minValue: maxOutflow };
     }, [rawData]);
 
+    const { netCashFlowCurrentMonth, avgCashFlowPerMonth, currentMonthCurrency } = useMemo(() => {
+        if (rawData.length === 0)
+            return {
+                netCashFlowCurrentMonth: 0,
+                avgCashFlowPerMonth: 0,
+                currentMonthCurrency: 'USD',
+            };
+
+        // Get current month's data (last item in rawData)
+        const currentMonthData = rawData[rawData.length - 1];
+        const currentMonthNet = currentMonthData
+            ? currentMonthData.inflow + currentMonthData.outflow
+            : 0;
+
+        // Calculate average cash flow across all months
+        const totalNetCashFlow = rawData.reduce(
+            (sum, month) => sum + (month.inflow + month.outflow),
+            0,
+        );
+        const avgCashFlow = totalNetCashFlow / rawData.length;
+
+        // Get currency from the first available transaction
+        const currency = stableTransactions.length > 0 ? stableTransactions[0].currency : 'USD';
+
+        return {
+            netCashFlowCurrentMonth: currentMonthNet,
+            avgCashFlowPerMonth: avgCashFlow,
+            currentMonthCurrency: currency,
+        };
+    }, [rawData, stableTransactions]);
+
     return (
         <View className='p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
-            <View className='mb-2.5'>
+            <View className='mb-2'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Cash Flow
                 </Text>
@@ -127,6 +160,25 @@ export default memo(function CashflowBarChart({
                             Outflow
                         </Text>
                     </View>
+                </View>
+            </View>
+
+            <View className='my-2.5 pb-3.5 flex flex-row'>
+                <View className='flex-1 flex-col text-center items-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
+                        Net Cash Flow
+                    </Text>
+                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                        {formatCurrencyRounded(netCashFlowCurrentMonth, currentMonthCurrency)}
+                    </Text>
+                </View>
+                <View className='flex-1 flex-col text-center items-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
+                        Avg Cash Flow
+                    </Text>
+                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                        {formatCurrencyRounded(avgCashFlowPerMonth, currentMonthCurrency)}
+                    </Text>
                 </View>
             </View>
 

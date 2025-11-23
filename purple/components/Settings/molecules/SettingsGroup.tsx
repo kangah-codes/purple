@@ -12,7 +12,6 @@ type SettingsGroupProps = {
 
 export default function SettingsGroup({ groupName, items }: SettingsGroupProps) {
     const ItemSeparator = () => <View className='h-[0.5px] border-b border-purple-100 my-4' />;
-
     const renderItem: ListRenderItem<SettingsListItem> = ({ item }) => <SettingsItem {...item} />;
 
     return (
@@ -21,7 +20,7 @@ export default function SettingsGroup({ groupName, items }: SettingsGroupProps) 
                 {groupName}
             </Text>
 
-            <View className='bg-purple-50 rounded-3xl p-4'>
+            <View className='bg-purple-50 rounded-3xl p-4 border border-purple-100'>
                 <FlatList
                     data={items}
                     renderItem={renderItem}

@@ -5,6 +5,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -13,11 +14,13 @@ import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/Globa
 import SettingsList from '../molecules/SettingsList';
 import UpdateFrequency from '../molecules/UpdateFrequency';
 import { SettingsListItem } from '../schema';
-import { exportDatabase, importDatabase } from '../utils';
+import { exportDatabase } from '../helpers/exportDb';
+import { importDatabase } from '../helpers/importDb';
 
 export default function ExperimentalSettingsScreen() {
     const { logEvent } = useAnalytics();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const db = useSQLiteContext();
 
     const handleRestore = async () => {
         Alert.alert(
@@ -33,22 +36,23 @@ export default function ExperimentalSettingsScreen() {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            const restored = await importDatabase();
+                            const { success, error } = await importDatabase(db);
 
-                            if (restored) {
+                            if (success) {
                                 Toast.show({
                                     type: 'success',
                                     props: {
                                         text1: 'Success',
-                                        text2: 'Database restored successfully. Please restart the app.',
+                                        text2: 'Data restored successfully',
                                     },
                                 });
                             } else {
+                                console.log(error);
                                 Toast.show({
                                     type: 'error',
                                     props: {
                                         text1: 'Error',
-                                        text2: 'No backup file selected or found',
+                                        text2: error || 'Failed to restore database',
                                     },
                                 });
                             }
