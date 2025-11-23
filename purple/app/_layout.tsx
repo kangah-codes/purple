@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { AuthProvider } from '@/components/Auth/hooks';
 import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
 import { toastConfig } from '@/components/Shared/atoms/Toast';
@@ -14,6 +15,7 @@ import { PortalProvider } from '@gorhom/portal';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
 import 'expo-dev-client';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
@@ -102,6 +104,15 @@ if (__DEV__) {
 
 export default Sentry.wrap(function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);
+    // TODO: temp fix since fonts dont seem to load properly
+    const [fontsLoaded] = useFonts({
+        SatoshiBlack: require('../assets/fonts/satoshi/Satoshi-Black.otf'),
+        SatoshiBold: require('../assets/fonts/satoshi/Satoshi-Bold.otf'),
+        SatoshiMedium: require('../assets/fonts/satoshi/Satoshi-Medium.otf'),
+        SatoshiRegular: require('../assets/fonts/satoshi/Satoshi-Regular.otf'),
+        SatoshiLight: require('../assets/fonts/satoshi/Satoshi-Light.otf'),
+    });
+
     const onInitialise = useCallback(async (db: SQLiteDatabase) => {
         try {
             await initializeApp(db);
@@ -113,7 +124,7 @@ export default Sentry.wrap(function RootLayout() {
         }
     }, []);
 
-    if (!appIsReady) {
+    if (!appIsReady || !fontsLoaded) {
         return null;
     }
 
