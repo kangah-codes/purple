@@ -1,4 +1,4 @@
-import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
+import { LinearGradient, SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -16,6 +16,7 @@ import GettingStartedWidget from '../molecules/GettingStartedWidget';
 import IndexNavigationArea from '../molecules/IndexNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+import { nativeStorage } from '@/lib/utils/storage';
 
 const now = new Date();
 
@@ -71,6 +72,8 @@ export default function IndexScreen() {
                     >
                         <LinearGradient colors={['#faf5ff', 'transparent']} style={{ flex: 1 }} />
                     </Animated.View>
+
+                    <Text>{nativeStorage.getItem('fontLoadError') || 'NO ERROR'}</Text>
 
                     <Animated.ScrollView
                         contentContainerStyle={styles.scrollView}
