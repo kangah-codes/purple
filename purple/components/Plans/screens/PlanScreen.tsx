@@ -12,7 +12,7 @@ import PlanAccountOverviewPieChart from '../molecules/PlanAccountOverviewPieChar
 import PlanActionMenu from '../molecules/PlanActionMenu';
 import PlanBuildUpChart from '../molecules/PlanBuildUpChart';
 import PlanInformation from '../molecules/PlanInformation';
-import PlanNavigationArea from '../molecules/PlanNavigationArea';
+import PlanNavigationArea from '../molecules/NavigationArea/PlanNavigationArea';
 import { Plan } from '../schema';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
 

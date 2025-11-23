@@ -37,7 +37,7 @@ export default function ReportLoadingScreen({
             )}
             <View style={[tw`px-5 flex flex-col space-y-5`]}>
                 <View className='my-2.5 flex flex-col space-y-5'>
-                    {[...Array(4)].map((_) => (
+                    {[...Array(4)].map(() => (
                         <View
                             style={tw`p-5 space-y-2 border border-purple-100 rounded-3xl flex flex-col bg-purple-50/20`}
                         >

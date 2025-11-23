@@ -51,7 +51,7 @@ export default function PlansNavigationArea() {
 
             <View className='absolute left-0 right-0 items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                    Plans
+                    September 2025
                 </Text>
             </View>
 

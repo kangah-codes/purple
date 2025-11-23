@@ -3,12 +3,13 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import { SceneMap, TabView } from 'react-native-tab-view';
+import { SceneMap } from 'react-native-tab-view';
 import ExpensesScreen from './ExpensesScreen';
 import SavingsScreen from './SavingsScreen';
-import PlansNavigationArea from '../molecules/PlansNavigationArea';
+import PlansNavigationArea from '../molecules/NavigationArea/PlansNavigationArea';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import tw from 'twrnc';
+import BudgetMonths from '../molecules/NavigationArea/BudgetMonths';
 
 const { width: screenWidth } = Dimensions.get('window');
 const routes = [
@@ -76,8 +77,14 @@ export default function PlansScreen() {
             <ExpoStatusBar style='dark' />
             <View style={styles.parentView} className='bg-white space-y- flex-1 flex flex-col'>
                 <PlansNavigationArea />
+                <BudgetMonths
+                    currentDate={new Date()}
+                    onMonthChange={(date) => {
+                        console.log('Selected month:', date);
+                    }}
+                />
 
-                <TabView
+                {/* <TabView
                     navigationState={{
                         index,
                         routes,
@@ -85,7 +92,7 @@ export default function PlansScreen() {
                     renderScene={renderScene}
                     renderTabBar={renderTabBar}
                     onIndexChange={setIndex}
-                />
+                /> */}
             </View>
         </SafeAreaView>
     );
