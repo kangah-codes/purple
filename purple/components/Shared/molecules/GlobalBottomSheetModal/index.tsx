@@ -6,7 +6,7 @@ import {
     BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import { useBottomSheetModalStore, useKeyboardSnapEffect } from './hooks';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 
@@ -36,6 +36,7 @@ const CustomBottomSheetModal = ({
     useEffect(() => {
         const isVisible = bottomSheetModalKeys[modalKey];
         if (isVisible && bottomSheetRef.current) {
+            Keyboard.dismiss();
             bottomSheetRef.current.present();
         }
     }, [bottomSheetModalKeys[modalKey]]);

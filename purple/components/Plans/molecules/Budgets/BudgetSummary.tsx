@@ -3,36 +3,9 @@ import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
 
-export default function BudgetSummary({ budgetData }) {
+export default function BudgetSummary() {
     return (
         <View className='px-5 py-5'>
-            {/* Left to Budget */}
-            <View
-                className='
-                    bg-white p-5 rounded-xl mb-6 
-                    shadow-md shadow-black/10
-                '
-            >
-                <View className='flex-row justify-between items-center mb-2'>
-                    <Text className='text-base text-gray-500' style={satoshiFont.satoshiMedium}>
-                        Left to budget
-                    </Text>
-
-                    <TouchableOpacity>
-                        <View className='w-5 h-5 rounded-full bg-gray-200 items-center justify-center'>
-                            <Text className='text-xs text-gray-500 font-semibold'>i</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                <Text
-                    className='text-4xl text-gray-900 font-black'
-                    style={satoshiFont.satoshiBlack}
-                >
-                    {formatCurrencyRounded(100, 'GHS')}
-                </Text>
-            </View>
-
             {/* Summary Section */}
             <View className='mb-6'>
                 <View className='flex-row justify-between items-center mb-4'>

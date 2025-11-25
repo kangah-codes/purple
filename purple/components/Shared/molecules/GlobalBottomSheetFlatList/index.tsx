@@ -13,7 +13,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
+import { Keyboard, ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { useBottomSheetFlatListStore } from './hooks';
 import { keyExtractor } from '@/lib/utils/number';
@@ -59,6 +59,7 @@ function CustomBottomSheetFlatList<T>({
 
     useEffect(() => {
         if (isVisible) {
+            Keyboard.dismiss();
             if (unmountTimeoutRef.current) {
                 clearTimeout(unmountTimeoutRef.current);
                 unmountTimeoutRef.current = null;
