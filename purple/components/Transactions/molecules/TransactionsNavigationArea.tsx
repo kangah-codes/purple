@@ -51,8 +51,8 @@ export default function TransactionsNavigationArea({
     }, 0);
 
     return (
-        <View className='w-full flex flex-col px-5 py-2.5'>
-            <View className='w-full flex flex-row justify-between items-center relative '>
+        <View className='w-full flex flex-col px-5 py-2.5 border-b border-purple-100'>
+            <View className='w-full flex flex-row justify-between items-center relative'>
                 <DropdownMenu
                     visible={visible}
                     handleOpen={() => setVisible(true)}

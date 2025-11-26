@@ -166,7 +166,7 @@ export default function IndexScreen() {
                         position: 'absolute',
                         left: 0,
                         right: 0,
-                        top: (RNStatusBar.currentHeight ?? 0) + 60 + 58,
+                        top: (RNStatusBar.currentHeight ?? 0) + 60 + 58 + 1,
                         height: 20,
                         zIndex: 999,
                     },

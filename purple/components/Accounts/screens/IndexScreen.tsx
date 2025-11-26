@@ -67,7 +67,7 @@ export default function AccountsScreen() {
                         position: 'absolute',
                         left: 0,
                         right: 0,
-                        top: (RNStatusBar.currentHeight ?? 0) + 60,
+                        top: (RNStatusBar.currentHeight ?? 0) + 60 + 1,
                         height: 20,
                         zIndex: 999,
                     },

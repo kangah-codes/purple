@@ -18,7 +18,7 @@ export default function AccountsNavigationArea() {
     }, []);
 
     return (
-        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5 border-b border-purple-100'>
             <DropdownMenu
                 visible={visible}
                 handleOpen={() => setVisible(true)}

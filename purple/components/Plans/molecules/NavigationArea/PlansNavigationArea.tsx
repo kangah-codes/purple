@@ -14,7 +14,7 @@ export default function PlansNavigationArea() {
     const [visible, setVisible] = useState(false);
 
     return (
-        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5 bg-red-100'>
             <DropdownMenu
                 visible={visible}
                 handleOpen={() => setVisible(true)}
