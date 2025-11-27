@@ -4,12 +4,13 @@ import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
+import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLineChart';
 
 export default function BudgetSummary() {
     return (
         <View className='px-5 py-5'>
             {/* Summary Section */}
-            <View className='mb-6 bg-purple-50 p-5 rounded-3xl border border-purple-100 flex flex-col space-y-2.5'>
+            <View className='bg-purple-50 p-5 rounded-3xl border border-purple-100 flex flex-col space-y-2.5'>
                 <View className='flex-row justify-between items-center'>
                     <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                         Summary
@@ -23,11 +24,11 @@ export default function BudgetSummary() {
 
                 {/* Income */}
                 <View className='flex flex-col space-y-2'>
-                    <View className='flex flex-row justify-between'>
-                        <Text className='text-base text-black mb-1' style={satoshiFont.satoshiBold}>
+                    <View className='flex flex-row justify-between items-center'>
+                        <Text className='text-sm text-black mb-1' style={satoshiFont.satoshiBold}>
                             Income
                         </Text>
-                        <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
+                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
                             {formatCurrencyRounded(100, 'GHS')} budget
                         </Text>
                     </View>
@@ -43,10 +44,10 @@ export default function BudgetSummary() {
                     </View>
 
                     <View className='flex-row justify-between'>
-                        <Text className='text-sm text-black' style={satoshiFont.satoshiBold}>
+                        <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
                             {formatCurrencyRounded(100, 'GHS')} earned
                         </Text>
-                        <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
+                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
                             {formatCurrencyRounded(100, 'GHS')} remaining
                         </Text>
                     </View>
@@ -58,11 +59,11 @@ export default function BudgetSummary() {
 
                 {/* Expenses */}
                 <View className='flex flex-col space-y-2'>
-                    <View className='flex flex-row justify-between'>
-                        <Text className='text-base text-black mb-1' style={satoshiFont.satoshiBold}>
+                    <View className='flex flex-row justify-between items-center'>
+                        <Text className='text-sm text-black mb-1' style={satoshiFont.satoshiBold}>
                             Expenses
                         </Text>
-                        <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
+                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
                             {formatCurrencyRounded(100, 'GHS')} budget
                         </Text>
                     </View>
@@ -78,23 +79,22 @@ export default function BudgetSummary() {
                     </View>
 
                     <View className='flex-row justify-between'>
-                        <Text className='text-sm text-black' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} earned
+                        <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
+                            {formatCurrencyRounded(100, 'GHS')} spent
                         </Text>
-                        <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
+                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
                             {formatCurrencyRounded(100, 'GHS')} remaining
                         </Text>
                     </View>
                 </View>
             </View>
 
+            <SpendVsBudgetLineChart />
+
             {/* Expenses Breakdown */}
-            <View className='flex flex-col space-y-5'>
+            <View className='flex flex-col space-y-5 mt-5'>
                 <View className='flex-row justify-between items-center px-5'>
-                    <Text
-                        className='text-base text-black font-bold'
-                        style={satoshiFont.satoshiBold}
-                    >
+                    <Text className='text-base text-black' style={satoshiFont.satoshiBold}>
                         Expenses
                     </Text>
 

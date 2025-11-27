@@ -138,9 +138,9 @@ export default Sentry.wrap(function RootLayout() {
                                 databaseName='purple.db'
                                 onInit={onInitialise}
                                 useSuspense
-                                // options={{
-                                //     useNewConnection: true,
-                                // }}
+                                options={{
+                                    useNewConnection: true,
+                                }}
                             >
                                 <AppWithNotifications />
                             </SQLiteProvider>

@@ -65,7 +65,7 @@ export default function TabLayout() {
                         <View className='flex flex-col items-center justify-center'>
                             <PiggyBankIcon width={24} height={24} stroke={color} />
                             <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
-                                Plans
+                                Budgets
                             </Text>
                         </View>
                     ),
