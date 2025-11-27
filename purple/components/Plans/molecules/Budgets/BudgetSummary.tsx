@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { transactionTypes } from '@/lib/constants/transactionTypes';
+import { BudgetCategoryCard } from './BudgetCategoryCard';
 
 export default function BudgetSummary() {
     return (
@@ -98,13 +100,13 @@ export default function BudgetSummary() {
 
                     <View className='flex-row'>
                         <Text
-                            className='text-sm text-purple-500 ml-8'
+                            className='text-xs text-purple-500 ml-8'
                             style={satoshiFont.satoshiBold}
                         >
                             Budget
                         </Text>
                         <Text
-                            className='text-sm text-purple-500 ml-8'
+                            className='text-xs text-purple-500 ml-8'
                             style={satoshiFont.satoshiBold}
                         >
                             Remaining
@@ -112,115 +114,17 @@ export default function BudgetSummary() {
                     </View>
                 </View>
 
-                {/* Fixed Expenses */}
-                <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 p-5'>
-                    <View className='flex-row justify-between items-center'>
-                        <View className='flex-row items-center flex-1'>
-                            <Text className='text-sm text-black' style={satoshiFont.satoshiBold}>
-                                Fixed
-                            </Text>
-                        </View>
-
-                        <View className='flex-row items-center'>
-                            <Text
-                                className='text-sm text-black w-20 text-right mr-8'
-                                style={satoshiFont.satoshiBold}
-                            >
-                                {formatCurrencyRounded(100, 'GHS')}
-                            </Text>
-                            <Text
-                                className='text-sm text-purple-500 w-20 text-right'
-                                style={satoshiFont.satoshiBold}
-                            >
-                                {formatCurrencyRounded(100, 'GHS')}
-                            </Text>
-                        </View>
-                    </View>
-                    <View className='h-[1px] border-b border-purple-100 w-full' />
-                    <View>
-                        {new Array(3).fill(null).map((_, idx) => (
-                            <View key={idx} className='flex-row justify-between items-center'>
-                                <View className='flex-row items-center flex-1'>
-                                    <Text
-                                        className='text-sm text-black'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        Expense {idx + 1}
-                                    </Text>
-                                </View>
-
-                                <View className='flex-row items-center'>
-                                    <Text
-                                        className='text-sm text-black w-20 text-right mr-8'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        {formatCurrencyRounded(100, 'GHS')}
-                                    </Text>
-                                    <Text
-                                        className='text-sm text-purple-500 w-20 text-right'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        {formatCurrencyRounded(100, 'GHS')}
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
+                <View>
+                    <BudgetCategoryCard
+                        title='Fixed'
+                        transactionTypes={['Rent', 'Insurance', 'Utilities']}
+                    />
                 </View>
-
-                <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 p-5'>
-                    <View className='flex-row justify-between items-center'>
-                        <View className='flex-row items-center flex-1'>
-                            <Text className='text-sm text-black' style={satoshiFont.satoshiBold}>
-                                Fixed
-                            </Text>
-                        </View>
-
-                        <View className='flex-row items-center'>
-                            <Text
-                                className='text-sm text-black w-20 text-right mr-8'
-                                style={satoshiFont.satoshiBold}
-                            >
-                                {formatCurrencyRounded(100, 'GHS')}
-                            </Text>
-                            <Text
-                                className='text-sm text-purple-500 w-20 text-right'
-                                style={satoshiFont.satoshiBold}
-                            >
-                                {formatCurrencyRounded(100, 'GHS')}
-                            </Text>
-                        </View>
-                    </View>
-                    <View className='h-[1px] border-b border-purple-100 w-full' />
-                    <View>
-                        {new Array(3).fill(null).map((_, idx) => (
-                            <View key={idx} className='flex-row justify-between items-center'>
-                                <View className='flex-row items-center flex-1'>
-                                    <Text
-                                        className='text-sm text-black'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        Expense {idx + 1}
-                                    </Text>
-                                </View>
-
-                                <View className='flex-row items-center'>
-                                    <Text
-                                        className='text-sm text-black w-20 text-right mr-8'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        {formatCurrencyRounded(100, 'GHS')}
-                                    </Text>
-                                    <Text
-                                        className='text-sm text-purple-500 w-20 text-right'
-                                        style={satoshiFont.satoshiBold}
-                                    >
-                                        {formatCurrencyRounded(100, 'GHS')}
-                                    </Text>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
+                <View>
+                    <BudgetCategoryCard
+                        title='Flexible'
+                        transactionTypes={transactionTypes.slice(0, 7)}
+                    />
                 </View>
             </View>
         </View>

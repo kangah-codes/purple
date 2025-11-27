@@ -185,7 +185,7 @@ export default function BudgetsContent({
     return (
         <SafeAreaView className='bg-white flex-1'>
             {/* Month Navigation */}
-            <View className='bg-white py-3 border-b border-gray-200'>
+            <View className='bg-white py-3 border-b border-purple-100'>
                 <ScrollView
                     ref={monthScrollRef}
                     horizontal
