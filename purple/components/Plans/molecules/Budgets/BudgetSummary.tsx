@@ -29,7 +29,7 @@ export default function BudgetSummary() {
                             Income
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} budget
+                            {formatCurrencyRounded(100, 'GHS')} estimated
                         </Text>
                     </View>
 
@@ -48,7 +48,7 @@ export default function BudgetSummary() {
                             {formatCurrencyRounded(100, 'GHS')} earned
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} remaining
+                            {formatCurrencyRounded(100, 'GHS')} left
                         </Text>
                     </View>
                 </View>
@@ -83,7 +83,7 @@ export default function BudgetSummary() {
                             {formatCurrencyRounded(100, 'GHS')} spent
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} remaining
+                            {formatCurrencyRounded(100, 'GHS')} left
                         </Text>
                     </View>
                 </View>
@@ -109,7 +109,7 @@ export default function BudgetSummary() {
                             className='text-xs text-purple-500 ml-8'
                             style={satoshiFont.satoshiBold}
                         >
-                            Remaining
+                            left
                         </Text>
                     </View>
                 </View>

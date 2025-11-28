@@ -231,6 +231,7 @@ export function generateNormalizedSpendChartDataWithMissingDays(
     transactions: Array<Transaction & { account_category?: string }>,
     startDate: Date,
     endDate?: Date,
+    initialBalance: number = 0,
 ): (ChartPoint & { label?: string })[] {
     const today = new Date();
     const finalEndDate =
@@ -312,7 +313,7 @@ export function generateNormalizedSpendChartDataWithMissingDays(
     }
 
     // Calculate running balance and format dates appropriately
-    let runningBalance = 0;
+    let runningBalance = initialBalance;
     const chartData = allDays.map((day) => {
         const isoDate = format(day, 'yyyy-MM-dd');
         runningBalance += dailyBalanceChanges[isoDate];
