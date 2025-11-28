@@ -3,16 +3,26 @@ import migrations from '../migrations';
 
 export type StartupTask = () => Promise<any>;
 
+export interface StartupTaskConfig {
+    task: StartupTask;
+    timeout?: number;
+    name?: string;
+}
+
 export default class StartupService {
     protected db: SQLite.SQLiteDatabase;
-    private startupTasks: StartupTask[] = [];
+    private startupTasks: StartupTaskConfig[] = [];
 
     constructor(protected sqlite: SQLite.SQLiteDatabase) {
         this.db = sqlite;
     }
 
-    public registerStartupTask(task: StartupTask): void {
-        this.startupTasks.push(task);
+    public registerStartupTask(task: StartupTask | StartupTaskConfig, timeout?: number): void {
+        if (typeof task === 'function') {
+            this.startupTasks.push({ task, timeout });
+        } else {
+            this.startupTasks.push(task);
+        }
     }
 
     public async runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
@@ -56,8 +66,34 @@ export default class StartupService {
     }
 
     public async executeStartupTasks(): Promise<void> {
-        for (const task of this.startupTasks) {
-            await task();
+        console.log(`[StartupService] Executing ${this.startupTasks.length} startup tasks`);
+        for (let i = 0; i < this.startupTasks.length; i++) {
+            const taskConfig = this.startupTasks[i];
+            const taskName = taskConfig.name || `Task ${i + 1}`;
+            const timeout = taskConfig.timeout || 10000;
+
+            console.log(
+                `[StartupService] Running ${taskName} (${i + 1}/${
+                    this.startupTasks.length
+                }) with ${timeout}ms timeout`,
+            );
+
+            try {
+                await Promise.race([
+                    taskConfig.task(),
+                    new Promise((_, reject) =>
+                        setTimeout(
+                            () => reject(new Error(`Task timed out after ${timeout}ms`)),
+                            timeout,
+                        ),
+                    ),
+                ]);
+                console.log(`[StartupService] ${taskName} completed successfully`);
+            } catch (error) {
+                console.error(`[StartupService] ${taskName} failed:`, error);
+                // Don't throw - continue with next task
+            }
         }
+        console.log('[StartupService] All startup tasks completed');
     }
 }
