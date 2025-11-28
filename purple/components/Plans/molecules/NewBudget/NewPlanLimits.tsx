@@ -6,7 +6,6 @@ import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Pressable, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
 import { useCreateNewPlanStore } from '../../hooks';
 
 type NewPlanLimitsProps = {
@@ -199,8 +198,7 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                     <View className='flex-1'>
                         <TouchableOpacity
                             onPress={() => {
-                                router.back();
-                                reset();
+                                storiesRef?.current?.goToPage(storiesRef.current.currentIndex - 1);
                             }}
                             style={{ width: '100%' }}
                             className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
@@ -209,7 +207,7 @@ export default function NewPlanLimits({ storiesRef }: NewPlanLimitsProps) {
                                 style={satoshiFont.satoshiBlack}
                                 className='text-purple-600 text-center'
                             >
-                                Cancel
+                                Back
                             </Text>
                         </TouchableOpacity>
                     </View>

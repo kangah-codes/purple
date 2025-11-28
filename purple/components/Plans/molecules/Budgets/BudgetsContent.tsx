@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { format, addMonths, subMonths, differenceInMonths } from 'date-fns';
-import { SafeAreaView, View, Text, ScrollView } from '@/components/Shared/styled';
+import { addMonths, subMonths, differenceInMonths, format } from 'date-fns';
+import { SafeAreaView, View, ScrollView } from '@/components/Shared/styled';
 import BudgetSummary from './BudgetSummary';
+import BudgetSummarySkeleton from './BudgetSummarySkeleton';
 import tw from 'twrnc';
 import MonthCard from './MonthCard';
+import CreateBudget from './CreateBudget';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MONTH_CARD_WIDTH = 72;
@@ -160,12 +162,12 @@ export default function BudgetsContent({
 
             return (
                 <ScrollView
-                    // style={styles.pageContent}
                     className='w-full h-full'
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={[tw`pb-20`]}
+                    contentContainerStyle={[tw`flex-grow`]}
                 >
-                    <BudgetSummary />
+                    <CreateBudget />
+                    {/* <BudgetSummary /> */}
                 </ScrollView>
             );
         },
@@ -175,9 +177,13 @@ export default function BudgetsContent({
     if (!isInitialized) {
         return (
             <SafeAreaView className='bg-white flex-1'>
-                <View className='flex-1 items-center justify-center'>
-                    <Text className='text-gray-500 text-sm font-medium'>Loading...</Text>
-                </View>
+                <ScrollView
+                    className='flex-1'
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={[tw`pb-20`]}
+                >
+                    <BudgetSummarySkeleton />
+                </ScrollView>
             </SafeAreaView>
         );
     }

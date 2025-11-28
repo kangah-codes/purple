@@ -109,7 +109,7 @@ export default function BudgetSummary() {
                             className='text-xs text-purple-500 ml-8'
                             style={satoshiFont.satoshiBold}
                         >
-                            left
+                            Left
                         </Text>
                     </View>
                 </View>

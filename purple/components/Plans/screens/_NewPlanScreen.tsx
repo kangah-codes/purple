@@ -5,13 +5,15 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useRef } from 'react';
 import { Image } from 'react-native';
 import tw from 'twrnc';
-import NewPlanLimits from '../molecules/NewPlan/NewPlanLimits';
-import NewPlanDateRange from '../molecules/NewPlan/NewPlanDateRange';
-import NewPlanAllocation from '../molecules/NewPlan/NewPlanAllocation';
+import NewPlanLimits from '../molecules/NewBudget/NewPlanLimits';
+import NewPlanDateRange from '../molecules/NewBudget/NewPlanDateRange';
+import NewPlanAllocation from '../molecules/NewBudget/NewPlanAllocation';
+import NewBudgetType from '../molecules/NewBudget/NewBudgetType';
 
 export default function NewPlanScreen() {
     const storiesRef = useRef<StoriesRef>(null);
     const pages = [
+        <NewBudgetType storiesRef={storiesRef} />,
         <NewPlanLimits storiesRef={storiesRef} />,
         <NewPlanDateRange storiesRef={storiesRef} />,
         <NewPlanAllocation storiesRef={storiesRef} />,

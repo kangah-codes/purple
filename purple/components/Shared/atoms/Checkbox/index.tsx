@@ -26,6 +26,8 @@ export default function Checkbox({
     labelStyle = {},
     boxStyle = {},
 }: CheckboxProps) {
+    const checkMarkIconSize = size * 0.6;
+
     return (
         <Pressable disabled={disabled} style={styles.container} onPress={() => onChange(!checked)}>
             <View
@@ -42,7 +44,12 @@ export default function Checkbox({
                 className='border-[1.5px] rounded-full justify-center items-center mr-[8px]'
             >
                 {checked && (
-                    <CheckMarkIcon strokeWidth={3} stroke={'#fff'} width={15} height={15} />
+                    <CheckMarkIcon
+                        strokeWidth={3}
+                        stroke={'#fff'}
+                        width={checkMarkIconSize}
+                        height={checkMarkIconSize}
+                    />
                 )}
             </View>
             {label && (
