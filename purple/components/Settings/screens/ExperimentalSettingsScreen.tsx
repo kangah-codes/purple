@@ -22,6 +22,45 @@ export default function ExperimentalSettingsScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
 
+    const handleBackup = async () => {
+        try {
+            const { success, error } = await exportDatabase(db);
+
+            if (success) {
+                Toast.show({
+                    type: 'success',
+                    props: {
+                        text1: 'Success',
+                        text2: 'Database exported successfully',
+                    },
+                });
+            } else {
+                console.log(error);
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error',
+                        text2: error || 'Failed to export database',
+                    },
+                });
+            }
+        } catch (error) {
+            await logEvent('error_occurred', {
+                error_type: 'DATABASE_EXPORT_ERROR',
+                context: 'Failed to export database',
+                severity: 'high',
+                error,
+            });
+            Toast.show({
+                type: 'error',
+                props: {
+                    text1: 'Error',
+                    text2: 'Failed to export database',
+                },
+            });
+        }
+    };
+
     const handleRestore = async () => {
         Alert.alert(
             'Restore Database',
@@ -88,7 +127,7 @@ export default function ExperimentalSettingsScreen() {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Backup Database',
             description: 'Backup your data to a file',
-            callback: exportDatabase,
+            callback: handleBackup,
         },
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
