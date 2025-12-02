@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, memo } from 'react';
 import { View, Text } from 'react-native';
-import Svg, { Line } from 'react-native-svg';
+import Svg, { Line, Circle } from 'react-native-svg';
 
 interface StackItem {
     value: number;
@@ -23,6 +23,8 @@ interface CustomBarChartProps {
     spacing: number;
     noOfSections: number;
     stepValue?: number;
+    showTrendLine?: boolean;
+    trendLineColor?: string;
 }
 
 function niceRound(value: number) {
@@ -41,6 +43,8 @@ export default memo(function CustomBarChart({
     spacing,
     noOfSections,
     stepValue,
+    showTrendLine = false,
+    trendLineColor = '#000',
 }: CustomBarChartProps) {
     const yAxisLabelWidth = 40;
     const chartWidth = width - yAxisLabelWidth;
@@ -169,6 +173,29 @@ export default memo(function CustomBarChart({
         [scale, barWidth],
     );
 
+    // Calculate center points for trend line
+    const trendLinePoints = useMemo(() => {
+        const points: { x: number; y: number }[] = [];
+
+        barPositions.forEach((bar) => {
+            const totalValue = bar.stacks.reduce((sum, stack) => sum + stack.value, 0);
+
+            // Calculate Y position of the center of the entire stack
+            // If positive, center is halfway from zero to the top
+            // If negative, center is halfway from zero to the bottom
+            const stackHeight = Math.abs(totalValue) * scale;
+            const centerY =
+                totalValue >= 0 ? zeroLineY - stackHeight / 2 : zeroLineY + stackHeight / 2;
+
+            // X position is center of the bar
+            const centerX = bar.x + barWidth / 2;
+
+            points.push({ x: centerX, y: centerY });
+        });
+
+        return points;
+    }, [barPositions, zeroLineY, scale, barWidth]);
+
     const renderedBars = useMemo(() => {
         const all: JSX.Element[] = [];
         barPositions.forEach((bar, barIndex) => {
@@ -290,6 +317,58 @@ export default memo(function CustomBarChart({
         );
     }, [zeroLineY, yAxisLabelWidth, chartWidth, chartHeight]);
 
+    const renderTrendLine = useCallback(() => {
+        if (!showTrendLine || trendLinePoints.length < 2) return null;
+
+        return (
+            <Svg
+                width={chartWidth}
+                height={chartHeight}
+                style={{
+                    position: 'absolute',
+                    left: yAxisLabelWidth,
+                    top: 0,
+                }}
+            >
+                {trendLinePoints.map((point, index) => {
+                    if (index === trendLinePoints.length - 1) return null;
+
+                    const nextPoint = trendLinePoints[index + 1];
+                    // Adjust X coordinates relative to yAxisLabelWidth since SVG is offset
+                    const x1 = point.x - yAxisLabelWidth;
+                    const x2 = nextPoint.x - yAxisLabelWidth;
+
+                    return (
+                        <Line
+                            key={`trend-${index}`}
+                            x1={x1}
+                            y1={point.y}
+                            x2={x2}
+                            y2={nextPoint.y}
+                            stroke={trendLineColor}
+                            strokeWidth={2}
+                            strokeDasharray={[6, 6]}
+                        />
+                    );
+                })}
+                {trendLinePoints.map((point, index) => {
+                    const cx = point.x - yAxisLabelWidth;
+                    return (
+                        <Circle
+                            key={`trend-dot-${index}`}
+                            cx={cx}
+                            cy={point.y}
+                            r={4}
+                            fill={trendLineColor}
+                            stroke='white'
+                            strokeWidth={2}
+                        />
+                    );
+                })}
+            </Svg>
+        );
+    }, [showTrendLine, trendLinePoints, chartWidth, chartHeight, yAxisLabelWidth, trendLineColor]);
+
     // ---------------------------
     // 6. RENDER CHART
     // ---------------------------
@@ -300,6 +379,7 @@ export default memo(function CustomBarChart({
                 {renderZeroLine()}
                 {renderYAxisLabels()}
                 {renderedBars}
+                {renderTrendLine()}
                 {renderXAxisLabels()}
             </View>
         </View>

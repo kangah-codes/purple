@@ -200,6 +200,7 @@ export default memo(function CashflowBarChart({
                             barWidth={barWidth}
                             spacing={spacing}
                             noOfSections={4}
+                            showTrendLine
                             stepValue={Math.max(
                                 1000,
                                 Math.ceil((maxValue - minValue) / 4 / 1000) * 1000,
