@@ -126,13 +126,12 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => (
                         <View className='flex flex-col items-center justify-center'>
                             <SettingsCogIcon width={24} height={24} stroke={color} />
-                            <Text className='text-xs' style={satoshiFont.satoshiBold}>
+                            <Text className='text-xs' style={[satoshiFont.satoshiBold, { color }]}>
                                 Settings
                             </Text>
                         </View>
                     ),
                     headerShown: false,
-                    href: null,
                 }}
             />
             <Tabs.Screen
