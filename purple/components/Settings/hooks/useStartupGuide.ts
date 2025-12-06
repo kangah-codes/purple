@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { router } from 'expo-router';
 import { usePreferences } from '../hooks';
 import { useAccounts } from '../../Accounts/hooks';
@@ -22,6 +22,7 @@ export type StartupStep = {
     callback: () => void;
 };
 
+// TODO: for some reason changing this causes issues with hooks
 const defaultSteps: StartupStep[] = [
     {
         id: 'add_account',
@@ -50,29 +51,19 @@ const defaultSteps: StartupStep[] = [
         order: 2,
         callback: () => router.push('/transactions/new'),
     },
-    {
-        id: 'saving_plan',
-        emoji: '🎯',
-        text: 'Create a saving plan',
-        isCompleted: false,
-        isRequired: true,
-        order: 3,
-        callback: () => router.push('/plans/new'),
-    },
-    {
-        id: 'budget',
-        emoji: '📊',
-        text: 'Create a budget',
-        isCompleted: false,
-        isRequired: true,
-        order: 4,
-        callback: () => console.log('Navigate to create budget'),
-    },
+    // {
+    //     id: 'saving_plan',
+    //     emoji: '🎯',
+    //     text: 'Create a saving plans',
+    //     isCompleted: false,
+    //     isRequired: true,
+    //     order: 3,
+    //     callback: () => router.push('/plans/new'),
+    // },
 ];
 
 export function useStartupGuide() {
     const { preferences, setPreference } = usePreferences();
-
     const { data: accountsData, refetch: refetchAccounts } = useAccounts({ requestQuery: {} });
     const accounts = accountsData?.data || [];
     useRefreshOnFocus(refetchAccounts);
@@ -82,6 +73,7 @@ export function useStartupGuide() {
     });
     useRefreshOnFocus(refetchTransactions);
     const transactions = transactionsData?.data || [];
+    const stepsBase = useMemo<StartupStep[]>(() => defaultSteps, []);
 
     const startupGuide = preferences.startupGuide || {
         isCompleted: false,
@@ -101,24 +93,19 @@ export function useStartupGuide() {
                     return accounts.length > 0;
                 case 'first_transaction':
                     return transactions.length > 0;
-                case 'saving_plan':
-                case 'budget':
-                    // TODO: future implementation
-                    return startupGuide.completedSteps?.includes(stepId) || false;
+                // case 'saving_plan':
+                // case 'budget':
+                //     // TODO: future implementation
+                //     return startupGuide.completedSteps?.includes(stepId) || false;
                 default:
                     return startupGuide.completedSteps?.includes(stepId) || false;
             }
         },
-        [
-            preferences.customTransactionTypes.length,
-            accounts.length,
-            transactions.length,
-            startupGuide.completedSteps,
-        ],
+        [preferences.customTransactionTypes, accounts, transactions, startupGuide.completedSteps],
     );
 
     const getSteps = useCallback((): StartupStep[] => {
-        return defaultSteps.map((step) => ({
+        return stepsBase.map((step) => ({
             ...step,
             isCompleted: detectCompletionFromData(step.id),
         }));

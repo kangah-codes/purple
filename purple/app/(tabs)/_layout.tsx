@@ -70,6 +70,8 @@ export default function TabLayout() {
                         </View>
                     ),
                     headerShown: false,
+                    // TODO: hiding this for now
+                    href: null,
                 }}
             />
             <Tabs.Screen

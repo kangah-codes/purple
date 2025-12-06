@@ -16,7 +16,6 @@ import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
 import SpendAreaChart from '../molecules/SpendAreaChart';
 import SpendOverview from '../molecules/SpendOverview';
 import SpendOverviewChart from '../molecules/SpendOverviewChart';
-import SpendVsBudgetLineChart from '../molecules/SpendVsBudgetLineChart';
 
 interface MonthlyStatsPageProps {
     currentDate: Date;
@@ -80,7 +79,7 @@ export default memo(function MonthlyStatsPage({
                     oldestTransactionDate={oldestTransactionDate}
                 />
                 <SpendAreaChart startDate={currentDate} />
-                <SpendVsBudgetLineChart />
+                {/* <SpendVsBudgetLineChart /> */}
                 <SpendOverviewChart transactions={transactions} startDate={currentDate} />
                 <StatsHeatmap transactions={transactions} startDate={currentDate} />
             </Animated.ScrollView>

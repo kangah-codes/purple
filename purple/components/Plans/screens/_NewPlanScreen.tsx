@@ -9,12 +9,14 @@ import NewPlanLimits from '../molecules/NewBudget/NewPlanLimits';
 import NewPlanDateRange from '../molecules/NewBudget/NewPlanDateRange';
 import NewPlanAllocation from '../molecules/NewBudget/NewPlanAllocation';
 import NewBudgetType from '../molecules/NewBudget/NewBudgetType';
+import NewFixedBudget from '../molecules/NewBudget/NewFixedBudget';
 
 export default function NewPlanScreen() {
     const storiesRef = useRef<StoriesRef>(null);
     const pages = [
         <NewBudgetType storiesRef={storiesRef} />,
         <NewPlanLimits storiesRef={storiesRef} />,
+        <NewFixedBudget storiesRef={storiesRef} />,
         <NewPlanDateRange storiesRef={storiesRef} />,
         <NewPlanAllocation storiesRef={storiesRef} />,
     ];

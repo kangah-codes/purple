@@ -7,7 +7,6 @@ import BudgetSummary from './BudgetSummary';
 import BudgetSummarySkeleton from './BudgetSummarySkeleton';
 import tw from 'twrnc';
 import MonthCard from './MonthCard';
-import CreateBudget from './CreateBudget';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MONTH_CARD_WIDTH = 72;
@@ -166,8 +165,8 @@ export default function BudgetsContent({
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={[tw`flex-grow`]}
                 >
-                    <CreateBudget />
-                    {/* <BudgetSummary /> */}
+                    {/* <CreateBudget /> */}
+                    <BudgetSummary />
                 </ScrollView>
             );
         },

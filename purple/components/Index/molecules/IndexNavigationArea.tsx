@@ -1,5 +1,5 @@
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { BellIcon, SettingsCogIcon } from '@/components/SVG/icons/24x24';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
@@ -24,7 +24,7 @@ export default function IndexNavigationArea() {
                 >
                     <SettingsCogIcon stroke='#c27aff' strokeWidth={2} width={24} height={24} />
                 </TouchableOpacity>
-                <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
+                {/* <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
                     <TouchableOpacity
                         className='flex items-center justify-center rounded-full w-9 h-9'
                         onPress={() => router.push('/notifications')}
@@ -39,7 +39,7 @@ export default function IndexNavigationArea() {
                             9+
                         </Text>
                     </View>
-                </LinearGradient>
+                </LinearGradient> */}
             </View>
         </View>
     );

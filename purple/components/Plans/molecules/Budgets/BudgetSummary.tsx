@@ -4,7 +4,6 @@ import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
-import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLineChart';
 
 export default function BudgetSummary() {
     return (
@@ -89,7 +88,7 @@ export default function BudgetSummary() {
                 </View>
             </View>
 
-            <SpendVsBudgetLineChart />
+            {/* <SpendVsBudgetLineChart /> */}
 
             {/* Expenses Breakdown */}
             <View className='flex flex-col space-y-5 mt-5'>

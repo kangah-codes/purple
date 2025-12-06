@@ -9,11 +9,6 @@ import { FlatList } from 'react-native';
 export default function GettingStartedWidget() {
     const { steps, completed, total, shouldShowGuide } = useStartupGuide();
 
-    // dont show widget if startup guide is completed
-    if (!shouldShowGuide) {
-        return null;
-    }
-
     const handleItemPress = (stepId: string, callback: () => void) => {
         callback();
         // Note: markStepCompleted will be called automatically for customize_categories
@@ -63,6 +58,11 @@ export default function GettingStartedWidget() {
         },
         [steps],
     );
+
+    // dont show widget if startup guide is completed
+    if (!shouldShowGuide) {
+        return null;
+    }
 
     return (
         <View className='w-full rounded-3xl bg-purple-50 border border-purple-100 p-5 flex flex-col space-y-5 mt-5'>

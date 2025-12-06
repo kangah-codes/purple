@@ -10,7 +10,7 @@ type NewBudgetTypeProps = {
 };
 
 export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
-    const [type, setType] = useState<'flexible' | 'fixed'>('flexible');
+    const [type, setType] = useState<'flexible' | 'fixed'>('fixed');
 
     return (
         <View className='flex flex-col space-y-5 justify-center h-[100%] relative px-5'>
@@ -42,10 +42,8 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                                 style={satoshiFont.satoshiBold}
                                 className='text-sm text-purple-500'
                             >
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime
-                                rem, id aperiam tempore non corporis amet error eaque incidunt
-                                adipisci voluptas iure porro natus laboriosam impedit saepe
-                                voluptatibus ad nisi.
+                                A fixed budget sets specific limits for different categories,
+                                helping you control spending and save money.
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -57,6 +55,7 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                     <TouchableOpacity
                         className='flex flex-row space-x-1.5 flex-1'
                         onPress={() => setType('flexible')}
+                        disabled
                     >
                         <View className='mt-1.5'>
                             <Checkbox
@@ -64,20 +63,29 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                                 checkedColor='#8b5cf6'
                                 checked={type === 'flexible'}
                                 onChange={() => setType('flexible')}
+                                disabled
                             />
                         </View>
                         <View className='flex flex-col flex-1'>
-                            <Text style={satoshiFont.satoshiBold} className='text-base'>
-                                Flexible Budget
-                            </Text>
+                            <View className='flex flex-row space-x-2.5 items-center'>
+                                <Text style={satoshiFont.satoshiBold} className='text-base'>
+                                    Flexible Budget
+                                </Text>
+                                <View className='bg-purple-100 rounded-full px-2 py-1'>
+                                    <Text
+                                        style={satoshiFont.satoshiBold}
+                                        className='text-xs text-purple-500'
+                                    >
+                                        ✨ Coming Soon
+                                    </Text>
+                                </View>
+                            </View>
                             <Text
                                 style={satoshiFont.satoshiBold}
                                 className='text-sm text-purple-500'
                             >
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime
-                                rem, id aperiam tempore non corporis amet error eaque incidunt
-                                adipisci voluptas iure porro natus laboriosam impedit saepe
-                                voluptatibus ad nisi.
+                                A flexible budget adapts to your spending habits, allowing for
+                                adjustments based on actual income and expenses.
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -90,7 +98,6 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                         <TouchableOpacity
                             onPress={() => {
                                 router.back();
-                                reset();
                             }}
                             style={{ width: '100%' }}
                             className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
