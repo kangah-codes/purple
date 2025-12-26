@@ -18,21 +18,24 @@ jobs:
       GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      # - name: Checkout repo
+      #   uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.11"
+
+      # - name: Install dependencies
+      #   run: pip install -r requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: echo "Installing"
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      # - name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: Run upload script
-        run: python upload_tracking.py
+      # - name: Run upload script
+      #   run: python upload_tracking.py
