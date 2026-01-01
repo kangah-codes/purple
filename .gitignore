@@ -60,3 +60,7 @@ nucleus/bin/main.exe
 /nucleus/bin
 **/env/**
 **/venv/**
+purple/.yarn/releases/yarn-berry.cjs
+purple/.yarnrc.yml
+purple/package-lock.json
+purple/yarn.lock

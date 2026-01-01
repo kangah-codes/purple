@@ -26,7 +26,7 @@ export default function BlockSection() {
                                         decoding='async'
                                         data-nimg={1}
                                         className='mx-auto'
-                                        src='/graphics/stats_screen_3.png'
+                                        src='/graphics/stats_screen_4.png'
                                     />
                                 </div>
                             </div>
@@ -178,7 +178,7 @@ export default function BlockSection() {
                                         decoding='async'
                                         data-nimg={1}
                                         style={{ color: 'transparent' }}
-                                        src='/graphics/transaction_modal.png'
+                                        src='/graphics/transaction_screen.png'
                                         className='shadow-2xl'
                                     />
                                 </div>
