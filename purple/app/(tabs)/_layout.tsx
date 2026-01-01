@@ -71,7 +71,7 @@ export default function TabLayout() {
                     ),
                     headerShown: false,
                     // TODO: hiding this for now
-                    href: null,
+                    // href: null,
                 }}
             />
             <Tabs.Screen
@@ -132,6 +132,7 @@ export default function TabLayout() {
                         </View>
                     ),
                     headerShown: false,
+                    href: null,
                 }}
             />
             <Tabs.Screen

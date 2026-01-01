@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import {
     useInfiniteQuery,
@@ -15,8 +15,12 @@ import { SessionData } from '../Auth/schema';
 import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './schema';
 import { createNewPlanStore, createPlanStore } from './state';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { useAuth } from '../Auth/hooks';
+import { BudgetSQLiteService, CreateBudgetData, Budget, BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
+import { startOfMonth, endOfMonth } from 'date-fns';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { Transaction } from '@/components/Transactions/schema';
+import { isTransferTransaction } from '@/components/Transactions/utils';
 
 export function useCreateNewPlanStore() {
     const [
@@ -283,4 +287,115 @@ export function useCreatePlanTransaction({
         };
         return planService.createTransaction(data as CreatePlanTransaction, planData);
     });
+}
+
+export function useCreateBudget(): UseMutationResult<
+    GenericAPIResponse<Budget>,
+    Error,
+    CreateBudgetData
+> {
+    const db = useSQLiteContext();
+
+    return useMutation(['create-budget'], async (data: CreateBudgetData) => {
+        const service = new BudgetSQLiteService(db);
+        return service.create(data);
+    });
+}
+
+export function useBudgetForMonth(
+    month: number,
+    year: number,
+): UseQueryResult<GenericAPIResponse<BudgetWithDetails | null>, Error> {
+    const db = useSQLiteContext();
+
+    const getMonthName = (monthNumber: number): string => {
+        const months = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ];
+        return months[monthNumber - 1];
+    };
+
+    return useQuery(
+        ['budget', month, year],
+        async () => {
+            const service = new BudgetSQLiteService(db);
+            return service.getBudgetForMonth(getMonthName(month), year);
+        },
+        {
+            enabled: month > 0 && month <= 12,
+        },
+    );
+}
+
+/**
+ * Hook to calculate earned income for a budget period.
+ * Calculates the sum of credit transactions (excluding transfers) within the budget's month/year.
+ */
+export function useBudgetEarnedIncome(
+    month: string | undefined,
+    year: number | undefined,
+): UseQueryResult<number, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    const getMonthIndex = (monthName: string): number => {
+        const months = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ];
+        return months.indexOf(monthName);
+    };
+
+    return useQuery(
+        ['budget-earned-income', month, year],
+        async () => {
+            if (!month || !year) return 0;
+
+            const monthIndex = getMonthIndex(month);
+            if (monthIndex === -1) return 0;
+
+            const budgetDate = new Date(year, monthIndex, 1);
+            const startDate = startOfMonth(budgetDate).toISOString();
+            const endDate = endOfMonth(budgetDate).toISOString();
+
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+            const response = await service.list({
+                start_date: startDate,
+                end_date: endDate,
+                type: 'credit',
+                page_size: Infinity,
+            });
+
+            const transactions = response.data || [];
+            const earnedIncome = transactions
+                .filter((t) => !isTransferTransaction(t))
+                .reduce((sum, t) => sum + Number(t.amount), 0);
+
+            return earnedIncome;
+        },
+        {
+            enabled: !!month && !!year,
+        },
+    );
 }

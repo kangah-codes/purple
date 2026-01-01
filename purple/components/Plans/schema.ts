@@ -58,18 +58,6 @@ export type CreatePlanTransaction = {
     debit_account_id: string;
 };
 
-type CreatePlanPayload = {
-    type: string;
-    category: string;
-    target: number;
-    balance: number;
-    start_date: string;
-    end_date: string;
-    deposit_frequency: string;
-    name: string;
-    currency: string;
-};
-
 export interface SpendingProgress {
     isOnTrack: boolean;
     actualSpendingRate: number;
@@ -158,3 +146,40 @@ export type CreateNewPlanStore = {
     reset: () => void;
     updateCategory: (category: { category?: string; allocation?: number }) => void;
 };
+
+// new stuff for the plans
+export type Budget = {
+    id: string;
+    type: 'fixed' | 'flexible';
+    name: string;
+    total_amount: number;
+    estimated_income: number;
+    estimated_expense: number;
+    income_earned: number;
+    expense_spent: number;
+    currency: string;
+    start_date: string;
+    end_date: string;
+    is_active: boolean;
+    is_completed: boolean;
+    created_at: string;
+    updated_at: string;
+    code: string;
+}
+
+export type NewBudgetStore = {
+    estimatedIncome: number;
+    estimatedExpense: number;
+    totalAmount: number;
+    startDate: Date | null;
+    endDate: Date | null;
+    type: 'fixed' | 'flexible';
+    name: string;
+    categoryAllocations: {
+        category: string;
+        allocationType: 'fixed' | 'flexible';
+        allocatedAmount: number;
+    }[];
+    setData: (data: Partial<NewBudgetStore>) => void;
+    reset: () => void;
+}

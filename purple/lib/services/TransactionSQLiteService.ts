@@ -98,8 +98,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     await this.db.runAsync(
                         `INSERT INTO transactions
                       (id, created_at, updated_at, account_id, user_id, type,
-                       amount, note, category, from_account, to_account, currency, plan_id)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                       amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [
                             debitUUID,
                             data.date,
@@ -114,6 +114,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                             data.to_account ?? null,
                             debitAccount.currency,
                             data.plan_id ?? null,
+                            data.budget_id ?? null,
                         ],
                     );
                 } else {
@@ -129,8 +130,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 await this.db.runAsync(
                     `INSERT INTO transactions
                   (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                   amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         creditUUID,
                         data.date,
@@ -145,6 +146,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.to_account ?? null,
                         creditAccount.currency,
                         data.plan_id ?? null,
+                        data.budget_id ?? null,
                     ],
                 );
 
@@ -175,8 +177,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 await this.db.runAsync(
                     `INSERT INTO transactions
                   (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                   amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         uuid,
                         data.date,
@@ -191,8 +193,14 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.to_account ?? null,
                         data.currency,
                         data.plan_id ?? null,
+                        data.budget_id ?? null,
                     ],
                 );
+
+                // Update budget summary if budget_id is provided and transaction is a debit (expense)
+                if (data.budget_id && data.type === 'debit') {
+                    await this.updateBudgetSummary(data.budget_id, data.amount, data.category);
+                }
 
                 const result = await this.db.getFirstAsync<Transaction>(
                     'SELECT * FROM transactions WHERE id = ?',
@@ -220,6 +228,34 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             total_items: 1,
             message: 'Created transaction',
         });
+    }
+
+    /**
+     * Updates budget summary and category limits when a transaction is created.
+     * Increments the total_spent in budget_summaries and spent_amount in budget_category_limits.
+     */
+    private async updateBudgetSummary(
+        budgetId: string,
+        amount: number,
+        category: string,
+    ): Promise<void> {
+        const now = new Date().toISOString();
+
+        // Update the budget summary total_spent
+        await this.db.runAsync(
+            `UPDATE budget_summaries 
+             SET total_spent = total_spent + ?, updated_at = ?
+             WHERE budget_id = ?`,
+            [amount, now, budgetId],
+        );
+
+        // Update the category limit spent_amount if it exists
+        await this.db.runAsync(
+            `UPDATE budget_category_limits 
+             SET spent_amount = spent_amount + ?, updated_at = ?
+             WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+            [amount, now, budgetId, category],
+        );
     }
 
     async update(id: string, data: EditTransaction): Promise<GenericAPIResponse<Transaction>> {

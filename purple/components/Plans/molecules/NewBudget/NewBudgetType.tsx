@@ -1,16 +1,27 @@
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import Checkbox from '@/components/Shared/atoms/Checkbox';
+import { useCreateBudgetStore } from '../../state/CreateBudgetStore';
 
 type NewBudgetTypeProps = {
     storiesRef: React.RefObject<StoriesRef>;
 };
 
 export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
-    const [type, setType] = useState<'flexible' | 'fixed'>('fixed');
+    const { budgetType, setBudgetType } = useCreateBudgetStore();
+    const handleNext = () => {
+        if (budgetType) {
+            storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1);
+        }
+    };
+
+    useEffect(() => {
+        // TODO: will remove this later
+        setBudgetType('category');
+    }, [])
 
     return (
         <View className='flex flex-col space-y-5 justify-center h-[100%] relative px-5'>
@@ -24,14 +35,14 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                 <View className='flex flex-row justify-between items-center'>
                     <TouchableOpacity
                         className='flex flex-row space-x-1.5 flex-1'
-                        onPress={() => setType('fixed')}
+                        onPress={() => setBudgetType('category')}
                     >
                         <View className='mt-1.5'>
                             <Checkbox
                                 size={18}
                                 checkedColor='#8b5cf6'
-                                checked={type === 'fixed'}
-                                onChange={() => setType('fixed')}
+                                checked={budgetType === 'category'}
+                                onChange={() => setBudgetType('category')}
                             />
                         </View>
                         <View className='flex flex-col flex-1'>
@@ -54,15 +65,15 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                 <View className='flex flex-row justify-between items-center'>
                     <TouchableOpacity
                         className='flex flex-row space-x-1.5 flex-1'
-                        onPress={() => setType('flexible')}
+                        onPress={() => setBudgetType('flex')}
                         disabled
                     >
                         <View className='mt-1.5'>
                             <Checkbox
                                 size={18}
                                 checkedColor='#8b5cf6'
-                                checked={type === 'flexible'}
-                                onChange={() => setType('flexible')}
+                                checked={budgetType === 'flex'}
+                                onChange={() => setBudgetType('flex')}
                                 disabled
                             />
                         </View>
@@ -112,12 +123,7 @@ export default function NewBudgetType({ storiesRef }: NewBudgetTypeProps) {
                     </View>
 
                     <View className='flex-1'>
-                        <TouchableOpacity
-                            style={{ width: '100%' }}
-                            onPress={() =>
-                                storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1)
-                            }
-                        >
+                        <TouchableOpacity style={{ width: '100%' }} onPress={handleNext}>
                             <LinearGradient
                                 className='flex items-center justify-center rounded-full px-5 h-[50]'
                                 colors={['#c084fc', '#9333ea']}

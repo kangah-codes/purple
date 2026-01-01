@@ -1,30 +1,22 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { AnimatedCollapsibleRef } from '@/components/Shared/molecules/AnimatedCollapsible';
-import { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { router } from 'expo-router';
+import { useCreateBudgetStore } from '../../state/CreateBudgetStore';
+import { usePreferences } from '@/components/Settings/hooks';
 
 export function BudgetCategorySetup() {
-    const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
-    const [isOpen, setIsOpen] = React.useState(false);
-    const footerOpacity = useSharedValue(1);
-
-    const handleToggle = () => {
-        collapsibleRef.current?.toggle();
-        setIsOpen(!isOpen);
+    const { categoryLimits } = useCreateBudgetStore();
+    const {
+            preferences: { customTransactionTypes, currency },
+        } = usePreferences();
+    const totalAllocated = categoryLimits.reduce((sum, limit) => sum + limit.limitAmount, 0);
+    const getCategoryAmount = (category: string) => {
+        const limit = categoryLimits.find((l) => l.category === category);
+        return limit?.limitAmount || 0;
     };
-
-    React.useEffect(() => {
-        footerOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
-    }, [isOpen, footerOpacity]);
-
-    const footerAnimatedStyle = useAnimatedStyle(() => ({
-        opacity: footerOpacity.value,
-        height: footerOpacity.value === 0 ? 0 : undefined,
-    }));
 
     return (
         <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 p-5'>
@@ -38,7 +30,7 @@ export function BudgetCategorySetup() {
                         className='text-sm text-purple-500 w-20 text-right'
                         style={satoshiFont.satoshiBlack}
                     >
-                        {formatCurrencyRounded(100, 'GHS')}
+                        {formatCurrencyRounded(totalAllocated, currency)}
                     </Text>
                 </View>
             </View>
@@ -46,7 +38,7 @@ export function BudgetCategorySetup() {
             <View className='h-[1px] border-b border-purple-100 w-full' />
 
             <View className='flex flex-col'>
-                {transactionTypes.map((transaction, idx) => (
+                {customTransactionTypes.map(tx => `${tx.emoji} ${tx.category}`).map((transaction, idx) => (
                     <React.Fragment key={idx}>
                         <View
                             className={`flex-row justify-between items-center ${
@@ -71,7 +63,7 @@ export function BudgetCategorySetup() {
                                         pathname: '/plans/set-category-amount',
                                         params: {
                                             category: transaction,
-                                            currentAmount: '0',
+                                            currentAmount: getCategoryAmount(transaction).toString(),
                                         },
                                     })
                                 }
@@ -80,7 +72,7 @@ export function BudgetCategorySetup() {
                                     className='text-sm text-purple-500'
                                     style={satoshiFont.satoshiBlack}
                                 >
-                                    {formatCurrencyRounded(0, 'GHS')}
+                                    {formatCurrencyRounded(getCategoryAmount(transaction), currency)}
                                 </Text>
                             </TouchableOpacity>
                         </View>

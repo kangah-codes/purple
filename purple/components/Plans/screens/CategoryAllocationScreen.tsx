@@ -14,21 +14,24 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyAccurate, formatCurrencyRounded } from '@/lib/utils/number';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
-import Switch from '@/components/Shared/atoms/Switch';
+import { useCreateBudgetStore } from '../state/CreateBudgetStore';
+import { usePreferences } from '@/components/Settings/hooks';
 
 export default function CategoryAllocationScreen() {
     const params = useLocalSearchParams<{ category: string; currentAmount?: string }>();
-    const [amount, setAmount] = useState(params.currentAmount || 0);
-    const [applyToFuture, setApplyToFuture] = useState(false);
+    const { categoryLimits, updateCategoryLimit, addCategoryLimit } =
+        useCreateBudgetStore();
+    const {preferences: { currency }} = usePreferences();
+    const existingLimit = categoryLimits.find((l) => l.category === params.category);
+    const [amount, setAmount] = useState(
+        params.currentAmount || existingLimit?.limitAmount.toString() || '0',
+    );
 
     const hiddenInputRef = useRef<any>(null);
 
-    // 🔥 FORCE KEYBOARD TO STAY OPEN
     useEffect(() => {
-        // Auto-focus shortly after mount
         setTimeout(() => hiddenInputRef.current?.focus(), 50);
 
-        // Re-open keyboard if it ever hides
         const listener = Keyboard.addListener('keyboardDidHide', () => {
             setTimeout(() => hiddenInputRef.current?.focus(), 50);
         });
@@ -36,10 +39,22 @@ export default function CategoryAllocationScreen() {
         return () => listener.remove();
     }, []);
 
-    const handleSave = () => router.back();
-    const handleCancel = () => router.back();
+    const handleSave = () => {
+        const limitAmount = parseFloat(amount || '0');
 
-    const displayAmount = Number(amount === '.' ? 0 : amount || 0);
+        if (existingLimit) {
+            updateCategoryLimit(params.category, limitAmount);
+        } else {
+            addCategoryLimit({
+                category: params.category,
+                limitAmount,
+            });
+        }
+
+        router.back();
+    };
+
+    const handleCancel = () => router.back();
 
     return (
         <SafeAreaView
@@ -50,12 +65,11 @@ export default function CategoryAllocationScreen() {
         >
             <StatusBar barStyle='dark-content' />
 
-            {/* 🔥 HIDDEN INPUT THAT NEVER LOSES FOCUS */}
             <InputField
                 ref={hiddenInputRef}
                 autoFocus
                 keyboardType='decimal-pad'
-                value={amount}
+                value={amount.toString()}
                 onChangeText={(text) => {
                     if (/^\d*\.?\d*$/.test(text)) {
                         setAmount(text === '' ? '0' : text);
@@ -70,14 +84,13 @@ export default function CategoryAllocationScreen() {
                     top: -100,
                 }}
                 onBlur={() => {
-                    // instantly refocus to keep keyboard always open
                     setTimeout(() => hiddenInputRef.current?.focus(), 50);
                 }}
             />
 
             <View className='w-full flex flex-row justify-between items-center relative px-5 py-2.5'>
                 <TouchableOpacity
-                    onPress={router.back}
+                    onPress={handleCancel}
                     className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'
                 >
                     <ArrowLeftIcon stroke={'#9333ea'} width={24} height={24} strokeWidth={2.5} />
@@ -95,7 +108,7 @@ export default function CategoryAllocationScreen() {
                 >
                     <TouchableOpacity
                         className='px-4 py-2 flex items-center justify-center rounded-full'
-                        onPress={() => router.push('/transactions/new')}
+                        onPress={handleSave}
                     >
                         <CheckMarkIcon stroke={'#faf5ff'} width={24} height={24} />
                     </TouchableOpacity>
@@ -106,21 +119,19 @@ export default function CategoryAllocationScreen() {
                 className='flex-1 space-y-2.5'
                 contentContainerStyle={{ paddingHorizontal: 20 }}
             >
-                {/* Amount Display */}
                 <View className='items-center mt-10 mb-6'>
                     <Text
                         className='text-4xl text-black text-center'
                         style={satoshiFont.satoshiBlack}
                     >
-                        {formatCurrencyAccurate('GHS', amount)}
+                        {formatCurrencyAccurate(currency, parseFloat(amount || '0'))}
                     </Text>
                 </View>
 
-                {/* Stats */}
                 <View className='flex-row justify-between space-x-2.5'>
                     <View className='flex-1 bg-purple-50 rounded-3xl p-5 items-center border border-purple-100'>
                         <Text className='text-xl text-black mb-1' style={satoshiFont.satoshiBlack}>
-                            {formatCurrencyRounded(0, 'GHS')}
+                            {formatCurrencyRounded(0, currency)}
                         </Text>
                         <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
                             Spent last month
@@ -128,7 +139,7 @@ export default function CategoryAllocationScreen() {
                     </View>
                     <View className='flex-1 bg-purple-50 rounded-3xl p-5 items-center border border-purple-100'>
                         <Text className='text-xl text-black mb-1' style={satoshiFont.satoshiBlack}>
-                            {formatCurrencyRounded(0, 'GHS')}
+                            {formatCurrencyRounded(0, currency)}
                         </Text>
                         <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
                             Monthly Average
@@ -136,16 +147,7 @@ export default function CategoryAllocationScreen() {
                     </View>
                 </View>
 
-                {/* Apply to Future Months Toggle */}
-                <View className='flex-row justify-between items-center bg-purple-50 rounded-3xl p-5 border border-purple-100'>
-                    <View className='flex-row items-center flex-1'>
-                        <Text className='text-sm text-black mr-2' style={satoshiFont.satoshiBold}>
-                            Apply {formatCurrencyRounded(displayAmount, 'GHS')} to all future months
-                        </Text>
-                    </View>
 
-                    <Switch />
-                </View>
             </ScrollView>
         </SafeAreaView>
     );

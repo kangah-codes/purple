@@ -141,7 +141,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
                                     style={{ backgroundColor: slice.color }}
                                 />
                                 <Text style={[satoshiFont.satoshiBold]} className='text-xs ml-1.5'>
-                                    {slice.category.slice(3)}{' '}
+                                    {slice.category.split(' ').slice(1).join('')}{' '}
                                     <Text style={[satoshiFont.satoshiBlack]} className='text-xs'>
                                         {percent}%
                                     </Text>

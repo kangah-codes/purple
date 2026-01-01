@@ -5,14 +5,46 @@ import { addMonths, subMonths, differenceInMonths, format } from 'date-fns';
 import { SafeAreaView, View, ScrollView } from '@/components/Shared/styled';
 import BudgetSummary from './BudgetSummary';
 import BudgetSummarySkeleton from './BudgetSummarySkeleton';
+import CreateBudget from './CreateBudget';
 import tw from 'twrnc';
 import MonthCard from './MonthCard';
+import { useBudgetForMonth } from '../../hooks';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MONTH_CARD_WIDTH = 72;
 const MONTH_CARD_SPACING = 12;
 const TOTAL_PAGES = 1000;
 const CENTER_INDEX = 500;
+
+function BudgetContentForMonth({ month }: { month: Date }) {
+    const monthNumber = month.getMonth() + 1;
+    const year = month.getFullYear();
+    const { data, isLoading } = useBudgetForMonth(monthNumber, year);
+
+    if (isLoading) {
+        return (
+            <ScrollView
+                className='w-full h-full'
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={[tw`flex-grow`]}
+            >
+                <BudgetSummarySkeleton />
+            </ScrollView>
+        );
+    }
+
+    const hasBudget = data?.data;
+
+    return (
+        <ScrollView
+            className='w-full h-full'
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[tw`flex-grow`]}
+        >
+            {hasBudget ? <BudgetSummary budget={data.data} /> : <CreateBudget />}
+        </ScrollView>
+    );
+}
 
 interface BudgetsScreenProps {
     currentDate: Date;
@@ -24,7 +56,7 @@ interface BudgetsScreenProps {
 export default function BudgetsContent({
     currentDate,
     onMonthChange,
-    availableMonths: _availableMonths, // Renamed with underscore to indicate it's intentionally unused
+    availableMonths: _availableMonths,
     renderContent,
 }: BudgetsScreenProps) {
     const pagerRef = useRef<PagerView>(null);
@@ -36,19 +68,17 @@ export default function BudgetsContent({
     const [baseDate, setBaseDate] = useState(currentDate);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // Suppress lint warning for intentionally unused parameter
     void _availableMonths;
 
     // Generate 5 months with base date in the middle
     const displayedMonths = [
         subMonths(baseDate, 2),
         subMonths(baseDate, 1),
-        baseDate, // Base date in the middle (index 2)
+        baseDate,
         addMonths(baseDate, 1),
         addMonths(baseDate, 2),
     ];
 
-    // Initialize component
     useEffect(() => {
         if (isInitialized) return;
 
@@ -61,7 +91,6 @@ export default function BudgetsContent({
 
         setTimeout(() => {
             pagerRef.current?.setPageWithoutAnimation(startIndex);
-            // Center the scroll view on the middle month
             const offsetX = Math.max(
                 0,
                 2 * (MONTH_CARD_WIDTH + MONTH_CARD_SPACING) -
@@ -72,7 +101,6 @@ export default function BudgetsContent({
         }, 100);
     }, [isInitialized]);
 
-    // Sync with external currentDate changes
     useEffect(() => {
         if (!isInitialized) return;
 
@@ -94,7 +122,6 @@ export default function BudgetsContent({
         }
     }, [currentDate, isInitialized]);
 
-    // Handle month navigation
     const goToMonth = useCallback(
         (monthIndex: number) => {
             if (monthIndex >= 0 && monthIndex < displayedMonths.length) {
@@ -107,7 +134,6 @@ export default function BudgetsContent({
                 onMonthChange(selectedDate);
                 pagerRef.current?.setPage(newIndex);
 
-                // Center the scroll view on the middle month
                 const offsetX = Math.max(
                     0,
                     2 * (MONTH_CARD_WIDTH + MONTH_CARD_SPACING) -
@@ -132,7 +158,6 @@ export default function BudgetsContent({
             setBaseDate(selectedDate);
             onMonthChange(selectedDate);
 
-            // Center the scroll view
             const offsetX = Math.max(
                 0,
                 2 * (MONTH_CARD_WIDTH + MONTH_CARD_SPACING) -
@@ -144,10 +169,8 @@ export default function BudgetsContent({
         [activeIndex, onMonthChange],
     );
 
-    // Page content renderer
     const renderPageContent = useCallback(
         (index: number) => {
-            // Virtualization
             if (Math.abs(index - activeIndex) > 2) {
                 return <View key={index} className='w-full h-full' />;
             }
@@ -159,18 +182,9 @@ export default function BudgetsContent({
                 return renderContent(month);
             }
 
-            return (
-                <ScrollView
-                    className='w-full h-full'
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={[tw`flex-grow`]}
-                >
-                    {/* <CreateBudget /> */}
-                    <BudgetSummary />
-                </ScrollView>
-            );
+            return <BudgetContentForMonth key={index} month={month} />;
         },
-        [renderContent, BudgetSummary, activeIndex],
+        [renderContent, activeIndex],
     );
 
     if (!isInitialized) {

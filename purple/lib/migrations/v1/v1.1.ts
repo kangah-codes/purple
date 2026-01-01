@@ -52,6 +52,20 @@ export const migrationsV1_1 = [
         `,
     },
     {
+        version: 1.11,
+        sql: `
+            PRAGMA journal_mode = WAL;
+            ALTER TABLE budgets ADD COLUMN estimated_income NUMERIC DEFAULT 0;
+        `,
+    },
+    {
+        version: 1.12,
+        sql: `
+            PRAGMA journal_mode = WAL;
+            ALTER TABLE budgets ADD COLUMN estimated_spend NUMERIC DEFAULT 0;
+        `,
+    },
+    {
         version: 1.1,
         sql: `
             PRAGMA journal_mode = WAL;

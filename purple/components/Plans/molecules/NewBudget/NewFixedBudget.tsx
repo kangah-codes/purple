@@ -81,7 +81,7 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
                 >
                     <View className='flex flex-col'>
                         <Text style={satoshiFont.satoshiBold} className='text-base text-purple-500'>
-                            Does this look right for your fixed budget?
+                            How much do you want to budget?
                         </Text>
                     </View>
 
@@ -117,8 +117,11 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
                             <View className='flex-1'>
                                 <TouchableOpacity
                                     style={{ width: '100%' }}
-                                    // onPress={handleSubmit(onSubmit)}
-                                    // disabled={isLoading}
+                                    onPress={() =>
+                                        storiesRef?.current?.goToPage(
+                                            storiesRef.current.currentIndex + 1,
+                                        )
+                                    }
                                 >
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 h-[50]'

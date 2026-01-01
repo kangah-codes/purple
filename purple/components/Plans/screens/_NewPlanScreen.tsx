@@ -5,20 +5,22 @@ import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useRef } from 'react';
 import { Image } from 'react-native';
 import tw from 'twrnc';
-import NewPlanLimits from '../molecules/NewBudget/NewPlanLimits';
-import NewPlanDateRange from '../molecules/NewBudget/NewPlanDateRange';
-import NewPlanAllocation from '../molecules/NewBudget/NewPlanAllocation';
 import NewBudgetType from '../molecules/NewBudget/NewBudgetType';
+import BudgetSummary from '../molecules/NewBudget/BudgetSummary';
+import EstimatedIncome from '../molecules/NewBudget/EstimatedIncome';
+import EstimatedSpend from '../molecules/NewBudget/EstimatedSpend';
 import NewFixedBudget from '../molecules/NewBudget/NewFixedBudget';
+import BudgetMonthSelector from '../molecules/NewBudget/BudgetMonthSelector';
 
 export default function NewPlanScreen() {
     const storiesRef = useRef<StoriesRef>(null);
     const pages = [
         <NewBudgetType storiesRef={storiesRef} />,
-        <NewPlanLimits storiesRef={storiesRef} />,
+        <EstimatedSpend storiesRef={storiesRef} />,
+        <EstimatedIncome storiesRef={storiesRef} />,
+        <BudgetMonthSelector storiesRef={storiesRef} />,
         <NewFixedBudget storiesRef={storiesRef} />,
-        <NewPlanDateRange storiesRef={storiesRef} />,
-        <NewPlanAllocation storiesRef={storiesRef} />,
+        <BudgetSummary storiesRef={storiesRef} />,
     ];
 
     return (

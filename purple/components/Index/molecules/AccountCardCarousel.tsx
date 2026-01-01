@@ -28,13 +28,19 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
         ),
         [accounts, pinnedIndex],
     );
+    const reorderedAccounts = useMemo(() => {
+        if (!accounts?.data || pinnedIndex === -1 || !pinnedIndex) return accounts?.data || [];
+        const pinnedAccount = accounts.data[pinnedIndex];
+        const otherAccounts = accounts.data.filter((_, index) => index !== pinnedIndex);
+        return [pinnedAccount, ...otherAccounts];
+    }, [accounts?.data, pinnedIndex]);
 
     useRefreshOnFocus(refetch);
 
     return (
         <View className='bg-purple-50 p-5 border border-purple-100 rounded-3xl'>
             <Carousel
-                data={accounts?.data ?? []}
+                data={reorderedAccounts}
                 renderItem={renderItem}
                 sliderWidth={styles.slider.width}
                 itemWidth={styles.item.width}
@@ -43,7 +49,6 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
                 style={styles.carouselStyle as StyleProp<ViewStyle>}
                 onSnapToItem={setActiveSlide}
                 loop
-                firstItem={pinnedIndex === -1 ? undefined : pinnedIndex}
             />
             <Pagination
                 dotsLength={accounts?.total_items ?? 1}

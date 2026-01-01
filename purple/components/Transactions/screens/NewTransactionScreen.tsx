@@ -1,4 +1,5 @@
 import { useAccounts } from '@/components/Accounts/hooks';
+import { useBudgetForMonth } from '@/components/Plans/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
@@ -69,6 +70,7 @@ export default function NewTransactionScreen() {
     const { logEvent } = useAnalytics();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const [isRecurring, setIsRecurring] = useState(false);
+    const [countInBudget, setCountInBudget] = useState(true);
     const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
     const { mutate: createRecurringTransaction, isLoading: isCreatingRecurring } =
         useCreateRecurringTransaction();
@@ -151,6 +153,22 @@ export default function NewTransactionScreen() {
         control,
         name: 'dayOfMonth',
     });
+
+    // Watch the transaction date to determine which budget to use
+    const transactionDateISO = useWatch({
+        control,
+        name: 'date',
+        defaultValue: new Date().toISOString(),
+    });
+
+    // Get the month and year from the transaction date for budget lookup
+    const transactionDate = transactionDateISO ? new Date(transactionDateISO) : new Date();
+    const transactionMonth = transactionDate.getMonth() + 1; // 1-indexed
+    const transactionYear = transactionDate.getFullYear();
+
+    // Fetch the budget for the transaction's month/year
+    const { data: budgetData } = useBudgetForMonth(transactionMonth, transactionYear);
+    const budgetForMonth = budgetData?.data;
 
     const date = dateISO ? new Date(dateISO) : new Date();
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -254,6 +272,9 @@ export default function NewTransactionScreen() {
             });
         } else {
             // Handle regular transaction creation
+            // Determine budget_id based on countInBudget toggle and if budget exists for the month
+            const budgetId = countInBudget && budgetForMonth ? budgetForMonth.id : null;
+
             let transformedData = transformObject(data, [
                 ['toAccount', 'to_account'],
                 ['fromAccount', 'from_account'],
@@ -261,6 +282,12 @@ export default function NewTransactionScreen() {
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
             ]);
+
+            // Add budget_id to the transaction data
+            transformedData = {
+                ...transformedData,
+                budget_id: budgetId ?? undefined,
+            };
 
             if (transactionType !== 'transfer') {
                 transformedData = omit(transformedData, [
@@ -285,6 +312,11 @@ export default function NewTransactionScreen() {
                 },
                 onSuccess: () => {
                     queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
+                    // Also invalidate budget queries to reflect updated spent amounts
+                    if (budgetId) {
+                        queryClient.invalidateQueries({ queryKey: ['budget'] });
+                        queryClient.invalidateQueries({ queryKey: ['budget-earned-income'] });
+                    }
                     Toast.show({
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction created successfully' },
@@ -902,7 +934,7 @@ export default function NewTransactionScreen() {
 
                         <View className='h-1 border-b border-purple-100 w-full' />
 
-                        <View className='flex flex-col space-y-1 mb-20'>
+                        <View className='flex flex-col space-y-1'>
                             <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                                 Note
                             </Text>
@@ -935,6 +967,26 @@ export default function NewTransactionScreen() {
                                 )}
                             </View>
                         </View>
+
+                        {/* Budget Toggle - only show for expense (debit) transactions and when budget exists */}
+                        {transactionType === 'debit' && budgetForMonth && (
+                            <View className='flex flex-col space-y-1 mb-20'>
+                                <View className='flex flex-row w-full justify-between items-center'>
+                                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                        Count in budget
+                                    </Text>
+
+                                    <View>
+                                        <Switch 
+                                            value={countInBudget} 
+                                            onValueChange={setCountInBudget}
+                                            disabled={!budgetForMonth}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+                        {transactionType !== 'debit' && <View className='mb-20' />}
                     </ScrollView>
                 </KeyboardAvoidingView>
 

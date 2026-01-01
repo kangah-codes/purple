@@ -9,17 +9,31 @@ import {
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { AnimatedChevron } from './AnimatedChevron';
 import { CollapsedFooter } from './CollapsedFooter';
+import { BudgetCategoryLimit } from '@/lib/services/BudgetSQLiteService';
 
 interface BudgetCategoryCardProps {
     title: string;
     transactionTypes: string[];
+    categoryLimits?: BudgetCategoryLimit[];
+    currency?: string;
 }
 
-export function BudgetCategoryCard({ title, transactionTypes }: BudgetCategoryCardProps) {
+export function BudgetCategoryCard({
+    title,
+    transactionTypes,
+    categoryLimits = [],
+    currency = 'GHS',
+}: BudgetCategoryCardProps) {
     const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
     const [isOpen, setIsOpen] = React.useState(false);
     const totalItems = transactionTypes.length;
     const footerOpacity = useSharedValue(1);
+
+    const totalBudget = categoryLimits.reduce((sum, cl) => sum + cl.limit_amount, 0);
+    const totalLeft = categoryLimits.reduce(
+        (sum, cl) => sum + (cl.limit_amount - cl.spent_amount),
+        0,
+    );
 
     const handleToggle = () => {
         collapsibleRef.current?.toggle();
@@ -54,14 +68,14 @@ export function BudgetCategoryCard({ title, transactionTypes }: BudgetCategoryCa
                         className='text-sm text-black w-20 text-right mr-8'
                         style={satoshiFont.satoshiBold}
                     >
-                        {formatCurrencyRounded(100, 'GHS')}
+                        {formatCurrencyRounded(totalBudget, currency)}
                     </Text>
 
                     <Text
                         className='text-sm text-purple-500 w-20 text-right'
                         style={satoshiFont.satoshiBold}
                     >
-                        {formatCurrencyRounded(100, 'GHS')}
+                        {formatCurrencyRounded(totalLeft, currency)}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -75,45 +89,60 @@ export function BudgetCategoryCard({ title, transactionTypes }: BudgetCategoryCa
                 onClose={() => setIsOpen(false)}
             >
                 <View className='flex flex-col'>
-                    {transactionTypes.map((transaction, idx) => (
-                        <React.Fragment key={idx}>
-                            <View className='flex-row justify-between items-center py-2.5'>
-                                <View className='flex-row items-center flex-1 mr-4'>
-                                    <Text
-                                        className='text-sm text-black flex-1'
-                                        style={satoshiFont.satoshiBold}
-                                        numberOfLines={1}
-                                        ellipsizeMode='tail'
-                                    >
-                                        {transaction}
-                                    </Text>
-                                </View>
+                    {transactionTypes.map((transaction, idx) => {
+                        const categoryLimit = categoryLimits.find((cl) => cl.category === transaction);
+                        const limitAmount = categoryLimit?.limit_amount || 0;
+                        const spentAmount = categoryLimit?.spent_amount || 0;
+                        const remainingAmount = limitAmount - spentAmount;
 
-                                <View className='flex-row items-center flex-shrink-0'>
-                                    <Text
-                                        className='text-sm text-black text-right mr-8'
-                                        style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
-                                    >
-                                        {formatCurrencyRounded(10042, 'GHS')}
-                                    </Text>
-                                    <Text
-                                        className='text-sm text-purple-500 text-right'
-                                        style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
-                                    >
-                                        {formatCurrencyRounded(1055430, 'GHS')}
-                                    </Text>
+                        return (
+                            <React.Fragment key={idx}>
+                                <View className='flex-row justify-between items-center py-2.5'>
+                                    <View className='flex-row items-center flex-1 mr-4'>
+                                        <Text
+                                            className='text-sm text-black flex-1'
+                                            style={satoshiFont.satoshiBold}
+                                            numberOfLines={1}
+                                            ellipsizeMode='tail'
+                                        >
+                                            {transaction}
+                                        </Text>
+                                    </View>
+
+                                    <View className='flex-row items-center flex-shrink-0'>
+                                        <Text
+                                            className='text-sm text-black text-right mr-8'
+                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
+                                        >
+                                            {formatCurrencyRounded(limitAmount, currency)}
+                                        </Text>
+                                        <Text
+                                            className='text-sm text-purple-500 text-right'
+                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
+                                        >
+                                            {formatCurrencyRounded(remainingAmount, currency)}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
-                            {idx < transactionTypes.length - 1 && (
-                                <View className='h-[0.5px] border-b border-purple-100 w-full' />
-                            )}
-                        </React.Fragment>
-                    ))}
+                                {idx < transactionTypes.length - 1 && (
+                                    <View className='h-[0.5px] border-b border-purple-100 w-full' />
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
                 </View>
             </AnimatedCollapsible>
 
             <Animated.View style={footerAnimatedStyle}>
-                {!isOpen && <CollapsedFooter collapsibleRef={collapsibleRef} count={totalItems} />}
+                {!isOpen && (
+                    <CollapsedFooter
+                        collapsibleRef={collapsibleRef}
+                        count={totalItems}
+                        totalBudget={totalBudget}
+                        totalLeft={totalLeft}
+                        currency={currency}
+                    />
+                )}
             </Animated.View>
         </View>
     );

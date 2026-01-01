@@ -1,22 +1,39 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
+import { View, Text } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { transactionTypes } from '@/lib/constants/transactionTypes';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
+import { BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
+import { useBudgetEarnedIncome } from '@/components/Plans/hooks';
 
-export default function BudgetSummary() {
+interface BudgetSummaryProps {
+    budget: BudgetWithDetails | null;
+}
+
+export default function BudgetSummary({ budget }: BudgetSummaryProps) {
+    const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budget?.month, budget?.year);
+
+    if (!budget) {
+        return null;
+    }
+
+    const totalAllocated = budget.summary?.total_allocated || 0;
+    const totalSpent = budget.summary?.total_spent || 0;
+    const remainingBudget = totalAllocated - totalSpent;
+    const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+    const estimatedIncome = budget.estimated_income || 0;
+    const earnedIncome = calculatedEarnedIncome;
+    const remainingIncome = estimatedIncome - earnedIncome;
+    const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
+
     return (
         <View className='px-5 py-5'>
             {/* Summary Section */}
             <View className='bg-purple-50 p-5 rounded-3xl border border-purple-100 flex flex-col space-y-2.5'>
                 <View className='flex-row justify-between items-center'>
-                    <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                    <Text className='text-base text-black' style={satoshiFont.satoshiBold}>
                         Summary
                     </Text>
-                    <TouchableOpacity>
-                        <Text className='text-xl text-purple-500'>⋯</Text>
-                    </TouchableOpacity>
                 </View>
 
                 <View className='h-[0.5px] border-b border-purple-100 w-full' />
@@ -28,7 +45,7 @@ export default function BudgetSummary() {
                             Income
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} estimated
+                            {formatCurrencyRounded(estimatedIncome, budget.currency)} estimated
                         </Text>
                     </View>
 
@@ -36,7 +53,7 @@ export default function BudgetSummary() {
                         <View
                             className='h-2 bg-purple-600 rounded-md'
                             style={{
-                                width: `${Math.min(23, 100)}%`,
+                                width: `${Math.min(incomePercentage, 100)}%`,
                             }}
                         />
                         <View className='h-2 flex-grow bg-purple-200 rounded-md' />
@@ -44,10 +61,10 @@ export default function BudgetSummary() {
 
                     <View className='flex-row justify-between'>
                         <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} earned
+                            {formatCurrencyRounded(earnedIncome, budget.currency)} earned
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} left
+                            {formatCurrencyRounded(remainingIncome, budget.currency)} left
                         </Text>
                     </View>
                 </View>
@@ -63,7 +80,7 @@ export default function BudgetSummary() {
                             Expenses
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} budget
+                            {formatCurrencyRounded(totalAllocated, budget.currency)} budget
                         </Text>
                     </View>
 
@@ -71,7 +88,7 @@ export default function BudgetSummary() {
                         <View
                             className='h-2 bg-purple-600 rounded-md'
                             style={{
-                                width: `${Math.min(78, 100)}%`,
+                                width: `${Math.min(spentPercentage, 100)}%`,
                             }}
                         />
                         <View className='h-2 flex-grow bg-purple-200 rounded-md' />
@@ -79,10 +96,10 @@ export default function BudgetSummary() {
 
                     <View className='flex-row justify-between'>
                         <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} spent
+                            {formatCurrencyRounded(totalSpent, budget.currency)} spent
                         </Text>
                         <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(100, 'GHS')} left
+                            {formatCurrencyRounded(remainingBudget, budget.currency)} left
                         </Text>
                     </View>
                 </View>
@@ -113,18 +130,22 @@ export default function BudgetSummary() {
                     </View>
                 </View>
 
-                <View>
-                    <BudgetCategoryCard
-                        title='Fixed'
-                        transactionTypes={['Rent', 'Insurance', 'Utilities']}
-                    />
-                </View>
-                <View>
-                    <BudgetCategoryCard
-                        title='Flexible'
-                        transactionTypes={transactionTypes.slice(0, 7)}
-                    />
-                </View>
+                {budget.categoryLimits.length > 0 ? (
+                    <View>
+                        <BudgetCategoryCard
+                            title={budget.type === 'category' ? 'Categories' : 'Allocations'}
+                            transactionTypes={budget.categoryLimits.map((cl) => cl.category)}
+                            categoryLimits={budget.categoryLimits}
+                            currency={budget.currency}
+                        />
+                    </View>
+                ) : (
+                    <View className='px-5'>
+                        <Text className='text-sm text-gray-500' style={satoshiFont.satoshiMedium}>
+                            No categories set up yet
+                        </Text>
+                    </View>
+                )}
             </View>
         </View>
     );
