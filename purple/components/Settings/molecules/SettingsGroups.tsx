@@ -14,6 +14,9 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { SettingsListItem } from '../schema';
 import SettingsGroup from './SettingsGroup';
+import { Text, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import pkg from '../../../package.json';
 
 export default function SettingsGroups() {
     const generalSettings: SettingsListItem[] = [
@@ -82,6 +85,11 @@ export default function SettingsGroups() {
             <SettingsGroup groupName='General' items={generalSettings} />
             <SettingsGroup groupName='Security & Notifications' items={securitySettings} />
             <SettingsGroup groupName='Other' items={otherSettings} />
+            <View className='flex flex-row items-center justify-center'>
+                <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500 px-2.5'>
+                    Purple v{pkg.version} {pkg.isBeta && 'Beta'}
+                </Text>
+            </View>
         </ScrollView>
     );
 }
