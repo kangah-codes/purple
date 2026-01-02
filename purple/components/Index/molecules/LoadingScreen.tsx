@@ -1,16 +1,10 @@
 import React from 'react';
 import AnimatedSkeleton from '@/components/Shared/atoms/Skeleton';
-import {
-    LinearGradient,
-    SafeAreaView,
-    Text,
-    View,
-    TouchableOpacity,
-} from '@/components/Shared/styled';
+import { SafeAreaView, Text, View, TouchableOpacity } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
-import { SettingsCogIcon, BellIcon } from '@/components/SVG/icons/24x24';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
@@ -69,7 +63,7 @@ export default function LoadingScreen() {
                                 height={24}
                             />
                         </TouchableOpacity>
-                        <LinearGradient
+                        {/* <LinearGradient
                             className='rounded-full relative'
                             colors={['#c084fc', '#9333ea']}
                         >
@@ -79,7 +73,7 @@ export default function LoadingScreen() {
                             >
                                 <BellIcon stroke={'#fff'} width={20} height={20} strokeWidth={2} />
                             </TouchableOpacity>
-                        </LinearGradient>
+                        </LinearGradient> */}
                     </View>
                 </View>
                 <View

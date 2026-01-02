@@ -55,7 +55,7 @@ export default class StartupService {
                         );
                     } else {
                         // ignore this for now. this is just to fix a version mismatch error in the build
-                        // throw error;
+                        throw error;
                     }
                 }
 
