@@ -39,14 +39,16 @@ export default class StartupService {
             const shouldRunMigration = isDev || version > dbVersion.user_version;
 
             if (shouldRunMigration) {
-                console.log(`Running migration v${version}${isDev ? ' (dev mode)' : ''}`);
+                console.log(
+                    `[StartupService] Running migration v${version}${isDev ? ' (dev mode)' : ''}`,
+                );
 
                 try {
                     await db.execAsync(sql);
                 } catch (error) {
                     if (isDev) {
                         console.warn(
-                            `Migration v${version} failed (continuing in dev mode):`,
+                            `[StartupService] Migration v${version} failed (continuing in dev mode):`,
                             error,
                         );
                     } else {

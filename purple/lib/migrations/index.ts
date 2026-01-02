@@ -1,11 +1,11 @@
-import { migrationsV1_0 } from './v1/v1.0';
-import { migrationsV1_1 } from './v1/v1.1';
+import { migrationsV1 } from './v1/v1';
+import { migrationsV2 } from './v1/v2';
 
 export type Migration = {
     version: number;
     sql: string;
 };
 
-const migrations: Migration[] = [...migrationsV1_0, ...migrationsV1_1];
+const migrations: Migration[] = [...migrationsV1, ...migrationsV2];
 
 export default migrations;

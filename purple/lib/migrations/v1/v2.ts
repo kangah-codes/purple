@@ -1,20 +1,20 @@
-export const migrationsV1_1 = [
+export const migrationsV2 = [
     {
-        version: 1.1,
+        version: 2,
         sql: `
           PRAGMA journal_mode = WAL;
           ALTER TABLE recurring_transactions ADD COLUMN notes TEXT DEFAULT NULL;
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE accounts ADD COLUMN is_open BOOLEAN DEFAULT 1;
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE accounts ADD COLUMN closed_at TEXT DEFAULT NULL;
@@ -23,7 +23,7 @@ export const migrationsV1_1 = [
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             CREATE TABLE IF NOT EXISTS budgets (
@@ -52,21 +52,21 @@ export const migrationsV1_1 = [
         `,
     },
     {
-        version: 1.11,
+        version: 21,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE budgets ADD COLUMN estimated_income NUMERIC DEFAULT 0;
         `,
     },
     {
-        version: 1.12,
+        version: 22,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE budgets ADD COLUMN estimated_spend NUMERIC DEFAULT 0;
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             CREATE TABLE IF NOT EXISTS budget_allocations (
@@ -92,7 +92,7 @@ export const migrationsV1_1 = [
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             CREATE TABLE IF NOT EXISTS budget_category_limits (
@@ -119,7 +119,7 @@ export const migrationsV1_1 = [
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE transactions ADD COLUMN budget_id TEXT DEFAULT NULL;
@@ -127,7 +127,7 @@ export const migrationsV1_1 = [
         `,
     },
     {
-        version: 1.1,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             CREATE TABLE IF NOT EXISTS budget_summaries (
