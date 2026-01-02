@@ -28,6 +28,13 @@ export async function importDatabase(db: SQLiteDatabase) {
 
         const importDb = openDatabaseSync(tempPath);
 
+        // Preserve schema/migration state from the imported DB.
+        // Note: export is a raw SQLite file copy
+        // so we must explicitly copy user_version onto the live DB.
+        const importedUserVersion =
+            (await importDb.getFirstAsync<{ user_version: number }>('PRAGMA user_version'))
+                ?.user_version ?? 0;
+
         const tables = await importDb.getAllAsync<{ name: string }>(
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
         );
@@ -64,6 +71,9 @@ export async function importDatabase(db: SQLiteDatabase) {
 
             await db.runAsync('PRAGMA foreign_keys = ON');
         });
+
+        // Apply imported user_version after data import so startup migrations behave correctly.
+        await db.execAsync(`PRAGMA user_version = ${importedUserVersion}`);
 
         // Merge predefined transaction types with imported ones
         await mergeTransactionTypes(db);
