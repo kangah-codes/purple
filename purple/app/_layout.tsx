@@ -10,6 +10,7 @@ import CurrentTransactionModal from '@/components/Transactions/molecules/Current
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
+import { installExportLogger } from '@/lib/utils/exportLogger';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -24,6 +25,15 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+
+// Capture production logs to a file for later export (Experimental Settings).
+if (!__DEV__) {
+    installExportLogger();
+} else {
+    // disable error logging in development
+    console.error = () => {};
+    console.warn = () => {};
+}
 
 function AppWithNotifications() {
     useNotifications();
@@ -95,12 +105,6 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 LogBox.ignoreAllLogs(true);
-
-// disable error logging in development
-if (__DEV__) {
-    console.error = () => {};
-    console.warn = () => {};
-}
 
 export default Sentry.wrap(function RootLayout() {
     const [appIsReady, setAppIsReady] = useState(true);

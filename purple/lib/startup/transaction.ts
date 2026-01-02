@@ -4,6 +4,7 @@ import { SQLiteDatabase } from 'expo-sqlite';
 import { RecurringTransaction } from '@/components/Transactions/schema';
 import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
 import { occurrencesBetween } from '../utils/rrule';
+import { installExportLogger } from '../utils/exportLogger';
 
 export interface ProcessingResult {
     success: boolean;
@@ -20,6 +21,10 @@ export interface ProcessingStats {
 }
 
 export async function processRecurringTransactions(db: SQLiteDatabase): Promise<ProcessingStats> {
+    // Ensure console.* is patched to persist logs to disk.
+    // (Safe to call multiple times; returns existing installed logger.)
+    installExportLogger({ enabled: true });
+
     console.log('[RecurringTx] Starting processRecurringTransactions');
     const now = new Date();
     console.log('[RecurringTx] Current time:', now.toISOString());

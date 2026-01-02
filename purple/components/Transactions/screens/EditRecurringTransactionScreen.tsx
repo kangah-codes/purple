@@ -279,7 +279,10 @@ export default function EditRecurringTransactionScreen() {
                         type: 'error',
                         props: { text1: 'Error!', text2: "Couldn't update recurring transaction" },
                     });
-                    console.error('Error updating recurring transaction:', error);
+                    console.error(
+                        '[EditRecurringTransactionScreen] Error updating recurring transaction:',
+                        error,
+                    );
                 },
             },
         );

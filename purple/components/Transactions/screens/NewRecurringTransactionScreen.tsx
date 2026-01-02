@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccountStore } from '@/components/Accounts/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
@@ -210,6 +209,7 @@ export default function NewRecurringTransactionScreen() {
 
         mutate(transformedData, {
             onError: (err) => {
+                console.error('[NewRecurringTransactionScreen] Error creating transaction:', err);
                 if (err instanceof HTTPError) {
                     Toast.show({
                         type: 'error',

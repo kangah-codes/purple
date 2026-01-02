@@ -1,4 +1,3 @@
- 
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import {
     useInfiniteQuery,
@@ -16,7 +15,12 @@ import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './sche
 import { createNewPlanStore, createPlanStore } from './state';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useAuth } from '../Auth/hooks';
-import { BudgetSQLiteService, CreateBudgetData, Budget, BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
+import {
+    BudgetSQLiteService,
+    CreateBudgetData,
+    Budget,
+    BudgetWithDetails,
+} from '@/lib/services/BudgetSQLiteService';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { Transaction } from '@/components/Transactions/schema';
@@ -133,6 +137,10 @@ export function usePlans({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error('[usePlans] Error fetching plans:', error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -172,6 +180,10 @@ export function usePlan({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(`[usePlan] Error fetching plan ${planID}:`, error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -206,6 +218,7 @@ export function usePlanStatus({
                 const err = new Error(json.message || 'Unknown error occurred');
                 // @ts-expect-error expect
                 err.statusCode = statusCode;
+                console.error(`[usePlanStatus] Error fetching status for plan ${planID}:`, json);
                 throw err;
             }
 
@@ -216,6 +229,10 @@ export function usePlanStatus({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(`[usePlanStatus] Error fetching status for plan ${planID}:`, error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -254,6 +271,10 @@ export function useInfinitePlans({
                     : undefined;
             },
             enabled: !!sessionData,
+            onError: (error) => {
+                console.error('[useInfinitePlans] Error fetching plans:', error);
+                options?.onError?.(error);
+            },
         },
     );
 }

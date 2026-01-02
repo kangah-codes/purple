@@ -87,7 +87,7 @@ export default function SettingsGroups() {
             <SettingsGroup groupName='Other' items={otherSettings} />
             <View className='flex flex-row items-center justify-center'>
                 <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500 px-2.5'>
-                    Purple v{pkg.version} {pkg.isBeta && 'Beta'}
+                    Purple v{pkg.appVersion}
                 </Text>
             </View>
         </ScrollView>

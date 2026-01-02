@@ -149,6 +149,7 @@ export default function AccountNavigationArea() {
                             });
                             return;
                         }
+                        console.error('[AccountNavigationArea] Error deleting account:', err);
                         Toast.show({
                             type: 'error',
                             props: {

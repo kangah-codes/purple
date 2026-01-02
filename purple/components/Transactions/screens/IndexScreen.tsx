@@ -42,7 +42,8 @@ export default function IndexScreen() {
             ...(debouncedSearchValue !== '' && { search_value: debouncedSearchValue }),
         },
         options: {
-            onError: () => {
+            onError: (err) => {
+                console.error('[IndexScreen] Error fetching transactions:', err);
                 Toast.show({
                     type: 'error',
                     props: {

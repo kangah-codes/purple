@@ -76,6 +76,7 @@ export async function importDatabase(db: SQLiteDatabase) {
 
         return { success: true };
     } catch (err) {
+        console.error('[importDatabase] Import DB failed', err);
         return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
 }
@@ -135,7 +136,7 @@ async function safeDelete(path: string) {
     try {
         const info = await FileSystem.getInfoAsync(path);
         if (info.exists) await FileSystem.deleteAsync(path);
-    } catch {
-        console.warn('Delete failed');
+    } catch (err) {
+        console.error('[safeDelete] Delete failed', err);
     }
 }

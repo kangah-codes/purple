@@ -256,6 +256,10 @@ export default function NewTransactionScreen() {
                     router.back();
                 },
                 onError: (error) => {
+                    console.error(
+                        '[NewRecurringTransactionScreen] Error creating transaction:',
+                        error,
+                    );
                     if (error instanceof HTTPError) {
                         Toast.show({
                             type: 'error',
@@ -972,13 +976,16 @@ export default function NewTransactionScreen() {
                         {transactionType === 'debit' && budgetForMonth && (
                             <View className='flex flex-col space-y-1 mb-20'>
                                 <View className='flex flex-row w-full justify-between items-center'>
-                                    <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                    <Text
+                                        style={satoshiFont.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
                                         Count in budget
                                     </Text>
 
                                     <View>
-                                        <Switch 
-                                            value={countInBudget} 
+                                        <Switch
+                                            value={countInBudget}
                                             onValueChange={setCountInBudget}
                                             disabled={!budgetForMonth}
                                         />

@@ -58,7 +58,7 @@ export async function exportDatabase(db: SQLiteDatabase) {
             return { success: true, path: dest };
         }
     } catch (err) {
-        console.error('Export failed:', err);
+        console.error('[exportDatabase] Export failed:', err);
         return { success: false, error: err instanceof Error ? err.message : String(err) };
     }
 }
@@ -68,6 +68,6 @@ async function safeDelete(path: string) {
         const info = await FileSystem.getInfoAsync(path);
         if (info.exists) await FileSystem.deleteAsync(path);
     } catch {
-        console.warn('Delete failed for:', path);
+        console.warn('[safeDelete] Delete failed for:', path);
     }
 }

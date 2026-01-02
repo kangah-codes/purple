@@ -37,7 +37,8 @@ export default function AccountsScreen() {
             });
             await settingsService.set('allowOverdraw', value);
             setPreference('allowOverdraw', value);
-        } catch {
+        } catch (err) {
+            console.error('[AccountsScreen] Error updating allowOverdraw:', err);
             await logEvent('error_occurred', {
                 error_type: 'SETTING_UPDATE_ERROR',
                 context: `Failed to update ${allowOverdraw} setting:`,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { usePreferences } from '@/components/Settings/hooks';
 import CustomModalSelectField from '@/components/Shared/atoms/CustomModalSelectField';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
@@ -91,7 +92,8 @@ export default function NewPlanScreen() {
         ]);
 
         mutate(transformedData, {
-            onError: () => {
+            onError: (err) => {
+                console.error('[NewPlanScreen] Error creating plan:', err);
                 Toast.show({
                     type: 'error',
                     props: { text1: 'Error!', text2: 'Error creating plan!' },

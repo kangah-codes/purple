@@ -63,7 +63,8 @@ export default function EditAccountScreen() {
         mutate(
             { id: currentAccount?.id ?? '', data },
             {
-                onError: () => {
+                onError: (err) => {
+                    console.error('[EditAccountScreen] Error updating account:', err);
                     Toast.show({
                         type: 'error',
                         props: {

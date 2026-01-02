@@ -239,23 +239,27 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         amount: number,
         category: string,
     ): Promise<void> {
-        const now = new Date().toISOString();
+        try {
+            const now = new Date().toISOString();
 
-        // Update the budget summary total_spent
-        await this.db.runAsync(
-            `UPDATE budget_summaries 
-             SET total_spent = total_spent + ?, updated_at = ?
-             WHERE budget_id = ?`,
-            [amount, now, budgetId],
-        );
+            // Update the budget summary total_spent
+            await this.db.runAsync(
+                `UPDATE budget_summaries 
+                SET total_spent = total_spent + ?, updated_at = ?
+                WHERE budget_id = ?`,
+                [amount, now, budgetId],
+            );
 
-        // Update the category limit spent_amount if it exists
-        await this.db.runAsync(
-            `UPDATE budget_category_limits 
-             SET spent_amount = spent_amount + ?, updated_at = ?
-             WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
-            [amount, now, budgetId, category],
-        );
+            // Update the category limit spent_amount if it exists
+            await this.db.runAsync(
+                `UPDATE budget_category_limits 
+                SET spent_amount = spent_amount + ?, updated_at = ?
+                WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+                [amount, now, budgetId, category],
+            );
+        } catch (error) {
+            console.error('Error updating budget summary:', error);
+        }
     }
 
     async update(id: string, data: EditTransaction): Promise<GenericAPIResponse<Transaction>> {

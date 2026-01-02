@@ -22,7 +22,8 @@ export default function AccountsScreen() {
                 const res = data as GenericAPIResponse<Account[]>;
                 setAccounts(res.data);
             },
-            onError: () => {
+            onError: (err) => {
+                console.error('[AccountsScreen] Error fetching accounts:', err);
                 Toast.show({
                     type: 'error',
                     props: {

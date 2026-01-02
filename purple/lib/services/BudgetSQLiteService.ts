@@ -100,6 +100,8 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
         const now = new Date().toISOString();
         const monthName = this.getMonthName(data.month);
 
+        // TODO: handle more gracefully, but for now I just want to get the build working
+        // up to future Joshua
         await this.db.withTransactionAsync(async () => {
             const existingBudget = await this.db.getFirstAsync<Budget>(
                 `SELECT * FROM budgets WHERE month = ? AND year = ? AND deleted_at IS NULL`,

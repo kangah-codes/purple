@@ -69,7 +69,8 @@ function AccountScreen() {
             onSuccess: (data) => {
                 setCurrentAccount((data as GenericAPIResponse<Account>).data);
             },
-            onError: () => {
+            onError: (error) => {
+                console.error('[AccountScreen] Error fetching account details', error);
                 Toast.show({
                     type: 'error',
                     props: {
@@ -99,7 +100,8 @@ function AccountScreen() {
             page_size: currentAccountRequestParams.page_size,
         },
         options: {
-            onError: () => {
+            onError: (error) => {
+                console.error('[AccountScreen] Error fetching transactions for account', error);
                 Toast.show({
                     type: 'error',
                     props: {

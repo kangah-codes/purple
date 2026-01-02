@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
-import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { Alert, Platform, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import SettingsList from '../molecules/SettingsList';
@@ -16,11 +16,49 @@ import UpdateFrequency from '../molecules/UpdateFrequency';
 import { SettingsListItem } from '../schema';
 import { exportDatabase } from '../helpers/exportDb';
 import { importDatabase } from '../helpers/importDb';
+import { installExportLogger } from '@/lib/utils/exportLogger';
 
 export default function ExperimentalSettingsScreen() {
     const { logEvent } = useAnalytics();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
+
+    const handleExportLogs = async () => {
+        try {
+            const logger = installExportLogger({ enabled: true });
+            const result = await logger.exportLogs();
+
+            if (result.success) {
+                Toast.show({
+                    type: 'success',
+                    props: {
+                        text1: 'Success',
+                        text2:
+                            Platform.OS === 'android'
+                                ? 'Logs exported successfully'
+                                : 'Logs saved to Files app',
+                    },
+                });
+            } else {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error',
+                        text2: result.error || 'Failed to export logs',
+                    },
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            Toast.show({
+                type: 'error',
+                props: {
+                    text1: 'Error',
+                    text2: 'Failed to export logs',
+                },
+            });
+        }
+    };
 
     const handleBackup = async () => {
         try {
@@ -122,6 +160,12 @@ export default function ExperimentalSettingsScreen() {
             title: 'Update Check Frequency',
             description: 'Choose when to check for app updates',
             callback: () => setShowBottomSheetFlatList('preferences-update-frequency', true),
+        },
+        {
+            icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Export App Logs',
+            description: 'Export a log file for debugging production builds',
+            callback: handleExportLogs,
         },
         {
             icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,

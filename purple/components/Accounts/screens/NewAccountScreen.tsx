@@ -66,7 +66,8 @@ export default function NewAccountScreen() {
                 balance: Number(data.balance),
             },
             {
-                onError: () => {
+                onError: (err) => {
+                    console.error('[NewAccountScreen] Error creating account:', err);
                     Toast.show({
                         type: 'error',
                         props: {

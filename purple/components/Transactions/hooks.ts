@@ -109,6 +109,10 @@ export function useTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error('[useTransactions] Error fetching transactions:', error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -146,6 +150,13 @@ export function useRecurringTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(
+                    '[useRecurringTransactions] Error fetching recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -183,6 +194,13 @@ export function useUpcomingRecurringTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(
+                    '[useUpcomingRecurringTransactions] Error fetching upcoming recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -228,6 +246,10 @@ export function useInfiniteTransactions({
                     ? nextPage
                     : undefined;
             },
+            onError: (error) => {
+                console.error('[useInfiniteTransactions] Error fetching transactions:', error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -267,6 +289,13 @@ export function useInfiniteRecurringTransactions({
                 return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
                     ? nextPage
                     : undefined;
+            },
+            onError: (error) => {
+                console.error(
+                    '[useInfiniteRecurringTransactions] Error fetching recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
             },
         },
     );

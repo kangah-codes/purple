@@ -110,6 +110,10 @@ export function useAccounts({
                 >,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error('[useAccounts] Error fetching accounts:', error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -140,6 +144,10 @@ export function useAccount({
                 >,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(`[useAccount] Error fetching account ${accountID}:`, error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -367,7 +375,7 @@ export function useCalculateAccountData({
                 transactions: transformedTransactions,
             };
         } catch (error) {
-            console.error('Error calculating account data:', error);
+            console.error('[useCalculateAccountData] Error calculating account data:', error);
             return {
                 currentBalance: 0,
                 previousBalance: 0,

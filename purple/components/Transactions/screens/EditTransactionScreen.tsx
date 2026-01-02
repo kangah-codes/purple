@@ -109,6 +109,7 @@ export default function EditTransactionScreen() {
             },
             {
                 onError: (error) => {
+                    console.error('[EditTransactionScreen] Error editing transaction:', error);
                     if (error instanceof HTTPError) {
                         Toast.show({
                             type: 'error',
@@ -116,10 +117,6 @@ export default function EditTransactionScreen() {
                         });
                         return;
                     }
-                    Toast.show({
-                        type: 'error',
-                        props: { text1: 'Error!', text2: "Couldn't edit transaction" },
-                    });
                 },
                 onSuccess: () => {
                     queryClient.invalidateQueries({
@@ -429,6 +426,7 @@ export default function EditTransactionScreen() {
                         <View className='flex-1'>
                             <TouchableOpacity
                                 style={{ width: '100%' }}
+                                // @ts-expect-error ignore
                                 onPress={handleSubmit(onSubmit)}
                                 disabled={isLoading}
                             >

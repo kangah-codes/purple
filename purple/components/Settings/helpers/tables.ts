@@ -1,6 +1,10 @@
 export const CLEAR_ORDER = [
     'transactions',
     'recurring_transactions',
+    'budget_summaries',
+    'budget_category_limits',
+    'budget_allocations',
+    'budgets',
     'accounts',
     'users',
     'settings',
@@ -12,6 +16,10 @@ export const INSERT_ORDER = [
     'settings',
     'transaction_types',
     'accounts',
+    'budgets',
+    'budget_allocations',
+    'budget_category_limits',
+    'budget_summaries',
     'recurring_transactions',
     'transactions',
 ] as const;

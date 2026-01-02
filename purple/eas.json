@@ -19,7 +19,9 @@
             "developmentClient": true,
             "distribution": "internal",
             "android": {
-                "buildType": "apk"
+                "buildType": "apk",
+                "gradleCommand": ":app:assembleDebug",
+                "withoutCredentials": true
             },
             "ios": {
                 "simulator": true
@@ -27,7 +29,8 @@
             "env": {
                 "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
                 "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
-                "EAS_BUILD_PROFILE": "development"
+                "EAS_BUILD_PROFILE": "development",
+                "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=512m"
             },
             "channel": "development",
             "environment": "development",
