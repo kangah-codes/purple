@@ -32,6 +32,8 @@ export default class StartupService {
             'PRAGMA user_version',
         )) ?? { user_version: 0 };
 
+        console.info(`[StartupService] Current DB version: v${dbVersion.user_version}`);
+
         let highestAppliedVersion = dbVersion.user_version;
 
         for (const { version, sql } of migrations) {
