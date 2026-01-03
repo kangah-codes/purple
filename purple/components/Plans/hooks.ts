@@ -1,10 +1,12 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
+import { useEffect, useMemo } from 'react';
 import {
     useInfiniteQuery,
     UseInfiniteQueryOptions,
     UseInfiniteQueryResult,
     useMutation,
     UseMutationResult,
+    useQueryClient,
     useQuery,
     UseQueryOptions,
     UseQueryResult,
@@ -20,11 +22,125 @@ import {
     CreateBudgetData,
     Budget,
     BudgetWithDetails,
+    BudgetCategoryBudgetStats,
 } from '@/lib/services/BudgetSQLiteService';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import {
+    differenceInCalendarDays,
+    endOfMonth,
+    format,
+    formatISO,
+    getDaysInMonth,
+    isSameMonth,
+    min,
+    startOfMonth,
+} from 'date-fns';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { Transaction } from '@/components/Transactions/schema';
 import { isTransferTransaction } from '@/components/Transactions/utils';
+import { MONTHS } from './constants';
+import { getBudgetPaceInsightCopy } from './utils';
+
+export type BudgetPaceInsight = {
+    tone: 'negative' | 'positive' | 'neutral';
+    title: string;
+    message: string;
+};
+
+export function useBudgetPaceInsight(
+    budget: BudgetWithDetails | null | undefined,
+    month: Date,
+): BudgetPaceInsight | null {
+    return useMemo(() => {
+        if (!budget) return null;
+
+        const totalAllocated = budget.summary?.total_allocated ?? 0;
+        const totalSpent = budget.summary?.total_spent ?? 0;
+
+        // If there is no allocated budget, we can't compute a meaningful pace.
+        if (totalAllocated <= 0) return null;
+
+        const monthStart = startOfMonth(month);
+        const currentMonthStart = startOfMonth(new Date());
+
+        // Don't show pace insights for previous months.
+        if (monthStart.getTime() < currentMonthStart.getTime()) {
+            return null;
+        }
+        const monthEnd = endOfMonth(monthStart);
+        const today = new Date();
+        const intervalEnd = isSameMonth(monthStart, today) ? min([today, monthEnd]) : monthEnd;
+
+        const daysInMonth = getDaysInMonth(monthStart);
+        const dayIndex = Math.min(
+            Math.max(differenceInCalendarDays(intervalEnd, monthStart) + 1, 1),
+            daysInMonth,
+        );
+        const progress = dayIndex / daysInMonth;
+
+        const expectedSpentToDate = totalAllocated * progress;
+        const delta = totalSpent - expectedSpentToDate;
+
+        // Category-level pace: compare each category's spend vs proportional expected-to-date.
+        const categories = budget.categoryLimits ?? [];
+        const pacedCategories = categories.filter((c) => (c.limit_amount ?? 0) > 0);
+
+        const overCategories = pacedCategories.filter((c) => {
+            const limit = Number(c.limit_amount) || 0;
+            const spent = Number(c.spent_amount) || 0;
+            const expected = limit * progress;
+
+            // Allow some slack early in the month to avoid noisy warnings.
+            const slack = Math.max(limit * 0.1, totalAllocated * 0.01);
+            return spent > expected + slack;
+        });
+
+        const overCount = overCategories.length;
+        const categoryCount = pacedCategories.length;
+
+        // Overall status based primarily on total spend vs expected-to-date,
+        // with category overspends as a secondary signal.
+        const overThreshold = expectedSpentToDate * 0.12; // 12% behind pace
+        const underThreshold = expectedSpentToDate * 0.15; // 15% ahead/under pace
+
+        if (delta > overThreshold || overCount >= 2) {
+            return getBudgetPaceInsightCopy('negative', { overCount, categoryCount });
+        }
+
+        if (delta < -underThreshold) {
+            return getBudgetPaceInsightCopy('positive', { overCount, categoryCount });
+        }
+
+        return getBudgetPaceInsightCopy('neutral', { overCount, categoryCount });
+    }, [budget, month]);
+}
+
+export function usePrefetchBudgetsForMonths(
+    months: Date[],
+    options?: { enabled?: boolean; staleTimeMs?: number },
+) {
+    const db = useSQLiteContext();
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (options?.enabled === false) return;
+        if (!months.length) return;
+
+        const service = new BudgetSQLiteService(db);
+        const staleTime = options?.staleTimeMs ?? 60_000;
+
+        for (const monthDate of months) {
+            const monthNumber = monthDate.getMonth() + 1;
+            const year = monthDate.getFullYear();
+            const monthName = format(monthDate, 'MMMM');
+
+            void queryClient.prefetchQuery(
+                ['budget', monthNumber, year],
+                () => service.getBudgetForMonth(monthName, year),
+                { staleTime },
+            );
+        }
+    }, [db, months, options?.enabled, options?.staleTimeMs, queryClient]);
+}
 
 export function useCreateNewPlanStore() {
     const [
@@ -330,21 +446,7 @@ export function useBudgetForMonth(
     const db = useSQLiteContext();
 
     const getMonthName = (monthNumber: number): string => {
-        const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-        ];
-        return months[monthNumber - 1];
+        return MONTHS[monthNumber - 1];
     };
 
     return useQuery(
@@ -355,6 +457,27 @@ export function useBudgetForMonth(
         },
         {
             enabled: month > 0 && month <= 12,
+        },
+    );
+}
+
+export function useBudgetCategoryStats(
+    category: string | undefined,
+): UseQueryResult<BudgetCategoryBudgetStats, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(
+        ['budget-category-stats', category],
+        async () => {
+            if (!category) {
+                return { lastMonthBudgeted: 0, averageBudgeted: 0 };
+            }
+            const service = new BudgetSQLiteService(db);
+            const res = await service.getCategoryBudgetStats(category);
+            return res.data;
+        },
+        {
+            enabled: !!category,
         },
     );
 }
@@ -371,21 +494,7 @@ export function useBudgetEarnedIncome(
     const { sessionData } = useAuth();
 
     const getMonthIndex = (monthName: string): number => {
-        const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-        ];
-        return months.indexOf(monthName);
+        return MONTHS.indexOf(monthName);
     };
 
     return useQuery(
@@ -397,8 +506,8 @@ export function useBudgetEarnedIncome(
             if (monthIndex === -1) return 0;
 
             const budgetDate = new Date(year, monthIndex, 1);
-            const startDate = startOfMonth(budgetDate).toISOString();
-            const endDate = endOfMonth(budgetDate).toISOString();
+            const startDate = formatISO(startOfMonth(budgetDate));
+            const endDate = formatISO(endOfMonth(budgetDate));
 
             const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
             const response = await service.list({

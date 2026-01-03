@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -22,13 +22,12 @@ export function BudgetCategoryCard({
     title,
     transactionTypes,
     categoryLimits = [],
-    currency = 'GHS',
+    currency,
 }: BudgetCategoryCardProps) {
     const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
     const [isOpen, setIsOpen] = React.useState(false);
     const totalItems = transactionTypes.length;
     const footerOpacity = useSharedValue(1);
-
     const totalBudget = categoryLimits.reduce((sum, cl) => sum + cl.limit_amount, 0);
     const totalLeft = categoryLimits.reduce(
         (sum, cl) => sum + (cl.limit_amount - cl.spent_amount),
@@ -40,7 +39,7 @@ export function BudgetCategoryCard({
         setIsOpen(!isOpen);
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         footerOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
     }, [isOpen, footerOpacity]);
 
@@ -90,7 +89,9 @@ export function BudgetCategoryCard({
             >
                 <View className='flex flex-col'>
                     {transactionTypes.map((transaction, idx) => {
-                        const categoryLimit = categoryLimits.find((cl) => cl.category === transaction);
+                        const categoryLimit = categoryLimits.find(
+                            (cl) => cl.category === transaction,
+                        );
                         const limitAmount = categoryLimit?.limit_amount || 0;
                         const spentAmount = categoryLimit?.spent_amount || 0;
                         const remainingAmount = limitAmount - spentAmount;
@@ -112,13 +113,13 @@ export function BudgetCategoryCard({
                                     <View className='flex-row items-center flex-shrink-0'>
                                         <Text
                                             className='text-sm text-black text-right mr-8'
-                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
+                                            style={[satoshiFont.satoshiBlack, { minWidth: 80 }]}
                                         >
                                             {formatCurrencyRounded(limitAmount, currency)}
                                         </Text>
                                         <Text
                                             className='text-sm text-purple-500 text-right'
-                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
+                                            style={[satoshiFont.satoshiBlack, { minWidth: 80 }]}
                                         >
                                             {formatCurrencyRounded(remainingAmount, currency)}
                                         </Text>

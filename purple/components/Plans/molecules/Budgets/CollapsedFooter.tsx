@@ -18,7 +18,7 @@ export function CollapsedFooter({
     collapsibleRef,
     totalBudget,
     totalLeft,
-    currency = 'GHS',
+    currency,
 }: CollapsedFooterProps) {
     const handlePress = () => collapsibleRef.current?.open();
 

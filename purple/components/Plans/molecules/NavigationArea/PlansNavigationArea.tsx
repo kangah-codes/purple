@@ -5,13 +5,17 @@ import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
 import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
+import { format } from 'date-fns';
 
-export default function PlansNavigationArea() {
+export default function PlansNavigationArea({ selectedMonth }: { selectedMonth?: Date }) {
     const [visible, setVisible] = useState(false);
+    const { showConfirmationModal } = useConfirmationModalStore();
+    const monthLabel = format(selectedMonth ?? new Date(), 'MMMM yyyy');
 
     return (
         <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
@@ -51,7 +55,7 @@ export default function PlansNavigationArea() {
 
             <View className='absolute left-0 right-0 items-center'>
                 <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                    September 2025
+                    {monthLabel}
                 </Text>
             </View>
 
@@ -61,7 +65,14 @@ export default function PlansNavigationArea() {
             >
                 <TouchableOpacity
                     className='px-4 py-2 flex items-center justify-center rounded-full'
-                    onPress={() => router.push('/plans/new')}
+                    onPress={() => {
+                        showConfirmationModal({
+                            title: 'Create a new budget?',
+                            message: `Adding a new budget for ${monthLabel} will override the current month's budget. You will not be able to access the previous budget after creating a new one.`,
+                            confirmText: 'Continue',
+                            onConfirm: () => router.push('/plans/new'),
+                        });
+                    }}
                 >
                     <PlusIcon stroke={'#fff'} width={24} height={24} />
                 </TouchableOpacity>

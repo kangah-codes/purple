@@ -3,7 +3,7 @@ import { Text, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import { endOfMonth, formatISO, startOfMonth, subMonths } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { LineChart } from 'react-native-gifted-charts';
 
@@ -16,16 +16,16 @@ export default function SpendAreaChart({ startDate }: SpendAreaChartProps) {
     const previousMonthStart = startOfMonth(subMonths(startDate, 1));
     const { data: currentMonthTransactions, refetch } = useTransactions({
         requestQuery: {
-            start_date: startOfMonth(startDate).toISOString(),
-            end_date: endOfMonth(startDate).toISOString(),
+            start_date: formatISO(startOfMonth(startDate)),
+            end_date: formatISO(endOfMonth(startDate)),
             page_size: Infinity,
             type: 'debit',
         },
     });
     const { data: previousMonthTransactions, refetch: refetchPrevious } = useTransactions({
         requestQuery: {
-            start_date: startOfMonth(subMonths(startDate, 1)).toISOString(),
-            end_date: endOfMonth(subMonths(startDate, 1)).toISOString(),
+            start_date: formatISO(startOfMonth(subMonths(startDate, 1))),
+            end_date: formatISO(endOfMonth(subMonths(startDate, 1))),
             page_size: Infinity,
             type: 'debit',
         },

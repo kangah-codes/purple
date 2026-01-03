@@ -11,38 +11,23 @@ import {
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useCreateBudgetStore } from '../../state/CreateBudgetStore';
+import { MONTHS } from '../../constants';
 
 type BudgetMonthSelectorProps = {
     storiesRef: React.RefObject<StoriesRef>;
 };
 
-const MONTHS = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
-
 export default function BudgetMonthSelector({ storiesRef }: BudgetMonthSelectorProps) {
     const { month, year, setMonthYear } = useCreateBudgetStore();
     const [selectedMonth, setSelectedMonth] = useState(month);
     const [selectedYear, setSelectedYear] = useState(year);
-
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
 
-    const generateYears = () => {
+    const generateYears = (threshold = 3) => {
         const years: number[] = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < threshold; i++) {
             years.push(currentYear + i);
         }
         return years;
@@ -77,7 +62,10 @@ export default function BudgetMonthSelector({ storiesRef }: BudgetMonthSelectorP
                         <Text style={satoshiFont.satoshiBold} className='text-base text-purple-500'>
                             Which month is this budget for?
                         </Text>
-                        <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-600 mt-1'>
+                        <Text
+                            style={satoshiFont.satoshiBold}
+                            className='text-sm text-gray-600 mt-1'
+                        >
                             Select the month you want to budget for
                         </Text>
                     </View>
@@ -87,7 +75,7 @@ export default function BudgetMonthSelector({ storiesRef }: BudgetMonthSelectorP
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 150 }}
                     >
-                        {generateYears().map((yearValue) => (
+                        {generateYears(1).map((yearValue) => (
                             <View key={yearValue} className='flex flex-col space-y-2'>
                                 <Text
                                     style={satoshiFont.satoshiBold}

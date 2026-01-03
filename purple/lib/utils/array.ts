@@ -1,5 +1,3 @@
-import { deepCompare, DeepObject } from './object';
-
 /**
  * Splits an array into a specified number of subarrays.
  *
@@ -115,4 +113,26 @@ export function dedupeByKey<T, K extends KeyOf<T>>(array: T[], key: K): T[] {
     }
 
     return result;
+}
+
+/**
+ * Randomly selects and returns one item from the given array.
+ *
+ * @param items - The array of items to pick from
+ * @returns A randomly selected item from the input array
+ *
+ * @example
+ * ```typescript
+ * const colors = ['red', 'green', 'blue'];
+ * const randomColor = pick(colors); // Returns one of: 'red', 'green', or 'blue'
+ * ```
+ *
+ * @throws Will throw an error if the array is empty (accessing undefined index)
+ */
+export function pickRandom<T>(items: T[]): T {
+    if (items.length === 0) {
+        throw new Error('Cannot pick an item from an empty array');
+    }
+
+    return items[Math.floor(Math.random() * items.length)];
 }

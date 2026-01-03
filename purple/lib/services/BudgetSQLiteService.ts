@@ -52,6 +52,11 @@ export interface BudgetWithDetails extends Budget {
     } | null;
 }
 
+export interface BudgetCategoryBudgetStats {
+    lastMonthBudgeted: number;
+    averageBudgeted: number;
+}
+
 export interface CreateBudgetData {
     name: string;
     type: 'flex' | 'category';
@@ -98,6 +103,7 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
         let budget!: Budget;
         const budgetId = UUID();
         const now = new Date().toISOString();
+        const nowUnix = Math.floor(Date.now() / 1000);
         const monthName = this.getMonthName(data.month);
 
         // TODO: handle more gracefully, but for now I just want to get the build working
@@ -108,20 +114,27 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
                 [monthName, data.year],
             );
 
+            const existingBudgetId = existingBudget?.id;
+
             if (existingBudget) {
                 await this.db.runAsync(
                     `UPDATE budgets SET deleted_at = ?, deleted_at_unix = ? WHERE id = ?`,
-                    [now, Math.floor(Date.now() / 1000), existingBudget.id],
+                    [now, nowUnix, existingBudget.id],
                 );
 
                 await this.db.runAsync(
                     `UPDATE budget_category_limits SET deleted_at = ?, deleted_at_unix = ? WHERE budget_id = ?`,
-                    [now, Math.floor(Date.now() / 1000), existingBudget.id],
+                    [now, nowUnix, existingBudget.id],
                 );
 
                 await this.db.runAsync(
                     `UPDATE budget_allocations SET deleted_at = ?, deleted_at_unix = ? WHERE budget_id = ?`,
-                    [now, Math.floor(Date.now() / 1000), existingBudget.id],
+                    [now, nowUnix, existingBudget.id],
+                );
+
+                await this.db.runAsync(
+                    `UPDATE budget_summaries SET deleted_at = ?, deleted_at_unix = ? WHERE budget_id = ?`,
+                    [now, nowUnix, existingBudget.id],
                 );
             }
 
@@ -195,6 +208,69 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
                 [summaryId, now, now, budgetId, totalAllocated, 0],
             );
 
+            // If we're overriding an existing month's budget, migrate any linked transactions
+            // and recompute spent values for the new budget so historical spend still appears.
+            if (existingBudgetId) {
+                await this.db.runAsync(
+                    `UPDATE transactions SET budget_id = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+                    [budgetId, now, existingBudgetId],
+                );
+
+                // Recompute total_spent from transactions for this budget
+                await this.db.runAsync(
+                    `UPDATE budget_summaries
+                     SET total_spent = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = ? AND type = 'debit' AND deleted_at IS NULL
+                     ), updated_at = ?
+                     WHERE budget_id = ?`,
+                    [budgetId, now, budgetId],
+                );
+
+                // Recompute spent per category for category budgets
+                if (data.type === 'category' && data.categoryLimits.length > 0) {
+                    for (const limit of data.categoryLimits) {
+                        await this.db.runAsync(
+                            `UPDATE budget_category_limits
+                             SET spent_amount = (
+                                SELECT COALESCE(SUM(amount), 0)
+                                FROM transactions
+                                WHERE budget_id = ?
+                                  AND type = 'debit'
+                                  AND category = ?
+                                  AND deleted_at IS NULL
+                             ), updated_at = ?
+                             WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+                            [budgetId, limit.category, now, budgetId, limit.category],
+                        );
+                    }
+                }
+
+                // Recompute spent per category for flex allocations (if used)
+                if (
+                    data.type === 'flex' &&
+                    data.flexAllocations &&
+                    data.flexAllocations.length > 0
+                ) {
+                    for (const allocation of data.flexAllocations) {
+                        await this.db.runAsync(
+                            `UPDATE budget_allocations
+                             SET spent_amount = (
+                                SELECT COALESCE(SUM(amount), 0)
+                                FROM transactions
+                                WHERE budget_id = ?
+                                  AND type = 'debit'
+                                  AND category = ?
+                                  AND deleted_at IS NULL
+                             ), updated_at = ?
+                             WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+                            [budgetId, allocation.category, now, budgetId, allocation.category],
+                        );
+                    }
+                }
+            }
+
             const result = await this.db.getFirstAsync<Budget>(
                 'SELECT * FROM budgets WHERE id = ?',
                 [budgetId],
@@ -243,9 +319,10 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
         const summary = await this.db.getFirstAsync<{
             total_allocated: number;
             total_spent: number;
-        }>(`SELECT total_allocated, total_spent FROM budget_summaries WHERE budget_id = ?`, [
-            budget.id,
-        ]);
+        }>(
+            `SELECT total_allocated, total_spent FROM budget_summaries WHERE budget_id = ? AND deleted_at IS NULL`,
+            [budget.id],
+        );
 
         const budgetWithDetails: BudgetWithDetails = {
             ...budget,
@@ -255,6 +332,58 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
 
         return this.formatResponse({
             data: budgetWithDetails,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Success',
+        });
+    }
+
+    async getCategoryBudgetStats(
+        category: string,
+        referenceDate: Date = new Date(),
+    ): Promise<GenericAPIResponse<BudgetCategoryBudgetStats>> {
+        const lastMonthDate = new Date(
+            referenceDate.getFullYear(),
+            referenceDate.getMonth() - 1,
+            1,
+        );
+        const lastMonthName = this.getMonthName(lastMonthDate.getMonth() + 1);
+        const lastMonthYear = lastMonthDate.getFullYear();
+
+        const lastMonthRow = await this.db.getFirstAsync<{ limit_amount: number | string }>(
+            `SELECT bcl.limit_amount AS limit_amount
+             FROM budgets b
+             INNER JOIN budget_category_limits bcl ON bcl.budget_id = b.id
+             WHERE b.month = ?
+               AND b.year = ?
+               AND b.deleted_at IS NULL
+               AND bcl.deleted_at IS NULL
+               AND bcl.category = ?
+             LIMIT 1`,
+            [lastMonthName, lastMonthYear, category],
+        );
+
+        const avgRow = await this.db.getFirstAsync<{ avg_limit: number | string | null }>(
+            `SELECT AVG(bcl.limit_amount) AS avg_limit
+             FROM budgets b
+             INNER JOIN budget_category_limits bcl ON bcl.budget_id = b.id
+             WHERE b.deleted_at IS NULL
+               AND bcl.deleted_at IS NULL
+               AND bcl.category = ?`,
+            [category],
+        );
+
+        const lastMonthBudgeted = Number(lastMonthRow?.limit_amount ?? 0);
+        const averageBudgeted = Number(avgRow?.avg_limit ?? 0);
+
+        return this.formatResponse({
+            data: {
+                lastMonthBudgeted: Number.isFinite(lastMonthBudgeted) ? lastMonthBudgeted : 0,
+                averageBudgeted: Number.isFinite(averageBudgeted) ? averageBudgeted : 0,
+            },
             status: 200,
             page: 1,
             page_size: 1,

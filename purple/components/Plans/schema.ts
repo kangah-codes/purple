@@ -165,7 +165,7 @@ export type Budget = {
     created_at: string;
     updated_at: string;
     code: string;
-}
+};
 
 export type NewBudgetStore = {
     estimatedIncome: number;
@@ -182,4 +182,11 @@ export type NewBudgetStore = {
     }[];
     setData: (data: Partial<NewBudgetStore>) => void;
     reset: () => void;
-}
+};
+
+export type PaceTone = 'positive' | 'neutral' | 'negative';
+
+export type PaceCopyVariant = {
+    title: string;
+    message: (params: { overCount: number; categoryCount: number }) => string;
+};

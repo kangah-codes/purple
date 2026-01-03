@@ -2,7 +2,7 @@ import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import { addMonths, endOfMonth, format, isBefore, startOfMonth } from 'date-fns';
+import { addMonths, endOfMonth, format, formatISO, isBefore, startOfMonth } from 'date-fns';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -75,14 +75,14 @@ export default function StatsScreen() {
     const monthRange = useMemo(() => {
         if (!isInitialized || !currentDate) {
             return {
-                start_date: new Date().toISOString(),
-                end_date: new Date().toISOString(),
+                start_date: formatISO(new Date()),
+                end_date: formatISO(new Date()),
             };
         }
 
         return {
-            start_date: startOfMonth(currentDate).toISOString(),
-            end_date: endOfMonth(currentDate).toISOString(),
+            start_date: formatISO(startOfMonth(currentDate)),
+            end_date: formatISO(endOfMonth(currentDate)),
         };
     }, [currentDate, isInitialized]);
 
@@ -106,8 +106,8 @@ export default function StatsScreen() {
             requestQuery: {
                 page_size: Infinity,
                 // fetch from earliest transaction to now to cover all possible month views
-                start_date: earliestTransactionDate.toISOString(),
-                end_date: endOfMonth(new Date()).toISOString(),
+                start_date: formatISO(earliestTransactionDate),
+                end_date: formatISO(endOfMonth(new Date())),
             },
             options: {
                 enabled: isInitialized,

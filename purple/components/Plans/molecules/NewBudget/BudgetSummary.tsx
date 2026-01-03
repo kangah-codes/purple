@@ -16,6 +16,7 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { router } from 'expo-router';
 import { useCreateBudget } from '../../hooks';
 import Toast from 'react-native-toast-message';
+import { MONTHS } from '../../constants';
 
 type BudgetSummaryProps = {
     storiesRef: React.RefObject<StoriesRef>;
@@ -37,27 +38,12 @@ export default function BudgetSummary({ storiesRef }: BudgetSummaryProps) {
     } = usePreferences();
     const { mutate: createBudget } = useCreateBudget();
     const [isSaving, setIsSaving] = useState(false);
-
     const totalBudget = categoryLimits.reduce((sum, limit) => sum + limit.limitAmount, 0);
     const cashFlow = estimatedIncome - totalBudget;
     const spendRatio = estimatedIncome > 0 ? (totalBudget / estimatedIncome) * 100 : 0;
-
+    // TODO: duplicated code - too lazy to fix
     const getMonthName = (monthNumber: number) => {
-        const months = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
-        ];
-        return months[monthNumber - 1];
+        return MONTHS[monthNumber - 1];
     };
 
     const handleSave = async () => {
@@ -192,7 +178,9 @@ export default function BudgetSummary({ storiesRef }: BudgetSummaryProps) {
                                             <Text
                                                 style={satoshiFont.satoshiBlack}
                                                 className={`text-lg mt-1 ${
-                                                    cashFlow >= 0 ? 'text-green-600' : 'text-red-600'
+                                                    cashFlow >= 0
+                                                        ? 'text-green-600'
+                                                        : 'text-red-600'
                                                 }`}
                                             >
                                                 {formatCurrencyRounded(cashFlow, currency)}
@@ -226,15 +214,16 @@ export default function BudgetSummary({ storiesRef }: BudgetSummaryProps) {
                             <View className='flex-row justify-between items-center mb-4'>
                                 <Text
                                     style={satoshiFont.satoshiBold}
-                                    className='text-base text-black'
+                                    className='text-sm text-black'
                                 >
-                                    Category Limits
+                                    Categories
                                 </Text>
                                 <Text
-                                    style={satoshiFont.satoshiBlack}
+                                    style={satoshiFont.satoshiBold}
                                     className='text-sm text-purple-500'
                                 >
-                                    {categoryLimits.length} categor{categoryLimits.length === 1 ? 'y' : 'ies'}
+                                    {categoryLimits.length} categor
+                                    {categoryLimits.length === 1 ? 'y' : 'ies'}
                                 </Text>
                             </View>
 
@@ -263,23 +252,6 @@ export default function BudgetSummary({ storiesRef }: BudgetSummaryProps) {
                                     </React.Fragment>
                                 );
                             })}
-                        </View>
-
-                        <View className='bg-purple-50 rounded-3xl border border-purple-100 p-5'>
-                            <View className='flex-row justify-between items-center'>
-                                <Text
-                                    style={satoshiFont.satoshiBold}
-                                    className='text-base text-black'
-                                >
-                                    Total Budget
-                                </Text>
-                                <Text
-                                    style={satoshiFont.satoshiBlack}
-                                    className='text-lg text-purple-500'
-                                >
-                                    {formatCurrencyRounded(totalBudget, currency)}
-                                </Text>
-                            </View>
                         </View>
                     </ScrollView>
 

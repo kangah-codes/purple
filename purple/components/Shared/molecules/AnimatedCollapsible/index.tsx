@@ -173,7 +173,13 @@ const AnimatedCollapsibleComponent = forwardRef<AnimatedCollapsibleRef, Animated
             <View className={className} style={style}>
                 {renderContent && (
                     <Animated.View style={[animatedHeightStyle, { overflow: 'hidden' }]}>
-                        <View onLayout={onContentLayout}>{children}</View>
+                        <View
+                            collapsable={false}
+                            onLayout={onContentLayout}
+                            style={{ width: '100%' }}
+                        >
+                            {children}
+                        </View>
                     </Animated.View>
                 )}
             </View>

@@ -13,6 +13,7 @@ import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
 import { useCreateBudgetStore } from '../../state/CreateBudgetStore';
 import { usePreferences } from '@/components/Settings/hooks';
+import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
 
 type EstimatedIncomeProps = {
     storiesRef: React.RefObject<StoriesRef>;
@@ -23,7 +24,7 @@ export default function EstimatedIncome({ storiesRef }: EstimatedIncomeProps) {
     const {
         preferences: { currency },
     } = usePreferences();
-
+    const { showConfirmationModal } = useConfirmationModalStore();
     const [amount, setAmount] = useState(estimatedIncome > 0 ? estimatedIncome.toString() : '0');
     const hiddenInputRef = useRef<any>(null);
 
@@ -33,8 +34,25 @@ export default function EstimatedIncome({ storiesRef }: EstimatedIncomeProps) {
 
     const handleNext = () => {
         const income = parseFloat(amount || '0');
-        setEstimatedIncome(income);
-        storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1);
+
+        const proceed = () => {
+            setEstimatedIncome(income);
+            storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1);
+        };
+
+        // dont advance immediately for very low values ask for confirmation
+        if (!Number.isFinite(income) || income < 1) {
+            showConfirmationModal({
+                title: 'Is this correct?',
+                message:
+                    'Your estimated income is very low. Do you want to continue with this amount?',
+                confirmText: 'Continue',
+                onConfirm: proceed,
+            });
+            return;
+        }
+
+        proceed();
     };
 
     return (
@@ -70,10 +88,7 @@ export default function EstimatedIncome({ storiesRef }: EstimatedIncomeProps) {
                         <Text style={satoshiFont.satoshiBold} className='text-base text-purple-500'>
                             What's your estimated income?
                         </Text>
-                        <Text
-                            style={satoshiFont.satoshiBold}
-                            className='text-sm text-gray-600'
-                        >
+                        <Text style={satoshiFont.satoshiBold} className='text-sm text-gray-600'>
                             This helps us calculate your budget analytics
                         </Text>
                     </View>

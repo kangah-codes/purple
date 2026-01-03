@@ -1,6 +1,8 @@
 import { usePreferences } from '@/components/Settings/hooks';
+import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
 import { StoriesRef } from '@/components/Shared/molecules/Stories';
 import {
+    InputField,
     LinearGradient,
     SafeAreaView,
     ScrollView,
@@ -9,10 +11,11 @@ import {
     View,
 } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { BudgetCategorySetup } from './BudgetCategorySetup';
 import SelectPlanCategory from './SelectPlanCategory';
+import { useCreateBudgetStore } from '../../state/CreateBudgetStore';
 
 type NewFixedBudgetProps = {
     storiesRef: React.RefObject<StoriesRef>;
@@ -22,6 +25,9 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
+    const { categoryLimits } = useCreateBudgetStore();
+    const { showConfirmationModal } = useConfirmationModalStore();
+    const [searchQuery, setSearchQuery] = useState('');
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const holdDurationRef = useRef(0);
@@ -47,14 +53,28 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
         [customTransactionTypes],
     );
 
-    console.log('Transaction Types:', transactionTypes);
-
     // Cleanup timers on unmount
     useEffect(() => {
         return () => {
             clearTimers();
         };
     }, [clearTimers]);
+
+    const handleNext = () => {
+        const hasAnyAllocation = categoryLimits.some((limit) => (limit.limitAmount ?? 0) > 0);
+
+        if (!hasAnyAllocation) {
+            showConfirmationModal({
+                title: 'Allocation required',
+                message: 'Please allocate money to at least one category before continuing.',
+                confirmText: 'OK',
+                onConfirm: () => {},
+            });
+            return;
+        }
+
+        storiesRef?.current?.goToPage(storiesRef.current.currentIndex + 1);
+    };
 
     return (
         <KeyboardAvoidingView
@@ -85,12 +105,24 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
                         </Text>
                     </View>
 
+                    <InputField
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder='Search category'
+                        className='bg-purple-50/80 rounded-full px-4 border border-purple-100 text-xs h-12'
+                        style={satoshiFont.satoshiMedium}
+                        returnKeyType='search'
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                        animateBorder={false}
+                    />
+
                     <ScrollView
                         className='flex flex-col space-y-2.5'
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 150 }}
                     >
-                        <BudgetCategorySetup />
+                        <BudgetCategorySetup searchQuery={searchQuery} />
                     </ScrollView>
 
                     <View className='items-center self-center justify-center absolute bottom-7 w-full'>
@@ -115,14 +147,7 @@ export default function NewFixedBudget({ storiesRef }: NewFixedBudgetProps) {
                             </View>
 
                             <View className='flex-1'>
-                                <TouchableOpacity
-                                    style={{ width: '100%' }}
-                                    onPress={() =>
-                                        storiesRef?.current?.goToPage(
-                                            storiesRef.current.currentIndex + 1,
-                                        )
-                                    }
-                                >
+                                <TouchableOpacity style={{ width: '100%' }} onPress={handleNext}>
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 h-[50]'
                                         colors={['#c084fc', '#9333ea']}

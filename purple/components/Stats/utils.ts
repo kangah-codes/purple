@@ -66,7 +66,7 @@ export const groupTransactionsByWeek = (
 export const getStackedChartData = (transactions: Transaction[], date: Date) => {
     const grouped = groupTransactionsByWeek(transactions, date);
     const rawChartData = dayKeys.map((key) => {
-        const stacks = Object.entries(grouped).map(([_, data], i) => ({
+        const stacks = Object.entries(grouped).map(([, data], i) => ({
             value: data[key] || 0,
             color: spendOverviewPalette[i],
             marginBottom: 2,
@@ -205,19 +205,11 @@ export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transact
     let id = 1;
     let current = start;
 
-    const totalDays = differenceInDays(end, start) + 1;
-    const startAmount = 10;
-    const endAmount = 10000;
-
-    let previousAmount = startAmount;
-
     while (current <= end) {
         const numTransactionsToday = Math.floor(Math.random() * 2);
 
         for (let i = 0; i < numTransactionsToday; i++) {
-            let amount: number;
-
-            amount = Math.random() * 5000;
+            const amount = Math.random() * 5000;
 
             transactions.push({
                 id: id.toString(),
@@ -237,7 +229,6 @@ export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transact
                 plan_id: '',
             } as Transaction);
 
-            previousAmount = amount;
             id++;
         }
 
@@ -324,4 +315,48 @@ export function generateNormalizedSpendChartData(
     });
 
     return chartData;
+}
+
+export function generateNormalizedBudgetChartData(
+    totalBudget: number,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const monthEnd = endOfMonth(monthStart);
+
+    const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
+    const dailyBudget = totalBudget / daysInMonth;
+
+    const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    const steppedDays = eachDayOfInterval(
+        { start: monthStart, end: monthEnd },
+        {
+            step: 5,
+        },
+    );
+
+    const lastSteppedDay = steppedDays[steppedDays.length - 1];
+
+    const stepDays =
+        lastSteppedDay && lastSteppedDay < monthEnd ? [...steppedDays, monthEnd] : steppedDays;
+    const stepValueByIsoDate: Record<string, number> = {};
+    for (const day of stepDays) {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        const dayIndex = differenceInDays(day, monthStart) + 1;
+        stepValueByIsoDate[isoDate] = dailyBudget * dayIndex;
+    }
+
+    let currentValue = stepValueByIsoDate[format(monthStart, 'yyyy-MM-dd')] ?? 0;
+    return allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+
+        if (isoDate in stepValueByIsoDate) {
+            currentValue = stepValueByIsoDate[isoDate];
+        }
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: currentValue,
+        };
+    });
 }

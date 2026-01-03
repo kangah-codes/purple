@@ -16,13 +16,17 @@ import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { useCreateBudgetStore } from '../state/CreateBudgetStore';
 import { usePreferences } from '@/components/Settings/hooks';
+import { useBudgetCategoryStats } from '../hooks';
 
 export default function CategoryAllocationScreen() {
     const params = useLocalSearchParams<{ category: string; currentAmount?: string }>();
-    const { categoryLimits, updateCategoryLimit, addCategoryLimit } =
-        useCreateBudgetStore();
-    const {preferences: { currency }} = usePreferences();
-    const existingLimit = categoryLimits.find((l) => l.category === params.category);
+    const category = typeof params.category === 'string' ? params.category : '';
+    const { categoryLimits, updateCategoryLimit, addCategoryLimit } = useCreateBudgetStore();
+    const {
+        preferences: { currency },
+    } = usePreferences();
+    const existingLimit = categoryLimits.find((l) => l.category === category);
+    const { data: categoryStats } = useBudgetCategoryStats(category);
     const [amount, setAmount] = useState(
         params.currentAmount || existingLimit?.limitAmount.toString() || '0',
     );
@@ -43,10 +47,10 @@ export default function CategoryAllocationScreen() {
         const limitAmount = parseFloat(amount || '0');
 
         if (existingLimit) {
-            updateCategoryLimit(params.category, limitAmount);
+            updateCategoryLimit(category, limitAmount);
         } else {
             addCategoryLimit({
-                category: params.category,
+                category,
                 limitAmount,
             });
         }
@@ -55,6 +59,8 @@ export default function CategoryAllocationScreen() {
     };
 
     const handleCancel = () => router.back();
+
+    console.log('Category Stats:', categoryStats);
 
     return (
         <SafeAreaView
@@ -131,23 +137,21 @@ export default function CategoryAllocationScreen() {
                 <View className='flex-row justify-between space-x-2.5'>
                     <View className='flex-1 bg-purple-50 rounded-3xl p-5 items-center border border-purple-100'>
                         <Text className='text-xl text-black mb-1' style={satoshiFont.satoshiBlack}>
-                            {formatCurrencyRounded(0, currency)}
+                            {formatCurrencyRounded(categoryStats?.lastMonthBudgeted ?? 0, currency)}
                         </Text>
                         <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
-                            Spent last month
+                            Budgeted last month
                         </Text>
                     </View>
                     <View className='flex-1 bg-purple-50 rounded-3xl p-5 items-center border border-purple-100'>
                         <Text className='text-xl text-black mb-1' style={satoshiFont.satoshiBlack}>
-                            {formatCurrencyRounded(0, currency)}
+                            {formatCurrencyRounded(categoryStats?.averageBudgeted ?? 0, currency)}
                         </Text>
                         <Text className='text-sm text-purple-500' style={satoshiFont.satoshiBold}>
                             Monthly Average
                         </Text>
                     </View>
                 </View>
-
-
             </ScrollView>
         </SafeAreaView>
     );
