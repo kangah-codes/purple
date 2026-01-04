@@ -51,7 +51,7 @@ export default function Hero() {
                 <div className='flex justify-center h-full space-x-5 relative'>
                     <div className='relative w-full h-[300px] lg:w-[400px] lg:h-[400px]'>
                         <Image
-                            src='/graphics/screenshots/home_screen.png'
+                            src='/graphics/screenshots/home_screen_2.png'
                             alt='Purple Home Screen'
                             width={400}
                             height={400}

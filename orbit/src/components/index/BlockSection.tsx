@@ -149,7 +149,7 @@ export default function BlockSection() {
                                     decoding='async'
                                     data-nimg={1}
                                     style={{ color: 'transparent' }}
-                                    src='/graphics/transaction_modal.png'
+                                    src='/graphics/screenshots/account_screen_2.png'
                                     className='translate-y-[125px] shadow-2xl'
                                 />
                             </div>
@@ -178,7 +178,7 @@ export default function BlockSection() {
                                         decoding='async'
                                         data-nimg={1}
                                         style={{ color: 'transparent' }}
-                                        src='/graphics/transaction_screen.png'
+                                        src='/graphics/account_screen_2.png'
                                         className='shadow-2xl'
                                     />
                                 </div>
