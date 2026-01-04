@@ -1,6 +1,6 @@
 import { LinearGradient, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
-import React from 'react';
+import React, { memo } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
@@ -14,18 +14,22 @@ import CashflowBarChart from '../molecules/CashflowBarChart';
 import StatsHeatmap from '../molecules/Heatmap';
 import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
 import SpendAreaChart from '../molecules/SpendAreaChart';
-import SpendOverview from '../molecules/SpendOverview';
 import SpendOverviewChart from '../molecules/SpendOverviewChart';
-import SpendVsBudgetLineChart from '../molecules/SpendVsBudgetLineChart';
+import SpendVsBudgetLineChart from './SpendVsBudgetLineChart';
+import MonthlySummaryCarousel from './MonthlySummaryCarousel';
 
 interface MonthlyStatsPageProps {
     currentDate: Date;
     transactions: Transaction[];
+    allHistoricalTransactions?: Transaction[];
+    oldestTransactionDate?: Date;
     isLoading: boolean;
 }
 
-export default function MonthlyStatsPage({
+export default memo(function MonthlyStatsPage({
     transactions,
+    allHistoricalTransactions,
+    oldestTransactionDate,
     isLoading,
     currentDate,
 }: MonthlyStatsPageProps) {
@@ -69,16 +73,25 @@ export default function MonthlyStatsPage({
                 onScroll={onScroll}
                 scrollEventThrottle={16}
             >
-                <SpendOverview transactions={transactions} />
-                <SpendOverviewChart transactions={transactions} />
-                <SpendVsBudgetLineChart />
-                <SpendAreaChart />
-                <CashflowBarChart />
+                <MonthlySummaryCarousel
+                    currentDate={currentDate}
+                    transactions={transactions}
+                    allHistoricalTransactions={allHistoricalTransactions || []}
+                    oldestTransactionDate={oldestTransactionDate}
+                />
+                <CashflowBarChart
+                    currentDate={currentDate}
+                    allTransactions={allHistoricalTransactions || []}
+                    oldestTransactionDate={oldestTransactionDate}
+                />
+                <SpendAreaChart startDate={currentDate} />
+                <SpendVsBudgetLineChart startDate={currentDate} />
+                <SpendOverviewChart transactions={transactions} startDate={currentDate} />
                 <StatsHeatmap transactions={transactions} startDate={currentDate} />
             </Animated.ScrollView>
         </View>
     );
-}
+});
 
 const styles = StyleSheet.create({
     scrollView: {

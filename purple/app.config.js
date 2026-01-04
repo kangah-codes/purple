@@ -1,12 +1,45 @@
+import { withAndroidStyles } from '@expo/config-plugins';
+import pkg from './package.json';
+
+const withNavigationBarColor = (config) => {
+    return withAndroidStyles(config, (config) => {
+        const styles = config.modResults;
+
+        const appThemeStyle = styles?.resources?.style?.find(
+            (style) => style.$.name === 'AppTheme',
+        );
+
+        if (appThemeStyle) {
+            const existingItem = appThemeStyle.item.find(
+                (item) => item.$.name === 'android:navigationBarColor',
+            );
+
+            if (existingItem) {
+                existingItem._ = '@android:color/transparent';
+            } else {
+                appThemeStyle.item.push({
+                    $: { name: 'android:navigationBarColor' },
+                    _: '@android:color/transparent',
+                });
+            }
+        }
+
+        return config;
+    });
+};
+
 export default ({ config }) => {
+    // eslint-disable-next-line no-undef
     const isDev = process.env.EAS_BUILD_PROFILE === 'development';
+    // eslint-disable-next-line no-undef
+    const isRc = process.env.EAS_BUILD_PROFILE === 'rc';
 
     return {
         ...config,
-        name: isDev ? 'Purple Dev' : 'Purple',
-        slug: isDev ? 'purple-dev' : 'purple',
-        scheme: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
-        version: '0.1.0',
+        name: isDev ? 'Purple Dev' : isRc ? 'Purple RC' : 'Purple',
+        slug: 'purple',
+        scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
+        version: pkg.version,
         orientation: 'portrait',
         icon: './assets/images/icon.png',
         userInterfaceStyle: 'automatic',
@@ -20,10 +53,19 @@ export default ({ config }) => {
         assetBundlePatterns: ['**/*'],
         ios: {
             supportsTablet: false,
-            bundleIdentifier: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
+            bundleIdentifier: isDev
+                ? 'com.akangah89.PurpleDev'
+                : isRc
+                    ? 'com.akangah89.PurpleRc'
+                    : 'com.akangah89.Purple',
+            scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
         },
         android: {
-            package: isDev ? 'com.akangah89.PurpleDev' : 'com.akangah89.Purple',
+            package: isDev
+                ? 'com.akangah89.PurpleDev'
+                : isRc
+                    ? 'com.akangah89.PurpleRc'
+                    : 'com.akangah89.Purple',
             adaptiveIcon: {
                 foregroundImage: './assets/images/icon.png',
                 backgroundColor: '#00000000',
@@ -101,6 +143,7 @@ export default ({ config }) => {
                 },
             ],
             'expo-localization',
+            withNavigationBarColor,
         ],
         experiments: {
             typedRoutes: true,
@@ -116,6 +159,9 @@ export default ({ config }) => {
         owner: 'akangah89',
         updates: {
             url: 'https://u.expo.dev/381fc979-2396-4f04-93f0-bdfea57f48d2',
+            fallbackToCacheTimeout: 0,
+            runtimeVersion: 'appVersion',
+            enabled: true,
         },
         runtimeVersion: {
             policy: 'appVersion',

@@ -2,6 +2,15 @@ import { RRule, rrulestr } from 'rrule';
 import { Transaction } from './schema';
 import { format, parse } from 'date-fns';
 
+/**
+ * Checks if a transaction is part of a transfer operation.
+ * Transfer transactions are identified by having both from_account and to_account populated.
+ * This helps exclude transfer transactions from income/expense reporting to avoid inflating totals.
+ */
+export function isTransferTransaction(transaction: Transaction): boolean {
+    return Boolean(transaction.from_account && transaction.to_account);
+}
+
 const DAYS_OF_WEEK = [
     { label: 'SU', value: '0' },
     { label: 'MO', value: '1' },
@@ -265,17 +274,19 @@ export function calculateTransactionSchedule(
         case 'weekly':
             summary = `Transaction will be created weekly on ${dayOfWeek} at ${time}`;
             break;
-        case 'monthly':
+        case 'monthly': {
             const suffix = getOrdinalSuffix(dayOfMonth!);
             summary = `Transaction will be created on the ${dayOfMonth}${suffix} of each month at ${time}`;
             break;
-        case 'custom':
+        }
+        case 'custom': {
             const day = customDate!.getDate();
             const suffixCustom = getOrdinalSuffix(day);
             const month = customDate!.toLocaleString('default', { month: 'long' });
             const year = customDate!.getFullYear();
             summary = `Transaction will be created on ${day}${suffixCustom} ${month} ${year} at ${time}`;
             break;
+        }
     }
 
     return summary;

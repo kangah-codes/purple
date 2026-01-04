@@ -7,12 +7,15 @@ import { Transaction } from '../Transactions/schema';
 import {
     ExpenseCalculationResult,
     Frequency,
+    PaceTone,
     Plan,
     PlanAccountPieChartStats,
-    SpendingProgress,
     SpendingTrendData,
     TrendDataPoint,
 } from './schema';
+import { pickRandom } from '@/lib/utils/array';
+import { BUDGET_PACE_COPY } from './constants';
+import { BudgetPaceInsight } from './hooks';
 
 /**
  * Calculates the total expense details from an array of budget plans.
@@ -47,30 +50,16 @@ export default function calculateTotalExpenseDetails(plans: Plan[]): ExpenseCalc
     };
 }
 
-/**
- * Helper function to create consistent SpendingProgress response
- */
-function createProgressResponse(
-    isOnTrack: boolean,
-    actualSpendingRate: number,
-    expectedSpendingRate: number,
-    daysElapsed: number,
-    totalDays: number,
-    percentTimeElapsed: number,
-    percentTargetSpent: number,
-    deviation: number,
-    message: string,
-): SpendingProgress {
+export function getBudgetPaceInsightCopy(
+    tone: PaceTone,
+    params: { overCount: number; categoryCount: number },
+): BudgetPaceInsight {
+    const variant = pickRandom(BUDGET_PACE_COPY[tone]);
+
     return {
-        isOnTrack,
-        actualSpendingRate,
-        expectedSpendingRate,
-        daysElapsed,
-        totalDays,
-        percentTimeElapsed,
-        percentTargetSpent,
-        deviation,
-        message,
+        tone,
+        title: variant.title,
+        message: variant.message(params),
     };
 }
 

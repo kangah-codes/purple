@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Text, LinearGradient } from '@/components/Shared/styled';
 import React from 'react';
-import { useAccounts, useAccountStore } from '../hooks';
+import { useAccounts } from '../hooks';
 import { groupAccountsByCategory } from '../utils';
 import AccountGroupCard from './AccountGroupCard';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
@@ -23,7 +23,7 @@ export default function AccountsAccordion() {
                 </View>
             ))}
 
-            <TouchableOpacity onPress={() => router.push('/accounts/new-acount')}>
+            <TouchableOpacity onPress={() => router.push('/accounts/new-account')}>
                 <LinearGradient
                     className='rounded-full justify-center items-center p-4'
                     colors={['#c084fc', '#9333ea']}

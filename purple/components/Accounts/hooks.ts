@@ -16,12 +16,11 @@ import {
 import { useStore } from 'zustand';
 import { useAuth } from '../Auth/hooks';
 import { usePreferences } from '../Settings/hooks';
-import { CurrencyCode } from '../Settings/molecules/ExchangeRateItem';
 import { useTransactions } from '../Transactions/hooks';
 import { Transaction } from '../Transactions/schema';
-import { Account, TimePeriod } from './schema';
+import { Account, AccountDataCalculation, EditAccount, TimePeriod } from './schema';
 import { createAccountsReportStore, createAccountStore } from './state';
-import { getEffectiveBalance, groupAccountsByCategory } from './utils';
+import { getEffectiveBalance, groupAccountsByCategory, isLiabilityAccount } from './utils';
 
 export function useAccountStore() {
     const [
@@ -111,8 +110,35 @@ export function useAccounts({
                 >,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error('[useAccounts] Error fetching accounts:', error);
+                options?.onError?.(error);
+            },
         },
     );
+}
+
+export function useHasAnyAccounts(): UseQueryResult<boolean, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(['accounts-exists'], async () => {
+        try {
+            const row = await db.getFirstAsync<{ has_account: number }>(
+                // Exclude the default Cash account created on first run
+                // only conside this complete if user has added at least one non default account
+                `SELECT 1 as has_account
+                 FROM accounts
+                 WHERE deleted_at IS NULL
+                   AND COALESCE(is_default_account, 0) = 0
+                 LIMIT 1`,
+            );
+            return !!row?.has_account;
+        } catch (error) {
+            // if tables arent initialized yet treat as none
+            if (String(error).includes('no such table')) return false;
+            throw error;
+        }
+    });
 }
 
 export function useAccount({
@@ -141,6 +167,10 @@ export function useAccount({
                 >,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(`[useAccount] Error fetching account ${accountID}:`, error);
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -152,6 +182,23 @@ export function useCreateAccount(): UseMutationResult<GenericAPIResponse<Account
     return useMutation(['create-account'], async (accountInformation) => {
         const service = ServiceFactory.create<Account>('accounts', db, sessionData);
         return service.create(accountInformation as Partial<Account>);
+    });
+}
+
+export function useEditAccount(): UseMutationResult<
+    GenericAPIResponse<Account>,
+    Error,
+    {
+        id: string;
+        data: EditAccount;
+    }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-account'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Account>('accounts', db, sessionData);
+        return service.update(id, data);
     });
 }
 
@@ -167,18 +214,6 @@ export function useDeleteAccount({
         const service = ServiceFactory.create<Transaction>('accounts', db, sessionData);
         return service.delete(id);
     });
-}
-
-export interface AccountDataCalculation {
-    currentBalance: number;
-    previousBalance: number;
-    absoluteChange: number;
-    percentageChange: number;
-    trend: 'increase' | 'decrease' | 'neutral';
-    currency: CurrencyCode;
-    isLoading: boolean;
-    error?: string;
-    transactions: Transaction[];
 }
 
 export function useCalculateAccountData({
@@ -281,7 +316,19 @@ export function useCalculateAccountData({
 
                 // calc the account balance at the start of the period
                 const transactionSum = accountTransactions.reduce((txSum, tx) => {
-                    return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
+                    const isLiability = isLiabilityAccount(account.category);
+
+                    // For liability accounts, reverse the logic:
+                    // - Credit increases liability (negative impact on net worth)
+                    // - Debit decreases liability (positive impact on net worth)
+                    if (isLiability) {
+                        return txSum + (tx.type === 'credit' ? -tx.amount : tx.amount);
+                    } else {
+                        // For asset accounts, normal logic:
+                        // - Credit increases balance
+                        // - Debit decreases balance
+                        return txSum + (tx.type === 'credit' ? tx.amount : -tx.amount);
+                    }
                 }, 0);
 
                 const balanceAtStart = getEffectiveBalance(account) - transactionSum;
@@ -297,12 +344,25 @@ export function useCalculateAccountData({
             }, 0);
 
             const absoluteChange = currentBalance - previousBalance;
-            const percentageChange = (
-                previousBalance !== 0 ? (absoluteChange / Math.abs(previousBalance)) * 100 : 0
-            ).toFixed(1);
+
+            // Handle percentage change calculation with safeguards for very small balances
+            let percentageChange: number;
+            const minThreshold = 0.01; // Minimum balance threshold for meaningful percentage calculation
+
+            if (Math.abs(previousBalance) < minThreshold) {
+                // If previous balance is very small, treat it as zero
+                percentageChange = 0;
+            } else {
+                const rawPercentage = (absoluteChange / Math.abs(previousBalance)) * 100;
+                // Cap the percentage at a reasonable maximum to avoid extreme values
+                const maxPercentage = 10000; // 10,000% maximum
+                percentageChange = Math.max(-maxPercentage, Math.min(maxPercentage, rawPercentage));
+            }
+
+            const formattedPercentageChange = Number(percentageChange.toFixed(1));
 
             let trend: 'increase' | 'decrease' | 'neutral';
-            if (Math.abs(Number(percentageChange)) < 0.01) {
+            if (Math.abs(percentageChange) < 0.01) {
                 trend = 'neutral';
             } else if (absoluteChange > 0) {
                 trend = 'increase';
@@ -310,21 +370,35 @@ export function useCalculateAccountData({
                 trend = 'decrease';
             }
 
+            const transformedTransactions =
+                accountGroup && !accountGroup.includes('Liability')
+                    ? transactions.map((tx) => {
+                          const account = accounts.find((acc) => acc.id === tx.account_id);
+                          if (account && isLiabilityAccount(account.category)) {
+                              return {
+                                  ...tx,
+                                  type:
+                                      tx.type === 'credit'
+                                          ? ('debit' as const)
+                                          : ('credit' as const),
+                              };
+                          }
+                          return tx;
+                      })
+                    : transactions;
+
             return {
                 currentBalance,
                 previousBalance,
                 absoluteChange,
-                percentageChange:
-                    Number(percentageChange) % 1 === 0
-                        ? Number(percentageChange)
-                        : percentageChange,
+                percentageChange: formattedPercentageChange,
                 trend,
                 currency: preferredCurrency,
                 isLoading: false,
-                transactions,
+                transactions: transformedTransactions,
             };
         } catch (error) {
-            console.error('Error calculating account data:', error);
+            console.error('[useCalculateAccountData] Error calculating account data:', error);
             return {
                 currentBalance: 0,
                 previousBalance: 0,

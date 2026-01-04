@@ -13,7 +13,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
     persist(
         (set) => ({
             preferences: {
-                currency: '',
+                currency: 'USD' as const,
                 theme: 'light',
                 customTransactionTypes: [],
                 allowOverdraw: false,
@@ -24,6 +24,12 @@ export const usePreferencesStore = create<PreferencesStore>()(
                 allowCurrencyConversion: true,
                 pushNotificationsEnabled: true,
                 dailyNotificationsEnabled: true,
+                updateFrequency: 'interval' as const,
+                startupGuide: {
+                    isCompleted: false,
+                    completedSteps: [],
+                    availableSteps: [],
+                },
             },
             setPreferences: (partialPrefs) =>
                 set((state) => ({

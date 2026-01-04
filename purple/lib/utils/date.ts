@@ -1,8 +1,10 @@
 import {
     endOfDay,
-    endOfMonth,
+    format,
+    isToday,
+    isYesterday,
+    parse,
     startOfDay,
-    startOfMonth,
     startOfYear,
     subDays,
     subMonths,
@@ -16,8 +18,6 @@ export function formatDate(
 ): string {
     return new Date(date).toLocaleDateString(undefined, options);
 }
-
-import { format, isToday, isYesterday, parse } from 'date-fns';
 
 export function formatDateTime(
     inputDateStr: string | undefined,
@@ -113,7 +113,7 @@ interface DateRange {
     endDate: Date;
 }
 
-export function getDateRange(period: TimePeriod): DateRange {
+export function getDateRange(period: TimePeriod, oldestTransactionDate?: Date): DateRange {
     const now = new Date();
     const endDate = endOfDay(now);
     let startDate: Date;
@@ -141,7 +141,8 @@ export function getDateRange(period: TimePeriod): DateRange {
             startDate = subYears(now, 1);
             break;
         case 'ALL':
-            startDate = new Date(0);
+            // Use the oldest transaction date if provided, otherwise fallback to 1970
+            startDate = oldestTransactionDate ? startOfDay(oldestTransactionDate) : new Date(0);
             break;
         default:
             startDate = now;

@@ -22,7 +22,8 @@ function ExpensesScreen() {
             is_completed: hideCompletedPlans ? false : undefined,
         },
         options: {
-            onError: () => {
+            onError: (err) => {
+                console.error('[ExpensesScreen] Error fetching plans:', err);
                 Toast.show({
                     type: 'error',
                     props: {

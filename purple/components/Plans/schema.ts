@@ -58,18 +58,6 @@ export type CreatePlanTransaction = {
     debit_account_id: string;
 };
 
-type CreatePlanPayload = {
-    type: string;
-    category: string;
-    target: number;
-    balance: number;
-    start_date: string;
-    end_date: string;
-    deposit_frequency: string;
-    name: string;
-    currency: string;
-};
-
 export interface SpendingProgress {
     isOnTrack: boolean;
     actualSpendingRate: number;
@@ -125,14 +113,80 @@ export interface PlanAccountPieChartStats {
     gradientCenterColor: string;
 }
 
-/**
- * 	PlanId         uuid.UUID  `json:"plan_id"`
-	UserId         uuid.UUID  `json:"user_id"`
-	Amount         float64    `gorm:"not null" json:"amount"`
-	User           User       `gorm:"foreignKey:UserId" json:"-"`
-	Plan           Plan       `gorm:"foreignKey:PlanId" json:"plan"`
-	Note           string     `gorm:"size:255" json:"note"`
-	CreatedAt      time.Time  `gorm:"type:timestamptz;not null"`
-	DebitAccountId *uuid.UUID `json:"debit_account_id"`
-	DebitAccount   Account    `gorm:"foreignKey:debit_account_id" json:"-"`
- */
+export type PlanStore = {
+    plans: Plan[];
+    setPlans: (accounts: Plan[]) => void;
+    currentPlan: Plan | null;
+    setCurrentPlan: (transaction: Plan | null) => void;
+    expensePlans: Plan[];
+    savingPlans: Plan[];
+    setExpensePlans: (plans: Plan[]) => void;
+    setSavingPlans: (plans: Plan[]) => void;
+    updateExpenseplans: (plan: Plan | Plan[]) => void;
+    updateSavingPlans: (plan: Plan | Plan[]) => void;
+    removeExpensePlan: (id: string) => void;
+    removeSavingPlan: (id: string) => void;
+    reset: () => void;
+};
+
+export type CreateNewPlanStore = {
+    amount: number;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    categories: {
+        category: string;
+        allocation: number;
+    }[];
+    setAmount: (amount: number) => void;
+    setStartDate: (date: Date | undefined) => void;
+    setEndDate: (date: Date | undefined) => void;
+    setCategories: (categories: { category: string; allocation: number }[]) => void;
+    addCategory: (category: { category: string; allocation: number }) => void;
+    removeCategory: (category: string) => void;
+    reset: () => void;
+    updateCategory: (category: { category?: string; allocation?: number }) => void;
+};
+
+// new stuff for the plans
+export type Budget = {
+    id: string;
+    type: 'fixed' | 'flexible';
+    name: string;
+    total_amount: number;
+    estimated_income: number;
+    estimated_expense: number;
+    income_earned: number;
+    expense_spent: number;
+    currency: string;
+    start_date: string;
+    end_date: string;
+    is_active: boolean;
+    is_completed: boolean;
+    created_at: string;
+    updated_at: string;
+    code: string;
+};
+
+export type NewBudgetStore = {
+    estimatedIncome: number;
+    estimatedExpense: number;
+    totalAmount: number;
+    startDate: Date | null;
+    endDate: Date | null;
+    type: 'fixed' | 'flexible';
+    name: string;
+    categoryAllocations: {
+        category: string;
+        allocationType: 'fixed' | 'flexible';
+        allocatedAmount: number;
+    }[];
+    setData: (data: Partial<NewBudgetStore>) => void;
+    reset: () => void;
+};
+
+export type PaceTone = 'positive' | 'neutral' | 'negative';
+
+export type PaceCopyVariant = {
+    title: string;
+    message: (params: { overCount: number; categoryCount: number }) => string;
+};

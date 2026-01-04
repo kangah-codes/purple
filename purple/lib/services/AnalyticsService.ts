@@ -9,6 +9,7 @@ type EventName =
     | 'button_tap'
     | 'error_occurred'
     | 'object_created'
+    | 'object_updated'
     | 'app_open'
     | 'app_exit'
     | 'settings_set'
@@ -33,6 +34,10 @@ type EventProperties = {
         object_type: string;
         payload: Record<string, unknown>;
     };
+    object_updated: {
+        object_type: string;
+        payload: Record<string, unknown>;
+    };
     app_open: {
         launch_type: 'cold' | 'warm' | 'background';
         from_notification?: boolean;
@@ -43,8 +48,8 @@ type EventProperties = {
     };
     settings_set: {
         setting: string;
-        old_value: any;
-        new_value: any;
+        old_value: unknown;
+        new_value: unknown;
     };
     generic_event: Record<string, unknown>;
 };

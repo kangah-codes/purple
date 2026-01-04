@@ -7,7 +7,7 @@ import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { usePlanStore } from '../hooks';
+import { usePlanStore } from '../../hooks';
 
 export default function PlanNavigationArea() {
     const { currentPlan } = usePlanStore();

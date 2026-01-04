@@ -1,6 +1,7 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { TransactionSQLiteService } from '@/lib/services/TransactionSQLiteService';
+import { formPreprocessor } from '@/lib/utils/object';
 import { useSQLiteContext } from 'expo-sqlite';
 import {
     UseInfiniteQueryOptions,
@@ -20,6 +21,7 @@ import {
     EditTransaction,
     RecurringTransaction,
     Transaction,
+    TransactionsFilter,
 } from './schema';
 import { createTransactionStore } from './state';
 
@@ -36,6 +38,12 @@ export function useTransactionStore() {
         updateTransactions,
         updateRecurringTransactions,
         deleteTransaction,
+        transactionsFilter,
+        pendingTransactionsFilter,
+        setTransactionsFilter,
+        setPendingTransactionsFilter,
+        applyPendingFilters,
+        resetTransactionsFilter,
     ] = useStore(createTransactionStore, (state) => [
         state.transactions,
         state.recurringTransactions,
@@ -48,6 +56,12 @@ export function useTransactionStore() {
         state.updateTransactions,
         state.updateRecurringTransactions,
         state.deleteTransaction,
+        state.transactionsFilter,
+        state.pendingTransactionsFilter,
+        state.setTransactionsFilter,
+        state.setPendingTransactionsFilter,
+        state.applyPendingFilters,
+        state.resetTransactionsFilter,
     ]);
 
     return {
@@ -63,6 +77,14 @@ export function useTransactionStore() {
         setCurrentRecurringTransaction,
         updateRecurringTransactions,
         deleteTransaction,
+
+        // Filter functionality
+        transactionsFilter,
+        pendingTransactionsFilter,
+        setTransactionsFilter,
+        setPendingTransactionsFilter,
+        applyPendingFilters,
+        resetTransactionsFilter,
     };
 }
 
@@ -87,8 +109,29 @@ export function useTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error('[useTransactions] Error fetching transactions:', error);
+                options?.onError?.(error);
+            },
         },
     );
+}
+
+export function useHasAnyTransactions(): UseQueryResult<boolean, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(['transactions-exists'], async () => {
+        try {
+            const row = await db.getFirstAsync<{ has_transaction: number }>(
+                `SELECT 1 as has_transaction FROM transactions WHERE deleted_at IS NULL LIMIT 1`,
+            );
+            return !!row?.has_transaction;
+        } catch (error) {
+            // If tables aren't initialized yet (fresh install), treat as none.
+            if (String(error).includes('no such table')) return false;
+            throw error;
+        }
+    });
 }
 
 export function useRecurringTransactions({
@@ -124,6 +167,57 @@ export function useRecurringTransactions({
                 UseQueryOptions<any, any, any, any>,
                 'queryKey' | 'queryFn' | 'initialData'
             >),
+            onError: (error) => {
+                console.error(
+                    '[useRecurringTransactions] Error fetching recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
+            },
+        },
+    );
+}
+
+export function useUpcomingRecurringTransactions({
+    requestQuery,
+    options,
+}: {
+    requestQuery: {
+        startDate: Date;
+        endDate: Date;
+        n: number;
+    };
+    options?: UseQueryOptions;
+}): UseQueryResult<GenericAPIResponse<RecurringTransaction[]>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useQuery(
+        ['recurring-transactions', requestQuery],
+        async () => {
+            const service = ServiceFactory.create<Transaction>(
+                'transactions',
+                db,
+                sessionData,
+            ) as TransactionSQLiteService;
+            return service.listUpcomingRecurringTransactions(
+                requestQuery.startDate,
+                requestQuery.endDate,
+                requestQuery.n,
+            );
+        },
+        {
+            ...(options as Omit<
+                UseQueryOptions<any, any, any, any>,
+                'queryKey' | 'queryFn' | 'initialData'
+            >),
+            onError: (error) => {
+                console.error(
+                    '[useUpcomingRecurringTransactions] Error fetching upcoming recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
+            },
         },
     );
 }
@@ -140,12 +234,21 @@ export function useInfiniteTransactions({
 }): UseInfiniteQueryResult<GenericAPIResponse<Transaction[]>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
+    const { transactionsFilter } = useTransactionStore();
+
+    // Process and clean the filter data
+    const processedFilter = formPreprocessor({
+        data: transactionsFilter,
+        omit: [undefined, null, '', []],
+        omitKeys: [],
+    });
 
     return useInfiniteQuery<GenericAPIResponse<Transaction[]>, Error>(
-        ['transactions', requestQuery],
+        ['transactions', requestQuery, processedFilter],
         async ({ pageParam = 1 }) => {
             const queryParams = {
                 ...requestQuery,
+                ...processedFilter,
                 page: pageParam,
                 page_size: requestQuery.page_size || 10,
             };
@@ -159,6 +262,10 @@ export function useInfiniteTransactions({
                 return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
                     ? nextPage
                     : undefined;
+            },
+            onError: (error) => {
+                console.error('[useInfiniteTransactions] Error fetching transactions:', error);
+                options?.onError?.(error);
             },
         },
     );
@@ -199,6 +306,13 @@ export function useInfiniteRecurringTransactions({
                 return nextPage <= Math.ceil(lastPage.total_items / lastPage.page_size)
                     ? nextPage
                     : undefined;
+            },
+            onError: (error) => {
+                console.error(
+                    '[useInfiniteRecurringTransactions] Error fetching recurring transactions:',
+                    error,
+                );
+                options?.onError?.(error);
             },
         },
     );
@@ -247,6 +361,30 @@ export function useCreateRecurringTransaction(): UseMutationResult<
     });
 }
 
+export function useEditRecurringTransaction(): UseMutationResult<
+    GenericAPIResponse<RecurringTransaction>,
+    Error,
+    {
+        id: string;
+        data: Partial<CreateRecurringTransaction> & {
+            is_active?: boolean;
+            status?: 'active' | 'paused' | 'cancelled';
+        };
+    }
+> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    return useMutation(['edit-recurring-transaction'], async ({ id, data }) => {
+        const service = ServiceFactory.create<Transaction>(
+            'transactions',
+            db,
+            sessionData,
+        ) as TransactionSQLiteService;
+        return service.updateRecurringTransaction(id, data);
+    });
+}
+
 export function useUpdateTransaction(): UseMutationResult<
     GenericAPIResponse<Transaction>,
     Error,
@@ -291,4 +429,17 @@ export function useDeleteRecurringTransaction({
         ) as TransactionSQLiteService;
         return service.deleteRecurring(transactionID);
     });
+}
+
+// Utility function to check if any filters are active
+export function hasActiveTransactionFilters(filter: TransactionsFilter): boolean {
+    return (
+        (filter.type && filter.type.length > 0) ||
+        (filter.category && filter.category.length > 0) ||
+        (filter.account_ids && filter.account_ids.length > 0) ||
+        filter.min_amount !== undefined ||
+        filter.max_amount !== undefined ||
+        filter.start_date !== undefined ||
+        filter.end_date !== undefined
+    );
 }

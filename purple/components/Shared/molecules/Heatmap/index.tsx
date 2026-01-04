@@ -46,7 +46,7 @@ export default function Heatmap({
 
     const handleCellPress = useCallback(
         (item: CellData) => {
-            onPressCallback && onPressCallback(item);
+            if (onPressCallback) onPressCallback(item);
         },
         [onPressCallback],
     );
@@ -92,6 +92,7 @@ export default function Heatmap({
             keyExtractor={keyExtractor}
             numColumns={cols}
             scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
             // getItemLayout={getItemLayout} here's to hoping commenting this out don't break anything
         />
     );

@@ -1,23 +1,40 @@
 import { nativeStorage } from '@/lib/utils/storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Plan } from './schema';
+import { CreateNewPlanStore, PlanStore } from './schema';
 
-type PlanStore = {
-    plans: Plan[];
-    setPlans: (accounts: Plan[]) => void;
-    currentPlan: Plan | null;
-    setCurrentPlan: (transaction: Plan | null) => void;
-    expensePlans: Plan[];
-    savingPlans: Plan[];
-    setExpensePlans: (plans: Plan[]) => void;
-    setSavingPlans: (plans: Plan[]) => void;
-    updateExpenseplans: (plan: Plan | Plan[]) => void;
-    updateSavingPlans: (plan: Plan | Plan[]) => void;
-    removeExpensePlan: (id: string) => void;
-    removeSavingPlan: (id: string) => void;
-    reset: () => void;
-};
+export const createNewPlanStore = create<CreateNewPlanStore>()((set) => ({
+    amount: 10,
+    startDate: undefined,
+    endDate: undefined,
+    categories: [],
+    setAmount: (amount) => set({ amount }),
+    setStartDate: (date) => set({ startDate: date }),
+    setEndDate: (date) => set({ endDate: date }),
+    setCategories: (categories) => set({ categories }),
+    addCategory: (category) =>
+        set((state) => ({
+            categories: state.categories.includes(category)
+                ? state.categories
+                : [...state.categories, category],
+        })),
+    removeCategory: (category) =>
+        set((state) => ({
+            categories: state.categories.filter((cat) => cat.category !== category),
+        })),
+    updateCategory: (category) =>
+        set((state) => ({
+            categories: state.categories.map((cat) =>
+                cat.category === category.category
+                    ? {
+                          category: category.category,
+                          allocation: category.allocation ?? cat.allocation,
+                      }
+                    : cat,
+            ),
+        })),
+    reset: () => set({ amount: 10, startDate: undefined, endDate: undefined, categories: [] }),
+}));
 
 export const createPlanStore = create<PlanStore>()(
     persist(

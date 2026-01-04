@@ -35,7 +35,7 @@ export default function PlansScreen() {
             });
             await settingsService.set('hideCompletedPlans', value);
             setPreference('hideCompletedPlans', value);
-        } catch (error) {
+        } catch {
             await logEvent('error_occurred', {
                 error_type: 'SETTING_UPDATE_ERROR',
                 context: `Failed to update hideCompletedPlans setting:`,
@@ -55,7 +55,6 @@ export default function PlansScreen() {
         {
             icon: <EyeCloseIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Hide completed plans',
-            description: 'Hide plans from the main plans screen once they have been completed',
             customItem: () => <Switch value={hideCompletedPlans} onValueChange={handleToggle} />,
         },
         ...(hideCompletedPlans
@@ -63,7 +62,6 @@ export default function PlansScreen() {
                   {
                       icon: <CoinsStackedIcon width={20} height={20} stroke='#9333ea' />,
                       title: 'Completed Plans',
-                      description: 'View plans which have been completed and hidden',
                       link: '/settings/hidden-plans',
                   },
               ]
@@ -91,7 +89,7 @@ export default function PlansScreen() {
                 </View>
             </View>
 
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

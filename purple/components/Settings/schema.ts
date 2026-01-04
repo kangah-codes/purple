@@ -15,7 +15,7 @@ export type SettingsListItem = {
     title: string;
     link?: string;
     callback?: () => void;
-    description: string;
+    description?: string;
     customItem?: () => React.ReactNode;
     renderIcon?: () => React.ReactNode;
     disabled?: boolean;
@@ -36,7 +36,7 @@ export type UserStore = {
 export type CustomTransactionType = {
     category: string;
     emoji: string;
-    is_custom?: boolean;
+    is_custom?: number;
 };
 
 export type UserPreferences = {
@@ -53,4 +53,24 @@ export type UserPreferences = {
     // notification preferences
     pushNotificationsEnabled: boolean;
     dailyNotificationsEnabled: boolean;
+
+    // update preferences
+    updateFrequency: 'on_app_open' | 'interval';
+
+    // startup guide preferences
+    startupGuide: {
+        isCompleted: boolean;
+        completedSteps: string[];
+        availableSteps: StartupStep[];
+    };
+};
+
+export type StartupStep = {
+    id: string;
+    emoji: string;
+    text: string;
+    isCompleted: boolean;
+    isRequired: boolean;
+    order: number;
+    callback: () => void;
 };

@@ -13,24 +13,23 @@ import Toast from 'react-native-toast-message';
 
 export default function HiddenPlansScreen() {
     const { setSavingPlans, savingPlans } = usePlanStore();
-    const { data, fetchNextPage, hasNextPage, isLoading, isError, refetch, isFetching } =
-        useInfinitePlans({
-            requestQuery: {
-                page_size: 10,
-                is_completed: true,
+    const { data, fetchNextPage, hasNextPage, isLoading, refetch } = useInfinitePlans({
+        requestQuery: {
+            page_size: 10,
+            is_completed: true,
+        },
+        options: {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your plans",
+                    },
+                });
             },
-            options: {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: "We couldn't fetch your plans",
-                        },
-                    });
-                },
-            },
-        });
+        },
+    });
     useFocusEffect(
         useCallback(() => {
             refetch();

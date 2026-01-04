@@ -1,7 +1,7 @@
 import { View, Text } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import React from 'react';
-import { calculateTransactionSchedule, getOrdinalSuffix } from '../utils';
+import { calculateTransactionSchedule } from '../utils';
 
 type ScheduleSummaryProps = {
     frequency: 'daily' | 'weekly' | 'monthly' | 'custom' | '';
@@ -29,8 +29,8 @@ export default function ScheduleSummary({
     if (!summary) return null;
 
     return (
-        <View className='bg-purple-100 w-full rounded-3xl mt-2.5 flex flex-col p-1.5'>
-            <View className='flex flex-col bg-white rounded-[20px] p-3'>
+        <View className='bg-purple-50 border border-purple-100 rounded-3xl w-full mt-2.5 flex flex-col'>
+            <View className='flex flex-col p-3'>
                 <Text style={satoshiFont.satoshiBlack} className='text-sm text-purple-600'>
                     Schedule Summary
                 </Text>

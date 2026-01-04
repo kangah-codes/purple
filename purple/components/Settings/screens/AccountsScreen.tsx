@@ -37,7 +37,8 @@ export default function AccountsScreen() {
             });
             await settingsService.set('allowOverdraw', value);
             setPreference('allowOverdraw', value);
-        } catch (error) {
+        } catch (err) {
+            console.error('[AccountsScreen] Error updating allowOverdraw:', err);
             await logEvent('error_occurred', {
                 error_type: 'SETTING_UPDATE_ERROR',
                 context: `Failed to update ${allowOverdraw} setting:`,
@@ -57,13 +58,11 @@ export default function AccountsScreen() {
         {
             icon: <ScaleIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Allow Overdraw',
-            description: 'Enable overspending by allowing the account balance to drop below zero',
             customItem: () => <Switch value={allowOverdraw} onValueChange={handleOverdrawChange} />,
         },
         {
             icon: <PinIcon width={20} height={20} stroke='#9333ea' />,
             title: 'Pinned Account',
-            description: 'Choose an account to always show first on the home screen',
             callback: () => setShowBottomSheetFlatList('preferences-pinned-account', true),
         },
     ];
@@ -88,7 +87,7 @@ export default function AccountsScreen() {
                     </Text>
                 </View>
             </View>
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

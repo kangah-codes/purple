@@ -22,7 +22,7 @@ export function ActionButton({
         <View className='flex flex-col items-center justify-center space-y-1.5'>
             <Link
                 href={{
-                    pathname: '/transactions/new-transaction',
+                    pathname: '/transactions/new',
                     params: {
                         type,
                         accountId: account.id,

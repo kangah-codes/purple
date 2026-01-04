@@ -10,12 +10,14 @@ import Animated, {
     useSharedValue,
 } from 'react-native-reanimated';
 import tw from 'twrnc';
-import SpendAreaChart from '../../Stats/molecules/SpendAreaChart';
 import AccountCardCarousel from '../molecules/AccountCardCarousel';
 import GettingStartedWidget from '../molecules/GettingStartedWidget';
 import IndexNavigationArea from '../molecules/IndexNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
+import StatsCardsCarousel from '../molecules/StatsCardsCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
+
+const now = new Date();
 
 export default function IndexScreen() {
     const [sectionsLoaded, setSectionsLoaded] = useState({
@@ -79,9 +81,7 @@ export default function IndexScreen() {
                     >
                         <AccountCardCarousel onLoaded={() => handleSectionLoaded('accounts')} />
                         <GettingStartedWidget />
-                        <View className='mt-5'>
-                            <SpendAreaChart />
-                        </View>
+                        <StatsCardsCarousel startDate={now} />
                         <TransactionHistoryList
                             onLoaded={() => handleSectionLoaded('transactions')}
                         />
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         paddingTop: (RNStatusBar.currentHeight ?? 0) + 10,
     },
     scrollView: {
-        paddingBottom: 250,
+        paddingBottom: 150,
     },
     shadow: {
         shadowColor: '#3c0366',

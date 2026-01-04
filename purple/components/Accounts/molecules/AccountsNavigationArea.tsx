@@ -1,12 +1,6 @@
-import { PlusIcon, TrashIcon } from '@/components/SVG/icons/24x24';
-import {
-    BarLineChartIcon,
-    DotsHorizontalIcon,
-    EyeCloseIcon,
-    EyeOpenIcon,
-} from '@/components/SVG/icons/noscale';
+import { PlusIcon } from '@/components/SVG/icons/24x24';
+import { BarLineChartIcon, DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import DropdownMenu from '@/components/Shared/molecules/DropdownMenu';
-import { MenuOption } from '@/components/Shared/molecules/DropdownMenu/MenuOption';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
@@ -20,11 +14,11 @@ export default function AccountsNavigationArea() {
     const [visible, setVisible] = useState(false);
 
     const handleNavigation = useCallback(() => {
-        router.push('/accounts/new-acount');
+        router.push('/accounts/new-account');
     }, []);
 
     return (
-        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+        <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5 border-b border-purple-100'>
             <DropdownMenu
                 visible={visible}
                 handleOpen={() => setVisible(true)}

@@ -1,5 +1,6 @@
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import { Account } from '@/components/Accounts/schema';
+import { isLiabilityAccount } from '@/components/Accounts/utils';
 import { CurrencyCode } from '@/components/Settings/molecules/ExchangeRateItem';
 import {
     CreateRecurringTransaction,
@@ -52,8 +53,11 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 if (!creditAccount || !debitAccount) throw new Error(errorMessage);
 
-                // Check for overdraw on transfer (debit side)
-                if (allowOverdraw === false) {
+                // Check for overdraw on transfer (debit side) - skip for liability accounts
+                const isDebitLiability = isLiabilityAccount(debitAccount.category);
+                const isCreditLiability = isLiabilityAccount(creditAccount.category);
+
+                if (allowOverdraw === false && !isDebitLiability) {
                     const debitAmount = data.amount + data.charges;
                     if (
                         typeof debitAccount.balance === 'number' &&
@@ -86,44 +90,55 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     });
                 }
 
-                // Create debit entry
-                const debitUUID = UUID();
-                await this.db.runAsync(
-                    `INSERT INTO transactions
-                  (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        debitUUID,
-                        data.date,
-                        now,
-                        data.from_account ?? null,
-                        null,
-                        'debit',
-                        data.amount + data.charges,
-                        isNotEmptyString(data.note) ? data.note! : defaultNote,
-                        data.category,
-                        data.from_account ?? null,
-                        data.to_account ?? null,
-                        debitAccount.currency,
-                        data.plan_id ?? null,
-                    ],
-                );
+                // Create debit entry only if source account is not a liability account
+                // For liability accounts, we don't want to reduce the debt when spending from it
+                let debitUUID: string;
+                if (!isDebitLiability) {
+                    debitUUID = UUID();
+                    await this.db.runAsync(
+                        `INSERT INTO transactions
+                      (id, created_at, updated_at, account_id, user_id, type,
+                       amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            debitUUID,
+                            data.date,
+                            now,
+                            data.from_account ?? null,
+                            null,
+                            'debit',
+                            data.amount + data.charges,
+                            isNotEmptyString(data.note) ? data.note! : defaultNote,
+                            data.category,
+                            data.from_account ?? null,
+                            data.to_account ?? null,
+                            debitAccount.currency,
+                            data.plan_id ?? null,
+                            data.budget_id ?? null,
+                        ],
+                    );
+                } else {
+                    // For liability accounts, just create a placeholder UUID for return
+                    debitUUID = UUID();
+                }
 
                 // Create credit entry
+                // For liability accounts, use debit to reduce the debt when receiving payment
                 const creditUUID = UUID();
+                const creditTransactionType = isCreditLiability ? 'debit' : 'credit';
+
                 await this.db.runAsync(
                     `INSERT INTO transactions
                   (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                   amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         creditUUID,
                         data.date,
                         now,
                         data.to_account ?? null,
                         null,
-                        'credit',
+                        creditTransactionType,
                         creditAmount,
                         isNotEmptyString(data.note) ? data.note! : defaultNote,
                         data.category,
@@ -131,12 +146,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.to_account ?? null,
                         creditAccount.currency,
                         data.plan_id ?? null,
+                        data.budget_id ?? null,
                     ],
                 );
 
                 const result = await this.db.getFirstAsync<Transaction>(
                     'SELECT * FROM transactions WHERE id = ?',
-                    [debitUUID],
+                    [isDebitLiability ? creditUUID : debitUUID],
                 );
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
@@ -161,8 +177,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 await this.db.runAsync(
                     `INSERT INTO transactions
                   (id, created_at, updated_at, account_id, user_id, type,
-                   amount, note, category, from_account, to_account, currency, plan_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                   amount, note, category, from_account, to_account, currency, plan_id, budget_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         uuid,
                         data.date,
@@ -177,8 +193,14 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.to_account ?? null,
                         data.currency,
                         data.plan_id ?? null,
+                        data.budget_id ?? null,
                     ],
                 );
+
+                // Update budget summary if budget_id is provided and transaction is a debit (expense)
+                if (data.budget_id && data.type === 'debit') {
+                    await this.updateBudgetSummary(data.budget_id, data.amount, data.category);
+                }
 
                 const result = await this.db.getFirstAsync<Transaction>(
                     'SELECT * FROM transactions WHERE id = ?',
@@ -206,6 +228,38 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             total_items: 1,
             message: 'Created transaction',
         });
+    }
+
+    /**
+     * Updates budget summary and category limits when a transaction is created.
+     * Increments the total_spent in budget_summaries and spent_amount in budget_category_limits.
+     */
+    private async updateBudgetSummary(
+        budgetId: string,
+        amount: number,
+        category: string,
+    ): Promise<void> {
+        try {
+            const now = new Date().toISOString();
+
+            // Update the budget summary total_spent
+            await this.db.runAsync(
+                `UPDATE budget_summaries 
+                SET total_spent = total_spent + ?, updated_at = ?
+                WHERE budget_id = ?`,
+                [amount, now, budgetId],
+            );
+
+            // Update the category limit spent_amount if it exists
+            await this.db.runAsync(
+                `UPDATE budget_category_limits 
+                SET spent_amount = spent_amount + ?, updated_at = ?
+                WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+                [amount, now, budgetId, category],
+            );
+        } catch (error) {
+            console.error('Error updating budget summary:', error);
+        }
     }
 
     async update(id: string, data: EditTransaction): Promise<GenericAPIResponse<Transaction>> {
@@ -319,10 +373,10 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     id, created_at, updated_at, account_id, type, amount, category,
                     recurrence_rule, start_date, end_date, status, metadata,
                     created_at_unix, updated_at_unix, start_date_unix, end_date_unix,
-                    create_next_at, create_next_at_unix, from_account, to_account
+                    create_next_at, create_next_at_unix, from_account, to_account, notes
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )`,
                 [
                     uuid,
@@ -345,6 +399,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     dateToUNIX(firstOccurrence),
                     fromAccount,
                     toAccount,
+                    data.notes ?? null,
                 ],
             );
 
@@ -362,6 +417,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             );
 
             // create transactions for each missed occurrence
+            // TODO: why tf am i creating a new transaction service here???
             const txService = new TransactionSQLiteService(this.db);
             let lastSuccessful: Date | null = null;
             for (const occurrenceDate of missedOccurrences) {
@@ -439,6 +495,157 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         });
     }
 
+    async updateRecurringTransaction(
+        id: string,
+        data: Partial<CreateRecurringTransaction> & {
+            is_active?: boolean;
+            status?: 'active' | 'paused' | 'cancelled';
+        },
+    ): Promise<GenericAPIResponse<RecurringTransaction>> {
+        const now = new Date().toISOString();
+        let updatedRecurring!: RecurringTransaction;
+
+        // First check if the recurring transaction exists
+        const existing = await this.db.getFirstAsync<RecurringTransaction>(
+            'SELECT * FROM recurring_transactions WHERE id = ?',
+            [id],
+        );
+        if (!existing) {
+            throw new HTTPError('Recurring transaction not found', 404);
+        }
+
+        await this.db.withTransactionAsync(async () => {
+            const updateFields: string[] = [];
+            const updateValues: any[] = [];
+
+            // Handle basic fields
+            if (data.amount !== undefined) {
+                updateFields.push('amount = ?');
+                updateValues.push(data.amount);
+            }
+            if (data.category !== undefined) {
+                updateFields.push('category = ?');
+                updateValues.push(data.category);
+            }
+            if (data.type !== undefined) {
+                updateFields.push('type = ?');
+                updateValues.push(data.type);
+            }
+            if (data.account_id !== undefined) {
+                updateFields.push('account_id = ?');
+                updateValues.push(data.account_id);
+            }
+            if (data.from_account !== undefined) {
+                updateFields.push('from_account = ?');
+                updateValues.push(data.from_account);
+            }
+            if (data.to_account !== undefined) {
+                updateFields.push('to_account = ?');
+                updateValues.push(data.to_account);
+            }
+            if (data.notes !== undefined) {
+                updateFields.push('notes = ?');
+                updateValues.push(data.notes);
+            }
+            if (data.currency !== undefined) {
+                updateFields.push('currency = ?');
+                updateValues.push(data.currency);
+            }
+            if (data.status !== undefined) {
+                updateFields.push('status = ?');
+                updateValues.push(data.status);
+                // Update is_active based on status
+                updateFields.push('is_active = ?');
+                updateValues.push(data.status === 'active' ? 1 : 0);
+            } else if (data.is_active !== undefined) {
+                updateFields.push('is_active = ?');
+                updateValues.push(data.is_active ? 1 : 0);
+                // Update status based on is_active
+                updateFields.push('status = ?');
+                updateValues.push(data.is_active ? 'active' : 'paused');
+            }
+
+            // Handle recurrence rule and dates if provided
+            if (data.recurrence_rule !== undefined) {
+                const safeRule = data.recurrence_rule.replace(
+                    /\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/g,
+                    (match) => WEEKDAY_MAP[match],
+                );
+                updateFields.push('recurrence_rule = ?');
+                updateValues.push(safeRule);
+
+                // Recalculate next occurrence if rule changed
+                const startDate = data.start_date
+                    ? new Date(data.start_date)
+                    : new Date(existing.start_date);
+                const dtStart = startOfDay(startDate);
+                const rule = rrulestr(safeRule, { dtstart: dtStart });
+                const nextOccurrence = rule.after(new Date(), true);
+
+                updateFields.push('create_next_at_unix = ?');
+                updateFields.push('create_next_at = datetime(?, "unixepoch")');
+                updateValues.push(nextOccurrence ? dateToUNIX(nextOccurrence) : null);
+                updateValues.push(nextOccurrence ? dateToUNIX(nextOccurrence) : null);
+            }
+
+            if (data.start_date !== undefined) {
+                updateFields.push('start_date = ?');
+                updateFields.push('start_date_unix = ?');
+                updateValues.push(data.start_date);
+                updateValues.push(dateToUNIX(new Date(data.start_date)));
+            }
+
+            if (data.end_date !== undefined) {
+                updateFields.push('end_date = ?');
+                updateFields.push('end_date_unix = ?');
+                updateValues.push(data.end_date);
+                updateValues.push(data.end_date ? dateToUNIX(new Date(data.end_date)) : null);
+            }
+
+            if (data.metadata !== undefined) {
+                updateFields.push('metadata = ?');
+                updateValues.push(JSON.stringify(data.metadata));
+            }
+
+            // Always update the updated_at timestamp
+            updateFields.push('updated_at = ?');
+            updateValues.push(now);
+
+            if (updateFields.length === 0) {
+                throw new HTTPError('No fields to update', 400);
+            }
+
+            // Add the ID for the WHERE clause
+            updateValues.push(id);
+
+            await this.db.runAsync(
+                `UPDATE recurring_transactions 
+                 SET ${updateFields.join(', ')} 
+                 WHERE id = ?`,
+                updateValues,
+            );
+
+            const result = await this.db.getFirstAsync<RecurringTransaction>(
+                'SELECT * FROM recurring_transactions WHERE id = ?',
+                [id],
+            );
+            if (!result) {
+                throw new HTTPError("Couldn't update recurring transaction", 500);
+            }
+            updatedRecurring = result;
+        });
+
+        return this.formatResponse({
+            data: updatedRecurring,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Updated recurring transaction',
+        });
+    }
+
     async list(query: RequestParamQuery): Promise<GenericAPIResponse<Transaction[]>> {
         const {
             page = 1,
@@ -449,42 +656,104 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             accountGroup = false,
             type = false,
             sortOrder = 'desc',
+            search_value = false,
+            // New filter parameters
+            account_ids = false,
+            category = false,
+            min_amount = false,
+            max_amount = false,
         } = query;
-        const offset = (page - 1) * page_size;
         const params: any[] = [];
+        const searchParams: any[] = [];
         const orderDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
         let paginationClause = '';
         let whereClause = 't.deleted_at IS NULL';
+        let searchClause = '';
+
+        // Legacy accountID support (single account)
         if (accountID) {
             whereClause += ' AND t.account_id = ?';
             params.push(accountID);
+            searchParams.push(accountID);
         }
+
+        // New account_ids filter support (multiple accounts)
+        if (account_ids && Array.isArray(account_ids) && account_ids.length > 0) {
+            const placeholders = account_ids.map(() => '?').join(',');
+            whereClause += ` AND t.account_id IN (${placeholders})`;
+            params.push(...account_ids);
+            searchParams.push(...account_ids);
+        }
+
         if (accountGroup) {
             whereClause += ' AND t.account_id IN (SELECT id FROM accounts WHERE category = ?)';
             params.push(accountGroup);
+            searchParams.push(accountGroup);
         }
+
         if (start_date && end_date) {
             whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
             params.push(start_date, end_date);
+            searchParams.push(start_date, end_date);
         }
-        if (type) {
-            whereClause += ' AND type = ?';
+
+        if (search_value) {
+            searchClause = ' AND (t.note LIKE ? OR t.category LIKE ? OR a.name LIKE ?)';
+            const likeTerm = `%${search_value}%`;
+            params.push(likeTerm, likeTerm, likeTerm);
+            searchParams.push(likeTerm, likeTerm, likeTerm);
+        }
+
+        if (type && !Array.isArray(type)) {
+            whereClause += ' AND t.type = ?';
             params.push(type);
+            searchParams.push(type);
         }
+
+        if (type && Array.isArray(type) && type.length > 0) {
+            const placeholders = type.map(() => '?').join(',');
+            whereClause += ` AND t.type IN (${placeholders})`;
+            params.push(...type);
+            searchParams.push(...type);
+        }
+
+        if (category && Array.isArray(category) && category.length > 0) {
+            const placeholders = category.map(() => '?').join(',');
+            whereClause += ` AND t.category IN (${placeholders})`;
+            params.push(...category);
+            searchParams.push(...category);
+        }
+
+        if (min_amount && typeof min_amount === 'number') {
+            whereClause += ' AND t.amount >= ?';
+            params.push(min_amount);
+            searchParams.push(min_amount);
+        }
+
+        if (max_amount && typeof max_amount === 'number') {
+            whereClause += ' AND t.amount <= ?';
+            params.push(max_amount);
+            searchParams.push(max_amount);
+        }
+
         if (Number.isFinite(page_size)) {
             const offset = (page - 1) * page_size;
             paginationClause = 'LIMIT ? OFFSET ?';
             params.push(page_size, offset);
         }
 
+        // For count query, use JOIN if search includes account name
+        const countQuery = search_value
+            ? `SELECT COUNT(*) FROM transactions t INNER JOIN accounts a ON t.account_id = a.id WHERE ${whereClause}${searchClause}`
+            : `SELECT COUNT(*) FROM transactions t WHERE ${whereClause}`;
+
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
-            `SELECT COUNT(*) FROM transactions t WHERE ${whereClause}`,
-            [...params],
+            countQuery,
+            search_value ? [...searchParams] : [...params.slice(0, -2)], // exclude pagination params
         );
         if (!result) throw new Error('Error fetching transactions');
 
-        params.push(page_size, offset);
         const transactions = await this.db.getAllAsync<
             Transaction & {
                 account_id: string;
@@ -502,7 +771,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 a.subcategory as account_subcategory
             FROM transactions t
             INNER JOIN accounts a ON t.account_id = a.id
-            WHERE ${whereClause}
+            WHERE ${whereClause}${searchClause}
             ORDER BY t.created_at ${orderDirection}
             ${paginationClause}`,
             params,
@@ -535,7 +804,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     ): Promise<GenericAPIResponse<RecurringTransaction[]>> {
         const fromUnix = dateToUNIX(from_date);
         const toUnix = dateToUNIX(to_date);
-
+        const occurrences: RecurringTransaction[] = [];
         const recurringDefs = await this.db.getAllAsync<RecurringTransaction>(
             `SELECT * FROM recurring_transactions
             WHERE start_date_unix <= ?
@@ -544,15 +813,17 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             [toUnix, fromUnix],
         );
 
-        const occurrences: RecurringTransaction[] = [];
-
         for (const def of recurringDefs) {
             try {
+                const originalStartDate = new Date(def.start_date);
                 const rule = rrulestr(def.recurrence_rule, {
-                    dtstart: new Date(def.start_date_unix * 1000),
+                    dtstart: originalStartDate,
                 });
 
-                const dates = rule.between(from_date, to_date, true);
+                // Get occurrences between the effective start date and end date
+                const effectiveStartDate =
+                    originalStartDate > from_date ? originalStartDate : from_date;
+                const dates = rule.between(effectiveStartDate, to_date, true);
 
                 for (const d of dates) {
                     const occurrenceUnix = Math.floor(d.getTime() / 1000);
@@ -648,14 +919,18 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         }
 
         const result = await this.db.getFirstAsync<{ 'COUNT(*)': number }>(
-            `SELECT COUNT(*) FROM recurring_transactions rt WHERE ${whereClause}`,
+            `SELECT COUNT(*) FROM recurring_transactions rt 
+             INNER JOIN accounts a ON rt.account_id = a.id 
+             WHERE ${whereClause}`,
             [...params],
         );
         if (!result) throw new Error('Error fetching recurring transactions');
 
         params.push(page_size, offset);
         const transactions = await this.db.getAllAsync<RecurringTransaction>(
-            `SELECT rt.* FROM recurring_transactions rt
+            `SELECT rt.*, a.currency AS account_currency 
+             FROM recurring_transactions rt
+             INNER JOIN accounts a ON rt.account_id = a.id
              WHERE ${whereClause}
              ORDER BY rt.start_date DESC
              ${paginationClause}`,

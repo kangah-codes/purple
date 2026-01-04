@@ -1,30 +1,51 @@
 import { Text, View } from '@/components/Shared/styled';
+import { EMPTY_LIST_STATES } from '@/lib/constants/emptyListStates';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { Image } from 'expo-image';
+import { pickRandom } from '@/lib/utils/array';
+import { Image, ImageSource } from 'expo-image';
 import React from 'react';
-import tw from 'twrnc';
 
 type EmptyListProps = {
-    message: string;
+    message?: string;
     title?: string;
+    image?: string | number | ImageSource | ImageSource[] | string[] | null | undefined;
+    imageDetails?: {
+        showImage?: boolean;
+        width?: number;
+        height?: number;
+    };
 };
 
-export default function EmptyList({ message, title }: EmptyListProps) {
+export default function EmptyList({
+    message,
+    title,
+    image,
+    imageDetails = { showImage: true, width: 200, height: 200 },
+}: EmptyListProps) {
+    const msg = pickRandom(EMPTY_LIST_STATES);
+    const { showImage = true, width = 200, height = 200 } = imageDetails ?? {};
+
     return (
         <View className='flex flex-col items-center justify-center px-5'>
-            <Image
-                source={require('@/assets/images/graphics/20.png')}
-                style={tw`h-[170px] w-[200px]`}
-            />
+            {showImage && (
+                <Image
+                    // eslint-disable-next-line @typescript-eslint/no-require-imports
+                    source={image ? image : require('@/assets/images/graphics/20.png')}
+                    style={{
+                        width,
+                        height,
+                    }}
+                />
+            )}
             <View className='flex flex-col'>
-                <Text style={satoshiFont.satoshiBlack} className='text-2xl text-black text-center'>
-                    {title || 'Wow, such empty.'}
+                <Text style={satoshiFont.satoshiBlack} className='text-lg text-black text-center'>
+                    {title ?? msg.title}
                 </Text>
                 <Text
                     style={satoshiFont.satoshiBold}
                     className='text-sm text-purple-500 text-center'
                 >
-                    {message}
+                    {message ?? msg.message}
                 </Text>
             </View>
         </View>

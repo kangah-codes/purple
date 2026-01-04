@@ -1,13 +1,11 @@
 import { usePreferences } from '@/components/Settings/hooks';
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
+import { isTransferTransaction } from '@/components/Transactions/utils';
 import { satoshiFont } from '@/lib/constants/fonts';
+import { generatePalette } from '@/lib/utils/colour';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { generatePalette } from '@/lib/utils/colour';
-import { mockTransactions } from '../contants';
-import { ChevronDownIcon } from '@/components/SVG/icons/16x16';
 
 type SpendOverviewProps = {
     transactions: Transaction[];
@@ -83,6 +81,10 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
 
         for (const tx of transactions) {
             if (!tx?.amount || !tx?.type || !tx?.category) continue;
+
+            // Skip transactions that are part of transfers to avoid inflating income/expense totals
+            if (isTransferTransaction(tx)) continue;
+
             if (tx.type === 'debit') {
                 totalDebits += tx.amount;
                 debitMap[tx.category] = (debitMap[tx.category] || 0) + tx.amount;
@@ -139,7 +141,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
                                     style={{ backgroundColor: slice.color }}
                                 />
                                 <Text style={[satoshiFont.satoshiBold]} className='text-xs ml-1.5'>
-                                    {slice.category.slice(3)}{' '}
+                                    {slice.category.split(' ').slice(1).join('')}{' '}
                                     <Text style={[satoshiFont.satoshiBlack]} className='text-xs'>
                                         {percent}%
                                     </Text>
@@ -167,7 +169,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
     };
 
     return (
-        <View className='flex flex-col p-5 space-y-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
+        <View className='flex flex-col space-y-5'>
             <View className='flex flex-col space-y-2.5'>
                 <View>
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
@@ -220,7 +222,3 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    card: {},
-});

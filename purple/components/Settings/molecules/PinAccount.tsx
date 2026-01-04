@@ -60,7 +60,7 @@ export default function PinAccount() {
                 paddingHorizontal: 20,
                 backgroundColor: 'white',
             }}
-            // @ts-expect-error
+            // @ts-expect-error idk
             renderItem={renderItem}
             keyExtractor={(item: Account) => item.id}
         />

@@ -80,7 +80,6 @@ export function useNotifications() {
             const alreadyScheduled = existing.some((n) => n.content.data.dailyReminder === true);
 
             if (alreadyScheduled) {
-                console.log('Daily notification already scheduled, skipping.');
                 return;
             }
 
@@ -129,7 +128,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
         if (!projectId) throw new Error('Project ID not found for Expo push token');
 
         const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-        console.log('Expo push token:', token);
         return token;
     } catch (e) {
         console.error('Error getting Expo push token:', e);

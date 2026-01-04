@@ -29,6 +29,20 @@ export function PlusIcon(props: SvgProps) {
     );
 }
 
+export function MinusIcon(props: SvgProps) {
+    return (
+        <Svg width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>
+            <Path
+                d='M5 12H19'
+                stroke={props.stroke}
+                strokeWidth={props.strokeWidth ?? 2}
+                strokeLinecap='round'
+                strokeLinejoin='round'
+            />
+        </Svg>
+    );
+}
+
 export function ChevronLeftIcon(props: SvgProps) {
     return (
         <Svg width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>

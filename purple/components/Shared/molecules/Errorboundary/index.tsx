@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
+import * as Sentry from '@sentry/react-native';
 import { Image } from 'expo-image';
 import { ErrorBoundaryProps as ExpoRouterErrorBoundaryProps } from 'expo-router';
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import tw from 'twrnc';
-import * as Sentry from '@sentry/react-native';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -48,7 +48,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                         </Text>
                         <Text
                             style={satoshiFont.satoshiBold}
-                            className='text-sm text-black text-center'
+                            className='text-sm text-purple-500 text-center'
                         >
                             We've been alerted and are looking into this. Hang tight!
                         </Text>
@@ -81,34 +81,3 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         return this.props.children;
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    errorMessage: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-});

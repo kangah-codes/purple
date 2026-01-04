@@ -1,10 +1,9 @@
-import { BaseSQLiteService } from './SQLiteService';
-import { Account } from '@/components/Accounts/schema';
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
-import HTTPError from '../utils/error';
+import { Account } from '@/components/Accounts/schema';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import HTTPError from '../utils/error';
 import { UUID } from '../utils/helpers';
-import { format, parse } from 'date-fns';
+import { BaseSQLiteService } from './SQLiteService';
 
 type CreateAccountPayload = {
     user_id?: string;
@@ -92,6 +91,66 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
             total: 1,
             total_items: 1,
             message: 'Success',
+        });
+    }
+
+    async update(
+        id: string,
+        data: Partial<
+            Omit<
+                Account,
+                | 'id'
+                | 'created_at'
+                | 'created_at_unix'
+                | 'deleted_at'
+                | 'deleted_at_unix'
+                | 'user_id'
+                | 'is_default_account'
+            >
+        >,
+    ): Promise<GenericAPIResponse<Account>> {
+        const account = await this.db.getFirstAsync<Account>(
+            `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
+            [id],
+        );
+        if (!account) throw new HTTPError('Account not found', 404);
+
+        const fields = Object.keys(data);
+        if (fields.length === 0) {
+            return this.formatResponse({
+                data: account,
+                status: 200,
+                page: 1,
+                page_size: 1,
+                total: 1,
+                total_items: 1,
+                message: 'No changes made',
+            });
+        }
+
+        const setString = fields.map((field) => `${field} = ?`).join(', ');
+        const values = fields.map((field) => (data as any)[field]);
+        values.push(new Date().toISOString()); // updated_at
+        values.push(Math.floor(Date.now() / 1000).toString()); // updated_at_unix
+        values.push(id); // where id = ?
+
+        const updateQuery = `UPDATE accounts SET ${setString}, updated_at = ?, updated_at_unix = ? WHERE id = ?`;
+        await this.db.runAsync(updateQuery, values);
+
+        const updatedAccount = await this.db.getFirstAsync<Account>(
+            `SELECT * FROM accounts WHERE deleted_at IS NULL AND id = ?`,
+            [id],
+        );
+        if (!updatedAccount) throw new HTTPError('Error fetching updated account', 500);
+
+        return this.formatResponse({
+            data: updatedAccount,
+            status: 200,
+            page: 1,
+            page_size: 1,
+            total: 1,
+            total_items: 1,
+            message: 'Updated account',
         });
     }
 

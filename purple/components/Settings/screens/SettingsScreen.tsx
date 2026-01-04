@@ -1,28 +1,16 @@
-import {
-    LinearGradient,
-    SafeAreaView,
-    Text,
-    TouchableOpacity,
-    View,
-} from '@/components/Shared/styled';
+import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import ProfilePages from '../molecules/ProfilePages';
 import { router } from 'expo-router';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-
-const linearGradientColours = ['#D8B4FE', '#fff'];
+import SettingsGroups from '../molecules/SettingsGroups';
 
 export default function SettingsScreen() {
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <LinearGradient
-                className='flex px-5 py-2.5 h-[350] absolute w-full'
-                colors={linearGradientColours}
-            />
             <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
                 <TouchableOpacity
                     onPress={router.back}
@@ -37,8 +25,8 @@ export default function SettingsScreen() {
                     </Text>
                 </View>
             </View>
-            <View className='mt-2.5'>
-                <ProfilePages />
+            <View className='mt-2.5 px-5'>
+                <SettingsGroups />
             </View>
         </SafeAreaView>
     );

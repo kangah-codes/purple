@@ -1,7 +1,6 @@
-import Toast from 'react-native-toast-message';
+import { usePreferencesStore } from '@/components/Settings/state';
 import { currencies } from '../constants/currencies';
 import { NativeStorage } from '../utils/storage';
-import { usePreferencesStore } from '@/components/Settings/state';
 
 type CurrencyCode = Lowercase<(typeof currencies)[number]['code']>;
 export type CurrencyRates = {

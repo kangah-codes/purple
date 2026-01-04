@@ -19,11 +19,10 @@ import {
 import { ACCOUNT_SUBGROUP_TYPES, ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
 import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
-import { useAnalytics, useScreenTracking } from '@/lib/hooks/useAnalytics';
-import { nativeStorage } from '@/lib/utils/storage';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -67,7 +66,8 @@ export default function NewAccountScreen() {
                 balance: Number(data.balance),
             },
             {
-                onError: () => {
+                onError: (err) => {
+                    console.error('[NewAccountScreen] Error creating account:', err);
                     Toast.show({
                         type: 'error',
                         props: {
@@ -92,19 +92,16 @@ export default function NewAccountScreen() {
                         object_type: 'account',
                         payload: data,
                     });
-                    router.replace('/(tabs)/accounts');
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)/accounts');
+                    }
                 },
             },
         );
     };
 
-    const renderItem = useCallback((item: any) => {
-        return (
-            <View className='py-3 border-b border-purple-100'>
-                <Text style={satoshiFont.satoshiBold}>{item.label}</Text>
-            </View>
-        );
-    }, []);
     const renderSelectedCurrency = () => {
         const selectedCode = getValues('currency');
         const currency = currencies.find((c) => c.code === selectedCode);
@@ -214,7 +211,6 @@ export default function NewAccountScreen() {
                                                 return acc;
                                             }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '55%', '60%']}
-                                            renderItem={renderItem}
                                             value={value}
                                             onChange={onChange}
                                         />
@@ -247,7 +243,11 @@ export default function NewAccountScreen() {
                                         <SelectField
                                             selectKey='newAccountSubcategory'
                                             options={(
-                                                ACCOUNT_SUBGROUP_TYPES[getValues('category')] ?? []
+                                                ACCOUNT_SUBGROUP_TYPES[
+                                                    getValues(
+                                                        'category',
+                                                    ) as keyof typeof ACCOUNT_SUBGROUP_TYPES
+                                                ] ?? []
                                             ).reduce((acc, curr) => {
                                                 acc[curr] = {
                                                     label: curr,
@@ -256,7 +256,6 @@ export default function NewAccountScreen() {
                                                 return acc;
                                             }, {} as Record<string, { label: string; value: string }>)}
                                             customSnapPoints={['50%', '55%', '60%']}
-                                            renderItem={renderItem}
                                             value={value}
                                             onChange={onChange}
                                         />

@@ -35,7 +35,6 @@ export default function CurrencyScreen() {
             icon: <CurrencyOption code={currency} />,
             title: 'Default Currency',
             callback: () => setShowBottomSheetFlatList('preferences-currency', true),
-            description: 'Select a default currency for all transactions',
             renderIcon: () => {
                 const settingCurrency = currencies.find(
                     (cur) => cur.code === currency,
@@ -52,8 +51,6 @@ export default function CurrencyScreen() {
                   {
                       icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
                       title: 'Currency Conversion',
-                      description:
-                          'Auto-convert amounts between different currencies when moving money',
                       customItem: () => (
                           <Switch
                               value={allowCurrencyConversion}
@@ -72,13 +69,10 @@ export default function CurrencyScreen() {
                       icon: <CoinSwapIcon width={20} height={20} stroke={'#9333ea'} />,
                       title: 'Exchange Rates',
                       link: '/settings/currencies/exchange-rates',
-                      description: 'View latest exchange rates',
                   },
               ]
             : []),
     ];
-
-    console.log(currency);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
@@ -91,7 +85,6 @@ export default function CurrencyScreen() {
                             new_value: item.code,
                             setting: 'currency',
                         });
-                        console.log('Cghanging currency, old: ', currency, ' new: ', item.code);
                         setPreference('currency', item.code);
                         setShowBottomSheetFlatList('preferences-currency', false);
                         CurrencyService.getInstance().fetchExchangeRates(
@@ -115,7 +108,7 @@ export default function CurrencyScreen() {
                 </View>
             </View>
 
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

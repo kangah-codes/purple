@@ -203,10 +203,10 @@ type TransformObject<T, U extends KeyMapping<T>[]> = {
     [K in U[number] as K[1]]: K extends [infer OldKey, any, (value: any) => infer R]
         ? R
         : K extends [infer OldKey, any]
-          ? OldKey extends keyof T
-              ? T[OldKey]
-              : never
-          : never;
+        ? OldKey extends keyof T
+            ? T[OldKey]
+            : never
+        : never;
 } & Omit<T, U[number][0]>;
 
 export function transformObject<T extends object, U extends KeyMapping<T>[]>(
@@ -230,7 +230,8 @@ export function transformObject<T extends object, U extends KeyMapping<T>[]>(
                 delete transformedObj[oldKey];
             }
         } else {
-            throw new Error(`Key ${String(oldKey)} does not exist in the object.`);
+            console.log(`Key ${String(oldKey)} does not exist in the object.`);
+            // throw new Error(`Key ${String(oldKey)} does not exist in the object.`);
         }
     }
     return transformedObj as TransformObject<T, U>;

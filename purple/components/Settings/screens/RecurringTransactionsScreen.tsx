@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import UpcomingTransactionCard from '@/components/Transactions/molecules/UpcomingTransactionCard';
 import { RecurringTransaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
@@ -22,24 +21,23 @@ import RecurringTransactionCard from '@/components/Transactions/molecules/Recurr
 
 function RecurringTransactionsScreen() {
     const { recurringTransactions, setRecurringTransactions } = useTransactionStore();
-    const { data, fetchNextPage, hasNextPage, refetch, isRefetching } =
-        useInfiniteRecurringTransactions({
-            requestQuery: {
-                page_size: 10,
-                status: 'active',
+    const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteRecurringTransactions({
+        requestQuery: {
+            page_size: 10,
+            status: 'active',
+        },
+        options: {
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your transactions",
+                    },
+                });
             },
-            options: {
-                onError: () => {
-                    Toast.show({
-                        type: 'error',
-                        props: {
-                            text1: 'Error!',
-                            text2: "We couldn't fetch your transactions",
-                        },
-                    });
-                },
-            },
-        });
+        },
+    });
 
     const renderItem = useCallback(
         ({ item }: { item: RecurringTransaction }) => (

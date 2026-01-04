@@ -119,8 +119,6 @@ export default function PrivacyScreen() {
         {
             icon: <BarLineChartIcon width={20} height={20} stroke='#9333ea' />,
             title: 'Usage statistics',
-            description:
-                'Allow Purple to track app metrics and usage patterns to improve features and user experience',
             customItem: () => (
                 <Switch
                     value={trackUsageStatistics}
@@ -170,7 +168,7 @@ export default function PrivacyScreen() {
                 </View>
             </View>
 
-            <View className='mt-5'>
+            <View>
                 <SettingsList items={settingsItems} />
             </View>
         </SafeAreaView>

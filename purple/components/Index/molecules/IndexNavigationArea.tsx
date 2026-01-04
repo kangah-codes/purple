@@ -1,5 +1,5 @@
-import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { BellIcon, SettingsCogIcon } from '@/components/SVG/icons/24x24';
+import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
@@ -17,17 +17,17 @@ export default function IndexNavigationArea() {
                 </Text>
             </View>
 
-            <View className='flex flex-row space-x-2.5'>
+            <View className='flex flex-row space-x-2.5 items-center'>
                 <TouchableOpacity
                     onPress={() => router.push('/settings')}
                     className='bg-purple-50 p-2 flex items-center justify-center rounded-full'
                 >
                     <SettingsCogIcon stroke='#c27aff' strokeWidth={2} width={24} height={24} />
                 </TouchableOpacity>
-                <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
+                {/* <LinearGradient className='rounded-full relative' colors={['#c084fc', '#9333ea']}>
                     <TouchableOpacity
-                        className='flex items-center justify-center rounded-full w-10 h-10'
-                        onPress={() => router.push('/transactions/new-transaction')}
+                        className='flex items-center justify-center rounded-full w-9 h-9'
+                        onPress={() => router.push('/notifications')}
                     >
                         <BellIcon stroke={'#fff'} width={20} height={20} strokeWidth={2} />
                     </TouchableOpacity>
@@ -39,7 +39,7 @@ export default function IndexNavigationArea() {
                             9+
                         </Text>
                     </View>
-                </LinearGradient>
+                </LinearGradient> */}
             </View>
         </View>
     );

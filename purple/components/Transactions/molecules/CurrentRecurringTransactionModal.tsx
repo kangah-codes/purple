@@ -5,7 +5,6 @@ import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBo
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import {
     useDeleteRecurringTransaction,
-    useDeleteTransaction,
     useTransactionStore,
 } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
@@ -17,12 +16,13 @@ import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { capitaliseFirstLetter, extractEmojiOrDefault } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg from 'react-native-svg';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { ruleToText } from '../utils';
+import { format } from 'date-fns';
 
 const snapPoints = ['55%', '70%', '90%'];
 const linearGradient = ['#c084fc', '#9333ea'];
@@ -165,7 +165,20 @@ export default function CurrentRecurringTransactionModal({
                             )}
                         />
                         <ReceiptDetail label='Account' value={account.name} />
-                        <ReceiptDetail label='Date' value={`${date} at ${time}`} />
+                        <ReceiptDetail label='Created at' value={`${date} at ${time}`} />
+                        <ReceiptDetail
+                            label='Starts on'
+                            value={format(currentRecurringTransaction.start_date, 'dd MMM, yyyy')}
+                        />
+                        {currentRecurringTransaction.end_date && (
+                            <ReceiptDetail
+                                label='Ends on'
+                                value={format(currentRecurringTransaction.end_date, 'dd MMM, yyyy')}
+                            />
+                        )}
+                        {currentRecurringTransaction.notes && (
+                            <ReceiptDetail label='Note' value={currentRecurringTransaction.notes} />
+                        )}
                         <View className='border-b border-purple-100 w-full mb-5' />
                         <View className='flex flex-row space-x-2 w-[60%] justify-between'>
                             <LinearGradient
@@ -177,7 +190,7 @@ export default function CurrentRecurringTransactionModal({
                                     onPress={() => {
                                         setShowBottomSheetModal(modalKey, false);
                                         router.push({
-                                            pathname: '/transactions/edit-transaction',
+                                            pathname: '/transactions/recurring/edit',
                                         });
                                     }}
                                 >

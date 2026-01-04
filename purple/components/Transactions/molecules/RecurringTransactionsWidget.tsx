@@ -4,18 +4,11 @@ import { LinearGradient, Text, View } from '@/components/Shared/styled';
 import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
-import {
-    eachDayOfInterval,
-    endOfMonth,
-    format,
-    getDay,
-    getDaysInMonth,
-    startOfMonth,
-} from 'date-fns';
+import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useRecurringTransactions, useTransactions } from '../hooks';
+import { useUpcomingRecurringTransactions } from '../hooks';
 import UpcomingTransactionCard from './UpcomingTransactionCard';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 
@@ -28,11 +21,11 @@ const numBlocksPerRow = 7;
 const monthDays = eachDayOfInterval({ start, end });
 const offset = monthDays[0].getDay();
 const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
+const startDate = startOfMonth(now);
+const endDate = endOfMonth(now);
 
 export default function RecurringTransactionsWidget() {
-    const startDate = startOfMonth(new Date());
-    const endDate = endOfMonth(new Date());
-    const { data, refetch } = useRecurringTransactions({
+    const { data, refetch } = useUpcomingRecurringTransactions({
         // its ok to use infinity here since we WANT to fetch all
         // recurring tx within the month
         // TODO: I should probably refactor the hook or add a new one to return
@@ -66,17 +59,6 @@ export default function RecurringTransactionsWidget() {
         };
     }, [data]);
 
-    // Build a set of dates that have at least one transaction actually created
-    const createdDatesSet = useMemo(() => {
-        const txs = transactions.transactions;
-        const set = new Set<string>();
-        txs.forEach((t) => {
-            const d = format(new Date(t.last_created_at), 'yyyy-MM-dd');
-            set.add(d);
-        });
-        return set;
-    }, [transactions]);
-
     const heatmapData = useMemo(() => {
         const groupedTransactions = groupBy(transactions.transactions, 'create_next_at_formatted');
         return monthDays.map((day, index) => {
@@ -89,11 +71,23 @@ export default function RecurringTransactionsWidget() {
         });
     }, [monthDays, transactions]);
 
+    const expectedOccurrences = useMemo(() => {
+        const occurrencesSet = new Set<string>();
+
+        (data?.data ?? []).forEach((recurring) => {
+            const key = format(new Date(recurring.create_next_at), 'yyyy-MM-dd');
+            occurrencesSet.add(key);
+            console.log(occurrencesSet);
+        });
+
+        return occurrencesSet;
+    }, [data]);
+
     const renderCell = useCallback(
         (data: CellData) => {
-            const hasScheduled = data.value > 0;
+            const hasScheduled = expectedOccurrences.has(data.key);
+            const showCheckmark = hasScheduled && new Date(data.key) <= now;
             const cellColors = hasScheduled ? colors[4] : colors[0];
-            const hasCreated = createdDatesSet.has(data.key);
 
             return (
                 <LinearGradient
@@ -101,13 +95,13 @@ export default function RecurringTransactionsWidget() {
                     colors={cellColors}
                     className='flex items-center justify-center'
                 >
-                    {hasScheduled && hasCreated && (
+                    {showCheckmark && (
                         <CheckMarkIcon stroke='#fff' width={16} height={16} strokeWidth={3} />
                     )}
                 </LinearGradient>
             );
         },
-        [heatmapData, createdDatesSet],
+        [expectedOccurrences],
     );
 
     useRefreshOnFocus(refetch);
@@ -115,7 +109,7 @@ export default function RecurringTransactionsWidget() {
     if (transactions.transactions.length === 0) return null;
 
     return (
-        <View className='w-full space-y-5 flex flex-col px-5 my-5'>
+        <View className='w-full space-y-5 flex flex-col px-5 mb-5'>
             <View className='flex flex-row w-full justify-between'>
                 <View className='w-[38%] flex flex-col justify-between items-start'>
                     <View className='bg-purple-50 px-2 py-1 rounded-full'>
@@ -156,7 +150,15 @@ export default function RecurringTransactionsWidget() {
                     <View className='flex flex-col space-y-2'>
                         {transactions.slicedTransactions.map((transaction, index) => {
                             return (
-                                <UpcomingTransactionCard transaction={transaction} key={index} />
+                                <>
+                                    <UpcomingTransactionCard
+                                        transaction={transaction}
+                                        key={index}
+                                    />
+                                    {index !== transactions.slicedTransactions.length - 1 && (
+                                        <View className='h-1 border-b border-purple-100' />
+                                    )}
+                                </>
                             );
                         })}
                     </View>

@@ -153,7 +153,7 @@ export default function ExchangeRatesScreen() {
             </View>
             <FlashList
                 estimatedItemSize={100}
-                // @ts-expect-error
+                // @ts-expect-error idk
                 data={filteredData}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={styles.contentContainer}

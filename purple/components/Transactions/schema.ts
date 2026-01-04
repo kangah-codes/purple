@@ -24,6 +24,7 @@ export type Transaction = {
     created_at: string;
     currency: string;
     plan_id: string;
+    budget_id: string | null;
     created_at_unix: string;
     updated_at_unix: string;
     deleted_at_unix: string | null;
@@ -56,6 +57,8 @@ export type RecurringTransaction = {
     created_at_unix: string;
     updated_at_unix: string;
     deleted_at_unix: string | null;
+    account_currency: string;
+    notes: string | null;
 };
 
 export type CreateTransaction = {
@@ -68,6 +71,7 @@ export type CreateTransaction = {
     to_account?: string;
     currency: string;
     plan_id?: string;
+    budget_id?: string | null;
     date: string;
     charges: number;
 };
@@ -84,7 +88,7 @@ export type EditTransaction = {
 
 export type CreateRecurringTransaction = {
     account_id: string;
-    type: Transaction['type']; // This already supports 'transfer'
+    type: Transaction['type'];
     amount: number;
     category: string;
     recurrence_rule: string;
@@ -92,7 +96,34 @@ export type CreateRecurringTransaction = {
     end_date?: string;
     metadata?: Record<string, any>;
     currency: string;
-    // Add fields needed for transfer transactions
     from_account?: string;
     to_account?: string;
+    notes?: string;
+};
+
+export type EditRecurringTransaction = {
+    account_id: string;
+    type: 'debit' | 'credit' | 'transfer';
+    amount: number;
+    category: string;
+    recurrence_rule: string;
+    start_date: string;
+    end_date?: string;
+    metadata?: Record<string, any>;
+    currency: string;
+    from_account?: string;
+    to_account?: string;
+    is_active: boolean;
+    status: 'active' | 'paused' | 'cancelled';
+    notes?: string;
+};
+
+export type TransactionsFilter = {
+    type?: Transaction['type'][];
+    category?: string[];
+    account_ids?: string[];
+    min_amount?: number;
+    max_amount?: number;
+    start_date?: string;
+    end_date?: string;
 };

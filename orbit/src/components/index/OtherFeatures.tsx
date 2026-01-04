@@ -106,7 +106,8 @@ export default function OtherFeatures() {
                             data-nimg={1}
                             className='rounded-md z-[2]'
                             style={{ color: 'transparent' }}
-                            src='/graphics/transaction_modal.png'
+                            src='/graphics/screenshots/transaction_screen.png'
+                            quality={100}
                         />
                         <div className='absolute bottom-3 w-[276px] h-3 rounded-full bg-purple-900/20 blur-md' />
                     </div>

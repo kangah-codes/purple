@@ -34,12 +34,13 @@ export default function AccountsAreaChart() {
             accountGroupData.transactions,
             startDate,
             endDate,
+            accountGroupData.previousBalance,
         );
         return {
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 102),
         };
-    }, [accountGroupData.transactions, startDate, endDate]);
+    }, [accountGroupData.transactions, startDate, endDate, accountGroupData.previousBalance]);
 
     const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
     const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
@@ -112,7 +113,7 @@ export default function AccountsAreaChart() {
                         >
                             {formatCurrencyAccurate(
                                 accountGroupData.currency,
-                                accountGroupData.currentBalance,
+                                accountGroupData.absoluteChange,
                             )}{' '}
                             ({accountGroupData.percentageChange}%)
                         </Text>

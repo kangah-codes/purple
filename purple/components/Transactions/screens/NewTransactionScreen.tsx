@@ -1,4 +1,5 @@
-import { useAccountStore } from '@/components/Accounts/hooks';
+import { useAccounts } from '@/components/Accounts/hooks';
+import { useBudgetForMonth } from '@/components/Plans/hooks';
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
@@ -24,7 +25,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar } from 'react-native';
+import {
+    ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    StatusBar as RNStatusBar,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { DAYS_OF_MONTH, DAYS_OF_WEEK, TRANSACTION_RECURRENCE_RULES } from '../constants';
@@ -32,6 +39,7 @@ import { useCreateRecurringTransaction, useCreateTransaction } from '../hooks';
 import ScheduleSummary from '../molecules/ScheduleSummary';
 import { generateICalRRule, getMinimumEndDate } from '../utils';
 import HTTPError from '@/lib/utils/error';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 
 type FormData = {
     amount: string;
@@ -53,30 +61,39 @@ type FormData = {
 };
 
 export default function NewTransactionScreen() {
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { type, accountId } = useLocalSearchParams();
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
     const queryClient = useQueryClient();
-    const { accounts, getAccountById } = useAccountStore();
     const { logEvent } = useAnalytics();
-    const {
-        preferences: { allowOverdraw },
-    } = usePreferences();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
     const [isRecurring, setIsRecurring] = useState(false);
+    const [countInBudget, setCountInBudget] = useState(true);
     const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
     const { mutate: createRecurringTransaction, isLoading: isCreatingRecurring } =
         useCreateRecurringTransaction();
-
+    const { data } = useAccounts({
+        requestQuery: {},
+    });
     const isLoading = isCreatingTransaction || isCreatingRecurring;
+    const accounts = data?.data || [];
+    const accountsToUse = accounts
+        .filter((a) => a.is_open)
+        .reduce((acc, curr) => {
+            acc[curr.id] = {
+                label: curr.name,
+                value: curr.id,
+            };
+            return acc;
+        }, {} as Record<string, { label: string; value: string }>);
 
     const {
         control,
         handleSubmit,
         formState: { errors },
         setValue,
-        watch,
     } = useForm<FormData>({
         defaultValues: {
             amount: '',
@@ -137,6 +154,22 @@ export default function NewTransactionScreen() {
         name: 'dayOfMonth',
     });
 
+    // Watch the transaction date to determine which budget to use
+    const transactionDateISO = useWatch({
+        control,
+        name: 'date',
+        defaultValue: new Date().toISOString(),
+    });
+
+    // Get the month and year from the transaction date for budget lookup
+    const transactionDate = transactionDateISO ? new Date(transactionDateISO) : new Date();
+    const transactionMonth = transactionDate.getMonth() + 1; // 1-indexed
+    const transactionYear = transactionDate.getFullYear();
+
+    // Fetch the budget for the transaction's month/year
+    const { data: budgetData } = useBudgetForMonth(transactionMonth, transactionYear);
+    const budgetForMonth = budgetData?.data;
+
     const date = dateISO ? new Date(dateISO) : new Date();
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dayOfMonth = frequency === 'monthly' ? selectedDayOfMonth : undefined;
@@ -155,8 +188,7 @@ export default function NewTransactionScreen() {
         Keyboard.dismiss();
 
         const accountId = transactionType !== 'transfer' ? data.accountId : data.fromAccount;
-        // check if overdraw is allowed
-        const account = getAccountById(accountId);
+        const account = accounts.find((acc) => acc.id === accountId);
         if (!account) {
             await logEvent('error_occurred', {
                 error_type: 'NOT_FOUND_ERROR',
@@ -200,6 +232,7 @@ export default function NewTransactionScreen() {
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
                 ['recurrence_rule', 'recurrence_rule', () => rrule],
+                ['note', 'notes', (value) => value ?? null],
             ]);
 
             // For transfers, ensure both from_account and to_account are included
@@ -223,6 +256,10 @@ export default function NewTransactionScreen() {
                     router.back();
                 },
                 onError: (error) => {
+                    console.error(
+                        '[NewRecurringTransactionScreen] Error creating transaction:',
+                        error,
+                    );
                     if (error instanceof HTTPError) {
                         Toast.show({
                             type: 'error',
@@ -239,6 +276,9 @@ export default function NewTransactionScreen() {
             });
         } else {
             // Handle regular transaction creation
+            // Determine budget_id based on countInBudget toggle and if budget exists for the month
+            const budgetId = countInBudget && budgetForMonth ? budgetForMonth.id : null;
+
             let transformedData = transformObject(data, [
                 ['toAccount', 'to_account'],
                 ['fromAccount', 'from_account'],
@@ -246,6 +286,12 @@ export default function NewTransactionScreen() {
                 ['amount', 'amount', (value) => Number(value)],
                 ['charges', 'charges', (value) => Number(value)],
             ]);
+
+            // Add budget_id to the transaction data
+            transformedData = {
+                ...transformedData,
+                budget_id: budgetId ?? undefined,
+            };
 
             if (transactionType !== 'transfer') {
                 transformedData = omit(transformedData, [
@@ -255,7 +301,14 @@ export default function NewTransactionScreen() {
             }
 
             createTransaction(transformedData, {
-                onError: () => {
+                onError: (err) => {
+                    if (err instanceof HTTPError) {
+                        Toast.show({
+                            type: 'error',
+                            props: { text1: 'Error!', text2: err.message },
+                        });
+                        return;
+                    }
                     Toast.show({
                         type: 'error',
                         props: { text1: 'Error!', text2: "Couldn't create transaction" },
@@ -263,6 +316,11 @@ export default function NewTransactionScreen() {
                 },
                 onSuccess: () => {
                     queryClient.invalidateQueries({ queryKey: ['transactions', 'accounts'] });
+                    // Also invalidate budget queries to reflect updated spent amounts
+                    if (budgetId) {
+                        queryClient.invalidateQueries({ queryKey: ['budget'] });
+                        queryClient.invalidateQueries({ queryKey: ['budget-earned-income'] });
+                    }
                     Toast.show({
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction created successfully' },
@@ -291,13 +349,7 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionDebitAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.id] = {
-                                                    label: curr.name,
-                                                    value: curr.id,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            options={accountsToUse}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -333,13 +385,7 @@ export default function NewTransactionScreen() {
                                     <>
                                         <SelectField
                                             selectKey='newTransactionCreditAccount'
-                                            options={accounts.reduce((acc, curr) => {
-                                                acc[curr.id] = {
-                                                    label: curr.name,
-                                                    value: curr.id,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, string>)}
+                                            options={accountsToUse}
                                             customSnapPoints={['50%', '70%']}
                                             value={value}
                                             onChange={(val) => {
@@ -410,13 +456,7 @@ export default function NewTransactionScreen() {
                             <>
                                 <SelectField
                                     selectKey='newTransactionAccount'
-                                    options={accounts.reduce((acc, curr) => {
-                                        acc[curr.id] = {
-                                            label: curr.name,
-                                            value: curr.id,
-                                        };
-                                        return acc;
-                                    }, {} as Record<string, { label: string; value: string }>)}
+                                    options={accountsToUse}
                                     customSnapPoints={['50%', '70%']}
                                     value={value}
                                     onChange={(val) => {
@@ -595,13 +635,13 @@ export default function NewTransactionScreen() {
                                 onChange={(date) => {
                                     onChange(date.toISOString());
                                     // update end date to be at least the minimum end date based on frequency and new start date
-                                    setValue(
-                                        'end_date',
-                                        getMinimumEndDate(
-                                            frequency,
-                                            date.toISOString(),
-                                        ).toISOString(),
-                                    );
+                                    // setValue(
+                                    //     'end_date',
+                                    //     getMinimumEndDate(
+                                    //         frequency,
+                                    //         date.toISOString(),
+                                    //     ).toISOString(),
+                                    // );
                                 }}
                                 // minimumDate={new Date()}
                                 value={value}
@@ -619,9 +659,9 @@ export default function NewTransactionScreen() {
                 <View className='flex flex-col space-y-1'>
                     <Controller
                         control={control}
-                        rules={{
-                            required: "Date can't be empty",
-                        }}
+                        // rules={{
+                        //     required: "Date can't be empty",
+                        // }}
                         render={({ field: { onChange, value } }) => (
                             <DatePicker
                                 label='End Date'
@@ -714,185 +754,248 @@ export default function NewTransactionScreen() {
 
                     <View className='h-1 border-b border-purple-100 w-full' />
                 </View>
-                <ScrollView
-                    className='space-y-5 flex-1 flex flex-col p-5'
-                    contentContainerStyle={{
-                        paddingBottom: 100,
-                    }}
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
                 >
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Amount
-                        </Text>
+                    <ScrollView
+                        className='space-y-5 flex-1 flex flex-col p-5'
+                        contentContainerStyle={{
+                            paddingBottom: 120,
+                        }}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps='handled'
+                    >
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Amount
+                            </Text>
 
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Amount can't be empty",
-                                    pattern: {
-                                        value: /^\d+(\.\d{1,2})?$/,
-                                        message: 'Amount must be a valid number',
-                                    },
-                                    min: {
-                                        value: 0.01,
-                                        message: 'Amount must be at least 0.01',
-                                    },
-                                }}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
-                                        style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='0.00'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                        keyboardType='numeric'
-                                    />
-                                )}
-                                name='amount'
-                            />
-                            {errors.amount && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.amount.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <View className='flex flex-col space-y-1'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Category
-                        </Text>
-                        <View>
-                            <Controller
-                                control={control}
-                                rules={{
-                                    required: "Category can't be empty",
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <>
-                                        <SelectField
-                                            selectKey='newTransactionCategory'
-                                            options={transactionTypes.reduce((acc, curr) => {
-                                                acc[curr] = {
-                                                    label: curr,
-                                                    value: curr,
-                                                };
-                                                return acc;
-                                            }, {} as Record<string, { label: string; value: string }>)}
-                                            customSnapPoints={['50%', '70%']}
-                                            value={value}
-                                            onChange={onChange}
-                                        />
-                                    </>
-                                )}
-                                name='category'
-                            />
-                            {errors.category && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.category.message}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    {/* Date picker - only for non-recurring transactions */}
-                    {!isRecurring && (
-                        <View className='space-y-5'>
-                            <View className='h-1 border-b border-purple-100 w-full' />
-                            <View className='flex flex-col space-y-1'>
+                            <View>
                                 <Controller
                                     control={control}
                                     rules={{
-                                        required: "Date can't be empty",
+                                        required: "Amount can't be empty",
+                                        pattern: {
+                                            value: /^\d+(\.\d{1,2})?$/,
+                                            message: 'Amount must be a valid number',
+                                        },
+                                        min: {
+                                            value: 0.01,
+                                            message: 'Amount must be at least 0.01',
+                                        },
                                     }}
-                                    render={({ field: { onChange, value } }) => (
-                                        <DateAndTimePicker
-                                            label='Date'
-                                            pickerKey='newTransactionStartDate'
-                                            onChange={(date) => {
-                                                onChange(date.toISOString());
-                                            }}
-                                            maximumDate={new Date()}
-                                            value={new Date(value)}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='0.00'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            keyboardType='numeric'
                                         />
                                     )}
-                                    name='date'
+                                    name='amount'
                                 />
-                                {errors.date && (
+                                {errors.amount && (
                                     <Text
                                         style={satoshiFont.satoshiMedium}
                                         className='text-xs text-red-500'
                                     >
-                                        {errors.date.message}
+                                        {errors.amount.message}
                                     </Text>
                                 )}
                             </View>
                         </View>
-                    )}
 
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    {renderAccountFields()}
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    {/* Recurring Transaction Toggle */}
-                    <View className='flex flex-row w-full justify-between items-center'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Repeat Transaction
-                        </Text>
-
-                        <View>
-                            <Switch value={isRecurring} onValueChange={setIsRecurring} />
-                        </View>
-                    </View>
-
-                    {/* Recurring transaction fields */}
-                    {renderRecurringFields()}
-
-                    <View className='h-1 border-b border-purple-100 w-full' />
-
-                    <View className='flex flex-col space-y-1 mb-20'>
-                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
-                            Note
-                        </Text>
-
-                        <View>
-                            <Controller
-                                control={control}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <InputField
-                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Category
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Category can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SelectField
+                                                selectKey='newTransactionCategory'
+                                                options={transactionTypes.reduce((acc, curr) => {
+                                                    acc[curr] = {
+                                                        label: curr,
+                                                        value: curr,
+                                                    };
+                                                    return acc;
+                                                }, {} as Record<string, { label: string; value: string }>)}
+                                                customSnapPoints={['50%', '70%']}
+                                                value={value}
+                                                onChange={onChange}
+                                                renderFooter={() => (
+                                                    <View className='my-5'>
+                                                        <TouchableOpacity
+                                                            style={{ width: '100%' }}
+                                                            onPress={() => {
+                                                                router.push(
+                                                                    '/settings/new-transaction-category',
+                                                                );
+                                                                setShowBottomSheetFlatList(
+                                                                    'newTransactionCategory',
+                                                                    false,
+                                                                );
+                                                            }}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <LinearGradient
+                                                                className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                                                colors={['#c084fc', '#9333ea']}
+                                                                style={{ width: '100%' }}
+                                                            >
+                                                                <Text
+                                                                    style={satoshiFont.satoshiBlack}
+                                                                    className='text-white text-center'
+                                                                >
+                                                                    New Category
+                                                                </Text>
+                                                            </LinearGradient>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                )}
+                                            />
+                                        </>
+                                    )}
+                                    name='category'
+                                />
+                                {errors.category && (
+                                    <Text
                                         style={satoshiFont.satoshiMedium}
-                                        cursorColor={'#8B5CF6'}
-                                        placeholder='Add a note...'
-                                        onChangeText={onChange}
-                                        onBlur={onBlur}
-                                        value={value}
-                                    />
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.category.message}
+                                    </Text>
                                 )}
-                                name='note'
-                            />
-                            {errors.note && (
-                                <Text
-                                    style={satoshiFont.satoshiMedium}
-                                    className='text-xs text-red-500'
-                                >
-                                    {errors.note.message}
-                                </Text>
-                            )}
+                            </View>
                         </View>
-                    </View>
-                </ScrollView>
+
+                        {/* Date picker - only for non-recurring transactions */}
+                        {!isRecurring && (
+                            <View className='space-y-5'>
+                                <View className='h-1 border-b border-purple-100 w-full' />
+                                <View className='flex flex-col space-y-1'>
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: "Date can't be empty",
+                                        }}
+                                        render={({ field: { onChange, value } }) => (
+                                            <DateAndTimePicker
+                                                label='Date'
+                                                pickerKey='newTransactionStartDate'
+                                                onChange={(date) => {
+                                                    onChange(date.toISOString());
+                                                }}
+                                                maximumDate={new Date()}
+                                                value={new Date(value)}
+                                            />
+                                        )}
+                                        name='date'
+                                    />
+                                    {errors.date && (
+                                        <Text
+                                            style={satoshiFont.satoshiMedium}
+                                            className='text-xs text-red-500'
+                                        >
+                                            {errors.date.message}
+                                        </Text>
+                                    )}
+                                </View>
+                            </View>
+                        )}
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        {renderAccountFields()}
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        {/* Recurring Transaction Toggle */}
+                        <View className='flex flex-row w-full justify-between items-center'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Repeat Transaction
+                            </Text>
+
+                            <View>
+                                <Switch value={isRecurring} onValueChange={setIsRecurring} />
+                            </View>
+                        </View>
+
+                        {/* Recurring transaction fields */}
+                        {renderRecurringFields()}
+
+                        <View className='h-1 border-b border-purple-100 w-full' />
+
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Note
+                            </Text>
+
+                            <View>
+                                <Controller
+                                    control={control}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <InputField
+                                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12'
+                                            style={satoshiFont.satoshiMedium}
+                                            cursorColor={'#8B5CF6'}
+                                            placeholder='Add a note...'
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
+                                            returnKeyType='done'
+                                            onSubmitEditing={Keyboard.dismiss}
+                                        />
+                                    )}
+                                    name='note'
+                                />
+                                {errors.note && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.note.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Budget Toggle - only show for expense (debit) transactions and when budget exists */}
+                        {transactionType === 'debit' && budgetForMonth && (
+                            <View className='flex flex-col space-y-1 mb-20'>
+                                <View className='flex flex-row w-full justify-between items-center'>
+                                    <Text
+                                        style={satoshiFont.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Count in budget
+                                    </Text>
+
+                                    <View>
+                                        <Switch
+                                            value={countInBudget}
+                                            onValueChange={setCountInBudget}
+                                            disabled={!budgetForMonth}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+                        {transactionType !== 'debit' && <View className='mb-20' />}
+                    </ScrollView>
+                </KeyboardAvoidingView>
 
                 <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
                     <View className='flex flex-row space-x-2.5 justify-between w-full'>

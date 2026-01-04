@@ -1,43 +1,58 @@
 {
-  "build": {
-    "production": {
-      "developmentClient": false,
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-        "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
-      },
-      "channel": "production",
-      "environment": "production"
+    "build": {
+        "production": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "production"
+            },
+            "channel": "production",
+            "environment": "production",
+            "node": "22.17.0"
+        },
+        "development": {
+            "developmentClient": true,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk",
+                "gradleCommand": ":app:assembleDebug",
+                "withoutCredentials": true
+            },
+            "ios": {
+                "simulator": true
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "development",
+                "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=512m"
+            },
+            "channel": "development",
+            "environment": "development",
+            "node": "22.17.0"
+        },
+        "rc": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "rc"
+            },
+            "channel": "rc",
+            "environment": "production",
+            "node": "22.17.0"
+        }
     },
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-        "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
-      },
-      "channel": "development",
-      "environment": "development"
-    },
-    "rc": {
-      "developmentClient": false,
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
-        "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL"
-      },
-      "channel": "rc",
-      "environment": "production"
+    "cli": {
+        "appVersionSource": "remote"
     }
-  }
 }

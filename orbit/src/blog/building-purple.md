@@ -4,7 +4,7 @@ description: Why I Built Purple - Turning Frustration into an app
 blogImage: building-purple/creating-purple.png
 slug: building-purple
 date: 10th May, 2025
-featured: true
+featured: false
 tags:
     - mobile apps
     - budgeting

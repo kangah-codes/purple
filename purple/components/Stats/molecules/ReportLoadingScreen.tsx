@@ -35,11 +35,11 @@ export default function ReportLoadingScreen({
                     </View>
                 </View>
             )}
-            <View style={[tw`px-5 flex flex-col space-y-5`]}>
+            <View style={[tw`px-5 flex flex-col space-y-5 bg-white`]}>
                 <View className='my-2.5 flex flex-col space-y-5'>
-                    {[...Array(4)].map((_) => (
+                    {[...Array(4)].map(() => (
                         <View
-                            style={tw`p-5 space-y-2 border border-purple-100 rounded-3xl flex flex-col bg-purple-50/20`}
+                            style={tw`p-5 space-y-2 border border-purple-100 rounded-3xl flex flex-col bg-purple-50`}
                         >
                             <View style={tw`flex-row justify-between items-center`}>
                                 <SkeletonLine width={80} height={20} />

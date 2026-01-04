@@ -1,5 +1,6 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { useCreateCategory, usePreferences } from '@/components/Settings/hooks';
+import { useStartupGuide } from '@/components/Settings/hooks/useStartupGuide';
 import {
     InputField,
     LinearGradient,
@@ -21,6 +22,7 @@ import Toast from 'react-native-toast-message';
 
 export default function NewCategoryScreen() {
     const { addCategory } = usePreferences();
+    const { markStepCompleted } = useStartupGuide();
     const {
         control,
         handleSubmit,
@@ -53,7 +55,8 @@ export default function NewCategoryScreen() {
                 });
             },
             onSuccess: () => {
-                addCategory(data);
+                addCategory({ ...data, is_custom: 1 });
+                markStepCompleted('customize_categories');
                 Toast.show({
                     type: 'success',
                     props: { text1: 'Success!', text2: 'Category created successfully' },
@@ -159,7 +162,7 @@ export default function NewCategoryScreen() {
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     className='items-center self-center justify-center px-4 absolute bottom-5'
                     onPress={handleSubmit(onSubmit)}
                     disabled={isLoading}
@@ -179,7 +182,51 @@ export default function NewCategoryScreen() {
                             </Text>
                         )}
                     </LinearGradient>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+
+                <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={router.back}
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                            >
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? (
+                                        <ActivityIndicator size={15} color='#fff' />
+                                    ) : (
+                                        <Text
+                                            style={satoshiFont.satoshiBlack}
+                                            className='text-white text-center'
+                                        >
+                                            Save
+                                        </Text>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </SafeAreaView>
         </>
     );

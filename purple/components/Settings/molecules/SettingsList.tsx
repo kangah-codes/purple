@@ -12,17 +12,18 @@ type SettingsListProps = {
 export default function SettingsList({ items }: SettingsListProps) {
     const renderItem: ListRenderItem<SettingsListItem> = useCallback(
         ({ item }) => (
-            <SettingsItem
-                icon={item.icon}
-                title={item.title}
-                link={item.link}
-                callback={item.callback}
-                description={item.description}
-                customItem={item.customItem}
-                disabled={item.disabled}
-                renderIcon={item.renderIcon}
-                isNew={item.isNew}
-            />
+            <View className='py-4'>
+                <SettingsItem
+                    icon={item.icon}
+                    title={item.title}
+                    link={item.link}
+                    callback={item.callback}
+                    customItem={item.customItem}
+                    disabled={item.disabled}
+                    renderIcon={item.renderIcon}
+                    isNew={item.isNew}
+                />
+            </View>
         ),
         [],
     );

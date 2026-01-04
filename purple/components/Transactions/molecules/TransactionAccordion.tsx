@@ -13,6 +13,7 @@ type TransactionsAccordionProps = {
     title?: string;
     onEndReached?: () => void;
     showTitle?: boolean;
+    contentContainerStyle?: object;
 };
 
 export default function TransactionsAccordion({
@@ -20,6 +21,7 @@ export default function TransactionsAccordion({
     title,
     onEndReached,
     showTitle = true,
+    contentContainerStyle = { paddingBottom: 300 },
 }: TransactionsAccordionProps) {
     const groupedTransactionData = useMemo(() => {
         const transactionsWithFormattedDate = transactions.map((transaction) => ({
@@ -59,7 +61,7 @@ export default function TransactionsAccordion({
 
     return (
         <View
-            style={{ flex: 1, marginTop: showTitle ? 20 : 0 }}
+            style={{ flex: 0, marginTop: showTitle ? 20 : 0 }}
             className='px-5 flex flex-col space-y-2.5'
         >
             {showTitle && (
@@ -73,7 +75,7 @@ export default function TransactionsAccordion({
                 data={groupedTransactionData}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 300 }}
+                contentContainerStyle={contentContainerStyle}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={renderEmptylist}
                 onEndReachedThreshold={0.5}

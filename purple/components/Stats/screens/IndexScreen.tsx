@@ -2,7 +2,7 @@ import { SafeAreaView, Text, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import { addMonths, endOfMonth, format, isBefore, startOfMonth } from 'date-fns';
+import { addMonths, endOfMonth, format, formatISO, isBefore, startOfMonth } from 'date-fns';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
@@ -16,10 +16,17 @@ export default function StatsScreen() {
     const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isInitialized, setIsInitialized] = useState(false);
-    const { data: oldestTransaction, isLoading: isLoadingOldest } = useTransactions({
+    const {
+        data: oldestTransaction,
+        isLoading: isLoadingOldest,
+        refetch: refetchOldestTransaction,
+    } = useTransactions({
         requestQuery: {
             page_size: 1,
             sortOrder: 'asc',
+        },
+        options: {
+            keepPreviousData: true,
         },
     });
 
@@ -68,14 +75,14 @@ export default function StatsScreen() {
     const monthRange = useMemo(() => {
         if (!isInitialized || !currentDate) {
             return {
-                start_date: new Date().toISOString(),
-                end_date: new Date().toISOString(),
+                start_date: formatISO(new Date()),
+                end_date: formatISO(new Date()),
             };
         }
 
         return {
-            start_date: startOfMonth(currentDate).toISOString(),
-            end_date: endOfMonth(currentDate).toISOString(),
+            start_date: formatISO(startOfMonth(currentDate)),
+            end_date: formatISO(endOfMonth(currentDate)),
         };
     }, [currentDate, isInitialized]);
 
@@ -90,10 +97,36 @@ export default function StatsScreen() {
         },
         options: {
             enabled: isInitialized,
+            keepPreviousData: true,
         },
     });
 
+    const { data: allHistoricalTransactions, refetch: refetchHistoricalTransactions } =
+        useTransactions({
+            requestQuery: {
+                page_size: Infinity,
+                // fetch from earliest transaction to now to cover all possible month views
+                start_date: formatISO(earliestTransactionDate),
+                end_date: formatISO(endOfMonth(new Date())),
+            },
+            options: {
+                enabled: isInitialized,
+                keepPreviousData: true,
+            },
+        });
+
+    const stableHistoricalData = useMemo(
+        () => allHistoricalTransactions?.data ?? [],
+        [allHistoricalTransactions?.data],
+    );
+    const stableMonthlyData = useMemo(
+        () => monthlyTransactions?.data ?? [],
+        [monthlyTransactions?.data],
+    );
+
     useRefreshOnFocus(refetch);
+    useRefreshOnFocus(refetchHistoricalTransactions);
+    useRefreshOnFocus(refetchOldestTransaction);
 
     const goToPreviousMonth = useCallback(() => {
         if (currentMonthIndex > 0) {
@@ -148,11 +181,10 @@ export default function StatsScreen() {
         <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
             <StatsNavigationArea {...navigationProps} />
-
             <PagerView
                 ref={pagerRef}
                 style={styles.pagerView}
-                initialPage={0}
+                // initialPage={0}
                 onPageSelected={handlePageSelected}
                 orientation='horizontal'
                 overdrag
@@ -160,13 +192,18 @@ export default function StatsScreen() {
             >
                 {availableMonths.map((month, index) => (
                     <View key={format(month, 'yyyy-MM')} style={styles.page}>
-                        <MonthlyStatsPage
-                            currentDate={month}
-                            transactions={
-                                index === currentMonthIndex ? monthlyTransactions?.data ?? [] : []
-                            }
-                            isLoading={isLoading && !monthlyTransactions}
-                        />
+                        {/* Only render the current month and adjacent months for better performance */}
+                        {Math.abs(index - currentMonthIndex) <= 1 ? (
+                            <MonthlyStatsPage
+                                currentDate={month}
+                                transactions={stableMonthlyData}
+                                allHistoricalTransactions={stableHistoricalData}
+                                oldestTransactionDate={earliestTransactionDate}
+                                isLoading={isLoading && !monthlyTransactions}
+                            />
+                        ) : (
+                            <ReportLoadingScreen showNavigation={false} />
+                        )}
                     </View>
                 ))}
             </PagerView>

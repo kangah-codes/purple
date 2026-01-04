@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import * as Font from 'expo-font';
 
 export async function loadFonts() {

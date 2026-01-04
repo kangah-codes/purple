@@ -26,7 +26,6 @@ export function occurrencesBetween(
 ): Date[] {
     const rule = parseRRule(rruleString);
     const occurrences: Date[] = [];
-
     const freq = rule['FREQ'] || 'DAILY';
     const interval = rule['INTERVAL'] || 1;
     const byHour = rule['BYHOUR'] || [dtStart.getUTCHours()];
@@ -34,15 +33,20 @@ export function occurrencesBetween(
     const byDay = rule['BYDAY'] || null;
     const until = rule['UNTIL'] ? new Date(rule['UNTIL']) : null;
     const count = rule['COUNT'] || null;
+    const cursor = new Date(dtStart);
 
-    let cursor = new Date(dtStart);
+    let generated = 0;
 
     while (cursor <= end) {
-        // check UNTIL
+        // stop if until is exceeded
         if (until && cursor > until) break;
 
-        // check BYDAY
-        if (!byDay || byDay.includes(WEEKDAYS[cursor.getUTCDay()])) {
+        // check if day matches (for byday) or include all if null
+        const weekdayCode = WEEKDAYS[cursor.getUTCDay()];
+        const dayMatches = !byDay || byDay.includes(weekdayCode);
+
+        if (dayMatches) {
+            // generate occurrences for all specified hours/minutes
             for (const h of byHour) {
                 for (const m of byMinute) {
                     const occurrence = new Date(cursor);
@@ -50,20 +54,18 @@ export function occurrencesBetween(
 
                     if (occurrence >= start && occurrence <= end) {
                         occurrences.push(occurrence);
+                        generated++;
 
-                        if (count && occurrences.length >= count) {
-                            return occurrences;
-                        }
+                        if (count && generated >= count) return occurrences;
                     }
                 }
             }
         }
 
-        // step forward based on FREQ
         if (freq === 'DAILY') {
             cursor.setUTCDate(cursor.getUTCDate() + interval);
         } else if (freq === 'WEEKLY') {
-            cursor.setUTCDate(cursor.getUTCDate() + 7 * interval);
+            cursor.setUTCDate(cursor.getUTCDate() + 1); // step one day byday filter will pick correct days
         } else if (freq === 'MONTHLY') {
             cursor.setUTCMonth(cursor.getUTCMonth() + interval);
         } else {

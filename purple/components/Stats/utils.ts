@@ -9,6 +9,7 @@ import {
     startOfMonth,
 } from 'date-fns';
 import { Transaction } from '../Transactions/schema';
+import { isTransferTransaction } from '../Transactions/utils';
 import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
 
 export function getCurrentMonthYear() {
@@ -23,7 +24,11 @@ const getDayKey = (date: Date) => {
     return dayKeys[index];
 };
 
-export const groupTransactionsByWeek = (transactions: Transaction[], currentDate = new Date()) => {
+export const groupTransactionsByWeek = (
+    transactions: Transaction[],
+    currentDate: Date,
+    type: string = 'debit',
+) => {
     const monthStart = startOfMonth(currentDate);
     const weeks: Record<number, Record<string, number>> = {
         1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
@@ -33,7 +38,7 @@ export const groupTransactionsByWeek = (transactions: Transaction[], currentDate
     };
 
     for (const tx of transactions) {
-        if (tx.type !== 'debit') continue;
+        if (tx.type !== type || isTransferTransaction(tx)) continue;
 
         const txDate = new Date(tx.created_at);
         const txMonth = txDate.getMonth();
@@ -58,10 +63,10 @@ export const groupTransactionsByWeek = (transactions: Transaction[], currentDate
     return weeks;
 };
 
-export const getStackedChartData = (transactions: Transaction[]) => {
-    const grouped = groupTransactionsByWeek(transactions);
+export const getStackedChartData = (transactions: Transaction[], date: Date) => {
+    const grouped = groupTransactionsByWeek(transactions, date);
     const rawChartData = dayKeys.map((key) => {
-        const stacks = Object.entries(grouped).map(([_, data], i) => ({
+        const stacks = Object.entries(grouped).map(([, data], i) => ({
             value: data[key] || 0,
             color: spendOverviewPalette[i],
             marginBottom: 2,
@@ -86,7 +91,7 @@ export const getStackedChartData = (transactions: Transaction[]) => {
             label,
             stacks: [
                 ...stacks,
-                ...(padding > 0 ? [{ value: padding, color: '#faf5ff', marginBottom: 2 }] : []),
+                ...(padding > 0 ? [{ value: padding, color: '#f3e8ff', marginBottom: 2 }] : []),
             ],
         };
     });
@@ -200,19 +205,11 @@ export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transact
     let id = 1;
     let current = start;
 
-    const totalDays = differenceInDays(end, start) + 1;
-    const startAmount = 10;
-    const endAmount = 10000;
-
-    let previousAmount = startAmount;
-
     while (current <= end) {
         const numTransactionsToday = Math.floor(Math.random() * 2);
 
         for (let i = 0; i < numTransactionsToday; i++) {
-            let amount: number;
-
-            amount = Math.random() * 5000;
+            const amount = Math.random() * 5000;
 
             transactions.push({
                 id: id.toString(),
@@ -232,7 +229,6 @@ export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transact
                 plan_id: '',
             } as Transaction);
 
-            previousAmount = amount;
             id++;
         }
 
@@ -297,6 +293,9 @@ export function generateNormalizedSpendChartData(
     const dailySpends: Record<string, number> = {};
 
     for (const tx of transactions) {
+        // Only include debit transactions that are not transfers
+        if (tx.type !== 'debit' || isTransferTransaction(tx)) continue;
+
         const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
         if (!dailySpends[isoDate]) {
             dailySpends[isoDate] = 0;
@@ -316,4 +315,48 @@ export function generateNormalizedSpendChartData(
     });
 
     return chartData;
+}
+
+export function generateNormalizedBudgetChartData(
+    totalBudget: number,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const monthEnd = endOfMonth(monthStart);
+
+    const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
+    const dailyBudget = totalBudget / daysInMonth;
+
+    const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    const steppedDays = eachDayOfInterval(
+        { start: monthStart, end: monthEnd },
+        {
+            step: 5,
+        },
+    );
+
+    const lastSteppedDay = steppedDays[steppedDays.length - 1];
+
+    const stepDays =
+        lastSteppedDay && lastSteppedDay < monthEnd ? [...steppedDays, monthEnd] : steppedDays;
+    const stepValueByIsoDate: Record<string, number> = {};
+    for (const day of stepDays) {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        const dayIndex = differenceInDays(day, monthStart) + 1;
+        stepValueByIsoDate[isoDate] = dailyBudget * dayIndex;
+    }
+
+    let currentValue = stepValueByIsoDate[format(monthStart, 'yyyy-MM-dd')] ?? 0;
+    return allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+
+        if (isoDate in stepValueByIsoDate) {
+            currentValue = stepValueByIsoDate[isoDate];
+        }
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: currentValue,
+        };
+    });
 }

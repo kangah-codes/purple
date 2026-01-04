@@ -1,6 +1,5 @@
 import { GenericAPIResponse } from '@/@types/request';
-import { LinearGradient, SafeAreaView, ScrollView } from '@/components/Shared/styled';
-import TransactionsAccordion from '@/components/Transactions/molecules/TransactionAccordion';
+import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { getDateRange } from '@/lib/utils/date';
@@ -16,6 +15,14 @@ import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import Animated, {
+    useSharedValue,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    interpolate,
+    Extrapolation,
+} from 'react-native-reanimated';
+import AccountTransactions from '../molecules/AccountTransactions';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
@@ -43,13 +50,27 @@ function AccountScreen() {
         account: currentAccount,
     });
 
+    const scrollY = useSharedValue(0);
+    const onScroll = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
+    const shadowStyle = useAnimatedStyle(() => {
+        return {
+            opacity: interpolate(scrollY.value, [0, 20], [0, 1], Extrapolation.CLAMP),
+        };
+    });
+
     const { refetch: accountRefetch, isLoading: accountsLoading } = useAccount({
         accountID,
         options: {
             onSuccess: (data) => {
                 setCurrentAccount((data as GenericAPIResponse<Account>).data);
             },
-            onError: () => {
+            onError: (error) => {
+                console.error('[AccountScreen] Error fetching account details', error);
                 Toast.show({
                     type: 'error',
                     props: {
@@ -79,7 +100,8 @@ function AccountScreen() {
             page_size: currentAccountRequestParams.page_size,
         },
         options: {
-            onError: () => {
+            onError: (error) => {
+                console.error('[AccountScreen] Error fetching transactions for account', error);
                 Toast.show({
                     type: 'error',
                     props: {
@@ -88,6 +110,7 @@ function AccountScreen() {
                     },
                 });
             },
+            keepPreviousData: true,
         },
     });
     useRefreshOnFocus(transactionsRefetch);
@@ -108,6 +131,8 @@ function AccountScreen() {
         return <LoadingScreen />;
     }
 
+    console.log(currentAccount);
+
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <LinearGradient
@@ -116,12 +141,33 @@ function AccountScreen() {
                 style={styles.parentView}
             />
             <ExpoStatusBar style='dark' />
-            <ScrollView>
-                <AccountNavigationArea />
-                <AccountInformation transactions={transactions?.data ?? []} />
-                <AccountActivityAreaChart transactions={transactions?.data ?? []} />
-                <TransactionsAccordion transactions={transactions?.data ?? []} />
-            </ScrollView>
+            <AccountNavigationArea />
+            <View className='relative'>
+                <Animated.View
+                    style={[
+                        {
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            height: 20,
+                            zIndex: 999,
+                        },
+                        shadowStyle,
+                    ]}
+                    pointerEvents='none'
+                >
+                    <LinearGradient colors={['#dab2ff', 'transparent']} style={{ flex: 1 }} />
+                </Animated.View>
+                <Animated.ScrollView showsVerticalScrollIndicator={false} onScroll={onScroll}>
+                    <AccountInformation transactions={transactions?.data ?? []} />
+                    <AccountActivityAreaChart transactions={transactions?.data ?? []} />
+                    <AccountTransactions
+                        transactions={transactions?.data ?? []}
+                        loading={transactionsLoading}
+                    />
+                </Animated.ScrollView>
+            </View>
         </SafeAreaView>
     );
 }

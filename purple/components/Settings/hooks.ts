@@ -8,8 +8,7 @@ import { useDebounce } from '@/lib/utils/debounce';
 
 export function usePreferences() {
     const db = useSQLiteContext();
-    const preferences = usePreferencesStore((state) => state.preferences);
-    const setPreferences = usePreferencesStore((state) => state.setPreferences);
+    const { addCategory, preferences, setPreferences } = usePreferencesStore();
     const pendingWrites = useRef<Map<string, unknown>>(new Map());
     const currency = preferences.currency;
 
@@ -49,6 +48,7 @@ export function usePreferences() {
     return {
         preferences: { ...preferences, currency },
         setPreference,
+        addCategory,
     };
 }
 
