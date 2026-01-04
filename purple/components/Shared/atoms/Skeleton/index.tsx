@@ -6,7 +6,7 @@ type AnimatedSkeletonProps = {
 };
 
 function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
-    const animatedValue = useRef(new Animated.Value(0)).current;
+    const animatedValue = useRef(new Animated.Value(0.5)).current;
 
     useEffect(() => {
         const animation = Animated.loop(
@@ -17,7 +17,7 @@ function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
                     useNativeDriver: false,
                 }),
                 Animated.timing(animatedValue, {
-                    toValue: 0,
+                    toValue: 0.5,
                     duration: 1000,
                     useNativeDriver: false,
                 }),
@@ -30,7 +30,7 @@ function AnimatedSkeleton({ style }: AnimatedSkeletonProps) {
     }, [animatedValue]);
 
     const backgroundColor = animatedValue.interpolate({
-        inputRange: [0, 1],
+        inputRange: [0, 0.5],
         outputRange: ['#faf5ff', '#f3e8ff'],
     });
 

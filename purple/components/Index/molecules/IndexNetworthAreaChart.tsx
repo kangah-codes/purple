@@ -61,7 +61,7 @@ export function IndexNetworthAreaChart() {
                         >
                             {formatCurrencyAccurate(
                                 accountGroupData.currency,
-                                accountGroupData.currentBalance,
+                                accountGroupData.absoluteChange,
                             )}{' '}
                             ({accountGroupData.percentageChange}%)
                         </Text>

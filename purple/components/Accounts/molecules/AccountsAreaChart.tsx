@@ -113,7 +113,7 @@ export default function AccountsAreaChart() {
                         >
                             {formatCurrencyAccurate(
                                 accountGroupData.currency,
-                                accountGroupData.currentBalance,
+                                accountGroupData.absoluteChange,
                             )}{' '}
                             ({accountGroupData.percentageChange}%)
                         </Text>

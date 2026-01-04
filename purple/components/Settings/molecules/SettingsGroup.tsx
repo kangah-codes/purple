@@ -16,7 +16,7 @@ export default function SettingsGroup({ groupName, items }: SettingsGroupProps) 
 
     return (
         <View className='w-full flex flex-col space-y-2.5'>
-            <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-500 px-2.5'>
+            <Text style={satoshiFont.satoshiBold} className='text-sm text-purple-500 px-5'>
                 {groupName}
             </Text>
 
