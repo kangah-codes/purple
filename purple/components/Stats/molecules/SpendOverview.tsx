@@ -169,7 +169,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
     };
 
     return (
-        <View className='flex flex-col p-5 space-y-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
+        <View className='flex flex-col space-y-5'>
             <View className='flex flex-col space-y-2.5'>
                 <View>
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>

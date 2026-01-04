@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -5,7 +6,7 @@ import { eachMonthOfInterval, format, isSameMonth, startOfMonth, subMonths } fro
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import CustomBarChart from '../../Shared/molecules/StackedBarChart';
 import { isTransferTransaction } from '@/components/Transactions/utils';
-import { formatCurrencyRounded } from '@/lib/utils/number';
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 
 interface CashflowBarChartProps {
     currentDate: Date;
@@ -110,37 +111,6 @@ export default memo(function CashflowBarChart({
         return { maxValue: maxInflow, minValue: maxOutflow };
     }, [rawData]);
 
-    const { netCashFlowCurrentMonth, avgCashFlowPerMonth, currentMonthCurrency } = useMemo(() => {
-        if (rawData.length === 0)
-            return {
-                netCashFlowCurrentMonth: 0,
-                avgCashFlowPerMonth: 0,
-                currentMonthCurrency: 'USD',
-            };
-
-        // Get current month's data (last item in rawData)
-        const currentMonthData = rawData[rawData.length - 1];
-        const currentMonthNet = currentMonthData
-            ? currentMonthData.inflow + currentMonthData.outflow
-            : 0;
-
-        // Calculate average cash flow across all months
-        const totalNetCashFlow = rawData.reduce(
-            (sum, month) => sum + (month.inflow + month.outflow),
-            0,
-        );
-        const avgCashFlow = totalNetCashFlow / rawData.length;
-
-        // Get currency from the first available transaction
-        const currency = stableTransactions.length > 0 ? stableTransactions[0].currency : 'USD';
-
-        return {
-            netCashFlowCurrentMonth: currentMonthNet,
-            avgCashFlowPerMonth: avgCashFlow,
-            currentMonthCurrency: currency,
-        };
-    }, [rawData, stableTransactions]);
-
     return (
         <View className='p-5 my-5 bg-purple-50 border-[0.5px] border-purple-100 rounded-3xl'>
             <View className='mb-2'>
@@ -160,25 +130,6 @@ export default memo(function CashflowBarChart({
                             Outflow
                         </Text>
                     </View>
-                </View>
-            </View>
-
-            <View className='my-2.5 pb-3.5 flex flex-row'>
-                <View className='flex-1 flex-col text-center items-center'>
-                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
-                        Net Cash Flow
-                    </Text>
-                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                        {formatCurrencyRounded(netCashFlowCurrentMonth, currentMonthCurrency)}
-                    </Text>
-                </View>
-                <View className='flex-1 flex-col text-center items-center'>
-                    <Text style={satoshiFont.satoshiBold} className='text-xs'>
-                        Avg Cash Flow
-                    </Text>
-                    <Text style={satoshiFont.satoshiBlack} className='text-lg'>
-                        {formatCurrencyRounded(avgCashFlowPerMonth, currentMonthCurrency)}
-                    </Text>
                 </View>
             </View>
 
@@ -208,13 +159,13 @@ export default memo(function CashflowBarChart({
                         />
                     )}
                 {(rawData.length === 0 || stackData.length < 1 || !isValidChart) && (
-                    <View className='items-center justify-center py-8'>
-                        <Text
-                            className='text-purple-500 text-sm text-center'
-                            style={satoshiFont.satoshiBold}
-                        >
-                            Not enough data available
-                        </Text>
+                    <View className='items-center justify-center py-5'>
+                        <EmptyList
+                            title='Nothing to see… yet 👀'
+                            message='This cat checked everywhere. There’s just not enough data right now.'
+                            image={require('@/assets/images/graphics/catto.png')}
+                            imageDetails={{ width: 100, height: 100, showImage: true }}
+                        />
                     </View>
                 )}
             </View>

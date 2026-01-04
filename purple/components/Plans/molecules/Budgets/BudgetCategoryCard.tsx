@@ -8,8 +8,8 @@ import {
 } from '@/components/Shared/molecules/AnimatedCollapsible';
 import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { AnimatedChevron } from './AnimatedChevron';
-import { CollapsedFooter } from './CollapsedFooter';
 import { BudgetCategoryLimit } from '@/lib/services/BudgetSQLiteService';
+import { CollapsedFooter } from './CollapsedFooter';
 
 interface BudgetCategoryCardProps {
     title: string;
@@ -46,10 +46,11 @@ export function BudgetCategoryCard({
     const footerAnimatedStyle = useAnimatedStyle(() => ({
         opacity: footerOpacity.value,
         height: footerOpacity.value === 0 ? 0 : undefined,
+        paddingBottom: footerOpacity.value === 0 ? 5 : 20,
     }));
 
     return (
-        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 p-5'>
+        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
             <TouchableOpacity
                 className='flex-row justify-between items-center'
                 onPress={handleToggle}
@@ -79,7 +80,7 @@ export function BudgetCategoryCard({
                 </View>
             </TouchableOpacity>
 
-            <View className='h-[1px] border-b border-purple-100 w-full' />
+            {/* <View className='h-[1px] border-b border-purple-100 w-full' /> */}
 
             <AnimatedCollapsible
                 ref={collapsibleRef}

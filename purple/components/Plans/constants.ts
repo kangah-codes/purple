@@ -66,7 +66,7 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
         {
             title: '💚 Ahead in a good way',
             message: () =>
-                'You’re under your pace budget right now. This gives you room to breathe if something unexpected comes up.',
+                'You’re under your budget pace right now. This gives you room to breathe if something unexpected comes up.',
         },
         {
             title: '✨ Strong control',
@@ -81,7 +81,7 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
         {
             title: '🙌 Nicely under control',
             message: () =>
-                'Your spending is comfortably below the pace budget right now. Keep this steady approach going.',
+                'Your spending is comfortably below the budget pace right now. Keep this steady approach going.',
         },
         {
             title: '🛡️ Cushion unlocked',
@@ -101,7 +101,7 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
         {
             title: '⚖️ Steady and balanced',
             message: () =>
-                'You’re tracking closely to your pace budget. No major adjustments needed right now.',
+                'You’re tracking closely to your budget pace. No major adjustments needed right now.',
         },
         {
             title: '📊 On track',

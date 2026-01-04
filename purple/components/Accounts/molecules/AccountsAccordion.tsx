@@ -23,7 +23,7 @@ export default function AccountsAccordion() {
                 </View>
             ))}
 
-            <TouchableOpacity onPress={() => router.push('/accounts/new-acount')}>
+            <TouchableOpacity onPress={() => router.push('/accounts/new-account')}>
                 <LinearGradient
                     className='rounded-full justify-center items-center p-4'
                     colors={['#c084fc', '#9333ea']}

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { router } from 'expo-router';
 import { usePreferences } from '../hooks';
-import { useAccounts } from '../../Accounts/hooks';
-import { useTransactions } from '../../Transactions/hooks';
+import { useHasAnyAccounts } from '../../Accounts/hooks';
+import { useHasAnyTransactions } from '../../Transactions/hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { useHasAnyBudgets } from '@/components/Plans/hooks';
 
 export type StartupStepId =
     | 'add_account'
@@ -31,7 +32,7 @@ const defaultSteps: StartupStep[] = [
         isCompleted: true, // cash account is created default
         isRequired: true,
         order: 0,
-        callback: () => console.log('Navigate to add account'),
+        callback: () => router.push('/accounts/new-account'),
     },
     {
         id: 'customize_categories',
@@ -43,36 +44,36 @@ const defaultSteps: StartupStep[] = [
         callback: () => router.push('/settings/new-transaction-category'),
     },
     {
+        id: 'budget',
+        emoji: '🎯',
+        text: 'Create a budget',
+        isCompleted: false,
+        isRequired: true,
+        order: 2,
+        callback: () => router.push('/plans/new'),
+    },
+    {
         id: 'first_transaction',
         emoji: '💸',
         text: 'Create your first transaction',
         isCompleted: false,
         isRequired: true,
-        order: 2,
+        order: 3,
         callback: () => router.push('/transactions/new'),
     },
-    // {
-    //     id: 'saving_plan',
-    //     emoji: '🎯',
-    //     text: 'Create a saving plans',
-    //     isCompleted: false,
-    //     isRequired: true,
-    //     order: 3,
-    //     callback: () => router.push('/plans/new'),
-    // },
 ];
 
 export function useStartupGuide() {
     const { preferences, setPreference } = usePreferences();
-    const { data: accountsData, refetch: refetchAccounts } = useAccounts({ requestQuery: {} });
-    const accounts = accountsData?.data || [];
+    const { data: hasAnyAccounts = false, refetch: refetchAccounts } = useHasAnyAccounts();
     useRefreshOnFocus(refetchAccounts);
 
-    const { data: transactionsData, refetch: refetchTransactions } = useTransactions({
-        requestQuery: { page_size: 1 },
-    });
+    const { data: hasAnyBudgets = false, refetch: refetchBudgets } = useHasAnyBudgets();
+    useRefreshOnFocus(refetchBudgets);
+
+    const { data: hasAnyTransactions = false, refetch: refetchTransactions } =
+        useHasAnyTransactions();
     useRefreshOnFocus(refetchTransactions);
-    const transactions = transactionsData?.data || [];
     const stepsBase = useMemo<StartupStep[]>(() => defaultSteps, []);
 
     const startupGuide = preferences.startupGuide || {
@@ -90,18 +91,22 @@ export function useStartupGuide() {
                             .length > 0
                     );
                 case 'add_account':
-                    return accounts.length > 0;
+                    return hasAnyAccounts;
                 case 'first_transaction':
-                    return transactions.length > 0;
-                // case 'saving_plan':
-                // case 'budget':
-                //     // TODO: future implementation
-                //     return startupGuide.completedSteps?.includes(stepId) || false;
+                    return hasAnyTransactions;
+                case 'budget':
+                    return hasAnyBudgets || startupGuide.completedSteps?.includes(stepId) || false;
                 default:
                     return startupGuide.completedSteps?.includes(stepId) || false;
             }
         },
-        [preferences.customTransactionTypes, accounts, transactions, startupGuide.completedSteps],
+        [
+            preferences.customTransactionTypes,
+            hasAnyAccounts,
+            hasAnyTransactions,
+            hasAnyBudgets,
+            startupGuide.completedSteps,
+        ],
     );
 
     const getSteps = useCallback((): StartupStep[] => {

@@ -92,7 +92,11 @@ export default function NewAccountScreen() {
                         object_type: 'account',
                         payload: data,
                     });
-                    router.replace('/(tabs)/accounts');
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)/accounts');
+                    }
                 },
             },
         );

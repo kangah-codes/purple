@@ -14,9 +14,9 @@ import CashflowBarChart from '../molecules/CashflowBarChart';
 import StatsHeatmap from '../molecules/Heatmap';
 import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
 import SpendAreaChart from '../molecules/SpendAreaChart';
-import SpendOverview from '../molecules/SpendOverview';
 import SpendOverviewChart from '../molecules/SpendOverviewChart';
 import SpendVsBudgetLineChart from './SpendVsBudgetLineChart';
+import MonthlySummaryCarousel from './MonthlySummaryCarousel';
 
 interface MonthlyStatsPageProps {
     currentDate: Date;
@@ -73,7 +73,12 @@ export default memo(function MonthlyStatsPage({
                 onScroll={onScroll}
                 scrollEventThrottle={16}
             >
-                <SpendOverview transactions={transactions} />
+                <MonthlySummaryCarousel
+                    currentDate={currentDate}
+                    transactions={transactions}
+                    allHistoricalTransactions={allHistoricalTransactions || []}
+                    oldestTransactionDate={oldestTransactionDate}
+                />
                 <CashflowBarChart
                     currentDate={currentDate}
                     allTransactions={allHistoricalTransactions || []}

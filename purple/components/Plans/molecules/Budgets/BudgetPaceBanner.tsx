@@ -14,14 +14,14 @@ export default function BudgetPaceBanner({ paceInsight }: BudgetPaceBannerProps)
         paceInsight.tone === 'negative'
             ? 'bg-red-50 border-red-100'
             : paceInsight.tone === 'positive'
-            ? 'bg-green-50 border-green-100'
+            ? 'bg-purple-50 border-purple-100'
             : 'bg-purple-50 border-purple-100';
 
     const textClassName =
         paceInsight.tone === 'negative'
             ? 'text-red-600'
             : paceInsight.tone === 'positive'
-            ? 'text-green-700'
+            ? 'text-purple-700'
             : 'text-purple-600';
 
     return (

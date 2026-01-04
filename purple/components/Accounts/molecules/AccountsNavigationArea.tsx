@@ -14,7 +14,7 @@ export default function AccountsNavigationArea() {
     const [visible, setVisible] = useState(false);
 
     const handleNavigation = useCallback(() => {
-        router.push('/accounts/new-acount');
+        router.push('/accounts/new-account');
     }, []);
 
     return (

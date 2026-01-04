@@ -117,6 +117,23 @@ export function useTransactions({
     );
 }
 
+export function useHasAnyTransactions(): UseQueryResult<boolean, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(['transactions-exists'], async () => {
+        try {
+            const row = await db.getFirstAsync<{ has_transaction: number }>(
+                `SELECT 1 as has_transaction FROM transactions WHERE deleted_at IS NULL LIMIT 1`,
+            );
+            return !!row?.has_transaction;
+        } catch (error) {
+            // If tables aren't initialized yet (fresh install), treat as none.
+            if (String(error).includes('no such table')) return false;
+            throw error;
+        }
+    });
+}
+
 export function useRecurringTransactions({
     requestQuery,
     options,

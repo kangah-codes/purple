@@ -461,6 +461,24 @@ export function useBudgetForMonth(
     );
 }
 
+// TODO: abstract these back into service functions
+export function useHasAnyBudgets(): UseQueryResult<boolean, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(['budgets-exists'], async () => {
+        try {
+            const row = await db.getFirstAsync<{ has_budget: number }>(
+                `SELECT 1 as has_budget FROM budgets WHERE deleted_at IS NULL LIMIT 1`,
+            );
+            return !!row?.has_budget;
+        } catch (error) {
+            // if tables arent initialized yet treat as none
+            if (String(error).includes('no such table')) return false;
+            throw error;
+        }
+    });
+}
+
 export function useBudgetCategoryStats(
     category: string | undefined,
 ): UseQueryResult<BudgetCategoryBudgetStats, Error> {

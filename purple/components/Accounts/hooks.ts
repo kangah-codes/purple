@@ -118,6 +118,29 @@ export function useAccounts({
     );
 }
 
+export function useHasAnyAccounts(): UseQueryResult<boolean, Error> {
+    const db = useSQLiteContext();
+
+    return useQuery(['accounts-exists'], async () => {
+        try {
+            const row = await db.getFirstAsync<{ has_account: number }>(
+                // Exclude the default Cash account created on first run
+                // only conside this complete if user has added at least one non default account
+                `SELECT 1 as has_account
+                 FROM accounts
+                 WHERE deleted_at IS NULL
+                   AND COALESCE(is_default_account, 0) = 0
+                 LIMIT 1`,
+            );
+            return !!row?.has_account;
+        } catch (error) {
+            // if tables arent initialized yet treat as none
+            if (String(error).includes('no such table')) return false;
+            throw error;
+        }
+    });
+}
+
 export function useAccount({
     options,
     accountID,

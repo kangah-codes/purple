@@ -10,12 +10,21 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
-import { format } from 'date-fns';
+import { format, startOfMonth } from 'date-fns';
+import { useBudgetForMonth } from '@/components/Plans/hooks';
 
 export default function PlansNavigationArea({ selectedMonth }: { selectedMonth?: Date }) {
     const [visible, setVisible] = useState(false);
     const { showConfirmationModal } = useConfirmationModalStore();
-    const monthLabel = format(selectedMonth ?? new Date(), 'MMMM yyyy');
+
+    const monthDate = selectedMonth ?? new Date();
+    const monthLabel = format(monthDate, 'MMMM yyyy');
+    const monthNumber = monthDate.getMonth() + 1;
+    const year = monthDate.getFullYear();
+    const { data: budgetData } = useBudgetForMonth(monthNumber, year);
+    const hasBudgetForMonth = Boolean(budgetData?.data);
+
+    const isPastMonth = startOfMonth(monthDate).getTime() < startOfMonth(new Date()).getTime();
 
     return (
         <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
@@ -62,13 +71,20 @@ export default function PlansNavigationArea({ selectedMonth }: { selectedMonth?:
             <LinearGradient
                 className='rounded-full justify-center items-center'
                 colors={['#c084fc', '#9333ea']}
+                style={isPastMonth ? { opacity: 0.5 } : undefined}
             >
                 <TouchableOpacity
                     className='px-4 py-2 flex items-center justify-center rounded-full'
+                    disabled={isPastMonth}
                     onPress={() => {
+                        if (!hasBudgetForMonth) {
+                            router.push('/plans/new');
+                            return;
+                        }
+
                         showConfirmationModal({
                             title: 'Create a new budget?',
-                            message: `Adding a new budget for ${monthLabel} will override the current month's budget. You will not be able to access the previous budget after creating a new one.`,
+                            message: `Adding a new budget for ${monthLabel} will override the existing budget for ${monthLabel}. You will not be able to access the previous budget after creating a new one.`,
                             confirmText: 'Continue',
                             onConfirm: () => router.push('/plans/new'),
                         });
