@@ -47,6 +47,12 @@ It’s a small feature on the surface, but it makes day-to-day usage _much_ smoo
 
 ## Revamped Budgets 📝
 
+The UX of the previous plan implementation was fairly clunky and far from ideal. To set budget limits for specific categories, you had to create separate plans for each individual category. As you can imagine, if you had broad spending habits, this quickly meant managing multiple plans recreated every month just to cover your typical expenses.
+
+This new version takes a completely different approach by introducing new budget types: fixed budgets, with flexible budgets coming in a later feature drop. You can now create a single budget that spans multiple categories, allocate limits to each, and track your spending against those limits in a far more intuitive way. You’ll also receive timely notifications as you approach or exceed your budget, helping you stay in control and on track.
+
+![Recurring transactions](/blog/beta-2/budgets.png)
+
 ---
 
 ## Better Reports with Month Filtering 📊
