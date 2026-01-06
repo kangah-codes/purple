@@ -379,15 +379,51 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             const nextAmount = data.amount ?? original.amount;
             const nextCategory = data.category ?? original.category;
 
-            // check for overdraft if updating to a debit
-            if (data.type === 'debit') {
-                const account = await this.db.getFirstAsync<{ balance: number }>(
+            // Overdraw validation for edits should be based on the *net change*.
+            // The account balance already reflects the original transaction.
+            if (allowOverdraw === false) {
+                const effectOnBalance = (type: Transaction['type'], amount: number): number => {
+                    if (type === 'debit') return -Number(amount);
+                    if (type === 'credit') return Number(amount);
+                    return 0;
+                };
+
+                const originalAccountId = original.account_id;
+                const nextAccountId = data.account_id;
+
+                const originalAccount = await this.db.getFirstAsync<Account>(
                     'SELECT * FROM accounts WHERE id = ?',
-                    [data.account_id],
+                    [originalAccountId],
                 );
-                if (!account) throw new HTTPError('Account not found', 404);
-                if (allowOverdraw === false && Number(data.amount) > Number(account.balance)) {
-                    throw new HTTPError('Insufficient balance in account.', 400);
+                if (!originalAccount) throw new HTTPError('Account not found', 404);
+
+                const nextAccount =
+                    nextAccountId === originalAccountId
+                        ? originalAccount
+                        : await this.db.getFirstAsync<Account>(
+                              'SELECT * FROM accounts WHERE id = ?',
+                              [nextAccountId],
+                          );
+                if (!nextAccount) throw new HTTPError('Account not found', 404);
+
+                const originalEffect = effectOnBalance(original.type, original.amount);
+                const nextEffect = effectOnBalance(nextType, nextAmount);
+
+                // Mirror what the `trg_after_update_transaction` trigger does:
+                // reverse OLD on OLD.account_id, then apply NEW on NEW.account_id.
+                if (originalAccountId === nextAccountId) {
+                    const projected =
+                        Number(originalAccount.balance ?? 0) + (nextEffect - originalEffect);
+                    if (projected < 0) {
+                        throw new HTTPError('Insufficient balance in account.', 400);
+                    }
+                } else {
+                    const projectedOriginal = Number(originalAccount.balance ?? 0) - originalEffect;
+                    const projectedNext = Number(nextAccount.balance ?? 0) + nextEffect;
+
+                    if (projectedOriginal < 0 || projectedNext < 0) {
+                        throw new HTTPError('Insufficient balance in account.', 400);
+                    }
                 }
             }
 
