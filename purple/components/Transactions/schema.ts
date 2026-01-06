@@ -84,6 +84,7 @@ export type EditTransaction = {
     category: string;
     date: string;
     currency: string;
+    budget_id?: string | null;
 };
 
 export type CreateRecurringTransaction = {

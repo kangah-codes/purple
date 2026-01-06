@@ -5,6 +5,7 @@ import { RecurringTransaction } from '@/components/Transactions/schema';
 import { TransactionSQLiteService } from '../services/TransactionSQLiteService';
 import { occurrencesBetween } from '../utils/rrule';
 import { installExportLogger } from '../utils/exportLogger';
+import { format } from 'date-fns';
 
 export interface ProcessingResult {
     success: boolean;
@@ -99,6 +100,18 @@ export async function processRecurringTransactions(db: SQLiteDatabase): Promise<
     return stats;
 }
 
+async function getBudgetIdForDate(db: SQLiteDatabase, date: Date): Promise<string | null> {
+    const monthName = format(date, 'MMMM');
+    const year = date.getFullYear();
+    const row = await db.getFirstAsync<{ id: string }>(
+        `SELECT id FROM budgets
+         WHERE month = ? AND year = ? AND deleted_at IS NULL
+         LIMIT 1`,
+        [monthName, year],
+    );
+    return row?.id ?? null;
+}
+
 async function processRecurringTransaction(
     db: SQLiteDatabase,
     recurring: RecurringTransaction & { account_currency: string },
@@ -164,6 +177,19 @@ async function processRecurringTransaction(
 
         const transactionService = new TransactionSQLiteService(db);
 
+        const metadataRaw: any = (recurring as any).metadata;
+        const metadata: any =
+            typeof metadataRaw === 'string'
+                ? (() => {
+                      try {
+                          return JSON.parse(metadataRaw);
+                      } catch {
+                          return {};
+                      }
+                  })()
+                : metadataRaw ?? {};
+        const shouldCountInBudget = Boolean(metadata?.count_in_budget);
+
         // Create transactions for all missed occurrences
         let lastSuccessfulOccurrence: Date | null = null;
         for (const occurrenceDate of missedOccurrences) {
@@ -173,8 +199,14 @@ async function processRecurringTransaction(
                 } at ${occurrenceDate.toISOString()}`,
             );
             try {
+                const budgetId =
+                    shouldCountInBudget && recurring.type === 'debit'
+                        ? await getBudgetIdForDate(db, occurrenceDate)
+                        : null;
+
                 await createRecurringTransaction(transactionService, recurring, occurrenceDate, {
                     useTransaction: false,
+                    budgetId,
                 });
                 console.log(
                     `[RecurringTx] Successfully created transaction for ${occurrenceDate.toISOString()}`,
@@ -239,7 +271,7 @@ async function createRecurringTransaction(
     transactionService: TransactionSQLiteService,
     recurring: RecurringTransaction & { account_currency: string },
     occurrenceDate: Date,
-    options?: { useTransaction?: boolean },
+    options?: { useTransaction?: boolean; budgetId?: string | null },
 ): Promise<void> {
     console.log(`[RecurringTx] Creating recurring transaction:`);
     console.log(`  - Recurring ID: ${recurring.id}`);
@@ -258,6 +290,7 @@ async function createRecurringTransaction(
         currency: recurring.account_currency,
         date: occurrenceDate.toISOString(),
         charges: 0,
+        budget_id: options?.budgetId ?? undefined,
     };
 
     if (recurring.type === 'transfer') {

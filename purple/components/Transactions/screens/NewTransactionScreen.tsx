@@ -235,6 +235,18 @@ export default function NewTransactionScreen() {
                 ['note', 'notes', (value) => value ?? null],
             ]);
 
+            const shouldCountInBudget = Boolean(
+                transactionType === 'debit' && budgetForMonth && countInBudget,
+            );
+
+            transformedData = {
+                ...transformedData,
+                metadata: {
+                    ...(transformedData as any).metadata,
+                    count_in_budget: shouldCountInBudget,
+                },
+            };
+
             // For transfers, ensure both from_account and to_account are included
             if (transactionType === 'transfer') {
                 transformedData = {

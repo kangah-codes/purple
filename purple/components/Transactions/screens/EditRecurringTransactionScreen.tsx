@@ -4,6 +4,7 @@ import { usePreferences } from '@/components/Settings/hooks';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import TimePicker from '@/components/Shared/atoms/TimePicker';
+import Switch from '@/components/Shared/atoms/Switch';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
     InputField,
@@ -20,7 +21,7 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { omit, transformObject } from '@/lib/utils/object';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -70,6 +71,24 @@ export default function EditRecurringTransactionScreen() {
     const [transactionType, setTransactionType] = useState<string>(
         currentRecurringTransaction?.type ?? (type as string) ?? 'debit',
     );
+
+    const parseMetadata = useCallback((raw: unknown) => {
+        if (!raw) return {};
+        if (typeof raw === 'string') {
+            try {
+                return JSON.parse(raw);
+            } catch {
+                return {};
+            }
+        }
+        if (typeof raw === 'object') return raw as Record<string, any>;
+        return {};
+    }, []);
+
+    const [countInBudget, setCountInBudget] = useState<boolean>(() => {
+        const md = parseMetadata((currentRecurringTransaction as any)?.metadata);
+        return Boolean(md?.count_in_budget);
+    });
     const { mutate: editRecurringTransaction, isLoading } = useEditRecurringTransaction();
 
     // Parse the existing recurrence rule to populate form fields
@@ -134,6 +153,10 @@ export default function EditRecurringTransactionScreen() {
     useEffect(() => {
         setValue('type', transactionType);
     }, [transactionType, setValue]);
+
+    useEffect(() => {
+        if (transactionType !== 'debit') setCountInBudget(false);
+    }, [transactionType]);
 
     const frequency = useWatch({
         control,
@@ -238,6 +261,17 @@ export default function EditRecurringTransactionScreen() {
             ],
             ['type', 'type', () => transactionType as 'debit' | 'credit' | 'transfer'],
         ]);
+
+        const existingMetadata = parseMetadata((currentRecurringTransaction as any)?.metadata);
+        const nextMetadata = {
+            ...existingMetadata,
+            count_in_budget: transactionType === 'debit' ? countInBudget : false,
+        };
+
+        transformedData = {
+            ...transformedData,
+            metadata: nextMetadata,
+        };
         // For transfers, ensure both from_account and to_account are included
         if (transactionType === 'transfer') {
             transformedData = {
@@ -873,6 +907,26 @@ export default function EditRecurringTransactionScreen() {
                                 )}
                             </View>
                         </View>
+
+                        {transactionType === 'debit' && (
+                            <View className='flex flex-col space-y-1'>
+                                <View className='flex flex-row w-full justify-between items-center'>
+                                    <Text
+                                        style={satoshiFont.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Count in budget
+                                    </Text>
+
+                                    <View>
+                                        <Switch
+                                            value={countInBudget}
+                                            onValueChange={setCountInBudget}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
 
                         <View className='h-1 border-b border-purple-100 w-full' />
                     </ScrollView>

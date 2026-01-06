@@ -19,7 +19,7 @@ import { isNotEmptyString } from '../utils/string';
 import CurrencyService from './CurrencyService';
 import { BaseSQLiteService } from './SQLiteService';
 import { WEEKDAY_MAP } from '@/components/Transactions/constants';
-import { startOfDay } from 'date-fns';
+import { format, startOfDay } from 'date-fns';
 import { occurrencesBetween } from '../utils/rrule';
 
 export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
@@ -292,7 +292,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             await this.db.runAsync(
                 `UPDATE transactions SET
                     updated_at = ?, account_id = ?, type = ?, amount = ?, note = ?,
-                    category = ?, created_at = ?
+                    category = ?, created_at = ?, budget_id = ?
                 WHERE id = ?`,
                 [
                     now,
@@ -302,6 +302,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     data.note ?? null,
                     data.category,
                     data.date,
+                    data.budget_id ?? null,
                     id,
                 ],
             );
@@ -367,6 +368,22 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         let createdRecurring!: RecurringTransaction;
 
         await this.db.withTransactionAsync(async () => {
+            const shouldCountInBudget = Boolean((data.metadata as any)?.count_in_budget);
+
+            const getBudgetIdForOccurrence = async (occurrenceDate: Date) => {
+                if (!shouldCountInBudget || data.type !== 'debit') return null;
+
+                const monthName = format(occurrenceDate, 'MMMM');
+                const year = occurrenceDate.getFullYear();
+                const row = await this.db.getFirstAsync<{ id: string }>(
+                    `SELECT id FROM budgets
+                     WHERE month = ? AND year = ? AND deleted_at IS NULL
+                     LIMIT 1`,
+                    [monthName, year],
+                );
+                return row?.id ?? null;
+            };
+
             // add recurring definition
             await this.db.runAsync(
                 `INSERT INTO recurring_transactions (
@@ -422,6 +439,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             let lastSuccessful: Date | null = null;
             for (const occurrenceDate of missedOccurrences) {
                 try {
+                    const budgetId = await getBudgetIdForOccurrence(occurrenceDate);
                     const base = {
                         account_id: data.account_id,
                         type: data.type,
@@ -430,6 +448,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         currency: account.currency,
                         date: occurrenceDate.toISOString(),
                         charges: 0,
+                        budget_id: budgetId ?? undefined,
                     } as const;
 
                     if (data.type === 'transfer') {

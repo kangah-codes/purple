@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import Switch from '@/components/Shared/atoms/Switch';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
     InputField,
@@ -21,7 +22,7 @@ import { transformObject } from '@/lib/utils/object';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
     ActivityIndicator,
     Keyboard,
@@ -33,6 +34,7 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from 'react-query';
 import { useEditTransaction, useTransactionStore } from '../hooks';
 import { EditTransaction } from '../schema';
+import { useBudgetForMonth } from '@/components/Plans/hooks';
 
 export default function EditTransactionScreen() {
     const { currentTransaction } = useTransactionStore();
@@ -44,6 +46,9 @@ export default function EditTransactionScreen() {
     const { logEvent } = useAnalytics();
     const [transactionType, setTransactionType] = useState<string>(
         currentTransaction?.type || 'debit',
+    );
+    const [countInBudget, setCountInBudget] = useState<boolean>(
+        Boolean(currentTransaction?.budget_id),
     );
     const { mutate, isLoading } = useEditTransaction();
     const {
@@ -73,6 +78,24 @@ export default function EditTransactionScreen() {
         setValue('type', transactionType);
     }, [transactionType, setValue]);
 
+    useEffect(() => {
+        if (transactionType !== 'debit') setCountInBudget(false);
+    }, [transactionType]);
+
+    const selectedDateISO = useWatch({ control, name: 'date' });
+    const selectedDate = useMemo(
+        () => (selectedDateISO ? new Date(selectedDateISO) : new Date()),
+        [selectedDateISO],
+    );
+    const selectedMonthNumber = selectedDate.getMonth() + 1;
+    const selectedYear = selectedDate.getFullYear();
+    const { data: budgetData } = useBudgetForMonth(selectedMonthNumber, selectedYear);
+    const budgetForMonth = budgetData?.data;
+
+    const showBudgetToggle =
+        transactionType === 'debit' &&
+        (Boolean(budgetForMonth) || Boolean(currentTransaction?.budget_id));
+
     const onSubmit = async (data: EditTransaction) => {
         await logEvent('button_tap', {
             button: 'submit',
@@ -96,16 +119,38 @@ export default function EditTransactionScreen() {
             return;
         }
 
+        const originalDate = currentTransaction?.created_at
+            ? new Date(currentTransaction.created_at)
+            : null;
+        const originalMonthKey = originalDate
+            ? `${originalDate.getMonth()}-${originalDate.getFullYear()}`
+            : null;
+        const selectedMonthKey = `${selectedDate.getMonth()}-${selectedDate.getFullYear()}`;
+
+        const budgetId =
+            transactionType === 'debit' && countInBudget
+                ? budgetForMonth?.id ??
+                  (currentTransaction?.budget_id && originalMonthKey === selectedMonthKey
+                      ? currentTransaction.budget_id
+                      : null)
+                : null;
+
         // @ts-expect-error expect
         const transformedData = transformObject(data, [
             ['amount', 'amount', (value) => Number(value)],
             ['currency', 'currency', () => account.currency],
         ]) as EditTransaction;
 
+        const payload: EditTransaction = {
+            ...transformedData,
+            budget_id: budgetId,
+            type: transactionType as EditTransaction['type'],
+        };
+
         mutate(
             {
                 id: currentTransaction?.id ?? '',
-                data: transformedData,
+                data: payload,
             },
             {
                 onError: (error) => {
@@ -122,6 +167,10 @@ export default function EditTransactionScreen() {
                     queryClient.invalidateQueries({
                         queryKey: ['transactions', 'accounts', 'user'],
                     });
+                    if (currentTransaction?.budget_id || budgetId) {
+                        queryClient.invalidateQueries({ queryKey: ['budget'] });
+                        queryClient.invalidateQueries({ queryKey: ['budget-earned-income'] });
+                    }
                     Toast.show({
                         type: 'success',
                         props: { text1: 'Success!', text2: 'Transaction updated successfully' },
@@ -403,6 +452,26 @@ export default function EditTransactionScreen() {
                                 )}
                             </View>
                         </View>
+
+                        {showBudgetToggle && (
+                            <View className='flex flex-col space-y-1'>
+                                <View className='flex flex-row w-full justify-between items-center'>
+                                    <Text
+                                        style={satoshiFont.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Count in budget
+                                    </Text>
+                                    <View>
+                                        <Switch
+                                            value={countInBudget}
+                                            onValueChange={setCountInBudget}
+                                            disabled={transactionType !== 'debit'}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
                     </ScrollView>
                 </KeyboardAvoidingView>
 
