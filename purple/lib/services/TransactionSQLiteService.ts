@@ -26,6 +26,43 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     constructor(db: SQLiteDatabase) {
         super('transactions', db);
     }
+    private budgetTriggerCheck: {
+        checked: boolean;
+        hasUpdateTrigger: boolean;
+        hasDeleteTrigger: boolean;
+    } = {
+        checked: false,
+        hasUpdateTrigger: false,
+        hasDeleteTrigger: false,
+    };
+
+    private async ensureBudgetTriggerInfo(): Promise<void> {
+        if (this.budgetTriggerCheck.checked) return;
+
+        try {
+            const update = await this.db.getFirstAsync<{ name: string }>(
+                `SELECT name FROM sqlite_master WHERE type = 'trigger' AND name = ? LIMIT 1`,
+                ['trg_after_update_transaction_budget'],
+            );
+            const del = await this.db.getFirstAsync<{ name: string }>(
+                `SELECT name FROM sqlite_master WHERE type = 'trigger' AND name = ? LIMIT 1`,
+                ['trg_before_delete_transaction_budget'],
+            );
+
+            this.budgetTriggerCheck = {
+                checked: true,
+                hasUpdateTrigger: Boolean(update?.name),
+                hasDeleteTrigger: Boolean(del?.name),
+            };
+        } catch {
+            // If sqlite_master is unavailable for any reason, assume no triggers and fall back.
+            this.budgetTriggerCheck = {
+                checked: true,
+                hasUpdateTrigger: false,
+                hasDeleteTrigger: false,
+            };
+        }
+    }
 
     async create(
         data: CreateTransaction,
@@ -199,7 +236,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
 
                 // Update budget summary if budget_id is provided and transaction is a debit (expense)
                 if (data.budget_id && data.type === 'debit') {
-                    await this.updateBudgetSummary(data.budget_id, data.amount, data.category);
+                    await this.applyBudgetSpendDelta(data.budget_id, data.amount, data.category);
                 }
 
                 const result = await this.db.getFirstAsync<Transaction>(
@@ -234,9 +271,9 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
      * Updates budget summary and category limits when a transaction is created.
      * Increments the total_spent in budget_summaries and spent_amount in budget_category_limits.
      */
-    private async updateBudgetSummary(
+    private async applyBudgetSpendDelta(
         budgetId: string,
-        amount: number,
+        amountDelta: number,
         category: string,
     ): Promise<void> {
         try {
@@ -247,7 +284,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 `UPDATE budget_summaries 
                 SET total_spent = total_spent + ?, updated_at = ?
                 WHERE budget_id = ?`,
-                [amount, now, budgetId],
+                [amountDelta, now, budgetId],
             );
 
             // Update the category limit spent_amount if it exists
@@ -255,10 +292,69 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 `UPDATE budget_category_limits 
                 SET spent_amount = spent_amount + ?, updated_at = ?
                 WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
-                [amount, now, budgetId, category],
+                [amountDelta, now, budgetId, category],
+            );
+
+            // Update flex allocations spent_amount if it exists
+            await this.db.runAsync(
+                `UPDATE budget_allocations 
+                SET spent_amount = spent_amount + ?, updated_at = ?
+                WHERE budget_id = ? AND category = ? AND deleted_at IS NULL`,
+                [amountDelta, now, budgetId, category],
             );
         } catch (error) {
-            console.error('Error updating budget summary:', error);
+            console.error('Error updating budget spend:', error);
+        }
+    }
+
+    private async recomputeBudgetSpend(budgetId: string): Promise<void> {
+        try {
+            const now = new Date().toISOString();
+
+            await this.db.runAsync(
+                `UPDATE budget_summaries
+                 SET total_spent = (
+                    SELECT COALESCE(SUM(amount), 0)
+                    FROM transactions
+                    WHERE budget_id = ?
+                      AND type = 'debit'
+                      AND deleted_at IS NULL
+                 ), updated_at = ?
+                 WHERE budget_id = ?`,
+                [budgetId, now, budgetId],
+            );
+
+            await this.db.runAsync(
+                `UPDATE budget_category_limits
+                 SET spent_amount = (
+                    SELECT COALESCE(SUM(amount), 0)
+                    FROM transactions
+                    WHERE budget_id = ?
+                      AND type = 'debit'
+                      AND category = budget_category_limits.category
+                      AND deleted_at IS NULL
+                 ), updated_at = ?
+                 WHERE budget_id = ?
+                   AND deleted_at IS NULL`,
+                [budgetId, now, budgetId],
+            );
+
+            await this.db.runAsync(
+                `UPDATE budget_allocations
+                 SET spent_amount = (
+                    SELECT COALESCE(SUM(amount), 0)
+                    FROM transactions
+                    WHERE budget_id = ?
+                      AND type = 'debit'
+                      AND category = budget_allocations.category
+                      AND deleted_at IS NULL
+                 ), updated_at = ?
+                 WHERE budget_id = ?
+                   AND deleted_at IS NULL`,
+                [budgetId, now, budgetId],
+            );
+        } catch (error) {
+            console.error('Error recomputing budget spend:', error);
         }
     }
 
@@ -275,6 +371,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 [id],
             );
             if (!original) throw new HTTPError('Transaction not found', 404);
+
+            await this.ensureBudgetTriggerInfo();
+
+            const nextBudgetId = data.budget_id === undefined ? original.budget_id : data.budget_id;
+            const nextType = data.type ?? original.type;
+            const nextAmount = data.amount ?? original.amount;
+            const nextCategory = data.category ?? original.category;
 
             // check for overdraft if updating to a debit
             if (data.type === 'debit') {
@@ -302,10 +405,21 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     data.note ?? null,
                     data.category,
                     data.date,
-                    data.budget_id ?? null,
+                    nextBudgetId ?? null,
                     id,
                 ],
             );
+
+            // Fallback: if triggers aren't installed (older DBs), manually adjust budget spend.
+            // This keeps "Count in budget" edits consistent without double-counting.
+            if (!this.budgetTriggerCheck.hasUpdateTrigger) {
+                const affected = new Set<string>();
+                if (original.budget_id) affected.add(original.budget_id);
+                if (nextBudgetId) affected.add(nextBudgetId);
+                for (const bId of affected) {
+                    await this.recomputeBudgetSpend(bId);
+                }
+            }
 
             const result = await this.db.getFirstAsync<Transaction>(
                 'SELECT * FROM transactions WHERE id = ?',
@@ -879,7 +993,23 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
     }
 
     async delete(id: string): Promise<GenericAPIResponse<null>> {
+        await this.ensureBudgetTriggerInfo();
+
+        let originalBudgetId: string | null = null;
+
+        if (!this.budgetTriggerCheck.hasDeleteTrigger) {
+            const original = await this.db.getFirstAsync<Transaction>(
+                'SELECT * FROM transactions WHERE id = ?',
+                [id],
+            );
+            originalBudgetId = original?.budget_id ?? null;
+        }
+
         await this.db.runAsync(`DELETE from transactions where id = ?`, [id]);
+
+        if (!this.budgetTriggerCheck.hasDeleteTrigger && originalBudgetId) {
+            await this.recomputeBudgetSpend(originalBudgetId);
+        }
         return this.formatResponse({
             data: null,
             status: 200,

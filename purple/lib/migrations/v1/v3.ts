@@ -3,104 +3,145 @@ export const migrationsV3 = [
         version: 3,
         sql: `
             PRAGMA journal_mode = WAL;
-            
-            -- Trigger to reverse budget totals when a debit transaction is deleted
-            CREATE TRIGGER IF NOT EXISTS trg_before_delete_transaction_budget
-            BEFORE DELETE ON transactions
+
+            DROP TRIGGER IF EXISTS trg_before_delete_transaction_budget;
+            DROP TRIGGER IF EXISTS trg_after_update_transaction_budget;
+
+            -- Recompute budget totals when a debit transaction is deleted
+            -- (stores the full summed total, not just the delta)
+            CREATE TRIGGER trg_before_delete_transaction_budget
+            AFTER DELETE ON transactions
             WHEN OLD.budget_id IS NOT NULL AND OLD.type = 'debit'
             BEGIN
-                -- Decrease total_spent in budget_summaries
-                UPDATE budget_summaries 
-                SET total_spent = total_spent - OLD.amount,
+                UPDATE budget_summaries
+                SET total_spent = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
                 WHERE budget_id = OLD.budget_id;
-                
-                -- Decrease spent_amount in budget_category_limits for the category
-                UPDATE budget_category_limits 
-                SET spent_amount = spent_amount - OLD.amount,
+
+                UPDATE budget_category_limits
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND category = budget_category_limits.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE budget_id = OLD.budget_id 
-                  AND category = OLD.category 
-                  AND deleted_at IS NULL;
-                
-                -- Decrease spent_amount in budget_allocations for flex budgets
-                UPDATE budget_allocations 
-                SET spent_amount = spent_amount - OLD.amount,
+                WHERE budget_id = OLD.budget_id
+                    AND deleted_at IS NULL;
+
+                UPDATE budget_allocations
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND category = budget_allocations.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE budget_id = OLD.budget_id 
-                  AND category = OLD.category 
-                  AND deleted_at IS NULL;
+                WHERE budget_id = OLD.budget_id
+                    AND deleted_at IS NULL;
             END;
-        `,
-    },
-    {
-        version: 3,
-        sql: `
-            PRAGMA journal_mode = WAL;
-            
-            -- Trigger to adjust budget totals when a transaction is updated
-            CREATE TRIGGER IF NOT EXISTS trg_after_update_transaction_budget
+
+            -- Recompute budget totals when a transaction is updated.
+            -- Important: use NULL-safe comparisons so transitions like NULL -> 'some-budget-id'
+            -- still trigger the recompute.
+            CREATE TRIGGER trg_after_update_transaction_budget
             AFTER UPDATE ON transactions
-            WHEN (NEW.budget_id IS NOT NULL OR OLD.budget_id IS NOT NULL) 
-                AND (NEW.type = 'debit' OR OLD.type = 'debit')
-                AND (
-                    OLD.budget_id != NEW.budget_id 
-                    OR OLD.amount != NEW.amount 
-                    OR OLD.category != NEW.category 
-                    OR OLD.type != NEW.type
-                )
+            WHEN (NEW.budget_id IS NOT NULL OR OLD.budget_id IS NOT NULL)
             BEGIN
-                -- If old transaction was a debit with budget, reverse it
-                UPDATE budget_summaries 
-                SET total_spent = total_spent - OLD.amount,
+                -- Recompute for OLD budget (if any)
+                UPDATE budget_summaries
+                SET total_spent = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE OLD.budget_id IS NOT NULL 
-                  AND OLD.type = 'debit' 
-                  AND budget_id = OLD.budget_id;
-                
-                UPDATE budget_category_limits 
-                SET spent_amount = spent_amount - OLD.amount,
+                WHERE OLD.budget_id IS NOT NULL
+                    AND budget_id = OLD.budget_id;
+
+                UPDATE budget_category_limits
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND category = budget_category_limits.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE OLD.budget_id IS NOT NULL 
-                  AND OLD.type = 'debit'
-                  AND budget_id = OLD.budget_id 
-                  AND category = OLD.category 
-                  AND deleted_at IS NULL;
-                  
-                UPDATE budget_allocations 
-                SET spent_amount = spent_amount - OLD.amount,
+                WHERE OLD.budget_id IS NOT NULL
+                    AND budget_id = OLD.budget_id
+                    AND deleted_at IS NULL;
+
+                UPDATE budget_allocations
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = OLD.budget_id
+                            AND type = 'debit'
+                            AND category = budget_allocations.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE OLD.budget_id IS NOT NULL 
-                  AND OLD.type = 'debit'
-                  AND budget_id = OLD.budget_id 
-                  AND category = OLD.category 
-                  AND deleted_at IS NULL;
-                
-                -- If new transaction is a debit with budget, add it
-                UPDATE budget_summaries 
-                SET total_spent = total_spent + NEW.amount,
+                WHERE OLD.budget_id IS NOT NULL
+                    AND budget_id = OLD.budget_id
+                    AND deleted_at IS NULL;
+
+                -- Recompute for NEW budget (if it is different from OLD budget)
+                UPDATE budget_summaries
+                SET total_spent = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = NEW.budget_id
+                            AND type = 'debit'
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE NEW.budget_id IS NOT NULL 
-                  AND NEW.type = 'debit'
-                  AND budget_id = NEW.budget_id;
-                
-                UPDATE budget_category_limits 
-                SET spent_amount = spent_amount + NEW.amount,
+                WHERE NEW.budget_id IS NOT NULL
+                    AND NEW.budget_id IS NOT OLD.budget_id
+                    AND budget_id = NEW.budget_id;
+
+                UPDATE budget_category_limits
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = NEW.budget_id
+                            AND type = 'debit'
+                            AND category = budget_category_limits.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE NEW.budget_id IS NOT NULL 
-                  AND NEW.type = 'debit'
-                  AND budget_id = NEW.budget_id 
-                  AND category = NEW.category 
-                  AND deleted_at IS NULL;
-                  
-                UPDATE budget_allocations 
-                SET spent_amount = spent_amount + NEW.amount,
+                WHERE NEW.budget_id IS NOT NULL
+                    AND NEW.budget_id IS NOT OLD.budget_id
+                    AND budget_id = NEW.budget_id
+                    AND deleted_at IS NULL;
+
+                UPDATE budget_allocations
+                SET spent_amount = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM transactions
+                        WHERE budget_id = NEW.budget_id
+                            AND type = 'debit'
+                            AND category = budget_allocations.category
+                            AND deleted_at IS NULL
+                    ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
-                WHERE NEW.budget_id IS NOT NULL 
-                  AND NEW.type = 'debit'
-                  AND budget_id = NEW.budget_id 
-                  AND category = NEW.category 
-                  AND deleted_at IS NULL;
+                WHERE NEW.budget_id IS NOT NULL
+                    AND NEW.budget_id IS NOT OLD.budget_id
+                    AND budget_id = NEW.budget_id
+                    AND deleted_at IS NULL;
             END;
         `,
     },

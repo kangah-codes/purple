@@ -50,7 +50,7 @@ export function BudgetCategoryCard({
     }));
 
     return (
-        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
+        <View className='flex flex-col space-y-5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
             <TouchableOpacity
                 className='flex-row justify-between items-center'
                 onPress={handleToggle}
