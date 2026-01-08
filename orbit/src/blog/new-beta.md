@@ -3,7 +3,7 @@ title: Beta 2 is here!
 description: Purple Beta 2 is now available - What's new?
 blogImage: beta-2/beta-2-is-here.png
 slug: beta-4
-date: 30th September, 2025
+date: 15th January, 2025
 featured: true
 tags:
     - mobile apps
