@@ -3,8 +3,9 @@ import { View, Text } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
+import BudgetSection from './BudgetSection';
 import { BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
-import { useBudgetEarnedIncome } from '@/components/Plans/hooks';
+import { useBudgetEarnedIncome, useUnbudgetedCategorySpending } from '@/components/Plans/hooks';
 import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLineChart';
 import { startOfMonth } from 'date-fns';
 import { MONTHS } from '../../constants';
@@ -40,6 +41,17 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const budgetStartDate = startOfMonth(
         new Date(budget.year, monthIndex === -1 ? new Date().getMonth() : monthIndex, 1),
     );
+
+    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budget.month, budget.year);
+    const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
+        id: '',
+        budget_id: '',
+        category: u.category,
+        limit_amount: 0,
+        spent_amount: u.spent,
+        rollover_enabled: false,
+        notes: null,
+    }));
 
     return (
         <View className='px-5 pb-5'>
@@ -139,45 +151,35 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
             <SpendVsBudgetLineChart startDate={budgetStartDate} />
 
             {/* Expenses Breakdown */}
-            <View className='flex flex-col space-y-5 mt-5'>
-                <View className='flex-row justify-between items-center px-5'>
-                    <Text className='text-base text-black' style={satoshiFont.satoshiBold}>
-                        Expenses
-                    </Text>
-
-                    <View className='flex-row'>
-                        <Text
-                            className='text-xs text-purple-500 ml-8'
-                            style={satoshiFont.satoshiBold}
-                        >
-                            Budget
-                        </Text>
-                        <Text
-                            className='text-xs text-purple-500 ml-8'
-                            style={satoshiFont.satoshiBold}
-                        >
-                            Left
-                        </Text>
-                    </View>
-                </View>
-
-                {budget.categoryLimits.length > 0 ? (
-                    <View>
-                        <BudgetCategoryCard
-                            title={budget.type === 'category' ? 'Categories' : 'Allocations'}
-                            transactionTypes={budget.categoryLimits.map((cl) => cl.category)}
-                            categoryLimits={budget.categoryLimits}
-                            currency={budget.currency}
-                        />
-                    </View>
-                ) : (
-                    <View className='px-5'>
-                        <Text className='text-sm text-gray-500' style={satoshiFont.satoshiMedium}>
-                            No categories set up yet
-                        </Text>
-                    </View>
+            <BudgetSection
+                title={'Expenses'}
+                rightHeaders={['Budget', 'Left']}
+                items={budget.categoryLimits}
+                emptyMessage={'No categories set up yet'}
+                renderBody={() => (
+                    <BudgetCategoryCard
+                        title={budget.type === 'category' ? 'Categories' : 'Allocations'}
+                        transactionTypes={budget.categoryLimits.map((cl) => cl.category)}
+                        categoryLimits={budget.categoryLimits}
+                        currency={budget.currency}
+                    />
                 )}
-            </View>
+            />
+
+            <BudgetSection
+                title={'Unbudgeted Expenses'}
+                rightHeaders={['Spent']}
+                items={unbudgeted}
+                emptyMessage={'No unbudgeted expenses this month'}
+                renderBody={() => (
+                    <BudgetCategoryCard
+                        title={'Unbudgeted'}
+                        transactionTypes={unbudgetedCategoryLimits.map((cl) => cl.category)}
+                        categoryLimits={unbudgetedCategoryLimits}
+                        currency={budget.currency}
+                    />
+                )}
+            />
         </View>
     );
 }

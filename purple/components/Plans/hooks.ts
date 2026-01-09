@@ -16,7 +16,6 @@ import { SessionData } from '../Auth/schema';
 import { CreatePlan, CreatePlanTransaction, Plan, PlanTransaction } from './schema';
 import { createNewPlanStore, createPlanStore } from './state';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useAuth } from '../Auth/hooks';
 import {
     BudgetSQLiteService,
     CreateBudgetData,
@@ -28,17 +27,18 @@ import {
     differenceInCalendarDays,
     endOfMonth,
     format,
-    formatISO,
     getDaysInMonth,
     isSameMonth,
     min,
     startOfMonth,
 } from 'date-fns';
+import { MONTHS } from './constants';
+import { getBudgetPaceInsightCopy } from './utils';
+import { formatISO } from 'date-fns';
+import { useAuth } from '../Auth/hooks';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { Transaction } from '@/components/Transactions/schema';
 import { isTransferTransaction } from '@/components/Transactions/utils';
-import { MONTHS } from './constants';
-import { getBudgetPaceInsightCopy } from './utils';
 
 export type BudgetPaceInsight = {
     tone: 'negative' | 'positive' | 'neutral';
@@ -541,6 +541,59 @@ export function useBudgetEarnedIncome(
                 .reduce((sum, t) => sum + Number(t.amount), 0);
 
             return earnedIncome;
+        },
+        {
+            enabled: !!month && !!year,
+        },
+    );
+}
+
+export function useUnbudgetedCategorySpending(
+    month: string | undefined,
+    year: number | undefined,
+): UseQueryResult<Array<{ category: string; spent: number }>, Error> {
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
+    const getMonthIndex = (monthName: string): number => {
+        return MONTHS.indexOf(monthName);
+    };
+
+    return useQuery(
+        ['budget-unbudgeted-categories', month, year],
+        async () => {
+            if (!month || !year) return [] as Array<{ category: string; spent: number }>;
+
+            const monthIndex = getMonthIndex(month);
+            if (monthIndex === -1) return [] as Array<{ category: string; spent: number }>;
+
+            const budgetDate = new Date(year, monthIndex, 1);
+            const startDate = formatISO(startOfMonth(budgetDate));
+            const endDate = formatISO(endOfMonth(budgetDate));
+
+            const service = ServiceFactory.create<Transaction>('transactions', db, sessionData);
+            const response = await service.list({
+                start_date: startDate,
+                end_date: endDate,
+                type: 'debit',
+                page_size: Infinity,
+            });
+
+            const transactions = response.data || [];
+
+            // Filter out transfers and those already attached to a budget
+            const unbudgeted = transactions
+                .filter((t) => !isTransferTransaction(t) && !t.budget_id)
+                .reduce<Record<string, number>>((acc, t) => {
+                    const key = t.category || 'Uncategorized';
+                    acc[key] = (acc[key] || 0) + Number(t.amount || 0);
+                    return acc;
+                }, {});
+
+            return Object.keys(unbudgeted).map((category) => ({
+                category,
+                spent: unbudgeted[category],
+            }));
         },
         {
             enabled: !!month && !!year,

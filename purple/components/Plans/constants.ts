@@ -21,14 +21,20 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
             title: '🚦 Spending is picking up speed',
             message: ({ overCount, categoryCount }) =>
                 overCount > 0
-                    ? `⚠️ ${overCount} of ${categoryCount} categories are moving faster than planned. A small slowdown now can make the rest of the month easier.`
+                    ? `⚠️ ${overCount} of ${categoryCount} ${
+                          categoryCount === 1 ? 'category' : 'categories'
+                      } ${
+                          overCount === 1 ? 'is' : 'are'
+                      } moving faster than planned. A small slowdown now can make the rest of the month easier.`
                     : '⚠️ You’re spending faster than your monthly pace. Catching this early gives you time to adjust.',
         },
         {
             title: '🔴 Lets slow down a bit...',
             message: ({ overCount }) =>
                 overCount > 0
-                    ? `${overCount} categories are outpacing their budgets. You might want to rein things in before it compounds.`
+                    ? `${overCount} ${
+                          overCount === 1 ? 'category is' : 'categories are'
+                      } outpacing their budget. You might want to rein things in before it compounds.`
                     : 'Your spending is ahead of schedule this month. A few mindful choices could bring things back on track.',
         },
         {
@@ -40,7 +46,9 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
             title: '⏳ Budget drifting off pace',
             message: ({ overCount }) =>
                 overCount > 0
-                    ? `${overCount} categories are spending faster than expected. A small reset now could make the rest of the month smoother.`
+                    ? `${overCount} ${
+                          overCount === 1 ? 'category is' : 'categories are'
+                      } spending faster than expected. A small reset now could make the rest of the month smoother.`
                     : 'Your spending is starting to outpace the plan. Slowing down slightly now can prevent pressure later.',
         },
         {
@@ -52,7 +60,11 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
             title: '🧭 Time to course-correct',
             message: ({ overCount, categoryCount }) =>
                 overCount > 0
-                    ? `${overCount} of ${categoryCount} categories are running ahead. A few small adjustments could bring things back into balance.`
+                    ? `${overCount} of ${categoryCount} ${
+                          categoryCount === 1 ? 'category' : 'categories'
+                      } ${
+                          overCount === 1 ? 'is' : 'are'
+                      } running ahead. A few small adjustments could bring things back into balance.`
                     : 'You’re spending faster than your monthly rhythm. A quick check-in now can help steady the pace.',
         },
     ],
@@ -95,7 +107,7 @@ export const BUDGET_PACE_COPY: Record<PaceTone, PaceCopyVariant[]> = {
             title: '🟡 Right on pace',
             message: ({ overCount }) =>
                 overCount > 0
-                    ? `${overCount} categories are a bit ahead, but overall your budget is holding steady.`
+                    ? `${overCount} ${overCount === 1 ? 'category is' : 'categories are'} a bit ahead, but overall your budget is holding steady.`
                     : 'Your spending is lining up nicely with your plan.',
         },
         {

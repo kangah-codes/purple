@@ -50,7 +50,7 @@ export function BudgetCategoryCard({
     }));
 
     return (
-        <View className='flex flex-col space-y-5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
+        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
             <TouchableOpacity
                 className='flex-row justify-between items-center'
                 onPress={handleToggle}
@@ -66,14 +66,14 @@ export function BudgetCategoryCard({
                 <View className='flex-row items-center'>
                     <Text
                         className='text-sm text-black w-20 text-right mr-8'
-                        style={satoshiFont.satoshiBold}
+                        style={satoshiFont.satoshiBlack}
                     >
                         {formatCurrencyRounded(totalBudget, currency)}
                     </Text>
 
                     <Text
                         className='text-sm text-purple-500 w-20 text-right'
-                        style={satoshiFont.satoshiBold}
+                        style={satoshiFont.satoshiBlack}
                     >
                         {formatCurrencyRounded(totalLeft, currency)}
                     </Text>
@@ -99,7 +99,7 @@ export function BudgetCategoryCard({
 
                         return (
                             <React.Fragment key={idx}>
-                                <View className='flex-row justify-between items-center py-2.5'>
+                                <View className='flex-row justify-between items-center py-3.5'>
                                     <View className='flex-row items-center flex-1 mr-4'>
                                         <Text
                                             className='text-sm text-black flex-1'
@@ -114,13 +114,20 @@ export function BudgetCategoryCard({
                                     <View className='flex-row items-center flex-shrink-0'>
                                         <Text
                                             className='text-sm text-black text-right mr-8'
-                                            style={[satoshiFont.satoshiBlack, { minWidth: 80 }]}
+                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
                                         >
                                             {formatCurrencyRounded(limitAmount, currency)}
                                         </Text>
                                         <Text
                                             className='text-sm text-purple-500 text-right'
-                                            style={[satoshiFont.satoshiBlack, { minWidth: 80 }]}
+                                            style={[
+                                                satoshiFont.satoshiBold,
+                                                {
+                                                    minWidth: 80,
+                                                    color:
+                                                        remainingAmount < 0 ? '#EF4444' : '#a855f7',
+                                                },
+                                            ]}
                                         >
                                             {formatCurrencyRounded(remainingAmount, currency)}
                                         </Text>
