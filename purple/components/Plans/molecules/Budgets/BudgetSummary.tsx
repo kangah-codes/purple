@@ -146,7 +146,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 emptyMessage={'No unbudgeted expenses this month'}
                 renderBody={() => (
                     <BudgetCategoryCard
-                        title={'Unbudgeted'}
+                        title={'Unbudgeted Expenses'}
                         type='unbudgeted-expense'
                         transactionTypes={unbudgetedCategoryLimits.map((cl) => cl.category)}
                         categoryLimits={unbudgetedCategoryLimits}

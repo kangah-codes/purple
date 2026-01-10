@@ -60,7 +60,7 @@ export function BudgetCategoryCard({
             >
                 <View className='flex-row items-center flex-1'>
                     <AnimatedChevron isOpen={isOpen} />
-                    <Text className='text-sm text-black ml-2' style={satoshiFont.satoshiBold}>
+                    <Text className='text-sm text-black ml-2' style={satoshiFont.satoshiBlack}>
                         {title}
                     </Text>
                 </View>
