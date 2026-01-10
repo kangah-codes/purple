@@ -34,11 +34,27 @@ export default class StartupService {
 
         console.info(`[StartupService] Current DB version: v${dbVersion.user_version}`);
 
+        // In production, allow users to force migrations to run (dev-mode behavior).
+        // This is intentionally tolerant of already-applied SQL so it won't brick prod.
+        let forceMigrations = false;
+        if (!isDev) {
+            try {
+                const row = await db.getFirstAsync<{ value: string }>(
+                    `SELECT value FROM settings WHERE key = ? LIMIT 1`,
+                    ['forceMigrations'],
+                );
+                forceMigrations = row?.value ? JSON.parse(row.value) === true : false;
+            } catch {
+                // settings table may not exist on a brand-new DB; ignore.
+                forceMigrations = false;
+            }
+        }
+
         let highestAppliedVersion = dbVersion.user_version;
 
         for (const { version, sql } of migrations) {
             // in dev mode run all migrations; in production only run new ones
-            const shouldRunMigration = isDev || version > dbVersion.user_version;
+            const shouldRunMigration = isDev || forceMigrations || version > dbVersion.user_version;
 
             if (shouldRunMigration) {
                 console.log(
@@ -48,7 +64,7 @@ export default class StartupService {
                 try {
                     await db.execAsync(sql);
                 } catch (error) {
-                    if (isDev) {
+                    if (isDev || forceMigrations) {
                         console.warn(
                             `[StartupService] Migration v${version} failed (continuing in dev mode):`,
                             error,
@@ -66,8 +82,7 @@ export default class StartupService {
         }
 
         if (highestAppliedVersion > dbVersion.user_version) {
-            // await db.execAsync(`PRAGMA user_version = ${highestAppliedVersion}`);
-            await db.execAsync(`PRAGMA user_version = ${3}`);
+            await db.execAsync(`PRAGMA user_version = ${highestAppliedVersion}`);
         }
     }
 

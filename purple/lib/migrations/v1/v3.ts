@@ -19,6 +19,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND deleted_at IS NULL
                     ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
@@ -30,6 +32,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_category_limits.category
                             AND deleted_at IS NULL
                     ),
@@ -43,6 +47,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_allocations.category
                             AND deleted_at IS NULL
                     ),
@@ -65,6 +71,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND deleted_at IS NULL
                     ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
@@ -77,6 +85,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_category_limits.category
                             AND deleted_at IS NULL
                     ),
@@ -91,6 +101,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = OLD.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_allocations.category
                             AND deleted_at IS NULL
                     ),
@@ -106,6 +118,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = NEW.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND deleted_at IS NULL
                     ),
                     updated_at = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW', 'localtime')
@@ -119,6 +133,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = NEW.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_category_limits.category
                             AND deleted_at IS NULL
                     ),
@@ -134,6 +150,8 @@ export const migrationsV3 = [
                         FROM transactions
                         WHERE budget_id = NEW.budget_id
                             AND type = 'debit'
+                            AND (from_account IS NULL OR from_account = '')
+                            AND (to_account IS NULL OR to_account = '')
                             AND category = budget_allocations.category
                             AND deleted_at IS NULL
                     ),
