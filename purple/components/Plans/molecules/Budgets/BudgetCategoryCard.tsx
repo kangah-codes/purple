@@ -34,6 +34,7 @@ export function BudgetCategoryCard({
         (sum, cl) => sum + (cl.limit_amount - cl.spent_amount),
         0,
     );
+    const totalSpent = categoryLimits.reduce((sum, cl) => sum + cl.spent_amount, 0);
 
     const handleToggle = () => {
         collapsibleRef.current?.toggle();
@@ -65,27 +66,35 @@ export function BudgetCategoryCard({
                 </View>
 
                 <View className='flex-row items-center'>
-                    <Text
-                        className='text-sm text-black w-20 text-right mr-8'
-                        style={satoshiFont.satoshiBlack}
-                    >
-                        {formatCurrencyRounded(totalBudget, currency)}
-                    </Text>
+                    {type === 'unbudgeted-expense' ? (
+                        <Text
+                            className='text-sm w-20 text-right'
+                            style={[satoshiFont.satoshiBlack, { color: '#a855f7' }]}
+                        >
+                            {formatCurrencyRounded(totalSpent, currency)}
+                        </Text>
+                    ) : (
+                        <>
+                            <Text
+                                className='text-sm text-black w-20 text-right mr-8'
+                                style={satoshiFont.satoshiBlack}
+                            >
+                                {formatCurrencyRounded(totalBudget, currency)}
+                            </Text>
 
-                    <Text
-                        className='text-sm w-20 text-right'
-                        style={[
-                            satoshiFont.satoshiBlack,
-                            {
-                                color: totalLeft < 0 ? '#EF4444' : '#a855f7',
-                            },
-                        ]}
-                    >
-                        {formatCurrencyRounded(
-                            type === 'unbudgeted-expense' ? Math.abs(totalLeft) : totalLeft,
-                            currency,
-                        )}
-                    </Text>
+                            <Text
+                                className='text-sm w-20 text-right'
+                                style={[
+                                    satoshiFont.satoshiBlack,
+                                    {
+                                        color: totalLeft < 0 ? '#EF4444' : '#a855f7',
+                                    },
+                                ]}
+                            >
+                                {formatCurrencyRounded(totalLeft, currency)}
+                            </Text>
+                        </>
+                    )}
                 </View>
             </TouchableOpacity>
 
@@ -121,25 +130,47 @@ export function BudgetCategoryCard({
                                     </View>
 
                                     <View className='flex-row items-center flex-shrink-0'>
-                                        <Text
-                                            className='text-sm text-black text-right mr-8'
-                                            style={[satoshiFont.satoshiBold, { minWidth: 80 }]}
-                                        >
-                                            {formatCurrencyRounded(limitAmount, currency)}
-                                        </Text>
-                                        <Text
-                                            className='text-sm text-purple-500 text-right'
-                                            style={[
-                                                satoshiFont.satoshiBold,
-                                                {
-                                                    minWidth: 80,
-                                                    color:
-                                                        remainingAmount < 0 ? '#EF4444' : '#a855f7',
-                                                },
-                                            ]}
-                                        >
-                                            {formatCurrencyRounded(remainingAmount, currency)}
-                                        </Text>
+                                        {type === 'unbudgeted-expense' ? (
+                                            <Text
+                                                className='text-sm text-purple-500 text-right'
+                                                style={[
+                                                    satoshiFont.satoshiBold,
+                                                    { minWidth: 80, color: '#a855f7' },
+                                                ]}
+                                            >
+                                                {formatCurrencyRounded(spentAmount, currency)}
+                                            </Text>
+                                        ) : (
+                                            <>
+                                                <Text
+                                                    className='text-sm text-black text-right mr-8'
+                                                    style={[
+                                                        satoshiFont.satoshiBold,
+                                                        { minWidth: 80 },
+                                                    ]}
+                                                >
+                                                    {formatCurrencyRounded(limitAmount, currency)}
+                                                </Text>
+                                                <Text
+                                                    className='text-sm text-purple-500 text-right'
+                                                    style={[
+                                                        satoshiFont.satoshiBold,
+                                                        {
+                                                            minWidth: 80,
+                                                            color:
+                                                                remainingAmount < 0
+                                                                    ? '#EF4444'
+                                                                    : '#a855f7',
+                                                        },
+                                                    ]}
+                                                >
+                                                    {formatCurrencyRounded(
+                                                        remainingAmount,
+                                                        currency,
+                                                    )}
+                                                </Text>
+                                            </>
+                                        )}
                                     </View>
                                 </View>
                                 {idx < transactionTypes.length - 1 && (

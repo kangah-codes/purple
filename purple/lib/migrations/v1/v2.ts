@@ -52,14 +52,14 @@ export const migrationsV2 = [
         `,
     },
     {
-        version: 21,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE budgets ADD COLUMN estimated_income NUMERIC DEFAULT 0;
         `,
     },
     {
-        version: 22,
+        version: 2,
         sql: `
             PRAGMA journal_mode = WAL;
             ALTER TABLE budgets ADD COLUMN estimated_spend NUMERIC DEFAULT 0;

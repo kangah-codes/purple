@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -10,41 +10,34 @@ import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLi
 import { endOfMonth, formatISO, startOfMonth } from 'date-fns';
 import { MONTHS } from '../../constants';
 import { useTransactions } from '@/components/Transactions/hooks';
+import { SummaryProgressSection } from './SummaryProgressSection';
 
 interface BudgetSummaryProps {
     budget: BudgetWithDetails | null;
 }
 export default function BudgetSummary({ budget }: BudgetSummaryProps) {
-    const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budget?.month, budget?.year);
-
-    if (!budget) {
-        return null;
-    }
-
-    const totalAllocated = budget.summary?.total_allocated || 0;
-    const totalSpent = budget.summary?.total_spent || 0;
-    const remainingBudget = totalAllocated - totalSpent;
-    const isExpensesOverrun = remainingBudget < 0;
-    const expensesDelta = Math.abs(remainingBudget);
-    const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
-    const estimatedIncome = budget.estimated_income || 0;
+    const budgetMonth = budget?.month;
+    const budgetYear = budget?.year;
+    const budgetId = budget?.id;
+    const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budgetMonth, budgetYear);
+    const totalAllocated = useMemo(() => {
+        return (budget?.categoryLimits ?? []).reduce(
+            (sum, cl) => sum + Number(cl.limit_amount ?? 0),
+            0,
+        );
+    }, [budget?.categoryLimits]);
+    const estimatedIncome = budget?.estimated_income || 0;
     const earnedIncome = calculatedEarnedIncome;
     const remainingIncome = estimatedIncome - earnedIncome;
     const isIncomeExceeded = remainingIncome < 0;
     const incomeDelta = Math.abs(remainingIncome);
     const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
-    const getMonthIndex = (monthName: string) => {
-        return MONTHS.indexOf(monthName);
-    };
-
-    const monthIndex = getMonthIndex(budget.month);
-    const budgetStartDate = startOfMonth(
-        new Date(budget.year, monthIndex === -1 ? new Date().getMonth() : monthIndex, 1),
-    );
-
+    const monthIndex = budgetMonth ? MONTHS.indexOf(budgetMonth) : new Date().getMonth();
+    const resolvedMonthIndex = monthIndex === -1 ? new Date().getMonth() : monthIndex;
+    const resolvedYear = budgetYear ?? new Date().getFullYear();
+    const budgetStartDate = startOfMonth(new Date(resolvedYear, resolvedMonthIndex, 1));
     const budgetEndDate = endOfMonth(budgetStartDate);
-
-    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budget.month, budget.year);
+    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budgetMonth, budgetYear);
     const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
         id: '',
         budget_id: '',
@@ -61,36 +54,25 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
             end_date: formatISO(budgetEndDate),
         },
         options: {
-            enabled: true,
+            enabled: !!budget,
             keepPreviousData: true,
         },
     });
+    const totalSpent = useMemo(() => {
+        return (
+            monthlyTransactions?.data
+                ?.filter((t) => t.type === 'debit' && !t.from_account && !t.to_account)
+                .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0
+        );
+    }, [monthlyTransactions?.data, budgetId]);
+    const remainingBudget = totalAllocated - totalSpent;
+    const isExpensesOverrun = remainingBudget < 0;
+    const expensesDelta = Math.abs(remainingBudget);
+    const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
 
-    // Debug helpers: compare apples-to-apples with budget_summaries.
-    // budget_summaries.total_spent is computed from: transactions WHERE budget_id = ? AND type = 'debit'.
-    const budgetLinkedDebitTotal =
-        monthlyTransactions?.data
-            ?.filter((t) => t.type === 'debit' && t.budget_id === budget.id)
-            .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-
-    const budgetLinkedNonTransferDebitTotal =
-        monthlyTransactions?.data
-            ?.filter(
-                (t) =>
-                    t.type === 'debit' &&
-                    t.budget_id === budget.id &&
-                    !t.from_account &&
-                    !t.to_account,
-            )
-            .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-
-    console.log('Budget Summary - Month:', budget.month, budget.year);
-    console.log('Budget Summary - total_spent (stored):', budget.summary?.total_spent ?? 0);
-    console.log('Budget Summary - linked debits (incl transfers):', budgetLinkedDebitTotal);
-    console.log(
-        'Budget Summary - linked debits (excl transfers):',
-        budgetLinkedNonTransferDebitTotal,
-    );
+    if (!budget) {
+        return null;
+    }
 
     return (
         <View className='px-5 pb-5'>
@@ -105,86 +87,37 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 <View className='h-[0.5px] border-b border-purple-100 w-full' />
 
                 {/* Income */}
-                <View className='flex flex-col space-y-2'>
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text className='text-sm text-black mb-1' style={satoshiFont.satoshiBold}>
-                            Income
-                        </Text>
-                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(estimatedIncome, budget.currency)} estimated
-                        </Text>
-                    </View>
-
-                    <View className='flex flex-row items-center space-x-0.5'>
-                        <View
-                            className={`h-2 rounded-md ${
-                                isIncomeExceeded ? 'bg-green-600' : 'bg-purple-600'
-                            }`}
-                            style={{
-                                width: `${Math.min(incomePercentage, 100)}%`,
-                            }}
-                        />
-                        <View className='h-2 flex-grow bg-purple-200 rounded-md' />
-                    </View>
-
-                    <View className='flex-row justify-between'>
-                        <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(earnedIncome, budget.currency)} earned
-                        </Text>
-                        <Text
-                            className={`text-xs ${
-                                isIncomeExceeded ? 'text-green-600' : 'text-purple-500'
-                            }`}
-                            style={satoshiFont.satoshiBold}
-                        >
-                            {formatCurrencyRounded(incomeDelta, budget.currency)}{' '}
-                            {isIncomeExceeded ? 'extra' : 'left'}
-                        </Text>
-                    </View>
-                </View>
+                <SummaryProgressSection
+                    title='Income'
+                    rightText={`${formatCurrencyRounded(
+                        estimatedIncome,
+                        budget.currency,
+                    )} estimated`}
+                    leftText={`${formatCurrencyRounded(earnedIncome, budget.currency)} earned`}
+                    deltaText={`${formatCurrencyRounded(incomeDelta, budget.currency)} ${
+                        isIncomeExceeded ? 'extra' : 'left'
+                    }`}
+                    percentage={incomePercentage}
+                    variant='income'
+                    isExceeded={isIncomeExceeded}
+                />
 
                 <View className='py-2.5'>
                     <View className='h-[0.5px] border-b border-purple-100 w-full' />
                 </View>
 
                 {/* Expenses */}
-                <View className='flex flex-col space-y-2'>
-                    <View className='flex flex-row justify-between items-center'>
-                        <Text className='text-sm text-black mb-1' style={satoshiFont.satoshiBold}>
-                            Expenses
-                        </Text>
-                        <Text className='text-xs text-purple-500' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(totalAllocated, budget.currency)} budget
-                        </Text>
-                    </View>
-
-                    <View className='flex flex-row items-center space-x-0.5'>
-                        <View
-                            className={`h-2 rounded-md ${
-                                isExpensesOverrun ? 'bg-red-500' : 'bg-purple-600'
-                            }`}
-                            style={{
-                                width: `${Math.min(spentPercentage, 100)}%`,
-                            }}
-                        />
-                        <View className='h-2 flex-grow bg-purple-200 rounded-md' />
-                    </View>
-
-                    <View className='flex-row justify-between'>
-                        <Text className='text-xs text-black' style={satoshiFont.satoshiBold}>
-                            {formatCurrencyRounded(totalSpent, budget.currency)} spent
-                        </Text>
-                        <Text
-                            className={`text-xs ${
-                                isExpensesOverrun ? 'text-red-500' : 'text-purple-500'
-                            }`}
-                            style={satoshiFont.satoshiBold}
-                        >
-                            {formatCurrencyRounded(expensesDelta, budget.currency)}{' '}
-                            {isExpensesOverrun ? 'over' : 'left'}
-                        </Text>
-                    </View>
-                </View>
+                <SummaryProgressSection
+                    title='Expenses'
+                    rightText={`${formatCurrencyRounded(totalAllocated, budget.currency)} budget`}
+                    leftText={`${formatCurrencyRounded(totalSpent, budget.currency)} spent`}
+                    deltaText={`${formatCurrencyRounded(expensesDelta, budget.currency)} ${
+                        isExpensesOverrun ? 'over' : 'left'
+                    }`}
+                    percentage={spentPercentage}
+                    variant='expense'
+                    isExceeded={isExpensesOverrun}
+                />
             </View>
 
             <SpendVsBudgetLineChart startDate={budgetStartDate} />
