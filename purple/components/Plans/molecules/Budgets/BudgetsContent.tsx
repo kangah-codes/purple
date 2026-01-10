@@ -5,13 +5,13 @@ import { addMonths, differenceInMonths, format, startOfMonth } from 'date-fns';
 import { SafeAreaView, View, ScrollView } from '@/components/Shared/styled';
 import BudgetSummary from './BudgetSummary';
 import BudgetSummarySkeleton from './BudgetSummarySkeleton';
-import CreateBudget from './CreateBudget';
-import NoBudget from './NoBudget';
 import BudgetPaceBanner from './BudgetPaceBanner';
 import tw from 'twrnc';
 import MonthCard from './MonthCard';
 import { useBudgetForMonth, useBudgetPaceInsight, usePrefetchBudgetsForMonths } from '../../hooks';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import CreateBudget from './CreateBudget';
+import NoBudget from './NoBudget';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MONTH_CARD_WIDTH = 72;
@@ -80,6 +80,7 @@ function BudgetContentForMonth({ month }: { month: Date }) {
                 ) : (
                     <CreateBudget />
                 )}
+                {/* <BudgetSummary budget={hasBudget} /> */}
             </ScrollView>
         </View>
     );

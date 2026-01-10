@@ -167,7 +167,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
             />
 
             <BudgetSection
-                title={'Unbudgeted Expenses'}
+                title={'Unbudgeted'}
                 rightHeaders={['Spent']}
                 items={unbudgeted}
                 emptyMessage={'No unbudgeted expenses this month'}

@@ -6,10 +6,9 @@ import {
     AnimatedCollapsible,
     AnimatedCollapsibleRef,
 } from '@/components/Shared/molecules/AnimatedCollapsible';
-import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
+import { withTiming, useSharedValue } from 'react-native-reanimated';
 import { AnimatedChevron } from './AnimatedChevron';
 import { BudgetCategoryLimit } from '@/lib/services/BudgetSQLiteService';
-import { CollapsedFooter } from './CollapsedFooter';
 
 interface BudgetCategoryCardProps {
     title: string;
@@ -26,7 +25,7 @@ export function BudgetCategoryCard({
 }: BudgetCategoryCardProps) {
     const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
     const [isOpen, setIsOpen] = React.useState(false);
-    const totalItems = transactionTypes.length;
+    // const totalItems = transactionTypes.length;
     const footerOpacity = useSharedValue(1);
     const totalBudget = categoryLimits.reduce((sum, cl) => sum + cl.limit_amount, 0);
     const totalLeft = categoryLimits.reduce(
@@ -43,14 +42,14 @@ export function BudgetCategoryCard({
         footerOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
     }, [isOpen, footerOpacity]);
 
-    const footerAnimatedStyle = useAnimatedStyle(() => ({
-        opacity: footerOpacity.value,
-        height: footerOpacity.value === 0 ? 0 : undefined,
-        paddingBottom: footerOpacity.value === 0 ? 5 : 20,
-    }));
+    // const footerAnimatedStyle = useAnimatedStyle(() => ({
+    //     opacity: footerOpacity.value,
+    //     height: footerOpacity.value === 0 ? 0 : undefined,
+    //     paddingBottom: footerOpacity.value === 0 ? 5 : 20,
+    // }));
 
     return (
-        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5'>
+        <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5 pb-3'>
             <TouchableOpacity
                 className='flex-row justify-between items-center'
                 onPress={handleToggle}
@@ -142,7 +141,7 @@ export function BudgetCategoryCard({
                 </View>
             </AnimatedCollapsible>
 
-            <Animated.View style={footerAnimatedStyle}>
+            {/* <Animated.View style={footerAnimatedStyle}>
                 {!isOpen && (
                     <CollapsedFooter
                         collapsibleRef={collapsibleRef}
@@ -152,7 +151,7 @@ export function BudgetCategoryCard({
                         currency={currency}
                     />
                 )}
-            </Animated.View>
+            </Animated.View> */}
         </View>
     );
 }
