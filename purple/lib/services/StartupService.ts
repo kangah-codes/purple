@@ -66,7 +66,8 @@ export default class StartupService {
         }
 
         if (highestAppliedVersion > dbVersion.user_version) {
-            await db.execAsync(`PRAGMA user_version = ${highestAppliedVersion}`);
+            // await db.execAsync(`PRAGMA user_version = ${highestAppliedVersion}`);
+            await db.execAsync(`PRAGMA user_version = ${3}`);
         }
     }
 
