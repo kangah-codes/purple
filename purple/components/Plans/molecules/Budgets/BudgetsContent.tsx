@@ -31,10 +31,7 @@ const CONTENT_MOUNT_RANGE = 2;
 function BudgetContentForMonth({ month }: { month: Date }) {
     const monthNumber = month.getMonth() + 1;
     const year = month.getFullYear();
-    const { data, isLoading, isFetching, isFetched, refetch } = useBudgetForMonth(
-        monthNumber,
-        year,
-    );
+    const { data, isLoading, refetch } = useBudgetForMonth(monthNumber, year);
 
     // If react-query is configured to keep previous data, we can momentarily
     // see the prior month's budget result while the new month is fetching.
@@ -51,9 +48,11 @@ function BudgetContentForMonth({ month }: { month: Date }) {
 
     useRefreshOnFocus(refetch);
 
-    // Default to skeleton until this month's query has completed at least once.
-    // This prevents brief flashes of CreateBudget/NoBudget while swiping.
-    if (!isFetched || isLoading || (isFetching && !budgetForThisMonth)) {
+    // Only show skeleton on true initial load when there's no data at all
+    // If we have any data (even stale/placeholder), show it immediately to avoid flashing
+    const shouldShowSkeleton = isLoading && data === undefined;
+
+    if (shouldShowSkeleton) {
         return (
             <ScrollView
                 className='w-full h-full'
@@ -76,7 +75,7 @@ function BudgetContentForMonth({ month }: { month: Date }) {
                 {hasBudget ? (
                     <BudgetSummary budget={hasBudget} />
                 ) : isPastMonth ? (
-                    <NoBudget />
+                    <NoBudget month={month} />
                 ) : (
                     <CreateBudget />
                 )}
@@ -102,7 +101,11 @@ export default function BudgetsContent({
     const pagerRef = useRef<PagerView>(null);
     // @ts-expect-error ignore
     const monthScrollRef = useRef<ScrollView>(null);
+
+    // baseDate is the anchor for pagerMonths - only changes on recenter
     const [baseDate, setBaseDate] = useState(currentDate);
+    // currentPageIndex tracks where we are in the pager without re-rendering pages
+    const [currentPageIndex, setCurrentPageIndex] = useState(PAGER_CENTER_INDEX);
     const [isInitialized, setIsInitialized] = useState(false);
 
     // track prop changes separately so internal swipes dont get overwritten
@@ -114,30 +117,34 @@ export default function BudgetsContent({
 
     void _availableMonths;
 
+    // The currently visible month based on page position
+    const visibleMonth = useMemo(() => {
+        return addMonths(baseDate, currentPageIndex - PAGER_CENTER_INDEX);
+    }, [baseDate, currentPageIndex]);
+
     const monthNavMonths = useMemo(() => {
-        const months = Array.from({ length: NAV_RANGE * 2 + 1 }, (_, i) =>
-            addMonths(baseDate, i - NAV_RANGE),
+        return Array.from({ length: NAV_RANGE * 2 + 1 }, (_, i) =>
+            addMonths(visibleMonth, i - NAV_RANGE),
         );
-        console.log('[DEBUG monthNavMonths] Recalculated, baseDate:', format(baseDate, 'MMM yyyy'));
-        return months;
-    }, [baseDate]);
+    }, [visibleMonth]);
 
     const pagerMonths = useMemo(() => {
-        const months = Array.from({ length: PAGER_RANGE * 2 + 1 }, (_, i) =>
+        return Array.from({ length: PAGER_RANGE * 2 + 1 }, (_, i) =>
             addMonths(baseDate, i - PAGER_RANGE),
         );
-        console.log(
-            '[DEBUG pagerMonths] Recalculated, baseDate:',
-            format(baseDate, 'MMM yyyy'),
-            'Range:',
-            format(months[0], 'MMM yyyy'),
-            '-',
-            format(months[months.length - 1], 'MMM yyyy'),
-        );
-        return months;
     }, [baseDate]);
 
-    usePrefetchBudgetsForMonths(pagerMonths, { enabled: isInitialized, staleTimeMs: 60_000 });
+    // Create a focused prefetch window of ±2 months from visible month
+    // This ensures the most likely swipe destinations are always ready
+    const prefetchWindow = useMemo(() => {
+        const PREFETCH_RANGE = 2;
+        return Array.from({ length: PREFETCH_RANGE * 2 + 1 }, (_, i) =>
+            addMonths(visibleMonth, i - PREFETCH_RANGE),
+        );
+    }, [visibleMonth]);
+
+    // Prefetch the focused window with shorter stale time for better freshness
+    usePrefetchBudgetsForMonths(prefetchWindow, { enabled: isInitialized, staleTimeMs: 30_000 });
 
     const scrollMonthChipsToCenter = useCallback((animated: boolean) => {
         const offsetX = Math.max(
@@ -182,6 +189,7 @@ export default function BudgetsContent({
             );
             lastPropDateRef.current = currentDate;
             setBaseDate(currentDate);
+            setCurrentPageIndex(PAGER_CENTER_INDEX);
             pagerRef.current?.setPageWithoutAnimation(PAGER_CENTER_INDEX);
             scrollMonthChipsToCenter(true);
         }
@@ -194,69 +202,46 @@ export default function BudgetsContent({
             const delta = monthIndex - NAV_RANGE;
             if (delta === 0) return;
 
-            // animate pager to the target month within the window
-            pagerRef.current?.setPage(PAGER_CENTER_INDEX + delta);
+            // Calculate the target page index based on current position
+            const targetPageIndex = currentPageIndex + delta;
+            pagerRef.current?.setPage(targetPageIndex);
         },
-        [monthNavMonths.length],
+        [monthNavMonths.length, currentPageIndex],
     );
 
     const handlePageSelected = useCallback(
         (e: { nativeEvent: { position: number } }) => {
-            console.log(
-                '[DEBUG handlePageSelected] START - position:',
-                e.nativeEvent.position,
-                'isRecentering:',
-                isRecenteringRef.current,
-            );
-
             if (isRecenteringRef.current) {
-                console.log('[DEBUG handlePageSelected] BLOCKED - currently recentering');
                 return;
             }
 
             const position = e.nativeEvent.position;
-            const delta = position - PAGER_CENTER_INDEX;
-            if (delta === 0) {
-                console.log('[DEBUG handlePageSelected] SKIPPED - already at center');
-                return;
-            }
 
-            const selectedDate = addMonths(baseDate, delta);
-            console.log(
-                '[DEBUG handlePageSelected] Swiped delta:',
-                delta,
-                'from',
-                format(baseDate, 'MMM yyyy'),
-                'to',
-                format(selectedDate, 'MMM yyyy'),
-            );
+            // Update current page index (doesn't cause pagerMonths recalculation)
+            setCurrentPageIndex(position);
 
+            const selectedDate = addMonths(baseDate, position - PAGER_CENTER_INDEX);
             onMonthChange?.(selectedDate);
-            console.log('[DEBUG handlePageSelected] Called onMonthChange');
 
-            // recenter to keep the window small and swipable forever
-            isRecenteringRef.current = true;
-            console.log(
-                '[DEBUG handlePageSelected] Set isRecenteringRef = true, scheduling recenter',
-            );
+            // Only recenter when getting close to the edges (within 2 pages)
+            // This prevents unnecessary re-renders on most swipes
+            const distanceToEdge = Math.min(position, PAGER_RANGE * 2 - position);
+            const shouldRecenter = distanceToEdge <= 2;
 
-            setTimeout(() => {
-                console.log(
-                    '[DEBUG handlePageSelected] TIMEOUT - Recentering pager to index',
-                    PAGER_CENTER_INDEX,
-                );
-                pagerRef.current?.setPageWithoutAnimation(PAGER_CENTER_INDEX);
+            if (shouldRecenter) {
+                // Need to recenter to keep infinite scroll working
+                isRecenteringRef.current = true;
 
-                // Wait for next frame to ensure pager position update completes
+                // Wait for animation to settle before recentering
                 requestAnimationFrame(() => {
-                    console.log('[DEBUG handlePageSelected] RAF - Updating baseDate');
-                    setBaseDate(selectedDate);
-                    console.log('[DEBUG handlePageSelected] RAF - Called setBaseDate');
-
-                    isRecenteringRef.current = false;
-                    console.log('[DEBUG handlePageSelected] RAF - Set isRecenteringRef = false');
+                    requestAnimationFrame(() => {
+                        setBaseDate(selectedDate);
+                        setCurrentPageIndex(PAGER_CENTER_INDEX);
+                        pagerRef.current?.setPageWithoutAnimation(PAGER_CENTER_INDEX);
+                        isRecenteringRef.current = false;
+                    });
                 });
-            }, 0);
+            }
 
             scrollMonthChipsToCenter(true);
         },
@@ -266,37 +251,30 @@ export default function BudgetsContent({
     const renderPageContent = useCallback(
         (index: number) => {
             const month = pagerMonths[index];
-            const distanceFromCenter = Math.abs(index - PAGER_CENTER_INDEX);
-            const willMount = distanceFromCenter <= CONTENT_MOUNT_RANGE;
+            // Use currentPageIndex instead of PAGER_CENTER_INDEX for mount range
+            const distanceFromCurrent = Math.abs(index - currentPageIndex);
+            const willMount = distanceFromCurrent <= CONTENT_MOUNT_RANGE;
 
-            console.log(
-                '[DEBUG renderPageContent] Index:',
-                index,
-                'Month:',
-                month ? format(month, 'MMM yyyy') : 'null',
-                'Distance:',
-                distanceFromCenter,
-                'WillMount:',
-                willMount,
-                'isRecentering:',
-                isRecenteringRef.current,
-            );
+            // Use stable key based on actual month/year to preserve component state
+            const monthKey = month
+                ? `${month.getFullYear()}-${month.getMonth()}`
+                : `empty-${index}`;
 
-            if (!month) return <View key={index} className='w-full h-full' />;
+            if (!month) return <View key={monthKey} className='w-full h-full' />;
 
             // only mount content close to the visible page
             // everything else is a lightweight placeholder
             if (!willMount) {
-                return <View key={index} className='w-full h-full' />;
+                return <View key={monthKey} className='w-full h-full' />;
             }
 
             if (renderContent) {
                 return renderContent(month);
             }
 
-            return <BudgetContentForMonth key={index} month={month} />;
+            return <BudgetContentForMonth key={monthKey} month={month} />;
         },
-        [renderContent, pagerMonths],
+        [renderContent, pagerMonths, currentPageIndex],
     );
 
     if (!isInitialized) {

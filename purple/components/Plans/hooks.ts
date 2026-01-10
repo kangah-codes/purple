@@ -132,9 +132,21 @@ export function usePrefetchBudgetsForMonths(
             const monthNumber = monthDate.getMonth() + 1;
             const year = monthDate.getFullYear();
             const monthName = format(monthDate, 'MMMM');
+            const queryKey = ['budget', monthNumber, year];
+
+            // Skip if data is already cached and fresh
+            const existingData = queryClient.getQueryData(queryKey);
+            const queryState = queryClient.getQueryState(queryKey);
+            const isFresh = queryState?.dataUpdatedAt
+                ? Date.now() - queryState.dataUpdatedAt < staleTime
+                : false;
+
+            if (existingData && isFresh) {
+                continue;
+            }
 
             void queryClient.prefetchQuery(
-                ['budget', monthNumber, year],
+                queryKey,
                 () => service.getBudgetForMonth(monthName, year),
                 { staleTime },
             );
@@ -444,6 +456,7 @@ export function useBudgetForMonth(
     year: number,
 ): UseQueryResult<GenericAPIResponse<BudgetWithDetails | null>, Error> {
     const db = useSQLiteContext();
+    const queryClient = useQueryClient();
 
     const getMonthName = (monthNumber: number): string => {
         return MONTHS[monthNumber - 1];
@@ -457,6 +470,18 @@ export function useBudgetForMonth(
         },
         {
             enabled: month > 0 && month <= 12,
+            // Use cached/prefetched data immediately to prevent flashing
+            placeholderData: () => {
+                return queryClient.getQueryData<GenericAPIResponse<BudgetWithDetails | null>>([
+                    'budget',
+                    month,
+                    year,
+                ]);
+            },
+            // Keep showing previous data while refetching
+            keepPreviousData: false,
+            // Consider data fresh for 30 seconds to reduce refetches while swiping
+            staleTime: 30_000,
         },
     );
 }
