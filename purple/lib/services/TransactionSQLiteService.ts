@@ -234,8 +234,15 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     ],
                 );
 
-                // Update budget summary if budget_id is provided and transaction is a debit (expense)
-                if (data.budget_id && data.type === 'debit') {
+                // Update budget summary if budget_id is provided and transaction is a debit (expense).
+                // Important: do NOT count transfers toward budgets. Some legacy data can represent
+                // transfers as debits with from_account/to_account populated, so explicitly exclude them.
+                if (
+                    data.budget_id &&
+                    data.type === 'debit' &&
+                    !data.from_account &&
+                    !data.to_account
+                ) {
                     await this.applyBudgetSpendDelta(data.budget_id, data.amount, data.category);
                 }
 
@@ -318,6 +325,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     FROM transactions
                     WHERE budget_id = ?
                       AND type = 'debit'
+                                            AND (from_account IS NULL OR from_account = '')
+                                            AND (to_account IS NULL OR to_account = '')
                       AND deleted_at IS NULL
                  ), updated_at = ?
                  WHERE budget_id = ?`,
@@ -331,6 +340,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     FROM transactions
                     WHERE budget_id = ?
                       AND type = 'debit'
+                                            AND (from_account IS NULL OR from_account = '')
+                                            AND (to_account IS NULL OR to_account = '')
                       AND category = budget_category_limits.category
                       AND deleted_at IS NULL
                  ), updated_at = ?
@@ -346,6 +357,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     FROM transactions
                     WHERE budget_id = ?
                       AND type = 'debit'
+                      AND (from_account IS NULL OR from_account = '')
+                      AND (to_account IS NULL OR to_account = '')
                       AND category = budget_allocations.category
                       AND deleted_at IS NULL
                  ), updated_at = ?

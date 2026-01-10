@@ -15,6 +15,7 @@ interface BudgetCategoryCardProps {
     transactionTypes: string[];
     categoryLimits?: BudgetCategoryLimit[];
     currency?: string;
+    type: 'income' | 'budgeted-expense' | 'unbudgeted-expense';
 }
 
 export function BudgetCategoryCard({
@@ -22,6 +23,7 @@ export function BudgetCategoryCard({
     transactionTypes,
     categoryLimits = [],
     currency,
+    type,
 }: BudgetCategoryCardProps) {
     const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
     const [isOpen, setIsOpen] = React.useState(false);
@@ -71,10 +73,18 @@ export function BudgetCategoryCard({
                     </Text>
 
                     <Text
-                        className='text-sm text-purple-500 w-20 text-right'
-                        style={satoshiFont.satoshiBlack}
+                        className='text-sm w-20 text-right'
+                        style={[
+                            satoshiFont.satoshiBlack,
+                            {
+                                color: totalLeft < 0 ? '#EF4444' : '#a855f7',
+                            },
+                        ]}
                     >
-                        {formatCurrencyRounded(totalLeft, currency)}
+                        {formatCurrencyRounded(
+                            type === 'unbudgeted-expense' ? Math.abs(totalLeft) : totalLeft,
+                            currency,
+                        )}
                     </Text>
                 </View>
             </TouchableOpacity>

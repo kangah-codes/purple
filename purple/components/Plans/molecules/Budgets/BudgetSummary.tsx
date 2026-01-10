@@ -7,13 +7,13 @@ import BudgetSection from './BudgetSection';
 import { BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
 import { useBudgetEarnedIncome, useUnbudgetedCategorySpending } from '@/components/Plans/hooks';
 import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLineChart';
-import { startOfMonth } from 'date-fns';
+import { endOfMonth, formatISO, startOfMonth } from 'date-fns';
 import { MONTHS } from '../../constants';
+import { useTransactions } from '@/components/Transactions/hooks';
 
 interface BudgetSummaryProps {
     budget: BudgetWithDetails | null;
 }
-
 export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budget?.month, budget?.year);
 
@@ -42,6 +42,8 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
         new Date(budget.year, monthIndex === -1 ? new Date().getMonth() : monthIndex, 1),
     );
 
+    const budgetEndDate = endOfMonth(budgetStartDate);
+
     const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budget.month, budget.year);
     const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
         id: '',
@@ -52,6 +54,43 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
         rollover_enabled: false,
         notes: null,
     }));
+    const { data: monthlyTransactions } = useTransactions({
+        requestQuery: {
+            page_size: Infinity,
+            start_date: formatISO(budgetStartDate),
+            end_date: formatISO(budgetEndDate),
+        },
+        options: {
+            enabled: true,
+            keepPreviousData: true,
+        },
+    });
+
+    // Debug helpers: compare apples-to-apples with budget_summaries.
+    // budget_summaries.total_spent is computed from: transactions WHERE budget_id = ? AND type = 'debit'.
+    const budgetLinkedDebitTotal =
+        monthlyTransactions?.data
+            ?.filter((t) => t.type === 'debit' && t.budget_id === budget.id)
+            .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
+
+    const budgetLinkedNonTransferDebitTotal =
+        monthlyTransactions?.data
+            ?.filter(
+                (t) =>
+                    t.type === 'debit' &&
+                    t.budget_id === budget.id &&
+                    !t.from_account &&
+                    !t.to_account,
+            )
+            .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
+
+    console.log('Budget Summary - Month:', budget.month, budget.year);
+    console.log('Budget Summary - total_spent (stored):', budget.summary?.total_spent ?? 0);
+    console.log('Budget Summary - linked debits (incl transfers):', budgetLinkedDebitTotal);
+    console.log(
+        'Budget Summary - linked debits (excl transfers):',
+        budgetLinkedNonTransferDebitTotal,
+    );
 
     return (
         <View className='px-5 pb-5'>
@@ -158,6 +197,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 emptyMessage={'No categories set up yet'}
                 renderBody={() => (
                     <BudgetCategoryCard
+                        type='budgeted-expense'
                         title={budget.type === 'category' ? 'Categories' : 'Allocations'}
                         transactionTypes={budget.categoryLimits.map((cl) => cl.category)}
                         categoryLimits={budget.categoryLimits}
@@ -174,6 +214,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 renderBody={() => (
                     <BudgetCategoryCard
                         title={'Unbudgeted'}
+                        type='unbudgeted-expense'
                         transactionTypes={unbudgetedCategoryLimits.map((cl) => cl.category)}
                         categoryLimits={unbudgetedCategoryLimits}
                         currency={budget.currency}

@@ -222,7 +222,11 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
                      SET total_spent = (
                         SELECT COALESCE(SUM(amount), 0)
                         FROM transactions
-                        WHERE budget_id = ? AND type = 'debit' AND deleted_at IS NULL
+                                                WHERE budget_id = ?
+                                                    AND type = 'debit'
+                                                    AND (from_account IS NULL OR from_account = '')
+                                                    AND (to_account IS NULL OR to_account = '')
+                                                    AND deleted_at IS NULL
                      ), updated_at = ?
                      WHERE budget_id = ?`,
                     [budgetId, now, budgetId],
@@ -238,6 +242,8 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
                                 FROM transactions
                                 WHERE budget_id = ?
                                   AND type = 'debit'
+                                  AND (from_account IS NULL OR from_account = '')
+                                  AND (to_account IS NULL OR to_account = '')
                                   AND category = ?
                                   AND deleted_at IS NULL
                              ), updated_at = ?
@@ -261,6 +267,8 @@ export class BudgetSQLiteService extends BaseSQLiteService<Budget> {
                                 FROM transactions
                                 WHERE budget_id = ?
                                   AND type = 'debit'
+                                  AND (from_account IS NULL OR from_account = '')
+                                  AND (to_account IS NULL OR to_account = '')
                                   AND category = ?
                                   AND deleted_at IS NULL
                              ), updated_at = ?
