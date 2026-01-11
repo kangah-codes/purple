@@ -84,7 +84,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                     </Text>
                 </View>
 
-                <View className='h-[0.5px] border-b border-purple-100 w-full' />
+                <View className='h-[0.5px] border-b border-purple-100 w-full mb-2.5' />
 
                 {/* Income */}
                 <SummaryProgressSection
@@ -146,7 +146,7 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 emptyMessage={'No unbudgeted expenses this month'}
                 renderBody={() => (
                     <BudgetCategoryCard
-                        title={'Unbudgeted Expenses'}
+                        title={'Unbudgeted Categories'}
                         type='unbudgeted-expense'
                         transactionTypes={unbudgetedCategoryLimits.map((cl) => cl.category)}
                         categoryLimits={unbudgetedCategoryLimits}
