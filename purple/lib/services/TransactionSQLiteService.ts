@@ -390,7 +390,6 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             const nextBudgetId = data.budget_id === undefined ? original.budget_id : data.budget_id;
             const nextType = data.type ?? original.type;
             const nextAmount = data.amount ?? original.amount;
-            const nextCategory = data.category ?? original.category;
 
             // Overdraw validation for edits should be based on the *net change*.
             // The account balance already reflects the original transaction.
@@ -700,6 +699,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             const updateFields: string[] = [];
             const updateValues: any[] = [];
 
+            // TODO: refactor the fuck outta this
             // Handle basic fields
             if (data.amount !== undefined) {
                 updateFields.push('amount = ?');
@@ -736,15 +736,6 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             if (data.status !== undefined) {
                 updateFields.push('status = ?');
                 updateValues.push(data.status);
-                // Update is_active based on status
-                updateFields.push('is_active = ?');
-                updateValues.push(data.status === 'active' ? 1 : 0);
-            } else if (data.is_active !== undefined) {
-                updateFields.push('is_active = ?');
-                updateValues.push(data.is_active ? 1 : 0);
-                // Update status based on is_active
-                updateFields.push('status = ?');
-                updateValues.push(data.is_active ? 'active' : 'paused');
             }
 
             // Handle recurrence rule and dates if provided

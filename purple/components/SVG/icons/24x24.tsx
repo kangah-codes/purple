@@ -168,6 +168,34 @@ export function TrashIcon(props: SvgProps) {
     );
 }
 
+export function PauseIcon(props: SvgProps) {
+    return (
+        <Svg width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>
+            <Path
+                d='M9.5 15V9M14.5 15V9M7.8 21H16.2C17.8802 21 18.7202 21 19.362 20.673C19.9265 20.3854 20.3854 19.9265 20.673 19.362C21 18.7202 21 17.8802 21 16.2V7.8C21 6.11984 21 5.27976 20.673 4.63803C20.3854 4.07354 19.9265 3.6146 19.362 3.32698C18.7202 3 17.8802 3 16.2 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21Z'
+                strokeWidth={props.strokeWidth ?? '2'}
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                stroke={props.stroke}
+            />
+        </Svg>
+    );
+}
+
+export function PlayIcon(props: SvgProps) {
+    return (
+        <Svg width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>
+            <Path
+                d='M5 4.98951C5 4.01835 5 3.53277 5.20249 3.2651C5.37889 3.03191 5.64852 2.88761 5.9404 2.87018C6.27544 2.85017 6.67946 3.11953 7.48752 3.65823L18.0031 10.6686C18.6708 11.1137 19.0046 11.3363 19.1209 11.6168C19.2227 11.8621 19.2227 12.1377 19.1209 12.383C19.0046 12.6635 18.6708 12.886 18.0031 13.3312L7.48752 20.3415C6.67946 20.8802 6.27544 21.1496 5.9404 21.1296C5.64852 21.1122 5.37889 20.9679 5.20249 20.7347C5 20.467 5 19.9814 5 19.0103V4.98951Z'
+                strokeWidth={props.strokeWidth ?? '2'}
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                stroke={props.stroke}
+            />
+        </Svg>
+    );
+}
+
 export function BellIcon(props: SvgProps) {
     return (
         <Svg width='24' height='24' viewBox='0 0 24 24' fill='none' {...props}>

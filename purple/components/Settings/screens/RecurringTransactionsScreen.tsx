@@ -24,7 +24,7 @@ function RecurringTransactionsScreen() {
     const { data, fetchNextPage, hasNextPage, refetch } = useInfiniteRecurringTransactions({
         requestQuery: {
             page_size: 10,
-            status: 'active',
+            // status: 'active',
         },
         options: {
             onError: () => {
@@ -95,7 +95,14 @@ function RecurringTransactionsScreen() {
                 >
                     <TouchableOpacity
                         className='px-4 py-2 flex items-center justify-center rounded-full'
-                        onPress={() => router.push('/transactions/new-recurring-transaction')}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/transactions/new',
+                                params: {
+                                    isRecurringTx: 'true',
+                                },
+                            })
+                        }
                     >
                         <PlusIcon stroke={'#fff'} width={24} height={24} />
                     </TouchableOpacity>

@@ -5,7 +5,6 @@ import {
     CoinSwapIcon,
     ExternalLinkIcon,
     FlaskIcon,
-    PiggyBankIcon,
     SafeIcon,
 } from '@/components/SVG/icons/noscale';
 import { BellIcon } from '@/components/SVG/icons/24x24';
@@ -30,11 +29,11 @@ export default function SettingsGroups() {
             title: 'Accounts',
             link: '/settings/account-settings',
         },
-        {
-            icon: <PiggyBankIcon width={18} height={18} stroke={'#9333ea'} />,
-            title: 'Plans',
-            link: '/settings/plan-settings',
-        },
+        // {
+        //     icon: <PiggyBankIcon width={18} height={18} stroke={'#9333ea'} />,
+        //     title: 'Plans',
+        //     link: '/settings/plan-settings',
+        // },
         {
             icon: <CoinSwapIcon width={18} height={18} stroke={'#9333ea'} />,
             title: 'Transactions',

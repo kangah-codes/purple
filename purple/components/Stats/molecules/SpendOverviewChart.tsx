@@ -47,6 +47,7 @@ export default function SpendOverviewChart({ transactions, startDate }: SpendOve
                     barWidth={40}
                     spacing={5}
                     noOfSections={3}
+                    stepValue={Math.ceil(maxValue / 3)}
                     maxValue={maxValue}
                     barBorderRadius={9}
                     stackData={stackData}

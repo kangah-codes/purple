@@ -170,7 +170,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
 
     return (
         <View className='flex flex-col space-y-5'>
-            <View className='flex flex-col space-y-2.5'>
+            <View className='flex flex-col space-y-2.5 pr-11'>
                 <View>
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
                         Income
@@ -196,7 +196,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
 
             <View className='h-[1px] border-b border-purple-100' />
 
-            <View className='flex flex-col space-y-2.5'>
+            <View className='flex flex-col space-y-2.5 pr-11'>
                 <View>
                     <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500'>
                         Expenses

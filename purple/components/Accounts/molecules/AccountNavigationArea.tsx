@@ -70,8 +70,6 @@ export default function AccountNavigationArea() {
                     ? 0 // closing set to 0
                     : currentAccount.closed_balance ?? currentAccount.balance; // reopening restore from closed_balance
 
-                console.log('New balance will be:', newBalance);
-
                 editMutate(
                     {
                         id: currentAccount?.id ?? '',

@@ -62,14 +62,14 @@ type FormData = {
 
 export default function NewTransactionScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const { type, accountId } = useLocalSearchParams();
+    const { type, accountId, isRecurringTx } = useLocalSearchParams();
     const {
         preferences: { customTransactionTypes },
     } = usePreferences();
     const queryClient = useQueryClient();
     const { logEvent } = useAnalytics();
     const [transactionType, setTransactionType] = useState<string>((type as string) ?? 'debit');
-    const [isRecurring, setIsRecurring] = useState(false);
+    const [isRecurring, setIsRecurring] = useState(Boolean(isRecurringTx));
     const [countInBudget, setCountInBudget] = useState(true);
     const { mutate: createTransaction, isLoading: isCreatingTransaction } = useCreateTransaction();
     const { mutate: createRecurringTransaction, isLoading: isCreatingRecurring } =

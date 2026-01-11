@@ -117,7 +117,15 @@ export function BudgetCategoryCard({
 
                         return (
                             <React.Fragment key={idx}>
-                                <View className='flex-row justify-between items-center py-3.5'>
+                                <View
+                                    className='flex-row justify-between items-center py-3.5'
+                                    style={{
+                                        // workaround -> for some reason when there is only one item, the collapsible
+                                        // does not measure correctly and cuts off the content. Setting a fixed height
+                                        // solves this issue
+                                        height: transactionTypes.length === 1 ? 50 : undefined,
+                                    }}
+                                >
                                     <View className='flex-row items-center flex-1 mr-4'>
                                         <Text
                                             className='text-sm text-black flex-1'

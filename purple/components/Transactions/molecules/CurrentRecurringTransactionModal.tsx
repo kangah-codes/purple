@@ -1,10 +1,11 @@
 import { useAccountStore } from '@/components/Accounts/hooks';
-import { EditSquareIcon, TrashIcon } from '@/components/SVG/icons/24x24';
+import { EditSquareIcon, PauseIcon, PlayIcon, TrashIcon } from '@/components/SVG/icons/24x24';
 import CustomBottomSheetModal from '@/components/Shared/molecules/GlobalBottomSheetModal';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import {
     useDeleteRecurringTransaction,
+    useEditRecurringTransaction,
     useTransactionStore,
 } from '@/components/Transactions/hooks';
 import { ReceiptDetail } from '@/components/Transactions/molecules/Receipt';
@@ -45,6 +46,8 @@ export default function CurrentRecurringTransactionModal({
     const { logEvent } = useAnalytics();
     const { accounts } = useAccountStore();
     const account = accounts.find((acc) => acc.id === currentRecurringTransaction?.account_id);
+    const { mutate: editRecurringTransaction } = useEditRecurringTransaction();
+    const isPaused = currentRecurringTransaction?.status === 'paused';
 
     useEffect(() => {
         const trackScreenView = async () => {
@@ -88,6 +91,51 @@ export default function CurrentRecurringTransactionModal({
             },
         });
     }, []);
+
+    const pauseTransactionCb = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        const newStatus = isPaused ? 'active' : 'paused';
+
+        editRecurringTransaction(
+            {
+                id: currentRecurringTransaction?.id ?? '',
+                data: { status: newStatus },
+            },
+            {
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: `There was an issue ${
+                                isPaused ? 'resuming' : 'pausing'
+                            } the transaction`,
+                        },
+                    });
+                },
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['recurring-transactions'],
+                    });
+                    setShowBottomSheetModal(modalKey, false);
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Success!',
+                            text2: `Transaction ${isPaused ? 'resumed' : 'paused'} successfully`,
+                        },
+                    });
+                },
+            },
+        );
+    }, [
+        isPaused,
+        currentRecurringTransaction?.id,
+        editRecurringTransaction,
+        queryClient,
+        modalKey,
+        setShowBottomSheetModal,
+    ]);
 
     if (!currentRecurringTransaction || !account) return null;
 
@@ -164,6 +212,7 @@ export default function CurrentRecurringTransactionModal({
                                 ruleToText(currentRecurringTransaction.recurrence_rule),
                             )}
                         />
+                        <ReceiptDetail label='Status' value={isPaused ? 'Paused' : 'Active'} />
                         <ReceiptDetail label='Account' value={account.name} />
                         <ReceiptDetail label='Created at' value={`${date} at ${time}`} />
                         <ReceiptDetail
@@ -180,7 +229,7 @@ export default function CurrentRecurringTransactionModal({
                             <ReceiptDetail label='Note' value={currentRecurringTransaction.notes} />
                         )}
                         <View className='border-b border-purple-100 w-full mb-5' />
-                        <View className='flex flex-row space-x-2 w-[60%] justify-between'>
+                        <View className='flex flex-row space-x-2 w-[70%] justify-between h-12'>
                             <LinearGradient
                                 colors={['#c084fc', '#9333ea']}
                                 className='flex-grow flex items-center justify-center rounded-full'
@@ -217,6 +266,35 @@ export default function CurrentRecurringTransactionModal({
                                     }}
                                 >
                                     <TrashIcon stroke={'#fff'} />
+                                </TouchableOpacity>
+                            </LinearGradient>
+                            <LinearGradient
+                                colors={isPaused ? ['#22c55e', '#16a34a'] : ['#ffb900', '#ff8000']}
+                                className='h-12 w-12 flex items-center justify-center rounded-full'
+                            >
+                                <TouchableOpacity
+                                    className='flex items-center w-full h-full justify-center rounded-full'
+                                    onLongPress={pauseTransactionCb}
+                                    delayLongPress={500}
+                                    onPress={() => {
+                                        Toast.show({
+                                            type: 'info',
+                                            props: {
+                                                text1: isPaused
+                                                    ? 'Hold to resume'
+                                                    : 'Hold to pause',
+                                                text2: isPaused
+                                                    ? 'Press and hold to resume this transaction'
+                                                    : 'Press and hold to pause this transaction',
+                                            },
+                                        });
+                                    }}
+                                >
+                                    {isPaused ? (
+                                        <PlayIcon stroke={'#fff'} />
+                                    ) : (
+                                        <PauseIcon stroke={'#fff'} />
+                                    )}
                                 </TouchableOpacity>
                             </LinearGradient>
                         </View>

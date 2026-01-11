@@ -5,18 +5,18 @@ import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/
 import { satoshiFont } from '@/lib/constants/fonts';
 import { SettingsServiceFactory } from '@/lib/factory/SettingsFactory';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { useConfirmationModalStore } from '@/components/Shared/molecules/ConfirmationModal/state';
 import { Portal } from '@gorhom/portal';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
 import React from 'react';
-import { Alert, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { usePreferences } from '../hooks';
 import PinAccount from '../molecules/PinAccount';
 import SettingsList from '../molecules/SettingsList';
 import { SettingsListItem } from '../schema';
-import pkg from '@/package.json';
 
 export default function PrivacyScreen() {
     const { preferences, setPreference } = usePreferences();
@@ -24,6 +24,7 @@ export default function PrivacyScreen() {
     const db = useSQLiteContext();
     const settingsService = SettingsServiceFactory.create(db);
     const { logEvent } = useAnalytics();
+    const { showConfirmationModal } = useConfirmationModalStore();
     const handleToggle = async (
         key: 'trackUsageStatistics' | 'sendDiagnosticData',
         value: boolean,
@@ -48,42 +49,37 @@ export default function PrivacyScreen() {
         const showConfirmation = isDisabling && messages[key];
 
         if (showConfirmation) {
-            Alert.alert('Are you sure? 🥺', messages[key].disable, [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
+            showConfirmationModal({
+                title: 'Are you sure? 🥺',
+                message: messages[key].disable,
+                confirmText: 'Disable',
+                onConfirm: async () => {
+                    if (key == 'sendDiagnosticData') return;
+                    try {
+                        await logEvent('settings_set', {
+                            setting: key,
+                            old_value: preferences[key],
+                            new_value: value,
+                        });
+                        await settingsService.set(key, value);
+                        setPreference(key, value);
+                    } catch (error) {
+                        console.error(`[PrivacyScreen] Failed to update ${key} setting:`, error);
+                        await logEvent('error_occurred', {
+                            error_type: 'SETTING_UPDATE_ERROR',
+                            context: `Failed to update ${key} setting:`,
+                            severity: 'medium',
+                        });
+                        Toast.show({
+                            type: 'error',
+                            props: {
+                                text1: 'Error',
+                                text2: `Failed to update setting`,
+                            },
+                        });
+                    }
                 },
-                {
-                    text: 'Disable',
-                    style: 'destructive',
-                    onPress: async () => {
-                        if (key == 'sendDiagnosticData') return;
-                        try {
-                            await logEvent('settings_set', {
-                                setting: key,
-                                old_value: preferences[key],
-                                new_value: value,
-                            });
-                            await settingsService.set(key, value);
-                            setPreference(key, value);
-                        } catch (error) {
-                            console.error(`Failed to update ${key} setting:`, error);
-                            await logEvent('error_occurred', {
-                                error_type: 'SETTING_UPDATE_ERROR',
-                                context: `Failed to update ${key} setting:`,
-                                severity: 'medium',
-                            });
-                            Toast.show({
-                                type: 'error',
-                                props: {
-                                    text1: 'Error',
-                                    text2: `Failed to update setting`,
-                                },
-                            });
-                        }
-                    },
-                },
-            ]);
+            });
         } else {
             try {
                 await settingsService.set(key, value);
@@ -98,7 +94,7 @@ export default function PrivacyScreen() {
                     });
                 }
             } catch (error) {
-                console.error(`Failed to update ${key} setting:`, error);
+                console.error(`[PrivacyScreen] Failed to update ${key} setting:`, error);
                 await logEvent('error_occurred', {
                     error_type: 'SETTING_UPDATE_ERROR',
                     context: `Failed to update ${key} setting:`,
@@ -126,24 +122,18 @@ export default function PrivacyScreen() {
                 />
             ),
         },
-        // diagnostic data is required for unstable beta versions
-        ...(!pkg.isBeta
-            ? [
-                  {
-                      icon: <PaperPlaneIcon width={20} height={20} stroke='#9333ea' />,
-                      title: 'Send diagnostic data',
-                      description:
-                          'Send diagnostic data and crash reports to help improve performance and reliability',
-                      customItem: () => (
-                          <Switch
-                              disabled
-                              value={sendDiagnosticData}
-                              onValueChange={(value) => handleToggle('sendDiagnosticData', value)}
-                          />
-                      ),
-                  },
-              ]
-            : []),
+        {
+            icon: <PaperPlaneIcon width={20} height={20} stroke='#9333ea' />,
+            title: 'Send diagnostic data',
+            description:
+                'Send diagnostic data and crash reports to help improve performance and reliability',
+            customItem: () => (
+                <Switch
+                    value={sendDiagnosticData}
+                    onValueChange={(value) => handleToggle('sendDiagnosticData', value)}
+                />
+            ),
+        },
     ];
 
     return (
