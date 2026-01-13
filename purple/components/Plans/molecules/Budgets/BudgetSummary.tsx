@@ -37,7 +37,15 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const resolvedYear = budgetYear ?? new Date().getFullYear();
     const budgetStartDate = startOfMonth(new Date(resolvedYear, resolvedMonthIndex, 1));
     const budgetEndDate = endOfMonth(budgetStartDate);
-    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budgetMonth, budgetYear);
+    const budgetedCategories = useMemo(
+        () => (budget?.categoryLimits ?? []).map((cl) => cl.category),
+        [budget?.categoryLimits],
+    );
+    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(
+        budgetMonth,
+        budgetYear,
+        budgetedCategories,
+    );
     const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
         id: '',
         budget_id: '',
@@ -69,6 +77,8 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const isExpensesOverrun = remainingBudget < 0;
     const expensesDelta = Math.abs(remainingBudget);
     const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+
+    console.log(unbudgeted, 'LOL');
 
     if (!budget) {
         return null;
