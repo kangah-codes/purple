@@ -53,7 +53,7 @@ type EnvConfig struct {
 	ResendAPIKey  string `mapstructure:"RESEND_API_KEY"`
 
 	// Encryption Key
-	EncryptionKey string `mapstructure:"ENCRYPTION_KEY" validate:"required"`
+	EncryptionKey string `mapstructure:"ENCRYPTION_KEY"`
 }
 
 var (
@@ -79,6 +79,7 @@ func loadEnv() *EnvConfig {
 	env := &EnvConfig{}
 	if os.Getenv("GIN_MODE") != "release" {
 		if err := godotenv.Load(); err != nil {
+			log.ErrorLogger.Errorf("Error value: %v", err)
 			log.ErrorLogger.Fatal("Error loading .env file")
 		} else {
 			log.InfoLogger.Println("Loaded env variables")
@@ -160,6 +161,8 @@ func (c *Config) InitialiseDB() error {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	log.InfoLogger.Println("Connected to database")
 
 	c.DB = db
 	return nil
