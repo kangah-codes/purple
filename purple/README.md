@@ -49,7 +49,7 @@ Right now, Purple is still just a pet project, I'm not entirely sure I have the 
 -   Golang backend??
 -   Web Version?
 -   Integration with bank/mobile money services for automatic expense tracking
--   D4RK M0D3 🌚
+-   D4RK M0D3 🌚.
 
 ### Contributing
 
