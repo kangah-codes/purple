@@ -54,18 +54,17 @@ export default function PrivacyScreen() {
                 message: messages[key].disable,
                 confirmText: 'Disable',
                 onConfirm: async () => {
-                    if (key == 'sendDiagnosticData') return;
                     try {
-                        await logEvent('settings_set', {
+                        await settingsService.set(key, value);
+                        setPreference(key, value);
+                        logEvent('settings_set', {
                             setting: key,
                             old_value: preferences[key],
                             new_value: value,
                         });
-                        await settingsService.set(key, value);
-                        setPreference(key, value);
                     } catch (error) {
                         console.error(`[PrivacyScreen] Failed to update ${key} setting:`, error);
-                        await logEvent('error_occurred', {
+                        logEvent('error_occurred', {
                             error_type: 'SETTING_UPDATE_ERROR',
                             context: `Failed to update ${key} setting:`,
                             severity: 'medium',

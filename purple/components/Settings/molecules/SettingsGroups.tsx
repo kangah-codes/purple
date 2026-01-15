@@ -13,11 +13,14 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { SettingsListItem } from '../schema';
 import SettingsGroup from './SettingsGroup';
-import { Text, View } from '@/components/Shared/styled';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import pkg from '../../../package.json';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function SettingsGroups() {
+    const { flush, flushQueue } = useAnalytics();
+
     const generalSettings: SettingsListItem[] = [
         {
             icon: <CashIcon width={18} height={18} stroke={'#9333ea'} />,
@@ -84,10 +87,54 @@ export default function SettingsGroups() {
             <SettingsGroup groupName='General' items={generalSettings} />
             <SettingsGroup groupName='Security & Notifications' items={securitySettings} />
             <SettingsGroup groupName='Other' items={otherSettings} />
-            <View className='flex flex-row items-center justify-center'>
-                <Text style={satoshiFont.satoshiBold} className='text-xs text-purple-500 px-2.5'>
-                    Purple v{pkg.appVersion}
-                </Text>
+            <View className='flex flex-col'>
+                <View className='flex flex-row items-center justify-center'>
+                    <Text
+                        style={satoshiFont.satoshiBold}
+                        className='text-xs text-purple-500 px-2.5'
+                    >
+                        Purple v{pkg.appVersion}
+                    </Text>
+                </View>
+
+                <View className=''>
+                    {process.env.NODE_ENV == 'development' && (
+                        <>
+                            <TouchableOpacity
+                                className='items-center self-center justify-center px-4 mt-2.5'
+                                onPress={flush}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                                    colors={['#497d00', '#3c6300']}
+                                >
+                                    <Text
+                                        style={satoshiFont.satoshiBlack}
+                                        className='text-white text-center'
+                                    >
+                                        Flush Analytics
+                                    </Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                className='items-center self-center justify-center px-4 mt-2.5'
+                                onPress={flushQueue}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 w-[200] h-[50]'
+                                    colors={['#00a6f4', '#0069a8']}
+                                >
+                                    <Text
+                                        style={satoshiFont.satoshiBlack}
+                                        className='text-white text-center'
+                                    >
+                                        Clear Analytics
+                                    </Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </>
+                    )}
+                </View>
             </View>
         </ScrollView>
     );
