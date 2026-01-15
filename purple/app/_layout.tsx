@@ -44,7 +44,7 @@ function AppWithNotifications() {
                 syncEveryMs: 180000,
                 batchSize: 25,
             }}
-            disabled
+            // disabled
             autoFlushOnBackground={true}
         >
             <BottomSheetModalProvider>
