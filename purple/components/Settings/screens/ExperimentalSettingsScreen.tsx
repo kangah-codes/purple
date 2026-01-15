@@ -1,5 +1,5 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
-import { FloppyDiskIcon, RefreshIcon } from '@/components/SVG/icons/noscale';
+import { FlaskIcon, FloppyDiskIcon, RefreshIcon } from '@/components/SVG/icons/noscale';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
@@ -207,6 +207,12 @@ export default function ExperimentalSettingsScreen() {
     };
 
     const settingsItems: SettingsListItem[] = [
+        {
+            icon: <FlaskIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Feature Flags',
+            description: 'Toggle experimental features and developer tools',
+            link: '/settings/feature-flags',
+        },
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
             title: 'Force migrations',
