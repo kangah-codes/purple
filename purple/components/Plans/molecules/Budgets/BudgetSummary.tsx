@@ -37,7 +37,15 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const resolvedYear = budgetYear ?? new Date().getFullYear();
     const budgetStartDate = startOfMonth(new Date(resolvedYear, resolvedMonthIndex, 1));
     const budgetEndDate = endOfMonth(budgetStartDate);
-    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(budgetMonth, budgetYear);
+    const budgetedCategories = useMemo(
+        () => (budget?.categoryLimits ?? []).map((cl) => cl.category),
+        [budget?.categoryLimits],
+    );
+    const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(
+        budgetMonth,
+        budgetYear,
+        budgetedCategories,
+    );
     const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
         id: '',
         budget_id: '',

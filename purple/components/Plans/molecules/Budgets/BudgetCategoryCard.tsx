@@ -68,7 +68,7 @@ export function BudgetCategoryCard({
                 <View className='flex-row items-center'>
                     {type === 'unbudgeted-expense' ? (
                         <Text
-                            className='text-sm w-20 text-right'
+                            className='text-sm text-right'
                             style={[satoshiFont.satoshiBlack, { color: '#a855f7' }]}
                         >
                             {formatCurrencyRounded(totalSpent, currency)}

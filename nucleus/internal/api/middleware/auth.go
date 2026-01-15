@@ -18,8 +18,8 @@ type AuthMiddlewareConfig struct {
 }
 
 var disabledRoutes = []*regexp.Regexp{
-	regexp.MustCompile(`^/api/v1/auth/.*`),
-	regexp.MustCompile(`^/api/v1/tracking/.*`),
+	// regexp.MustCompile(`^/api/v1/auth/.*`),
+	// regexp.MustCompile(`^/api/v1/tracking/.*`),
 }
 
 func SkipAuthorization(path string, routes []*regexp.Regexp) bool {

@@ -60,8 +60,6 @@ export default function CategoryAllocationScreen() {
 
     const handleCancel = () => router.back();
 
-    console.log('Category Stats:', categoryStats);
-
     return (
         <SafeAreaView
             className='bg-white h-full'

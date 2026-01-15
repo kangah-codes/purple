@@ -53,11 +53,7 @@ export function useNotifications() {
             setNotification(n);
         });
 
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(
-            (response) => {
-                console.log('Notification response:', response);
-            },
-        );
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
 
         scheduleDailyNotification();
 

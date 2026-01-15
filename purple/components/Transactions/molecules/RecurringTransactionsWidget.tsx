@@ -77,7 +77,6 @@ export default function RecurringTransactionsWidget() {
         (data?.data ?? []).forEach((recurring) => {
             const key = format(new Date(recurring.create_next_at), 'yyyy-MM-dd');
             occurrencesSet.add(key);
-            console.log(occurrencesSet);
         });
 
         return occurrencesSet;

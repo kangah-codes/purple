@@ -576,6 +576,7 @@ export function useBudgetEarnedIncome(
 export function useUnbudgetedCategorySpending(
     month: string | undefined,
     year: number | undefined,
+    budgetedCategories: string[] = [],
 ): UseQueryResult<Array<{ category: string; spent: number }>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
@@ -584,8 +585,14 @@ export function useUnbudgetedCategorySpending(
         return MONTHS.indexOf(monthName);
     };
 
+    // Create a Set for efficient lookup of budgeted categories
+    const budgetedCategorySet = useMemo(
+        () => new Set(budgetedCategories.map((c) => c.toLowerCase())),
+        [budgetedCategories],
+    );
+
     return useQuery(
-        ['budget-unbudgeted-categories', month, year],
+        ['budget-unbudgeted-categories', month, year, budgetedCategories],
         async () => {
             if (!month || !year) return [] as Array<{ category: string; spent: number }>;
 
@@ -606,9 +613,17 @@ export function useUnbudgetedCategorySpending(
 
             const transactions = response.data || [];
 
-            // Filter out transfers and those already attached to a budget
+            // Filter out transfers and include transactions that either:
+            // 1. Don't have a budget_id, OR
+            // 2. Have a budget_id but their category wasn't actually budgeted for
             const unbudgeted = transactions
-                .filter((t) => !isTransferTransaction(t) && !t.budget_id)
+                .filter((t) => {
+                    if (isTransferTransaction(t)) return false;
+                    const category = (t.category || 'Uncategorized').toLowerCase();
+                    const isCategoryBudgeted = budgetedCategorySet.has(category);
+                    // Include if no budget_id OR if the category wasn't budgeted for
+                    return !t.budget_id || !isCategoryBudgeted;
+                })
                 .reduce<Record<string, number>>((acc, t) => {
                     const key = t.category || 'Uncategorized';
                     acc[key] = (acc[key] || 0) + Number(t.amount || 0);
