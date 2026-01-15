@@ -174,19 +174,8 @@ export default function BudgetsContent({
 
         // only react to actual prop changes not internal swipes
         const monthDiff = differenceInMonths(currentDate, lastPropDateRef.current);
-        console.log(
-            '[DEBUG useEffect currentDate] Prop changed, monthDiff:',
-            monthDiff,
-            'from',
-            format(lastPropDateRef.current, 'MMM yyyy'),
-            'to',
-            format(currentDate, 'MMM yyyy'),
-        );
 
         if (monthDiff !== 0) {
-            console.log(
-                '[DEBUG useEffect currentDate] Applying prop change - updating baseDate and recentering',
-            );
             lastPropDateRef.current = currentDate;
             setBaseDate(currentDate);
             setCurrentPageIndex(PAGER_CENTER_INDEX);

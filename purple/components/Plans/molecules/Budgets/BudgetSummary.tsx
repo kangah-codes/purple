@@ -78,8 +78,6 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
     const expensesDelta = Math.abs(remainingBudget);
     const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
 
-    console.log(unbudgeted, 'LOL');
-
     if (!budget) {
         return null;
     }

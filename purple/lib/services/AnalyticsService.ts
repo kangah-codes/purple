@@ -72,6 +72,7 @@ type AnalyticsConfig = {
     readonly maxRetries?: number;
     readonly enableDebugLogs?: boolean;
     readonly endpoint?: string;
+    readonly apiKey?: string;
     readonly batchSize?: number;
     readonly flushOnBackground?: boolean;
     readonly timeoutMs?: number;
@@ -128,7 +129,8 @@ export class AnalyticsTracker {
             maxQueueSize: 1000,
             maxRetries: 3,
             enableDebugLogs: false,
-            endpoint: process.env.EXPO_PUBLIC_TRACKING_URL as string,
+            endpoint: `${process.env.EXPO_PUBLIC_API_URL}/analytics`,
+            apiKey: process.env.EXPO_PUBLIC_API_KEY as string,
             batchSize: 50,
             flushOnBackground: true,
             timeoutMs: 15000,
@@ -320,6 +322,7 @@ export class AnalyticsTracker {
                     headers: {
                         'Content-Type': 'application/json',
                         'User-Agent': this.getUserAgent(),
+                        'x-api-key': this.config.apiKey,
                     },
                     body: JSON.stringify(payload),
                     signal: controller.signal,

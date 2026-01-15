@@ -7,7 +7,6 @@ import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
 import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientProvider';
 import CurrentRecurringTransactionModal from '@/components/Transactions/molecules/CurrentRecurringTransactionModal';
 import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
-import { useNotifications } from '@/lib/hooks/useNotifications';
 import { AnalyticsProvider } from '@/lib/providers/Analytics';
 import { initializeApp } from '@/lib/startup';
 import { installExportLogger } from '@/lib/utils/exportLogger';
@@ -36,7 +35,7 @@ if (!__DEV__) {
 }
 
 function AppWithNotifications() {
-    useNotifications();
+    // useNotifications();
     return (
         <AnalyticsProvider
             config={{

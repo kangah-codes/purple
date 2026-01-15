@@ -131,8 +131,6 @@ function AccountScreen() {
         return <LoadingScreen />;
     }
 
-    console.log(currentAccount);
-
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <LinearGradient

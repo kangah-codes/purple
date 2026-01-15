@@ -60,11 +60,6 @@ export default function AccountNavigationArea() {
                     return;
                 }
                 const now = new Date();
-                console.log('Account operation:', {
-                    isOpen,
-                    currentBalance: currentAccount.balance,
-                    closedBalance: currentAccount.closed_balance,
-                });
 
                 const newBalance = isOpen
                     ? 0 // closing set to 0

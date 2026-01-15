@@ -6,8 +6,8 @@
 return (
     <AnalyticsProvider
         config={{
-            endpoint: 'URL',
-            apiKey: 'API_KEY',
+            endpoint: `${EXPO_PUBLIC_API_URL}/analytics`,
+            apiKey: process.env.EXPO_PUBLIC_API_KEY,
             enableDebugLogs: true,
             syncEveryMs: 20000,
             batchSize: 25,
