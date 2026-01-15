@@ -3,6 +3,7 @@ name: Upload Analytics to GCloud buckets
 on:
   # schedule:
   #   - cron: "0 1 * * *"
+  #
   push:
     branches:
       - dev
