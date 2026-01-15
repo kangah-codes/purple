@@ -129,7 +129,7 @@ export class AnalyticsTracker {
             maxQueueSize: 1000,
             maxRetries: 3,
             enableDebugLogs: false,
-            endpoint: `${process.env.EXPO_PUBLIC_API_URL}/analytics`,
+            endpoint: `${process.env.EXPO_PUBLIC_API_URL}/tracking`,
             apiKey: process.env.EXPO_PUBLIC_API_KEY as string,
             batchSize: 50,
             flushOnBackground: true,
@@ -316,6 +316,16 @@ export class AnalyticsTracker {
 
             try {
                 this.log(JSON.stringify(payload));
+                console.log('Sending analytics batch:', payload, this.config.endpoint);
+                console.log({
+                    endpoint: this.config.endpoint,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': this.getUserAgent(),
+                        'x-api-key': this.config.apiKey,
+                    },
+                    body: JSON.stringify(payload),
+                });
 
                 const response = await fetch(this.config.endpoint, {
                     method: 'POST',
@@ -327,6 +337,8 @@ export class AnalyticsTracker {
                     body: JSON.stringify(payload),
                     signal: controller.signal,
                 });
+
+                console.log('RES ', response);
 
                 clearTimeout(timeoutId);
 

@@ -17,9 +17,11 @@ import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Share
 import { satoshiFont } from '@/lib/constants/fonts';
 import pkg from '../../../package.json';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { useFeatureFlag } from '@/lib/hooks/useFeatureFlags';
 
 export default function SettingsGroups() {
     const { flush, flushQueue } = useAnalytics();
+    const showAnalyticsDebug = useFeatureFlag('analytics_debug');
 
     const generalSettings: SettingsListItem[] = [
         {
@@ -98,7 +100,7 @@ export default function SettingsGroups() {
                 </View>
 
                 <View className=''>
-                    {process.env.NODE_ENV == 'development' && (
+                    {showAnalyticsDebug && (
                         <>
                             <TouchableOpacity
                                 className='items-center self-center justify-center px-4 mt-2.5'
