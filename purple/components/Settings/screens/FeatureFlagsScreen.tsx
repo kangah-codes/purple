@@ -20,7 +20,7 @@ const CATEGORY_LABELS: Record<FeatureFlagDefinition['category'], string> = {
 };
 
 export default function FeatureFlagsScreen() {
-    const { flags, isLoading, setFlag, resetAllFlags } = useFeatureFlags();
+    const { flags, isLoading, setFlag } = useFeatureFlags();
 
     const handleToggle = async (name: string, value: boolean) => {
         const success = await setFlag(name as Parameters<typeof setFlag>[0], value);
@@ -38,27 +38,6 @@ export default function FeatureFlagsScreen() {
                 props: {
                     text1: 'Error',
                     text2: 'Failed to update feature flag',
-                },
-            });
-        }
-    };
-
-    const handleResetAll = async () => {
-        const success = await resetAllFlags();
-        if (success) {
-            Toast.show({
-                type: 'success',
-                props: {
-                    text1: 'Reset Complete',
-                    text2: 'All feature flags have been reset to defaults',
-                },
-            });
-        } else {
-            Toast.show({
-                type: 'error',
-                props: {
-                    text1: 'Error',
-                    text2: 'Failed to reset feature flags',
                 },
             });
         }
@@ -118,7 +97,10 @@ export default function FeatureFlagsScreen() {
                 </View>
             </View>
 
-            <ScrollView className='flex-1 px-5' contentContainerStyle={styles.contentContainer}>
+            <ScrollView
+                className='flex-1 px-5 mt-2.5'
+                contentContainerStyle={styles.contentContainer}
+            >
                 {Object.entries(groupedFlags).map(([category, categoryFlags]) => (
                     <View key={category} className='mb-4'>
                         <SettingsGroup

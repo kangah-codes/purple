@@ -34,11 +34,6 @@ export default function SettingsGroups() {
             title: 'Accounts',
             link: '/settings/account-settings',
         },
-        // {
-        //     icon: <PiggyBankIcon width={18} height={18} stroke={'#9333ea'} />,
-        //     title: 'Plans',
-        //     link: '/settings/plan-settings',
-        // },
         {
             icon: <CoinSwapIcon width={18} height={18} stroke={'#9333ea'} />,
             title: 'Transactions',

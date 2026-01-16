@@ -2,14 +2,13 @@ import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Share
 import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { useFeatureFlag } from '@/lib/hooks/useFeatureFlags';
-import { useScheduleNotification } from '@/lib/hooks/useScheduleNotification';
 import pkg from '@/package.json';
 import React from 'react';
 
 export default function SettingsFooter() {
     const { flush, flushQueue } = useAnalytics();
-    const { scheduleNotification } = useScheduleNotification();
     const showAnalyticsDebug = useFeatureFlag('analytics_debug');
+
     return (
         <View className='flex flex-col space-y-2.5 mb-[100]'>
             <View className='flex flex-row justify-center'>

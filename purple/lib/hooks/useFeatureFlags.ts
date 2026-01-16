@@ -2,6 +2,18 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { FEATURE_FLAGS, FeatureFlagName, FeatureFlagDefinition } from '../constants/featureFlags';
 
+type FlagChangeListener = (name: FeatureFlagName, enabled: boolean) => void;
+const flagChangeListeners = new Set<FlagChangeListener>();
+
+const emitFlagChange = (name: FeatureFlagName, enabled: boolean) => {
+    flagChangeListeners.forEach((listener) => listener(name, enabled));
+};
+
+const subscribeFlagChange = (listener: FlagChangeListener) => {
+    flagChangeListeners.add(listener);
+    return () => flagChangeListeners.delete(listener);
+};
+
 type FeatureFlagState = {
     [key: string]: boolean;
 };
@@ -90,6 +102,7 @@ export function useFeatureFlags() {
                 );
 
                 setFlags((prev) => ({ ...prev, [name]: enabled }));
+                emitFlagChange(name, enabled);
                 return true;
             } catch (err) {
                 console.error('[useFeatureFlags] Failed to set flag:', err);
@@ -195,8 +208,16 @@ export function useFeatureFlag(name: FeatureFlagName): boolean {
 
         loadFlag();
 
+        // sub to changes from other components
+        const unsubscribe = subscribeFlagChange((changedName, newValue) => {
+            if (mounted && changedName === name) {
+                setEnabled(newValue);
+            }
+        });
+
         return () => {
             mounted = false;
+            unsubscribe();
         };
     }, [db, name]);
 
