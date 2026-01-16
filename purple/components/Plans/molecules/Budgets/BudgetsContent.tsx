@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, RefreshControl } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { addMonths, differenceInMonths, format, startOfMonth } from 'date-fns';
 import { SafeAreaView, View, ScrollView } from '@/components/Shared/styled';
@@ -12,6 +12,7 @@ import { useBudgetForMonth, useBudgetPaceInsight, usePrefetchBudgetsForMonths } 
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import CreateBudget from './CreateBudget';
 import NoBudget from './NoBudget';
+import { useQueryClient } from 'react-query';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MONTH_CARD_WIDTH = 72;
@@ -32,6 +33,8 @@ function BudgetContentForMonth({ month }: { month: Date }) {
     const monthNumber = month.getMonth() + 1;
     const year = month.getFullYear();
     const { data, isLoading, refetch } = useBudgetForMonth(monthNumber, year);
+    const queryClient = useQueryClient();
+    const [refreshing, setRefreshing] = useState(false);
 
     // If react-query is configured to keep previous data, we can momentarily
     // see the prior month's budget result while the new month is fetching.
@@ -47,6 +50,20 @@ function BudgetContentForMonth({ month }: { month: Date }) {
     const paceInsight = useBudgetPaceInsight(hasBudget ?? null, month);
 
     useRefreshOnFocus(refetch);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await Promise.all([
+                refetch(),
+                queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+                queryClient.invalidateQueries({ queryKey: ['budget-earned-income'] }),
+                queryClient.invalidateQueries({ queryKey: ['budget-unbudgeted-categories'] }),
+            ]);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [refetch, queryClient]);
 
     // Only show skeleton on true initial load when there's no data at all
     // If we have any data (even stale/placeholder), show it immediately to avoid flashing
@@ -71,6 +88,14 @@ function BudgetContentForMonth({ month }: { month: Date }) {
                 className='w-full flex-1'
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={[tw`flex-grow`]}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor='#a855f7'
+                        colors={['#a855f7']}
+                    />
+                }
             >
                 {hasBudget ? (
                     <BudgetSummary budget={hasBudget} />
