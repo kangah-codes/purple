@@ -149,6 +149,10 @@ export function AnalyticsProvider({
             name: T | string,
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
+            console.log("AMBATU", {
+                refCurrent: !!analyticsRef.current,
+                active: process.env.NODE_ENV ! == 'development',
+            })
             if (
                 // !shouldTrackEvents ||
                 !analyticsRef.current ||
