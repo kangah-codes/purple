@@ -104,8 +104,8 @@ export function AnalyticsProvider({
             }
         };
     }, [
-        shouldTrackEvents,
-        shouldSendDiagnostics,
+        // shouldTrackEvents,
+        // shouldSendDiagnostics,
         config,
         onInitialized,
         onError,
@@ -150,7 +150,7 @@ export function AnalyticsProvider({
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
             if (
-                !shouldTrackEvents ||
+                // !shouldTrackEvents ||
                 !analyticsRef.current ||
                 process.env.NODE_ENV !== 'development'
             ) {
@@ -166,7 +166,8 @@ export function AnalyticsProvider({
                 onError?.(analyticsError);
             }
         },
-        [shouldTrackEvents, onError],
+        // [shouldTrackEvents, onError],
+        [onError],
     );
 
     const flush = useCallback(async (): Promise<void> => {
