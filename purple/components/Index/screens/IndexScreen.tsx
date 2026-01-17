@@ -1,6 +1,6 @@
 import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
@@ -18,23 +18,31 @@ import LoadingScreen from '../molecules/LoadingScreen';
 import StatsCardsCarousel from '../molecules/StatsCardsCarousel';
 import TransactionHistoryList from '../molecules/TransactionHistoryList';
 
-const now = new Date();
+// Move outside component to avoid recreating on every render
+const NOW = new Date();
 
 export default function IndexScreen() {
-        const { logEvent } = useAnalytics();
-        React.useEffect(() => {
-            logEvent('screen_view', {
-                screen: 'index_screen',
-                source: 'navigation',
-            });
-        }, [logEvent]);
+    const { logEvent } = useAnalytics();
+    React.useEffect(() => {
+        logEvent('screen_view', {
+            screen: 'index_screen',
+            source: 'navigation',
+        });
+    }, [logEvent]);
+
     const [sectionsLoaded, setSectionsLoaded] = useState({
         accounts: false,
         transactions: false,
     });
-    const allLoaded = Object.values(sectionsLoaded).every(Boolean);
-    const handleSectionLoaded = (section: string) =>
+
+    const allLoaded = useMemo(
+        () => Object.values(sectionsLoaded).every(Boolean),
+        [sectionsLoaded]
+    );
+
+    const handleSectionLoaded = useCallback((section: string) => {
         setSectionsLoaded((prev) => ({ ...prev, [section]: true }));
+    }, []);
     const scrollY = useSharedValue(0);
     const onScroll = useAnimatedScrollHandler({
         onScroll: (event) => {
@@ -89,7 +97,7 @@ export default function IndexScreen() {
                     >
                         <AccountCardCarousel onLoaded={() => handleSectionLoaded('accounts')} />
                         <GettingStartedWidget />
-                        <StatsCardsCarousel startDate={now} />
+                        <StatsCardsCarousel startDate={NOW} />
                         <TransactionHistoryList
                             onLoaded={() => handleSectionLoaded('transactions')}
                         />

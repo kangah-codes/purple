@@ -10,10 +10,11 @@ import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { keyExtractor } from '@/lib/utils/number';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
-export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => void }) {
+// Memoize the component to prevent unnecessary re-renders
+const TransactionHistoryList = memo(function TransactionHistoryList({ onLoaded }: { onLoaded: () => void }) {
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { setCurrentTransaction } = useTransactionStore();
     const { data: transactions, refetch } = useTransactions({
@@ -37,7 +38,7 @@ export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => v
                 }}
             />
         ),
-        [],
+        [setCurrentTransaction, setShowBottomSheetModal],
     );
     const renderItemSeparator = useCallback(
         () => <View className='border-b border-purple-100' />,
@@ -85,7 +86,9 @@ export default function TransactionHistoryList({ onLoaded }: { onLoaded: () => v
             />
         </View>
     );
-}
+});
+
+export default TransactionHistoryList;
 
 const styles = StyleSheet.create({
     zigZag: {

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, memo } from 'react';
 import { Dimensions, LayoutChangeEvent, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import { endOfMonth, formatISO, startOfMonth } from 'date-fns';
 import { View } from '@/components/Shared/styled';
@@ -18,24 +18,31 @@ type StatsCardsCarouselProps = {
 
 const HEIGHT_SPRING_CONFIG = { damping: 15, stiffness: 180 };
 
-export default function StatsCardsCarousel({ startDate }: StatsCardsCarouselProps) {
+// Memoize the component to prevent unnecessary re-renders
+const StatsCardsCarousel = memo(function StatsCardsCarousel({ startDate }: StatsCardsCarouselProps) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [slideHeights, setSlideHeights] = useState<Partial<Record<IndexStatsCardId, number>>>({});
     const viewportHeight = useSharedValue<number>(0);
+
+    // Memoize date calculations to prevent recalculating on every render
+    const dateRange = useMemo(() => ({
+        start_date: formatISO(startOfMonth(startDate)),
+        end_date: formatISO(endOfMonth(startDate)),
+    }), [startDate]);
+
     const { data: transactionsData } = useTransactions({
         requestQuery: {
-            start_date: formatISO(startOfMonth(startDate)),
-            end_date: formatISO(endOfMonth(startDate)),
+            ...dateRange,
             page_size: Infinity,
         },
     });
 
     const transactions = useMemo(() => transactionsData?.data ?? [], [transactionsData?.data]);
 
-    // TODO: when order functionality is implemented replace DEFAULT_INDEX_STATS_CARD_ORDER with user settings
-    const cards: IndexStatsCardDefinition[] = DEFAULT_INDEX_STATS_CARD_ORDER.map(
-        (id) => INDEX_STATS_CARDS[id],
-    );
+    // Memoize cards array to prevent recreation on every render
+    const cards = useMemo<IndexStatsCardDefinition[]>(() => {
+        return DEFAULT_INDEX_STATS_CARD_ORDER.map((id) => INDEX_STATS_CARDS[id]);
+    }, []);
 
     const renderItem = useCallback(
         ({ item, index }: { item: IndexStatsCardDefinition; index: number }) => {
@@ -117,7 +124,9 @@ export default function StatsCardsCarousel({ startDate }: StatsCardsCarouselProp
             />
         </View>
     );
-}
+});
+
+export default StatsCardsCarousel;
 
 const styles = StyleSheet.create({
     // IndexScreen applies horizontal padding (px-5 => 20) and this card also has p-5 (20)

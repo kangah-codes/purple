@@ -3,12 +3,13 @@ import { Account } from '@/components/Accounts/schema';
 import { usePreferences } from '@/components/Settings/hooks';
 import { View } from '@/components/Shared/styled';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, memo } from 'react';
 import { Dimensions, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AccountCard from './AccountCard';
 
-export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void }) {
+// Memoize the carousel component to prevent unnecessary re-renders
+const AccountCardCarousel = memo(function AccountCardCarousel({ onLoaded }: { onLoaded: () => void }) {
     const { data: accounts, refetch } = useAccounts({
         requestQuery: {},
         options: {
@@ -19,15 +20,18 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
     });
     const { preferences } = usePreferences();
     const [activeSlide, setActiveSlide] = useState(0);
+
     const pinnedIndex = useMemo(() => {
         return accounts?.data.findIndex((account) => account.id === preferences.pinnedAccount);
     }, [accounts?.data, preferences?.pinnedAccount]);
+
     const renderItem = useCallback(
         (item: { index: number; item: Account }) => (
             <AccountCard item={item.item} pinnedAccount={preferences.pinnedAccount} />
         ),
-        [accounts, pinnedIndex],
+        [preferences.pinnedAccount],
     );
+
     const reorderedAccounts = useMemo(() => {
         if (!accounts?.data || pinnedIndex === -1 || !pinnedIndex) return accounts?.data || [];
         const pinnedAccount = accounts.data[pinnedIndex];
@@ -60,7 +64,9 @@ export default function AccountCardCarousel({ onLoaded }: { onLoaded: () => void
             />
         </View>
     );
-}
+});
+
+export default AccountCardCarousel;
 
 const styles = StyleSheet.create({
     slider: { width: Dimensions.get('window').width - 80 },

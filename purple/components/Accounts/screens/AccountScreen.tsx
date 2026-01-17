@@ -84,16 +84,6 @@ function AccountScreen() {
         },
     });
 
-    useEffect(() => {
-        if (currentAccountRequestParams.startDate && currentAccountRequestParams.endDate) {
-            transactionsRefetch();
-        }
-    }, [
-        currentAccountRequestParams.startDate,
-        currentAccountRequestParams.endDate,
-        transactionsRefetch,
-    ]);
-
     const {
         data: transactions,
         isLoading: transactionsLoading,
@@ -119,8 +109,16 @@ function AccountScreen() {
             keepPreviousData: true,
         },
     });
-    useRefreshOnFocus(transactionsRefetch);
-    useRefreshOnFocus(accountRefetch);
+
+    useEffect(() => {
+        if (currentAccountRequestParams.startDate && currentAccountRequestParams.endDate) {
+            transactionsRefetch();
+        }
+    }, [
+        currentAccountRequestParams.startDate,
+        currentAccountRequestParams.endDate,
+        transactionsRefetch,
+    ]);
 
     useEffect(() => {
         setCurrentAccountRequestParams({
@@ -133,6 +131,9 @@ function AccountScreen() {
             setInitialLoadComplete(true);
         }
     }, [accountsLoading, transactionsLoading, initialLoadComplete]);
+
+    useRefreshOnFocus(transactionsRefetch);
+    useRefreshOnFocus(accountRefetch);
 
     if (!initialLoadComplete) {
         return <LoadingScreen />;
