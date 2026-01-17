@@ -210,7 +210,7 @@ export function AnalyticsProvider({
 
     const contextValue: AnalyticsContextType = {
         analytics: analyticsRef.current,
-        isInitialized,
+        isInitialized: true,
         queueSize,
         isOnline,
         sessionId,
