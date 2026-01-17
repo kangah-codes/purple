@@ -5,9 +5,11 @@ import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import React, { useMemo } from 'react';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { useAccountStore } from '../hooks';
 
 export default function AccountInformation({ transactions }: { transactions: Transaction[] }) {
+        const { logEvent } = useAnalytics();
     const { currentAccount } = useAccountStore();
     const amountAdded = useMemo(
         () => calculateAmountAddedOnDay(transactions),
@@ -15,6 +17,15 @@ export default function AccountInformation({ transactions }: { transactions: Tra
     );
 
     if (!currentAccount) return null;
+    React.useEffect(() => {
+        if (currentAccount) {
+            logEvent('object_viewed', {
+                object_type: 'account',
+                account_id: currentAccount.id,
+                balance: currentAccount.balance,
+            });
+        }
+    }, [currentAccount, logEvent]);
 
     return (
         <View className='px-5 flex flex-col space-y-2.5'>

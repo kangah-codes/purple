@@ -1,6 +1,7 @@
 import { LinearGradient, SafeAreaView, View } from '@/components/Shared/styled';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Animated, {
     Extrapolation,
@@ -20,6 +21,13 @@ import TransactionHistoryList from '../molecules/TransactionHistoryList';
 const now = new Date();
 
 export default function IndexScreen() {
+        const { logEvent } = useAnalytics();
+        React.useEffect(() => {
+            logEvent('screen_view', {
+                screen: 'index_screen',
+                source: 'navigation',
+            });
+        }, [logEvent]);
     const [sectionsLoaded, setSectionsLoaded] = useState({
         accounts: false,
         transactions: false,

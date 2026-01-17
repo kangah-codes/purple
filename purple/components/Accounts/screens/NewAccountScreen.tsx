@@ -22,13 +22,13 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useAccountStore, useCreateAccount } from '../hooks';
 
-export default function NewAccountScreen() {
+export default function NewAccountScreen() {    
     const {
         preferences: { currency },
     } = usePreferences();
@@ -51,6 +51,13 @@ export default function NewAccountScreen() {
             currency,
         },
     });
+
+    useEffect(() => {
+        logEvent('screen_view', {
+            screen: 'new_account_screen',
+            source: 'navigation',
+        });
+    }, [logEvent]);
 
     const onSubmit = async (data: { category: string; name: string; balance: string }) => {
         await logEvent('button_tap', {

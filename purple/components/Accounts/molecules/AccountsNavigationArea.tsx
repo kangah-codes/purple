@@ -5,15 +5,21 @@ import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Share
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
 import tw from 'twrnc';
 import { useAccountReportStore } from '../hooks';
 
 export default function AccountsNavigationArea() {
+        const { logEvent } = useAnalytics();
     const { setShowChart, showChart } = useAccountReportStore();
     const [visible, setVisible] = useState(false);
 
     const handleNavigation = useCallback(() => {
+        logEvent('button_tap', {
+            button: 'navigate_new_account',
+            screen: 'accounts_screen',
+        });
         router.push('/accounts/new-account');
     }, []);
 
@@ -42,6 +48,10 @@ export default function AccountsNavigationArea() {
                     onPress={() => {
                         setVisible(false);
                         setShowChart(!showChart);
+                        logEvent('button_tap', {
+                            button: showChart ? 'hide_chart' : 'show_chart',
+                            screen: 'accounts_screen',
+                        });
                     }}
                 >
                     <View className='flex flex-row items-center space-x-2 py-1.5'>

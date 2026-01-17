@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { SvgProps } from 'react-native-svg';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { ArrowCircleDownIcon, ArrowCircleUpIcon, CoinSwapIcon } from '../../SVG/icons/noscale';
 
 export function ActionButton({
@@ -18,6 +19,7 @@ export function ActionButton({
     type: string;
     account: Account;
 }) {
+    const { logEvent } = useAnalytics();
     return (
         <View className='flex flex-col items-center justify-center space-y-1.5'>
             <Link
@@ -27,6 +29,13 @@ export function ActionButton({
                         type,
                         accountId: account.id,
                     },
+                }}
+                onPress={() => {
+                    logEvent('button_tap', {
+                        button: `action_${type}`,
+                        screen: 'index_screen',
+                        account_id: account.id,
+                    });
                 }}
             >
                 <View

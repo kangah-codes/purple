@@ -1,6 +1,7 @@
 import { GenericAPIResponse } from '@/@types/request';
 import { SafeAreaView, ScrollView } from '@/components/Shared/styled';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import React from 'react';
@@ -15,6 +16,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AccountsScreen() {
+        const { logEvent } = useAnalytics();
     const { setAccounts } = useAccountStore();
     const { refetch } = useAccounts({
         options: {
@@ -56,6 +58,12 @@ export default function AccountsScreen() {
     useScreenTracking('accounts', {
         source: 'navigation',
     });
+    React.useEffect(() => {
+        logEvent('screen_view', {
+            screen: 'accounts_screen',
+            source: 'navigation',
+        });
+    }, [logEvent]);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>

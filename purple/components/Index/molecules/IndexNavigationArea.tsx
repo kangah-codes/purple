@@ -3,9 +3,11 @@ import { SettingsCogIcon } from '@/components/SVG/icons/24x24';
 import { DotsHorizontalIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import React from 'react';
 
 export default function IndexNavigationArea() {
+        const { logEvent } = useAnalytics();
     return (
         <View className='w-full flex flex-row justify-between items-center relative px-5'>
             <View className='bg-purple-50 px-4 py-2 flex items-center justify-center rounded-full'>
@@ -19,7 +21,13 @@ export default function IndexNavigationArea() {
 
             <View className='flex flex-row space-x-2.5 items-center'>
                 <TouchableOpacity
-                    onPress={() => router.push('/settings')}
+                    onPress={() => {
+                        logEvent('button_tap', {
+                            button: 'navigate_settings',
+                            screen: 'index_screen',
+                        });
+                        router.push('/settings');
+                    }}
                     className='bg-purple-50 p-2 flex items-center justify-center rounded-full'
                 >
                     <SettingsCogIcon stroke='#c27aff' strokeWidth={2} width={24} height={24} />

@@ -8,6 +8,7 @@ import { groupBy } from '@/lib/utils/helpers';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { getMaxValue } from '@/lib/utils/object';
 import React, { useMemo } from 'react';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import tw from 'twrnc';
@@ -17,6 +18,7 @@ import { generateNormalizedSpendChartDataWithMissingDays } from '../utils';
 const datePeriods: TimePeriod[] = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
+        const { logEvent } = useAnalytics();
     const { category, setCategory, period, setPeriod, showChart } = useAccountReportStore();
     const { accounts } = useAccountStore();
     const {
@@ -43,7 +45,23 @@ export default function AccountsAreaChart() {
     }, [accountGroupData.transactions, startDate, endDate, accountGroupData.previousBalance]);
 
     const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
+        const handleCategoryChange = (newCategory: string) => {
+            setCategory(newCategory);
+            logEvent('button_tap', {
+                button: 'change_account_category',
+                screen: 'accounts_screen',
+                category: newCategory,
+            });
+        };
     const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
+    const handlePeriodChange = (newPeriod: TimePeriod) => {
+        setPeriod(newPeriod);
+        logEvent('button_tap', {
+            button: 'change_chart_period',
+            screen: 'accounts_screen',
+            period: newPeriod,
+        });
+    };
 
     if (!showChart) return null;
 
