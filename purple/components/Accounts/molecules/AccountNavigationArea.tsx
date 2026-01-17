@@ -19,6 +19,7 @@ import { Account } from '../schema';
 import { dateToUNIX } from '@/lib/utils/date';
 
 export default function AccountNavigationArea() {
+        const { logEvent } = useAnalytics();
     const {
         setPreference,
         preferences: { pinnedAccount },
@@ -36,9 +37,20 @@ export default function AccountNavigationArea() {
         if (currentAccount) {
             if (pinnedAccount === currentAccount.id) {
                 setPreference('pinnedAccount', '');
+                logEvent('button_tap', {
+                    button: 'unpin_account',
+                    screen: 'account_screen',
+                    account_id: currentAccount.id,
+                });
+                setVisible(false);
                 return;
             }
             setPreference('pinnedAccount', currentAccount?.id);
+            logEvent('button_tap', {
+                button: 'pin_account',
+                screen: 'account_screen',
+                account_id: currentAccount.id,
+            });
         }
         setVisible(false);
     };
@@ -65,6 +77,11 @@ export default function AccountNavigationArea() {
                     ? 0 // closing set to 0
                     : currentAccount.closed_balance ?? currentAccount.balance; // reopening restore from closed_balance
 
+                logEvent('button_tap', {
+                    button: isOpen ? 'close_account' : 'reopen_account',
+                    screen: 'account_screen',
+                    account_id: currentAccount.id,
+                });
                 editMutate(
                     {
                         id: currentAccount?.id ?? '',
@@ -97,6 +114,11 @@ export default function AccountNavigationArea() {
                             });
                         },
                         onSuccess: () => {
+                            logEvent('object_updated', {
+                                object_type: 'account',
+                                action: isOpen ? 'closed' : 'reopened',
+                                account_id: currentAccount.id,
+                            });
                             setCurrentAccount({
                                 ...currentAccount,
                                 is_open: currentAccount.is_open ? 0 : 1,
@@ -130,6 +152,15 @@ export default function AccountNavigationArea() {
                 'All transactions linked to this account will also be deleted. This action cannot be undone.',
             confirmText: 'Delete',
             onConfirm: () => {
+                if (!currentAccount) {
+                    router.back();
+                    return;
+                }
+                logEvent('button_tap', {
+                    button: 'delete_account',
+                    screen: 'account_screen',
+                    account_id: currentAccount.id,
+                });
                 mutate(undefined, {
                     onError: (err) => {
                         if (err instanceof HTTPError) {
@@ -152,6 +183,11 @@ export default function AccountNavigationArea() {
                         });
                     },
                     onSuccess: () => {
+                        logEvent('object_updated', {
+                            object_type: 'account',
+                            action: 'deleted',
+                            account_id: currentAccount.id,
+                        });
                         queryClient.invalidateQueries({
                             queryKey: ['transactions', 'accounts'],
                         });
