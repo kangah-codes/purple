@@ -6,41 +6,56 @@ import { processRecurringTransactions } from './transaction';
 import { loadAndApplyUpdates } from './updates';
 
 export async function initializeApp(db: SQLiteDatabase) {
+    const startTime = Date.now();
     console.log('[InitializeApp] Starting app initialization');
     try {
-        // init startup service
-        console.log('[InitializeApp] Creating startup service');
         const startupService = await StartupServiceFactory.init(db);
-        // const currencyService = CurrencyService.getInstance();
 
-        // load startup tasks here
-        console.log('[InitializeApp] Registering startup tasks');
-        startupService.registerStartupTask({ task: loadFonts, name: 'Load Fonts', timeout: 5000 });
-        startupService.registerStartupTask({
-            task: () => initializePreferences(db),
-            name: 'Initialize Preferences',
-            timeout: 3000,
-        });
-        // startupService.registerStartupTask({ task: currencyService.fetchExchangeRates, name: 'Fetch Exchange Rates', timeout: 5000 });
-        startupService.registerStartupTask({
-            task: () => processRecurringTransactions(db),
-            name: 'Process Recurring Transactions',
-            timeout: 10000,
-        });
-        startupService.registerStartupTask({
-            task: () => loadAndApplyUpdates(),
-            name: 'Load and Apply Updates',
-            timeout: 5000,
-        });
-        console.log('[InitializeApp] Registered 4 startup tasks');
-
-        console.log('[InitializeApp] Running migrations');
+        // PHASE 1: Critical - Must run migrations first
+        const phase1Start = Date.now();
+        console.log('[InitializeApp] Phase 1: Running migrations');
         await startupService.runMigrations(db);
-        console.log('[InitializeApp] Migrations complete');
+        console.log(`[InitializeApp] Phase 1 complete (${Date.now() - phase1Start}ms)`);
 
-        console.log('[InitializeApp] Executing startup tasks');
-        await startupService.executeStartupTasks();
-        console.log('[InitializeApp] App initialization complete');
+        // PHASE 2: Critical parallel - Can all run in parallel, none depend on each other
+        const phase2Start = Date.now();
+        console.log('[InitializeApp] Phase 2: Loading critical dependencies (parallel)');
+        const criticalTasks = [
+            loadFonts(),
+            initializePreferences(db),
+        ];
+        await Promise.all(criticalTasks);
+        console.log(`[InitializeApp] Phase 2 complete (${Date.now() - phase2Start}ms)`);
+
+        // PHASE 3: Background tasks - Defer non-critical tasks
+        console.log('[InitializeApp] Phase 3: Scheduling background tasks');
+        // Run these in background without blocking app startup
+        setImmediate(() => {
+            const phase3Start = Date.now();
+
+            const recurringStart = Date.now();
+            const recurringPromise = processRecurringTransactions(db)
+                .then(() => {
+                    console.log(`[Background] Recurring transactions complete (${Date.now() - recurringStart}ms)`);
+                })
+                .catch(err => console.error('[Background] Recurring transactions failed:', err));
+
+            const updatesStart = Date.now();
+            const updatesPromise = loadAndApplyUpdates()
+                .then(() => {
+                    console.log(`[Background] Updates check complete (${Date.now() - updatesStart}ms)`);
+                })
+                .catch(err => console.error('[Background] Updates failed:', err));
+
+            Promise.all([recurringPromise, updatesPromise])
+                .then(() => {
+                    console.log(`[InitializeApp] Phase 3 complete (${Date.now() - phase3Start}ms)`);
+                })
+                .catch(err => console.error('[Background] Background tasks failed:', err));
+        });
+
+        const totalTime = Date.now() - startTime;
+        console.log(`[InitializeApp] App ready for user interaction (${totalTime}ms)`);
     } catch (error) {
         console.error('[InitializeApp] Failed to initialize app:', error);
         throw error;

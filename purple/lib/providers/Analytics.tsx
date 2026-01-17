@@ -124,7 +124,9 @@ export function AnalyticsProvider({
 
         updateStatus();
 
-        const interval = setInterval(updateStatus, 5000);
+        // Reduced polling from 5s to 30s - queue size doesn't need frequent updates
+        // State changes will still trigger re-renders when logEvent is called
+        const interval = setInterval(updateStatus, 30000);
         return () => clearInterval(interval);
     }, [isInitialized]);
 
@@ -148,28 +150,21 @@ export function AnalyticsProvider({
             name: T | string,
             properties?: EventProperties[T] | Record<string, unknown>,
         ): Promise<void> => {
-            // console.log("[Analytics] bef", {
-            //     refCurrent: !!analyticsRef.current,
-            //     active: process.env.NODE_ENV ! == 'development',
-            // })
-            if (
-                !shouldTrackEvents ||
-                !analyticsRef.current
-            ) {
+            if (!shouldTrackEvents || !analyticsRef.current) {
                 return;
             }
 
             try {
-                await analyticsRef.current.logEvent(name as any, properties);
-                setQueueSize(analyticsRef.current.getQueueSize());
+                // Don't await or update state - let it happen asynchronously
+                analyticsRef.current.logEvent(name as any, properties);
+                // Queue size will be updated by the polling interval
             } catch (error) {
                 const analyticsError =
                     error instanceof Error ? error : new Error('Failed to log event');
                 onError?.(analyticsError);
             }
         },
-        // [shouldTrackEvents, onError],
-        [onError],
+        [shouldTrackEvents, onError],
     );
 
     const flush = useCallback(async (): Promise<void> => {

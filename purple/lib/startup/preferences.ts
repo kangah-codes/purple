@@ -6,9 +6,8 @@ import { SettingsServiceFactory } from '../factory/SettingsFactory';
 export async function initializePreferences(db: SQLiteDatabase) {
     try {
         const settingsService = SettingsServiceFactory.create(db);
-        const existingCurrency = await settingsService.get('currency');
         const defaultSettings: UserPreferences = {
-            currency: existingCurrency || 'USD',
+            currency: 'USD',
             theme: 'light',
             allowOverdraw: false,
             hideCompletedPlans: true,
@@ -21,17 +20,24 @@ export async function initializePreferences(db: SQLiteDatabase) {
         } as UserPreferences;
         await settingsService.ensureDefaults(defaultSettings);
 
-        const transactionTypes = await settingsService.listTransactionTypes();
-        const settingsEntries = await Promise.all(
-            Object.keys(defaultSettings).map(async (key) => [
-                key,
-                await settingsService.getWithFallback(
-                    key as keyof UserPreferences,
-                    defaultSettings[key as keyof UserPreferences],
-                ),
-            ]),
+        // Single query to fetch all settings at once
+        const allSettings = await db.getAllAsync<{ key: string; value: string }>(
+            'SELECT key, value FROM settings WHERE key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            Object.keys(defaultSettings),
         );
-        const settings = Object.fromEntries(settingsEntries) as UserPreferences;
+
+        // Build settings object from query results
+        const settings: UserPreferences = { ...defaultSettings };
+        for (const row of allSettings) {
+            const key = row.key as keyof UserPreferences;
+            try {
+                settings[key] = JSON.parse(row.value) as any;
+            } catch {
+                settings[key] = defaultSettings[key];
+            }
+        }
+
+        const transactionTypes = await settingsService.listTransactionTypes();
 
         usePreferencesStore.getState().setPreferences({
             ...settings,

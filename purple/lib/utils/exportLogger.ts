@@ -22,7 +22,7 @@ type InstalledLogger = {
 
 const DEFAULT_FILE_NAME = 'purple-app-logs.txt';
 const DEFAULT_MAX_BYTES = 2_000_000;
-const DEFAULT_FLUSH_INTERVAL_MS = 1500;
+const DEFAULT_FLUSH_INTERVAL_MS = 3000;
 
 let installed: InstalledLogger | null = null;
 
@@ -89,6 +89,10 @@ function stringifyArg(value: unknown): string {
     if (typeof value === 'function') return `[Function ${value.name || 'anonymous'}]`;
 
     try {
+        // Skip circular reference checking for primitive objects to improve performance
+        if (value === null) return 'null';
+        if (typeof value !== 'object') return String(value);
+
         const seen = new WeakSet<object>();
         const json = JSON.stringify(
             value,
@@ -101,7 +105,7 @@ function stringifyArg(value: unknown): string {
                 }
                 return v;
             },
-            2,
+            0, // Reduced from 2 to 0 (no pretty-printing) for better performance
         );
 
         if (json === undefined) return String(value);
@@ -126,9 +130,8 @@ function scheduleFlush(fileUri: string, flushIntervalMs: number) {
 }
 
 async function maybeRotate(fileUri: string, maxBytes: number) {
-    // Avoid frequent size checks (expensive on some devices)
     const now = Date.now();
-    if (now - lastRotationCheckAt < 10_000) return;
+    if (now - lastRotationCheckAt < 30_000) return;
     lastRotationCheckAt = now;
 
     try {
@@ -186,14 +189,19 @@ function patchConsole(options: Required<ExportLoggerOptions>, fileUri: string) {
     const makePatched = (level: LogLevel) => {
         const original = originalConsole?.[level] ?? console[level];
         return (...args: unknown[]) => {
-            try {
-                buffer.push(formatLogLine(level, args));
-                void maybeRotate(fileUri, options.maxBytes);
-                scheduleFlush(fileUri, options.flushIntervalMs);
-            } catch {
-                // ignore
-            }
+            // Call original console first for immediate feedback
             original(...(args as any));
+
+            // Defer logging operations to avoid blocking
+            setImmediate(() => {
+                try {
+                    buffer.push(formatLogLine(level, args));
+                    void maybeRotate(fileUri, options.maxBytes);
+                    scheduleFlush(fileUri, options.flushIntervalMs);
+                } catch {
+                    // ignore
+                }
+            });
         };
     };
 

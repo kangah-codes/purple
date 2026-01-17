@@ -15,7 +15,6 @@ import AccountNavigationArea from '../molecules/AccountNavigationArea';
 import LoadingScreen from '../molecules/LoadingScreen';
 import { Account } from '../schema';
 import { useScreenTracking } from '@/lib/hooks/useAnalytics';
-import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import Animated, {
     useSharedValue,
     useAnimatedScrollHandler,
@@ -28,7 +27,6 @@ import AccountTransactions from '../molecules/AccountTransactions';
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
-    const { logEvent } = useAnalytics();
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
     const {
         setCurrentAccount,
@@ -51,16 +49,8 @@ function AccountScreen() {
 
     useScreenTracking('account', {
         source: 'navigation',
-        account: currentAccount,
+        account_id: currentAccount?.id,
     });
-
-    React.useEffect(() => {
-        logEvent('screen_view', {
-            screen: 'account_screen',
-            source: 'navigation',
-            account_id: currentAccount?.id,
-        });
-    }, [logEvent, currentAccount]);
 
     const scrollY = useSharedValue(0);
     const onScroll = useAnimatedScrollHandler({

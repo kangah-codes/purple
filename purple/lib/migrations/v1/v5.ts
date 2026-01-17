@@ -42,4 +42,13 @@ export const migrationsV5 = [
             CREATE INDEX IF NOT EXISTS idx_accounts_created_at ON accounts(created_at DESC);
         `,
     },
+    {
+        version: 5,
+        sql: `
+            PRAGMA journal_mode = WAL;
+
+            -- Optimize recurring transactions startup query
+            CREATE INDEX IF NOT EXISTS idx_recurring_transactions_status_next ON recurring_transactions(status, create_next_at_unix) WHERE status = 'active' AND create_next_at_unix IS NOT NULL;
+        `,
+    },
 ];

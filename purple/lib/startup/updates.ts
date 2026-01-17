@@ -23,7 +23,14 @@ export async function loadAndApplyUpdates() {
         }
         try {
             nativeStorage.setItem('lastUpdateCheck', Date.now().toString());
-            const update = await Updates.checkForUpdateAsync();
+
+            // Add timeout to prevent slow network from blocking too long
+            const updateCheckPromise = Updates.checkForUpdateAsync();
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Update check timeout')), 3000)
+            );
+
+            const update = await Promise.race([updateCheckPromise, timeoutPromise]) as any;
 
             if (update.isAvailable) {
                 try {

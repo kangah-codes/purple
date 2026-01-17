@@ -22,14 +22,12 @@ export interface ProcessingStats {
 }
 
 export async function processRecurringTransactions(db: SQLiteDatabase): Promise<ProcessingStats> {
-    // Ensure console.* is patched to persist logs to disk.
-    // (Safe to call multiple times; returns existing installed logger.)
-    installExportLogger({ enabled: true });
+    // Defer logger installation to avoid blocking
+    setImmediate(() => {
+        installExportLogger({ enabled: true });
+    });
 
-    console.log('[RecurringTx] Starting processRecurringTransactions');
     const now = new Date();
-    console.log('[RecurringTx] Current time:', now.toISOString());
-
     const stats: ProcessingStats = {
         totalProcessed: 0,
         successfulTransactions: 0,
@@ -37,7 +35,6 @@ export async function processRecurringTransactions(db: SQLiteDatabase): Promise<
         results: [],
     };
 
-    // Fetch all active recurring transactions that have a next creation date
     const recurringTxs: Array<RecurringTransaction & { account_currency: string }> =
         await db.getAllAsync<any>(
             `SELECT rt.*, a.currency AS account_currency FROM recurring_transactions rt
@@ -47,56 +44,39 @@ export async function processRecurringTransactions(db: SQLiteDatabase): Promise<
             [],
         );
 
-    console.log(`[RecurringTx] Found ${recurringTxs.length} active recurring transactions`);
     if (recurringTxs.length === 0) {
-        console.log('[RecurringTx] No recurring transactions to process');
         return stats;
     }
 
-    for (const recurring of recurringTxs) {
-        console.log(`[RecurringTx] Processing recurring transaction ${recurring.id}:`);
-        console.log(`  - Category: ${recurring.category}`);
-        console.log(`  - Type: ${recurring.type}`);
-        console.log(`  - Amount: ${recurring.amount}`);
-        console.log(`  - Next at (unix): ${recurring.create_next_at_unix}`);
-        console.log(
-            `  - Next at (date): ${new Date(recurring.create_next_at_unix * 1000).toISOString()}`,
-        );
-        console.log(`  - Recurrence rule: ${recurring.recurrence_rule}`);
-        console.log(`  - Start date (unix): ${recurring.start_date_unix}`);
-        console.log(
-            `  - Start date (date): ${new Date(recurring.start_date_unix * 1000).toISOString()}`,
-        );
-
+    // Process all recurring transactions in parallel for better performance
+    const processingPromises = recurringTxs.map(async (recurring) => {
         try {
-            const results = await processRecurringTransaction(db, recurring, now);
-            console.log(
-                `[RecurringTx] Completed processing ${recurring.id}, created ${results.length} transactions`,
-            );
-            stats.results.push(...results);
-            stats.totalProcessed += results.length;
-            stats.successfulTransactions += results.filter((r) => r.success).length;
-            stats.failedTransactions += results.filter((r) => !r.success).length;
+            return await processRecurringTransaction(db, recurring, now);
         } catch (error) {
-            console.error(
-                `[RecurringTx] Failed to process recurring transaction ${recurring.id}:`,
-                error,
-            );
-            stats.results.push({
+            return [{
                 success: false,
                 recurringTransactionId: recurring.id,
                 transactionDate: new Date(recurring.create_next_at_unix * 1000),
                 error: error instanceof Error ? error : new Error('Unknown error'),
-            });
-            stats.failedTransactions++;
+            }] as ProcessingResult[];
+        }
+    });
+
+    const allResults = await Promise.all(processingPromises);
+
+    // Count stats in a single pass instead of multiple filter operations
+    for (const results of allResults) {
+        stats.results.push(...results);
+        for (const result of results) {
+            stats.totalProcessed++;
+            if (result.success) {
+                stats.successfulTransactions++;
+            } else {
+                stats.failedTransactions++;
+            }
         }
     }
 
-    console.log(`[RecurringTx] Final stats:`, {
-        totalProcessed: stats.totalProcessed,
-        successful: stats.successfulTransactions,
-        failed: stats.failedTransactions,
-    });
     return stats;
 }
 
@@ -117,63 +97,27 @@ async function processRecurringTransaction(
     recurring: RecurringTransaction & { account_currency: string },
     now: Date,
 ): Promise<ProcessingResult[]> {
-    console.log(`[RecurringTx] Processing individual transaction ${recurring.id}`);
     const results: ProcessingResult[] = [];
 
     try {
         const rule = RRule.fromString(recurring.recurrence_rule);
-        console.log(`[RecurringTx] Parsed RRule for ${recurring.id}:`, rule.toString());
-
         const nextExpected = new Date(recurring.create_next_at_unix * 1000);
-        console.log(
-            `[RecurringTx] Next expected date for ${recurring.id}:`,
-            nextExpected.toISOString(),
-        );
-        console.log(`[RecurringTx] Current time:`, now.toISOString());
-        console.log(`[RecurringTx] Is due? ${nextExpected <= now}`);
 
-        // If the next expected date is in the future, nothing to process
         if (nextExpected > now) {
-            console.log(
-                `[RecurringTx] Recurring transaction ${recurring.id} not due yet:`,
-                'Next at:',
-                nextExpected.toISOString(),
-                'Rule:',
-                recurring.recurrence_rule,
-            );
             return results;
         }
 
-        // Find all occurrences from nextExpected up to now using the more reliable helper
         const dtStart = new Date(recurring.start_date_unix * 1000);
-        console.log(
-            `[RecurringTx] Finding occurrences between ${nextExpected.toISOString()} and ${now.toISOString()}`,
-        );
-        console.log(`[RecurringTx] Start date for rule: ${dtStart.toISOString()}`);
-
         const missedOccurrences = occurrencesBetween(
             recurring.recurrence_rule,
             dtStart,
             nextExpected,
             now,
         );
-        console.log(
-            `[RecurringTx] Found ${missedOccurrences.length} occurrences from occurrencesBetween`,
-        );
 
-        // If no occurrences found using between(), but nextExpected <= now,
-        // it means we should create at least one transaction for nextExpected
         if (missedOccurrences.length === 0 && nextExpected <= now) {
-            console.log(`[RecurringTx] No occurrences found but date is due, adding nextExpected`);
             missedOccurrences.push(nextExpected);
         }
-
-        console.log(
-            `[RecurringTx] Processing ${missedOccurrences.length} missed occurrences for recurring transaction ${recurring.id}`,
-        );
-        missedOccurrences.forEach((occ, idx) => {
-            console.log(`  [${idx + 1}] ${occ.toISOString()}`);
-        });
 
         const transactionService = new TransactionSQLiteService(db);
 
@@ -190,27 +134,27 @@ async function processRecurringTransaction(
                 : metadataRaw ?? {};
         const shouldCountInBudget = Boolean(metadata?.count_in_budget);
 
-        // Create transactions for all missed occurrences
+        // Cache budget IDs by month to avoid repeated DB queries
+        const budgetCache = new Map<string, string | null>();
+
         let lastSuccessfulOccurrence: Date | null = null;
         for (const occurrenceDate of missedOccurrences) {
-            console.log(
-                `[RecurringTx] Creating transaction for ${
-                    recurring.id
-                } at ${occurrenceDate.toISOString()}`,
-            );
             try {
-                const budgetId =
-                    shouldCountInBudget && recurring.type === 'debit'
-                        ? await getBudgetIdForDate(db, occurrenceDate)
-                        : null;
+                let budgetId: string | null = null;
+                if (shouldCountInBudget && recurring.type === 'debit') {
+                    const monthKey = `${format(occurrenceDate, 'MMMM')}-${occurrenceDate.getFullYear()}`;
+                    if (budgetCache.has(monthKey)) {
+                        budgetId = budgetCache.get(monthKey)!;
+                    } else {
+                        budgetId = await getBudgetIdForDate(db, occurrenceDate);
+                        budgetCache.set(monthKey, budgetId);
+                    }
+                }
 
                 await createRecurringTransaction(transactionService, recurring, occurrenceDate, {
                     useTransaction: false,
                     budgetId,
                 });
-                console.log(
-                    `[RecurringTx] Successfully created transaction for ${occurrenceDate.toISOString()}`,
-                );
                 results.push({
                     success: true,
                     recurringTransactionId: recurring.id,
@@ -218,10 +162,6 @@ async function processRecurringTransaction(
                 });
                 lastSuccessfulOccurrence = occurrenceDate;
             } catch (error) {
-                console.error(
-                    `[RecurringTx] Failed to create transaction for ${occurrenceDate.toISOString()}:`,
-                    error,
-                );
                 results.push({
                     success: false,
                     recurringTransactionId: recurring.id,
@@ -231,31 +171,16 @@ async function processRecurringTransaction(
             }
         }
 
-        // Only advance schedule if at least one transaction was successfully created
         if (lastSuccessfulOccurrence) {
             const nextOccurrence = rule.after(lastSuccessfulOccurrence, false);
-            console.log(`[RecurringTx] Advancing schedule for ${recurring.id}`);
-            console.log(`  - Last created: ${lastSuccessfulOccurrence.toISOString()}`);
-            console.log(
-                `  - Next occurrence: ${
-                    nextOccurrence ? nextOccurrence.toISOString() : 'null (ended)'
-                }`,
-            );
             await updateRecurringTransactionSchedule(
                 db,
                 recurring,
                 nextOccurrence,
                 lastSuccessfulOccurrence,
             );
-        } else {
-            console.warn(
-                `[RecurringTx] No successful creations for recurring ${recurring.id}; schedule not advanced`,
-            );
         }
-
-        console.log(`[RecurringTx] COMPLETED ${recurring.id}:`, results);
     } catch (error) {
-        console.error(`Error processing recurring transaction ${recurring.id}:`, error);
         results.push({
             success: false,
             recurringTransactionId: recurring.id,
@@ -273,15 +198,6 @@ async function createRecurringTransaction(
     occurrenceDate: Date,
     options?: { useTransaction?: boolean; budgetId?: string | null },
 ): Promise<void> {
-    console.log(`[RecurringTx] Creating recurring transaction:`);
-    console.log(`  - Recurring ID: ${recurring.id}`);
-    console.log(`  - Account ID: ${recurring.account_id}`);
-    console.log(`  - Type: ${recurring.type}`);
-    console.log(`  - Amount: ${recurring.amount}`);
-    console.log(`  - Category: ${recurring.category}`);
-    console.log(`  - Currency: ${recurring.account_currency}`);
-    console.log(`  - Occurrence Date: ${occurrenceDate.toISOString()}`);
-
     const baseTransaction = {
         account_id: recurring.account_id,
         type: recurring.type,
@@ -294,9 +210,6 @@ async function createRecurringTransaction(
     };
 
     if (recurring.type === 'transfer') {
-        console.log(
-            `[RecurringTx] Creating transfer transaction from ${recurring.from_account} to ${recurring.to_account}`,
-        );
         await transactionService.create(
             {
                 ...baseTransaction,
@@ -307,7 +220,6 @@ async function createRecurringTransaction(
             options,
         );
     } else {
-        console.log(`[RecurringTx] Creating ${recurring.type} transaction`);
         await transactionService.create(
             {
                 ...baseTransaction,
@@ -316,7 +228,6 @@ async function createRecurringTransaction(
             options,
         );
     }
-    console.log(`[RecurringTx] Successfully created transaction in database`);
 }
 
 async function updateRecurringTransactionSchedule(
@@ -328,14 +239,6 @@ async function updateRecurringTransactionSchedule(
     const lastCreatedUnix = dateToUNIX(lastCreatedAt);
     const nextOccurrenceUnix = nextOccurrence ? dateToUNIX(nextOccurrence) : null;
 
-    console.log(`[RecurringTx] Updating schedule for ${recurring.id}:`);
-    console.log(`  - Last created at: ${lastCreatedAt.toISOString()} (unix: ${lastCreatedUnix})`);
-    console.log(
-        `  - Next occurrence: ${
-            nextOccurrence ? nextOccurrence.toISOString() : 'null'
-        } (unix: ${nextOccurrenceUnix})`,
-    );
-
     await db.runAsync(
         `UPDATE recurring_transactions
         SET create_next_at_unix = ?,
@@ -345,6 +248,4 @@ async function updateRecurringTransactionSchedule(
         WHERE id = ?`,
         [nextOccurrenceUnix, nextOccurrenceUnix, lastCreatedUnix, lastCreatedUnix, recurring.id],
     );
-
-    console.log(`[RecurringTx] Successfully updated schedule for ${recurring.id}`);
 }

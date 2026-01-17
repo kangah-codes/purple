@@ -118,10 +118,12 @@ export class AnalyticsTracker {
     private readonly storageKey = 'analytics-data' as const;
     private readonly sessionId: string;
     private syncTimer?: NodeJS.Timeout;
+    private saveTimer?: NodeJS.Timeout;
     private isOnline = true;
     private deviceMetadata: Partial<DeviceMetadata> = {};
     private readonly storage: NativeStorage;
     private uniqueId: string | null = null;
+    private pendingSave = false;
 
     constructor(config: AnalyticsConfig = {}) {
         this.config = {
@@ -148,11 +150,21 @@ export class AnalyticsTracker {
 
     private async initialize(): Promise<void> {
         try {
-            await this.loadDeviceMetadata();
+            // Restore queue first (synchronous, fast)
             this.restoreQueue();
+
+            // Setup listeners (fast)
             this.setupNetworkListener();
             this.scheduleSync();
             this.setupAppStateHandlers();
+
+            // Load device metadata in background (slow, non-critical)
+            this.loadDeviceMetadata().catch((error) => {
+                this.handleError(
+                    new AnalyticsError('Failed to load device metadata', 'STORAGE_ERROR', error),
+                );
+            });
+
             this.log('Analytics tracker initialized');
         } catch (error) {
             throw new AnalyticsError(
@@ -167,29 +179,36 @@ export class AnalyticsTracker {
         name: T | string,
         properties?: EventProperties[T] | Record<string, unknown>,
     ): Promise<void> {
-        try {
-            const event: TrackedItem = {
-                id: this.generateId(),
-                type: 'event',
-                retryCount: 0,
-                createdAt: new Date().toISOString(),
-                payload: {
-                    name,
-                    properties: {
-                        ...this.sanitizeProperties(properties),
+        // CRITICAL: Make this completely non-blocking by using setImmediate/setTimeout
+        // This ensures the event logging never blocks the UI thread
+        setImmediate(() => {
+            try {
+                const event: TrackedItem = {
+                    id: this.generateId(),
+                    type: 'event',
+                    retryCount: 0,
+                    createdAt: new Date().toISOString(),
+                    payload: {
+                        name,
+                        properties: {
+                            ...this.sanitizeProperties(properties),
+                        },
+                        timestamp: new Date().toISOString(),
+                        sessionId: this.sessionId,
                     },
-                    timestamp: new Date().toISOString(),
-                    sessionId: this.sessionId,
-                },
-            };
+                };
 
-            await this.enqueue(event);
-            this.log(`Event logged: ${name}`);
-        } catch (error) {
-            this.handleError(
-                new AnalyticsError(`Failed to log event: ${name}`, 'VALIDATION_ERROR', error),
-            );
-        }
+                this.enqueue(event);
+                this.log(`Event logged: ${name}`);
+            } catch (error) {
+                this.handleError(
+                    new AnalyticsError(`Failed to log event: ${name}`, 'VALIDATION_ERROR', error),
+                );
+            }
+        });
+
+        // Return immediately without waiting
+        return Promise.resolve();
     }
 
     public setUniqueId(uniqueId: string): void {
@@ -233,7 +252,7 @@ export class AnalyticsTracker {
         return this.uniqueId;
     }
 
-    private async enqueue(item: TrackedItem): Promise<void> {
+    private enqueue(item: TrackedItem): void {
         if (this.queue.length >= this.config.maxQueueSize) {
             this.log('Queue size limit reached, removing oldest items');
             const itemsToKeep = this.config.maxQueueSize - 100;
@@ -241,7 +260,9 @@ export class AnalyticsTracker {
         }
 
         this.queue.push(item);
-        this.saveQueue();
+
+        // Debounce storage writes - save after 1 second of inactivity or when queue is large
+        this.debouncedSaveQueue();
 
         if (this.queue.length >= this.config.batchSize) {
             this.syncQueue().catch((error) => {
@@ -250,12 +271,27 @@ export class AnalyticsTracker {
         }
     }
 
+    private debouncedSaveQueue(): void {
+        // If queue is getting full, save immediately
+        if (this.queue.length >= this.config.maxQueueSize * 0.8) {
+            if (this.saveTimer) clearTimeout(this.saveTimer);
+            this.saveQueue();
+            return;
+        }
+
+        // Otherwise debounce saves to reduce I/O
+        this.pendingSave = true;
+        if (this.saveTimer) clearTimeout(this.saveTimer);
+
+        this.saveTimer = setTimeout(() => {
+            if (this.pendingSave) {
+                this.saveQueue();
+                this.pendingSave = false;
+            }
+        }, 1000); // Save after 1 second of inactivity
+    }
+
     private async syncQueue(): Promise<void> {
-        console.log('Syncing analytics queue...', {
-            queueLength: this.queue.length,
-            isOnline: this.isOnline,
-            syncing: this.syncing,
-        });
         if (this.syncing || this.queue.length === 0 || !this.isOnline) {
             return;
         }
@@ -320,8 +356,7 @@ export class AnalyticsTracker {
             const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
             try {
-                this.log(JSON.stringify(payload));
-                console.log('Sending analytics batch:', payload, this.config.endpoint);
+                this.log(`Sending batch with ${batch.length} events`);
 
                 const response = await fetch(this.config.endpoint, {
                     method: 'POST',
@@ -530,6 +565,14 @@ export class AnalyticsTracker {
         if (this.syncTimer) {
             clearInterval(this.syncTimer);
             this.syncTimer = undefined;
+        }
+        if (this.saveTimer) {
+            clearTimeout(this.saveTimer);
+            this.saveTimer = undefined;
+        }
+        // Save any pending events before destroying
+        if (this.pendingSave && this.queue.length > 0) {
+            this.saveQueue();
         }
         this.log('Analytics tracker destroyed');
     }
