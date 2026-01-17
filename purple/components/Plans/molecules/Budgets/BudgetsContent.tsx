@@ -29,24 +29,33 @@ const PAGER_CENTER_INDEX = PAGER_RANGE;
 // only mount expensive page content close to the visible month
 const CONTENT_MOUNT_RANGE = 2;
 
-function BudgetContentForMonth({ month }: { month: Date }) {
+interface BudgetsScreenProps {
+    currentDate: Date;
+    onMonthChange?: (date: Date) => void;
+    availableMonths?: Date[];
+    renderContent?: (month: Date) => React.ReactNode;
+}
+
+const BudgetContentForMonth = React.memo(function BudgetContentForMonth({ month }: { month: Date }) {
     const monthNumber = month.getMonth() + 1;
     const year = month.getFullYear();
     const { data, isLoading, refetch } = useBudgetForMonth(monthNumber, year);
     const queryClient = useQueryClient();
     const [refreshing, setRefreshing] = useState(false);
 
-    // If react-query is configured to keep previous data, we can momentarily
-    // see the prior month's budget result while the new month is fetching.
-    // Guard against that to avoid flashing CreateBudget/NoBudget incorrectly.
-    const expectedMonthName = format(month, 'MMMM');
-    const budgetForThisMonth =
+    const expectedMonthName = useMemo(() => format(month, 'MMMM'), [month]);
+    const budgetForThisMonth = useMemo(() =>
         data?.data && data.data.month === expectedMonthName && data.data.year === year
             ? data.data
-            : null;
+            : null,
+        [data?.data, expectedMonthName, year]
+    );
 
     const hasBudget = budgetForThisMonth;
-    const isPastMonth = startOfMonth(month).getTime() < startOfMonth(new Date()).getTime();
+    const isPastMonth = useMemo(() =>
+        startOfMonth(month).getTime() < startOfMonth(new Date()).getTime(),
+        [month]
+    );
     const paceInsight = useBudgetPaceInsight(hasBudget ?? null, month);
 
     useRefreshOnFocus(refetch);
@@ -108,14 +117,7 @@ function BudgetContentForMonth({ month }: { month: Date }) {
             </ScrollView>
         </View>
     );
-}
-
-interface BudgetsScreenProps {
-    currentDate: Date;
-    onMonthChange?: (date: Date) => void;
-    availableMonths?: Date[];
-    renderContent?: (month: Date) => React.ReactNode;
-}
+});
 
 export default function BudgetsContent({
     currentDate,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { View, Text, TouchableOpacity } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -18,7 +18,7 @@ interface BudgetCategoryCardProps {
     type: 'income' | 'budgeted-expense' | 'unbudgeted-expense';
 }
 
-export function BudgetCategoryCard({
+export const BudgetCategoryCard = memo(function BudgetCategoryCard({
     title,
     transactionTypes,
     categoryLimits = [],
@@ -27,29 +27,26 @@ export function BudgetCategoryCard({
 }: BudgetCategoryCardProps) {
     const collapsibleRef = useRef<AnimatedCollapsibleRef>(null);
     const [isOpen, setIsOpen] = React.useState(false);
-    // const totalItems = transactionTypes.length;
     const footerOpacity = useSharedValue(1);
-    const totalBudget = categoryLimits.reduce((sum, cl) => sum + cl.limit_amount, 0);
-    const totalLeft = categoryLimits.reduce(
-        (sum, cl) => sum + (cl.limit_amount - cl.spent_amount),
-        0,
-    );
-    const totalSpent = categoryLimits.reduce((sum, cl) => sum + cl.spent_amount, 0);
 
-    const handleToggle = () => {
+    const {totalBudget, totalLeft, totalSpent} = useMemo(() => {
+        const totalBudget = categoryLimits.reduce((sum, cl) => sum + cl.limit_amount, 0);
+        const totalSpent = categoryLimits.reduce((sum, cl) => sum + cl.spent_amount, 0);
+        const totalLeft = categoryLimits.reduce(
+            (sum, cl) => sum + (cl.limit_amount - cl.spent_amount),
+            0,
+        );
+        return { totalBudget, totalSpent, totalLeft };
+    }, [categoryLimits]);
+
+    const handleToggle = useCallback(() => {
         collapsibleRef.current?.toggle();
         setIsOpen(!isOpen);
-    };
+    }, [isOpen]);
 
     useEffect(() => {
         footerOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
     }, [isOpen, footerOpacity]);
-
-    // const footerAnimatedStyle = useAnimatedStyle(() => ({
-    //     opacity: footerOpacity.value,
-    //     height: footerOpacity.value === 0 ? 0 : undefined,
-    //     paddingBottom: footerOpacity.value === 0 ? 5 : 20,
-    // }));
 
     return (
         <View className='flex flex-col space-y-2.5 bg-purple-50 rounded-3xl border border-purple-100 px-5 pt-5 pb-3'>
@@ -203,4 +200,4 @@ export function BudgetCategoryCard({
             </Animated.View> */}
         </View>
     );
-}
+});

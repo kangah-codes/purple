@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { View, Text } from '@/components/Shared/styled';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -15,38 +15,50 @@ import { SummaryProgressSection } from './SummaryProgressSection';
 interface BudgetSummaryProps {
     budget: BudgetWithDetails | null;
 }
-export default function BudgetSummary({ budget }: BudgetSummaryProps) {
+
+const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps) {
     const budgetMonth = budget?.month;
     const budgetYear = budget?.year;
-    const budgetId = budget?.id;
     const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budgetMonth, budgetYear);
+
     const totalAllocated = useMemo(() => {
         return (budget?.categoryLimits ?? []).reduce(
             (sum, cl) => sum + Number(cl.limit_amount ?? 0),
             0,
         );
     }, [budget?.categoryLimits]);
-    const estimatedIncome = budget?.estimated_income || 0;
-    const earnedIncome = calculatedEarnedIncome;
-    const remainingIncome = estimatedIncome - earnedIncome;
-    const isIncomeExceeded = remainingIncome < 0;
-    const incomeDelta = Math.abs(remainingIncome);
-    const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
-    const monthIndex = budgetMonth ? MONTHS.indexOf(budgetMonth) : new Date().getMonth();
-    const resolvedMonthIndex = monthIndex === -1 ? new Date().getMonth() : monthIndex;
-    const resolvedYear = budgetYear ?? new Date().getFullYear();
-    const budgetStartDate = startOfMonth(new Date(resolvedYear, resolvedMonthIndex, 1));
-    const budgetEndDate = endOfMonth(budgetStartDate);
+
     const budgetedCategories = useMemo(
         () => (budget?.categoryLimits ?? []).map((cl) => cl.category),
         [budget?.categoryLimits],
     );
+
+    const dateRange = useMemo(() => {
+        const monthIndex = budgetMonth ? MONTHS.indexOf(budgetMonth) : new Date().getMonth();
+        const resolvedMonthIndex = monthIndex === -1 ? new Date().getMonth() : monthIndex;
+        const resolvedYear = budgetYear ?? new Date().getFullYear();
+        const budgetStartDate = startOfMonth(new Date(resolvedYear, resolvedMonthIndex, 1));
+        const budgetEndDate = endOfMonth(budgetStartDate);
+        return { budgetStartDate, budgetEndDate };
+    }, [budgetMonth, budgetYear]);
+
+    const incomeMetrics = useMemo(() => {
+        const estimatedIncome = budget?.estimated_income || 0;
+        const earnedIncome = calculatedEarnedIncome;
+        const remainingIncome = estimatedIncome - earnedIncome;
+        const isIncomeExceeded = remainingIncome < 0;
+        const incomeDelta = Math.abs(remainingIncome);
+        const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
+        return { estimatedIncome, earnedIncome, isIncomeExceeded, incomeDelta, incomePercentage };
+    }, [budget?.estimated_income, calculatedEarnedIncome]);
+
     const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(
         budgetMonth,
         budgetYear,
         budgetedCategories,
     );
-    const unbudgetedCategoryLimits = unbudgeted.map((u) => ({
+
+    const unbudgetedCategoryLimits = useMemo(() => unbudgeted.map((u) => ({
         id: '',
         budget_id: '',
         category: u.category,
@@ -54,29 +66,35 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
         spent_amount: u.spent,
         rollover_enabled: false,
         notes: null,
-    }));
+    })), [unbudgeted]);
+
     const { data: monthlyTransactions } = useTransactions({
         requestQuery: {
             page_size: Infinity,
-            start_date: formatISO(budgetStartDate),
-            end_date: formatISO(budgetEndDate),
+            start_date: formatISO(dateRange.budgetStartDate),
+            end_date: formatISO(dateRange.budgetEndDate),
         },
         options: {
             enabled: !!budget,
             keepPreviousData: true,
         },
     });
+
     const totalSpent = useMemo(() => {
         return (
             monthlyTransactions?.data
                 ?.filter((t) => t.type === 'debit' && !t.from_account && !t.to_account)
                 .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0
         );
-    }, [monthlyTransactions?.data, budgetId]);
-    const remainingBudget = totalAllocated - totalSpent;
-    const isExpensesOverrun = remainingBudget < 0;
-    const expensesDelta = Math.abs(remainingBudget);
-    const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+    }, [monthlyTransactions?.data]);
+
+    const expenseMetrics = useMemo(() => {
+        const remainingBudget = totalAllocated - totalSpent;
+        const isExpensesOverrun = remainingBudget < 0;
+        const expensesDelta = Math.abs(remainingBudget);
+        const spentPercentage = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+        return { isExpensesOverrun, expensesDelta, spentPercentage };
+    }, [totalAllocated, totalSpent]);
 
     if (!budget) {
         return null;
@@ -98,16 +116,16 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                 <SummaryProgressSection
                     title='Income'
                     rightText={`${formatCurrencyRounded(
-                        estimatedIncome,
+                        incomeMetrics.estimatedIncome,
                         budget.currency,
                     )} estimated`}
-                    leftText={`${formatCurrencyRounded(earnedIncome, budget.currency)} earned`}
-                    deltaText={`${formatCurrencyRounded(incomeDelta, budget.currency)} ${
-                        isIncomeExceeded ? 'extra' : 'left'
+                    leftText={`${formatCurrencyRounded(incomeMetrics.earnedIncome, budget.currency)} earned`}
+                    deltaText={`${formatCurrencyRounded(incomeMetrics.incomeDelta, budget.currency)} ${
+                        incomeMetrics.isIncomeExceeded ? 'extra' : 'left'
                     }`}
-                    percentage={incomePercentage}
+                    percentage={incomeMetrics.incomePercentage}
                     variant='income'
-                    isExceeded={isIncomeExceeded}
+                    isExceeded={incomeMetrics.isIncomeExceeded}
                 />
 
                 <View className='py-2.5'>
@@ -119,16 +137,16 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
                     title='Expenses'
                     rightText={`${formatCurrencyRounded(totalAllocated, budget.currency)} budget`}
                     leftText={`${formatCurrencyRounded(totalSpent, budget.currency)} spent`}
-                    deltaText={`${formatCurrencyRounded(expensesDelta, budget.currency)} ${
-                        isExpensesOverrun ? 'over' : 'left'
+                    deltaText={`${formatCurrencyRounded(expenseMetrics.expensesDelta, budget.currency)} ${
+                        expenseMetrics.isExpensesOverrun ? 'over' : 'left'
                     }`}
-                    percentage={spentPercentage}
+                    percentage={expenseMetrics.spentPercentage}
                     variant='expense'
-                    isExceeded={isExpensesOverrun}
+                    isExceeded={expenseMetrics.isExpensesOverrun}
                 />
             </View>
 
-            <SpendVsBudgetLineChart startDate={budgetStartDate} />
+            <SpendVsBudgetLineChart startDate={dateRange.budgetStartDate} />
 
             {/* Expenses Breakdown */}
             <BudgetSection
@@ -164,4 +182,6 @@ export default function BudgetSummary({ budget }: BudgetSummaryProps) {
             />
         </View>
     );
-}
+});
+
+export default BudgetSummary;
