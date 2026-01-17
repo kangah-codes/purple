@@ -44,16 +44,14 @@ export default function AccountsAreaChart() {
         };
     }, [accountGroupData.transactions, startDate, endDate, accountGroupData.previousBalance]);
 
-    const handleCategoryChange = (newCategory: string) => setCategory(newCategory);
-        const handleCategoryChange = (newCategory: string) => {
-            setCategory(newCategory);
-            logEvent('button_tap', {
-                button: 'change_account_category',
-                screen: 'accounts_screen',
-                category: newCategory,
-            });
-        };
-    const handlePeriodChange = (newPeriod: TimePeriod) => setPeriod(newPeriod);
+    const handleCategoryChange = (newCategory: string) => {
+        setCategory(newCategory);
+        logEvent('button_tap', {
+            button: 'change_account_category',
+            screen: 'accounts_screen',
+            category: newCategory,
+        });
+    };
     const handlePeriodChange = (newPeriod: TimePeriod) => {
         setPeriod(newPeriod);
         logEvent('button_tap', {
