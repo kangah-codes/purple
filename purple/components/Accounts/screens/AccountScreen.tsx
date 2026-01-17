@@ -28,7 +28,7 @@ import AccountTransactions from '../molecules/AccountTransactions';
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
-        const { logEvent } = useAnalytics();
+    const { logEvent } = useAnalytics();
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
     const {
         setCurrentAccount,
@@ -37,6 +37,7 @@ function AccountScreen() {
         setCurrentAccountRequestParams,
     } = useAccountStore();
     const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
+
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
         setCurrentAccountRequestParams({
@@ -46,11 +47,13 @@ function AccountScreen() {
             startDate: defaultDateRange.startDate.toISOString(),
             endDate: defaultDateRange.endDate.toISOString(),
         });
-    }, [accountID]);
+    }, [accountID, setCurrentAccountRequestParams]);
+
     useScreenTracking('account', {
         source: 'navigation',
         account: currentAccount,
     });
+
     React.useEffect(() => {
         logEvent('screen_view', {
             screen: 'account_screen',
@@ -95,7 +98,11 @@ function AccountScreen() {
         if (currentAccountRequestParams.startDate && currentAccountRequestParams.endDate) {
             transactionsRefetch();
         }
-    }, [currentAccountRequestParams.startDate, currentAccountRequestParams.endDate]);
+    }, [
+        currentAccountRequestParams.startDate,
+        currentAccountRequestParams.endDate,
+        transactionsRefetch,
+    ]);
 
     const {
         data: transactions,
@@ -124,12 +131,13 @@ function AccountScreen() {
     });
     useRefreshOnFocus(transactionsRefetch);
     useRefreshOnFocus(accountRefetch);
+
     useEffect(() => {
         setCurrentAccountRequestParams({
             accountID,
             page_size: Infinity,
         });
-    }, []);
+    }, [accountID, setCurrentAccountRequestParams]);
     useEffect(() => {
         if (!accountsLoading && !transactionsLoading && !initialLoadComplete) {
             setInitialLoadComplete(true);

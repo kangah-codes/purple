@@ -4,7 +4,7 @@ import { formatCurrencyAccurate } from '@/lib/utils/number';
 import { extractEmojiOrDefault, stripEmojis, truncateStringIfLongerThan } from '@/lib/utils/string';
 import { formatDistanceToNow } from 'date-fns';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { useAccountStore } from '../hooks';
 import { Account } from '../schema';
 
@@ -12,20 +12,19 @@ type AccountCardProps = {
     account: Account;
 };
 
-export default function AccountCard({ account }: AccountCardProps) {
+function AccountCard({ account }: AccountCardProps) {
     const { setCurrentAccount } = useAccountStore();
 
+    const handlePress = useCallback(() => {
+        setCurrentAccount(account);
+        router.push({
+            pathname: '/accounts/account-transactions',
+            params: { accountName: account.name, accountID: account.id },
+        });
+    }, [account, setCurrentAccount]);
+
     return (
-        <TouchableOpacity
-            onPress={() => {
-                setCurrentAccount(account);
-                router.push({
-                    pathname: '/accounts/account-transactions',
-                    params: { accountName: account.name, accountID: account.id },
-                });
-            }}
-            className='flex flex-row justify-between'
-        >
+        <TouchableOpacity onPress={handlePress} className='flex flex-row justify-between'>
             <View className='flex flex-row space-x-2.5 items-center'>
                 <View className='flex items-center justify-center h-10 w-10 rounded-xl bg-purple-100'>
                     <Text style={satoshiFont.satoshiBold} className='text-base'>
@@ -56,3 +55,5 @@ export default function AccountCard({ account }: AccountCardProps) {
         </TouchableOpacity>
     );
 }
+
+export default memo(AccountCard);

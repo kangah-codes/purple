@@ -18,14 +18,16 @@ import { generateNormalizedSpendChartDataWithMissingDays } from '../utils';
 const datePeriods: TimePeriod[] = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
 
 export default function AccountsAreaChart() {
-        const { logEvent } = useAnalytics();
+    const { logEvent } = useAnalytics();
     const { category, setCategory, period, setPeriod, showChart } = useAccountReportStore();
     const { accounts } = useAccountStore();
     const {
         preferences: { currency },
     } = usePreferences();
-    const { startDate, endDate } = getDateRange(period);
-    const groupedAccounts = groupBy(accounts, 'category');
+
+    const { startDate, endDate } = useMemo(() => getDateRange(period), [period]);
+    const groupedAccounts = useMemo(() => groupBy(accounts, 'category'), [accounts]);
+
     const accountGroupData = useCalculateAccountData({
         accountGroup: category,
         timePeriod: period,
@@ -44,22 +46,29 @@ export default function AccountsAreaChart() {
         };
     }, [accountGroupData.transactions, startDate, endDate, accountGroupData.previousBalance]);
 
-    const handleCategoryChange = (newCategory: string) => {
-        setCategory(newCategory);
-        logEvent('button_tap', {
-            button: 'change_account_category',
-            screen: 'accounts_screen',
-            category: newCategory,
-        });
-    };
-    const handlePeriodChange = (newPeriod: TimePeriod) => {
-        setPeriod(newPeriod);
-        logEvent('button_tap', {
-            button: 'change_chart_period',
-            screen: 'accounts_screen',
-            period: newPeriod,
-        });
-    };
+    const handleCategoryChange = React.useCallback(
+        (newCategory: string) => {
+            setCategory(newCategory);
+            logEvent('button_tap', {
+                button: 'change_account_category',
+                screen: 'accounts_screen',
+                category: newCategory,
+            });
+        },
+        [setCategory, logEvent],
+    );
+
+    const handlePeriodChange = React.useCallback(
+        (newPeriod: TimePeriod) => {
+            setPeriod(newPeriod);
+            logEvent('button_tap', {
+                button: 'change_chart_period',
+                screen: 'accounts_screen',
+                period: newPeriod,
+            });
+        },
+        [setPeriod, logEvent],
+    );
 
     if (!showChart) return null;
 

@@ -257,6 +257,34 @@ export function useCalculateAccountData({
     const accounts = accountsData?.data || [];
     const transactions = transactionsData?.data || [];
 
+    // Memoize grouped accounts to avoid recalculation
+    const groupedAccounts = useMemo(() => groupAccountsByCategory(accounts), [accounts]);
+
+    // Memoize relevant accounts selection
+    const relevantAccounts = useMemo(() => {
+        if (accountGroup && accountGroup !== '📈 NET WORTH') {
+            return groupedAccounts[accountGroup] || [];
+        }
+        return accounts;
+    }, [accountGroup, groupedAccounts, accounts]);
+
+    // Memoize account IDs set for faster lookup
+    const relevantAccountIds = useMemo(
+        () => new Set(relevantAccounts.map((a) => a.id)),
+        [relevantAccounts],
+    );
+
+    // Filter transactions once and memoize
+    const filteredTransactions = useMemo(() => {
+        if (!relevantAccountIds.size) return [];
+        return transactions.filter(
+            (tx) =>
+                relevantAccountIds.has(tx.account_id) &&
+                new Date(tx.created_at) >= start_date &&
+                new Date(tx.created_at) <= end_date,
+        );
+    }, [transactions, relevantAccountIds, start_date, end_date]);
+
     // @ts-expect-error ignore
     return useMemo(() => {
         if (isLoading) {
@@ -273,13 +301,6 @@ export function useCalculateAccountData({
         }
 
         try {
-            let relevantAccounts = accounts;
-            if (accountGroup && accountGroup !== '📈 NET WORTH') {
-                // TODO: fix import cycle
-                const groupedAccounts = groupAccountsByCategory(accounts);
-                relevantAccounts = groupedAccounts[accountGroup] || [];
-            }
-
             if (relevantAccounts.length === 0) {
                 return {
                     currentBalance: 0,
@@ -304,14 +325,11 @@ export function useCalculateAccountData({
                 return sum + converted;
             }, 0);
 
-            // calc balance at the start of the period
+            // calc balance at the start of the period - use pre-filtered transactions
             const previousBalance = relevantAccounts.reduce((sum, account) => {
                 // get transactions for this account within the time period
-                const accountTransactions = transactions.filter(
-                    (tx) =>
-                        tx.account_id === account.id &&
-                        new Date(tx.created_at) >= start_date &&
-                        new Date(tx.created_at) <= end_date,
+                const accountTransactions = filteredTransactions.filter(
+                    (tx) => tx.account_id === account.id,
                 );
 
                 // calc the account balance at the start of the period
@@ -411,5 +429,13 @@ export function useCalculateAccountData({
                 transactions,
             };
         }
-    }, [accountGroup, timePeriod, accounts, transactions, preferredCurrency, isLoading]);
+    }, [
+        relevantAccounts,
+        filteredTransactions,
+        accounts,
+        transactions,
+        preferredCurrency,
+        isLoading,
+        accountGroup,
+    ]);
 }

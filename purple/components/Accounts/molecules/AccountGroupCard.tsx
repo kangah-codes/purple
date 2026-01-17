@@ -2,7 +2,7 @@ import { Text, View } from '@/components/Shared/styled';
 import { ArrowNarrowDownRightIcon, ArrowNarrowUpRightIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyAccurate } from '@/lib/utils/number';
-import React from 'react';
+import React, { memo } from 'react';
 import { useAccountReportStore, useCalculateAccountData } from '../hooks';
 import { Account } from '../schema';
 import AccountCard from './AccountCard';
@@ -12,7 +12,7 @@ type AccountGroupCardProps = {
     group: string;
 };
 
-export default function AccountGroupCard({ group, accounts }: AccountGroupCardProps) {
+function AccountGroupCard({ group, accounts }: AccountGroupCardProps) {
     const { period } = useAccountReportStore();
     const { currentBalance, currency, percentageChange, absoluteChange } = useCalculateAccountData({
         accountGroup: group,
@@ -75,3 +75,5 @@ export default function AccountGroupCard({ group, accounts }: AccountGroupCardPr
         </View>
     );
 }
+
+export default memo(AccountGroupCard);

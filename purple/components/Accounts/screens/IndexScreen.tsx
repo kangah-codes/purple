@@ -43,11 +43,15 @@ export default function AccountsScreen() {
     useRefreshOnFocus(refetch);
 
     const shadowOpacity = useSharedValue(0);
-    const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
-        const scrollY = event.nativeEvent.contentOffset.y;
-        const newOpacity = scrollY > 0 ? Math.min(scrollY / 20, 1) : 0;
-        shadowOpacity.value = withSpring(newOpacity, { damping: 15, stiffness: 150 });
-    };
+
+    const handleScroll = React.useCallback(
+        (event: { nativeEvent: { contentOffset: { y: number } } }) => {
+            const scrollY = event.nativeEvent.contentOffset.y;
+            const newOpacity = scrollY > 0 ? Math.min(scrollY / 20, 1) : 0;
+            shadowOpacity.value = withSpring(newOpacity, { damping: 15, stiffness: 150 });
+        },
+        [shadowOpacity],
+    );
 
     const shadowStyle = useAnimatedStyle(() => {
         return {

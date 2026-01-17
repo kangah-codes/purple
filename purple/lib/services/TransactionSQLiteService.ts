@@ -866,7 +866,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         }
 
         if (start_date && end_date) {
-            whereClause += ` AND strftime('%s', t.created_at) BETWEEN strftime('%s', ?) AND strftime('%s', ?)`;
+            // Use direct string comparison instead of strftime to allow index usage
+            whereClause += ` AND t.created_at BETWEEN ? AND ?`;
             params.push(start_date, end_date);
             searchParams.push(start_date, end_date);
         }
@@ -927,6 +928,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         );
         if (!result) throw new Error('Error fetching transactions');
 
+        // Use indexed columns in WHERE clause first for better query planning
         const transactions = await this.db.getAllAsync<
             Transaction & {
                 account_id: string;

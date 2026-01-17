@@ -28,7 +28,7 @@ export default function AccountActivityAreaChart({ transactions }: AccountActivi
             data: transformedData,
             maxValue: getMaxValue(transformedData, 'value', 10),
         };
-    }, [transactions]);
+    }, [transactions, startDate, endDate]);
 
     return (
         <View className='relative -ml-[5px] flex flex-col scale-[1.03]'>
