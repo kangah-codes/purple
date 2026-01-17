@@ -251,6 +251,11 @@ export class AnalyticsTracker {
     }
 
     private async syncQueue(): Promise<void> {
+        console.log('Syncing analytics queue...', {
+            queueLength: this.queue.length,
+            isOnline: this.isOnline,
+            syncing: this.syncing,
+        });
         if (this.syncing || this.queue.length === 0 || !this.isOnline) {
             return;
         }
