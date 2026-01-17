@@ -1,4 +1,3 @@
-import { usePreferences } from '@/components/Settings/hooks';
 import React, { ReactNode, createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { AnalyticsConfig, AnalyticsTracker, EventProperties } from '../services/AnalyticsService';
@@ -44,11 +43,13 @@ export function AnalyticsProvider({
     const [isOnline, setIsOnline] = useState(true);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [uniqueId, setUniqueId] = useState<string | null>(null);
-    const { preferences } = usePreferences();
-    const shouldTrackEvents = preferences?.trackUsageStatistics ?? true;
-    const shouldSendDiagnostics = preferences?.sendDiagnosticData ?? true;
-    const trackingEnabled = !disabled && (shouldTrackEvents || shouldSendDiagnostics);
-    const diagnosticsEnabled = !disabled && shouldSendDiagnostics;
+    // const { preferences } = usePreferences();
+    // const shouldTrackEvents = preferences?.trackUsageStatistics ?? true;
+    // const shouldSendDiagnostics = preferences?.sendDiagnosticData ?? true;
+    // const trackingEnabled = !disabled && (shouldTrackEvents || shouldSendDiagnostics);
+    // const diagnosticsEnabled = !disabled && shouldSendDiagnostics;
+    const trackingEnabled = true
+    const diagnosticsEnabled = true
 
     useEffect(() => {
         if (!trackingEnabled && !diagnosticsEnabled) {
