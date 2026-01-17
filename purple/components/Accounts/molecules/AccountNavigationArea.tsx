@@ -17,6 +17,7 @@ import { usePreferences } from '@/components/Settings/hooks';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { Account } from '../schema';
 import { dateToUNIX } from '@/lib/utils/date';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
 export default function AccountNavigationArea() {
         const { logEvent } = useAnalytics();

@@ -9,7 +9,7 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { useAccountStore } from '../hooks';
 
 export default function AccountInformation({ transactions }: { transactions: Transaction[] }) {
-        const { logEvent } = useAnalytics();
+    const { logEvent } = useAnalytics();
     const { currentAccount } = useAccountStore();
     const amountAdded = useMemo(
         () => calculateAmountAddedOnDay(transactions),
@@ -19,7 +19,7 @@ export default function AccountInformation({ transactions }: { transactions: Tra
     if (!currentAccount) return null;
     React.useEffect(() => {
         if (currentAccount) {
-            logEvent('object_viewed', {
+            logEvent('screen_view', {
                 object_type: 'account',
                 account_id: currentAccount.id,
                 balance: currentAccount.balance,
