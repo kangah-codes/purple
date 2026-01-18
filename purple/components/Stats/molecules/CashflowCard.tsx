@@ -22,10 +22,8 @@ export default memo(function CashflowCard({
     const {
         preferences: { currency: userPreferenceCurrency },
     } = usePreferences();
-    const stableTransactions = useMemo(
-        () => allTransactions,
-        [allTransactions.length, allTransactions],
-    );
+    const stableTransactions = useMemo(() => allTransactions, [allTransactions]);
+
     const rawData = useMemo(() => {
         if (stableTransactions.length === 0) {
             return [];
@@ -39,11 +37,19 @@ export default memo(function CashflowCard({
                 : startMonth
             : startMonth;
         const allMonths = eachMonthOfInterval({ start: effectiveStartMonth, end: endMonth });
+
+        const transactionsByMonth = new Map<string, Transaction[]>();
+        for (const transaction of stableTransactions) {
+            const monthKey = format(new Date(transaction.created_at), 'yyyy-MM');
+            if (!transactionsByMonth.has(monthKey)) {
+                transactionsByMonth.set(monthKey, []);
+            }
+            transactionsByMonth.get(monthKey)!.push(transaction);
+        }
+
         const result = allMonths.map((month) => {
-            const monthTransactions = stableTransactions.filter((transaction) => {
-                const transactionDate = new Date(transaction.created_at);
-                return isSameMonth(transactionDate, month);
-            });
+            const monthKey = format(month, 'yyyy-MM');
+            const monthTransactions = transactionsByMonth.get(monthKey) || [];
 
             const inflow = monthTransactions
                 .filter((t) => t.type === 'credit' && !isTransferTransaction(t))

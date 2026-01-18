@@ -14,10 +14,18 @@ import AccountsNavigationArea from '../molecules/AccountsNavigationArea';
 import { Account } from '../schema';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useQueryClient } from 'react-query';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useAuth } from '@/components/Auth/hooks';
 
 export default function AccountsScreen() {
-        const { logEvent } = useAnalytics();
-    const { setAccounts } = useAccountStore();
+    const { logEvent } = useAnalytics();
+    const { setAccounts, accounts } = useAccountStore();
+    const queryClient = useQueryClient();
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
+
     const { refetch } = useAccounts({
         options: {
             onSuccess: (data) => {
@@ -41,6 +49,28 @@ export default function AccountsScreen() {
         },
     });
     useRefreshOnFocus(refetch);
+
+    // Prefetch all account details when the screen mounts or accounts change
+    React.useEffect(() => {
+        if (!accounts || accounts.length === 0) return;
+
+        const prefetchAllAccounts = async () => {
+            const accountService = ServiceFactory.create<Account>('accounts', db, sessionData);
+
+            // Prefetch each account's details in parallel
+            const prefetchPromises = accounts.map((account) =>
+                queryClient.prefetchQuery(
+                    [`account-${account.id}`],
+                    () => accountService.get(account.id),
+                    { staleTime: 60000 } // Cache for 60 seconds
+                )
+            );
+
+            await Promise.all(prefetchPromises);
+        };
+
+        prefetchAllAccounts();
+    }, [accounts, db, sessionData, queryClient]);
 
     const shadowOpacity = useSharedValue(0);
 

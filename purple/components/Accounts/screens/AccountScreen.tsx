@@ -23,11 +23,13 @@ import Animated, {
     Extrapolation,
 } from 'react-native-reanimated';
 import AccountTransactions from '../molecules/AccountTransactions';
+import { useQueryClient } from 'react-query';
 
 const LINEAR_GRADIENT_COLORS = ['#D8B4FE', '#fff'];
 
 function AccountScreen() {
     const { accountID } = useLocalSearchParams<{ accountID: string }>();
+    const queryClient = useQueryClient();
     const {
         setCurrentAccount,
         currentAccount,
@@ -35,6 +37,12 @@ function AccountScreen() {
         setCurrentAccountRequestParams,
     } = useAccountStore();
     const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
+
+    // Check if we have cached data for this account
+    const hasCachedAccountData = React.useMemo(() => {
+        const cachedAccount = queryClient.getQueryData([`account-${accountID}`]);
+        return !!cachedAccount;
+    }, [accountID, queryClient]);
 
     useEffect(() => {
         const defaultDateRange = getDateRange('1W');
@@ -127,15 +135,19 @@ function AccountScreen() {
         });
     }, [accountID, setCurrentAccountRequestParams]);
     useEffect(() => {
-        if (!accountsLoading && !transactionsLoading && !initialLoadComplete) {
+        // If we have cached data, skip the loading screen immediately
+        if (hasCachedAccountData && !initialLoadComplete) {
+            setInitialLoadComplete(true);
+        } else if (!accountsLoading && !transactionsLoading && !initialLoadComplete) {
             setInitialLoadComplete(true);
         }
-    }, [accountsLoading, transactionsLoading, initialLoadComplete]);
+    }, [accountsLoading, transactionsLoading, initialLoadComplete, hasCachedAccountData]);
 
     useRefreshOnFocus(transactionsRefetch);
     useRefreshOnFocus(accountRefetch);
 
-    if (!initialLoadComplete) {
+    // Only show loading screen if we don't have cached data AND data is still loading
+    if (!initialLoadComplete && !hasCachedAccountData) {
         return <LoadingScreen />;
     }
 

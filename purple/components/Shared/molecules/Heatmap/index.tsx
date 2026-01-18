@@ -24,7 +24,6 @@ export type HeatmapProps = {
 };
 
 export default function Heatmap({
-    rows = 4,
     cols = 7,
     cellSize = 10,
     cellStyle = { margin: 2, borderRadius: 8 },

@@ -1,7 +1,7 @@
 import { Text, View } from '@/components/Shared/styled';
 import { Transaction } from '@/components/Transactions/schema';
 import { satoshiFont } from '@/lib/constants/fonts';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { BarChart } from 'react-native-gifted-charts';
 import { getStackedChartData, getWeekRangesForMonth } from '../utils';
 import WeekLegend from './SpendOverviewLegend';
@@ -11,7 +11,7 @@ type SpendOverviewChartProps = {
     startDate: Date;
 };
 
-export default function SpendOverviewChart({ transactions, startDate }: SpendOverviewChartProps) {
+function SpendOverviewChart({ transactions, startDate }: SpendOverviewChartProps) {
     const { stackData, weekRanges, maxValue } = useMemo(() => {
         const stackData = getStackedChartData(transactions, startDate);
         return {
@@ -73,3 +73,5 @@ export default function SpendOverviewChart({ transactions, startDate }: SpendOve
         </View>
     );
 }
+
+export default memo(SpendOverviewChart);

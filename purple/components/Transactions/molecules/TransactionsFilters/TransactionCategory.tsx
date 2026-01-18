@@ -39,7 +39,11 @@ export default function TransactionCategoryFilter() {
         const newCategories = Array.from(selectedTypes);
         const currentCategories = pendingTransactionsFilter.category || [];
 
-        if (JSON.stringify(newCategories.sort()) !== JSON.stringify(currentCategories.sort())) {
+        // Efficiently check if arrays are different
+        if (
+            newCategories.length !== currentCategories.length ||
+            !newCategories.every((cat) => currentCategories.includes(cat))
+        ) {
             setPendingTransactionsFilter({
                 ...pendingTransactionsFilter,
                 category: newCategories,

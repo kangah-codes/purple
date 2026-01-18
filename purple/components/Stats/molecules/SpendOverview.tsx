@@ -5,7 +5,16 @@ import { isTransferTransaction } from '@/components/Transactions/utils';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { generatePalette } from '@/lib/utils/colour';
 import { formatCurrencyRounded } from '@/lib/utils/number';
-import React, { useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
+
+const paletteCache = new Map<string, string>();
+
+const getCachedColor = (category: string): string => {
+    if (!paletteCache.has(category)) {
+        paletteCache.set(category, generatePalette(category).color500);
+    }
+    return paletteCache.get(category)!;
+};
 
 type SpendOverviewProps = {
     transactions: Transaction[];
@@ -100,7 +109,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
                 category,
                 amount,
                 percent: total === 0 ? 0 : (amount / total) * 100,
-                color: generatePalette(`${category}`).color500,
+                color: getCachedColor(category),
             }));
         };
 
@@ -222,3 +231,5 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
         </View>
     );
 }
+
+export default memo(SpendOverview);

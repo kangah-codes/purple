@@ -41,8 +41,11 @@ export default function TransactionTypeFilter() {
         const newTypes = Array.from(selectedTypes) as ('debit' | 'credit' | 'transfer')[];
         const currentTypes = pendingTransactionsFilter.type || [];
 
-        // Only update if the arrays are different
-        if (JSON.stringify(newTypes.sort()) !== JSON.stringify(currentTypes.sort())) {
+        // Efficiently check if arrays are different
+        if (
+            newTypes.length !== currentTypes.length ||
+            !newTypes.every((type) => currentTypes.includes(type))
+        ) {
             setPendingTransactionsFilter({
                 ...pendingTransactionsFilter,
                 type: newTypes,

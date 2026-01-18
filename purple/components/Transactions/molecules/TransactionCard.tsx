@@ -3,7 +3,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { formatDateTime } from '@/lib/utils/date';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { Transaction } from '../schema';
@@ -15,7 +15,7 @@ type TransactionCardProps = {
     showTitle?: boolean;
 };
 
-export default function TransactionCard({ data, onPress, showTitle = true }: TransactionCardProps) {
+function TransactionCard({ data, onPress, showTitle = true }: TransactionCardProps) {
     const date = useMemo(() => formatDateTime(data.created_at), [data.created_at]);
 
     return (
@@ -82,3 +82,5 @@ const styles = StyleSheet.create({
         // elevation: 3,
     },
 });
+
+export default memo(TransactionCard);

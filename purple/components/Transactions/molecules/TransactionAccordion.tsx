@@ -5,7 +5,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { FlashList } from '@shopify/flash-list';
 import { formatDate } from 'date-fns';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import TransactionCard from '../../Stats/molecules/TransactionCard';
 
 type TransactionsAccordionProps = {
@@ -16,7 +16,7 @@ type TransactionsAccordionProps = {
     contentContainerStyle?: object;
 };
 
-export default function TransactionsAccordion({
+function TransactionsAccordion({
     transactions,
     title,
     onEndReached,
@@ -85,3 +85,5 @@ export default function TransactionsAccordion({
         </View>
     );
 }
+
+export default memo(TransactionsAccordion);

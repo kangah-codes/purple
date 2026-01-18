@@ -5,7 +5,7 @@ import { CheckMarkIcon } from '@/components/SVG/icons/noscale';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { groupBy } from '@/lib/utils/helpers';
 import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useUpcomingRecurringTransactions } from '../hooks';
@@ -24,7 +24,7 @@ const blockSize = (deviceWidth - padding * 2 - 28) / numBlocksPerRow;
 const startDate = startOfMonth(now);
 const endDate = endOfMonth(now);
 
-export default function RecurringTransactionsWidget() {
+function RecurringTransactionsWidget() {
     const { data, refetch } = useUpcomingRecurringTransactions({
         // its ok to use infinity here since we WANT to fetch all
         // recurring tx within the month
@@ -175,3 +175,5 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
 });
+
+export default memo(RecurringTransactionsWidget);

@@ -4,12 +4,12 @@ import { ChevronRightIcon } from '@/components/SVG/icons/16x16';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { format } from 'date-fns';
-import React from 'react';
+import React, { memo } from 'react';
 import { getTransactionColour } from '../utils';
 import { useTransactionStore } from '../hooks';
 import { useBottomSheetModalStore } from '@/components/Shared/molecules/GlobalBottomSheetModal/hooks';
 
-export default function UpcomingTransactionCard({
+function UpcomingTransactionCard({
     transaction,
 }: {
     transaction: RecurringTransaction;
@@ -63,3 +63,5 @@ export default function UpcomingTransactionCard({
         </TouchableOpacity>
     );
 }
+
+export default memo(UpcomingTransactionCard);

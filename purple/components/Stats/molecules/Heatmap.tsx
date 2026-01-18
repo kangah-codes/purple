@@ -27,24 +27,23 @@ function StatsHeatmap({ transactions, startDate }: StatsHeatmapProps) {
     const end = endOfMonth(startDate);
     const monthDays = eachDayOfInterval({ start, end });
     const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
-    const heatmapData = useMemo(
-        () =>
-            monthDays.map((day, index) => {
-                const formattedTransactions = transactions.map((transaction) => ({
-                    ...transaction,
-                    created_at_formatted: format(new Date(transaction.created_at), 'dd/MM/yy'),
-                }));
-                const date = format(day, 'dd/MM/yy');
-                const groupedTransactions = groupBy(formattedTransactions, 'created_at_formatted');
+    const heatmapData = useMemo(() => {
+        const transactionsByDate: Record<string, number> = {};
 
-                return {
-                    value: groupedTransactions[date]?.length ?? 0,
-                    key: format(day, 'dd/MM/yyyy'),
-                    index: index + offset,
-                };
-            }),
-        [monthDays, transactions],
-    );
+        for (const transaction of transactions) {
+            const date = format(new Date(transaction.created_at), 'dd/MM/yy');
+            transactionsByDate[date] = (transactionsByDate[date] || 0) + 1;
+        }
+
+        return monthDays.map((day, index) => {
+            const date = format(day, 'dd/MM/yy');
+            return {
+                value: transactionsByDate[date] ?? 0,
+                key: format(day, 'dd/MM/yyyy'),
+                index: index + offset,
+            };
+        });
+    }, [monthDays, transactions, offset]);
 
     const renderCell = useCallback(
         (data: CellData) => {

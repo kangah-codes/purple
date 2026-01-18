@@ -197,9 +197,11 @@ export default function IndexScreen() {
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
-                removeClippedSubviews={false}
-                maxToRenderPerBatch={10}
-                windowSize={10}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={5}
+                windowSize={5}
+                initialNumToRender={10}
+                updateCellsBatchingPeriod={50}
             />
         </SafeAreaView>
     );

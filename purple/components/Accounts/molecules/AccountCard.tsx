@@ -24,7 +24,10 @@ function AccountCard({ account }: AccountCardProps) {
     }, [account, setCurrentAccount]);
 
     return (
-        <TouchableOpacity onPress={handlePress} className='flex flex-row justify-between'>
+        <TouchableOpacity
+            onPress={handlePress}
+            className='flex flex-row justify-between'
+        >
             <View className='flex flex-row space-x-2.5 items-center'>
                 <View className='flex items-center justify-center h-10 w-10 rounded-xl bg-purple-100'>
                     <Text style={satoshiFont.satoshiBold} className='text-base'>

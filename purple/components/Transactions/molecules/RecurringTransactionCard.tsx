@@ -4,7 +4,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { extractEmojiOrDefault, truncateStringIfLongerThan } from '@/lib/utils/string';
 import * as Haptics from 'expo-haptics';
-import React from 'react';
+import React, { memo } from 'react';
 import { Text, TouchableOpacity, View } from '../../Shared/styled';
 import { useTransactionStore } from '../hooks';
 import { RecurringTransaction } from '../schema';
@@ -14,7 +14,7 @@ type RecurringTransactionCardProps = {
     transaction: RecurringTransaction;
 };
 
-export default function RecurringTransactionCard({ transaction }: RecurringTransactionCardProps) {
+function RecurringTransactionCard({ transaction }: RecurringTransactionCardProps) {
     const { setCurrentRecurringTransaction } = useTransactionStore();
     const { setShowBottomSheetModal } = useBottomSheetModalStore();
     const { frequency, time } = getRRuleFrequency(transaction.recurrence_rule);
@@ -72,3 +72,5 @@ export default function RecurringTransactionCard({ transaction }: RecurringTrans
         </TouchableOpacity>
     );
 }
+
+export default memo(RecurringTransactionCard);

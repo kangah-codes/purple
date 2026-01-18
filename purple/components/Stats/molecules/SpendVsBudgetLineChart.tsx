@@ -30,7 +30,6 @@ export default function SpendVsBudgetLineChart({ startDate }: SpendVsBudgetLineC
     // Fetch budget for the month
     const { data: budgetData, refetch: refetchBudget } = useBudgetForMonth(monthNumber, year);
     const budget = budgetData?.data;
-
     const { spendData, budgetLineData, globalMax, totalBudget, totalSpent } = useMemo(() => {
         const transactions = transactionsData?.data ?? [];
         const actualSpendData = generateNormalizedSpendChartData(transactions, monthStart);
@@ -142,13 +141,13 @@ export default function SpendVsBudgetLineChart({ startDate }: SpendVsBudgetLineC
             <LineChart
                 data={budgetLineData}
                 data2={spendData}
-                // lineSegments={[
-                //     {
-                //         startIndex: 0,
-                //         endIndex: budgetLineData.length - 1,
-                //         strokeDashArray: [4, 4],
-                //     },
-                // ]}
+                lineSegments={[
+                    {
+                        startIndex: 0,
+                        endIndex: budgetLineData.length - 1,
+                        strokeDashArray: [4, 4],
+                    },
+                ]}
                 maxValue={globalMax}
                 hideDataPoints
                 width={300}
