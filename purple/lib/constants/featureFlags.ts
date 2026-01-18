@@ -14,6 +14,13 @@ export const FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
         defaultEnabled: false,
         category: 'developer',
     },
+    {
+        name: 'forceMigrations',
+        label: 'Force Migrations',
+        description: 'Force database migrations to run on app restart',
+        defaultEnabled: false,
+        category: 'developer',
+    },
 ] as const;
 
 export type FeatureFlagName = (typeof FEATURE_FLAGS)[number]['name'];

@@ -27,7 +27,6 @@ export default class StartupService {
 
     public async runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
         const isDev = __DEV__;
-
         const dbVersion = (await db.getFirstAsync<{ user_version: number }>(
             'PRAGMA user_version',
         )) ?? { user_version: 0 };
@@ -39,13 +38,12 @@ export default class StartupService {
         let forceMigrations = false;
         if (!isDev) {
             try {
-                const row = await db.getFirstAsync<{ value: string }>(
-                    `SELECT value FROM settings WHERE key = ? LIMIT 1`,
-                    ['forceMigrations'],
+                const row = await db.getFirstAsync<{ enabled: number }>(
+                    `SELECT enabled FROM feature_flags WHERE name = forceMigrations LIMIT 1`,
                 );
-                forceMigrations = row?.value ? JSON.parse(row.value) === true : false;
+                forceMigrations = row?.enabled === 1;
             } catch {
-                // settings table may not exist on a brand-new DB; ignore.
+                // feature_flags table may not exist on a brand-new DB; ignore.
                 forceMigrations = false;
             }
         }

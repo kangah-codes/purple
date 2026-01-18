@@ -1,6 +1,5 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import {
-    DatabaseIcon,
     DownloadIcon,
     FileCodeIcon,
     FlagIcon,
@@ -24,63 +23,11 @@ import { SettingsListItem } from '../schema';
 import { exportDatabase } from '../helpers/exportDb';
 import { importDatabase } from '../helpers/importDb';
 import { installExportLogger } from '@/lib/utils/exportLogger';
-import Switch from '@/components/Shared/atoms/Switch';
-import { useEffect, useState } from 'react';
 
 export default function ExperimentalSettingsScreen() {
     const { logEvent } = useAnalytics();
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const db = useSQLiteContext();
-
-    const [forceMigrations, setForceMigrations] = useState(false);
-
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
-                const row = await db.getFirstAsync<{ value: string }>(
-                    `SELECT value FROM settings WHERE key = ? LIMIT 1`,
-                    ['forceMigrations'],
-                );
-                const next = row?.value ? JSON.parse(row.value) === true : false;
-                if (mounted) setForceMigrations(next);
-            } catch {
-                // settings table might not exist on a fresh install; ignore.
-                if (mounted) setForceMigrations(false);
-            }
-        })();
-        return () => {
-            mounted = false;
-        };
-    }, [db]);
-
-    const handleForceMigrationsChange = async (value: boolean) => {
-        try {
-            await db.runAsync(
-                `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`,
-                ['forceMigrations', JSON.stringify(value)],
-            );
-            setForceMigrations(value);
-            Toast.show({
-                type: 'success',
-                props: {
-                    text1: 'Updated',
-                    text2: value
-                        ? 'Force migrations enabled. Restart the app to apply.'
-                        : 'Force migrations disabled.',
-                },
-            });
-        } catch (error) {
-            console.log(error);
-            Toast.show({
-                type: 'error',
-                props: {
-                    text1: 'Error',
-                    text2: 'Failed to update setting',
-                },
-            });
-        }
-    };
 
     const handleExportLogs = async () => {
         try {
@@ -219,13 +166,6 @@ export default function ExperimentalSettingsScreen() {
             title: 'Feature Flags',
             description: 'Toggle experimental features and developer tools',
             link: '/settings/feature-flags',
-        },
-        {
-            icon: <DatabaseIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Force migrations',
-            customItem: () => (
-                <Switch value={forceMigrations} onValueChange={handleForceMigrationsChange} />
-            ),
         },
         {
             icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
