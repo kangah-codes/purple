@@ -35,7 +35,7 @@ export function IndexNetworthAreaChart() {
 
     return (
         <View className='relative flex flex-col pt-5'>
-            <View className='flex flex-col'>
+            <View className='flex flex-col px-10'>
                 <Text style={satoshiFont.satoshiBlack} className='text-base text-black'>
                     {formatCurrencyAccurate(currency, accountGroupData.currentBalance)} net worth
                 </Text>
@@ -71,7 +71,7 @@ export function IndexNetworthAreaChart() {
                     </View>
                 )}
             </View>
-            <View className='relative mt-5'>
+            <View className='relative mt-5 -mx-5'>
                 {data.length < 2 && (
                     <View className='absolute left-0 right-0 top-0 items-center'>
                         <EmptyList
@@ -82,7 +82,7 @@ export function IndexNetworthAreaChart() {
                         />
                     </View>
                 )}
-                <View className='-ml-[10px] h-[200px]'>
+                <View className='h-[200px]'>
                     <LineChart
                         areaChart
                         data={data}
@@ -95,9 +95,9 @@ export function IndexNetworthAreaChart() {
                         adjustToWidth
                         color='#9810fa'
                         startFillColor='#9810fa'
-                        endFillColor='#7E22CE'
+                        endFillColor='#faf5ff'
                         startOpacity={0.5}
-                        endOpacity={0}
+                        endOpacity={0.5}
                         initialSpacing={0}
                         yAxisColor='white'
                         yAxisThickness={0}

@@ -69,7 +69,7 @@ function IndexHeatmap({ transactions, startDate }: IndexHeatmapProps) {
     );
 
     return (
-        <View className='pt-5 w-full'>
+        <View className='pt-5 w-full px-10'>
             <View
                 className='flex-col space-y-2.5'
                 style={{

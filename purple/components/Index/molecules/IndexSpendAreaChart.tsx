@@ -81,7 +81,7 @@ export default function IndexSpendAreaChart({ startDate }: IndexSpendAreaChartPr
     useRefreshOnFocus(refetchPrevious);
 
     return (
-        <View className='flex flex-col pt-5'>
+        <View className='flex flex-col pt-5 px-10'>
             <View className='flex flex-col mb-2.5'>
                 <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
                     Spending

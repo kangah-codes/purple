@@ -18,13 +18,11 @@ type StatsCardsCarouselProps = {
 
 const HEIGHT_SPRING_CONFIG = { damping: 15, stiffness: 180 };
 
-// Memoize the component to prevent unnecessary re-renders
 const StatsCardsCarousel = memo(function StatsCardsCarousel({ startDate }: StatsCardsCarouselProps) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [slideHeights, setSlideHeights] = useState<Partial<Record<IndexStatsCardId, number>>>({});
     const viewportHeight = useSharedValue<number>(0);
 
-    // Memoize date calculations to prevent recalculating on every render
     const dateRange = useMemo(() => ({
         start_date: formatISO(startOfMonth(startDate)),
         end_date: formatISO(endOfMonth(startDate)),
@@ -131,8 +129,8 @@ export default StatsCardsCarousel;
 const styles = StyleSheet.create({
     // IndexScreen applies horizontal padding (px-5 => 20) and this card also has p-5 (20)
     // so the usable content width matches the account carousel sizing screenWidth - 80
-    slider: { width: Dimensions.get('window').width - 80 },
-    item: { width: Dimensions.get('window').width - 80 },
+    slider: { width: Dimensions.get('window').width },
+    item: { width: Dimensions.get('window').width },
     carouselStyle: {
         width: '100%',
     },
