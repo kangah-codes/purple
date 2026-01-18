@@ -1,10 +1,11 @@
 import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import {
     DatabaseIcon,
+    DownloadIcon,
     FileCodeIcon,
     FlagIcon,
-    FloppyDiskIcon,
     RefreshIcon,
+    UploadIcon,
 } from '@/components/SVG/icons/noscale';
 import { SafeAreaView, Text, TouchableOpacity, View } from '@/components/Shared/styled';
 import { satoshiFont } from '@/lib/constants/fonts';
@@ -239,14 +240,14 @@ export default function ExperimentalSettingsScreen() {
             callback: handleExportLogs,
         },
         {
-            icon: <FloppyDiskIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Backup Database',
+            icon: <UploadIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Export Data',
             description: 'Backup your data to a file',
             callback: handleBackup,
         },
         {
-            icon: <RefreshIcon width={20} height={20} stroke={'#9333ea'} />,
-            title: 'Restore Database',
+            icon: <DownloadIcon width={20} height={20} stroke={'#9333ea'} />,
+            title: 'Import Data',
             description: 'Restore your data from a backup file. This will overwrite existing data.',
             callback: handleRestore,
         },

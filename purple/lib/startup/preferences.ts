@@ -28,10 +28,18 @@ export async function initializePreferences(db: SQLiteDatabase) {
 
         // Build settings object from query results
         const settings: UserPreferences = { ...defaultSettings };
+        // Keys that are stored as plain strings (not JSON)
+        const stringKeys: (keyof UserPreferences)[] = ['currency', 'theme', 'updateFrequency'];
+
         for (const row of allSettings) {
             const key = row.key as keyof UserPreferences;
             try {
-                settings[key] = JSON.parse(row.value) as any;
+                // String values should not be JSON.parsed
+                if (stringKeys.includes(key)) {
+                    settings[key] = row.value as any;
+                } else {
+                    settings[key] = JSON.parse(row.value) as any;
+                }
             } catch {
                 settings[key] = defaultSettings[key];
             }

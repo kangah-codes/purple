@@ -30,13 +30,6 @@ import { useAccountStore, useEditAccount } from '../hooks';
 import { EditAccount } from '../schema';
 
 export default function EditAccountScreen() {
-        React.useEffect(() => {
-            logEvent('screen_view', {
-                screen: 'edit_account_screen',
-                source: 'navigation',
-                account_id: currentAccount?.id,
-            });
-        }, [logEvent, currentAccount]);
     const {
         preferences: { currency },
     } = usePreferences();

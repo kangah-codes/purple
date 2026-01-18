@@ -82,7 +82,7 @@ export function IndexNetworthAreaChart() {
                         />
                     </View>
                 )}
-                <View className='h-[200px]'>
+                <View className='h-[208px]'>
                     <LineChart
                         areaChart
                         data={data}
@@ -97,8 +97,8 @@ export function IndexNetworthAreaChart() {
                         startFillColor='#9810fa'
                         endFillColor='#faf5ff'
                         startOpacity={0.5}
-                        endOpacity={0.5}
-                        initialSpacing={0}
+                        endOpacity={1}
+                        initialSpacing={0.5}
                         yAxisColor='white'
                         yAxisThickness={0}
                         rulesType='solid'

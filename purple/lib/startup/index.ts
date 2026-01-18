@@ -4,6 +4,7 @@ import { loadFonts } from './fonts';
 import { initializePreferences } from './preferences';
 import { processRecurringTransactions } from './transaction';
 import { loadAndApplyUpdates } from './updates';
+import { fetchExchangeRates } from './currency';
 
 export async function initializeApp(db: SQLiteDatabase) {
     const startTime = Date.now();
@@ -47,7 +48,14 @@ export async function initializeApp(db: SQLiteDatabase) {
                 })
                 .catch(err => console.error('[Background] Updates failed:', err));
 
-            Promise.all([recurringPromise, updatesPromise])
+            const exchangeRatesStart = Date.now();
+            const exchangeRatesPromise = fetchExchangeRates()
+                .then(() => {
+                    console.log(`[Background] Exchange rates fetch complete (${Date.now() - exchangeRatesStart}ms)`);
+                })
+                .catch(err => console.error('[Background] Exchange rates fetch failed:', err));
+
+            Promise.all([recurringPromise, updatesPromise, exchangeRatesPromise])
                 .then(() => {
                     console.log(`[InitializeApp] Phase 3 complete (${Date.now() - phase3Start}ms)`);
                 })

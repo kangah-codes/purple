@@ -198,12 +198,30 @@ async function createRecurringTransaction(
     occurrenceDate: Date,
     options?: { useTransaction?: boolean; budgetId?: string | null },
 ): Promise<void> {
+    // Parse metadata to get original currency if stored
+    const metadataRaw: any = (recurring as any).metadata;
+    const metadata: any =
+        typeof metadataRaw === 'string'
+            ? (() => {
+                  try {
+                      return JSON.parse(metadataRaw);
+                  } catch {
+                      return {};
+                  }
+              })()
+            : metadataRaw ?? {};
+
+    // Use original currency from metadata if available, otherwise use account currency
+    // This allows conversion to happen with the latest exchange rates
+    const originalCurrency = metadata?.original_currency ?? recurring.account_currency;
+    const originalAmount = metadata?.original_amount ?? recurring.amount;
+
     const baseTransaction = {
         account_id: recurring.account_id,
         type: recurring.type,
-        amount: recurring.amount,
+        amount: originalAmount, // Use original amount - conversion happens in create()
         category: recurring.category,
-        currency: recurring.account_currency,
+        currency: originalCurrency, // Use original currency - triggers conversion in create()
         date: occurrenceDate.toISOString(),
         charges: 0,
         budget_id: options?.budgetId ?? undefined,

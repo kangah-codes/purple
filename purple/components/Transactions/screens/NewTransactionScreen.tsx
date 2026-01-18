@@ -4,9 +4,14 @@ import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
 import { usePreferences } from '@/components/Settings/hooks';
 import DateAndTimePicker from '@/components/Shared/atoms/DateAndTimePicker';
 import DatePicker from '@/components/Shared/atoms/DatePicker';
+import SearchableSelectField, {
+    SelectOption,
+} from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
 import Switch from '@/components/Shared/atoms/Switch';
 import TimePicker from '@/components/Shared/atoms/TimePicker';
+import FlagIcon from '@/components/Shared/atoms/FlagIcon';
+import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
 import { AnimatedPillSelect } from '@/components/Shared/molecules/AnimatedPillSelect';
 import {
     InputField,
@@ -17,13 +22,14 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
+import { currencies } from '@/lib/constants/currencies';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { TRANSACTION_TYPES } from '@/lib/constants/transactionTypes';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { omit, transformObject } from '@/lib/utils/object';
 import { router, useLocalSearchParams } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -58,13 +64,14 @@ type FormData = {
     recurrence_rule: string;
     start_date?: string;
     end_date?: string;
+    currency: string;
 };
 
 export default function NewTransactionScreen() {
     const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
     const { type, accountId, isRecurringTx } = useLocalSearchParams();
     const {
-        preferences: { customTransactionTypes },
+        preferences: { customTransactionTypes, currency: defaultCurrency },
     } = usePreferences();
     const queryClient = useQueryClient();
     const { logEvent } = useAnalytics();
@@ -94,6 +101,7 @@ export default function NewTransactionScreen() {
         handleSubmit,
         formState: { errors },
         setValue,
+        getValues,
     } = useForm<FormData>({
         defaultValues: {
             amount: '',
@@ -112,6 +120,7 @@ export default function NewTransactionScreen() {
             recurrence_rule: '',
             start_date: new Date().toISOString(),
             end_date: undefined,
+            currency: defaultCurrency,
         },
     });
 
@@ -122,6 +131,36 @@ export default function NewTransactionScreen() {
             ),
         [customTransactionTypes],
     );
+
+    const renderSelectedCurrency = () => {
+        const selectedCode = getValues('currency');
+        const currency = currencies.find((c) => c.code === selectedCode);
+
+        return (
+            <View className='flex flex-row space-x-2 items-center -ml-2.5'>
+                <FlagIcon currency={currency!} />
+                <Text style={satoshiFont.satoshiBold} className='text-sm'>
+                    {currency?.name} ({currency?.symbol})
+                </Text>
+            </View>
+        );
+    };
+
+    const renderCurrencies = useCallback((item: SelectOption) => {
+        const currency = currencies.find((currency) => currency.code === item.value)!;
+        const selectedValue = getValues('currency');
+
+        return (
+            <CurrencySelect
+                currency={currency}
+                callback={() => {
+                    setValue('currency', currency.code);
+                    setShowBottomSheetFlatList('newTransactionCurrency', false);
+                }}
+                selectedCurrency={selectedValue}
+            />
+        );
+    }, [getValues, setValue, setShowBottomSheetFlatList]);
 
     useEffect(() => {
         setValue('type', transactionType);
@@ -818,6 +857,59 @@ export default function NewTransactionScreen() {
                                         className='text-xs text-red-500'
                                     >
                                         {errors.amount.message}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                        <View className='flex flex-col space-y-1'>
+                            <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                                Currency
+                            </Text>
+                            <View>
+                                <Controller
+                                    control={control}
+                                    rules={{
+                                        required: "Currency can't be empty",
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <>
+                                            <SearchableSelectField
+                                                selectKey='newTransactionCurrency'
+                                                options={currencies.reduce(
+                                                    (acc, curr) => {
+                                                        acc[curr.code] = {
+                                                            label: curr.name,
+                                                            value: curr.code,
+                                                            searchField: `${curr.code} ${curr.name} ${curr.country}`,
+                                                        };
+                                                        return acc;
+                                                    },
+                                                    {} as Record<
+                                                        string,
+                                                        {
+                                                            label: string;
+                                                            value: string;
+                                                            searchField: string;
+                                                        }
+                                                    >,
+                                                )}
+                                                customSnapPoints={['80%', '90%']}
+                                                renderItem={renderCurrencies}
+                                                renderSelectedItem={renderSelectedCurrency}
+                                                value={value}
+                                                onChange={onChange}
+                                            />
+                                        </>
+                                    )}
+                                    name='currency'
+                                />
+                                {errors.currency && (
+                                    <Text
+                                        style={satoshiFont.satoshiMedium}
+                                        className='text-xs text-red-500'
+                                    >
+                                        {errors.currency.message}
                                     </Text>
                                 )}
                             </View>

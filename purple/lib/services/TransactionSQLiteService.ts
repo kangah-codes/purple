@@ -194,14 +194,37 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 if (!result) throw new HTTPError(errorMessage, 500);
                 transaction = result;
             } else {
+                // Get the account to check currency and balance
+                const account = await this.db.getFirstAsync<Account>(
+                    'SELECT * FROM accounts WHERE id = ?',
+                    [data.account_id],
+                );
+                if (!account) throw new HTTPError('Account not found', 404);
+
+                // Convert amount if transaction currency differs from account currency
+                let transactionAmount = data.amount;
+                const shouldUseConversion = await settingsService.get('allowCurrencyConversion');
+                if (
+                    data.currency &&
+                    account.currency &&
+                    data.currency.toLowerCase() !== account.currency.toLowerCase() &&
+                    shouldUseConversion === true
+                ) {
+                    const currencyService = CurrencyService.getInstance();
+                    transactionAmount = await currencyService.convertCurrencyAsync({
+                        from: {
+                            currency: data.currency.toLowerCase() as CurrencyCode,
+                            amount: data.amount,
+                        },
+                        to: {
+                            currency: account.currency.toLowerCase() as CurrencyCode,
+                        },
+                    });
+                }
+
                 // For debit, check for overdraw
                 if (data.type === 'debit' && allowOverdraw === false) {
-                    const account = await this.db.getFirstAsync<Account>(
-                        'SELECT * FROM accounts WHERE id = ?',
-                        [data.account_id],
-                    );
-                    if (!account) throw new HTTPError('Account not found', 404);
-                    const debitAmount = data.amount + (data.charges ?? 0);
+                    const debitAmount = transactionAmount + (data.charges ?? 0);
                     if (typeof account.balance === 'number' && account.balance < debitAmount) {
                         throw new HTTPError(
                             'Insufficient funds in account for debit transaction',
@@ -223,12 +246,12 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                         data.account_id,
                         null,
                         data.type,
-                        data.amount,
+                        transactionAmount,
                         data.note ?? null,
                         data.category,
                         data.from_account ?? null,
                         data.to_account ?? null,
-                        data.currency,
+                        account.currency, // Use account's currency since amount was converted
                         data.plan_id ?? null,
                         data.budget_id ?? null,
                     ],
@@ -243,7 +266,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     !data.from_account &&
                     !data.to_account
                 ) {
-                    await this.applyBudgetSpendDelta(data.budget_id, data.amount, data.category);
+                    await this.applyBudgetSpendDelta(data.budget_id, transactionAmount, data.category);
                 }
 
                 const result = await this.db.getFirstAsync<Transaction>(
@@ -532,6 +555,21 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
         await this.db.withTransactionAsync(async () => {
             const shouldCountInBudget = Boolean((data.metadata as any)?.count_in_budget);
 
+            // Get the account to check currency
+            const account = await this.db.getFirstAsync<{ currency: string }>(
+                'SELECT currency FROM accounts WHERE id = ?',
+                [data.account_id],
+            );
+            if (!account) throw new HTTPError('Account not found for recurring transaction', 404);
+
+            // Store the original currency in metadata so we can convert at each occurrence
+            // This ensures we use the latest exchange rates for each transaction
+            const metadataWithCurrency = {
+                ...(data.metadata ?? {}),
+                original_currency: data.currency, // Store original currency for future conversions
+                original_amount: data.amount, // Store original amount for reference
+            };
+
             const getBudgetIdForOccurrence = async (occurrenceDate: Date) => {
                 if (!shouldCountInBudget || data.type !== 'debit') return null;
 
@@ -546,7 +584,8 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 return row?.id ?? null;
             };
 
-            // add recurring definition
+            // add recurring definition - store original amount and currency in metadata
+            // Conversion will happen at each occurrence using latest exchange rates
             await this.db.runAsync(
                 `INSERT INTO recurring_transactions (
                     id, created_at, updated_at, account_id, type, amount, category,
@@ -563,13 +602,13 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     now.toISOString(),
                     data.account_id,
                     data.type,
-                    data.amount,
+                    data.amount, // Store original amount - conversion happens at each occurrence
                     data.category,
                     data.recurrence_rule,
                     data.start_date,
                     data.end_date ?? null,
                     'active',
-                    JSON.stringify(data.metadata ?? {}),
+                    JSON.stringify(metadataWithCurrency), // Include original currency info
                     nowUNIX,
                     nowUNIX,
                     dateToUNIX(dtStart),
@@ -582,12 +621,6 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                 ],
             );
 
-            const account = await this.db.getFirstAsync<{ currency: string }>(
-                'SELECT currency FROM accounts WHERE id = ?',
-                [data.account_id],
-            );
-            if (!account) throw new HTTPError('Account not found for recurring transaction', 404);
-
             const missedOccurrences = occurrencesBetween(
                 data.recurrence_rule,
                 dtStart,
@@ -596,7 +629,7 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
             );
 
             // create transactions for each missed occurrence
-            // TODO: why tf am i creating a new transaction service here???
+            // Pass original currency so conversion happens with current rates
             const txService = new TransactionSQLiteService(this.db);
             let lastSuccessful: Date | null = null;
             for (const occurrenceDate of missedOccurrences) {
@@ -605,9 +638,9 @@ export class TransactionSQLiteService extends BaseSQLiteService<Transaction> {
                     const base = {
                         account_id: data.account_id,
                         type: data.type,
-                        amount: data.amount,
+                        amount: data.amount, // Original amount - will be converted in create()
                         category: data.category,
-                        currency: account.currency,
+                        currency: data.currency, // Original currency - triggers conversion in create()
                         date: occurrenceDate.toISOString(),
                         charges: 0,
                         budget_id: budgetId ?? undefined,

@@ -59,7 +59,7 @@ export default function UpdateFrequency() {
                                 {item.label}
                             </Text>
                             <Text
-                                style={satoshiFont.satoshiBold}
+                                style={satoshiFont.satoshiMedium}
                                 className='text-xs text-purple-500'
                             >
                                 {item.description}

@@ -92,20 +92,20 @@ const BudgetContentForMonth = React.memo(function BudgetContentForMonth({ month 
 
     return (
         <View className='bg-white flex-1'>
-            <BudgetPaceBanner paceInsight={paceInsight} />
             <ScrollView
                 className='w-full flex-1'
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={[tw`flex-grow`]}
                 refreshControl={
                     <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor='#a855f7'
-                        colors={['#a855f7']}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor='#a855f7'
+                    colors={['#a855f7']}
                     />
                 }
             >
+                <BudgetPaceBanner paceInsight={paceInsight} />
                 {hasBudget ? (
                     <BudgetSummary budget={hasBudget} />
                 ) : isPastMonth ? (

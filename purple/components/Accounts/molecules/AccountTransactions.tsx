@@ -12,11 +12,11 @@ export default function AccountTransactions({
     loading: boolean;
 }) {
     return (
-        <View className='px-5' style={{ paddingBottom: 200 }}>
+        <View className='px-5' style={{ paddingBottom: 80 }}>
             {loading ? (
                 <View className='mt-5'>
                     <View
-                        className={`p-5 space-y-2 border border-purple-100 rounded-3xl bg-purple-50/30`}
+                        className={`p-5 space-y-2 border border-purple-100 rounded-3xl bg-purple-50`}
                     >
                         <View className={`flex-row justify-between items-center`}>
                             <SkeletonLine width={80} height={20} />

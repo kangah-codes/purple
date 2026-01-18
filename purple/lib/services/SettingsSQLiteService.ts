@@ -26,7 +26,7 @@ export class SettingsSQLiteService {
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('hideCompletedPlans', ?)`,
-                    [JSON.stringify(preferences.allowOverdraw)],
+                    [JSON.stringify(preferences.hideCompletedPlans)],
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('trackUsageStatistics', ?)`,
@@ -34,7 +34,7 @@ export class SettingsSQLiteService {
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('sendDiagnosticData', ?)`,
-                    [JSON.stringify(preferences.trackUsageStatistics)],
+                    [JSON.stringify(preferences.sendDiagnosticData)],
                 ),
                 this.db.runAsync(
                     `INSERT OR IGNORE INTO settings (key, value) VALUES ('allowCurrencyConversion', ?)`,
