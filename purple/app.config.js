@@ -107,6 +107,9 @@ export default ({ config }) => {
                     },
                     android: {
                         newArchEnabled: false,
+                        compileSdkVersion: 34,
+                        targetSdkVersion: 35,
+                        buildToolsVersion: '35.0.0',
                     },
                 },
             ],
