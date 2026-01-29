@@ -2,7 +2,7 @@
     "name": "purple",
     "main": "expo-router/entry",
     "version": "0.2.1",
-    "appVersion": "0.2.1-beta.32",
+    "appVersion": "0.2.1-beta.33",
     "isBeta": true,
     "scripts": {
         "start": "expo start",

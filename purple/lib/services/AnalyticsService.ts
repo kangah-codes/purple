@@ -356,7 +356,7 @@ export class AnalyticsTracker {
             const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
             try {
-                this.log(`Sending batch with ${batch.length} events`);
+                this.log(`Sending batch with ${batch.length} events to ${this.config.endpoint}`);
 
                 const response = await fetch(this.config.endpoint, {
                     method: 'POST',
