@@ -358,7 +358,7 @@ export class AnalyticsTracker {
             try {
                 this.log(`Sending batch with ${batch.length} events to ${this.config.endpoint}`);
 
-                const response = await fetch(this.config.endpoint, {
+                const response = await fetch('https://api.trypurpleapp.site/api/v1/tracking', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
