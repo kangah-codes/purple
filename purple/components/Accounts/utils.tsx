@@ -85,7 +85,7 @@ export function groupAccountsByCategory(accounts: Account[]): Record<string, Acc
         if (currencies.size > 1) {
             // Multiple currencies exist, group by both category and currency
             categoryAccounts.forEach((account) => {
-                const key = `${category}_${account.currency}`;
+                const key = `${category} - ${account.currency}`;
                 if (!finalGroups[key]) {
                     finalGroups[key] = [];
                 }
