@@ -223,10 +223,14 @@ for key in tracking_keys:
 
         for entry in entries:
             try:
-                event = json.loads(entry)['event']
+                payload = json.loads(entry)
+                event = payload['event']
+                meta = payload.get('meta', {})
 
                 # Process event based on format
                 processed_event = storage_adapter.process_event(event)
+                if meta:
+                    processed_event['meta'] = meta
 
                 # Extract timestamp for organizing by date
                 timestamp = None
