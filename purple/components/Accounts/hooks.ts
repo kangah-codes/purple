@@ -20,7 +20,7 @@ import { useTransactions } from '../Transactions/hooks';
 import { Transaction } from '../Transactions/schema';
 import { Account, AccountDataCalculation, EditAccount, TimePeriod } from './schema';
 import { createAccountsReportStore, createAccountStore } from './state';
-import { getEffectiveBalance, groupAccountsByCategory, isLiabilityAccount } from './utils';
+import { getEffectiveBalance, isLiabilityAccount } from './utils';
 
 export function useAccountStore() {
     const [
@@ -257,16 +257,14 @@ export function useCalculateAccountData({
     const accounts = accountsData?.data || [];
     const transactions = transactionsData?.data || [];
 
-    // Memoize grouped accounts to avoid recalculation
-    const groupedAccounts = useMemo(() => groupAccountsByCategory(accounts), [accounts]);
-
-    // Memoize relevant accounts selection
+    // Memoize relevant accounts selection - filter by raw category directly
+    // to avoid mismatch with groupAccountsByCategory which splits by currency
     const relevantAccounts = useMemo(() => {
         if (accountGroup && accountGroup !== '📈 NET WORTH') {
-            return groupedAccounts[accountGroup] || [];
+            return accounts.filter((a) => a.category === accountGroup);
         }
         return accounts;
-    }, [accountGroup, groupedAccounts, accounts]);
+    }, [accountGroup, accounts]);
 
     // Memoize account IDs set for faster lookup
     const relevantAccountIds = useMemo(
@@ -389,9 +387,19 @@ export function useCalculateAccountData({
                 trend = 'decrease';
             }
 
+            // Convert transaction amounts to preferred currency for correct chart data
+            const currencyConvertedTransactions = transactions.map((tx) => {
+                const convertedAmount = currencyService.convertCurrencySync({
+                    from: { currency: tx.currency as Parameters<typeof currencyService.convertCurrencySync>[0]['from']['currency'], amount: tx.amount },
+                    // @ts-expect-error ignore
+                    to: { currency: preferredCurrency },
+                });
+                return { ...tx, amount: convertedAmount };
+            });
+
             const transformedTransactions =
                 accountGroup && !accountGroup.includes('Liability')
-                    ? transactions.map((tx) => {
+                    ? currencyConvertedTransactions.map((tx) => {
                           const account = accounts.find((acc) => acc.id === tx.account_id);
                           if (account && isLiabilityAccount(account.category)) {
                               return {
@@ -404,7 +412,7 @@ export function useCalculateAccountData({
                           }
                           return tx;
                       })
-                    : transactions;
+                    : currencyConvertedTransactions;
 
             return {
                 currentBalance,

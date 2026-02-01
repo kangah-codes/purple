@@ -70,6 +70,8 @@ export default function AccountsAreaChart() {
         [setPeriod, logEvent],
     );
 
+    console.log('group data', accountGroupData.transactions);
+
     if (!showChart) return null;
 
     return (
