@@ -124,6 +124,23 @@ export default function NewTransactionScreen() {
         },
     });
 
+    const setAccountCurrency = useCallback(
+        (accountId: string) => {
+            const account = accounts.find((a) => a.id === accountId);
+            if (account) {
+                setValue('currency', account.currency);
+            }
+        },
+        [accounts, setValue],
+    );
+
+    // Auto-select currency when screen opens with a pre-selected account
+    useEffect(() => {
+        if (accountId && accounts.length > 0) {
+            setAccountCurrency(accountId as string);
+        }
+    }, [accountId, accounts, setAccountCurrency]);
+
     const transactionTypes = useMemo(
         () =>
             customTransactionTypes.map(
@@ -406,6 +423,7 @@ export default function NewTransactionScreen() {
                                             onChange={(val) => {
                                                 onChange(val);
                                                 setValue('fromAccount', val);
+                                                setAccountCurrency(val);
                                             }}
                                         />
                                     </>
@@ -513,6 +531,7 @@ export default function NewTransactionScreen() {
                                     onChange={(val) => {
                                         onChange(val);
                                         setValue('accountId', val);
+                                        setAccountCurrency(val);
                                     }}
                                 />
                             </>

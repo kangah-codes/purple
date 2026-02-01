@@ -322,6 +322,7 @@ export function useCalculateAccountData({
                     // @ts-expect-error ignore
                     to: { currency: preferredCurrency },
                 });
+
                 return sum + converted;
             }, 0);
 
