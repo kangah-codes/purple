@@ -14,18 +14,18 @@ export default function BudgetPaceBanner({ paceInsight }: BudgetPaceBannerProps)
         paceInsight.tone === 'negative'
             ? 'bg-red-50 border-red-100'
             : paceInsight.tone === 'positive'
-            ? 'bg-purple-50 border-purple-100'
-            : 'bg-purple-50 border-purple-100';
+              ? 'bg-purple-50 border-purple-100'
+              : 'bg-purple-50 border-purple-100';
 
     const textClassName =
         paceInsight.tone === 'negative'
             ? 'text-red-600'
             : paceInsight.tone === 'positive'
-            ? 'text-purple-700'
-            : 'text-purple-600';
+              ? 'text-purple-700'
+              : 'text-purple-600';
 
     return (
-        <View className={`mx-5 mt-5 mb-5 px-4 py-3 rounded-3xl border ${containerClassName}`}>
+        <View className={`mx-5 mt-5 px-4 py-3 rounded-3xl border ${containerClassName}`}>
             <View className='flex-row items-center justify-between'>
                 <Text className={`text-sm ${textClassName}`} style={satoshiFont.satoshiBold}>
                     {paceInsight.title}

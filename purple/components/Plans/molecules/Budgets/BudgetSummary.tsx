@@ -58,15 +58,19 @@ const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps
         budgetedCategories,
     );
 
-    const unbudgetedCategoryLimits = useMemo(() => unbudgeted.map((u) => ({
-        id: '',
-        budget_id: '',
-        category: u.category,
-        limit_amount: 0,
-        spent_amount: u.spent,
-        rollover_enabled: false,
-        notes: null,
-    })), [unbudgeted]);
+    const unbudgetedCategoryLimits = useMemo(
+        () =>
+            unbudgeted.map((u) => ({
+                id: '',
+                budget_id: '',
+                category: u.category,
+                limit_amount: 0,
+                spent_amount: u.spent,
+                rollover_enabled: false,
+                notes: null,
+            })),
+        [unbudgeted],
+    );
 
     const { data: monthlyTransactions } = useTransactions({
         requestQuery: {
@@ -101,7 +105,7 @@ const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps
     }
 
     return (
-        <View className='px-5 pb-5'>
+        <View className='px-5 py-5'>
             {/* Summary Section */}
             <View className='bg-purple-50 px-5 pb-5 pt-3.5 rounded-3xl border border-purple-100 flex flex-col space-y-2.5'>
                 <View className='flex-row justify-between items-center'>
