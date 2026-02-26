@@ -1,3 +1,5 @@
+/* eslint-disable unused-imports/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GenericAPIResponse, RequestParamQuery } from '@/@types/request';
 import * as SQLite from 'expo-sqlite';
 import { DataService } from './DataService';

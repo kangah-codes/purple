@@ -946,15 +946,16 @@ export default function NewTransactionScreen() {
                                     }}
                                     render={({ field: { onChange, value } }) => (
                                         <>
-                                            <SelectField
+                                            <SearchableSelectField
                                                 selectKey='newTransactionCategory'
                                                 options={transactionTypes.reduce((acc, curr) => {
                                                     acc[curr] = {
                                                         label: curr,
                                                         value: curr,
+                                                        searchField: curr,
                                                     };
                                                     return acc;
-                                                }, {} as Record<string, { label: string; value: string }>)}
+                                                }, {} as Record<string, { label: string; value: string; searchField: string }>)}
                                                 customSnapPoints={['50%', '70%']}
                                                 value={value}
                                                 onChange={onChange}

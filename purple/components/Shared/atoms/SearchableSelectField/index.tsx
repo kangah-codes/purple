@@ -26,6 +26,7 @@ type SearchableSelectFieldProps = {
     customSnapPoints?: (number | string)[];
     renderItem?: (item: SelectOption) => React.ReactNode;
     renderSelectedItem?: (item: SelectOption) => React.ReactNode;
+    renderFooter?: () => React.ReactNode;
     onChange?: (value: string) => void;
     value?: string;
     useCache?: boolean;
@@ -38,6 +39,7 @@ export default function SearchableSelectField({
     customSnapPoints,
     renderItem,
     renderSelectedItem,
+    renderFooter,
     onChange,
     value,
     useCache = false,
@@ -161,6 +163,7 @@ export default function SearchableSelectField({
                             </TouchableOpacity>
                         );
                     }}
+                    ListFooterComponent={renderFooter ? renderFooter() : undefined}
                     containerStyle={{
                         paddingHorizontal: 20,
                     }}

@@ -229,6 +229,12 @@ export function useCalculateAccountData({
     const { startDate: start_date, endDate: end_date } = getDateRange(timePeriod);
     const currencyService = CurrencyService.getInstance();
 
+    // groupAccountsByCategory creates keys like "📈 Asset - USD" when a category
+    // has accounts in multiple currencies. Parse out the base category and currency.
+    const groupCurrencyMatch = accountGroup?.match(/^(.+) - ([A-Z]{3})$/);
+    const baseCategory = groupCurrencyMatch ? groupCurrencyMatch[1] : accountGroup;
+    const groupCurrency = groupCurrencyMatch ? groupCurrencyMatch[2] : null;
+
     const {
         data: accountsData,
         isLoading: accountsLoading,
@@ -246,7 +252,7 @@ export function useCalculateAccountData({
             page_size: Infinity,
             start_date: start_date.toISOString(),
             end_date: end_date.toISOString(),
-            ...(accountGroup !== '📈 NET WORTH' && { accountGroup }),
+            ...(baseCategory !== '📈 NET WORTH' && { accountGroup: baseCategory }),
         },
     });
 
@@ -257,14 +263,17 @@ export function useCalculateAccountData({
     const accounts = accountsData?.data || [];
     const transactions = transactionsData?.data || [];
 
-    // Memoize relevant accounts selection - filter by raw category directly
-    // to avoid mismatch with groupAccountsByCategory which splits by currency
+    // Memoize relevant accounts selection - filter by base category and optional
+    // currency (for groups split by currency via groupAccountsByCategory)
     const relevantAccounts = useMemo(() => {
         if (accountGroup && accountGroup !== '📈 NET WORTH') {
-            return accounts.filter((a) => a.category === accountGroup);
+            return accounts.filter((a) => {
+                if (a.category !== baseCategory) return false;
+                return groupCurrency ? a.currency === groupCurrency : true;
+            });
         }
         return accounts;
-    }, [accountGroup, accounts]);
+    }, [accountGroup, accounts, baseCategory, groupCurrency]);
 
     // Memoize account IDs set for faster lookup
     const relevantAccountIds = useMemo(

@@ -358,16 +358,19 @@ export class AnalyticsTracker {
             try {
                 this.log(`Sending batch with ${batch.length} events to ${this.config.endpoint}`);
 
-                const response = await fetch('https://api.trypurpleapp.site/api/v1/tracking', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'User-Agent': this.getUserAgent(),
-                        'x-api-key': this.config.apiKey,
+                const response = await fetch(
+                    'https://purple-727247695813.us-east1.run.app/api/v1/tracking',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'User-Agent': this.getUserAgent(),
+                            'x-api-key': this.config.apiKey,
+                        },
+                        body: JSON.stringify(payload),
+                        signal: controller.signal,
                     },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal,
-                });
+                );
 
                 clearTimeout(timeoutId);
 
