@@ -9,7 +9,7 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { router } from 'expo-router';
 
 export default function AccountsAccordion() {
-        const { logEvent } = useAnalytics();
+    const { logEvent } = useAnalytics();
     const { data: accounts, refetch } = useAccounts({
         requestQuery: {},
     });
@@ -25,13 +25,15 @@ export default function AccountsAccordion() {
                 </View>
             ))}
 
-            <TouchableOpacity onPress={() => {
-                logEvent('button_tap', {
-                    button: 'create_account',
-                    screen: 'accounts_screen',
-                });
-                router.push('/accounts/new-account');
-            }}>
+            <TouchableOpacity
+                onPress={() => {
+                    logEvent('button_tap', {
+                        button: 'create_account',
+                        screen: 'accounts_screen',
+                    });
+                    router.push('/accounts/new-account');
+                }}
+            >
                 <LinearGradient
                     className='rounded-full justify-center items-center p-4'
                     colors={['#c084fc', '#9333ea']}

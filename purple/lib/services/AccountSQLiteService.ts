@@ -166,7 +166,7 @@ export class AccountSQLiteService extends BaseSQLiteService<Account> {
              WHERE deleted_at IS NULL
              ORDER BY created_at DESC
              LIMIT ? OFFSET ?`,
-            [page_size, offset],
+            [result['COUNT(*)'], offset],
         );
 
         return this.formatResponse({
