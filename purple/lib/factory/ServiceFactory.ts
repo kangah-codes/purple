@@ -15,12 +15,22 @@ export class ServiceFactory {
     private static isOfflineModeCache: boolean | null = null;
     private static lastOfflineModeCheck: number = 0;
     private static CACHE_DURATION = 1000; // Cache offline mode check for 1 second
+    private static cachedDb: SQLite.SQLiteDatabase | null = null;
 
     static create<T>(
         endpoint: 'accounts' | 'transactions' | 'plans',
         db: SQLite.SQLiteDatabase,
         sessionData: SessionData | null,
     ): DataService<T> {
+        // If the db instance changed (SQLiteProvider remounted with a new connection),
+        // discard all cached SQLite services so they're recreated with the live connection.
+        if (this.cachedDb !== null && this.cachedDb !== db) {
+            this.accountService = null;
+            this.transactionService = null;
+            this.planService = null;
+        }
+        this.cachedDb = db;
+
         // Cache the offline mode check to avoid repeated synchronous storage reads
         const now = Date.now();
         if (
@@ -67,5 +77,9 @@ export class ServiceFactory {
         this.isOfflineModeCache = null;
         this.lastOfflineModeCheck = 0;
         this.apiServices.clear();
+        this.accountService = null;
+        this.transactionService = null;
+        this.planService = null;
+        this.cachedDb = null;
     }
 }
