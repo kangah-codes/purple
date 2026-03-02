@@ -1,6 +1,12 @@
-import { Slot, Stack } from 'expo-router';
+import { useAuth } from '@/components/Auth/hooks';
+import { Redirect, Stack } from 'expo-router';
+import React from 'react';
 
-export default function Plans() {
+export default function Onboarding() {
+    const { isAuthenticated } = useAuth();
+
+    if (isAuthenticated) return <Redirect href={'/(tabs)/'} />;
+
     return (
         <Stack
             screenOptions={{

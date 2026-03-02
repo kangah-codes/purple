@@ -1,7 +1,13 @@
+import { useAuth } from '@/components/Auth/hooks';
 import Landing from '@/components/Onboarding/screens/Landing';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+import React from 'react';
 
 export default function Screen() {
+    const { hasOnboarded } = useAuth();
+
+    if (!hasOnboarded) return <Redirect href='/onboarding/steps' />;
+
     return (
         <>
             <Stack.Screen options={{ headerShown: false }} />

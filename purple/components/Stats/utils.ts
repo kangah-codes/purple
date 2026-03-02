@@ -1,0 +1,362 @@
+import {
+    addDays,
+    differenceInDays,
+    eachDayOfInterval,
+    endOfMonth,
+    format,
+    isSameMonth,
+    min,
+    startOfMonth,
+} from 'date-fns';
+import { Transaction } from '../Transactions/schema';
+import { isTransferTransaction } from '../Transactions/utils';
+import { dayKeys, dayLabels, spendOverviewPalette } from './contants';
+
+export function getCurrentMonthYear() {
+    const date = new Date();
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+}
+
+const getDayKey = (date: Date) => {
+    const index = date.getDay();
+    return dayKeys[index];
+};
+
+export const groupTransactionsByWeek = (
+    transactions: Transaction[],
+    currentDate: Date,
+    type: string = 'debit',
+) => {
+    const monthStart = startOfMonth(currentDate);
+    const weeks: Record<number, Record<string, number>> = {
+        1: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+        2: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+        3: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+        4: Object.fromEntries(dayKeys.map((k) => [k, 0])),
+    };
+
+    for (const tx of transactions) {
+        if (tx.type !== type || isTransferTransaction(tx)) continue;
+
+        const txDate = new Date(tx.created_at);
+        const txMonth = txDate.getMonth();
+        const currentMonth = currentDate.getMonth();
+
+        if (txDate.getFullYear() !== currentDate.getFullYear() || txMonth !== currentMonth) {
+            continue;
+        }
+
+        const daysSinceMonthStart = differenceInDays(txDate, monthStart);
+        // determine week (1 indexed) based on days since month start
+        // each week is 7 days starting from the 1st of the month
+        let week = Math.floor(daysSinceMonthStart / 7) + 1;
+
+        // limit at 4 wks
+        if (week > 4) week = 4;
+
+        const key = getDayKey(txDate);
+        weeks[week][key] += tx.amount;
+    }
+
+    return weeks;
+};
+
+export const getStackedChartData = (transactions: Transaction[], date: Date) => {
+    const grouped = groupTransactionsByWeek(transactions, date);
+    const rawChartData = dayKeys.map((key) => {
+        const stacks = Object.entries(grouped).map(([, data], i) => ({
+            value: data[key] || 0,
+            color: spendOverviewPalette[i],
+            marginBottom: 2,
+        }));
+
+        return {
+            label: dayLabels[key],
+            stacks,
+        };
+    });
+
+    const maxTotal = Math.max(
+        1,
+        ...rawChartData.map(({ stacks }) => stacks.reduce((sum, s) => sum + s.value, 0)),
+    );
+
+    const paddedChartData = rawChartData.map(({ label, stacks }) => {
+        const total = stacks.reduce((sum, s) => sum + s.value, 0);
+        const padding = maxTotal - total;
+
+        return {
+            label,
+            stacks: [
+                ...stacks,
+                ...(padding > 0 ? [{ value: padding, color: '#f3e8ff', marginBottom: 2 }] : []),
+            ],
+        };
+    });
+
+    return paddedChartData;
+};
+
+export const generateMockTransactionsForMonth = (
+    monthDate: Date,
+    trend: boolean = false,
+    cumulative: boolean = false,
+): Transaction[] => {
+    const start = startOfMonth(monthDate);
+    const end = endOfMonth(monthDate);
+    const transactions: Transaction[] = [];
+    let id = 1;
+    let current = start;
+
+    const totalDays = differenceInDays(end, start) + 1;
+    const startAmount = 10;
+    const endAmount = 10000;
+
+    let previousAmount = startAmount;
+    let cumulativeBalance = cumulative ? 1000 : 0; // Starting balance for cumulative mode
+
+    while (current <= end) {
+        const numTransactionsToday = Math.floor(Math.random() * 2);
+
+        for (let i = 0; i < numTransactionsToday; i++) {
+            let amount: number;
+
+            if (trend) {
+                const progress = differenceInDays(current, start) / totalDays;
+                const easedProgress = Math.pow(progress, 1.5);
+                const baseAmount = startAmount + (endAmount - startAmount) * easedProgress;
+                const randomFactor = 0.9 + Math.random() * 0.1;
+                amount = baseAmount * randomFactor;
+            } else {
+                amount = previousAmount + Math.random() * 500;
+            }
+
+            amount = Math.max(amount, previousAmount + 1);
+
+            // Determine transaction type
+            let transactionType: 'credit' | 'debit';
+
+            if (cumulative) {
+                // In cumulative mode, bias towards credits to maintain growth
+                // but allow some debits for realism
+                transactionType = Math.random() > 0.25 ? 'credit' : 'debit';
+
+                // Prevent balance from going too negative
+                if (cumulativeBalance < 100 && Math.random() > 0.1) {
+                    transactionType = 'credit';
+                }
+            } else {
+                transactionType = trend
+                    ? Math.random() > 0.3
+                        ? 'credit'
+                        : 'debit'
+                    : Math.random() > 0.5
+                    ? 'debit'
+                    : 'credit';
+            }
+
+            // For cumulative mode, adjust amount based on current balance
+            if (cumulative) {
+                if (transactionType === 'debit') {
+                    // Limit debits to not exceed current balance (with some buffer)
+                    amount = Math.min(amount, Math.max(cumulativeBalance * 0.8, 50));
+                }
+
+                // Update cumulative balance
+                cumulativeBalance += transactionType === 'credit' ? amount : -amount;
+            }
+
+            transactions.push({
+                id: id.toString(),
+                created_at: current.toISOString(),
+                updated_at: current.toISOString(),
+                deleted_at: null,
+                account_id: 'acc1',
+                user_id: 'user1',
+                type: transactionType,
+                amount: parseFloat(amount.toFixed(2)),
+                account: {} as any,
+                note: `Mock transaction ${id}${
+                    cumulative ? ` (Balance: ${cumulativeBalance.toFixed(2)})` : ''
+                }`,
+                category: 'Test',
+                from_account: '',
+                to_account: '',
+                currency: 'GHS',
+                plan_id: '',
+            } as Transaction);
+
+            previousAmount = amount;
+            id++;
+        }
+
+        current = addDays(current, 1);
+    }
+
+    return transactions;
+};
+
+export const generateMockDebitTransactionsForMonth = (monthDate: Date): Transaction[] => {
+    const start = startOfMonth(monthDate);
+    const end = endOfMonth(monthDate);
+    const transactions: Transaction[] = [];
+    let id = 1;
+    let current = start;
+
+    while (current <= end) {
+        const numTransactionsToday = Math.floor(Math.random() * 2);
+
+        for (let i = 0; i < numTransactionsToday; i++) {
+            const amount = Math.random() * 5000;
+
+            transactions.push({
+                id: id.toString(),
+                created_at: current.toISOString(),
+                updated_at: current.toISOString(),
+                deleted_at: null,
+                account_id: 'acc1',
+                user_id: 'user1',
+                type: 'debit',
+                amount: parseFloat(amount.toFixed(2)),
+                account: {} as any,
+                note: `Mock transaction ${id}`,
+                category: 'Test',
+                from_account: '',
+                to_account: '',
+                currency: 'GHS',
+                plan_id: '',
+            } as Transaction);
+
+            id++;
+        }
+
+        current = addDays(current, 1);
+    }
+
+    return transactions;
+};
+
+export function getWeekRangesForMonth(date: Date): string[] {
+    const monthStart = startOfMonth(date);
+    const monthEnd = endOfMonth(date);
+    const weeks: string[] = [];
+
+    // start from the first day of the month
+    let currentWeekStart = monthStart;
+
+    // process exactly 4 weeks
+    for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
+        // calculate the end date of this week (6 days after start = 7 day period)
+        let currentWeekEnd = addDays(currentWeekStart, 6);
+
+        // for the 4th week extend to the end of month if needed
+        if (weekIndex === 3 && currentWeekEnd < monthEnd) {
+            currentWeekEnd = monthEnd;
+        }
+
+        // if the end date exceeds the month end, cap it
+        if (currentWeekEnd > monthEnd) {
+            currentWeekEnd = monthEnd;
+        }
+
+        // create the week label
+        const label = `${format(currentWeekStart, 'MMM d')} - ${format(currentWeekEnd, 'MMM d')}`;
+        weeks.push(label);
+
+        // move to the start of the next week (7 days from current start)
+        currentWeekStart = addDays(currentWeekStart, 7);
+
+        // if we've gone past the end of the month and it's not the last week yet
+        // we can stop as there are no more days to include
+        if (currentWeekStart > monthEnd && weekIndex < 3) {
+            break;
+        }
+    }
+
+    return weeks;
+}
+
+type ChartPoint = {
+    value: number;
+    date: string;
+};
+export function generateNormalizedSpendChartData(
+    transactions: Array<Transaction & { account_category?: string }>,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const today = new Date();
+    const monthEnd = endOfMonth(monthStart);
+    const intervalEnd = isSameMonth(monthStart, today) ? min([today, monthEnd]) : monthEnd;
+    const allDays = eachDayOfInterval({ start: monthStart, end: intervalEnd });
+    const dailySpends: Record<string, number> = {};
+
+    for (const tx of transactions) {
+        // Only include debit transactions that are not transfers
+        if (tx.type !== 'debit' || isTransferTransaction(tx)) continue;
+
+        const isoDate = format(new Date(tx.created_at), 'yyyy-MM-dd');
+        if (!dailySpends[isoDate]) {
+            dailySpends[isoDate] = 0;
+        }
+        dailySpends[isoDate] += tx.amount;
+    }
+
+    let runningSpend = 0;
+    const chartData = allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        runningSpend += dailySpends[isoDate] || 0;
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: runningSpend,
+        };
+    });
+
+    return chartData;
+}
+
+export function generateNormalizedBudgetChartData(
+    totalBudget: number,
+    monthStart: Date,
+): (ChartPoint & { label?: string })[] {
+    const monthEnd = endOfMonth(monthStart);
+
+    const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
+    const dailyBudget = totalBudget / daysInMonth;
+
+    const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    const steppedDays = eachDayOfInterval(
+        { start: monthStart, end: monthEnd },
+        {
+            step: 5,
+        },
+    );
+
+    const lastSteppedDay = steppedDays[steppedDays.length - 1];
+
+    const stepDays =
+        lastSteppedDay && lastSteppedDay < monthEnd ? [...steppedDays, monthEnd] : steppedDays;
+    const stepValueByIsoDate: Record<string, number> = {};
+    for (const day of stepDays) {
+        const isoDate = format(day, 'yyyy-MM-dd');
+        const dayIndex = differenceInDays(day, monthStart) + 1;
+        stepValueByIsoDate[isoDate] = dailyBudget * dayIndex;
+    }
+
+    let currentValue = stepValueByIsoDate[format(monthStart, 'yyyy-MM-dd')] ?? 0;
+    return allDays.map((day) => {
+        const isoDate = format(day, 'yyyy-MM-dd');
+
+        if (isoDate in stepValueByIsoDate) {
+            currentValue = stepValueByIsoDate[isoDate];
+        }
+
+        return {
+            date: format(day, 'd MMM yyyy'),
+            value: currentValue,
+        };
+    });
+}

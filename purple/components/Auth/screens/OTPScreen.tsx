@@ -1,13 +1,18 @@
+import { ChevronLeftIcon } from '@/components/SVG/icons/24x24';
 import {
     InputField,
+    LinearGradient,
     SafeAreaView,
     Text,
     TouchableOpacity,
     View,
-    LinearGradient,
 } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import {} from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
     Keyboard,
@@ -19,18 +24,12 @@ import {
 } from 'react-native';
 import tw from 'twrnc';
 import { OTPInput } from '../molecules/OTPInput';
-import { Controller, useForm } from 'react-hook-form';
-import {} from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { ChevronLeftIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
 
 export default function OTPScreen() {
-    const [codes, setCodes] = useState<string[]>(['', '', '', '', '', '']);
+    const [codes, setCodes] = useState<string[]>(['', '', '', '', '']);
     const inputRefs = Array.from({ length: codes.length }, () => useRef<TextInput>(null));
     const [loading, setLoading] = useState(false);
     const [hasRequestedCode, setHasRequestedCode] = useState(false);
-    const [canResetPassword, setCanResetPassword] = useState(false);
 
     const handleChangeCode = (text: string, index: number) => {
         const newCodes = [...codes];
@@ -67,7 +66,7 @@ export default function OTPScreen() {
                 <TouchableOpacity onPress={router.back}>
                     <View className='flex flex-row space-x-2 items-center'>
                         <ChevronLeftIcon strokeWidth={3} width={17} stroke='#9333ea' />
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
+                        <Text style={GLOBAL_STYLESHEET.satoshiBold} className='text-purple-600'>
                             Back
                         </Text>
                     </View>
@@ -89,7 +88,7 @@ export default function OTPScreen() {
                                     Forgot password?
                                 </Text>
                                 <Text
-                                    style={{ fontFamily: 'InterMedium' }}
+                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                     className='text-sm text-gray-600 text-center'
                                 >
                                     {hasRequestedCode
@@ -128,7 +127,7 @@ export default function OTPScreen() {
                                                 }) => (
                                                     <InputField
                                                         className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                        style={GLOBAL_STYLESHEET.interSemiBold}
+                                                        style={GLOBAL_STYLESHEET.satoshiMedium}
                                                         cursorColor={'#8B5CF6'}
                                                         placeholder='Email address'
                                                         onChangeText={onChange}
@@ -141,7 +140,7 @@ export default function OTPScreen() {
                                             />
                                             {errors.userName && (
                                                 <Text
-                                                    style={{ fontFamily: 'InterMedium' }}
+                                                    style={GLOBAL_STYLESHEET.satoshiMedium}
                                                     className='text-xs text-red-500'
                                                 >
                                                     {errors.userName.message}
@@ -167,7 +166,7 @@ export default function OTPScreen() {
                                                     <ActivityIndicator size={18} color='#fff' />
                                                 ) : (
                                                     <Text
-                                                        style={{ fontFamily: 'InterBold' }}
+                                                        style={{ fontFamily: 'MonaSansBold' }}
                                                         className='text-base text-white tracking-tight'
                                                     >
                                                         Send Code

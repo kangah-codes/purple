@@ -1,5 +1,6 @@
-import NewProfileScreen from '@/components/Profile/screens/NewProfileScreen';
+import ProfileScreen from '@/components/Profile/screens/ProfileScreen';
+import React from 'react';
 
 export default function Screen() {
-    return <NewProfileScreen />;
+    return <ProfileScreen />;
 }

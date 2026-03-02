@@ -1,70 +1,139 @@
-import {
-    InputField,
-    LinearGradient,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from '@/components/Shared/styled';
+import { GenericAPIResponse } from '@/@types/request';
+import { SafeAreaView, ScrollView } from '@/components/Shared/styled';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { useCallback, useState } from 'react';
-import { RefreshControl, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import AccountsTotalSummary from '../molecules/AccountsTotalSummary';
-import { DotsVerticalIcon } from '@/components/SVG/20x20';
+import React from 'react';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { useAccountStore, useAccounts } from '../hooks';
 import AccountsAccordion from '../molecules/AccountsAccordion';
-import { router } from 'expo-router';
-import { EditSquareIcon, PlusIcon } from '@/components/SVG/24x24';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import AccountsAreaChart from '../molecules/AccountsAreaChart';
+import AccountsNavigationArea from '../molecules/AccountsNavigationArea';
+import { Account } from '../schema';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useQueryClient } from 'react-query';
+import { ServiceFactory } from '@/lib/factory/ServiceFactory';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useAuth } from '@/components/Auth/hooks';
 
 export default function AccountsScreen() {
-    const [refreshing, setRefreshing] = useState(false);
+    const { logEvent } = useAnalytics();
+    const { setAccounts, accounts } = useAccountStore();
+    const queryClient = useQueryClient();
+    const db = useSQLiteContext();
+    const { sessionData } = useAuth();
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 2000);
-    }, []);
-    const handleNavigation = useCallback(() => {
-        router.push('/accounts/new-acount');
-    }, []);
+    const { refetch } = useAccounts({
+        options: {
+            onSuccess: (data) => {
+                const res = data as GenericAPIResponse<Account[]>;
+                setAccounts(res.data);
+            },
+            onError: (err) => {
+                console.error('[AccountsScreen] Error fetching accounts:', err);
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "Couldn't fetch your accounts",
+                    },
+                });
+            },
+        },
+        requestQuery: {
+            page: 1,
+            limit: Infinity,
+        },
+    });
+    useRefreshOnFocus(refetch);
+
+    // Prefetch all account details when the screen mounts or accounts change
+    React.useEffect(() => {
+        if (!accounts || accounts.length === 0) return;
+
+        const prefetchAllAccounts = async () => {
+            const accountService = ServiceFactory.create<Account>('accounts', db, sessionData);
+
+            // Prefetch each account's details in parallel
+            const prefetchPromises = accounts.map((account) =>
+                queryClient.prefetchQuery(
+                    [`account-${account.id}`],
+                    () => accountService.get(account.id),
+                    { staleTime: 60000 } // Cache for 60 seconds
+                )
+            );
+
+            await Promise.all(prefetchPromises);
+        };
+
+        prefetchAllAccounts();
+    }, [accounts, db, sessionData, queryClient]);
+
+    const shadowOpacity = useSharedValue(0);
+
+    const handleScroll = React.useCallback(
+        (event: { nativeEvent: { contentOffset: { y: number } } }) => {
+            const scrollY = event.nativeEvent.contentOffset.y;
+            const newOpacity = scrollY > 0 ? Math.min(scrollY / 20, 1) : 0;
+            shadowOpacity.value = withSpring(newOpacity, { damping: 15, stiffness: 150 });
+        },
+        [shadowOpacity],
+    );
+
+    const shadowStyle = useAnimatedStyle(() => {
+        return {
+            opacity: shadowOpacity.value,
+        };
+    });
+
+    useScreenTracking('accounts', {
+        source: 'navigation',
+    });
+    React.useEffect(() => {
+        logEvent('screen_view', {
+            screen: 'accounts_screen',
+            source: 'navigation',
+        });
+    }, [logEvent]);
 
     return (
         <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
             <ExpoStatusBar style='dark' />
-            <View className='px-5 flex flex-col space-y-2.5'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg mt-2.5'>
-                    Accounts
-                </Text>
+            <AccountsNavigationArea />
 
-                <View className='h-1 border-gray-100 border-b w-full mb-2.5' />
-
-                <AccountsTotalSummary />
-            </View>
+            <Animated.View
+                style={[
+                    {
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: (RNStatusBar.currentHeight ?? 0) + 60 + 1,
+                        height: 20,
+                        zIndex: 999,
+                    },
+                    shadowStyle,
+                ]}
+                pointerEvents='none'
+            >
+                <LinearGradient
+                    colors={['rgba(250, 245, 255, 0.95)', 'transparent']}
+                    style={{ flex: 1 }}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                />
+            </Animated.View>
 
             <ScrollView
-                className='h-full space-y-5'
-                contentContainerStyle={{
-                    paddingBottom: 300,
-                }}
-                showsVerticalScrollIndicator={false}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                onScroll={handleScroll}
+                className='flex flex-col'
+                contentContainerStyle={{ paddingBottom: 100 }}
             >
+                <AccountsAreaChart />
                 <AccountsAccordion />
             </ScrollView>
-
-            <LinearGradient
-                className='rounded-full justify-center items-center space-y-4 absolute right-5 bottom-5'
-                colors={['#c084fc', '#9333ea']}
-            >
-                <TouchableOpacity
-                    className='items-center w-[55px] h-[55px] justify-center rounded-full p-3 '
-                    onPress={handleNavigation}
-                >
-                    <PlusIcon stroke={'#fff'} />
-                </TouchableOpacity>
-            </LinearGradient>
         </SafeAreaView>
     );
 }

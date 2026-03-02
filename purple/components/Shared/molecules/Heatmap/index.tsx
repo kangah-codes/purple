@@ -1,8 +1,9 @@
-import { ReactNode, useCallback, useMemo } from 'react';
-import { FlatList, ViewStyle } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { ViewStyle } from 'react-native';
 import { LinearGradient, TouchableOpacity, View } from '../../styled';
-import { getColorIndex } from './utils';
 import { colors as defaultColors } from './constants';
+import { getColorIndex } from './utils';
 
 export type CellData = {
     value: number;
@@ -23,15 +24,14 @@ export type HeatmapProps = {
 };
 
 export default function Heatmap({
-    rows,
-    cols,
-    cellSize,
-    cellStyle,
+    cols = 7,
+    cellSize = 10,
+    cellStyle = { margin: 2, borderRadius: 8 },
     data,
     colors = defaultColors,
     onPressCallback,
     renderCell,
-    startColumn,
+    startColumn = 0,
 }: HeatmapProps) {
     const maxValue = useMemo(() => Math.max(...data.map((d) => d.value)), [data]);
     const fullData = useMemo(() => {
@@ -42,20 +42,10 @@ export default function Heatmap({
         });
         return [...offsetData, ...data];
     }, [data, startColumn]);
-    const getItemLayout = useCallback(
-        (_data: ArrayLike<CellData> | null | undefined, index: number) => {
-            const row = Math.floor(index / cols);
-            return {
-                length: cellSize,
-                offset: row * cellSize,
-                index,
-            };
-        },
-        [cellSize, cols],
-    );
+
     const handleCellPress = useCallback(
         (item: CellData) => {
-            onPressCallback && onPressCallback(item);
+            if (onPressCallback) onPressCallback(item);
         },
         [onPressCallback],
     );
@@ -78,7 +68,7 @@ export default function Heatmap({
         return renderCell && renderCell(item, index) !== undefined ? (
             renderCell(item, index)
         ) : (
-            <TouchableOpacity onPress={() => handleCellPress(item)}>
+            <TouchableOpacity onPress={handleCellPress.bind(null, item)}>
                 <LinearGradient
                     style={{
                         width: cellSize,
@@ -94,25 +84,15 @@ export default function Heatmap({
     const keyExtractor = (item: CellData, index: number) => item.key + index.toString();
 
     return (
-        <FlatList
+        <FlashList
+            estimatedItemSize={cellSize}
             data={fullData}
             renderItem={renderItem as any}
             keyExtractor={keyExtractor}
             numColumns={cols}
-            scrollEnabled={false} // disable scrolling for static heatmap
-            getItemLayout={getItemLayout}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            // getItemLayout={getItemLayout} here's to hoping commenting this out don't break anything
         />
     );
 }
-
-Heatmap.defaultProps = {
-    rows: 4,
-    cols: 7,
-    cellSize: 10,
-    cellStyle: {
-        margin: 2,
-        borderRadius: 8,
-    },
-    colors: defaultColors,
-    startColumn: 0,
-};

@@ -1,10 +1,8 @@
 type Primitive = string | number | boolean | null | undefined;
-
 type ObjectType = Record<string, unknown>;
-
 type ArrayType = unknown[];
-
 type DeepValueType = Primitive | ObjectType | ArrayType;
+type OmitKeys = Array<string | [string, ...string[]]>;
 
 export type DeepObject = Record<string, DeepValueType>;
 
@@ -48,4 +46,256 @@ export function deepCompare(obj1: DeepObject, obj2: DeepObject): boolean {
     }
 
     return true;
+}
+
+/**
+ * Updates an array by adding only new, unique items based on deep comparison.
+ *
+ * @param existingArray - The original array of items.
+ * @param newItems - The new items to potentially add to the array.
+ * @returns A new array with unique items from both existingArray and newItems.
+ */
+export function updateArrayWithUniqueItems<T extends DeepObject>(
+    existingArray: T[],
+    newItems: T[],
+): T[] {
+    const updatedArray = [...existingArray];
+
+    for (const newItem of newItems) {
+        const existingItem = updatedArray.find((item) => deepCompare(item, newItem));
+        if (!existingItem) {
+            updatedArray.push(newItem);
+        }
+    }
+
+    return updatedArray;
+}
+
+/**
+ * ["test"] -> Filter out the "test" value from the form data
+ * {
+ *  test: {
+ *    "abs": "test"
+ * }
+ * }
+ * ["another", ["test", ["abs"]]]
+ */
+
+/**
+ * @description Function to pre-process form data before submission. this allows us to remove unwanted values from the form data before submission
+ * @param {Object} data the form data
+ * @param {Array} omit the values to remove from the form data
+ * @returns {Object} the pre-processed form data
+ * @author Joshua Akangah
+ */
+export const formPreprocessor = <T extends Record<string, unknown> | Array<unknown>>({
+    data,
+    omit,
+    omitKeys,
+}: {
+    data: T;
+    omit: Array<unknown>;
+    omitKeys?: OmitKeys;
+}): Partial<T> | T => {
+    const hasEmptyArray = omit.some((value) => Array.isArray(value) && value.length === 0);
+
+    const filteredData = Array.isArray(data)
+        ? (data.filter((value) => {
+              return (
+                  !(hasEmptyArray && Array.isArray(value) && value.length === 0) &&
+                  !omit.includes(value)
+              );
+          }) as T)
+        : (Object.keys(data || {}).reduce((acc: Record<string, unknown>, key) => {
+              // handle nested objects
+              if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+                  const nestedData = data[key] as Record<string, unknown>;
+                  const nestedFilteredData = formPreprocessor({
+                      data: nestedData,
+                      omit,
+                      omitKeys: omitKeys
+                          ?.map((omitKey) => {
+                              if (Array.isArray(omitKey)) {
+                                  const [firstKey, ...restKeys] = omitKey;
+                                  if (firstKey === key) {
+                                      return restKeys.length > 0 ? restKeys : undefined;
+                                  }
+                              } else if (omitKey === key) {
+                                  return undefined;
+                              }
+                              return omitKey;
+                          })
+                          .filter(Boolean) as OmitKeys,
+                  });
+
+                  return {
+                      ...acc,
+                      [key]: nestedFilteredData,
+                  };
+              }
+
+              const value = data[key] as unknown;
+
+              if (
+                  !(hasEmptyArray && Array.isArray(value) && value.length === 0) &&
+                  !omit.includes(value) &&
+                  !omitKeys?.some((omitKey) => {
+                      if (Array.isArray(omitKey)) {
+                          const [firstKey, ...restKeys] = omitKey;
+                          if (firstKey === key) {
+                              return (
+                                  restKeys.length === 0 ||
+                                  restKeys.reduce(
+                                      (obj, k) => (obj as any)[k],
+                                      data as Record<string, unknown>,
+                                  ) === undefined
+                              );
+                          }
+                      } else if (omitKey === key) {
+                          return true;
+                      }
+                      return false;
+                  })
+              ) {
+                  return {
+                      ...acc,
+                      [key]: value,
+                  };
+              }
+
+              return acc;
+          }, {}) as T);
+
+    return filteredData as Partial<T> | T;
+};
+/**
+ * @description Function to preprocess a single field from a form
+ * @param {Object} data the form data
+ * @param {Array} omit the values to remove from the form data
+ * @returns {String} the pre-processed form data
+ * @author Joshua Akangah
+ */
+export const fieldPreprocessor = <T extends string>({
+    data,
+    omit,
+}: {
+    data: T;
+    omit: Array<string | number | boolean | null | undefined>;
+}): undefined | T => {
+    if (omit.includes(data)) {
+        return undefined;
+    }
+
+    return data;
+};
+
+type KeyMapping<T> =
+    | [keyof T, string]
+    | [
+          keyof T,
+          string,
+          (
+              value: T[keyof T],
+          ) => string | number | boolean | null | undefined | ObjectType | ArrayType,
+      ];
+
+type TransformObject<T, U extends KeyMapping<T>[]> = {
+    [K in U[number] as K[1]]: K extends [infer OldKey, any, (value: any) => infer R]
+        ? R
+        : K extends [infer OldKey, any]
+        ? OldKey extends keyof T
+            ? T[OldKey]
+            : never
+        : never;
+} & Omit<T, U[number][0]>;
+
+export function transformObject<T extends object, U extends KeyMapping<T>[]>(
+    obj: T,
+    keyMappings: U,
+): TransformObject<T, U> {
+    const transformedObj: any = { ...obj };
+    for (const keyMapping of keyMappings) {
+        const [oldKey, newKey, valueTransform] = keyMapping;
+        if (oldKey in obj) {
+            // Apply transformation if provided
+            const value = valueTransform
+                ? valueTransform(obj[oldKey as keyof T])
+                : obj[oldKey as keyof T];
+
+            // Rename the key with the transformed value
+            transformedObj[newKey] = value;
+
+            // Remove the old key only if it's different from the new key
+            if (oldKey !== newKey) {
+                delete transformedObj[oldKey];
+            }
+        } else {
+            console.log(`Key ${String(oldKey)} does not exist in the object.`);
+            // throw new Error(`Key ${String(oldKey)} does not exist in the object.`);
+        }
+    }
+    return transformedObj as TransformObject<T, U>;
+}
+
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): T | Partial<T> {
+    const result = { ...obj };
+    for (const key of keys) {
+        delete result[key];
+    }
+    return result;
+}
+
+/**
+ * Excludes specific keys from an object.
+ *
+ * @param obj - The object from which to exclude keys.
+ * @param keysToExclude - An array of keys to exclude.
+ * @returns A new object without the excluded keys.
+ *
+ * @example
+ * const obj = { a: 1, b: 2, c: 3 };
+ * excludeKeys(obj, ['b']); // { a: 1, c: 3 }
+ */
+export function excludeKeys<T extends Record<string, unknown>>(
+    obj: T,
+    keysToExclude: (keyof T)[],
+): Partial<T> {
+    return Object.keys(obj).reduce((acc, key) => {
+        if (!keysToExclude.includes(key as keyof T)) {
+            acc[key as keyof T] = obj[key] as T[keyof T];
+        }
+        return acc;
+    }, {} as Partial<T>);
+}
+
+/**
+ * Returns the maximum value for a specified numeric property in an array of objects
+ * @param arr - Array of objects to search through
+ * @param key - Key of the numeric property to compare
+ * @param fallback - fallback value
+ * @returns The maximum value found or undefined if the array is empty
+ */
+export function getMaxValue<T extends object, K extends keyof T>(
+    arr: T[],
+    key: K,
+    fallback: number,
+): T[K] | number {
+    if (arr.length === 0) {
+        return fallback;
+    }
+
+    return arr.reduce((max, current) => {
+        const currentValue = current[key];
+        const maxValue = max[key];
+
+        if (
+            typeof currentValue === 'number' &&
+            typeof maxValue === 'number' &&
+            currentValue > maxValue
+        ) {
+            return current;
+        }
+
+        return max;
+    }, arr[0])[key];
 }

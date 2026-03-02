@@ -13,11 +13,14 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import { ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
+import { Keyboard, ListRenderItem, Platform, StyleProp, ViewStyle } from 'react-native';
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated';
 import { useBottomSheetFlatListStore } from './hooks';
 import { keyExtractor } from '@/lib/utils/number';
+import EmptyList from '../ListStates/Empty';
+import { View } from '../../styled';
 
+// TODO: this typing is wrong - it should extend bottomflatlist
 interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
     sheetKey: string;
     data: T[];
@@ -29,6 +32,7 @@ interface CustomBottomSheetFlatListProps<T> extends BottomSheetProps {
         | SharedValue<ComponentType<any> | null | undefined>
         | null
         | undefined;
+    ListFooterComponent?: any;
 }
 
 function CustomBottomSheetFlatList<T>({
@@ -38,51 +42,89 @@ function CustomBottomSheetFlatList<T>({
     flatListContentContainerStyle,
     children,
     itemSeparator,
+    ListFooterComponent,
     ...rest
 }: CustomBottomSheetFlatListProps<T>) {
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const [defaultSnapPoints, setDefaultSnapPoints] = useState<
-        | (string | number)[]
-        | SharedValue<(string | number)[]>
-        | Readonly<(string | number)[] | SharedValue<(string | number)[]>>
-    >(useMemo(() => ['50%', '50%'], []));
+    const unmountTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [shouldRender, setShouldRender] = useState(false);
+
+    const defaultSnapPoints = useMemo(() => rest.snapPoints || ['50%', '50%'], [rest.snapPoints]);
     const { setShowBottomSheetFlatList, bottomSheetFlatListKeys, createBottomSheetFlatList } =
         useBottomSheetFlatListStore();
+    const isVisible = useMemo(
+        () => !!bottomSheetFlatListKeys[sheetKey],
+        [bottomSheetFlatListKeys, sheetKey],
+    );
 
     useEffect(() => {
-        createBottomSheetFlatList(sheetKey);
+        if (isVisible) {
+            Keyboard.dismiss();
+            if (unmountTimeoutRef.current) {
+                clearTimeout(unmountTimeoutRef.current);
+                unmountTimeoutRef.current = null;
+            }
 
-        if (rest.snapPoints) {
-            setDefaultSnapPoints(rest.snapPoints);
+            setShouldRender(true);
+        } else if (shouldRender) {
+            unmountTimeoutRef.current = setTimeout(() => {
+                setShouldRender(false);
+                unmountTimeoutRef.current = null;
+            }, 300);
         }
-    }, []);
 
-    const handleSheetChanges = useCallback((index: number) => {
-        // if user swipes modal down, close it
-        if (index === -1) setShowBottomSheetFlatList(sheetKey, false);
-    }, []);
+        return () => {
+            if (unmountTimeoutRef.current) {
+                clearTimeout(unmountTimeoutRef.current);
+            }
+        };
+    }, [isVisible, shouldRender]);
 
-    useEffect(() => {
-        if (bottomSheetFlatListKeys[sheetKey]) {
-            bottomSheetRef.current?.snapToIndex(0);
-        } else {
-            bottomSheetRef.current?.close();
-        }
-    }, [bottomSheetFlatListKeys]);
-
+    const handleSheetChanges = useCallback(
+        (index: number) => {
+            if (index === -1 && bottomSheetFlatListKeys[sheetKey]) {
+                setShowBottomSheetFlatList(sheetKey, false);
+            }
+        },
+        [sheetKey, setShowBottomSheetFlatList, bottomSheetFlatListKeys],
+    );
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
                 {...props}
-                onPress={() => setShowBottomSheetFlatList(sheetKey, false)}
+                onPress={() => {
+                    bottomSheetRef.current?.close();
+                }}
                 appearsOnIndex={0}
                 disappearsOnIndex={-1}
             />
         ),
         [],
     );
+    const EmptyListComponent = useMemo(
+        () => (
+            <View className='pt-10'>
+                <EmptyList message="Couldn't find what you're looking for!" />
+            </View>
+        ),
+        [],
+    );
 
-    if (!bottomSheetFlatListKeys[sheetKey]) return null;
+    useEffect(() => {
+        createBottomSheetFlatList(sheetKey);
+    }, [sheetKey, createBottomSheetFlatList]);
+
+    useEffect(() => {
+        if (shouldRender) {
+            if (isVisible) {
+                bottomSheetRef.current?.snapToIndex(0);
+            } else {
+                bottomSheetRef.current?.close();
+            }
+        }
+    }, [isVisible, shouldRender]);
+
+    if (!shouldRender) return null;
 
     return (
         <BottomSheet
@@ -91,12 +133,14 @@ function CustomBottomSheetFlatList<T>({
             android_keyboardInputMode='adjustResize'
             keyboardBlurBehavior='restore'
             ref={bottomSheetRef}
-            index={bottomSheetFlatListKeys[sheetKey] ? 1 : -1}
+            index={isVisible ? 0 : -1}
             snapPoints={defaultSnapPoints}
             onChange={handleSheetChanges}
+            enablePanDownToClose={true}
             {...rest}
+            backgroundStyle={{ borderRadius: 28 }}
         >
-            {children && children}
+            {children}
             <BottomSheetFlatList
                 data={data}
                 keyExtractor={keyExtractor}
@@ -104,6 +148,12 @@ function CustomBottomSheetFlatList<T>({
                 contentContainerStyle={flatListContentContainerStyle}
                 showsVerticalScrollIndicator
                 ItemSeparatorComponent={itemSeparator}
+                ListEmptyComponent={EmptyListComponent}
+                removeClippedSubviews={Platform.OS === 'android'}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                updateCellsBatchingPeriod={50}
+                ListFooterComponent={ListFooterComponent}
             />
         </BottomSheet>
     );

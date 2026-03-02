@@ -1,39 +1,104 @@
+import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
 import { View } from '@/components/Shared/styled';
 import { keyExtractor } from '@/lib/utils/number';
-import { memo, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { memo, useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
-import { expensePlans } from '../constants';
+import Toast from 'react-native-toast-message';
+import { useInfinitePlans, usePlanStore } from '../hooks';
 import BudgetPlanCard from '../molecules/BudgetCard';
-import BudgetInfoCard from '../molecules/BudgetInfoCard';
-import { BudgetPlan } from '../schema';
+import { useScreenTracking } from '@/lib/hooks/useAnalytics';
+import { usePreferences } from '@/components/Settings/hooks';
 
 function ExpensesScreen() {
-    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: BudgetPlan }) => <BudgetPlanCard data={item} />,
-        [],
+    const { setExpensePlans, expensePlans } = usePlanStore();
+    const {
+        preferences: { hideCompletedPlans },
+    } = usePreferences();
+    const { data, fetchNextPage, hasNextPage, isLoading, refetch } = useInfinitePlans({
+        requestQuery: {
+            type: 'expense',
+            page_size: 10,
+            is_completed: hideCompletedPlans ? false : undefined,
+        },
+        options: {
+            onError: (err) => {
+                console.error('[ExpensesScreen] Error fetching plans:', err);
+                Toast.show({
+                    type: 'error',
+                    props: {
+                        text1: 'Error!',
+                        text2: "We couldn't fetch your plans",
+                    },
+                });
+            },
+            refetchOnWindowFocus: 'always',
+        },
+    });
+
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch]),
     );
-    const listHeader = useCallback(
+    useScreenTracking('plans_expenses', {
+        source: 'navigation',
+    });
+
+    const itemSeparator = useCallback(() => <View style={styles.itemSeparator} />, []);
+    const renderEmptylist = useCallback(
         () => (
-            <View>
-                <BudgetInfoCard />
-                <View style={styles.listHeaderView} />
+            <View className='my-10'>
+                <EmptyList message="Looks like you haven't created any budgets yet." />
             </View>
         ),
         [],
     );
+    const listHeader = useCallback(() => {
+        if (expensePlans.length === 0) return null;
+        return (
+            <View className='flex flex-col space-y-5 -px-5'>
+                {/* <PlanInfoCard type='expense' /> */}
+                <View />
+            </View>
+        );
+    }, []);
+
+    useEffect(() => {
+        if (data) {
+            const tx = data.pages.flatMap((page) => page.data);
+            setExpensePlans(tx);
+        }
+    }, [data]);
+
+    const handleLoadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
 
     return (
         <FlatList
             contentContainerStyle={styles.contentContainer}
             style={styles.container}
+            numColumns={2}
+            columnWrapperStyle={{ gap: 10 }}
             showsHorizontalScrollIndicator={false}
             data={expensePlans}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+                <View style={{ flex: 0.5 }}>
+                    <BudgetPlanCard data={item} />
+                </View>
+            )}
             keyExtractor={keyExtractor}
             ItemSeparatorComponent={itemSeparator}
             initialNumToRender={5}
             ListHeaderComponent={listHeader}
+            refreshing={isLoading}
+            onRefresh={refetch}
+            ListEmptyComponent={renderEmptylist}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
         />
     );
 }
@@ -45,11 +110,8 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 100,
     },
-    listHeaderView: {
-        marginTop: 20,
-    },
     itemSeparator: {
-        height: 20,
+        height: 10,
     },
 });
 export default memo(ExpensesScreen);

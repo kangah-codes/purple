@@ -1,0 +1,150 @@
+import { StarsIcon } from '@/components/SVG/icons/24x24';
+import Heatmap, { CellData } from '@/components/Shared/molecules/Heatmap';
+import { colors } from '@/components/Shared/molecules/Heatmap/constants';
+import { getColorIndex } from '@/components/Shared/molecules/Heatmap/utils';
+import { LinearGradient, Text, TouchableOpacity, View } from '@/components/Shared/styled';
+import { Transaction } from '@/components/Transactions/schema';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { groupBy } from '@/lib/utils/helpers';
+import { eachDayOfInterval, endOfMonth, format, getDay, startOfMonth } from 'date-fns';
+import React, { useCallback, useMemo } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
+
+const now = new Date();
+const deviceWidth = Dimensions.get('window').width;
+const padding = 20;
+const numBlocksPerRow = 7; // for a week view
+const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const blockSize = (deviceWidth - padding * 6) / numBlocksPerRow;
+
+type IndexHeatmapProps = {
+    transactions: Transaction[];
+    startDate: Date;
+};
+
+function IndexHeatmap({ transactions, startDate }: IndexHeatmapProps) {
+    const start = startOfMonth(startDate);
+    const end = endOfMonth(startDate);
+    const monthDays = eachDayOfInterval({ start, end });
+    const offset = new Date(monthDays[0].getFullYear(), monthDays[0].getMonth(), 1).getDay();
+    const heatmapData = useMemo(
+        () =>
+            monthDays.map((day, index) => {
+                const formattedTransactions = transactions.map((transaction) => ({
+                    ...transaction,
+                    created_at_formatted: format(new Date(transaction.created_at), 'dd/MM/yy'),
+                }));
+                const date = format(day, 'dd/MM/yy');
+                const groupedTransactions = groupBy(formattedTransactions, 'created_at_formatted');
+
+                return {
+                    value: groupedTransactions[date]?.length ?? 0,
+                    key: format(day, 'dd/MM/yyyy'),
+                    index: index + offset,
+                };
+            }),
+        [monthDays, transactions],
+    );
+
+    const renderCell = useCallback(
+        (data: CellData) => {
+            const maxValue = Math.max(...heatmapData.map((d) => d.value));
+            const colorIndex = getColorIndex(data.value, 0, maxValue, colors.length);
+
+            if (format(now, 'dd/MM/yyyy') === data.key) {
+                return (
+                    <TouchableOpacity key={data.key}>
+                        <LinearGradient
+                            style={styles.linearGradient}
+                            colors={colors[colorIndex]}
+                            className='flex items-center justify-center'
+                        >
+                            <StarsIcon stroke='#fff' fill={'#fff'} />
+                        </LinearGradient>
+                    </TouchableOpacity>
+                );
+            }
+        },
+        [heatmapData],
+    );
+
+    return (
+        <View className='pt-5 w-full px-10'>
+            <View
+                className='flex-col space-y-2.5'
+                style={{
+                    // crackhead math to account for padding and margins
+                    // it works ¯\_(ツ)_/¯
+                    height: deviceWidth - padding * 6 + numBlocksPerRow * 7,
+                }}
+            >
+                <View className='flex flex-col mb-2.5'>
+                    <Text className='text-base text-black' style={satoshiFont.satoshiBlack}>
+                        Daily Activity
+                    </Text>
+                    <Text className='text-purple-500 text-xs' style={satoshiFont.satoshiBold}>
+                        How often you log your transactions
+                    </Text>
+                </View>
+                <View className='flex-row justify-between py-2'>
+                    {days.map((day, key) => (
+                        <Text
+                            key={key}
+                            className='text-black text-xs mx-auto'
+                            style={satoshiFont.satoshiBlack}
+                        >
+                            {day}
+                        </Text>
+                    ))}
+                </View>
+                <Heatmap
+                    cellSize={blockSize}
+                    rows={4}
+                    cols={numBlocksPerRow}
+                    data={heatmapData}
+                    startColumn={getDay(start)}
+                    renderCell={renderCell}
+                />
+                <View className='flex-row justify-end items-center space-x-2 mt-2 pr-1'>
+                    <Text className='text-black text-xs' style={satoshiFont.satoshiBold}>
+                        Less
+                    </Text>
+                    <View className='flex flex-row space-x-0.5'>
+                        {colors.map((gradient, index) => (
+                            <LinearGradient
+                                key={index}
+                                colors={gradient}
+                                className='h-3 w-3 rounded-[4px]'
+                            />
+                        ))}
+                    </View>
+                    <Text className='text-black text-xs' style={satoshiFont.satoshiBold}>
+                        More
+                    </Text>
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    bottomSheetContainer: {
+        paddingHorizontal: 20,
+    },
+    handleIndicator: {
+        backgroundColor: '#D4D4D4',
+    },
+    flatlistContentContainer: {
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+        backgroundColor: 'white',
+    },
+    linearGradient: {
+        width: blockSize,
+        height: blockSize,
+        margin: 2,
+        borderRadius: 8,
+    },
+});
+
+export default IndexHeatmap;

@@ -1,21 +1,74 @@
 {
-  "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk"
-      }
+    "build": {
+        "production": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "production"
+            },
+            "channel": "production",
+            "environment": "production",
+            "node": "22.17.0"
+        },
+        "production-store": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "app-bundle"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "production"
+            },
+            "channel": "production-store",
+            "environment": "production",
+            "node": "22.17.0",
+            "autoIncrement": true
+        },
+        "development": {
+            "developmentClient": true,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk",
+                "gradleCommand": ":app:assembleDebug",
+                "withoutCredentials": true
+            },
+            "ios": {
+                "simulator": true
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "development",
+                "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=512m"
+            },
+            "channel": "development",
+            "environment": "development",
+            "node": "22.17.0"
+        },
+        "rc": {
+            "developmentClient": false,
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_KEY": "EXPO_PUBLIC_API_KEY",
+                "EXPO_PUBLIC_API_URL": "EXPO_PUBLIC_API_URL",
+                "EAS_BUILD_PROFILE": "rc"
+            },
+            "channel": "rc",
+            "environment": "production",
+            "node": "22.17.0"
+        }
     },
-    "preview2": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
-    },
-    "preview3": {
-      "developmentClient": true
-    },
-    "preview4": {
-      "distribution": "internal"
-    },
-    "production": {}
-  }
+    "cli": {
+        "appVersionSource": "remote"
+    }
 }

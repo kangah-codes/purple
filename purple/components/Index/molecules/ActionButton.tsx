@@ -1,59 +1,91 @@
-import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { Account } from '@/components/Accounts/schema';
+import { Text, View } from '@/components/Shared/styled';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { Link } from 'expo-router';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { SvgProps } from 'react-native-svg';
-import {
-    ArrowCircleDownIcon,
-    ArrowCircleUpIcon,
-    CoinSwapIcon,
-    PiggyBankIcon,
-} from '../../SVG/noscale';
-import { Link } from 'expo-router';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { ArrowCircleDownIcon, ArrowCircleUpIcon, CoinSwapIcon } from '../../SVG/icons/noscale';
 
 export function ActionButton({
     IconComponent,
     label,
     type,
+    account,
 }: {
     IconComponent: React.ComponentType<SvgProps>;
     label: string;
     type: string;
+    account: Account;
 }) {
+    const { logEvent } = useAnalytics();
     return (
         <View className='flex flex-col items-center justify-center space-y-1.5'>
             <Link
                 href={{
-                    pathname: type == 'plan' ? '/plans/new-plan' : '/transactions/new-transaction',
+                    pathname: '/transactions/new',
                     params: {
                         type,
-                        ...(type == 'plan' && { accountId: '1' }),
+                        accountId: account.id,
                     },
                 }}
+                onPress={() => {
+                    logEvent('button_tap', {
+                        button: `action_${type}`,
+                        screen: 'index_screen',
+                        account_id: account.id,
+                    });
+                }}
             >
-                <View className='border bg-white border-gray-200 shadow-xl w-14 h-14 rounded-full flex flex-col items-center justify-center space-y-1.5 relative'>
+                <View
+                    style={styles.actionButton}
+                    className='border bg-white border-purple-200 px-5 py-2.5 rounded-full flex items-center justify-center relative'
+                >
                     <IconComponent width={24} height={24} stroke='#9333ea' />
                 </View>
             </Link>
-            <Text style={[GLOBAL_STYLESHEET.interMedium, styles.actionText]}>{label}</Text>
+            <Text style={[satoshiFont.satoshiBold]} className='text-sm text-[#9333ea]'>
+                {label}
+            </Text>
         </View>
     );
 }
 
-export default function ActionButtons() {
+export default function ActionButtons({ account }: { account: Account }) {
     return (
-        <View className='flex-row justify-between items-stretch w-full px-7 pt-2.5'>
-            <ActionButton IconComponent={ArrowCircleDownIcon} label='Income' type='income' />
-            <ActionButton IconComponent={ArrowCircleUpIcon} label='Expense' type='expense' />
-            <ActionButton IconComponent={CoinSwapIcon} label='Transfer' type='transfer' />
-            <ActionButton IconComponent={PiggyBankIcon} label='Plan' type='plan' />
+        <View className='flex-row justify-between items-stretch w-auto px-16 py-2.5'>
+            <ActionButton
+                IconComponent={ArrowCircleDownIcon}
+                label='Income'
+                type='credit'
+                account={account}
+            />
+            <ActionButton
+                IconComponent={ArrowCircleUpIcon}
+                label='Expense'
+                type='debit'
+                account={account}
+            />
+            <ActionButton
+                IconComponent={CoinSwapIcon}
+                label='Transfer'
+                type='transfer'
+                account={account}
+            />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    actionText: {
-        color: '#1f2937',
-        fontSize: 14,
-        letterSpacing: -0.5,
+    actionButton: {
+        shadowColor: '#A855F7',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });

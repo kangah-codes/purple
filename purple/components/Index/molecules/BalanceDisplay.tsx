@@ -1,40 +1,39 @@
+import { Account } from '@/components/Accounts/schema';
 import { Text, View } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import { EyeCloseIcon, EyeOpenIcon } from '../../SVG/noscale';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { formatCurrencyRounded } from '@/lib/utils/number';
+import { Link } from 'expo-router';
+import React from 'react';
+import { PinIcon } from '../../SVG/icons/noscale';
 
-// TODO: Add types for props
-export function BalanceDisplay({ showAmount, setShowAmount, balance, accountName }: any) {
+type BalanceDisplayProps = {
+    accountName: string;
+    account: Account;
+    isPinned: boolean;
+};
+
+export function BalanceDisplay({ accountName, account, isPinned }: BalanceDisplayProps) {
     return (
-        <>
-            <View className='flex flex-row space-x-2 items-center'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-sm'>
-                    Available Balance
+        <Link
+            href={{
+                pathname: '/accounts/account-transactions',
+                params: { accountName: account.name, accountID: account.id },
+            }}
+        >
+            <View className='flex flex-col'>
+                <Text style={satoshiFont.satoshiBlack} className='text-black text-3xl'>
+                    {formatCurrencyRounded(account.balance, account.currency)}
                 </Text>
-                {showAmount ? (
-                    <EyeOpenIcon
-                        width={16}
-                        height={16}
-                        stroke='black'
-                        onPress={() => setShowAmount(false)}
-                    />
-                ) : (
-                    <EyeCloseIcon
-                        width={16}
-                        height={16}
-                        stroke='black'
-                        onPress={() => setShowAmount(true)}
-                    />
-                )}
+                <View className='flex flex-row space-x-2 items-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-[#9333ea] text-base'>
+                        {accountName}
+                    </Text>
+
+                    {isPinned && (
+                        <PinIcon width={15} height={15} stroke={'#9333ea'} fill={'#9333ea'} />
+                    )}
+                </View>
             </View>
-            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-black text-3xl mt-1.5'>
-                {balance}
-            </Text>
-            <Text
-                style={GLOBAL_STYLESHEET.interMedium}
-                className='text-gray-600 text-base tracking-tighter mt-1.5'
-            >
-                {accountName}
-            </Text>
-        </>
+        </Link>
     );
 }

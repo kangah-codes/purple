@@ -2,99 +2,29 @@ package main
 
 import (
 	"context"
-	"log"
-	"nucleus/cmd/workers"
-	"nucleus/internal/api/middleware"
-	"nucleus/internal/api/routes"
-	"nucleus/internal/api/types"
-	"nucleus/internal/models"
-	"nucleus/utils"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"time"
-
-	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"nucleus/internal/bootstrap"
+	"nucleus/internal/log"
 )
 
 func main() {
-	// load env variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	cfg := bootstrap.Init()
 
-	dsn := utils.EnvValue("DSN", "")
-	utils.InitDB(dsn)
-	utils.InitLogger()
-
-	// get db instance
-	db := utils.GetDB()
-	if db == nil {
-		log.Fatal("Failed to connect to the database")
-	}
-
-	// context for workers
+	// setup background workers
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	// session cleaners
-	cleaner := workers.NewSessionCleaner(db)
-	cleaner.Start(ctx)
+	// setup workers
+	SetupWorkers(ctx, cfg)
 
-	// rate limiting
-	rateLimitStore := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
-		Rate:  time.Second,
-		Limit: 5,
-	})
-	rateLimit := ratelimit.RateLimiter(rateLimitStore, &ratelimit.Options{
-		ErrorHandler: func(ctx *gin.Context, i ratelimit.Info) {
-			ctx.JSON(429, gin.H{"error": "Too many requests"})
-			ctx.Abort()
-		},
-		KeyFunc: func(ctx *gin.Context) string {
-			return ctx.ClientIP()
-		},
-	})
+	// setup API server
+	r := SetupRouter(cfg)
 
-	models.Migrate(db)
-	r := gin.Default()
-	r.Use(rateLimit)
-	r.Use(middleware.CorsMiddleware())
-	r.Use(middleware.APIKeyMiddleware())
+	// setup shutdown handler
+	setupGracefulShutdown(cancel, cfg)
 
-	// create api group
-	v1 := utils.CreateV1Group(r)
-	routes.RegisterUserRoutes(v1)
-	routes.RegisterAuthRoutes(v1)
-	routes.RegisterAccountRoutes(v1)
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, types.Response{
-			Status:  200,
-			Message: "pong",
-			Data:    nil,
-		})
-	})
-
-	utils.InfoLogger.Printf("Starting server on port 8080")
-
-	// setup graceful shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-quit
-		utils.InfoLogger.Println("Shutting down server")
-
-		// stop workers
-		cancel()
-		cleaner.Stop()
-	}()
-
-	// Run the server on the specified port
-	if err := r.Run(":8080"); err != nil {
-		utils.InfoLogger.Fatalf("Failed to run server: %v", err)
+	// start server
+	log.InfoLogger.Printf("Starting server on port 8080")
+	if err := r.Run("0.0.0.0:8080"); err != nil {
+		log.InfoLogger.Fatalf("Failed to run server: %v", err)
 	}
 }

@@ -1,103 +1,148 @@
 import { Text, TouchableOpacity, View } from '@/components/Shared/styled';
-import { BudgetPlan } from '../schema';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { currencies } from '@/lib/constants/currencies';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { formatCurrencyRounded, formatNumberRounded } from '@/lib/utils/number';
+import { differenceInDays } from 'date-fns';
+import { router } from 'expo-router';
+import React, { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+import { Plan } from '../schema';
+import { calculateRemainingForCurrentPeriod } from '../utils';
 
-type BudgetCardProps = {
-    data: BudgetPlan;
-};
+const now = new Date();
 
-export default function BudgetPlanCard(props: BudgetCardProps) {
-    const { category, startDate, endDate, percentageCompleted, spent, balance, budget } =
-        props.data;
+export default function BudgetPlanCard({ data }: { data: Plan }) {
+    const {
+        start_date,
+        end_date,
+        balance,
+        target,
+        type,
+        transactions,
+        deposit_frequency,
+        currency,
+    } = data;
+    const amountSpent = Math.abs(Math.min((data.balance / data.target) * 100, 100));
+    const daysLeft = differenceInDays(new Date(data.end_date), now);
+    const isExpense = type == 'expense';
+    const { remaining, frequency, isOverPeriodAmount, overageAmount } = useMemo(() => {
+        const { remainingAmount, isOverPeriodAmount, overageAmount } =
+            calculateRemainingForCurrentPeriod(
+                new Date(start_date),
+                new Date(end_date),
+                target,
+                deposit_frequency,
+                transactions,
+                isExpense,
+            );
+        const frequency = () => {
+            switch (deposit_frequency) {
+                case 'bi-weekly':
+                    return '2-week period';
+                case 'monthly':
+                    return 'month';
+                case 'weekly':
+                    return 'week';
+            }
+        };
+
+        return {
+            remaining: remainingAmount,
+            frequency: frequency(),
+            isOverPeriodAmount,
+            overageAmount,
+        };
+    }, [data]);
 
     return (
-        <View className='p-4 border border-gray-200 rounded-2xl flex flex-col space-y-2.5 w-full'>
-            <View className='flex flex-row w-full justify-between items-center'>
-                <Text style={GLOBAL_STYLESHEET.suprapower} className='text-base text-black'>
-                    {category}
-                </Text>
-            </View>
+        <TouchableOpacity onPress={() => router.push(`/plans/${data.id}`)} activeOpacity={0.9}>
+            <View
+                className='p-4 rounded-3xl flex flex-col w-full bg-purple-50'
+                style={styles.planCard}
+            >
+                <View className='flex flex-col space-y-0.5'>
+                    <Text style={satoshiFont.satoshiBold} className='text-sm text-black'>
+                        {data.category}
+                    </Text>
+                    <Text
+                        style={[
+                            satoshiFont.satoshiBold,
+                            {
+                                color: daysLeft < 0 ? '#fb2c36' : '#ad46ff',
+                            },
+                        ]}
+                        className='text-xs'
+                    >
+                        {Math.abs(daysLeft)} day{Math.abs(daysLeft) > 1 && 's'}{' '}
+                        {daysLeft < 0 ? 'overdue' : 'left'}
+                    </Text>
+                </View>
 
-            <View className='flex flex-col space-y-2.5'>
-                {/* <View className='relative w-full'>
-                    <View className='h-2 w-full rounded-full bg-purple-50' />
+                <View className='flex flex-col w-full mt-7'>
+                    <Text style={[satoshiFont.satoshiBold]} className='text-xs'>
+                        {Number(amountSpent.toFixed(0)) >= 100
+                            ? `${isExpense ? 'Budget limit' : 'Target'} reached ${
+                                  !isExpense && '🎉'
+                              }`
+                            : `${amountSpent.toFixed(0)}% ${isExpense ? 'spent' : 'saved'}`}
+                    </Text>
+                    <View className='flex flex-row text-black'>
+                        <Text style={satoshiFont.satoshiBold} className='text-sm mt-0.5'>
+                            {currencies.find((cur) => cur.code === data.currency)?.symbol}
+                        </Text>
+                        <Text style={satoshiFont.satoshiBlack} className='text-2xl'>
+                            {formatNumberRounded(balance)}
+                        </Text>
+                    </View>
+                    <Text
+                        style={[
+                            satoshiFont.satoshiBold,
+                            {
+                                color:
+                                    (daysLeft < 0 || isOverPeriodAmount) && type == 'expense'
+                                        ? '#fb2c36'
+                                        : '#ad46ff',
+                            },
+                        ]}
+                        className='text-xs'
+                    >
+                        {isOverPeriodAmount ? (
+                            <>
+                                Over target amount for this {frequency} by{' '}
+                                {formatCurrencyRounded(overageAmount, currency)}
+                            </>
+                        ) : (
+                            <>
+                                {formatCurrencyRounded(remaining, currency)} left{' '}
+                                {isExpense ? 'to spend' : 'to save'} this {frequency}
+                            </>
+                        )}
+                    </Text>
+                </View>
+
+                <View className='flex flex-row items-center space-x-0.5 mt-5'>
                     <View
-                        className='h-2 bg-purple-600 rounded-full absolute'
+                        className='h-5 bg-purple-600 rounded-md'
                         style={{
-                            width: `${percentageCompleted}%`,
+                            width: `${Math.min(amountSpent, 100)}%`,
                         }}
                     />
-                </View> */}
-                <View className='flex flex-row items-center space-x-0.5'>
-                    <View className='h-2 w-10 bg-purple-600 rounded-md' />
-                    <View className='h-2 flex-grow bg-purple-200 rounded-full' />
-                </View>
-
-                <View className='flex flex-row justify-between items-center'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interMedium}
-                        className='text-sm text-black tracking-tighter'
-                    >
-                        {startDate}
-                    </Text>
-
-                    <Text
-                        style={GLOBAL_STYLESHEET.interMedium}
-                        className='text-sm text-gray-600 tracking-tighter'
-                    >
-                        {endDate}
-                    </Text>
+                    <View className='h-5 flex-grow bg-purple-200 rounded-md' />
                 </View>
             </View>
-
-            <View className='h-[1.5px] bg-purple-50 w-full' />
-
-            <View className='bg-purple-50 p-3.5 rounded-xl space-y-2.5 flex flex-col'>
-                <View className='flex flex-row justify-between items-center'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
-                    >
-                        Spent
-                    </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
-                        className='text-sm text-black tracking-tighter'
-                    >
-                        GHS {spent}
-                    </Text>
-                </View>
-                <View className='border-b border-purple-200 w-full' />
-                <View className='flex flex-row justify-between items-center'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
-                    >
-                        Balance
-                    </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
-                        className='text-sm text-black tracking-tighter'
-                    >
-                        GHS {balance}
-                    </Text>
-                </View>
-                <View className='border-b border-purple-200 w-full' />
-                <View className='flex flex-row justify-between items-center'>
-                    <Text
-                        style={GLOBAL_STYLESHEET.interSemiBold}
-                        className='text-sm text-gray-700 tracking-tighter'
-                    >
-                        Total Budget
-                    </Text>
-                    <Text
-                        style={GLOBAL_STYLESHEET.suprapower}
-                        className='text-sm text-black tracking-tighter'
-                    >
-                        GHS {budget}
-                    </Text>
-                </View>
-            </View>
-        </View>
+        </TouchableOpacity>
     );
 }
+
+const styles = StyleSheet.create({
+    planCard: {
+        // shadowColor: '#A855F7',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 2,
+        // },
+        // shadowOpacity: 0.125,
+        // shadowRadius: 8,
+        // elevation: 5,
+    },
+});

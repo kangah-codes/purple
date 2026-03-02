@@ -1,42 +1,73 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
+	"nucleus/internal/api/services"
 	"nucleus/internal/api/types"
-	"nucleus/internal/models"
-	"nucleus/utils"
+	"nucleus/internal/log"
+	"nucleus/internal/utils"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func APIKeyMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		apiKey := utils.EnvValue("API_KEY", "")
-		if apiKey != c.GetHeader("X-API-KEY") {
-			c.JSON(401, types.Response{Status: 401, Message: "Invalid API key", Data: nil})
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
+type AuthMiddlewareConfig struct {
+	AuthService *services.AuthService
 }
 
-func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
+var disabledRoutes = []*regexp.Regexp{
+	// regexp.MustCompile(`^/api/v1/auth/.*`),
+	regexp.MustCompile(`^/api/v1/tracking/.*`),
+}
+
+func SkipAuthorization(path string, routes []*regexp.Regexp) bool {
+	// disable header checks for some routes
+	for _, r := range routes {
+		if r.MatchString(path) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func AuthMiddleware(config *AuthMiddlewareConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		db := utils.GetDB()
-		token := c.GetHeader("Authorization")
-		if token == "" {
-			c.JSON(401, types.Response{Status: 401, Message: "No authorization token provided", Data: nil})
-			c.Abort()
+		path := c.FullPath()
+
+		if SkipAuthorization(path, disabledRoutes) {
+			c.Next()
 			return
 		}
 
-		session, err := utils.ValidateSessionToken(db, token)
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, types.Response{
+				Status:  http.StatusUnauthorized,
+				Message: "Authorization header is required",
+				Data:    nil,
+			})
+			return
+		}
+
+		session, err := config.AuthService.GetSession(c.Request.Context(), authHeader)
 		if err != nil {
-			c.JSON(401, types.Response{Status: 401, Message: "Invalid or expired token", Data: nil})
-			c.Abort()
+			log.ErrorLogger.Errorf("Error validating session token: %v", err)
+			statusCode := http.StatusUnauthorized
+			message := "Invalid or expired session token"
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// Keep the default message
+			} else {
+				message = "Failed to validate session token"
+				statusCode = http.StatusInternalServerError
+			}
+			c.AbortWithStatusJSON(statusCode, types.Response{
+				Status:  statusCode,
+				Message: message,
+				Data:    nil,
+			})
 			return
 		}
 
@@ -45,21 +76,17 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func SuperUserMiddleware(db *gorm.DB) gin.HandlerFunc {
+func APIKeyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		db := utils.GetDB()
-		userID := c.GetInt("userID")
-
-		user := models.User{}
-		result := db.First(&user, userID)
-		if result.Error != nil {
-			c.JSON(500, types.Response{Status: http.StatusInternalServerError, Message: "Failed to fetch user", Data: nil})
-			c.Abort()
+		path := c.FullPath()
+		if SkipAuthorization(path, disabledRoutes) {
+			c.Next()
 			return
 		}
 
-		if user.Role != models.SuperUser {
-			c.JSON(403, types.Response{Status: 403, Message: "Forbidden", Data: nil})
+		apiKey := utils.EnvValue("API_KEY", "")
+		if apiKey != c.GetHeader("X-API-KEY") {
+			c.JSON(401, types.Response{Status: 401, Message: "Invalid API key", Data: nil})
 			c.Abort()
 			return
 		}

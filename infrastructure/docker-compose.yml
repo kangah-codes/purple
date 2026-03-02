@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: purple
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  android-builder:
+    build:
+      context: .
+      dockerfile: AndroidBuild.Dockerfile
+    volumes:
+      - ../purple:/app
+      - ./output:/output
+    working_dir: /app
+    environment:
+      - EXPO_TOKEN
+
+  android-builder-dev:
+    extends: android-builder
+    container_name: purple-android-builder-dev
+    command: >
+      --profile development
+      --output purple-dev.apk
+      --env rc
+      --api-url ${API_URL:-}
+      --api-key ${API_KEY:-}
+      --expo-token ${EXPO_TOKEN:-}
+
+  android-builder-rc:
+    extends: android-builder
+    container_name: purple-android-builder-rc
+    command: >
+      --profile rc
+      --output purple-rc.apk
+      --env rc
+      --api-url ${API_URL:-}
+      --api-key ${API_KEY:-}
+      --expo-token ${EXPO_TOKEN:-}
+
+volumes:
+  postgres_data:
+  redis_data:

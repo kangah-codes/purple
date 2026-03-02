@@ -1,6 +1,8 @@
 import { View } from '@/components/Shared/styled';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import React from 'react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { TextInput, Animated } from 'react-native';
+import { TextInput, Animated, Dimensions, InputModeOptions } from 'react-native';
 import tw from 'twrnc';
 
 interface OTPInputProps {
@@ -9,11 +11,22 @@ interface OTPInputProps {
     errorMessages: string[] | undefined;
     onChangeCode: (text: string, index: number) => void;
     onComplete: (otp: string) => void;
+    inputType?: InputModeOptions;
 }
 
-export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete }: OTPInputProps) {
+const { width: screenWidth } = Dimensions.get('window');
+
+export function OTPInput({
+    codes,
+    refs,
+    errorMessages,
+    onChangeCode,
+    onComplete,
+    inputType = 'text',
+}: OTPInputProps) {
     const [focusedIndex, setFocusedIndex] = useState(-1);
     const borderColorAnim = useRef(new Animated.Value(0)).current;
+    const inputWidth = screenWidth / codes.length - 20;
 
     useEffect(() => {
         Animated.timing(borderColorAnim, {
@@ -55,21 +68,26 @@ export function OTPInput({ codes, refs, errorMessages, onChangeCode, onComplete 
                     style={{
                         borderColor: interpolateBorderColor(index),
                         borderWidth: 2,
-                        borderRadius: 8,
+                        borderRadius: 999,
                     }}
                 >
                     <TextInput
                         onFocus={() => setFocusedIndex(index)}
                         autoComplete='one-time-code'
                         enterKeyHint='next'
-                        style={{
-                            fontFamily: 'Suprapower',
-                            ...tw`bg-purple-50 text-center rounded-lg px-2 py-1 w-[48px] h-[48px]`,
-                        }}
-                        inputMode='numeric'
+                        style={[
+                            GLOBAL_STYLESHEET.satoshiBlack,
+                            {
+                                ...tw`bg-purple-50 text-center rounded-full px-2 py-1`,
+                                width: inputWidth,
+                                height: 48,
+                            },
+                        ]}
+                        inputMode={inputType}
                         onChangeText={(text) => handleChangeText(text, index)}
                         value={code}
-                        maxLength={index === 0 ? codes.length : 1}
+                        // maxLength={index === 0 ? codes.length : 1}
+                        maxLength={1}
                         ref={refs[index]}
                         onKeyPress={({ nativeEvent: { key } }) => {
                             if (key === 'Backspace' && index > 0 && !codes[index]) {

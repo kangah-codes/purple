@@ -1,78 +1,60 @@
-import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { ErrorBoundaryProps, Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
-
-import { useColorScheme } from '@/components/useColorScheme';
+/* eslint-disable @typescript-eslint/no-require-imports */
+import { AuthProvider } from '@/components/Auth/hooks';
+import LoadingScreen from '@/components/Index/molecules/LoadingScreen';
+import { toastConfig } from '@/components/Shared/atoms/Toast';
+import ConfirmationModal from '@/components/Shared/molecules/ConfirmationModal';
+import { ErrorBoundary } from '@/components/Shared/molecules/Errorboundary';
+import AppQueryClientProvider from '@/components/Shared/molecules/QueryClientProvider';
+import CurrentRecurringTransactionModal from '@/components/Transactions/molecules/CurrentRecurringTransactionModal';
+import CurrentTransactionModal from '@/components/Transactions/molecules/CurrentTransactionModal';
+import { AnalyticsProvider } from '@/lib/providers/Analytics';
+import { initializeApp } from '@/lib/startup';
+import { installExportLogger } from '@/lib/utils/exportLogger';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PortalProvider } from '@gorhom/portal';
-import * as Font from 'expo-font';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
+import 'expo-dev-client';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
+import React, { Suspense, useCallback, useState } from 'react';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Text, View } from '@/components/Shared/styled';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { toastConfig } from '@/components/Shared/atoms/Toast';
 
-export const unstable_settings = {
-    initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-    const [appIsReady, setAppIsReady] = useState(false);
-
-    useEffect(() => {
-        async function prepare() {
-            try {
-                // Pre-load fonts, make any API calls you need to do here
-                await Font.loadAsync({
-                    Suprapower: require('../assets/fonts/Suprapower.otf'),
-                    InterRegular: require('../assets/fonts/Inter-Regular.ttf'),
-                    InterThin: require('../assets/fonts/Inter-Thin.ttf'),
-                    InterBlack: require('../assets/fonts/Inter-Black.ttf'),
-                    InterBold: require('../assets/fonts/Inter-Bold.ttf'),
-                    InterExtraBold: require('../assets/fonts/Inter-ExtraBold.ttf'),
-                    InterExtraLight: require('../assets/fonts/Inter-ExtraLight.ttf'),
-                    InterLight: require('../assets/fonts/Inter-Light.ttf'),
-                    InterMedium: require('../assets/fonts/Inter-Medium.ttf'),
-                    InterSemiBold: require('../assets/fonts/Inter-SemiBold.ttf'),
-                });
-            } catch (e) {
-                console.warn(e);
-            } finally {
-                // Tell the application to render
-                setAppIsReady(true);
-            }
-        }
-
-        prepare();
-    }, []);
-
-    if (!appIsReady) {
-        return null;
-    }
-
-    return <RootLayoutNav />;
+// Capture production logs to a file for later export (Experimental Settings).
+if (!__DEV__) {
+    installExportLogger();
+} else {
+    // disable error logging in development
+    console.error = () => {};
+    console.warn = () => {};
 }
 
-function RootLayoutNav() {
-    const colorScheme = useColorScheme();
-
-    useEffect(() => {
-        async function hideSplashScreen() {
-            await SplashScreen.hideAsync();
-        }
-
-        hideSplashScreen();
-    }, []);
-
+function AppWithNotifications() {
+    // useNotifications();
     return (
-        <>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <BottomSheetModalProvider>
-                    <PortalProvider>
+        <AnalyticsProvider
+            config={{
+                enableDebugLogs: true,
+                syncEveryMs: 180000,
+                batchSize: 25,
+            }}
+            // disabled
+            autoFlushOnBackground={true}
+        >
+            <BottomSheetModalProvider>
+                <PortalProvider>
+                    <SafeAreaProvider>
                         <ThemeProvider value={DefaultTheme}>
+                            {/** Portal Rendering  */}
+                            <CurrentTransactionModal modalKey='transactionReceipt' />
+                            <CurrentRecurringTransactionModal modalKey='recurringTransactionReceipt' />
+                            <ConfirmationModal />
+                            {/** Main Navigation Stack */}
                             <Stack
                                 screenOptions={{
                                     contentStyle: {
@@ -89,21 +71,84 @@ function RootLayoutNav() {
                                 />
                                 <Stack.Screen name='onboarding' options={{ headerShown: false }} />
                                 <Stack.Screen name='auth' options={{ headerShown: false }} />
+                                <Stack.Screen name='settings' options={{ headerShown: false }} />
                             </Stack>
                         </ThemeProvider>
-                    </PortalProvider>
-                </BottomSheetModalProvider>
-            </GestureHandlerRootView>
-            <Toast config={toastConfig} />
-        </>
+                    </SafeAreaProvider>
+                </PortalProvider>
+            </BottomSheetModalProvider>
+        </AnalyticsProvider>
     );
 }
 
-export function ErrorBoundary(props: ErrorBoundaryProps) {
+Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+
+    // Adds more context data to events (IP address, cookies, user, etc.)
+    // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+    sendDefaultPii: true,
+
+    // Configure Session Replay
+    // replaysSessionSampleRate: 0,
+    // replaysOnErrorSampleRate: 0,
+    integrations: [],
+
+    // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+    // spotlight: __DEV__,
+    enabled: !__DEV__,
+});
+
+export const unstable_settings = {
+    initialRouteName: '(tabs)/index',
+};
+
+SplashScreen.preventAutoHideAsync();
+LogBox.ignoreAllLogs(true);
+
+export default Sentry.wrap(function RootLayout() {
+    const [appIsReady, setAppIsReady] = useState(true);
+    // TODO: temp fix since fonts dont seem to load properly
+    const [fontsLoaded] = useFonts({
+        SatoshiBlack: require('../assets/fonts/satoshi/Satoshi-Black.otf'),
+        SatoshiBold: require('../assets/fonts/satoshi/Satoshi-Bold.otf'),
+        SatoshiMedium: require('../assets/fonts/satoshi/Satoshi-Medium.otf'),
+        SatoshiRegular: require('../assets/fonts/satoshi/Satoshi-Regular.otf'),
+        SatoshiLight: require('../assets/fonts/satoshi/Satoshi-Light.otf'),
+    });
+
+    const onInitialise = useCallback(async (db: SQLiteDatabase) => {
+        try {
+            await initializeApp(db);
+        } catch (e) {
+            console.error('Error during app initialization:', e);
+        } finally {
+            setAppIsReady(true);
+            await SplashScreen.hideAsync();
+        }
+    }, []);
+
+    if (!appIsReady || !fontsLoaded) {
+        return null;
+    }
+
     return (
-        <View style={{ flex: 1, backgroundColor: 'red' }}>
-            <Text>{props.error.message}</Text>
-            <Text onPress={props.retry}>Try Again?</Text>
-        </View>
+        <ErrorBoundary>
+            <AppQueryClientProvider>
+                <AuthProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                        <Suspense fallback={<LoadingScreen />}>
+                            <SQLiteProvider
+                                databaseName='purple.db'
+                                onInit={onInitialise}
+                                useSuspense
+                            >
+                                <AppWithNotifications />
+                            </SQLiteProvider>
+                        </Suspense>
+                    </GestureHandlerRootView>
+                    <Toast config={toastConfig} />
+                </AuthProvider>
+            </AppQueryClientProvider>
+        </ErrorBoundary>
     );
-}
+});

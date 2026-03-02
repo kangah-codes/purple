@@ -1,25 +1,141 @@
+import { ArrowLeftIcon } from '@/components/SVG/icons/24x24';
+import { usePreferences } from '@/components/Settings/hooks';
+import FlagIcon from '@/components/Shared/atoms/FlagIcon';
+import SearchableSelectField, {
+    SelectOption,
+} from '@/components/Shared/atoms/SearchableSelectField';
 import SelectField from '@/components/Shared/atoms/SelectField';
+import CurrencySelect from '@/components/Shared/molecules/CurrencySelect';
+import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import {
     InputField,
+    LinearGradient,
     SafeAreaView,
     ScrollView,
     Text,
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import { ACCOUNT_SUBGROUP_TYPES, ACCOUNT_TYPES } from '@/lib/constants/accountTypes';
+import { currencies } from '@/lib/constants/currencies';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { ActivityIndicator, Keyboard, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { useAccountStore, useCreateAccount } from '../hooks';
 
-export default function NewAccountScreen() {
-    const [isLoading, setIsLoading] = useState(false);
-    const renderItem = useCallback((item: any) => {
+export default function NewAccountScreen() {    
+    const {
+        preferences: { currency },
+    } = usePreferences();
+    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
+    const { updateAccounts } = useAccountStore();
+    const { mutate, isLoading } = useCreateAccount();
+    const { logEvent } = useAnalytics();
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        getValues,
+        setValue,
+    } = useForm({
+        defaultValues: {
+            category: '',
+            subcategory: '',
+            name: '',
+            balance: '0',
+            currency,
+        },
+    });
+
+    useEffect(() => {
+        logEvent('screen_view', {
+            screen: 'new_account_screen',
+            source: 'navigation',
+        });
+    }, [logEvent]);
+
+    const onSubmit = async (data: { category: string; name: string; balance: string }) => {
+        await logEvent('button_tap', {
+            button: 'submit',
+            screen: 'new_account_screen',
+            log: 'attempting to create account',
+            data,
+        });
+        Keyboard.dismiss();
+        mutate(
+            {
+                ...data,
+                balance: Number(data.balance),
+            },
+            {
+                onError: (err) => {
+                    console.error('[NewAccountScreen] Error creating account:', err);
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: 'There was an issue creating account',
+                        },
+                    });
+                },
+                onSuccess: async (res) => {
+                    const { data } = res;
+
+                    updateAccounts(data);
+                    Toast.show({
+                        type: 'success',
+                        props: {
+                            text1: 'Success!',
+                            text2: 'Account created successfully',
+                        },
+                    });
+
+                    await logEvent('object_created', {
+                        object_type: 'account',
+                        payload: data,
+                    });
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)/accounts');
+                    }
+                },
+            },
+        );
+    };
+
+    const renderSelectedCurrency = () => {
+        const selectedCode = getValues('currency');
+        const currency = currencies.find((c) => c.code === selectedCode);
+
         return (
-            <View className='py-3 border-b border-gray-100'>
-                <Text>{item.label}</Text>
+            <View className='flex flex-row space-x-2 items-center -ml-2.5'>
+                <FlagIcon currency={currency!} />
+                <Text style={satoshiFont.satoshiBold} className='text-sm'>
+                    {currency?.name} ({currency?.symbol})
+                </Text>
             </View>
+        );
+    };
+
+    const renderCurrencies = useCallback((item: SelectOption) => {
+        const currency = currencies.find((currency) => currency.code === item.value)!;
+        const selectedValue = getValues('currency');
+
+        return (
+            <CurrencySelect
+                currency={currency}
+                callback={() => {
+                    setValue('currency', currency.code);
+                    setShowBottomSheetFlatList('newCurrencyType', false);
+                }}
+                selectedCurrency={selectedValue}
+            />
         );
     }, []);
 
@@ -27,108 +143,276 @@ export default function NewAccountScreen() {
         <>
             <SafeAreaView className='bg-white relative h-full' style={styles.parentView}>
                 <ExpoStatusBar style='dark' />
-                <View className='w-full flex flex-row px-5 py-2.5 justify-between items-center'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                        New Account
-                    </Text>
-
-                    <TouchableOpacity onPress={router.back}>
-                        <Text style={GLOBAL_STYLESHEET.interSemiBold} className='text-purple-600'>
-                            Cancel
-                        </Text>
+                <View className='w-full flex flex-row py-2.5 justify-between items-center relative px-5'>
+                    <TouchableOpacity
+                        onPress={router.back}
+                        className='bg-purple-100 px-4 py-2 flex items-center justify-center rounded-full'
+                    >
+                        <ArrowLeftIcon stroke='#9333EA' strokeWidth={2.5} />
                     </TouchableOpacity>
+
+                    <View className='absolute left-0 right-0 items-center'>
+                        <Text style={satoshiFont.satoshiBlack} className='text-lg'>
+                            New Account
+                        </Text>
+                    </View>
                 </View>
                 <ScrollView
                     className='space-y-5 flex-1 flex flex-col p-5'
                     contentContainerStyle={styles.scrollView}
                 >
-                    <>
-                        <SelectField
-                            selectKey='newPlanType'
-                            label='Account Group'
-                            options={{
-                                expense: {
-                                    label: '💸   Expense',
-                                    value: 'expense',
-                                },
-                                saving: {
-                                    label: '💰   Saving',
-                                    value: 'saving',
-                                },
-                            }}
-                            customSnapPoints={['50%', '55%', '60%']}
-                            renderItem={renderItem}
-                        />
-                    </>
-
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
                             Account Name
                         </Text>
 
-                        <InputField
-                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            cursorColor={'#8B5CF6'}
-                        />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Account name can't be empty",
+                                }}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={satoshiFont.satoshiMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='Account name'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                        autoCapitalize='none'
+                                    />
+                                )}
+                                name='name'
+                            />
+                            {errors.name && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.name.message}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Account Group
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Category can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newPlanType'
+                                            options={ACCOUNT_TYPES.reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '55%', '60%']}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='category'
+                            />
+                            {errors.category && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.category.message}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Subgroup
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Subcategory can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SelectField
+                                            selectKey='newAccountSubcategory'
+                                            options={(
+                                                ACCOUNT_SUBGROUP_TYPES[
+                                                    getValues(
+                                                        'category',
+                                                    ) as keyof typeof ACCOUNT_SUBGROUP_TYPES
+                                                ] ?? []
+                                            ).reduce((acc, curr) => {
+                                                acc[curr] = {
+                                                    label: curr,
+                                                    value: curr,
+                                                };
+                                                return acc;
+                                            }, {} as Record<string, { label: string; value: string }>)}
+                                            customSnapPoints={['50%', '55%', '60%']}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='subcategory'
+                            />
+                            {errors.subcategory && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.subcategory.message}
+                                </Text>
+                            )}
+                        </View>
                     </View>
 
                     <View className='flex flex-col space-y-1'>
-                        <Text style={{ fontFamily: 'InterBold' }} className='text-xs text-gray-600'>
-                            Amount
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Balance
                         </Text>
 
-                        <InputField
-                            className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
-                            style={GLOBAL_STYLESHEET.interSemiBold}
-                            cursorColor={'#8B5CF6'}
-                            placeholder='0.00'
-                        />
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Balance can't be empty",
+                                }}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <InputField
+                                        className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                        style={satoshiFont.satoshiMedium}
+                                        cursorColor={'#8B5CF6'}
+                                        placeholder='0.00'
+                                        keyboardType='numeric'
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        value={value}
+                                    />
+                                )}
+                                name='balance'
+                            />
+                            {errors.balance && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.balance.message}
+                                </Text>
+                            )}
+                        </View>
                     </View>
-
-                    <View>
-                        <SelectField
-                            selectKey='newPlanAccount'
-                            label='Account'
-                            options={{
-                                weekly: {
-                                    label: 'Weekly',
-                                    value: 'weekly',
-                                },
-                                'bi-weekly': {
-                                    label: 'Bi-Weekly',
-                                    value: 'bi-weekly',
-                                },
-                                monthly: {
-                                    label: 'Monthly',
-                                    value: 'monthly',
-                                },
-                            }}
-                            customSnapPoints={['30%', '30%']}
-                        />
+                    <View className='flex flex-col space-y-1'>
+                        <Text style={satoshiFont.satoshiBold} className='text-xs text-gray-600'>
+                            Currency
+                        </Text>
+                        <View>
+                            <Controller
+                                control={control}
+                                rules={{
+                                    required: "Currency can't be empty",
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <>
+                                        <SearchableSelectField
+                                            selectKey='newCurrencyType'
+                                            options={currencies.reduce(
+                                                (acc, curr) => {
+                                                    acc[curr.code] = {
+                                                        label: curr.name,
+                                                        value: curr.code,
+                                                        searchField: `${curr.code} ${curr.name} ${curr.country}`,
+                                                    };
+                                                    return acc;
+                                                },
+                                                {} as Record<
+                                                    string,
+                                                    {
+                                                        label: string;
+                                                        value: string;
+                                                        searchField: string;
+                                                    }
+                                                >,
+                                            )}
+                                            customSnapPoints={['80%', '90%']}
+                                            renderItem={renderCurrencies}
+                                            renderSelectedItem={renderSelectedCurrency}
+                                            value={value}
+                                            onChange={onChange}
+                                        />
+                                    </>
+                                )}
+                                name='currency'
+                            />
+                            {errors.currency && (
+                                <Text
+                                    style={satoshiFont.satoshiMedium}
+                                    className='text-xs text-red-500'
+                                >
+                                    {errors.currency.message}
+                                </Text>
+                            )}
+                        </View>
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity
-                    onPress={() => {
-                        setIsLoading(true);
-                        setTimeout(() => {
-                            setIsLoading(false);
-                        }, 3000);
-                    }}
-                    disabled={isLoading}
-                    className='items-center self-center w-[95%] justify-center px-4 absolute bottom-8'
-                >
-                    <View className='bg-purple-600 py-4 w-full flex items-center justify-center rounded-full'>
-                        {isLoading ? (
-                            <ActivityIndicator size={18} color='#fff' />
-                        ) : (
-                            <Text style={GLOBAL_STYLESHEET.suprapower} className='text-white'>
-                                Create Account
-                            </Text>
-                        )}
+                <View className='items-center self-center justify-center px-5 absolute bottom-7 w-full'>
+                    <View className='flex flex-row space-x-2.5 justify-between w-full'>
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                onPress={router.back}
+                                style={{ width: '100%' }}
+                                className='bg-purple-50 border border-purple-100 items-center justify-center rounded-full px-5 h-[50]'
+                            >
+                                <Text
+                                    style={satoshiFont.satoshiBlack}
+                                    className='text-purple-600 text-center'
+                                >
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className='flex-1'>
+                            <TouchableOpacity
+                                style={{ width: '100%' }}
+                                onPress={handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
+                                <LinearGradient
+                                    className='flex items-center justify-center rounded-full px-5 h-[50]'
+                                    colors={['#c084fc', '#9333ea']}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? (
+                                        <ActivityIndicator size={15} color='#fff' />
+                                    ) : (
+                                        <Text
+                                            style={satoshiFont.satoshiBlack}
+                                            className='text-white text-center'
+                                        >
+                                            Save
+                                        </Text>
+                                    )}
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </TouchableOpacity>
+                </View>
             </SafeAreaView>
         </>
     );

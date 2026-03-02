@@ -1,97 +1,225 @@
-import { transactionData } from '@/components/Index/constants';
-import CustomBottomSheetFlatList from '@/components/Shared/molecules/GlobalBottomSheetFlatList';
-import { useBottomSheetFlatListStore } from '@/components/Shared/molecules/GlobalBottomSheetFlatList/hooks';
 import { SafeAreaView, Text, View } from '@/components/Shared/styled';
-import TransactionHistoryCard from '@/components/Transactions/molecules/TransactionHistoryCard';
-import { Portal } from '@gorhom/portal';
+import { useTransactions } from '@/components/Transactions/hooks';
+import { satoshiFont } from '@/lib/constants/fonts';
+import { useRefreshOnFocus } from '@/lib/hooks/useRefreshOnFocus';
+import { addMonths, endOfMonth, format, formatISO, isBefore, startOfMonth } from 'date-fns';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import React, { useCallback } from 'react';
-import { FlatList, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
-import StatsHeader from '../molecules/StatsHeader';
-import TransactionBreakdownCard from '../molecules/TransactionBreakdownCard';
-import { keyExtractor } from '@/lib/utils/number';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import PagerView from 'react-native-pager-view';
+import MonthlyStatsPage from '../molecules/MonthlyStatsReport';
+import ReportLoadingScreen from '../molecules/ReportLoadingScreen';
+import StatsNavigationArea from '../molecules/StatsNavigationArea';
 
-export default function AccountsScreen() {
-    const { setShowBottomSheetFlatList } = useBottomSheetFlatListStore();
-    const itemSeparator = useCallback(() => <View className='border-b border-gray-100' />, []);
-    const renderItem = useCallback(
-        ({ item }: { item: any }) => (
-            <TransactionHistoryCard showTitle={false} data={item} onPress={() => {}} />
-        ),
-        [],
+export default function StatsScreen() {
+    const pagerRef = useRef<PagerView>(null);
+    const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [isInitialized, setIsInitialized] = useState(false);
+    const {
+        data: oldestTransaction,
+        isLoading: isLoadingOldest,
+        refetch: refetchOldestTransaction,
+    } = useTransactions({
+        requestQuery: {
+            page_size: 1,
+            sortOrder: 'asc',
+        },
+        options: {
+            keepPreviousData: true,
+        },
+    });
+
+    const earliestTransactionDate = useMemo(() => {
+        const date = oldestTransaction?.data?.[0]?.created_at
+            ? new Date(oldestTransaction.data[0].created_at)
+            : new Date();
+        return startOfMonth(date);
+    }, [oldestTransaction?.data]);
+
+    const availableMonths = useMemo(() => {
+        if (isLoadingOldest) return [];
+
+        const months: Date[] = [];
+        const currentMonth = startOfMonth(new Date());
+        let iterDate = earliestTransactionDate;
+
+        while (!isBefore(currentMonth, iterDate)) {
+            months.push(iterDate);
+            iterDate = addMonths(iterDate, 1);
+        }
+
+        return months;
+    }, [earliestTransactionDate, isLoadingOldest]);
+
+    useEffect(() => {
+        if (availableMonths.length === 0 || isInitialized) return;
+
+        const now = new Date();
+        const currentMonthKey = format(now, 'yyyy-MM');
+        const currentMonthIdx = availableMonths.findIndex(
+            (month) => format(month, 'yyyy-MM') === currentMonthKey,
+        );
+
+        if (currentMonthIdx !== -1) {
+            setCurrentMonthIndex(currentMonthIdx);
+            setCurrentDate(availableMonths[currentMonthIdx]);
+            setIsInitialized(true);
+
+            setTimeout(() => {
+                pagerRef.current?.setPageWithoutAnimation(currentMonthIdx);
+            }, 150);
+        }
+    }, [availableMonths, isInitialized]);
+
+    const monthRange = useMemo(() => {
+        if (!isInitialized || !currentDate) {
+            return {
+                start_date: formatISO(new Date()),
+                end_date: formatISO(new Date()),
+            };
+        }
+
+        return {
+            start_date: formatISO(startOfMonth(currentDate)),
+            end_date: formatISO(endOfMonth(currentDate)),
+        };
+    }, [currentDate, isInitialized]);
+
+    const {
+        refetch,
+        data: monthlyTransactions,
+        isLoading,
+    } = useTransactions({
+        requestQuery: {
+            page_size: Infinity,
+            ...monthRange,
+        },
+        options: {
+            enabled: isInitialized,
+            keepPreviousData: true,
+        },
+    });
+
+    const { data: allHistoricalTransactions, refetch: refetchHistoricalTransactions } =
+        useTransactions({
+            requestQuery: {
+                page_size: Infinity,
+                // fetch from earliest transaction to now to cover all possible month views
+                start_date: formatISO(earliestTransactionDate),
+                end_date: formatISO(endOfMonth(new Date())),
+            },
+            options: {
+                enabled: isInitialized,
+                keepPreviousData: true,
+            },
+        });
+
+    const stableHistoricalData = useMemo(
+        () => allHistoricalTransactions?.data ?? [],
+        [allHistoricalTransactions?.data],
     );
-    const renderBreakdownItem = useCallback(
-        ({ item }: { item: any }) => (
-            <TransactionBreakdownCard
-                data={item}
-                onPress={() => setShowBottomSheetFlatList('statsTransactionBreakdownList', true)}
-            />
-        ),
-        [],
+    const stableMonthlyData = useMemo(
+        () => monthlyTransactions?.data ?? [],
+        [monthlyTransactions?.data],
     );
 
-    return (
-        <SafeAreaView className='relative h-full bg-white'>
-            <ExpoStatusBar style='dark' />
-            <Portal>
-                <CustomBottomSheetFlatList
-                    snapPoints={['50%', '70%']}
-                    children={
-                        <View className='px-5 py-2.5'>
-                            <Text
-                                style={GLOBAL_STYLESHEET.suprapower}
-                                className='text-base text-gray-900'
-                            >
-                                🏠 Housing
-                            </Text>
-                        </View>
-                    }
-                    sheetKey={'statsTransactionBreakdownList'}
-                    data={transactionData}
-                    renderItem={renderItem}
-                    containerStyle={styles.container}
-                    handleIndicatorStyle={styles.handleIndicator}
-                    flatListContentContainerStyle={styles.flatlistContentContainer}
-                />
-            </Portal>
+    useRefreshOnFocus(refetch);
+    useRefreshOnFocus(refetchHistoricalTransactions);
+    useRefreshOnFocus(refetchOldestTransaction);
 
-            <View className='px-5' style={styles.parentView}>
-                <View className='flex flex-row items-center justify-between py-2.5'>
-                    <Text style={GLOBAL_STYLESHEET.suprapower} className='text-lg'>
-                        Stats
+    const goToPreviousMonth = useCallback(() => {
+        if (currentMonthIndex > 0) {
+            pagerRef.current?.setPage(currentMonthIndex - 1);
+        }
+    }, [currentMonthIndex]);
+
+    const goToNextMonth = useCallback(() => {
+        if (currentMonthIndex < availableMonths.length - 1) {
+            pagerRef.current?.setPage(currentMonthIndex + 1);
+        }
+    }, [currentMonthIndex, availableMonths.length]);
+
+    const handlePageSelected = useCallback(
+        (e: { nativeEvent: { position: number } }) => {
+            const newIndex = e.nativeEvent.position;
+            setCurrentMonthIndex(newIndex);
+            setCurrentDate(availableMonths[newIndex]);
+        },
+        [availableMonths],
+    );
+
+    const navigationProps = useMemo(
+        () => ({
+            currentDate,
+            currentMonthIndex,
+            goToPreviousMonth,
+            goToNextMonth,
+            setCurrentMonthIndex,
+            setCurrentDate,
+            availableMonths,
+        }),
+        [currentDate, currentMonthIndex, goToPreviousMonth, goToNextMonth, availableMonths],
+    );
+
+    if (!isInitialized || (isLoadingOldest && !oldestTransaction)) return <ReportLoadingScreen />;
+
+    if (availableMonths.length === 0) {
+        return (
+            <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
+                <ExpoStatusBar style='dark' />
+                <View className='flex-1 items-center justify-center'>
+                    <Text style={satoshiFont.satoshiBold} className='text-lg'>
+                        {isLoadingOldest ? 'Loading...' : 'No transaction data available'}
                     </Text>
                 </View>
+            </SafeAreaView>
+        );
+    }
 
-                <FlatList
-                    contentContainerStyle={styles.flatlist}
-                    showsVerticalScrollIndicator={false}
-                    data={transactionData}
-                    renderItem={renderBreakdownItem}
-                    ItemSeparatorComponent={itemSeparator}
-                    keyExtractor={keyExtractor}
-                    ListHeaderComponent={<StatsHeader />}
-                />
-            </View>
+    return (
+        <SafeAreaView className='relative h-full bg-white' style={styles.parentView}>
+            <ExpoStatusBar style='dark' />
+            <StatsNavigationArea {...navigationProps} />
+            <PagerView
+                ref={pagerRef}
+                style={styles.pagerView}
+                // initialPage={0}
+                onPageSelected={handlePageSelected}
+                orientation='horizontal'
+                overdrag
+                scrollEnabled
+            >
+                {availableMonths.map((month, index) => (
+                    <View key={format(month, 'yyyy-MM')} style={styles.page}>
+                        {/* Only render the current month and adjacent months for better performance */}
+                        {Math.abs(index - currentMonthIndex) <= 1 ? (
+                            <MonthlyStatsPage
+                                currentDate={month}
+                                transactions={stableMonthlyData}
+                                allHistoricalTransactions={stableHistoricalData}
+                                oldestTransactionDate={earliestTransactionDate}
+                                isLoading={isLoading && !monthlyTransactions}
+                            />
+                        ) : (
+                            <ReportLoadingScreen showNavigation={false} />
+                        )}
+                    </View>
+                ))}
+            </PagerView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    flatlist: {
+    scrollView: {
         paddingBottom: 100,
     },
-    flatlistContentContainer: {
-        paddingBottom: 100,
-        paddingHorizontal: 20,
-        // paddingTop: 20,
-        backgroundColor: 'white',
+    pagerView: {
+        flex: 1,
     },
-    handleIndicator: {
-        backgroundColor: '#D4D4D4',
-    },
-    container: {
-        paddingHorizontal: 20,
+    page: {
+        flex: 1,
     },
     parentView: {
         paddingTop: RNStatusBar.currentHeight,

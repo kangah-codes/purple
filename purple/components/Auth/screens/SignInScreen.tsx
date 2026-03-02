@@ -1,3 +1,4 @@
+import ProtectedInput from '@/components/Shared/atoms/Input/ProtectedInput';
 import {
     InputField,
     LinearGradient,
@@ -6,12 +7,12 @@ import {
     TouchableOpacity,
     View,
 } from '@/components/Shared/styled';
-import { GLOBAL_STYLESHEET } from '@/constants/Stylesheet';
-import useHasOnboarded from '@/lib/db/db';
+import { GLOBAL_STYLESHEET } from '@/lib/constants/Stylesheet';
+import { nativeStorage } from '@/lib/utils/storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar';
-import { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     ActivityIndicator,
@@ -21,22 +22,94 @@ import {
     StatusBar as RNStatusBar,
     TouchableWithoutFeedback,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import tw from 'twrnc';
+import { useAuth, useSignIn } from '../hooks';
+import { useTransactionStore } from '@/components/Transactions/hooks';
 
 export default function SignInScreen() {
-    const [loading, setLoading] = useState(false);
-    const { setHasOnboarded } = useHasOnboarded();
+    const { setSessionData } = useAuth();
+    const { transactions } = useTransactionStore();
     const {
         control,
         handleSubmit,
         formState: { errors },
     } = useForm({
         defaultValues: {
-            fullName: '',
-            userName: '',
-            email: '',
+            username: 'gyimihendrix',
+            password: 'password',
         },
     });
+    const { mutate, isLoading } = useSignIn();
+    const signIn = (loginInformation: { username: string; password: string }) => {
+        Keyboard.dismiss();
+        mutate(
+            {
+                username: loginInformation.username.trim(),
+                password: loginInformation.password.trim(),
+            },
+            {
+                onError: (err) => {
+                    Toast.show({
+                        type: 'error',
+                        props: {
+                            text1: 'Error!',
+                            text2: err.message,
+                        },
+                    });
+                },
+                onSuccess: (res) => {
+                    const { data } = res;
+                    const {
+                        account_groups,
+                        currencies,
+                        transaction_types,
+                        access_token,
+                        access_token_expires_at,
+                        user,
+                    } = data;
+                    setSessionData({
+                        access_token,
+                        access_token_expires_at,
+                        user: {
+                            ID: user.ID,
+                            username: user.username,
+                            email: user.email,
+                        },
+                    })
+                        .then(() => {
+                            router.replace('/(tabs)/');
+                            nativeStorage.setItem('account_groups', account_groups);
+                            nativeStorage.setItem('currencies', currencies);
+                            nativeStorage.setItem('transaction_types', transaction_types);
+                            Toast.show({
+                                type: 'success',
+                                props: {
+                                    text1: 'Success!',
+                                    text2: `Welcome back, ${user.username}`,
+                                },
+                            });
+                        })
+                        .catch((err) => {
+                            Toast.show({
+                                type: 'error',
+                                props: {
+                                    text1: 'Error!',
+                                    text2: err.message,
+                                },
+                            });
+                        });
+                },
+            },
+        );
+    };
+
+    // TODO: figure out how to refactor the code so race conditions on sign out are fixed
+    useEffect(() => {
+        if (nativeStorage.getAllKeys().length > 0) {
+            nativeStorage.clear();
+        }
+    }, []);
 
     return (
         <SafeAreaView
@@ -57,13 +130,13 @@ export default function SignInScreen() {
                         </View>
                         <View className='flex flex-col space-y-2.5'>
                             <Text
-                                style={{ fontFamily: 'Suprapower' }}
-                                className='text-2xl text-black text-center'
+                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                className='text-2xl text-black text-center tracking-tighter'
                             >
                                 Welcome back!
                             </Text>
                             <Text
-                                style={{ fontFamily: 'InterMedium' }}
+                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                 className='text-sm textblack text-center'
                             >
                                 Enjoy a seamless experience with Purple and take control of your
@@ -76,19 +149,21 @@ export default function SignInScreen() {
                         >
                             <View className='space-y-3.5 flex flex-col w-full'>
                                 <View className='flex flex-col space-y-1'>
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Username
+                                    </Text>
                                     <Controller
                                         control={control}
                                         rules={{
                                             required: "Username can't be empty",
-                                            pattern: {
-                                                value: /^[a-zA-Z0-9]{1,10}$/,
-                                                message: 'Invalid username',
-                                            },
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
                                             <InputField
-                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                                className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
                                                 placeholder='gyimihendrix'
                                                 onChangeText={onChange}
@@ -97,82 +172,65 @@ export default function SignInScreen() {
                                                 autoCapitalize='none'
                                             />
                                         )}
-                                        name='userName'
+                                        name='username'
                                     />
-                                    {errors.userName && (
+                                    {errors.username && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
-                                            {errors.userName.message}
+                                            {errors.username.message}
                                         </Text>
                                     )}
                                 </View>
 
                                 <View className='flex flex-col space-y-1'>
-                                    {/* <Text
-                                    style={{ fontFamily: 'InterBold' }}
-                                    className='text-xs text-gray-600'
-                                >
-                                    Email
-                                </Text> */}
+                                    <Text
+                                        style={GLOBAL_STYLESHEET.satoshiBold}
+                                        className='text-xs text-gray-600'
+                                    >
+                                        Password
+                                    </Text>
 
                                     <Controller
                                         control={control}
                                         rules={{
-                                            required: "Email can't be empty",
-                                            pattern: {
-                                                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                                message: 'Invalid email address',
-                                            },
+                                            required: "Password can't be empty",
                                         }}
                                         render={({ field: { onChange, onBlur, value } }) => (
-                                            <InputField
-                                                className='bg-gray-100 rounded-full px-4 text-xs border border-gray-200 h-12 text-gray-900'
-                                                style={GLOBAL_STYLESHEET.interSemiBold}
+                                            <ProtectedInput
+                                                className='bg-purple-50/80 rounded-full px-4 text-xs border border-purple-200 h-12 text-gray-900'
+                                                style={GLOBAL_STYLESHEET.satoshiMedium}
                                                 cursorColor={'#8B5CF6'}
-                                                placeholder='hello@purpleapp.com'
+                                                placeholder='password'
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
                                                 value={value}
-                                                secureTextEntry
                                             />
                                         )}
-                                        name='email'
+                                        name='password'
                                     />
-                                    {errors.email && (
+                                    {errors.password && (
                                         <Text
-                                            style={{ fontFamily: 'InterMedium' }}
+                                            style={GLOBAL_STYLESHEET.satoshiMedium}
                                             className='text-xs text-red-500'
                                         >
-                                            {errors.email.message}
+                                            {errors.password.message}
                                         </Text>
                                     )}
                                 </View>
 
-                                <TouchableOpacity
-                                    className='w-full'
-                                    onPress={() => {
-                                        setLoading(true);
-                                        setHasOnboarded(true)
-                                            .then(() => {
-                                                router.push('/(tabs)/');
-                                            })
-                                            .finally(() => {
-                                                setLoading(false);
-                                            });
-                                    }}
-                                >
+                                <TouchableOpacity className='w-full' onPress={handleSubmit(signIn)}>
                                     <LinearGradient
                                         className='flex items-center justify-center rounded-full px-5 py-2.5 h-12'
                                         colors={['#c084fc', '#9333ea']}
                                     >
-                                        {loading ? (
+                                        {isLoading ? (
                                             <ActivityIndicator size={18} color='#fff' />
                                         ) : (
                                             <Text
-                                                style={{ fontFamily: 'InterBold' }}
-                                                className='text-base text-white tracking-tight'
+                                                style={GLOBAL_STYLESHEET.satoshiBlack}
+                                                className='text-base text-white'
                                             >
                                                 Sign In
                                             </Text>
@@ -183,7 +241,7 @@ export default function SignInScreen() {
                                 <View className='flex flex-row justify-between'>
                                     <TouchableOpacity onPress={() => router.push('/auth/otp')}>
                                         <Text
-                                            style={{ fontFamily: 'InterBold' }}
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
                                             className='text-xs text-purple-500'
                                         >
                                             Forgot your password?
@@ -194,7 +252,7 @@ export default function SignInScreen() {
                                         onPress={() => router.replace('/auth/sign-up')}
                                     >
                                         <Text
-                                            style={{ fontFamily: 'InterBold' }}
+                                            style={GLOBAL_STYLESHEET.satoshiBold}
                                             className='text-xs text-purple-500'
                                         >
                                             New here? Sign Up

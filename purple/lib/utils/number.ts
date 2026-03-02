@@ -13,14 +13,27 @@ export const numberFormatter = (num: number, digits: number): string => {
         { value: 1e9, symbol: 'B' },
     ];
 
+    if (num === 0) return '0';
+    const isNegative = num < 0;
+    const absNum = Math.abs(num);
+
     const item = lookup
         .slice()
         .reverse()
-        .find((item) => num >= item.value);
+        .find((item) => absNum >= item.value);
 
-    return item
-        ? (num / item.value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1') + item.symbol
-        : '0';
+    if (!item) {
+        // round the number properly to avoid floating point precision issues
+        const rounded = Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
+        return rounded.toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1');
+    }
+
+    const scaledValue = absNum / item.value;
+    // round the scaled value properly to avoid floating point precision issues
+    const rounded = Math.round(scaledValue * Math.pow(10, digits)) / Math.pow(10, digits);
+    const formattedNumber = rounded.toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, '$1');
+
+    return isNegative ? `-${formattedNumber}${item.symbol}` : `${formattedNumber}${item.symbol}`;
 };
 
 /**
@@ -34,8 +47,12 @@ export const formatCurrencyRounded = (
     amount: number | undefined | null,
     currency: string | undefined | null,
     dp: number = 2,
-) => {
-    if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
+): string => {
+    // NOTE: idk why I filter out ALL currency code
+    // if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
+    if (!currency || currency === '') return 'N/A';
+    if (!amount || amount === 0) return `${currency} 0`;
+    if (amount < 0.01 && amount > 0) return `${currency} 0.01`;
 
     if (amount === undefined || amount === null || currency === undefined || currency === '')
         return 'N/A';
@@ -44,6 +61,11 @@ export const formatCurrencyRounded = (
     return `${currency} ${formattedValue}`;
 };
 
+export function formatNumberRounded(amount: number | undefined | null, dp: number = 2): string {
+    const formattedValue = numberFormatter(amount ?? 0, dp);
+    return `${formattedValue}`;
+}
+
 /**
  * @description Function to format a number as a currency string to an accurate value
  * @param {Number} amount the amount to be formatted
@@ -51,7 +73,7 @@ export const formatCurrencyRounded = (
  * @returns {String} the formatted amount
  * @author Joshua Akangah
  */
-export function formatCurrencyAccurate(currency: string, amount: number) {
+export function formatCurrencyAccurate(currency: string, amount: number): string {
     if (!currency || currency === '' || currency.toLocaleLowerCase() === 'all') return 'N/A';
 
     if (amount === undefined || currency === undefined || currency === '') return 'N/A';
@@ -61,7 +83,7 @@ export function formatCurrencyAccurate(currency: string, amount: number) {
             style: 'currency',
             currency: currency,
         }).format(isNaN(amount) ? 0 : amount);
-    } catch (error) {
+    } catch {
         console.error(`Invalid currency code: ${currency}`);
         return 'N/A';
     }

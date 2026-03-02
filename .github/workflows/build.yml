@@ -1,0 +1,93 @@
+name: Android App APK Build
+
+on:
+  push:
+    branches:
+      - dev
+      - rc
+    paths:
+      # Trigger this action only for changes in purple directory
+      - "purple/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: purple
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          #   cache: "yarn"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Create .env file for build (dev or rc)
+        run: |
+          echo "EXPO_PUBLIC_API_URL=${{ secrets.API_URL }}" > .env
+          echo "EXPO_PUBLIC_API_KEY=${{ secrets.API_KEY }}" >> .env
+          echo "EXPO_PUBLIC_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
+          export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "NODE_ENV=dev" >> .env
+          fi
+
+      - name: 🚀 Development Build
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple-dev.apk
+
+      - name: 🚀 Release Candidate Build
+        if: ${{ github.ref == 'refs/heads/rc' }}
+        run: npx dotenv -c -- eas build --non-interactive -p android --profile rc --local --output ${{ github.workspace }}/purple-rc.apk
+
+      - name: ☁️ Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: ${{ github.workspace }}/purple-*.apk
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.ref == 'refs/heads/rc' }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            Release Candidate Build
+            - Version: ${{ steps.version.outputs.version }}
+            - Branch: ${{ github.ref }}
+            - Commit: ${{ github.sha }}
+          files: |
+            ${{ github.workspace }}/purple-rc.apk
+          draft: false
+          make_latest: true

@@ -39,7 +39,7 @@ Since this application uses the expo-sdk and is built with React Native, buildin
 -   cd into the project directory
 -   Run `yarn install` to install all the dependencies
 -   To build for Android, you have to have your Android development environment set up
-    -   Run `eas build -p android --profile preview --local --output purple.apk` to build the app for an android target _OR_ you can use the GitHub action provided which builds the apk and creates a new release for it, so you can just download the `.apk` file directly from GitHub.
+    -   Run `eas build -p android --profile development --local --output purple.apk` to build the app for an android target _OR_ you can use the GitHub action provided which builds the apk and creates a new release for it, so you can just download the `.apk` file directly from GitHub.
 
 ### Roadmap
 

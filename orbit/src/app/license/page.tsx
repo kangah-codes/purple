@@ -1,0 +1,16 @@
+import { MarkdownContent } from '@/components/blog/BlogPost';
+import Hero from '@/components/shared/Hero';
+import { getDocument } from '@/utils/utils';
+
+export default async function License() {
+    const license = await getDocument('license.md');
+
+    return (
+        <div className='flex items-center flex-col'>
+            <Hero title='License' description={``} />
+            <article className='prose prose-purple col-span-full md:col-span-4 w-full px-5 text-left prose-p:text-black prose-li:text-black prose-img:rounded-lg mb-20 z-[2]'>
+                <MarkdownContent content={license.content} />
+            </article>
+        </div>
+    );
+}

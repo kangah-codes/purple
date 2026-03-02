@@ -1,0 +1,19 @@
+package repositories
+
+import (
+	"context"
+	"nucleus/internal/models"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type AccountRepository interface {
+	Create(ctx context.Context, account *models.Account) error
+	Update(ctx context.Context, tx *gorm.DB, account *models.Account) error
+	FindByID(ctx context.Context, accountID uuid.UUID) (*models.Account, error)
+	FindByUserID(ctx context.Context, userID uuid.UUID, page int, limit int) ([]models.Account, int, error)
+	CountByUserID(ctx context.Context, userID uuid.UUID) (int, error)
+	Delete(ctx context.Context, tx *gorm.DB, account *models.Account) error
+	DeleteByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) error
+}

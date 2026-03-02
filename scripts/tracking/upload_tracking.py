@@ -1,0 +1,348 @@
+"""
+Script to move analytics data from Redis into cold storage in GCS buckets
+Supports both CSV and JSON output formats via adapters
+"""
+
+import json
+import csv
+import os
+import logging
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+from google.cloud import storage
+from google.oauth2 import service_account
+from dotenv import load_dotenv
+from abc import ABC, abstractmethod
+from upstash_redis import Redis
+
+# ----- SETUP LOGGING -----
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+# ----- LOAD ENV -----
+load_dotenv()
+logging.info("Loaded environment variables from .env")
+
+# ----- CONFIG -----
+REDIS_HOST = os.getenv('REDIS_HOST', "")
+REDIS_PORT = int(os.getenv('REDIS_PORT') or 6379)
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+REDIS_USERNAME = os.getenv('REDIS_USERNAME')
+REDIS_URL = os.getenv("REDIS_URL", "")
+KEY_PREFIX = 'analytics:'
+GCS_BUCKET = os.getenv('GCS_BUCKET')
+GCS_FOLDER_FORMAT = '%d-%m-%y'
+OUTPUT_FORMAT = os.getenv('OUTPUT_FORMAT', 'json').lower()
+
+logging.debug(f"Redis URL: {REDIS_URL}")
+logging.debug(f"GCS Bucket: {GCS_BUCKET}")
+logging.debug(f"Output Format: {OUTPUT_FORMAT}")
+
+# ----- STORAGE ADAPTERS -----
+
+
+class StorageAdapter(ABC):
+    """Abstract base class for storage adapters"""
+
+    @abstractmethod
+    def get_file_extension(self):
+        """Return the file extension for this format"""
+        pass
+
+    @abstractmethod
+    def get_content_type(self):
+        """Return the MIME content type for this format"""
+        pass
+
+    @abstractmethod
+    def serialize_events(self, events):
+        """Convert events list to string format for upload"""
+        pass
+
+    @abstractmethod
+    def process_event(self, event):
+        """Process individual event for this format"""
+        pass
+
+
+class CSVAdapter(StorageAdapter):
+    """Adapter for CSV format storage"""
+
+    def get_file_extension(self):
+        return 'csv'
+
+    def get_content_type(self):
+        return 'text/csv'
+
+    def flatten_dict(self, d, parent_key='', sep='_'):
+        """Flatten nested dictionaries for CSV compatibility"""
+        items = []
+        for k, v in d.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            if isinstance(v, dict):
+                items.extend(self.flatten_dict(v, new_key, sep=sep).items())
+            elif isinstance(v, list):
+                # Convert lists to JSON strings for CSV
+                items.append((new_key, json.dumps(v)))
+            else:
+                items.append((new_key, v))
+        return dict(items)
+
+    def process_event(self, event):
+        """Flatten event for CSV compatibility"""
+        return self.flatten_dict(event)
+
+    def serialize_events(self, events):
+        """Convert events to CSV format"""
+        if not events:
+            return ""
+
+        # get unique field names
+        all_fieldnames = set()
+        for event in events:
+            all_fieldnames.update(event.keys())
+
+        fieldnames = sorted(list(all_fieldnames))
+
+        output = StringIO()
+        writer = csv.DictWriter(
+            output, fieldnames=fieldnames, extrasaction='ignore')
+        writer.writeheader()
+
+        # ensure events have all fields
+        for event in events:
+            row = {field: event.get(field, None) for field in fieldnames}
+            writer.writerow(row)
+
+        return output.getvalue()
+
+
+class JSONAdapter(StorageAdapter):
+    """Adapter for JSON format storage"""
+
+    def get_file_extension(self):
+        return 'json'
+
+    def get_content_type(self):
+        return 'application/json'
+
+    def process_event(self, event):
+        """Keep event structure intact for JSON"""
+        return event
+
+    def serialize_events(self, events):
+        """Convert events to JSON format"""
+        return json.dumps(events, indent=2, default=str)
+
+# ----- ADAPTER FACTORY -----
+
+
+def get_storage_adapter(format_type):
+    """Factory function to get the appropriate storage adapter"""
+    adapters = {
+        'csv': CSVAdapter(),
+        'json': JSONAdapter()
+    }
+
+    if format_type not in adapters:
+        raise ValueError(
+            f"Unsupported format: {format_type}. Available formats: {list(adapters.keys())}")
+
+    return adapters[format_type]
+
+
+# ----- INITIALIZE COMPONENTS -----
+# init storage adapter
+try:
+    storage_adapter = get_storage_adapter(OUTPUT_FORMAT)
+    logging.info(f"✅ Initialized {OUTPUT_FORMAT.upper()} storage adapter")
+except ValueError as e:
+    logging.error(f"❌ {e}")
+    raise
+
+# connect to Redis
+try:
+    r = Redis(url=REDIS_HOST, token=REDIS_PASSWORD)
+    r.ping()
+    logging.info("✅ Connected to Redis successfully")
+except Exception as e:
+    logging.exception(f"❌ Redis connection failed - {e}")
+    raise
+
+
+# init gcs client
+try:
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(GCS_BUCKET)
+    logging.info("✅ Initialized GCS client")
+except Exception as e:
+    logging.exception(f"❌ Failed to initialize GCS client - {e}")
+    raise
+
+
+# ─── FETCH ALL TRACKING KEYS ──────────────────────────────────────────────
+logging.info("🔍 Fetching tracking keys from Redis...")
+try:
+    tracking_keys: list[str] = []
+    cursor = 0
+    while True:
+        cursor, keys = r.scan(cursor=cursor, match=f"{KEY_PREFIX}*")
+        # Ensure we always have str, even when using redis‑py locally.
+        tracking_keys.extend(k.decode() if isinstance(k, bytes) else k for k in keys)
+        if cursor == 0:
+            break
+    logging.info(f"📦 Found {len(tracking_keys)} tracking keys")
+except Exception:
+    logging.exception("❌ Failed to fetch tracking keys")
+    raise
+
+# ─── ORGANIZE BY DATE AND TRACKING ID ─────────────────────────────────────
+files_by_date: dict[str, dict[str, list]] = {}
+errors_by_date: dict[str, dict[str, list]] = {}
+redis_key_mapping: dict[str, list[str]] = {}
+
+logging.info("🧮 Organizing events by date...")
+for key in tracking_keys:
+    full_key = key.replace(KEY_PREFIX, '')
+    tracking_id = full_key.split(":")[-1]
+    redis_key_mapping.setdefault(tracking_id, []).append(key)
+
+    logging.debug(f"Processing key: {key.split(':')[1]}")
+
+    try:
+        entries = r.lrange(key, 0, -1)
+        if not entries:
+            logging.debug(f"🚫 No entries for {key}")
+            continue
+
+        for entry in entries:
+            try:
+                payload = json.loads(entry)
+                event = payload['event']
+                meta = payload.get('meta', {})
+
+                # Process event based on format
+                processed_event = storage_adapter.process_event(event)
+                if meta:
+                    processed_event['meta'] = meta
+
+                # Extract timestamp for organizing by date
+                timestamp = None
+                if 'timestamp' in event:
+                    timestamp = event['timestamp']
+                elif 'created_at' in event:
+                    timestamp = event['created_at']
+                elif 'time' in event:
+                    timestamp = event['time']
+
+                # Parse timestamp and create date folder
+                date_folder = "unknown"
+                if timestamp:
+                    try:
+                        if isinstance(timestamp, str):
+                            dt = parser.parse(timestamp)
+                        else:
+                            dt = datetime.fromtimestamp(timestamp)
+                        date_folder = dt.strftime(GCS_FOLDER_FORMAT)
+                    except (ValueError, TypeError):
+                        logging.warning(f"⚠️ Could not parse timestamp: {timestamp}")
+                        date_folder = "unknown"
+
+                # Determine if this is an error event
+                is_error = (
+                    event.get('level') == 'error' or
+                    event.get('type') == 'error' or
+                    'error' in event.get('event_type', '').lower()
+                )
+
+                # Organize into appropriate dictionary
+                target_dict = errors_by_date if is_error else files_by_date
+
+                if date_folder not in target_dict:
+                    target_dict[date_folder] = {}
+
+                if tracking_id not in target_dict[date_folder]:
+                    target_dict[date_folder][tracking_id] = []
+
+                target_dict[date_folder][tracking_id].append(processed_event)
+
+            except json.JSONDecodeError:
+                logging.warning(f"⚠️ Skipping invalid JSON for {tracking_id}")
+            except Exception as e:
+                logging.warning(f"⚠️ Error processing event for {tracking_id}: {str(e)}")
+    except Exception:
+        logging.exception(f"❌ Failed processing key: {key}")
+
+# ----- FUNCTION TO WRITE EVENTS TO GCS -----
+def upload_event_group(name, tracking_data, is_error=False):
+    logging.info(
+        f"🚀 Uploading {name} events to GCS as {OUTPUT_FORMAT.upper()} ({'errors' if is_error else 'normal'})")
+
+    successfully_uploaded_keys = set()
+
+    for date_folder, trackings in tracking_data.items():
+        for tracking_id, events in trackings.items():
+            try:
+                if not events:
+                    logging.warning(
+                        f"⚠️ No events to upload for {tracking_id}")
+                    continue
+
+                serialized_data = storage_adapter.serialize_events(events)
+
+                if not serialized_data:
+                    logging.warning(f"⚠️ No data to upload for {tracking_id}")
+                    continue
+
+                subfolder = "errors" if is_error else ""
+                filename = f"{tracking_id}.{storage_adapter.get_file_extension()}"
+                blob_path = f"{date_folder}/{subfolder}/{filename}" if subfolder else f"{date_folder}/{filename}"
+                blob = bucket.blob(blob_path)
+                blob.upload_from_string(
+                    serialized_data,
+                    content_type=storage_adapter.get_content_type()
+                )
+
+                logging.info(
+                    f"✅ Uploaded {blob_path} with {len(events)} events ({OUTPUT_FORMAT.upper()})")
+
+                # Mark for deletion only after successful upload
+                successfully_uploaded_keys.add(tracking_id)
+
+            except Exception as e:
+                logging.exception(
+                    f"❌ Failed to upload for tracking ID: {tracking_id} - {e}")
+
+
+        # ─── DELETE ONLY THOSE KEYS WE REALLY UPLOADED ───────────────────────────
+        for tracking_id in successfully_uploaded_keys:
+            for original_key in redis_key_mapping.get(tracking_id, []):
+                try:
+                    resp = r.delete(original_key)
+                    deleted = (
+                        resp.get("result")
+                        if isinstance(resp, dict)
+                        else resp
+                    )
+                    if deleted == 1:
+                        logging.info(f"🗑️  Deleted Redis key: {original_key}")
+                    else:
+                        logging.warning(f"⚠️ Key not found or already deleted: {original_key}")
+                except Exception:
+                    logging.exception(f"❌ Failed to delete Redis key: {original_key}")
+
+    return len(successfully_uploaded_keys)
+
+
+# ----- UPLOAD EVENTS TO GCS -----
+normal_uploaded = upload_event_group("normal", files_by_date, is_error=False)
+error_uploaded = upload_event_group("error", errors_by_date, is_error=True)
+
+logging.info(f"🎉 Upload complete! {normal_uploaded} normal and {error_uploaded} error tracking IDs processed")
+logging.info(f"Data uploaded in {OUTPUT_FORMAT.upper()} format and Redis keys cleaned up")
