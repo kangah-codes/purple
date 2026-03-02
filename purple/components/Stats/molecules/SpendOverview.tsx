@@ -5,6 +5,7 @@ import { isTransferTransaction } from '@/components/Transactions/utils';
 import { satoshiFont } from '@/lib/constants/fonts';
 import { generatePalette } from '@/lib/utils/colour';
 import { formatCurrencyRounded } from '@/lib/utils/number';
+import CurrencyService from '@/lib/services/CurrencyService';
 import React, { memo, useMemo, useState } from 'react';
 
 const paletteCache = new Map<string, string>();
@@ -81,6 +82,7 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
     const {
         preferences: { currency },
     } = usePreferences();
+    const currencyService = CurrencyService.getInstance();
 
     const { totalDebits, totalCredits, creditSlices, debitSlices } = useMemo(() => {
         const debitMap: Record<string, number> = {};
@@ -94,12 +96,19 @@ export default function SpendOverview({ transactions }: SpendOverviewProps) {
             // Skip transactions that are part of transfers to avoid inflating income/expense totals
             if (isTransferTransaction(tx)) continue;
 
+            const convertedAmount = currencyService.convertCurrencySync({
+                // @ts-expect-error ignore
+                from: { currency: tx.currency, amount: tx.amount },
+                // @ts-expect-error ignore
+                to: { currency },
+            });
+
             if (tx.type === 'debit') {
-                totalDebits += tx.amount;
-                debitMap[tx.category] = (debitMap[tx.category] || 0) + tx.amount;
+                totalDebits += convertedAmount;
+                debitMap[tx.category] = (debitMap[tx.category] || 0) + convertedAmount;
             } else if (tx.type === 'credit') {
-                totalCredits += tx.amount;
-                creditMap[tx.category] = (creditMap[tx.category] || 0) + tx.amount;
+                totalCredits += convertedAmount;
+                creditMap[tx.category] = (creditMap[tx.category] || 0) + convertedAmount;
             }
         }
 
