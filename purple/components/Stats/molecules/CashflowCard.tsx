@@ -6,6 +6,7 @@ import React, { memo, useMemo } from 'react';
 import { isTransferTransaction } from '@/components/Transactions/utils';
 import { formatCurrencyRounded } from '@/lib/utils/number';
 import { usePreferences } from '@/components/Settings/hooks';
+import CurrencyService from '@/lib/services/CurrencyService';
 
 interface CashflowCardProps {
     currentDate: Date;
@@ -22,6 +23,7 @@ export default memo(function CashflowCard({
     const {
         preferences: { currency: userPreferenceCurrency },
     } = usePreferences();
+    const currencyService = CurrencyService.getInstance();
     const stableTransactions = useMemo(() => allTransactions, [allTransactions]);
 
     const rawData = useMemo(() => {
@@ -53,11 +55,27 @@ export default memo(function CashflowCard({
 
             const inflow = monthTransactions
                 .filter((t) => t.type === 'credit' && !isTransferTransaction(t))
-                .reduce((sum, t) => sum + Number(t.amount), 0);
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error ignore
+                        from: { currency: t.currency, amount: Number(t.amount) },
+                        // @ts-expect-error ignore
+                        to: { currency: userPreferenceCurrency },
+                    });
+                    return sum + converted;
+                }, 0);
 
             const outflow = monthTransactions
                 .filter((t) => t.type === 'debit' && !isTransferTransaction(t))
-                .reduce((sum, t) => sum - Math.abs(Number(t.amount)), 0);
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error ignore
+                        from: { currency: t.currency, amount: Math.abs(Number(t.amount)) },
+                        // @ts-expect-error ignore
+                        to: { currency: userPreferenceCurrency },
+                    });
+                    return sum - converted;
+                }, 0);
 
             return {
                 label: format(month, 'MMM'),
@@ -90,16 +108,12 @@ export default memo(function CashflowCard({
         );
         const avgCashFlow = totalNetCashFlow / rawData.length;
 
-        // Get currency from the first available transaction
-        const currency =
-            stableTransactions.length > 0 ? stableTransactions[0].currency : userPreferenceCurrency;
-
         return {
             netCashFlowCurrentMonth: currentMonthNet,
             avgCashFlowPerMonth: avgCashFlow,
-            currentMonthCurrency: currency,
+            currentMonthCurrency: userPreferenceCurrency,
         };
-    }, [rawData, stableTransactions, userPreferenceCurrency]);
+    }, [rawData, userPreferenceCurrency]);
 
     const netFlowColor = netCashFlowCurrentMonth > 0 ? '#00a63e' : '#EF4444';
     const avgFlowColor = avgCashFlowPerMonth > 0 ? '#00a63e' : '#EF4444';

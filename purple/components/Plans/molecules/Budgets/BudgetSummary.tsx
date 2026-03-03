@@ -5,12 +5,14 @@ import { satoshiFont } from '@/lib/constants/fonts';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
 import BudgetSection from './BudgetSection';
 import { BudgetWithDetails } from '@/lib/services/BudgetSQLiteService';
-import { useBudgetEarnedIncome, useUnbudgetedCategorySpending } from '@/components/Plans/hooks';
+import { useUnbudgetedCategorySpending } from '@/components/Plans/hooks';
 import SpendVsBudgetLineChart from '@/components/Stats/molecules/SpendVsBudgetLineChart';
 import { endOfMonth, formatISO, startOfMonth } from 'date-fns';
 import { MONTHS } from '../../constants';
 import { useTransactions } from '@/components/Transactions/hooks';
 import { SummaryProgressSection } from './SummaryProgressSection';
+import { usePreferences } from '@/components/Settings/hooks';
+import CurrencyService from '@/lib/services/CurrencyService';
 
 interface BudgetSummaryProps {
     budget: BudgetWithDetails | null;
@@ -19,7 +21,11 @@ interface BudgetSummaryProps {
 const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps) {
     const budgetMonth = budget?.month;
     const budgetYear = budget?.year;
-    const { data: calculatedEarnedIncome = 0 } = useBudgetEarnedIncome(budgetMonth, budgetYear);
+    const {
+        preferences: { currency: userPreferenceCurrency },
+    } = usePreferences();
+    const currencyService = CurrencyService.getInstance();
+    const targetCurrency = budget?.currency ?? userPreferenceCurrency;
 
     const totalAllocated = useMemo(() => {
         return (budget?.categoryLimits ?? []).reduce(
@@ -41,16 +47,6 @@ const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps
         const budgetEndDate = endOfMonth(budgetStartDate);
         return { budgetStartDate, budgetEndDate };
     }, [budgetMonth, budgetYear]);
-
-    const incomeMetrics = useMemo(() => {
-        const estimatedIncome = budget?.estimated_income || 0;
-        const earnedIncome = calculatedEarnedIncome;
-        const remainingIncome = estimatedIncome - earnedIncome;
-        const isIncomeExceeded = remainingIncome < 0;
-        const incomeDelta = Math.abs(remainingIncome);
-        const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
-        return { estimatedIncome, earnedIncome, isIncomeExceeded, incomeDelta, incomePercentage };
-    }, [budget?.estimated_income, calculatedEarnedIncome]);
 
     const { data: unbudgeted = [] } = useUnbudgetedCategorySpending(
         budgetMonth,
@@ -84,13 +80,46 @@ const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps
         },
     });
 
+    const earnedIncome = useMemo(() => {
+        return (
+            monthlyTransactions?.data
+                ?.filter((t) => t.type === 'credit' && !t.from_account && !t.to_account)
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error currency not typed on Transaction
+                        from: { currency: t.currency, amount: Number(t.amount) },
+                        // @ts-expect-error ignore
+                        to: { currency: targetCurrency },
+                    });
+                    return sum + converted;
+                }, 0) ?? 0
+        );
+    }, [monthlyTransactions?.data, targetCurrency]);
+
+    const incomeMetrics = useMemo(() => {
+        const estimatedIncome = budget?.estimated_income || 0;
+        const remainingIncome = estimatedIncome - earnedIncome;
+        const isIncomeExceeded = remainingIncome < 0;
+        const incomeDelta = Math.abs(remainingIncome);
+        const incomePercentage = estimatedIncome > 0 ? (earnedIncome / estimatedIncome) * 100 : 0;
+        return { estimatedIncome, earnedIncome, isIncomeExceeded, incomeDelta, incomePercentage };
+    }, [budget?.estimated_income, earnedIncome]);
+
     const totalSpent = useMemo(() => {
         return (
             monthlyTransactions?.data
                 ?.filter((t) => t.type === 'debit' && !t.from_account && !t.to_account)
-                .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error currency not typed on Transaction
+                        from: { currency: t.currency, amount: Number(t.amount) },
+                        // @ts-expect-error ignore
+                        to: { currency: targetCurrency },
+                    });
+                    return sum + converted;
+                }, 0) ?? 0
         );
-    }, [monthlyTransactions?.data]);
+    }, [monthlyTransactions?.data, targetCurrency]);
 
     const expenseMetrics = useMemo(() => {
         const remainingBudget = totalAllocated - totalSpent;

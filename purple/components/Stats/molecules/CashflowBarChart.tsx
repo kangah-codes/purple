@@ -7,6 +7,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import CustomBarChart from '../../Shared/molecules/StackedBarChart';
 import { isTransferTransaction } from '@/components/Transactions/utils';
 import EmptyList from '@/components/Shared/molecules/ListStates/Empty';
+import { usePreferences } from '@/components/Settings/hooks';
+import CurrencyService from '@/lib/services/CurrencyService';
 
 interface CashflowBarChartProps {
     currentDate: Date;
@@ -21,6 +23,10 @@ export default memo(function CashflowBarChart({
     oldestTransactionDate,
 }: CashflowBarChartProps) {
     const [chartW, setChartW] = useState(0);
+    const {
+        preferences: { currency: userPreferenceCurrency },
+    } = usePreferences();
+    const currencyService = CurrencyService.getInstance();
     const stableTransactions = useMemo(() => allTransactions, [allTransactions]);
 
     const rawData = useMemo(() => {
@@ -52,11 +58,27 @@ export default memo(function CashflowBarChart({
 
             const inflow = monthTransactions
                 .filter((t) => t.type === 'credit' && !isTransferTransaction(t))
-                .reduce((sum, t) => sum + Number(t.amount), 0);
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error ignore
+                        from: { currency: t.currency, amount: Number(t.amount) },
+                        // @ts-expect-error ignore
+                        to: { currency: userPreferenceCurrency },
+                    });
+                    return sum + converted;
+                }, 0);
 
             const outflow = monthTransactions
                 .filter((t) => t.type === 'debit' && !isTransferTransaction(t))
-                .reduce((sum, t) => sum - Math.abs(Number(t.amount)), 0);
+                .reduce((sum, t) => {
+                    const converted = currencyService.convertCurrencySync({
+                        // @ts-expect-error ignore
+                        from: { currency: t.currency, amount: Math.abs(Number(t.amount)) },
+                        // @ts-expect-error ignore
+                        to: { currency: userPreferenceCurrency },
+                    });
+                    return sum - converted;
+                }, 0);
 
             return {
                 label: format(month, 'MMM'),
