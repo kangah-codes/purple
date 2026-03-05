@@ -3,8 +3,7 @@ name: Android App APK Build
 on:
   push:
     branches:
-      - dev
-      - rc
+      - disable
     paths:
       # Trigger this action only for changes in purple directory
       - "purple/**"
