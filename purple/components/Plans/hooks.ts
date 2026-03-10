@@ -39,6 +39,7 @@ import { useAuth } from '../Auth/hooks';
 import { ServiceFactory } from '@/lib/factory/ServiceFactory';
 import { Transaction } from '@/components/Transactions/schema';
 import { isTransferTransaction } from '@/components/Transactions/utils';
+import CurrencyService from '@/lib/services/CurrencyService';
 
 export type BudgetPaceInsight = {
     tone: 'negative' | 'positive' | 'neutral';
@@ -577,9 +578,11 @@ export function useUnbudgetedCategorySpending(
     month: string | undefined,
     year: number | undefined,
     budgetedCategories: string[] = [],
+    targetCurrency?: string,
 ): UseQueryResult<Array<{ category: string; spent: number }>, Error> {
     const db = useSQLiteContext();
     const { sessionData } = useAuth();
+    const currencyService = CurrencyService.getInstance();
 
     const getMonthIndex = (monthName: string): number => {
         return MONTHS.indexOf(monthName);
@@ -592,7 +595,7 @@ export function useUnbudgetedCategorySpending(
     );
 
     return useQuery(
-        ['budget-unbudgeted-categories', month, year, budgetedCategories],
+        ['budget-unbudgeted-categories', month, year, budgetedCategories, targetCurrency],
         async () => {
             if (!month || !year) return [] as Array<{ category: string; spent: number }>;
 
@@ -626,7 +629,14 @@ export function useUnbudgetedCategorySpending(
                 })
                 .reduce<Record<string, number>>((acc, t) => {
                     const key = t.category || 'Uncategorized';
-                    acc[key] = (acc[key] || 0) + Number(t.amount || 0);
+                    const amount = targetCurrency
+                        ? currencyService.convertCurrencySync({
+                              // @ts-expect-error currency not typed on Transaction
+                              from: { currency: t.currency, amount: Number(t.amount || 0) },
+                              to: { currency: targetCurrency },
+                          })
+                        : Number(t.amount || 0);
+                    acc[key] = (acc[key] || 0) + amount;
                     return acc;
                 }, {});
 

@@ -52,6 +52,7 @@ const BudgetSummary = memo(function BudgetSummary({ budget }: BudgetSummaryProps
         budgetMonth,
         budgetYear,
         budgetedCategories,
+        targetCurrency,
     );
 
     const unbudgetedCategoryLimits = useMemo(
