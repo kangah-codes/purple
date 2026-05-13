@@ -22,6 +22,8 @@ import { Account, AccountDataCalculation, EditAccount, TimePeriod } from './sche
 import { createAccountsReportStore, createAccountStore } from './state';
 import { getEffectiveBalance, isLiabilityAccount } from './utils';
 
+// trigger build error
+
 export function useAccountStore() {
     const [
         accounts,
@@ -399,7 +401,12 @@ export function useCalculateAccountData({
             // Convert transaction amounts to preferred currency for correct chart data
             const currencyConvertedTransactions = transactions.map((tx) => {
                 const convertedAmount = currencyService.convertCurrencySync({
-                    from: { currency: tx.currency as Parameters<typeof currencyService.convertCurrencySync>[0]['from']['currency'], amount: tx.amount },
+                    from: {
+                        currency: tx.currency as Parameters<
+                            typeof currencyService.convertCurrencySync
+                        >[0]['from']['currency'],
+                        amount: tx.amount,
+                    },
                     // @ts-expect-error ignore
                     to: { currency: preferredCurrency },
                 });
