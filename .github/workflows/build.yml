@@ -2,6 +2,16 @@ name: Android App APK Build
 
 on:
   workflow_dispatch:
+    inputs:
+      build_profile:
+        description: Android EAS build profile to run
+        required: true
+        default: development
+        type: choice
+        options:
+          - development
+          - rc
+          - production
   push:
     branches:
       - disable
@@ -55,15 +65,17 @@ jobs:
 
           if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
             echo "NODE_ENV=dev" >> .env
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.build_profile }}" == "rc" ]]; then
+            echo "NODE_ENV=rc" >> .env
           fi
-
-      - name: 🚀 Development Build
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        run: eas build --non-interactive -p android --profile development --local --output ${{ github.workspace }}/purple-dev.apk
-
-      - name: 🚀 Release Candidate Build
-        if: ${{ github.ref == 'refs/heads/rc' }}
-        run: npx dotenv -c -- eas build --non-interactive -p android --profile rc --local --output ${{ github.workspace }}/purple-rc.apk
+      - name: 🚀 Build APK
+        run: |
+          PROFILE=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_profile || (github.ref == 'refs/heads/dev' && 'development' || 'production') }}
+          if [ "$PROFILE" = "rc" ]; then
+            npx dotenv -c -- eas build --non-interactive -p android --profile "$PROFILE" --local --output "${{ github.workspace }}/purple-${PROFILE}.apk"
+          else
+            eas build --non-interactive -p android --profile "$PROFILE" --local --output "${{ github.workspace }}/purple-${PROFILE}.apk"
+          fi
 
       - name: ☁️ Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -78,7 +90,7 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: ${{ github.ref == 'refs/heads/rc' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_profile == 'rc' || github.ref == 'refs/heads/rc' }}
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
