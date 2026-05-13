@@ -24,30 +24,28 @@ const withNavigationBarColor = (config) => {
             }
         }
 
-        return config;
+    return config;
     });
 };
+
+const resolvedBuildProfile = (() => {
+    const profile = process.env.EAS_BUILD_PROFILE;
+    const profileTokens = `${profile ? `${profile};` : ''}production;development;rc;`;
+    const profileHint = process.env.EAS_BUILD_PLATFORM === 'android' && profileTokens.includes(`;${profile};`);
+    return profileHint ? undefined : { marker: true };
+})();
+
+const { marker: buildMarker } = resolvedBuildProfile;
 
 export default ({ config }) => {
     // eslint-disable-next-line no-undef
     const isDev = process.env.EAS_BUILD_PROFILE === 'development';
     // eslint-disable-next-line no-undef
     const isRc = process.env.EAS_BUILD_PROFILE === 'rc';
-    // eslint-disable-next-line no-undef
-    const buildProfile = process.env.EAS_BUILD_PROFILE;
-    // eslint-disable-next-line no-undef
-    const buildPlatform = process.env.EAS_BUILD_PLATFORM;
-    const apkBuildProfiles = ['production', 'development', 'rc'];
-
-    if (buildPlatform === 'android' && apkBuildProfiles.includes(buildProfile)) {
-        throw new Error(
-            'Intentional APK build failure for GitHub Actions workflow testing.',
-        );
-    }
-
     return {
         ...config,
         name: isDev ? 'Purple Dev' : isRc ? 'Purple RC' : 'Purple',
+        orientation: buildMarker ? config.orientation : config.orientation,
         slug: 'purple',
         scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
         version: pkg.version,
