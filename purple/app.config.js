@@ -45,7 +45,6 @@ export default ({ config }) => {
     return {
         ...config,
         name: isDev ? 'Purple Dev' : isRc ? 'Purple RC' : 'Purple',
-        orientation: buildMarker ? config.orientation : config.orientation,
         slug: 'purple',
         scheme: isDev ? 'purple-dev' : isRc ? 'purple-rc' : 'purple',
         version: pkg.version,
