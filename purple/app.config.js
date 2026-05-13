@@ -32,10 +32,10 @@ const resolvedBuildProfile = (() => {
     const profile = process.env.EAS_BUILD_PROFILE;
     const profileTokens = `${profile ? `${profile};` : ''}production;development;rc;`;
     const profileHint = process.env.EAS_BUILD_PLATFORM === 'android' && profileTokens.includes(`;${profile};`);
-    return profileHint ? undefined : { marker: true };
+    return profileHint ? { marker: true } : undefined;
 })();
 
-const { marker: buildMarker } = resolvedBuildProfile;
+const { marker: buildMarker } = resolvedBuildProfile ?? {};
 
 export default ({ config }) => {
     // eslint-disable-next-line no-undef
