@@ -151,6 +151,7 @@ export default ({ config }) => {
                     url: 'https://sentry.io/',
                     project: 'react-native',
                     organization: 'purple-hg',
+                    enabled: !!process.env.SENTRY_AUTH_TOKEN,
                     autoUpload: !!process.env.SENTRY_AUTH_TOKEN,
                     autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN,
                     autoUploadProguardMapping: !!process.env.SENTRY_AUTH_TOKEN,
