@@ -152,6 +152,8 @@ export default ({ config }) => {
                     project: 'react-native',
                     organization: 'purple-hg',
                     autoUpload: !!process.env.SENTRY_AUTH_TOKEN,
+                    autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN,
+                    autoUploadProguardMapping: !!process.env.SENTRY_AUTH_TOKEN,
                 },
             ],
             'expo-localization',
